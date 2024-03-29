@@ -102,6 +102,7 @@ public class RenderingRegistration {
         BlockModelRegistry.registerDefault(Blocks.GRAVEL);
         BlockModelRegistry.registerDefault(Blocks.WATER);
         BlockModelRegistry.registerDefault(Blocks.STONE);
+        BlockModelRegistry.registerDefault(Blocks.IRON_ORE);
         BlockModelRegistry.registerDefault(Blocks.LEAVES);
         BlockModelRegistry.registerDefault(Blocks.PLANKS);
         BlockModelRegistry.registerDefault(Blocks.COBBLESTONE);

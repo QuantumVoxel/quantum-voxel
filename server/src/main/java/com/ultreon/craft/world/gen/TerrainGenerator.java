@@ -3,6 +3,7 @@ package com.ultreon.craft.world.gen;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.craft.CommonConstants;
 import com.ultreon.craft.debug.WorldGenDebugContext;
+import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.util.MathHelper;
 import com.ultreon.craft.world.Biome;
 import com.ultreon.craft.world.BuilderChunk;
@@ -75,7 +76,7 @@ public class TerrainGenerator {
                 var index = this.findGenerator(chunk, new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z));
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
                 chunk = index.biomeGenerator.processColumn(chunk, x, z, recordedChanges);
-                chunk.getBiomeGenerator(x, z).generateTerrainFeatures(recordingChunk, x, z, chunk.getHighest(x, z));
+                index.biomeGenerator.generateTerrainFeatures(recordingChunk, x, z, chunk.getHighest(x, z));
             }
         }
 
@@ -83,6 +84,11 @@ public class TerrainGenerator {
             if (WorldGenDebugContext.isActive()) {
                 CommonConstants.LOGGER.info("Recorded change: " + change);
             }
+
+            if (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE) {
+                UltracraftServer.LOGGER.warn("Recorded change out of bounds: " + change);
+            }
+
             chunk.set(change.x(), change.y(), change.z(), change.block());
         }
 

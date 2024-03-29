@@ -3,6 +3,7 @@ package com.ultreon.craft.world.gen.feature;
 import com.badlogic.gdx.math.GridPoint2;
 import com.ultreon.craft.block.Block;
 import com.ultreon.craft.block.Blocks;
+import com.ultreon.craft.debug.DebugFlags;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.world.ChunkAccess;
 import com.ultreon.craft.world.ServerWorld;
@@ -52,7 +53,9 @@ public class OreFeature extends WorldGenFeature {
 
             chunk.set(x + xOffset, y, z + zOffset, this.ore.createMeta());
 
-            UltracraftServer.LOGGER.warn("Generating ore feature at: " + (x + chunk.getOffset().x) + ", " + (y + chunk.getOffset().y) + ", " + (z + chunk.getOffset().z));
+            if (DebugFlags.ORE_FEATURE.enabled()) {
+                UltracraftServer.LOGGER.warn("Generating ore feature at: " + (x + chunk.getOffset().x) + ", " + (y + chunk.getOffset().y) + ", " + (z + chunk.getOffset().z));
+            }
 
             GridPoint2 offset = new GridPoint2(xOffset, zOffset);
             List<GridPoint2> offsets = new DefaultedArray<>(() -> new GridPoint2(0, 0), v);
@@ -65,6 +68,8 @@ public class OreFeature extends WorldGenFeature {
                 }
 
                 offsets.add(offset);
+
+                if (chunk.get(x + xOffset, y, z + zOffset).getBlock() != Blocks.STONE) continue;
                 chunk.set(x + xOffset, y, z + zOffset, this.ore.createMeta());
             }
             return true;

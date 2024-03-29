@@ -14,6 +14,7 @@ public class DebugFlags {
     }
 
 
+
     public static final boolean IS_RUNNING_IN_DEBUG = detectDebug();
 
     public static final DebugFlag CHUNK_PACKET_DUMP = new DebugFlag(false);
@@ -24,6 +25,7 @@ public class DebugFlags {
     public static final DebugFlag WORLD_GEN = new DebugFlag(false);
     public static final DebugFlag LOG_POSITION_RESET_ON_CHUNK_LOAD = new DebugFlag(false);
     public static final DebugFlag PACKET_LOGGING = new DebugFlag(true);
+    public static final DebugFlag ORE_FEATURE = new DebugFlag(true);
 
     static {
         if (IS_RUNNING_IN_DEBUG)
