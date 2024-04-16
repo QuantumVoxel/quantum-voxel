@@ -2,6 +2,7 @@ package com.ultreon.craft.client.network;
 
 import com.ultreon.craft.network.Connection;
 import com.ultreon.craft.network.MemoryConnection;
+import com.ultreon.craft.network.MemoryConnectionContext;
 import com.ultreon.craft.network.SocketConnection;
 import com.ultreon.craft.network.api.PacketDestination;
 import com.ultreon.craft.network.packets.c2s.C2SPingPacket;
@@ -47,6 +48,7 @@ public class ClientConnection implements Runnable {
      */
     public static MemoryConnection connectToLocalServer() {
         MemoryConnection connection = new MemoryConnection(PacketDestination.SERVER);
+        MemoryConnectionContext.set(connection);
         connection.setHandler(new LoginClientPacketHandlerImpl(connection));
         return connection;
     }

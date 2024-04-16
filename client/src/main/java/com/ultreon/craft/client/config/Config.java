@@ -131,4 +131,8 @@ public class Config extends CraftyConfig {
     @ConfigEntry(path = "audio.masterVolume", comment = "The master volume of the game's audio.")
     @Ranged(min = 0, max = 100)
     public static int masterVolume = 100;
+
+    @ConfigEntry(path = "camera.cameraSensitivity", comment = "The camera sensitivity.")
+    @Ranged(min = 0, max = 2)
+    public static float cameraSensitivity = 0.5F;
 }

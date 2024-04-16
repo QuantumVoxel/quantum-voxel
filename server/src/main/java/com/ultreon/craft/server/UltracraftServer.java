@@ -102,6 +102,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     private final PermissionMap permissions = new PermissionMap();
     private final CommandSender consoleSender = new ConsoleCommandSender();
     private final RecipeManager recipeManager;
+    private boolean initialChunksLoaded = false;
 
     /**
      * Creates a new {@link UltracraftServer} instance.
@@ -850,6 +851,10 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     public abstract void fatalCrash(Throwable throwable);
 
     public void onInitialChunksLoaded() {
+        this.initialChunksLoaded = true;
+    }
 
+    public boolean isInitialChunksLoaded() {
+        return this.initialChunksLoaded;
     }
 }

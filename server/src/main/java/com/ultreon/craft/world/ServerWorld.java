@@ -173,8 +173,8 @@ public class ServerWorld extends World {
      * @param z     the z-coordinate
      * @param block the block type to set
      * @return true if the block was successfully set, false if setting the block failed
-     * @deprecated due to block setting changes, use {@link #set(int, int, int, BlockMetadata, int)} instead
      * @see BlockFlags
+     * @deprecated due to block setting changes, use {@link #set(int, int, int, BlockMetadata, int)} instead
      */
     @Override
     @Deprecated
@@ -207,7 +207,7 @@ public class ServerWorld extends World {
                 blockMetadata.update(this, offset);
             }
         }
-        
+
         return isBlockSet;
     }
 
@@ -469,13 +469,16 @@ public class ServerWorld extends World {
         if (!this.chunksToLoad.isEmpty()) return;
         if (!this.chunksToUnload.isEmpty()) return;
 
-        if (this.chunksToLoadCount > 0) {
-            this.chunksToLoadCount = -1;
-            this.server.onInitialChunksLoaded();
-        }
+        if (!this.server.isInitialChunksLoaded()) {
+            if (this.chunksToLoadCount > 0) {
+                this.chunksToLoadCount = -1;
+                this.server.onInitialChunksLoaded();
+            }
+            if (this.chunksToLoadCount == 0) {
+                this.chunksToLoadCount = refresher.toLoad.size();
+            }
 
-        if (this.chunksToLoadCount == 0) {
-            this.chunksToLoadCount = refresher.toLoad.size();
+            return;
         }
 
         for (ChunkPos pos : refresher.toLoad) {
@@ -627,26 +630,26 @@ public class ServerWorld extends World {
     public @Nullable ServerChunk getChunk(@NotNull ChunkPos pos) {
         // Get the region at the specified position
         var region = this.regionStorage.getRegionAt(pos);
-        
+
         // If the region is not found, return null
         if (region == null) return null;
-        
+
         // Convert the chunk position to local coordinates
         var localPos = World.toLocalChunkPos(pos);
-        
+
         // Get the chunk from the region
         var chunk = region.getChunk(localPos);
-        
+
         // If the chunk is found, verify its position matches the expected position
         if (chunk != null) {
             ChunkPos foundAt = chunk.getPos();
-            
+
             // If the positions don't match, throw a validation error
             if (!foundAt.equals(localPos)) {
                 throw new ValidationError("Chunk expected to be found at %s was found at %s instead.".formatted(pos, foundAt));
             }
         }
-        
+
         // Return the chunk
         return chunk;
     }
@@ -1471,12 +1474,14 @@ public class ServerWorld extends World {
             this.chunkCount++;
 
             // Send the chunk to all connections.
-            try {
-                this.world.server.sendChunk(globalPos, builtChunk);
-            } catch (IOException e) {
-                this.generatingChunks.remove(globalPos);
-                throw new RuntimeException(e);
-            }
+            CompletableFuture.runAsync(() -> {
+                try {
+                    this.world.server.sendChunk(globalPos, builtChunk);
+                } catch (IOException e) {
+                    this.generatingChunks.remove(globalPos);
+                    throw new RuntimeException(e);
+                }
+            });
 
             // Mark the chunk as ready.
             builtChunk.ready = true;
@@ -1770,11 +1775,11 @@ public class ServerWorld extends World {
         @Override
         public String toString() {
             return "RecordedChange{" +
-                   "x=" + x +
-                   ", y=" + y +
-                   ", z=" + z +
-                   ", block=" + block +
-                   '}';
+                    "x=" + x +
+                    ", y=" + y +
+                    ", z=" + z +
+                    ", block=" + block +
+                    '}';
         }
     }
 }

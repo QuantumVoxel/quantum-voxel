@@ -8,6 +8,7 @@ import com.ultreon.craft.client.gui.GuiBuilder;
 import com.ultreon.craft.client.gui.Position;
 import com.ultreon.craft.client.gui.Renderer;
 import com.ultreon.craft.client.gui.widget.Label;
+import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.server.player.ServerPlayer;
 import com.ultreon.craft.text.TextObject;

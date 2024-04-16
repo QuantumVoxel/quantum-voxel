@@ -99,10 +99,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             player.resurrect();
         }
 
-        if (!(this.client.screen instanceof WorldLoadScreen)) {
-            this.client.showScreen(null);
-        }
-
         UltracraftClient.LOGGER.debug("Player respawned at %s".formatted(pos)); //! DEBUG
     }
 

@@ -9,6 +9,7 @@ import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.crash.ApplicationCrash;
 import com.ultreon.craft.crash.CrashLog;
 import com.ultreon.craft.debug.DebugFlags;
+import com.ultreon.craft.network.Connection;
 import com.ultreon.craft.network.packets.s2c.S2CPlayerSetPosPacket;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.server.player.ServerPlayer;
@@ -27,6 +28,7 @@ public class IntegratedServer extends UltracraftServer {
     private final UltracraftClient client = UltracraftClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
+    private Connection connection;
 
     public IntegratedServer(WorldStorage storage) {
         super(storage, UltracraftClient.PROFILER, UltracraftClient.get().inspection);
@@ -70,6 +72,7 @@ public class IntegratedServer extends UltracraftServer {
         // Set the host player if the player UUID matches the local player UUID
         if (player.getUuid().equals(localPlayer.getUuid())) {
             this.host = player;
+            this.connection = player.connection;
         }
 
         // Create a debug node for host player if inspection is enabled

@@ -108,10 +108,10 @@ public class ServerConnections {
      * @return the local address of the started memory server
      */
     public SocketAddress startMemoryServer() {
-        ChannelFuture channelFuture;
-
         synchronized (this.channels) {
-            MemoryConnection connection = MemoryConnectionContext.get();
+            MemoryConnection oppositeConnection = MemoryConnectionContext.get();
+            MemoryConnection connection = new MemoryConnection(PacketDestination.CLIENT, oppositeConnection);
+            oppositeConnection.setOppositeConnection(connection);
             this.connections.add(connection);
             connection.setHandler(new LoginServerPacketHandler(ServerConnections.this.server, connection));
         }

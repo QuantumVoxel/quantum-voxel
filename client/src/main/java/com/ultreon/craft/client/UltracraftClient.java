@@ -145,6 +145,7 @@ import java.awt.datatransfer.Clipboard;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -2238,8 +2239,9 @@ public class UltracraftClient extends PollingExecutorService implements Deferred
     public void startIntegratedServer() {
         this.integratedServer.start();
 
-        LocalAddress address = new LocalAddress(UltracraftClient.class);
         this.connection = ClientConnection.connectToLocalServer();
+
+        SocketAddress address = this.integratedServer.getConnections().startMemoryServer();;
         this.clientConn = new ClientConnection(address);
 
         // Initialize (memory) connection.
