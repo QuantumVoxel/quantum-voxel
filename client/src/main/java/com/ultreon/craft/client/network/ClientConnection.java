@@ -1,13 +1,14 @@
 package com.ultreon.craft.client.network;
 
 import com.ultreon.craft.network.Connection;
+import com.ultreon.craft.network.MemoryConnection;
+import com.ultreon.craft.network.SocketConnection;
 import com.ultreon.craft.network.api.PacketDestination;
 import com.ultreon.craft.network.packets.c2s.C2SPingPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.local.LocalChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -42,17 +43,11 @@ public class ClientConnection implements Runnable {
     /**
      * Connects to a local memory server
      *
-     * @param address the address to connect to
      * @return the connection
      */
-    public static Connection connectToLocalServer(SocketAddress address) {
-        Connection connection = new Connection(PacketDestination.SERVER);
-        new Bootstrap()
-                .group(Connection.LOCAL_WORKER_GROUP.get())
-                .handler(new LocalServerInitializer(connection))
-                .channel(LocalChannel.class)
-                .connect(address)
-                .syncUninterruptibly();
+    public static MemoryConnection connectToLocalServer() {
+        MemoryConnection connection = new MemoryConnection(PacketDestination.SERVER);
+        connection.setHandler(new LoginClientPacketHandlerImpl(connection));
         return connection;
     }
 
@@ -63,15 +58,15 @@ public class ClientConnection implements Runnable {
      * @param connection        the connection to use
      * @return the channel's future
      */
-    public static ChannelFuture connectTo(InetSocketAddress inetSocketAddress, Connection connection) {
+    public static ChannelFuture connectTo(InetSocketAddress inetSocketAddress, SocketConnection connection) {
         Class<? extends SocketChannel> channelClass;
         Supplier<? extends EventLoopGroup> group;
         if (Epoll.isAvailable()) {
             channelClass = EpollSocketChannel.class;
-            group = Connection.NETWORK_EPOLL_WORKER_GROUP;
+            group = SocketConnection.NETWORK_EPOLL_WORKER_GROUP;
         } else {
             channelClass = NioSocketChannel.class;
-            group = Connection.NETWORK_WORKER_GROUP;
+            group = SocketConnection.NETWORK_WORKER_GROUP;
         }
 
         return new Bootstrap()
@@ -82,7 +77,7 @@ public class ClientConnection implements Runnable {
     }
 
     public static Future<?> closeGroup() {
-        return Connection.NETWORK_WORKER_GROUP.get().shutdownGracefully();
+        return SocketConnection.NETWORK_WORKER_GROUP.get().shutdownGracefully();
     }
 
     public void tick(Connection connection) {
@@ -108,7 +103,7 @@ public class ClientConnection implements Runnable {
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(@NotNull SocketChannel ch) {
-                    Connection connection = new Connection(PacketDestination.SERVER);
+                    SocketConnection connection = new SocketConnection(PacketDestination.SERVER);
                     connection.setup(ch.pipeline());
                     connection.setHandler(new LoginClientPacketHandlerImpl(connection));
                 }
@@ -125,15 +120,15 @@ public class ClientConnection implements Runnable {
     }
 
     private static class MultiplayerChannelInitializer extends ChannelInitializer<Channel> {
-        private final Connection connection;
+        private final SocketConnection connection;
 
-        public MultiplayerChannelInitializer(Connection connection) {
+        public MultiplayerChannelInitializer(SocketConnection connection) {
             this.connection = connection;
         }
 
         @Override
         protected void initChannel(@NotNull Channel channel) {
-            Connection.setInitAttributes(channel);
+            SocketConnection.setInitAttributes(channel);
 
             channel.config().setOption(ChannelOption.TCP_NODELAY, true);
             channel.config().setRecvByteBufAllocator(new AdaptiveRecvByteBufAllocator(64, 1024, 2097152));
@@ -141,24 +136,6 @@ public class ClientConnection implements Runnable {
             ChannelPipeline pipeline = channel.pipeline();
             this.connection.setup(pipeline);
             pipeline.addLast("read_timeout", new ReadTimeoutHandler(30));
-            this.connection.setupPacketHandler(pipeline);
-            this.connection.setHandler(new LoginClientPacketHandlerImpl(this.connection));
-        }
-    }
-
-    private static class LocalServerInitializer extends ChannelInitializer<Channel> {
-        private final Connection connection;
-
-        public LocalServerInitializer(Connection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        protected void initChannel(@NotNull Channel channel) {
-            Connection.setInitAttributes(channel);
-
-            ChannelPipeline pipeline = channel.pipeline();
-            this.connection.setup(pipeline);
             this.connection.setupPacketHandler(pipeline);
             this.connection.setHandler(new LoginClientPacketHandlerImpl(this.connection));
         }

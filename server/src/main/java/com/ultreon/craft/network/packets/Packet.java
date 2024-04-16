@@ -4,6 +4,8 @@ import com.ultreon.craft.network.PacketBuffer;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.PacketHandler;
 
+import java.util.Collection;
+
 public abstract class Packet<T extends PacketHandler> {
     public Packet() {
 

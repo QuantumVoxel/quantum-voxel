@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.craft.CommonConstants;
 import com.ultreon.craft.block.state.BlockMetadata;
 import com.ultreon.craft.item.ItemStack;
+import com.ultreon.craft.network.partial.PartialPacket;
 import com.ultreon.craft.text.TextObject;
 import com.ultreon.craft.util.Identifier;
 import com.ultreon.craft.world.BlockPos;
@@ -15,7 +16,9 @@ import com.ultreon.libs.commons.v0.util.EnumUtils;
 import com.ultreon.libs.commons.v0.vector.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.util.ByteProcessor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -30,12 +33,48 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+@SuppressWarnings({"UnusedReturnValue"})
 public class PacketBuffer extends ByteBuf {
     private static final int MAX_UBO_SIZE = 1024 * 1024 * 2;
     private final ByteBuf buf;
 
     public PacketBuffer(ByteBuf buf) {
         this.buf = buf;
+    }
+
+    /**
+     * Creates a new packet buffer from a list of partial packets.
+     *
+     * @param parts the partial packets
+     * @throws PacketIntegrityException if the packet integrity check fails
+     */
+    public PacketBuffer(List<PartialPacket> parts) throws PacketIntegrityException {
+        List<ByteBuf> bufs = this.validate(parts);
+
+        this.buf = new CompositeByteBuf(alloc(), isDirect(), 64, bufs);
+    }
+
+    /**
+     * Checks the integrity of the partial packets.
+     *
+     * @param parts the partial packets
+     * @return the list of netty byte buffers
+     * @throws PacketIntegrityException if the packet integrity check fails
+     */
+    @ApiStatus.Internal
+    public final @NotNull List<ByteBuf> validate(List<PartialPacket> parts) throws PacketIntegrityException {
+        List<ByteBuf> bufs = new ArrayList<>();
+        int dataOffsetCheck = 0;
+        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).toList()) {
+            if (dataOffsetCheck != partialPacket.dataOffset()) throw new PacketIntegrityException("Packet data offset mismatch. Expected " + dataOffsetCheck + " but got " + partialPacket.dataOffset());
+            bufs.add(partialPacket.data());
+            dataOffsetCheck += partialPacket.data().readableBytes();
+        }
+        return bufs;
+    }
+
+    public PacketBuffer() {
+        this.buf = ByteBufAllocator.DEFAULT.compositeBuffer(64);
     }
 
     public String readString(int max) {
@@ -1637,5 +1676,18 @@ public class PacketBuffer extends ByteBuf {
 
     public void writeBlockMeta(BlockMetadata blockMeta) {
         blockMeta.write(this);
+    }
+
+    public PartialPacket[] split(int packetId, long sequenceId) {
+        ByteBuffer[] nioBuffers = this.buf.nioBuffers();
+        PartialPacket[] partialPackets = new PartialPacket[nioBuffers.length];
+
+        int offset = 0;
+        for (int i = 0; i < nioBuffers.length; i++) {
+            partialPackets[i] = new PartialPacket(packetId, sequenceId, offset, this.buf.readerIndex(), nioBuffers[i]);
+            offset += nioBuffers[i].remaining();
+        }
+
+        return partialPackets;
     }
 }

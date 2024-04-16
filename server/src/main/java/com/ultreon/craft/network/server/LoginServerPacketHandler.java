@@ -96,7 +96,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         final var player = this.server.loadPlayer(name, uuid, this.connection);
         this.connection.setPlayer(player);
 
-        Connection.LOGGER.info(name + " joined the server.");
+        Connection.LOGGER.info("{} joined the server.", name);
 
 
         this.connection.send(new S2CLoginAcceptedPacket(uuid), PacketResult.onEither(() -> {

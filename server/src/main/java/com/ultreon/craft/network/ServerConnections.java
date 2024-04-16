@@ -14,7 +14,6 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.local.LocalAddress;
-import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 /**
@@ -113,17 +111,12 @@ public class ServerConnections {
         ChannelFuture channelFuture;
 
         synchronized (this.channels) {
-            channelFuture = new ServerBootstrap()
-                    .channel(LocalServerChannel.class)
-                    .childHandler(new MemoryChannelInitializer())
-                    .group(ServerConnections.SERVER_EVENT_GROUP.get())
-                    .localAddress(LocalAddress.ANY)
-                    .bind()
-                    .syncUninterruptibly();
-            this.channels.add(channelFuture);
+            MemoryConnection connection = MemoryConnectionContext.get();
+            this.connections.add(connection);
+            connection.setHandler(new LoginServerPacketHandler(ServerConnections.this.server, connection));
         }
 
-        return channelFuture.channel().localAddress();
+        return LocalAddress.ANY;
     }
 
     /**
@@ -231,7 +224,7 @@ public class ServerConnections {
     private class TcpChannelInitializer extends ChannelInitializer<Channel> {
         @Override
         protected void initChannel(@NotNull Channel channel) {
-            Connection.setInitAttributes(channel);
+            SocketConnection.setInitAttributes(channel);
 
             try {
                 channel.config().setOption(ChannelOption.TCP_NODELAY, true);
@@ -240,26 +233,11 @@ public class ServerConnections {
             }
 
             ChannelPipeline pipeline = channel.pipeline();
-            Connection connection = new Connection(PacketDestination.CLIENT);
+            SocketConnection connection = new SocketConnection(PacketDestination.CLIENT);
             ServerConnections.this.connections.add(connection);
             connection.setup(pipeline);
             pipeline.addLast("timeout", new ReadTimeoutHandler(30));
             connection.setupPacketHandler(pipeline);
-            connection.setHandler(new LoginServerPacketHandler(ServerConnections.this.server, connection));
-        }
-    }
-
-    private class MemoryChannelInitializer extends ChannelInitializer<Channel> {
-        @Override
-        protected void initChannel(@NotNull Channel channel) {
-            Connection.setInitAttributes(channel);
-
-            Connection connection = new Connection(PacketDestination.CLIENT);
-            connection.memoryConnection = true;
-            ServerConnections.this.connections.add(connection);
-            ChannelPipeline channelPipeline = channel.pipeline();
-            connection.setup(channelPipeline);
-            connection.setupPacketHandler(channelPipeline);
             connection.setHandler(new LoginServerPacketHandler(ServerConnections.this.server, connection));
         }
     }

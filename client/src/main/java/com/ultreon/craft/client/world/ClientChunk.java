@@ -118,7 +118,7 @@ public final class ClientChunk extends Chunk {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
         }
 
-        ModelInstance remove = models.remove(new BlockPos(x, y, z));
+        this.models.remove(new BlockPos(x, y, z));
 
         boolean isBlockSet = super.setFast(x, y, z, block);
 

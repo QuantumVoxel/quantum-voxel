@@ -21,4 +21,6 @@ public interface PacketHandler {
     }
 
     boolean isDisconnected();
+
+    Packet<?> reply(long sequenceId);
 }

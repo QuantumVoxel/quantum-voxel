@@ -77,6 +77,7 @@ import com.ultreon.craft.client.render.pipeline.MainRenderNode;
 import com.ultreon.craft.client.render.pipeline.RenderPipeline;
 import com.ultreon.craft.client.render.pipeline.WorldDiffuseNode;
 import com.ultreon.craft.client.render.shader.GameShaderProvider;
+import com.ultreon.craft.network.SocketConnection;
 import com.ultreon.craft.resources.ReloadContext;
 import com.ultreon.craft.client.resources.ResourceLoader;
 import com.ultreon.craft.client.resources.ResourceNotFoundException;
@@ -126,6 +127,7 @@ import com.ultreon.libs.datetime.v0.Duration;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
+import io.netty.channel.local.LocalAddress;
 import net.fabricmc.loader.api.FabricLoader;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
@@ -143,7 +145,6 @@ import java.awt.datatransfer.Clipboard;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -1740,7 +1741,7 @@ public class UltracraftClient extends PollingExecutorService implements Deferred
             }
         }
 
-        // Execute player tick if not cancelled
+        // Execute player tick if not canceled
         if (this.player != null && !ClientTickEvents.PRE_PLAYER_TICK.factory().onPlayerTick(this.player).isCanceled()) {
             this.player.tick();
             ClientTickEvents.POST_PLAYER_TICK.factory().onPlayerTick(this.player);
@@ -1972,17 +1973,20 @@ public class UltracraftClient extends PollingExecutorService implements Deferred
         CompletableFuture.runAsync(() -> {
             this.player = null;
 
-            if (this.connection != null) {
+            if (this.connection instanceof SocketConnection socketConnection) {
                 try {
-                    var close = this.connection.close();
+                    var close = socketConnection.close();
                     if (close != null) close.sync();
-                    var future = this.connection.closeGroup();
+                    var future = socketConnection.closeGroup();
                     if (future != null) future.sync();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     UltracraftClient.crash(e);
                     return;
                 }
+            } else {
+                this.connection.close();
+                this.connection = null;
             }
 
             if (this.integratedServer != null) {
@@ -2043,10 +2047,15 @@ public class UltracraftClient extends PollingExecutorService implements Deferred
         if (this.world != null) {
             this.exitWorldAndThen(() -> {
                 try {
-                    var close = this.connection.close();
-                    if (close != null) close.sync();
-                    var future = this.connection.closeGroup();
-                    if (future != null) future.sync();
+                    if (this.connection instanceof SocketConnection socketConnection) {
+                        var close = socketConnection.close();
+                        if (close != null) close.sync();
+                        var future = socketConnection.closeGroup();
+                        if (future != null) future.sync();
+                    } else {
+                        this.connection.close();
+                        this.connection = null;
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } catch (Exception e) {
@@ -2229,19 +2238,20 @@ public class UltracraftClient extends PollingExecutorService implements Deferred
     public void startIntegratedServer() {
         this.integratedServer.start();
 
-        SocketAddress localServer = this.integratedServer.getConnections().startMemoryServer();
-        this.connection = ClientConnection.connectToLocalServer(localServer);
-        this.clientConn = new ClientConnection(localServer);
+        LocalAddress address = new LocalAddress(UltracraftClient.class);
+        this.connection = ClientConnection.connectToLocalServer();
+        this.clientConn = new ClientConnection(address);
 
         // Initialize (memory) connection.
         this.multiplayerData = new MultiplayerData(this);
-        this.connection.initiate(localServer.toString(), 0, new LoginClientPacketHandlerImpl(this.connection), new C2SLoginPacket(this.user.name()));
+        this.connection.initiate(address.toString(), 0, new LoginClientPacketHandlerImpl(this.connection), new C2SLoginPacket(this.user.name()));
     }
 
     public void connectToServer(String host, int port) {
-        this.connection = new Connection(PacketDestination.SERVER);
+        SocketConnection socketConnection = new SocketConnection(PacketDestination.SERVER);
+        this.connection = socketConnection;
         InetSocketAddress address = new InetSocketAddress(host, port);
-        ClientConnection.connectTo(address, this.connection).syncUninterruptibly();
+        ClientConnection.connectTo(address, socketConnection).syncUninterruptibly();
 
         // Initialize remote connection.
         this.multiplayerData = new MultiplayerData(this);

@@ -3,13 +3,13 @@ package com.ultreon.craft.client.gui.debug;
 import com.badlogic.gdx.graphics.Mesh;
 import com.ultreon.craft.block.state.BlockMetadata;
 import com.ultreon.craft.client.IntegratedServer;
+import com.ultreon.craft.network.MemoryConnection;
 import com.ultreon.craft.client.util.RenderableArray;
 import com.ultreon.craft.client.world.ChunkMesh;
 import com.ultreon.craft.client.world.ClientChunk;
 import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.debug.ValueTracker;
 import com.ultreon.craft.entity.Player;
-import com.ultreon.craft.network.Connection;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.util.HitResult;
 import com.ultreon.craft.world.BlockPos;
@@ -37,7 +37,7 @@ public class SystemInfoDebugPage implements DebugPage {
         if (integratedServer != null) {
             context.left("Integrated Server")
                     .left("Server TPS", integratedServer.getCurrentTps())
-                    .left("Packets", "rx = " + Connection.getPacketsReceived() + ", tx = " + Connection.getPacketsSent())
+                    .left("Packets", "rx = " + MemoryConnection.getPacketsReceived() + ", tx = " + MemoryConnection.getPacketsSent())
                     .left();
         }
 

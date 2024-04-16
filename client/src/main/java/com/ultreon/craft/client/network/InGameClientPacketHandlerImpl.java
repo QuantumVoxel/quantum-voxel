@@ -22,6 +22,7 @@ import com.ultreon.craft.menu.Inventory;
 import com.ultreon.craft.network.Connection;
 import com.ultreon.craft.network.NetworkChannel;
 import com.ultreon.craft.network.PacketContext;
+import com.ultreon.craft.network.SocketConnection;
 import com.ultreon.craft.network.api.PacketDestination;
 import com.ultreon.craft.network.api.packet.ModPacket;
 import com.ultreon.craft.network.api.packet.ModPacketContext;
@@ -44,6 +45,7 @@ import com.ultreon.craft.world.Chunk;
 import com.ultreon.craft.world.ChunkPos;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
+import io.netty.channel.ChannelFuture;
 import net.fabricmc.api.EnvType;
 import org.jetbrains.annotations.Nullable;
 
@@ -189,18 +191,18 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             }
 
             var close = this.connection.close();
-            if (close != null) {
+            if (close instanceof ChannelFuture channelFuture) {
                 try {
-                    close.sync();
+                    channelFuture.sync();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     UltracraftClient.LOGGER.error("Failed to close connection", e);
                 }
             }
             var future = this.connection.closeGroup();
-            if (future != null) {
+            if (future instanceof ChannelFuture channelFuture) {
                 try {
-                    future.sync();
+                    channelFuture.sync();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     UltracraftClient.LOGGER.error("Failed to close Netty event group", e);

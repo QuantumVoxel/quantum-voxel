@@ -5,11 +5,12 @@ import com.ultreon.craft.server.UltracraftServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.util.AttributeKey;
 
 import java.util.List;
 
-public class PacketDecoder extends ByteToMessageDecoder {
+public class PacketDecoder extends MessageToMessageDecoder<PacketBuffer> {
     private final AttributeKey<? extends PacketData<?>> theirDataKey;
 
     /**
@@ -27,7 +28,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
      * @param out the {@link List} to which decoded messages should be added
      */
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
+    protected void decode(ChannelHandlerContext ctx, PacketBuffer in, List<Object> out) {
         PacketBuffer buffer = new PacketBuffer(in);
         int id = buffer.readInt();
 
