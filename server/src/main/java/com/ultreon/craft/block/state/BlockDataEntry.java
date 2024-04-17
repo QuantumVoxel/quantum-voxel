@@ -1,7 +1,6 @@
 package com.ultreon.craft.block.state;
 
-import com.google.gson.JsonObject;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.data.types.BooleanType;
 import com.ultreon.data.types.IType;
 import com.ultreon.data.types.IntType;
@@ -30,7 +29,7 @@ public abstract class BlockDataEntry<T> {
         return new BooleanEntry(value);
     }
 
-    public abstract BlockDataEntry<?> read(PacketBuffer packetBuffer);
+    public abstract BlockDataEntry<?> read(PacketIO packetBuffer);
 
     public abstract BlockDataEntry<?> load(IType<?> type);
 
@@ -53,7 +52,7 @@ public abstract class BlockDataEntry<T> {
 
     public abstract IType<?> save();
 
-    public abstract void write(PacketBuffer packetBuffer);
+    public abstract void write(PacketIO packetBuffer);
 
     public abstract BlockDataEntry<?> parse(Json5Object overrideObj);
 
@@ -88,7 +87,7 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public BlockDataEntry<?> read(PacketBuffer packetBuffer) {
+        public BlockDataEntry<?> read(PacketIO packetBuffer) {
             return this.with(packetBuffer.readBoolean());
         }
 
@@ -103,7 +102,7 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public void write(PacketBuffer packetBuffer) {
+        public void write(PacketIO packetBuffer) {
             packetBuffer.writeBoolean(this.value);
         }
 
@@ -149,7 +148,7 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public BlockDataEntry<?> read(PacketBuffer packetBuffer) {
+        public BlockDataEntry<?> read(PacketIO packetBuffer) {
             return this.with(packetBuffer.readInt());
         }
 
@@ -164,7 +163,7 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public void write(PacketBuffer packetBuffer) {
+        public void write(PacketIO packetBuffer) {
             packetBuffer.writeInt(this.value);
         }
 
@@ -191,7 +190,7 @@ public abstract class BlockDataEntry<T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockDataEntry<?> read(PacketBuffer packetBuffer) {
+        public BlockDataEntry<?> read(PacketIO packetBuffer) {
             return this.with((T) this.value.getClass().getEnumConstants()[packetBuffer.readInt()]);
         }
 
@@ -207,7 +206,7 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public void write(PacketBuffer packetBuffer) {
+        public void write(PacketIO packetBuffer) {
             packetBuffer.writeInt(this.value.ordinal());
         }
 

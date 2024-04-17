@@ -5,16 +5,13 @@ import com.ultreon.craft.crash.ApplicationCrash;
 import com.ultreon.craft.crash.CrashLog;
 import com.ultreon.craft.debug.inspect.InspectionRoot;
 import com.ultreon.craft.debug.profiler.Profiler;
+import com.ultreon.craft.network.system.TcpNetworker;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.text.ServerLanguage;
 import com.ultreon.craft.util.Identifier;
-import com.ultreon.craft.world.ChunkPos;
-import com.ultreon.craft.world.ServerChunk;
-import com.ultreon.craft.world.World;
 import com.ultreon.craft.world.WorldStorage;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +21,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Dedicated server implementation.
@@ -47,10 +42,10 @@ public class DedicatedServer extends UltracraftServer {
      * @param inspection the inspection root.
      * @throws UnknownHostException if the hostname cannot be resolved.
      */
-    public DedicatedServer(String host, int port, InspectionRoot<Main> inspection) throws UnknownHostException {
+    public DedicatedServer(String host, int port, InspectionRoot<Main> inspection) throws IOException {
         super(DedicatedServer.STORAGE, DedicatedServer.PROFILER, inspection);
 
-        this.getConnections().startTcpServer(InetAddress.getByName(host), port);
+        this.networker = new TcpNetworker(this, InetAddress.getByName(host), port);
     }
 
     /**
@@ -93,7 +88,7 @@ public class DedicatedServer extends UltracraftServer {
      * @param inspection the InspectionRoot object for main inspection
      * @throws UnknownHostException if the hostname is unknown
      */
-    DedicatedServer(InspectionRoot<Main> inspection) throws UnknownHostException {
+    DedicatedServer(InspectionRoot<Main> inspection) throws IOException {
         // Call the other constructor with hostname, port, and inspection
         this(ServerConfig.hostname, ServerConfig.port, inspection);
 
@@ -125,7 +120,7 @@ public class DedicatedServer extends UltracraftServer {
 
         // Print and save the crash log.
         crash.printCrash();
-        if (crash.getCrashLog().defaultSave().isFailurePresent()) {
+        if (crash.getCrashLog().defaultSave().isFailure()) {
             CommonConstants.LOGGER.error("Failed to save crash log!", crash.getCrashLog().defaultSave().getFailure());
             Runtime.getRuntime().halt(2);
         }

@@ -43,11 +43,11 @@ public class Result<T> {
         return this.failure.throwable;
     }
 
-    public boolean isValuePresent() {
+    public boolean isOk() {
         return this.ok != null;
     }
 
-    public boolean isFailurePresent() {
+    public boolean isFailure() {
         return this.failure != null;
     }
 
@@ -109,6 +109,40 @@ public class Result<T> {
     public void ifAny(Consumer<T> onValue, Consumer<Throwable> onFailure) {
         if (this.ok != null) onValue.accept(this.ok.value);
         else if (this.failure != null) onFailure.accept(this.failure.throwable);
+    }
+
+    public T unwrap() {
+        if (this.ok == null) throw new NoSuchElementException("The value is not present.");
+        return this.ok.value;
+    }
+
+    public Throwable unwrapFailure() {
+        if (this.failure == null) throw new NoSuchElementException("The failure is not present.");
+        return this.failure.throwable;
+    }
+
+    public T unwrapOr(T other) {
+        Ok<T> ok = this.ok;
+        if (ok == null) return other;
+        T value = ok.value;
+        return value == null ? other : value;
+    }
+
+    public Throwable unwrapOrGet(Supplier<? extends Throwable> other) {
+        Failure failure = this.failure;
+        if (failure == null) return other.get();
+        Throwable value = failure.throwable;
+        return value == null ? other.get() : value;
+    }
+
+    public T expect(String message) {
+        if (this.ok == null) throw new NoSuchElementException(message);
+        return this.ok.value;
+    }
+
+    public Throwable expectFailure(String message) {
+        if (this.failure == null) throw new NoSuchElementException(message);
+        return this.failure.throwable;
     }
 
     private static class Ok<L> {

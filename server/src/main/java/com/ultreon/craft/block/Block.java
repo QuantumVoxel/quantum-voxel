@@ -7,7 +7,7 @@ import com.ultreon.craft.item.Item;
 import com.ultreon.craft.item.ItemStack;
 import com.ultreon.craft.item.UseItemContext;
 import com.ultreon.craft.item.tool.ToolType;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.text.TextObject;
 import com.ultreon.craft.ubo.DataWriter;
@@ -22,7 +22,6 @@ import com.ultreon.libs.commons.v0.vector.Vec3i;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,7 +113,7 @@ public class Block implements DataWriter<MapType> {
         return UseResult.SKIP;
     }
 
-    public void write(PacketBuffer buffer) {
+    public void write(PacketIO buffer) {
         buffer.writeId(this.getId());
     }
 

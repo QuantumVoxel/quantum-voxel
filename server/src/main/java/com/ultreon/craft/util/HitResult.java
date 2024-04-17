@@ -3,7 +3,7 @@ package com.ultreon.craft.util;
 import com.ultreon.craft.block.Block;
 import com.ultreon.craft.block.Blocks;
 import com.ultreon.craft.block.state.BlockMetadata;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.world.CubicDirection;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
@@ -38,7 +38,7 @@ public class HitResult {
         this.distanceMax = distanceMax;
     }
 
-    public HitResult(PacketBuffer buffer) {
+    public HitResult(PacketIO buffer) {
         this.ray = new Ray(buffer);
         this.direction = ray.getDirection();
         this.distanceMax = buffer.readFloat();
@@ -52,7 +52,7 @@ public class HitResult {
         this.distance = buffer.readDouble();
     }
 
-    public void write(PacketBuffer buffer) {
+    public void write(PacketIO buffer) {
         this.ray.write(buffer);
         buffer.writeFloat(this.distanceMax);
         buffer.writeVec3d(this.position);

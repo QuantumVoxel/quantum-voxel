@@ -6,7 +6,7 @@ import com.ultreon.craft.block.entity.BlockEntity;
 import com.ultreon.craft.block.state.BlockMetadata;
 import com.ultreon.craft.collection.PaletteStorage;
 import com.ultreon.craft.collection.Storage;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.server.ServerDisposable;
 import com.ultreon.craft.util.PosOutOfBoundsException;
@@ -146,7 +146,7 @@ public abstract class Chunk implements ServerDisposable, ChunkAccess {
      * @param buffer The input data.
      * @return The decoded block data.
      */
-    public static Block decodeBlock(PacketBuffer buffer) {
+    public static Block decodeBlock(PacketIO buffer) {
         int id = buffer.readInt();
         return Registries.BLOCK.byId(id);
     }

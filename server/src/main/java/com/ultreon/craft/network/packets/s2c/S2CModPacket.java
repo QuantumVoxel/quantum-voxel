@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.packets.s2c;
 
 import com.ultreon.craft.network.NetworkChannel;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.api.packet.ModPacket;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
@@ -19,14 +19,14 @@ public class S2CModPacket extends Packet<InGameClientPacketHandler> {
         this.packet = packet;
     }
 
-    public S2CModPacket(PacketBuffer buffer) {
+    public S2CModPacket(PacketIO buffer) {
         this.channelId = buffer.readId();
         this.channel = NetworkChannel.getChannel(this.channelId);
         this.packet = this.channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeId(this.channelId);
         buffer.writeShort(this.channel.getId(this.packet));
 

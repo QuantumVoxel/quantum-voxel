@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -15,13 +15,13 @@ public class S2CPlaySoundPacket extends Packet<InGameClientPacketHandler> {
         this.volume = volume;
     }
 
-    public S2CPlaySoundPacket(PacketBuffer buffer) {
+    public S2CPlaySoundPacket(PacketIO buffer) {
         this.sound = buffer.readId();
         this.volume = buffer.readFloat();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeId(this.sound);
         buffer.writeFloat(this.volume);
     }

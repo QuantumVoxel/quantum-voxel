@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.stage;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketCollection;
 import com.ultreon.craft.network.PacketData;
 import com.ultreon.craft.network.client.ClientPacketHandler;
@@ -40,7 +40,7 @@ public abstract class PacketStage {
      */
     @SuppressWarnings("unchecked")
     @CanIgnoreReturnValue
-    protected <T extends Packet<? extends ServerPacketHandler>> int addServerBound(Function<PacketBuffer, T> decoder, T... typeGetter) {
+    protected <T extends Packet<? extends ServerPacketHandler>> int addServerBound(Function<PacketIO, T> decoder, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
         return this.serverBoundList.add(type, Packet::toBytes, t -> (Packet<ServerPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
     }
@@ -55,7 +55,7 @@ public abstract class PacketStage {
      */
     @SuppressWarnings("unchecked")
     @CanIgnoreReturnValue
-    protected <T extends Packet<?>> int addClientBound(Function<PacketBuffer, T> decoder, T... typeGetter) {
+    protected <T extends Packet<?>> int addClientBound(Function<PacketIO, T> decoder, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
         return this.clientBoundList.add(type, Packet::toBytes, t -> (Packet<ClientPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
     }
@@ -63,14 +63,14 @@ public abstract class PacketStage {
     /**
      * @return the client bound packet data.
      */
-    public PacketData<ClientPacketHandler> getClientBoundData() {
+    public PacketData<ClientPacketHandler> getClientPackets() {
         return this.clientData;
     }
 
     /**
      * @return the server bound packet data.
      */
-    public PacketData<ServerPacketHandler> getServerData() {
+    public PacketData<ServerPacketHandler> getServerPackets() {
         return this.serverData;
     }
 }

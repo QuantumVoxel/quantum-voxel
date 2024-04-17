@@ -1,8 +1,8 @@
 package com.ultreon.craft.network.api.packet;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.craft.network.Connection;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.system.IConnection;
+import com.ultreon.craft.network.PacketIO;
 
 import java.util.function.Supplier;
 
@@ -15,10 +15,10 @@ public abstract sealed class ModPacket<T extends ModPacket<T>> permits BiDirecti
         try {
             this.handle(context);
         } catch (Throwable throwable) {
-            Connection.LOGGER.error("Couldn't handle packet:", throwable);
+            IConnection.LOGGER.error("Couldn't handle packet:", throwable);
         }
         return true;
     }
 
-    public abstract void toBytes(PacketBuffer buffer);
+    public abstract void toBytes(PacketIO buffer);
 }

@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.packets.s2c;
 
 import com.ultreon.craft.entity.player.PlayerAbilities;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.AbilitiesPacket;
@@ -28,7 +28,7 @@ public class S2CAbilitiesPacket extends Packet<InGameClientPacketHandler> implem
         this.bitSet.set(3, this.invincible);
     }
 
-    public S2CAbilitiesPacket(PacketBuffer buffer) {
+    public S2CAbilitiesPacket(PacketIO buffer) {
         this.bitSet = buffer.readBitSet();
         this.flying = this.bitSet.get(0);
         this.allowFlight = this.bitSet.get(1);
@@ -57,7 +57,7 @@ public class S2CAbilitiesPacket extends Packet<InGameClientPacketHandler> implem
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeBitSet(this.bitSet);
     }
 

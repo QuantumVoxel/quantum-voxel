@@ -4,9 +4,9 @@ import com.ultreon.craft.network.packets.Packet;
 
 import java.util.function.Supplier;
 
-public interface PacketResult {
-    static PacketResult onFailure(Supplier<Packet<?>> supplier) {
-        return new PacketResult() {
+public interface PacketListener {
+    static PacketListener onFailure(Supplier<Packet<?>> supplier) {
+        return new PacketListener() {
             @Override
             public Packet<?> onFailure() {
                 return supplier.get();
@@ -14,8 +14,8 @@ public interface PacketResult {
         };
     }
 
-    static PacketResult onSuccess(Runnable func) {
-        return new PacketResult() {
+    static PacketListener onSuccess(Runnable func) {
+        return new PacketListener() {
             @Override
             public void onSuccess() {
                 func.run();
@@ -23,8 +23,8 @@ public interface PacketResult {
         };
     }
 
-    static PacketResult onEither(Runnable func) {
-        return new PacketResult() {
+    static PacketListener onEither(Runnable func) {
+        return new PacketListener() {
             @Override
             public void onSuccess() {
                 func.run();
@@ -33,7 +33,7 @@ public interface PacketResult {
             @Override
             public Packet<?> onFailure() {
                 func.run();
-                return PacketResult.super.onFailure();
+                return PacketListener.super.onFailure();
             }
         };
     }

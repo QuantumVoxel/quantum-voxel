@@ -11,7 +11,7 @@ import com.ultreon.craft.item.tool.ToolItem;
 import com.ultreon.craft.menu.ContainerMenu;
 import com.ultreon.craft.menu.ItemSlot;
 import com.ultreon.craft.menu.MenuType;
-import com.ultreon.craft.network.Connection;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.network.NetworkChannel;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.api.PacketDestination;
@@ -40,11 +40,11 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     private static final Map<Identifier, NetworkChannel> CHANNEL = new HashMap<>();
     private final UltracraftServer server;
     private final ServerPlayer player;
-    private final Connection connection;
+    private final IConnection connection;
     private final PacketContext context;
     private boolean disconnected;
 
-    public InGameServerPacketHandler(UltracraftServer server, ServerPlayer player, Connection connection) {
+    public InGameServerPacketHandler(UltracraftServer server, ServerPlayer player, IConnection connection) {
         this.server = server;
         this.player = player;
         this.connection = connection;
@@ -64,7 +64,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     @Override
     public void onDisconnect(String message) {
-        Connection.LOGGER.info("Player {} disconnected: {}", this.player.getName(), message);
+        IConnection.LOGGER.info("Player {} disconnected: {}", this.player.getName(), message);
         PlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(this.player);
 
         this.disconnected = true;

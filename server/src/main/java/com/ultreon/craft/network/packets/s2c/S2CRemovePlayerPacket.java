@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -15,12 +15,12 @@ public class S2CRemovePlayerPacket extends Packet<InGameClientPacketHandler> {
         this.uuid = uuid;
     }
 
-    public S2CRemovePlayerPacket(PacketBuffer buffer) {
+    public S2CRemovePlayerPacket(PacketIO buffer) {
         this.uuid = buffer.readUuid();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeUuid(this.uuid);
     }
 

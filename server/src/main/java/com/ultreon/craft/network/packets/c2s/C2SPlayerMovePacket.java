@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.c2s;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.server.InGameServerPacketHandler;
@@ -16,14 +16,14 @@ public class C2SPlayerMovePacket extends Packet<InGameServerPacketHandler> {
         this.z = z;
     }
 
-    public C2SPlayerMovePacket(PacketBuffer buffer) {
+    public C2SPlayerMovePacket(PacketIO buffer) {
         this.x = buffer.readDouble();
         this.y = buffer.readDouble();
         this.z = buffer.readDouble();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeDouble(this.x);
         buffer.writeDouble(this.y);
         buffer.writeDouble(this.z);

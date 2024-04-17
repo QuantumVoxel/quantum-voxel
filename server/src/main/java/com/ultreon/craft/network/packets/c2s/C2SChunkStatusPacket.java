@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.c2s;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.server.InGameServerPacketHandler;
@@ -16,13 +16,13 @@ public class C2SChunkStatusPacket extends Packet<InGameServerPacketHandler> {
         this.status = status;
     }
 
-    public C2SChunkStatusPacket(PacketBuffer buffer) {
+    public C2SChunkStatusPacket(PacketIO buffer) {
         this.pos = buffer.readChunkPos();
         this.status = Chunk.Status.values()[buffer.readUnsignedShort()];
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeChunkPos(this.pos);
         buffer.writeShort(this.status.ordinal());
     }

@@ -1,8 +1,7 @@
 package com.ultreon.craft.entity;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
-import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.data.types.MapType;
@@ -16,13 +15,13 @@ public class S2CEntityPipeline extends Packet<InGameClientPacketHandler> {
         this.pipeline = pipeline;
     }
 
-    public S2CEntityPipeline(PacketBuffer buffer) {
+    public S2CEntityPipeline(PacketIO buffer) {
         this.id = buffer.readVarInt();
         pipeline = buffer.readUbo();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeVarInt(id);
         buffer.writeUbo(pipeline);
     }

@@ -1,5 +1,6 @@
 package com.ultreon.craft.client;
 
+import com.sun.jdi.connect.spi.ClosedConnectionException;
 import com.ultreon.craft.client.gui.Notification;
 import com.ultreon.craft.client.gui.icon.MessageIcon;
 import com.ultreon.craft.client.gui.screens.TitleScreen;
@@ -9,7 +10,7 @@ import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.crash.ApplicationCrash;
 import com.ultreon.craft.crash.CrashLog;
 import com.ultreon.craft.debug.DebugFlags;
-import com.ultreon.craft.network.Connection;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.network.packets.s2c.S2CPlayerSetPosPacket;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.server.player.ServerPlayer;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ public class IntegratedServer extends UltracraftServer {
     private final UltracraftClient client = UltracraftClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
-    private Connection connection;
+    private IConnection connection;
 
     public IntegratedServer(WorldStorage storage) {
         super(storage, UltracraftClient.PROFILER, UltracraftClient.get().inspection);
@@ -179,7 +181,13 @@ public class IntegratedServer extends UltracraftServer {
     public void close() {
         super.close();
 
-        this.getConnections().stop();
+        try {
+            this.getNetworker().close();
+        } catch (ClosedChannelException | ClosedConnectionException e) {
+            // Ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

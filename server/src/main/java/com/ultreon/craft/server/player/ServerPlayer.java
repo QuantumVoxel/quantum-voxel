@@ -20,8 +20,10 @@ import com.ultreon.craft.item.Items;
 import com.ultreon.craft.item.UseItemContext;
 import com.ultreon.craft.menu.ContainerMenu;
 import com.ultreon.craft.menu.ItemSlot;
-import com.ultreon.craft.network.Connection;
-import com.ultreon.craft.network.PacketResult;
+import com.ultreon.craft.network.client.ClientPacketHandler;
+import com.ultreon.craft.network.server.ServerPacketHandler;
+import com.ultreon.craft.network.system.IConnection;
+import com.ultreon.craft.network.PacketListener;
 import com.ultreon.craft.network.packets.AbilitiesPacket;
 import com.ultreon.craft.network.packets.s2c.*;
 import com.ultreon.craft.registry.CommandRegistry;
@@ -60,7 +62,7 @@ import java.util.stream.Collectors;
  * @see UltracraftServer#getCachedPlayer(String)
  */
 public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
-    public Connection connection;
+    public IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private final ServerWorld world;
     public int hotbarIdx;
     private final UUID uuid;
@@ -85,7 +87,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     private final MutablePermissionMap permissions = new MutablePermissionMap();
     private boolean isAdmin;
 
-    public ServerPlayer(EntityType<? extends Player> entityType, ServerWorld world, UUID uuid, String name, Connection connection) {
+    public ServerPlayer(EntityType<? extends Player> entityType, ServerWorld world, UUID uuid, String name, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         super(entityType, world, name);
         this.world = world;
         this.uuid = uuid;
@@ -121,7 +123,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         // Check if the world is not null
         assert this.world != null;
 
-        // Remove player from the world if it exists in the world
+        // Remove the player from the world if it exists in the world
         if (this.world.getEntity(this.getId()) == this) {
             this.world.despawn(this);
         }
@@ -183,7 +185,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
      * @param connection The connection used for spawning
      */
     @ApiStatus.Internal
-    public void spawn(Vec3d position, Connection connection) {
+    public void spawn(Vec3d position, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkNotNull(connection, "connection");
 
@@ -465,7 +467,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         if (this.sendingChunk) return;
 
         this.onChunkPending(pos);
-        this.connection.send(new S2CChunkDataPacket(pos, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()), PacketResult.onEither(() -> this.sendingChunk = false));
+        this.connection.send(new S2CChunkDataPacket(pos, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()), PacketListener.onEither(() -> this.sendingChunk = false));
     }
 
     /**
@@ -491,7 +493,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
 
     /**
      * Handles the AbilitiesPacket received from the client.
-     * If the player is trying to fly when flight is not allowed, disconnects them.
+     * If the player is trying to fly when the ability to flight is not allowed, disconnects them.
      *
      * @param packet The AbilitiesPacket received from the client.
      */
@@ -730,5 +732,9 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         if (block == null || !this.world.isLoaded(blockPos) || !this.world.get(blockPos).isReplaceable()) return;
 
         this.world.set(x, y, z, block, BlockFlags.SYNC | BlockFlags.UPDATE);
+    }
+
+    public void onDisconnect(String message) {
+        UltracraftServer.LOGGER.info("Player %s disconnected: %s".formatted(this.getName(), message));
     }
 }

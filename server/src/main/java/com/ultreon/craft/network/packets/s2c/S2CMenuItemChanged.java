@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.packets.s2c;
 
 import com.ultreon.craft.item.ItemStack;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -15,13 +15,13 @@ public class S2CMenuItemChanged extends Packet<InGameClientPacketHandler> {
         this.stack = stack;
     }
 
-    public S2CMenuItemChanged(PacketBuffer buffer) {
+    public S2CMenuItemChanged(PacketIO buffer) {
         this.index = buffer.readInt();
         this.stack = buffer.readItemStack();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeInt(this.index);
         buffer.writeItemStack(this.stack);
     }

@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.c2s;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.server.InGameServerPacketHandler;
@@ -12,7 +12,7 @@ public class C2SOpenMenuPacket extends Packet<InGameServerPacketHandler> {
     private final Identifier id;
     private final BlockPos pos;
 
-    public C2SOpenMenuPacket(PacketBuffer buffer) {
+    public C2SOpenMenuPacket(PacketIO buffer) {
         this.id = buffer.readId();
         this.pos = buffer.readBoolean() ? buffer.readBlockPos() : null;
     }
@@ -23,7 +23,7 @@ public class C2SOpenMenuPacket extends Packet<InGameServerPacketHandler> {
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeId(id);
         buffer.writeBoolean(pos != null);
         if (pos != null) {

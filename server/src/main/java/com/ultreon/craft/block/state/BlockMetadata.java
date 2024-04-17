@@ -3,16 +3,13 @@ package com.ultreon.craft.block.state;
 import com.ultreon.craft.UnsafeApi;
 import com.ultreon.craft.block.Block;
 import com.ultreon.craft.block.Blocks;
-import com.ultreon.craft.entity.Player;
-import com.ultreon.craft.item.ItemStack;
 import com.ultreon.craft.item.UseItemContext;
 import com.ultreon.craft.item.tool.ToolType;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.util.BoundingBox;
 import com.ultreon.craft.util.Identifier;
 import com.ultreon.craft.world.BlockPos;
-import com.ultreon.craft.world.CubicDirection;
 import com.ultreon.craft.world.ServerWorld;
 import com.ultreon.craft.world.World;
 import com.ultreon.craft.world.loot.LootGenerator;
@@ -33,7 +30,7 @@ public class BlockMetadata {
         this.entries = entries;
     }
 
-    public static BlockMetadata read(PacketBuffer packetBuffer) {
+    public static BlockMetadata read(PacketIO packetBuffer) {
         int rawId = packetBuffer.readVarInt();
         Block block = Registries.BLOCK.byId(rawId);
         if (block == null)
@@ -45,7 +42,7 @@ public class BlockMetadata {
         return meta;
     }
 
-    private Map<String, BlockDataEntry<?>> readEntries(PacketBuffer packetBuffer) {
+    private Map<String, BlockDataEntry<?>> readEntries(PacketIO packetBuffer) {
         int size = packetBuffer.readMedium();
         for (int i = 0; i < size; i++) {
             String key = packetBuffer.readString(64);
@@ -59,7 +56,7 @@ public class BlockMetadata {
         return entries;
     }
 
-    public int write(PacketBuffer encode) {
+    public int write(PacketIO encode) {
         encode.writeVarInt(Registries.BLOCK.getRawId(block));
         encode.writeMedium(entries.size());
         for (Map.Entry<String, BlockDataEntry<?>> entry : entries.entrySet()) {

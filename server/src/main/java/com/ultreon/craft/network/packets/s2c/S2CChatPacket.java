@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -13,12 +13,12 @@ public class S2CChatPacket extends Packet<InGameClientPacketHandler> {
         this.message = message;
     }
 
-    public S2CChatPacket(PacketBuffer buffer) {
+    public S2CChatPacket(PacketIO buffer) {
         this.message = buffer.readTextObject();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeTextObject(this.message);
     }
 

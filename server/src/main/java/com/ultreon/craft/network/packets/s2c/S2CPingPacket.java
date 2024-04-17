@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
@@ -15,13 +15,13 @@ public class S2CPingPacket extends Packet<ClientPacketHandler> {
         this.time = time;
     }
 
-    public S2CPingPacket(PacketBuffer buffer) {
+    public S2CPingPacket(PacketIO buffer) {
         this.serverTime = buffer.readLong();
         this.time = buffer.readLong();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeLong(this.serverTime);
         buffer.writeLong(this.time);
     }

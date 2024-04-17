@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.c2s;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.server.InGameServerPacketHandler;
@@ -12,12 +12,12 @@ public class C2SPingPacket extends Packet<InGameServerPacketHandler> {
         this.time = System.currentTimeMillis();
     }
 
-    public C2SPingPacket(PacketBuffer buffer) {
+    public C2SPingPacket(PacketIO buffer) {
         this.time = buffer.readLong();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeLong(this.time);
     }
 

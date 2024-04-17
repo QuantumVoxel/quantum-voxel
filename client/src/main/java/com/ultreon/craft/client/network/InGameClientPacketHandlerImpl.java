@@ -1,5 +1,6 @@
 package com.ultreon.craft.client.network;
 
+import com.sun.jdi.connect.spi.ClosedConnectionException;
 import com.ultreon.craft.block.entity.BlockEntityType;
 import com.ultreon.craft.block.state.BlockMetadata;
 import com.ultreon.craft.client.UltracraftClient;
@@ -19,10 +20,11 @@ import com.ultreon.craft.entity.EntityType;
 import com.ultreon.craft.item.ItemStack;
 import com.ultreon.craft.menu.ContainerMenu;
 import com.ultreon.craft.menu.Inventory;
-import com.ultreon.craft.network.Connection;
+import com.ultreon.craft.network.client.ClientPacketHandler;
+import com.ultreon.craft.network.server.ServerPacketHandler;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.network.NetworkChannel;
 import com.ultreon.craft.network.PacketContext;
-import com.ultreon.craft.network.SocketConnection;
 import com.ultreon.craft.network.api.PacketDestination;
 import com.ultreon.craft.network.api.packet.ModPacket;
 import com.ultreon.craft.network.api.packet.ModPacketContext;
@@ -45,10 +47,11 @@ import com.ultreon.craft.world.Chunk;
 import com.ultreon.craft.world.ChunkPos;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
-import io.netty.channel.ChannelFuture;
 import net.fabricmc.api.EnvType;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,14 +59,14 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler {
-    private final Connection connection;
+    private final IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     private final Map<Identifier, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final UltracraftClient client = UltracraftClient.get();
     private long ping = 0;
     private boolean disconnected;
 
-    public InGameClientPacketHandlerImpl(Connection connection) {
+    public InGameClientPacketHandlerImpl(IConnection<ClientPacketHandler, ServerPacketHandler> connection) {
         this.connection = connection;
         this.context = new PacketContext(null, connection, EnvType.CLIENT);
     }
@@ -170,7 +173,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             ClientPlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(player, message);
         }
 
-        this.client.connection.closeAll();
+        try {
+            this.client.connection.close();
+        } catch (ClosedChannelException | ClosedConnectionException e) {
+            // Ignored
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         this.disconnected = true;
 
         this.client.submit(() -> {
@@ -186,25 +195,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 this.client.worldRenderer = null;
             }
 
-            var close = this.connection.close();
-            if (close instanceof ChannelFuture channelFuture) {
-                try {
-                    channelFuture.sync();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    UltracraftClient.LOGGER.error("Failed to close connection", e);
-                }
+            try {
+                this.connection.close();
+            } catch (ClosedChannelException | ClosedConnectionException e) {
+                // Ignored
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            var future = this.connection.closeGroup();
-            if (future instanceof ChannelFuture channelFuture) {
-                try {
-                    channelFuture.sync();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    UltracraftClient.LOGGER.error("Failed to close Netty event group", e);
-                }
-            }
-
             if (this.client.integratedServer != null) {
                 this.client.integratedServer.shutdown();
                 this.client.integratedServer = null;

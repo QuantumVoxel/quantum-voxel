@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -14,13 +14,13 @@ public class S2CTimePacket extends Packet<InGameClientPacketHandler> {
         this.time = time;
     }
 
-    public S2CTimePacket(PacketBuffer buffer) {
+    public S2CTimePacket(PacketIO buffer) {
         this.operation = Operation.values()[buffer.readVarInt()];
         this.time = buffer.readInt();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeVarInt(operation.ordinal());
         buffer.writeInt(time);
     }

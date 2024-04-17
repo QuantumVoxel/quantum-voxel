@@ -5,9 +5,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.sun.jdi.connect.spi.ClosedConnectionException;
 import com.ultreon.craft.CommonConstants;
 import com.ultreon.craft.api.commands.CommandSender;
-import com.ultreon.craft.config.UltracraftServerConfig;
 import com.ultreon.craft.crash.ApplicationCrash;
 import com.ultreon.craft.crash.CrashLog;
 import com.ultreon.craft.debug.DebugFlags;
@@ -18,13 +18,12 @@ import com.ultreon.craft.entity.Entity;
 import com.ultreon.craft.entity.EntityTypes;
 import com.ultreon.craft.events.WorldEvents;
 import com.ultreon.craft.gamerule.GameRules;
-import com.ultreon.craft.network.Connection;
-import com.ultreon.craft.network.ServerConnections;
+import com.ultreon.craft.network.Networker;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.packets.s2c.S2CAddPlayerPacket;
 import com.ultreon.craft.network.packets.s2c.S2CRemovePlayerPacket;
-import com.ultreon.craft.recipe.CraftingRecipe;
 import com.ultreon.craft.recipe.RecipeManager;
 import com.ultreon.craft.recipe.Recipes;
 import com.ultreon.craft.resources.ResourceManager;
@@ -54,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
@@ -81,7 +81,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Queue<Pair<ServerPlayer, Supplier<Packet<? extends ClientPacketHandler>>>> chunkNetworkQueue = new ArrayDeque<>();
     private final Map<UUID, ServerPlayer> players = new ConcurrentHashMap<>();
-    private final ServerConnections connections;
+    protected Networker networker;
     private final WorldStorage storage;
     private final ResourceManager resourceManager;
     protected InspectionNode<UltracraftServer> node;
@@ -102,6 +102,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     private final PermissionMap permissions = new PermissionMap();
     private final CommandSender consoleSender = new ConsoleCommandSender();
     private final RecipeManager recipeManager;
+    private final PlayerManager playerManager = new PlayerManager(this);
     private boolean initialChunksLoaded = false;
 
     /**
@@ -118,7 +119,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         UltracraftServer.instance = this;
         this.thread = new Thread(this, "server");
 
-        this.connections = new ServerConnections(this);
+        this.networker = null;
 
         MapType worldData = new MapType();
         if (this.storage.exists("world.ubo")) {
@@ -329,7 +330,14 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         }
 
         // Close all connections.
-        this.connections.stop();
+        try {
+            this.networker.close();
+        } catch (ClosedChannelException | ClosedConnectionException e) {
+            // Ignored
+        } catch (IOException e) {
+            // Log error for closing connections failure.
+            UltracraftServer.LOGGER.error("Closing connections failed!", e);
+        }
 
         // Save all the server data.
         try {
@@ -424,7 +432,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         this.profiler.section("taskPolling", this::poll);
 
         // Tick connections.
-        this.profiler.section("connections", this.connections::tick);
+        this.profiler.section("connections", this.networker::tick);
 
         // Tick the world.
         var world = this.world;
@@ -671,8 +679,8 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     /**
      * @return the server connections.
      */
-    public ServerConnections getConnections() {
-        return this.connections;
+    public Networker getNetworker() {
+        return this.networker;
     }
 
     /**
@@ -771,7 +779,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         return null;
     }
 
-    public ServerPlayer loadPlayer(String name, UUID uuid, Connection connection) {
+    public ServerPlayer loadPlayer(String name, UUID uuid, IConnection connection) {
         ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.world, uuid, name, connection);
         try {
             if (this.storage.exists("players/%s.ubo".formatted(name))) {
@@ -856,5 +864,9 @@ public abstract class UltracraftServer extends PollingExecutorService implements
 
     public boolean isInitialChunksLoaded() {
         return this.initialChunksLoaded;
+    }
+
+    public PlayerManager getPlayerManager() {
+        return this.playerManager;
     }
 }

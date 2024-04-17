@@ -6,7 +6,7 @@ import com.ultreon.craft.block.entity.BlockEntityType;
 import com.ultreon.craft.block.state.BlockMetadata;
 import com.ultreon.craft.collection.PaletteStorage;
 import com.ultreon.craft.collection.Storage;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -32,9 +32,9 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
     private final IntList blockEntities = new IntArrayList();
     public static final int MAX_SIZE = 1048576;
 
-    public S2CChunkDataPacket(PacketBuffer buffer) {
+    public S2CChunkDataPacket(PacketIO buffer) {
         this.pos = buffer.readChunkPos();
-        this.storage = new PaletteStorage<>(BlockMetadata.AIR, buffer, PacketBuffer::readBlockMeta);
+        this.storage = new PaletteStorage<>(BlockMetadata.AIR, buffer, PacketIO::readBlockMeta);
         this.biomeStorage = new PaletteStorage<>(Biomes.PLAINS, buffer, buf -> Registries.BIOME.byId(buf.readShort()));
 
         int blockEntityCount = buffer.readVarInt();
@@ -57,7 +57,7 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeChunkPos(this.pos);
         this.storage.write(buffer, (encode, block) -> block.write(encode));
         this.biomeStorage.write(buffer, (encode, biome) -> {

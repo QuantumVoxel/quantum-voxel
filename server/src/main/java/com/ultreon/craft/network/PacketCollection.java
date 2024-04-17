@@ -20,8 +20,8 @@ import java.util.function.Function;
  */
 public class PacketCollection<H extends PacketHandler> {
     private int id;
-    private final Map<Class<? extends Packet<?>>, BiConsumer<Packet<?>, PacketBuffer>> encoders = new HashMap<>();
-    private final Int2ObjectMap<Function<PacketBuffer, ? extends Packet<H>>> decoders = new Int2ObjectArrayMap<>();
+    private final Map<Class<? extends Packet<?>>, BiConsumer<Packet<?>, PacketIO>> encoders = new HashMap<>();
+    private final Int2ObjectMap<Function<PacketIO, ? extends Packet<H>>> decoders = new Int2ObjectArrayMap<>();
     private final Map<Class<? extends Packet<?>>, BiConsumer<Packet<H>, Pair<PacketContext, H>>> handlers = new HashMap<>();
     private final Map<Class<? extends Packet<?>>, Integer> packet2id = new HashMap<>();
 
@@ -34,7 +34,7 @@ public class PacketCollection<H extends PacketHandler> {
      * @param handler the handler to use.
      * @return the ID of the packet.
      */
-    public int add(Class<? extends Packet<?>> type, BiConsumer<Packet<?>, PacketBuffer> encoder, Function<PacketBuffer, Packet<H>> decoder, BiConsumer<Packet<H>, Pair<PacketContext, H>> handler) {
+    public int add(Class<? extends Packet<?>> type, BiConsumer<Packet<?>, PacketIO> encoder, Function<PacketIO, Packet<H>> decoder, BiConsumer<Packet<H>, Pair<PacketContext, H>> handler) {
         this.encoders.put(type, encoder);
         this.decoders.put(this.id, decoder);
         this.handlers.put(type, handler);
@@ -49,11 +49,11 @@ public class PacketCollection<H extends PacketHandler> {
      * @param buffer the buffer to encode to.
      * @throws PacketException if the packet is not registered.
      */
-    public void encode(Packet<?> packet, PacketBuffer buffer) {
+    public void encode(Packet<?> packet, PacketIO buffer) {
         Preconditions.checkNotNull(packet, "packet");
         Preconditions.checkNotNull(buffer, "buffer");
 
-        @Nullable BiConsumer<Packet<?>, PacketBuffer> encoder = this.encoders.get(packet.getClass());
+        @Nullable BiConsumer<Packet<?>, PacketIO> encoder = this.encoders.get(packet.getClass());
         if (encoder == null) throw new PacketException("Unknown packet: " + packet.getClass());
         encoder.accept(packet, buffer);
     }
@@ -66,10 +66,10 @@ public class PacketCollection<H extends PacketHandler> {
      * @return the decoded packet.
      * @throws PacketException if the packet ID is unknown.
      */
-    public Packet<H> decode(int id, PacketBuffer buffer) {
+    public Packet<H> decode(int id, PacketIO buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
 
-        Function<PacketBuffer, ? extends Packet<H>> decoder = this.decoders.get(id);
+        Function<PacketIO, ? extends Packet<H>> decoder = this.decoders.get(id);
         if (decoder == null) return null;
         return decoder.apply(buffer);
     }

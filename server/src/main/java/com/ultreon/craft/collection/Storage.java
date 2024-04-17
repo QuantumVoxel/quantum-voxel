@@ -1,6 +1,6 @@
 package com.ultreon.craft.collection;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.data.types.MapType;
 
 import java.util.function.BiConsumer;
@@ -13,9 +13,9 @@ public interface Storage<D> {
     void load(MapType inputData, Function<MapType, D> decoder);
 
 
-    void write(PacketBuffer buffer, BiConsumer<PacketBuffer, D> encoder);
+    void write(PacketIO buffer, BiConsumer<PacketIO, D> encoder);
 
-    void read(PacketBuffer buffer, Function<PacketBuffer, D> decoder);
+    void read(PacketIO buffer, Function<PacketIO, D> decoder);
 
     boolean set(int idx, D value);
 

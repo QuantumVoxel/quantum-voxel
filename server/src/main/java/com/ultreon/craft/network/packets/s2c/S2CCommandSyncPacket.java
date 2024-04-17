@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -14,12 +14,12 @@ public class S2CCommandSyncPacket extends Packet<InGameClientPacketHandler> {
         this.commands = commands;
     }
 
-    public S2CCommandSyncPacket(PacketBuffer buffer) {
+    public S2CCommandSyncPacket(PacketIO buffer) {
         this.commands = buffer.readList(buf -> buf.readString(64));
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeList(this.commands, (buf, s) -> buf.writeUTF(s, 64));
     }
 

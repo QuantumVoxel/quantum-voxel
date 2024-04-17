@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -17,13 +17,13 @@ public class S2CPlayerPositionPacket extends Packet<InGameClientPacketHandler> {
         this.pos = pos;
     }
 
-    public S2CPlayerPositionPacket(PacketBuffer buffer) {
+    public S2CPlayerPositionPacket(PacketIO buffer) {
         this.uuid = buffer.readUuid();
         this.pos = buffer.readVec3d();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeUuid(this.uuid);
         buffer.writeVec3d(this.pos);
     }

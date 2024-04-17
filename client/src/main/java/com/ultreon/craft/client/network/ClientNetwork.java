@@ -1,7 +1,7 @@
 package com.ultreon.craft.client.network;
 
 import com.ultreon.craft.client.UltracraftClient;
-import com.ultreon.craft.network.Connection;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.network.api.Network;
 import com.ultreon.craft.network.api.PacketRegisterContext;
 import com.ultreon.craft.network.api.packet.ModPacket;
@@ -20,7 +20,7 @@ public abstract class ClientNetwork extends Network {
 
     @Override
     public <T extends ModPacket<T> & ServerEndpoint> void sendToServer(T packet) {
-        Connection connection = UltracraftClient.get().connection;
+        IConnection connection = UltracraftClient.get().connection;
         if (connection != null) {
             connection.send(new C2SModPacket(this.channel, packet));
         }

@@ -1,7 +1,7 @@
 package com.ultreon.craft.collection;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.server.ServerDisposable;
 import com.ultreon.craft.ubo.DataKeys;
 import com.ultreon.data.types.ListType;
@@ -50,7 +50,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
         this.data = data;
     }
 
-    public PaletteStorage(D defaultValue, PacketBuffer buffer, Function<PacketBuffer, D> decoder) {
+    public PaletteStorage(D defaultValue, PacketIO buffer, Function<PacketIO, D> decoder) {
         this(defaultValue, 0);
         this.read(buffer, decoder);
     }
@@ -83,7 +83,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     }
 
     @Override
-    public void write(PacketBuffer buffer, BiConsumer<PacketBuffer, D> encoder) {
+    public void write(PacketIO buffer, BiConsumer<PacketIO, D> encoder) {
         buffer.writeMedium(this.data.size());
         for (D entry : this.data) if (entry != null) encoder.accept(buffer, entry);
         buffer.writeMedium(this.palette.length);
@@ -91,7 +91,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     }
 
     @Override
-    public void read(PacketBuffer buffer, Function<PacketBuffer, D> decoder) {
+    public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
         var data = new ArrayList<D>();
         var dataSize = buffer.readMedium();
         for (int i = 0; i < dataSize; i++) {

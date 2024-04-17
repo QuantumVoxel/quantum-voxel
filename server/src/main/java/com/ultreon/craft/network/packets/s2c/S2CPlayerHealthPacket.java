@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -12,12 +12,12 @@ public class S2CPlayerHealthPacket extends Packet<InGameClientPacketHandler> {
         this.newHealth = newHealth;
     }
 
-    public S2CPlayerHealthPacket(PacketBuffer buffer) {
+    public S2CPlayerHealthPacket(PacketIO buffer) {
         this.newHealth = buffer.readFloat();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeFloat(this.newHealth);
     }
 

@@ -2,7 +2,7 @@ package com.ultreon.craft.network.packets.s2c;
 
 import com.ultreon.craft.entity.Entity;
 import com.ultreon.craft.entity.EntityType;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -23,7 +23,7 @@ public class S2CAddEntityPacket extends Packet<InGameClientPacketHandler> {
         this.pipeline = spawned.getPipeline();
     }
 
-    public S2CAddEntityPacket(PacketBuffer buffer) {
+    public S2CAddEntityPacket(PacketIO buffer) {
         this.id = buffer.readVarInt();
         this.type = Registries.ENTITY_TYPE.byId(buffer.readVarInt());
         this.position = new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
@@ -31,7 +31,7 @@ public class S2CAddEntityPacket extends Packet<InGameClientPacketHandler> {
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeVarInt(this.id);
         buffer.writeVarInt(Registries.ENTITY_TYPE.getRawId(this.type));
 

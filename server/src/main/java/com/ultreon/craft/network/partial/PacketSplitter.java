@@ -1,7 +1,5 @@
 package com.ultreon.craft.network.partial;
 
-import com.ultreon.craft.network.PacketEncoder;
-import com.ultreon.craft.network.ReplyPacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 

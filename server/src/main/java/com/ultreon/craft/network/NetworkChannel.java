@@ -4,8 +4,10 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.ultreon.craft.network.api.packet.ClientEndpoint;
 import com.ultreon.craft.network.api.packet.ModPacket;
 import com.ultreon.craft.network.api.packet.ModPacketContext;
+import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.packets.c2s.C2SModPacket;
 import com.ultreon.craft.network.packets.s2c.S2CModPacket;
+import com.ultreon.craft.network.server.ServerPacketHandler;
 import com.ultreon.craft.server.player.ServerPlayer;
 import com.ultreon.craft.util.Identifier;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -21,18 +23,19 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import com.ultreon.craft.network.system.IConnection;
 
 public class NetworkChannel {
     private static final Map<Identifier, NetworkChannel> CHANNELS = new HashMap<>();
     private final Identifier key;
     private int curId;
     private final Reference2IntMap<Class<? extends ModPacket<?>>> idMap = new Reference2IntArrayMap<>();
-    private final Map<Class<? extends ModPacket<?>>, BiConsumer<? extends ModPacket<?>, PacketBuffer>> encoders = new HashMap<>();
-    private final Int2ReferenceMap<Function<PacketBuffer, ? extends ModPacket<?>>> decoders = new Int2ReferenceArrayMap<>();
+    private final Map<Class<? extends ModPacket<?>>, BiConsumer<? extends ModPacket<?>, PacketIO>> encoders = new HashMap<>();
+    private final Int2ReferenceMap<Function<PacketIO, ? extends ModPacket<?>>> decoders = new Int2ReferenceArrayMap<>();
     private final Map<Class<? extends ModPacket<?>>, BiConsumer<? extends ModPacket<?>, Supplier<ModPacketContext>>> consumers = new HashMap<>();
 
     @Environment(EnvType.CLIENT)
-    private Connection c2sConnection;
+    private IConnection<ClientPacketHandler, ServerPacketHandler> c2sConnection;
 
     private NetworkChannel(Identifier key) {
         this.key = key;
@@ -50,7 +53,7 @@ public class NetworkChannel {
     }
 
     @Environment(EnvType.CLIENT)
-    public void setC2sConnection(Connection connection) {
+    public void setC2sConnection(IConnection<ClientPacketHandler, ServerPacketHandler> connection) {
         this.c2sConnection = connection;
     }
 
@@ -58,7 +61,7 @@ public class NetworkChannel {
         return this.key;
     }
 
-    public <T extends ModPacket<T>> void register(Class<T> clazz, BiConsumer<T, PacketBuffer> encoder, Function<PacketBuffer, T> decoder, BiConsumer<T, Supplier<ModPacketContext>> packetConsumer) {
+    public <T extends ModPacket<T>> void register(Class<T> clazz, BiConsumer<T, PacketIO> encoder, Function<PacketIO, T> decoder, BiConsumer<T, Supplier<ModPacketContext>> packetConsumer) {
         this.curId++;
         this.idMap.put(clazz, this.curId);
         this.encoders.put(clazz, encoder);
@@ -67,7 +70,7 @@ public class NetworkChannel {
     }
 
     public void queue(Runnable task) {
-
+        this.c2sConnection.queue(task);
     }
 
     public <T extends ModPacket<T> & ClientEndpoint> void sendToPlayer(ServerPlayer player, ModPacket<T> modPacket) {
@@ -77,9 +80,9 @@ public class NetworkChannel {
     public <T extends ModPacket<T> & ClientEndpoint> void sendToPlayers(List<ServerPlayer> players, ModPacket<T> modPacket) {
         for (int i = 0; i < players.size(); i++) {
             ServerPlayer player = players.get(i);
-            player.connection.send(new S2CModPacket(this, modPacket), false);
+            player.connection.send(new S2CModPacket(this, modPacket));
             if (i == players.size() - 1) {
-                player.connection.send(new S2CModPacket(this, modPacket), true);
+                player.connection.send(new S2CModPacket(this, modPacket));
             }
         }
     }
@@ -88,11 +91,11 @@ public class NetworkChannel {
         this.c2sConnection.send(new C2SModPacket(this, modPacket));
     }
 
-    public Function<PacketBuffer, ? extends ModPacket<?>> getDecoder(int id) {
+    public Function<PacketIO, ? extends ModPacket<?>> getDecoder(int id) {
         return this.decoders.get(id);
     }
 
-    public BiConsumer<? extends ModPacket<?>, PacketBuffer> getEncoder(Class<? extends ModPacket<?>> type) {
+    public BiConsumer<? extends ModPacket<?>, PacketIO> getEncoder(Class<? extends ModPacket<?>> type) {
         return this.encoders.get(type);
     }
 

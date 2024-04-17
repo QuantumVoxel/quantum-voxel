@@ -1,7 +1,7 @@
 package com.ultreon.craft.collection;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.ubo.DataKeys;
 import com.ultreon.data.types.ListType;
 import com.ultreon.data.types.MapType;
@@ -51,7 +51,7 @@ public class FlatStorage<D> implements Storage<D> {
     }
 
     @SuppressWarnings("unchecked")
-    public FlatStorage(D defaultValue, PacketBuffer buffer, Function<PacketBuffer, D> decoder) {
+    public FlatStorage(D defaultValue, PacketIO buffer, Function<PacketIO, D> decoder) {
         this.defaultValue = defaultValue;
 
         int size = buffer.readInt();
@@ -87,7 +87,7 @@ public class FlatStorage<D> implements Storage<D> {
     }
 
     @Override
-    public void write(PacketBuffer buffer, BiConsumer<PacketBuffer, D> encoder) {
+    public void write(PacketIO buffer, BiConsumer<PacketIO, D> encoder) {
         buffer.writeInt(this.data.length);
         D[] ds = this.data;
         for (D entry : ds) {
@@ -97,7 +97,7 @@ public class FlatStorage<D> implements Storage<D> {
     }
 
     @Override
-    public void read(PacketBuffer buffer, Function<PacketBuffer, D> decoder) {
+    public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
         var size = buffer.readInt();
         this.data = Arrays.copyOf(this.data, size);
         for (int i = 0; i < size; i++) {

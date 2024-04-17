@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -15,12 +15,12 @@ public class S2CTabCompletePacket extends Packet<InGameClientPacketHandler> {
         this.options = options;
     }
 
-    public S2CTabCompletePacket(PacketBuffer buffer) {
+    public S2CTabCompletePacket(PacketIO buffer) {
         this.options = buffer.readList(buf -> buf.readString(64));
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeList(this.options, (buf, elem) -> buf.writeUTF(elem, 64));
     }
 

@@ -82,7 +82,7 @@ public class WorldLoadScreen extends Screen {
             assert this.world != null;
             MathUtils.random.setSeed(this.world.getSeed());
 
-            this.message("Starting integrated server..");
+            this.message("Starting integrated server...");
             this.client.startIntegratedServer();
 
             this.message("Loading saved world...");

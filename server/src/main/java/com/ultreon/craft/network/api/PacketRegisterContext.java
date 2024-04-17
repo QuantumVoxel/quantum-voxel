@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.api;
 
 import com.ultreon.craft.network.NetworkChannel;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.api.packet.ModPacket;
 import io.netty.handler.codec.DecoderException;
 
@@ -21,14 +21,14 @@ public class PacketRegisterContext {
 
     @SafeVarargs
     @SuppressWarnings("unchecked")
-    public final <T extends ModPacket<T>> int register(Function<PacketBuffer, T> construct, T... type) {
+    public final <T extends ModPacket<T>> int register(Function<PacketIO, T> construct, T... type) {
         final int id = this.id++;
         final Constructor<T> declaredConstructor;
 
         Class<T> clazz = (Class<T>) type.getClass().getComponentType();
 
         try {
-            declaredConstructor = clazz.getDeclaredConstructor(PacketBuffer.class);
+            declaredConstructor = clazz.getDeclaredConstructor(PacketIO.class);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("ModPacket " + construct.getClass().getName() + " is missing a constructor that takes a FriendlyByteBuf as an argument.", e);
         }

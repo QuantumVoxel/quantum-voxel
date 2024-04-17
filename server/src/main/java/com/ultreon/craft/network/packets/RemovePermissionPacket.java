@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.packets;
 
 import com.ultreon.craft.api.commands.perms.Permission;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 
@@ -12,12 +12,12 @@ public class RemovePermissionPacket extends Packet<InGameClientPacketHandler> {
         this.permission = permission;
     }
 
-    public RemovePermissionPacket(PacketBuffer buffer) {
+    public RemovePermissionPacket(PacketIO buffer) {
         this.permission = new Permission(buffer.readString(128));
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeUTF(this.permission.toString(), 128);
     }
 

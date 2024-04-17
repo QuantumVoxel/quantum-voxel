@@ -1,10 +1,12 @@
 package com.ultreon.craft.network.server;
 
 import com.ultreon.craft.events.PlayerEvents;
-import com.ultreon.craft.network.Connection;
+import com.ultreon.craft.network.client.ClientPacketHandler;
+import com.ultreon.craft.network.stage.PacketStages;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.network.NetworkChannel;
 import com.ultreon.craft.network.PacketContext;
-import com.ultreon.craft.network.PacketResult;
+import com.ultreon.craft.network.PacketListener;
 import com.ultreon.craft.network.api.packet.ModPacket;
 import com.ultreon.craft.network.api.packet.ModPacketContext;
 import com.ultreon.craft.network.packets.Packet;
@@ -21,11 +23,11 @@ import java.util.UUID;
 public class LoginServerPacketHandler implements ServerPacketHandler {
     private static final Map<Identifier, NetworkChannel> CHANNELS = new HashMap<>();
     private final UltracraftServer server;
-    private final Connection connection;
+    private final IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private final PacketContext context;
     private boolean disconnected;
 
-    public LoginServerPacketHandler(UltracraftServer server, Connection connection) {
+    public LoginServerPacketHandler(UltracraftServer server, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         this.server = server;
         this.connection = connection;
         this.context = new PacketContext(null, connection, EnvType.SERVER);
@@ -96,13 +98,12 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         final var player = this.server.loadPlayer(name, uuid, this.connection);
         this.connection.setPlayer(player);
 
-        Connection.LOGGER.info("{} joined the server.", name);
+        IConnection.LOGGER.info("{} joined the server.", name);
 
 
-        this.connection.send(new S2CLoginAcceptedPacket(uuid), PacketResult.onEither(() -> {
-            this.connection.moveToInGame();
+        this.connection.send(new S2CLoginAcceptedPacket(uuid), PacketListener.onEither(() -> {
             this.server.placePlayer(player);
-            this.connection.setHandler(new InGameServerPacketHandler(this.server, player, this.connection));
+            this.connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(this.server, player, this.connection));
 
             PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
 
@@ -114,7 +115,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
             }
 
             PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);
-        }), true);
+        }));
     }
 
     @Override

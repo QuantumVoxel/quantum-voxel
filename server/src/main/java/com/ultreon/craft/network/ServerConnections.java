@@ -1,57 +1,38 @@
 package com.ultreon.craft.network;
 
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.ultreon.craft.network.api.PacketDestination;
+import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.packets.s2c.S2CDisconnectPacket;
-import com.ultreon.craft.network.server.LoginServerPacketHandler;
+import com.ultreon.craft.network.server.ServerPacketHandler;
+import com.ultreon.craft.network.system.IConnection;
+import com.ultreon.craft.network.system.MemoryConnection;
+import com.ultreon.craft.network.system.ServerTcpConnection;
+import com.ultreon.craft.network.system.ServerMemoryConnection;
+import com.ultreon.craft.network.system.TcpNetworker;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.util.Identifier;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.local.LocalAddress;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.util.concurrent.Future;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * Connections for the server.
  *
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  * @since 0.1.0
- * @see Connection
+ * @see ServerMemoryConnection
+ * @see ServerTcpConnection
  */
 public class ServerConnections {
     private static final Map<Identifier, NetworkChannel> CHANNELS = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerConnections.class);
     private final UltracraftServer server;
-    private final List<ChannelFuture> channels = Collections.synchronizedList(Lists.newArrayList());
 
-    /**
-     * Generic server event groups for all platforms
-     */
-    public static final Supplier<NioEventLoopGroup> SERVER_EVENT_GROUP = Suppliers.memoize(ServerConnections::createServerEventGroup);
-
-    /**
-     * Epoll server event groups for Linux
-     */
-    public static final Supplier<EpollEventLoopGroup> SERVER_EPOLL_EVENT_GROUP = Suppliers.memoize(ServerConnections::createEpollEventGroup);
-    final List<Connection> connections = new ArrayList<>();
     private boolean running;
+    private Networker networker;
 
     /**
      * Constructs a new {@link ServerConnections} for the specified {@link UltracraftServer}.
@@ -94,29 +75,19 @@ public class ServerConnections {
         return ServerConnections.CHANNELS.get(identifier);
     }
 
-    private static NioEventLoopGroup createServerEventGroup() {
-        return new NioEventLoopGroup(Math.max(Runtime.getRuntime().availableProcessors() / 2, 1), new ThreadFactoryBuilder().setNameFormat("Netty Server IO #%d").build());
-    }
-
-    private static EpollEventLoopGroup createEpollEventGroup() {
-        return new EpollEventLoopGroup(Math.max(Runtime.getRuntime().availableProcessors() / 2, 1), new ThreadFactoryBuilder().setNameFormat("Netty Epoll Server IO #%d").build());
-    }
-
     /**
      * Starts a memory server using the provided configuration.
      *
      * @return the local address of the started memory server
      */
-    public SocketAddress startMemoryServer() {
-        synchronized (this.channels) {
-            MemoryConnection oppositeConnection = MemoryConnectionContext.get();
-            MemoryConnection connection = new MemoryConnection(PacketDestination.CLIENT, oppositeConnection);
-            oppositeConnection.setOppositeConnection(connection);
-            this.connections.add(connection);
-            connection.setHandler(new LoginServerPacketHandler(ServerConnections.this.server, connection));
+    public MemoryNetworker startMemoryServer(MemoryConnection<ClientPacketHandler, ServerPacketHandler> otherSide) {
+        MemoryNetworker networker;
+        synchronized (this) {
+            networker = new MemoryNetworker(server, otherSide);
+            this.networker = networker;
         }
 
-        return LocalAddress.ANY;
+        return networker;
     }
 
     /**
@@ -125,36 +96,26 @@ public class ServerConnections {
      * @param address the IP address to bind the server to, or null to bind to all available network interfaces
      * @param port    the port number to listen on
      */
-    public void startTcpServer(@Nullable InetAddress address, int port) {
-        synchronized (this.channels) {
-            Class<? extends ServerChannel> clazz;
-            EventLoopGroup group;
-            if (Epoll.isAvailable()) {
-                clazz = EpollServerSocketChannel.class;
-                group = ServerConnections.SERVER_EPOLL_EVENT_GROUP.get();
-                ServerConnections.LOGGER.info("Using Epoll server");
-            } else {
-                clazz = NioServerSocketChannel.class;
-                group = ServerConnections.SERVER_EVENT_GROUP.get();
-                ServerConnections.LOGGER.info("Using Nio server");
+    public TcpNetworker startTcpServer(@Nullable InetAddress address, int port) throws ServerHostingException {
+        TcpNetworker networker;
+        synchronized (this) {
+            try {
+                networker = new TcpNetworker(server, address, port);
+                this.networker = networker;
+            } catch (IOException e) {
+                throw new ServerHostingException(e);
             }
-
-            this.channels.add(new ServerBootstrap()
-                    .channel(clazz)
-                    .childHandler(new TcpChannelInitializer())
-                    .group(group)
-                    .localAddress(address, port)
-                    .bind()
-                    .syncUninterruptibly());
         }
+
+        return networker;
     }
 
     public void tick() {
-        synchronized (this.connections) {
-            Iterator<Connection> iterator = this.connections.iterator();
+        synchronized (this) {
+            Iterator<? extends IConnection<ServerPacketHandler, ClientPacketHandler>> iterator = this.networker.getConnections().iterator();
 
             while (true) {
-                Connection connection;
+                IConnection<ServerPacketHandler, ClientPacketHandler> connection;
                 do {
                     if (!iterator.hasNext()) {
                         return;
@@ -172,14 +133,14 @@ public class ServerConnections {
                         }
 
                         ServerConnections.LOGGER.warn("Failed to handle packet:", e);
-                        Connection finalConnection = connection;
+                        IConnection<ServerPacketHandler, ClientPacketHandler> finalConnection = connection;
                         String message = "Server failed to tick the connection";
-                        connection.send(new S2CDisconnectPacket<>(message), PacketResult.onEither(() -> finalConnection.disconnect(message)));
+                        connection.send(new S2CDisconnectPacket<>(message), PacketListener.onEither(() -> finalConnection.disconnect(message)));
                         connection.setReadOnly();
                     }
                 } else {
                     iterator.remove();
-                    connection.handleDisconnect();
+                    connection.on3rdPartyDisconnect("Connection lost");
                 }
             }
         }
@@ -196,15 +157,6 @@ public class ServerConnections {
 
     public void stop() {
         this.running = false;
-
-        try {
-            Future<?> sync = ServerConnections.SERVER_EVENT_GROUP.get().shutdownGracefully().sync();
-            if (!sync.isSuccess()) {
-                ServerConnections.LOGGER.warn("Failed to shutdown server event loop group");
-            }
-        } catch (InterruptedException ex) {
-            ServerConnections.LOGGER.warn("Failed to shutdown server event loop group due to interrupt", ex);
-        }
     }
 
     /**
@@ -219,26 +171,5 @@ public class ServerConnections {
     @Override
     public String toString() {
         return "ServerConnections{}";
-    }
-
-    private class TcpChannelInitializer extends ChannelInitializer<Channel> {
-        @Override
-        protected void initChannel(@NotNull Channel channel) {
-            SocketConnection.setInitAttributes(channel);
-
-            try {
-                channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-            } catch (ChannelException ignored) {
-
-            }
-
-            ChannelPipeline pipeline = channel.pipeline();
-            SocketConnection connection = new SocketConnection(PacketDestination.CLIENT);
-            ServerConnections.this.connections.add(connection);
-            connection.setup(pipeline);
-            pipeline.addLast("timeout", new ReadTimeoutHandler(30));
-            connection.setupPacketHandler(pipeline);
-            connection.setHandler(new LoginServerPacketHandler(ServerConnections.this.server, connection));
-        }
     }
 }

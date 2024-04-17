@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.client;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.ReplyPacket;
 import com.ultreon.craft.network.packets.Packet;
@@ -15,12 +15,12 @@ public class C2SReplyPacket extends Packet<ServerPacketHandler> implements Reply
         this.sequenceId = sequenceId;
     }
 
-    public C2SReplyPacket(PacketBuffer buffer) {
+    public C2SReplyPacket(PacketIO buffer) {
         this(buffer.readLong());
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeLong(this.sequenceId);
     }
 

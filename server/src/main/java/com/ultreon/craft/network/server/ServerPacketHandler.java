@@ -1,10 +1,10 @@
 package com.ultreon.craft.network.server;
 
-import com.ultreon.craft.network.PacketEncoder;
 import com.ultreon.craft.network.PacketHandler;
 import com.ultreon.craft.network.S2CReplyPacket;
 import com.ultreon.craft.network.api.PacketDestination;
 import com.ultreon.craft.network.packets.Packet;
+import com.ultreon.craft.network.system.Connection;
 
 public interface ServerPacketHandler extends PacketHandler {
     @Override
@@ -18,6 +18,6 @@ public interface ServerPacketHandler extends PacketHandler {
     }
 
     default void handleC2SReply(long sequenceId) {
-        PacketEncoder.handleReply(sequenceId);
+        Connection.handleReply(sequenceId);
     }
 }

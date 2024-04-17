@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.c2s;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.server.InGameServerPacketHandler;
@@ -13,12 +13,12 @@ public class C2SItemUsePacket extends Packet<InGameServerPacketHandler> {
         this.hitResult = hitResult;
     }
 
-    public C2SItemUsePacket(PacketBuffer buffer) {
+    public C2SItemUsePacket(PacketIO buffer) {
         this.hitResult = new HitResult(buffer);
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         this.hitResult.write(buffer);
     }
 

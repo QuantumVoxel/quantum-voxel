@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -16,13 +16,13 @@ public class S2CBlockEntitySetPacket extends Packet<InGameClientPacketHandler> {
         this.blockEntityId = blockEntityId;
     }
 
-    public S2CBlockEntitySetPacket(PacketBuffer buffer) {
+    public S2CBlockEntitySetPacket(PacketIO buffer) {
         this.pos = buffer.readBlockPos();
         this.blockEntityId = buffer.readVarInt();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.blockEntityId);
     }

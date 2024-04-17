@@ -16,7 +16,7 @@
 
 package com.ultreon.craft.util;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.world.CubicDirection;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 
@@ -44,12 +44,12 @@ public class Ray implements Serializable {
 		this.direction.set(direction).nor();
 	}
 
-	public Ray(PacketBuffer buffer) {
+	public Ray(PacketIO buffer) {
 		this.origin.set(buffer.readVec3d());
 		this.direction.set(buffer.readVec3d()).nor();
 	}
 
-	public void write(PacketBuffer buffer) {
+	public void write(PacketIO buffer) {
 		buffer.writeVec3d(this.origin);
 		buffer.writeVec3d(this.direction);
 	}

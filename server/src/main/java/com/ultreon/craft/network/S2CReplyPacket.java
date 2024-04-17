@@ -12,12 +12,12 @@ public class S2CReplyPacket extends Packet<ClientPacketHandler> implements Reply
         this.sequenceId = sequenceId;
     }
 
-    public S2CReplyPacket(PacketBuffer buffer) {
+    public S2CReplyPacket(PacketIO buffer) {
         this(buffer.readLong());
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeLong(this.sequenceId);
     }
 

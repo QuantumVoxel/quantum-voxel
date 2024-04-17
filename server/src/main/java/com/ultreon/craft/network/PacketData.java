@@ -10,11 +10,11 @@ public class PacketData<T extends PacketHandler> {
         this.collection = collection;
     }
 
-    public Packet<?> decode(int id, PacketBuffer buffer) {
+    public Packet<?> decode(int id, PacketIO buffer) {
         return this.collection.decode(id, buffer);
     }
 
-    public void encode(Packet<?> packet, PacketBuffer buffer) {
+    public void encode(Packet<?> packet, PacketIO buffer) {
         this.collection.encode(packet, buffer);
     }
 

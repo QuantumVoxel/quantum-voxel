@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -13,12 +13,12 @@ public class S2CChunkCancelPacket extends Packet<InGameClientPacketHandler> {
         this.pos = pos;
     }
 
-    public S2CChunkCancelPacket(PacketBuffer buffer) {
+    public S2CChunkCancelPacket(PacketIO buffer) {
         this.pos = buffer.readChunkPos();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeChunkPos(this.pos);
     }
 

@@ -1,7 +1,7 @@
 package com.ultreon.craft.network.packets.s2c;
 
 import com.ultreon.craft.entity.damagesource.DamageSource;
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -17,7 +17,7 @@ public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
         this.source = source;
     }
 
-    public S2CPlayerHurtPacket(PacketBuffer buffer) {
+    public S2CPlayerHurtPacket(PacketIO buffer) {
         this.damage = buffer.readFloat();
         var source = Registries.DAMAGE_SOURCE.get(buffer.readId());
         if (source == null) {
@@ -27,7 +27,7 @@ public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         Identifier type = this.source.getType();
         buffer.writeFloat(this.damage);
         buffer.writeId(type == null ? new Identifier("none") : type);

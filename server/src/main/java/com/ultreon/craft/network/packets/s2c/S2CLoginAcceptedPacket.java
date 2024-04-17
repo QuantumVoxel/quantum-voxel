@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.LoginClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -14,12 +14,12 @@ public class S2CLoginAcceptedPacket extends Packet<LoginClientPacketHandler> {
         this.uuid = uuid;
     }
 
-    public S2CLoginAcceptedPacket(PacketBuffer buffer) {
+    public S2CLoginAcceptedPacket(PacketIO buffer) {
         this.uuid = buffer.readUuid();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeUuid(this.uuid);
     }
 

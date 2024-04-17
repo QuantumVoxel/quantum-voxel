@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -13,12 +13,12 @@ public class S2CGamemodePacket extends Packet<InGameClientPacketHandler> {
         this.gamemode = gamemode;
     }
 
-    public S2CGamemodePacket(PacketBuffer buffer) {
+    public S2CGamemodePacket(PacketIO buffer) {
         this.gamemode = Gamemode.byOrdinal(buffer.readByte());
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeByte(this.gamemode.ordinal());
     }
 

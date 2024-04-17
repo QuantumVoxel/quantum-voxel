@@ -1,6 +1,6 @@
 package com.ultreon.craft.network.packets.s2c;
 
-import com.ultreon.craft.network.PacketBuffer;
+import com.ultreon.craft.network.PacketIO;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.client.InGameClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
@@ -20,14 +20,14 @@ public class S2CAddPlayerPacket extends Packet<InGameClientPacketHandler> {
         this.position = position;
     }
 
-    public S2CAddPlayerPacket(PacketBuffer buffer) {
+    public S2CAddPlayerPacket(PacketIO buffer) {
         this.uuid = buffer.readUuid();
         this.name = buffer.readString(20);
         this.position = buffer.readVec3d();
     }
 
     @Override
-    public void toBytes(PacketBuffer buffer) {
+    public void toBytes(PacketIO buffer) {
         buffer.writeUuid(this.uuid);
         buffer.writeUTF(this.name, 20);
         buffer.writeVec3d(this.position);
