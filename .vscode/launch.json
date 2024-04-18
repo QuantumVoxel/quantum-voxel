@@ -119,21 +119,21 @@
             "type": "java",
             "name": "DevMain",
             "request": "launch",
-            "mainClass": "com.ultreon.craft.premain.DevMain",
+            "mainClass": "com.ultreon.quantum.premain.DevMain",
             "projectName": "desktop-merge"
         },
         {
             "type": "java",
             "name": "PreMain",
             "request": "launch",
-            "mainClass": "com.ultreon.craft.premain.PreMain",
+            "mainClass": "com.ultreon.quantum.premain.PreMain",
             "projectName": "desktop-merge"
         },
         {
             "type": "java",
             "name": "DesktopLauncher",
             "request": "launch",
-            "mainClass": "com.ultreon.craft.DesktopLauncher",
+            "mainClass": "com.ultreon.quantum.DesktopLauncher",
             "projectName": "desktop"
         }
     ]

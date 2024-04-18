@@ -180,7 +180,7 @@ class GameUtilsPlugin implements Plugin<Project> {
         sdkJson.addProperty("type", "JavaJDK")
         json.add("sdk", sdkJson)
         json.addProperty("main-class", extension.mainClass)
-        json.addProperty("game", "ultracraft")
+        json.addProperty("game", "quantum")
 
         def gson = new GsonBuilder().create()
         def writer = new JsonWriter(new FileWriter(packProject.file("$packProject.projectDir/build/config.json")))

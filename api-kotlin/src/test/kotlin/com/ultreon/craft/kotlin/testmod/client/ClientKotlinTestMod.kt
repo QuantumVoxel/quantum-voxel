@@ -1,16 +1,16 @@
-package com.ultreon.craft.kotlin.testmod.client
+package com.ultreon.quantum.kotlin.testmod.client
 
-import com.ultreon.craft.client.ClientModInit
-import com.ultreon.craft.client.api.events.gui.ScreenEvents
-import com.ultreon.craft.client.gui.screens.TitleScreen
-import com.ultreon.craft.client.gui.widget.Button
-import com.ultreon.craft.client.gui.widget.TextButton
-import com.ultreon.craft.events.api.ValueEventResult
-import com.ultreon.craft.kotlin.api.button
-import com.ultreon.craft.kotlin.api.literal
-import com.ultreon.craft.util.Color
-import com.ultreon.craft.util.Color.hex
-import com.ultreon.craft.util.Color.rgb
+import com.ultreon.quantum.client.ClientModInit
+import com.ultreon.quantum.client.api.events.gui.ScreenEvents
+import com.ultreon.quantum.client.gui.screens.TitleScreen
+import com.ultreon.quantum.client.gui.widget.Button
+import com.ultreon.quantum.client.gui.widget.TextButton
+import com.ultreon.quantum.events.api.ValueEventResult
+import com.ultreon.quantum.kotlin.api.button
+import com.ultreon.quantum.kotlin.api.literal
+import com.ultreon.quantum.util.Color
+import com.ultreon.quantum.util.Color.hex
+import com.ultreon.quantum.util.Color.rgb
 
 class ClientKotlinTestMod : ClientModInit {
     override fun onInitializeClient() {

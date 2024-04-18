@@ -1,9 +1,9 @@
-package com.ultreon.craft.scala.testmod.init
+package com.ultreon.quantum.scala.testmod.init
 
-import com.ultreon.craft.block.Block
-import com.ultreon.craft.item.ItemStack
-import com.ultreon.craft.registry.{DeferRegistry, DeferredElement, Registries}
-import com.ultreon.craft.scala.testmod.Constants
+import com.ultreon.quantum.block.Block
+import com.ultreon.quantum.item.ItemStack
+import com.ultreon.quantum.registry.{DeferRegistry, DeferredElement, Registries}
+import com.ultreon.quantum.scala.testmod.Constants
 
 import java.util.function.Supplier
 import scala.language.postfixOps

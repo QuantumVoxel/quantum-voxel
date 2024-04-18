@@ -1,12 +1,12 @@
-package com.ultreon.craft.scala.testmod.client
+package com.ultreon.quantum.scala.testmod.client
 
-import com.ultreon.craft.client.api.events.ClientLifecycleEvents
-import com.ultreon.craft.client.{ClientModInit, UltracraftClient}
+import com.ultreon.quantum.client.api.events.ClientLifecycleEvents
+import com.ultreon.quantum.client.{ClientModInit, QuantumClient}
 import net.fabricmc.api.ModInitializer
 
 class ClientScalaTestMod extends ClientModInit {
   override def onInitializeClient(): Unit = {
-    ClientLifecycleEvents.CLIENT_STARTED.subscribe((_: UltracraftClient) => {
+    ClientLifecycleEvents.CLIENT_STARTED.subscribe((_: QuantumClient) => {
       println("Game loaded!")
     })
   }

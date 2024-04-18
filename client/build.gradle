@@ -181,10 +181,10 @@ jar {
     //noinspection GroovyAssignabilityCheck
     manifest {
         //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Ultracraft',
+        attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Team',
                 project_version: project.version,
-                'Main-Class': 'com.ultreon.craft.DesktopLauncher',
+                'Main-Class': 'com.ultreon.quantum.DesktopLauncher',
                 'Multi-Release': 'true'
     }
 

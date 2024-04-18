@@ -97,7 +97,7 @@ commonProperties
 
                 runConfigurations {
                     create(
-                        "Ultracraft Client Clojure",
+                        "Quantum Voxel Client Clojure",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -113,7 +113,7 @@ commonProperties
                         }
                     }
                     create(
-                        "Ultracraft Client Clojure Alt",
+                        "Quantum Voxel Client Clojure Alt",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -129,7 +129,7 @@ commonProperties
                         }
                     }
                     create(
-                        "Ultracraft Server Clojure",
+                        "Quantum Voxel Server Clojure",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =

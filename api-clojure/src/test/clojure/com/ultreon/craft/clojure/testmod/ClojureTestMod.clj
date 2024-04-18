@@ -1,5 +1,5 @@
-(ns com.ultreon.craft.clojure.testmod.ClojureTestMod
-  (:import (com.ultreon.craft ModInit)))
+(ns com.ultreon.quantum.clojure.testmod.ClojureTestMod
+  (:import (com.ultreon.quantum ModInit)))
 
 (def ^:public ^:static MOD_ID "clojure_testmod")
 (defn- on-initialize []

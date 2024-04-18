@@ -1,12 +1,12 @@
-package com.ultreon.craft.kotlin.api
+package com.ultreon.quantum.kotlin.api
 
 
-import com.ultreon.craft.client.gui.icon.Icon
-import com.ultreon.craft.client.gui.widget.IconButton
-import com.ultreon.craft.client.gui.widget.TextButton
-import com.ultreon.craft.kotlin.dsl.IconButtonDSL
-import com.ultreon.craft.kotlin.dsl.TextButtonDSL
-import com.ultreon.craft.text.TextObject
+import com.ultreon.quantum.client.gui.icon.Icon
+import com.ultreon.quantum.client.gui.widget.IconButton
+import com.ultreon.quantum.client.gui.widget.TextButton
+import com.ultreon.quantum.kotlin.dsl.IconButtonDSL
+import com.ultreon.quantum.kotlin.dsl.TextButtonDSL
+import com.ultreon.quantum.text.TextObject
 
 fun button(text: TextObject = TextObject.empty(), dsl: TextButtonDSL.() -> Unit): TextButton = TextButtonDSL(text).apply { dsl(this) }.build()
 

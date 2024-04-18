@@ -1,10 +1,10 @@
-package com.ultreon.craft.groovy.testmod
+package com.ultreon.quantum.groovy.testmod
 
-import com.ultreon.craft.ModInit
-import com.ultreon.craft.events.PlayerEvents
-import com.ultreon.craft.groovy.testmod.init.ModBlocks
-import com.ultreon.craft.groovy.testmod.init.ModItems
-import com.ultreon.craft.item.ItemStack
+import com.ultreon.quantum.ModInit
+import com.ultreon.quantum.events.PlayerEvents
+import com.ultreon.quantum.groovy.testmod.init.ModBlocks
+import com.ultreon.quantum.groovy.testmod.init.ModItems
+import com.ultreon.quantum.item.ItemStack
 
 class GroovyTestMod implements ModInit {
     public static def MOD_ID = "groovy_testmod"

@@ -76,7 +76,7 @@ dependencies {
 
 processResources {
     inputs.property "version", version
-    inputs.property "ulreoncraft_version", project(":client").version
+    inputs.property "quantum_version", project(":client").version
     inputs.property "gdx_version", gdx_version
 
     filesMatching("fabric.mod.json") {
@@ -84,7 +84,7 @@ processResources {
     }
 
     filesMatching("versions.properties") {
-        expand "ulreoncraft_version": project(":client").version, "gdx_version": gdx_version
+        expand "quantum_version": project(":client").version, "gdx_version": gdx_version
     }
 
     exclude "*.pdn", "*.xcf", "*.ps"

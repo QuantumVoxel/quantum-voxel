@@ -60,20 +60,20 @@ val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 // Setting up the main properties //
 //********************************//
 extensions.configure<GameUtilsExt> {
-    projectName = "Ultracraft"
+    projectName = "Quantum Voxel"
 
     projectVersion =
         if (ghBuildNumber != null) "$gameVersion+build.$ghBuildNumber"
         else gameVersion
-    projectGroup = "io.github.ultreon.ultracraft"
-    projectId = "ultracraft"
+    projectGroup = "io.github.ultreon.quantum"
+    projectId = "quantum"
     production = true
 
     coreProject = project(":client")
     desktopProject = project(":desktop")
     packageProject = project(":desktop-merge")
 
-    mainClass = "com.ultreon.craft.premain.PreMain"
+    mainClass = "com.ultreon.quantum.premain.PreMain"
     javaVersion = 17
 }
 
@@ -136,7 +136,7 @@ allprojects {
     apply(plugin = "java-library")
 
     ext.also {
-        it["app_name"] = "Ultracraft"
+        it["app_name"] = "Quantum Voxel"
         it["gdx_version"] = property("gdx_version")
         it["robo_vm_version"] = "2.3.16"
         it["box_2d_lights_version"] = "1.5"
@@ -199,7 +199,7 @@ subprojects {
 
     tasks.withType(Jar::class.java).configureEach {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        archiveBaseName.set("ultracraft-${project.name}")
+        archiveBaseName.set("quantum-${project.name}")
     }
 }
 
@@ -225,7 +225,7 @@ afterEvaluate {
         source(subprojects.map { subproject ->
             subproject?.extensions?.getByType(JavaPluginExtension::class.java)?.sourceSets?.getByName("main")?.allJava?.sourceDirectories
         })
-        this.title = "Ultracraft API"
+        this.title = "Quantum Voxel API"
         this.setDestinationDir(File(rootProject.projectDir, "/build/docs/javadoc"))
         // Configure the classpath
         classpath = files(subprojects.map { subproject ->
@@ -279,13 +279,13 @@ publishProjects.forEach {
             create<MavenPublication>("mavenJava") {
                 from(it.components["java"])
 
-                groupId = "io.github.ultreon.craft"
-                artifactId = "ultracraft-${it.name}"
+                groupId = "io.github.ultreon.quantum"
+                artifactId = "quantum-${it.name}"
                 version = gameVersion
 
                 pom {
-                    this@pom.name.set("Ultracraft")
-                    this@pom.description.set("Ultracraft is a voxel game that focuses on technology based survival.")
+                    this@pom.name.set("QuantumVoxel")
+                    this@pom.description.set("Quantum Voxel is a voxel game that focuses on technology based survival.")
 
                     this@pom.url.set("https://github.com/Ultreon/ultracraft")
                     this@pom.inceptionYear.set("2023")
@@ -316,7 +316,7 @@ publishProjects.forEach {
 
                     this@pom.scm {
                         url.set("https://github.com/Ultreon/ultracraft")
-                        connection.set("scm:git:git://github.com/Ultreon/ultracraft.git")
+                        connection.set("scm:git:git://github.com/Ultreon/quantum.git")
                     }
 
                     this@pom.licenses {
@@ -361,7 +361,7 @@ publishProjects.forEach {
 
         repositories {
             maven {
-                name = "UltracraftGitHub"
+                name = "QuantumVoxelGitHub"
                 url = uri("https://maven.pkg.github.com/Ultreon/ultracraft")
                 credentials {
                     username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
@@ -377,13 +377,13 @@ publishing {
         create("maven", MavenPublication::class) {
             from(components["java"])
 
-            groupId = "io.github.ultreon.craft"
-            artifactId = "ultracraft"
+            groupId = "io.github.ultreon.quantum"
+            artifactId = "quantum"
             version = gameVersion
 
             pom {
-                this@pom.name.set("Ultracraft")
-                this@pom.description.set("Ultracraft is a voxel game that focuses on technology based survival.")
+                this@pom.name.set("QuantumVoxel")
+                this@pom.description.set("Quantum Voxel is a voxel game that focuses on technology based survival.")
 
                 this@pom.url.set("https://github.com/Ultreon/ultracraft")
                 this@pom.inceptionYear.set("2023")
@@ -414,7 +414,7 @@ publishing {
 
                 this@pom.scm {
                     url.set("https://github.com/Ultreon/ultracraft")
-                    connection.set("scm:git:git://github.com/Ultreon/ultracraft.git")
+                    connection.set("scm:git:git://github.com/Ultreon/quantum.git")
                 }
 
                 this@pom.licenses {
@@ -459,7 +459,7 @@ publishing {
 
     repositories {
         maven {
-            name = "UltracraftGitHub"
+            name = "QuantumVoxelGitHub"
             url = uri("https://maven.pkg.github.com/Ultreon/ultracraft")
             credentials {
                 username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
@@ -521,7 +521,7 @@ commonProperties
 
                 runConfigurations {
                     create(
-                        "Ultracraft Client $name",
+                        "Quantum Voxel Client $name",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -532,7 +532,7 @@ commonProperties
                         programParameters = "--gameDir=."
                     }
                     create(
-                        "Ultracraft Client $name Alt",
+                        "Quantum Voxel Client $name Alt",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -543,7 +543,7 @@ commonProperties
                         programParameters = "--gameDir=."
                     }
                     create(
-                        "Ultracraft Server $name",
+                        "Quantum Voxel Server $name",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =

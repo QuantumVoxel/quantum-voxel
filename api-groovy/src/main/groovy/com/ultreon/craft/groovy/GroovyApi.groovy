@@ -1,7 +1,7 @@
-package com.ultreon.craft.groovy
+package com.ultreon.quantum.groovy
 
-import com.ultreon.craft.client.UltracraftClient
-import com.ultreon.craft.server.UltracraftServer
+import com.ultreon.quantum.client.QuantumClient
+import com.ultreon.quantum.server.QuantumServer
 import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.LoggerFactory
 
@@ -9,8 +9,8 @@ class GroovyApi {
     def fabricLoader = FabricLoader.instance
     def logger
 
-    def client = { -> UltracraftClient.get() }
-    def server = { -> UltracraftServer.get() }
+    def client = { -> QuantumClient.get() }
+    def server = { -> QuantumServer.get() }
 
     private def scriptName
 

@@ -1,0 +1,70 @@
+package com.ultreon.quantum.world.gen.feature;
+
+import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.ultreon.quantum.block.Block;
+import com.ultreon.quantum.world.ChunkAccess;
+import com.ultreon.quantum.world.ServerWorld;
+import com.ultreon.quantum.world.World;
+import com.ultreon.quantum.world.gen.WorldGenFeature;
+import com.ultreon.quantum.world.gen.noise.NoiseConfig;
+import com.ultreon.quantum.world.gen.noise.NoiseInstance;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class PatchFeature extends WorldGenFeature {
+    private final NoiseConfig settingsBase;
+    private final Block patchBlock;
+    private final float threshold;
+    @LazyInit
+    @Nullable
+    private NoiseInstance baseNoise;
+    private final int depth;
+
+    /**
+     * Creates a new patch feature with the given settings
+     *
+     * @param settingsBase the noise config to use
+     * @param patchBlock   the block to use for the patch
+     * @param threshold    the threshold to use for the patch
+     * @deprecated Use {@link #PatchFeature(NoiseConfig, Block, float, int)} instead
+     */
+    @Deprecated(since = "0.1.0", forRemoval = true)
+    public PatchFeature(NoiseConfig settingsBase, Block patchBlock, float threshold) {
+        this(settingsBase, patchBlock, threshold, 4);
+    }
+
+    /**
+     * Creates a new patch feature with the given settings
+     *
+     * @param settingsBase the noise config to use
+     * @param patchBlock   the block to use for the patch
+     * @param threshold    the threshold to use for the patch
+     * @param depth        the depth for the patch generation.
+     */
+    public PatchFeature(NoiseConfig settingsBase, Block patchBlock, float threshold, int depth) {
+        this.settingsBase = settingsBase;
+        this.patchBlock = patchBlock;
+        this.threshold = threshold;
+        this.depth = depth;
+    }
+
+    @Override
+    public void create(@NotNull ServerWorld world) {
+        super.create(world);
+
+        this.baseNoise = this.settingsBase.create(world.getSeed());
+    }
+
+    @Override
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+        if (this.baseNoise == null) return false;
+
+        float value = (float) this.baseNoise.eval(chunk.getOffset().x + x, height, chunk.getOffset().z + z);
+        return value < this.threshold && chunk.set(x, height, z, this.patchBlock.createMeta());
+    }
+
+    @Override
+    public void dispose() {
+        if (this.baseNoise != null) this.baseNoise.dispose();
+    }
+}

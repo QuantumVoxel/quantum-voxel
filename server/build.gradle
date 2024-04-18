@@ -40,7 +40,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 @Language("jvm-class-name")
-def mainClass = 'com.ultreon.craft.server.dedicated.PreMain'
+def mainClass = 'com.ultreon.quantum.server.dedicated.PreMain'
 
 java {
     withSourcesJar()
@@ -172,7 +172,7 @@ jar {
     //noinspection GroovyAssignabilityCheck
     manifest {
         //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Ultracraft',
+        attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Team',
                 project_version: project.version,
                 'Main-Class': mainClass,
@@ -199,7 +199,7 @@ tasks.create("serverJar", Jar) {
 
     manifest {
         //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Ultracraft',
+        attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Team',
                 project_version: project.version,
                 'Main-Class': mainClass,

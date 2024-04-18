@@ -1,11 +1,11 @@
 (function() {
 
     let item_parents = [
-        'base/cube', 	'ultracraft:base/cube'
+        'base/cube', 	'quantum:base/cube'
     ]
     
-    var codec = new Codec('ultracraft_model', {
-        name: 'Ultracraft Model',
+    var codec = new Codec('"quantum_model', {
+        name: 'Quantum Voxel Model',
         remember: true,
         extension: 'json',
         load_filter: {
@@ -306,7 +306,7 @@
                             link = texture_arr[link.substring(1)];
                         }
                         let texture = new Texture({id: key}).fromJavaLink(link, path_arr.slice()).add();
-                        texture_paths[texture_arr[key].replace(/^ultracraft:/, '')] = texture_ids[key] = texture;
+                        texture_paths[texture_arr[key].replace(/^quantum:/, '')] = texture_ids[key] = texture;
                         new_textures.push(texture);
                     }
                 }
@@ -315,11 +315,11 @@
                     if (link.startsWith('#') && texture_arr[link.substring(1)]) {
                         link = texture_arr[link.substring(1)];
                     }
-                    if (texture_paths[link.replace(/^ultracraft:/, '')]) {
-                        texture_paths[link.replace(/^ultracraft:/, '')].enableParticle()
+                    if (texture_paths[link.replace(/^quantum:/, '')]) {
+                        texture_paths[link.replace(/^quantum:/, '')].enableParticle()
                     } else {
                         let texture = new Texture({id: 'particle'}).fromJavaLink(link, path_arr.slice()).enableParticle().add();
-                        texture_paths[link.replace(/^ultracraft:/, '')] = texture_ids.particle = texture;
+                        texture_paths[link.replace(/^quantum:/, '')] = texture_ids.particle = texture;
                         new_textures.push(texture);
                     }
                 }
@@ -501,12 +501,12 @@
     })
     
     var format = new ModelFormat({
-        id: 'ultracraft_model',
-        name: 'Ultracraft Model',
+        id: '"quantum_model',
+        name: 'Quantum Voxel Model',
         extension: 'json',
         icon: 'icon-format_block',
-        category: 'ultracraft',
-        target: 'Ultracraft',
+        category: 'quantum',
+        target: 'QuantumVoxel',
         format_page: {
 
         },
@@ -594,7 +594,7 @@
                 codec.export();
             }
         })
-        new Action('import_ultracraft_model', {
+        new Action('import_"quantum_model', {
             icon: 'assessment',
             category: 'file',
             condition: () => Format == format,
@@ -614,10 +614,10 @@
         })
     })
     
-    Plugin.register("ultracraft_model", {
-        title: "Ultracraft Model Support",
+    Plugin.register("quantum_model", {
+        title: "Quantum Voxel Model Support",
         author: "XyperCode",
-        description: "Create models for the Ultracraft game!",
+        description: "Create models for the Quantum Voxel game!",
         icon: "icon.png",
         version: "0.1.0",
         variant: "both"

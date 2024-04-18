@@ -1,0 +1,13 @@
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+@FieldsAreNonnullByDefault
+@TypeParametersAreNonnullByDefault
+@TypeUsesAreNonnullByDefault
+package com.ultreon.quantum.entity.damagesource;
+
+import com.ultreon.quantum.FieldsAreNonnullByDefault;
+import com.ultreon.quantum.MethodsReturnNonnullByDefault;
+import com.ultreon.quantum.TypeParametersAreNonnullByDefault;
+import com.ultreon.quantum.TypeUsesAreNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;

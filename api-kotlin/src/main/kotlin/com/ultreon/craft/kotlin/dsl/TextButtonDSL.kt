@@ -1,9 +1,9 @@
-package com.ultreon.craft.kotlin.dsl
+package com.ultreon.quantum.kotlin.dsl
 
-import com.ultreon.craft.client.gui.Callback
-import com.ultreon.craft.client.gui.widget.TextButton
-import com.ultreon.craft.text.TextObject
-import com.ultreon.craft.util.Color
+import com.ultreon.quantum.client.gui.Callback
+import com.ultreon.quantum.client.gui.widget.TextButton
+import com.ultreon.quantum.text.TextObject
+import com.ultreon.quantum.util.Color
 
 class TextButtonDSL(var text: TextObject) {
     private var callback: Callback<TextButton> = Callback { }

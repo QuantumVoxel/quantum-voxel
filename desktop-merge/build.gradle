@@ -53,7 +53,7 @@ apply plugin: 'maven-publish'
 tasks.register('runClient', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 
-    mainClass = 'com.ultreon.craft.premain.DevMain'
+    mainClass = 'com.ultreon.quantum.premain.DevMain'
 
     // arguments to pass to the application
     workingDir "$rootProject.projectDir/run/client/main/"
@@ -186,10 +186,10 @@ jar {
     //noinspection GroovyAssignabilityCheck
     manifest {
         //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Ultracraft',
+        attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Team',
                 project_version: project.project_version,
-                'Main-Class': 'com.ultreon.craft.DesktopLauncher',
+                'Main-Class': 'com.ultreon.quantum.DesktopLauncher',
                 'Multi-Release': 'true'
     }
 
@@ -273,13 +273,13 @@ jpackage {
     runtimeImage = System.getProperty("java.home")
 
     mainJar = jar.archiveFileName.get()
-    mainClass = "com.ultreon.craft.premain.PreMain"
+    mainClass = "com.ultreon.quantum.premain.PreMain"
 
     destination = "$projectDir/build/dist"
 
     licenseFile = "$rootProject.projectDir/package/LICENSE.txt"
 
-    javaOptions = [ "-Dfile.encoding=UTF-8", "-Dultracraft.environment=packaged","-Dfabric.skipMcProvider=true" ]
+    javaOptions = [ "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]
     arguments = [ "--packaged" ]
 
     aboutUrl = "https://github.com/Ultreon/ultreon-craft"

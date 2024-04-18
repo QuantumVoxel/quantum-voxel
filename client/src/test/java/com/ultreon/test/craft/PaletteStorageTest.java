@@ -1,12 +1,12 @@
 package com.ultreon.test.craft;
 
-import com.ultreon.craft.CommonConstants;
-import com.ultreon.craft.block.Block;
-import com.ultreon.craft.block.Blocks;
-import com.ultreon.craft.collection.PaletteStorage;
-import com.ultreon.craft.item.Items;
-import com.ultreon.craft.registry.Registries;
-import com.ultreon.craft.registry.event.RegistryEvents;
+import com.ultreon.quantum.CommonConstants;
+import com.ultreon.quantum.block.Block;
+import com.ultreon.quantum.block.Blocks;
+import com.ultreon.quantum.collection.PaletteStorage;
+import com.ultreon.quantum.item.Items;
+import com.ultreon.quantum.registry.Registries;
+import com.ultreon.quantum.registry.event.RegistryEvents;
 import com.ultreon.data.DataIo;
 import com.ultreon.data.types.MapType;
 import org.jetbrains.annotations.NotNull;

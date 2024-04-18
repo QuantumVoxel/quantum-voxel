@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "ultracraft_api",
-  "name": "Ultracraft API",
-  "description": "Extended API for Ultracraft.",
+  "id": "quantum_api",
+  "name": "Quantum Voxel API",
+  "description": "Extended API for quantum.",
   "version": "1.0.0",
 
   "entrypoints": {
     "init": [
-      "com.ultreon.craft.api.JavaApiMod"
+      "com.ultreon.quantum.api.JavaApiMod"
     ]
   }
 }

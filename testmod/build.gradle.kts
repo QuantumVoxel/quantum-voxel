@@ -13,7 +13,7 @@ plugins {
 
 apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
 
-group = "io.github.ultreon.craftmods"
+group = "io.github.ultreon.quantummods"
 version = "0.1.0"
 
 base {
@@ -89,7 +89,7 @@ commonProperties
 
                 runConfigurations {
                     create(
-                        "Ultracraft Client",
+                        "Quantum Voxel Client",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -105,7 +105,7 @@ commonProperties
                         }
                     }
                     create(
-                        "Ultracraft Client Alt",
+                        "Quantum Voxel Client Alt",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -121,7 +121,7 @@ commonProperties
                         }
                     }
                     create(
-                        "Ultracraft Server",
+                        "Quantum Voxel Server",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =

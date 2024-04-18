@@ -1,7 +1,7 @@
-package com.ultreon.craft.groovy.testmod.client
+package com.ultreon.quantum.groovy.testmod.client
 
-import com.ultreon.craft.client.ClientModInit
-import com.ultreon.craft.client.api.events.ClientLifecycleEvents
+import com.ultreon.quantum.client.ClientModInit
+import com.ultreon.quantum.client.api.events.ClientLifecycleEvents
 
 class ClientGroovyTestMod implements ClientModInit {
     @Override

@@ -7,7 +7,7 @@
 
   "entrypoints": {
     "init": [
-      "com.ultreon.craft.groovy.GroovyApiMod"
+      "com.ultreon.quantum.groovy.GroovyApiMod"
     ]
   }
 }

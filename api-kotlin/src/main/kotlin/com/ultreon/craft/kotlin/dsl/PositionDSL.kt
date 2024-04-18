@@ -1,6 +1,6 @@
-package com.ultreon.craft.kotlin.dsl
+package com.ultreon.quantum.kotlin.dsl
 
-import com.ultreon.craft.client.gui.Position
+import com.ultreon.quantum.client.gui.Position
 
 class PositionDSL : Position() {
     private var position: () -> PositionDSL? = { PositionDSL() }

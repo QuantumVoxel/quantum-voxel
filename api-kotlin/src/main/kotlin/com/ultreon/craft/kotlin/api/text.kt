@@ -1,6 +1,6 @@
-package com.ultreon.craft.kotlin.api
+package com.ultreon.quantum.kotlin.api
 
-import com.ultreon.craft.text.TextObject
+import com.ultreon.quantum.text.TextObject
 
 val String.literal: TextObject
     get() = TextObject.literal(this)

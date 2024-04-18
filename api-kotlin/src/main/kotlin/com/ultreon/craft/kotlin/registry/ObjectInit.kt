@@ -1,8 +1,8 @@
-package com.ultreon.craft.kotlin.registry
+package com.ultreon.quantum.kotlin.registry
 
-import com.ultreon.craft.registry.DeferRegistry
-import com.ultreon.craft.registry.DeferredElement
-import com.ultreon.craft.registry.Registry
+import com.ultreon.quantum.registry.DeferRegistry
+import com.ultreon.quantum.registry.DeferredElement
+import com.ultreon.quantum.registry.Registry
 
 abstract class ObjectInit<T>(namespace: String, registry: Registry<T>) {
     private val register: DeferRegistry<T> = DeferRegistry.of(namespace, registry)
