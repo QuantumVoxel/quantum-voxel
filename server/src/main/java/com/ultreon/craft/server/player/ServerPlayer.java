@@ -628,16 +628,9 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         double dy = y - this.oy;
         double dz = z - this.oz;
 
-        System.out.println("dx = " + dx + ", dy = " + dy + ", dz = " + dz);
-//        System.out.println("x = " + x + ", y = " + y + ", z = " + z);
         this.velocityX = dx;
         this.velocityY = dy;
         this.velocityZ = dz;
-//        System.out.println("x = " + x + ", y = " + y + ", z = " + z);
-
-//        this.x = x;
-//        this.y = y;
-//        this.z = z;
     }
 
     public boolean isSpawned() {
