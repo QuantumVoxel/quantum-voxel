@@ -35,7 +35,6 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     private final D defaultValue;
     private short[] palette;
     private List<D> data = new LinkedList<>();
-    private int paletteCounter = 0;
 
     public PaletteStorage(D defaultValue, int size) {
         this.defaultValue = defaultValue;
@@ -151,7 +150,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
             return d != null ? d : this.defaultValue;
         }
 
-        throw new IndexOutOfBoundsException("Palette index out of bounds: " + dataIdx);
+        return this.defaultValue;
     }
 
     public short add(int idx, D value) {
@@ -169,7 +168,6 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
             if (dataIdx < 0) return;
             this.data.remove(dataIdx);
             this.palette[idx] = -1;
-            this.paletteCounter--;
 
             // Update paletteMap entries for indices after the removed one
             for (int i = idx; i < this.palette.length; i++) {
@@ -181,7 +179,6 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
 
     @Override
     public void dispose() {
-        this.palette = null;
         this.data.clear();
     }
 

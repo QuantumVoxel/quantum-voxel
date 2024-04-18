@@ -57,9 +57,19 @@
   "ultracraft.screen.world_creation.create": "Aanmaken",
   "ultracraft.screen.title": "Titelscherm",
   "ultracraft.screen.title.singleplayer": "Alleen spelen",
-  "ultracraft.screen.title.reset_world": "Wereld Resetten",
+  "ultracraft.screen.title.reset_world": "Wereld resetten",
   "ultracraft.screen.title.quit": "Afsluiten",
   "ultracraft.screen.multiplayer": "Samen spelen",
   "ultracraft.screen.multiplayer.server_ip": "Server-adres",
-  "ultracraft.screen.multiplayer.join": "Meedoen"
+  "ultracraft.screen.multiplayer.join": "Meedoen",
+
+  "ultracraft.damageSource.kill": "%s is vermoord",
+  "ultracraft.damageSource.kill.player": "%1$s is vermoord door %2$s",
+  "ultracraft.damageSource.kill.item": "%1$s is vermoord door %2$s met %3$s",
+  "ultracraft.damageSource.falling": "%s viel van een hoogte af",
+  "ultracraft.damageSource.falling.player": "%1$s vliegt van een hoogte af door %2$s",
+  "ultracraft.damageSource.void": "%s is verdwenen in de void",
+  "ultracraft.damageSource.void.player": "%1$s is verdwenen in de void vanwege %2$s",
+  "ultracraft.damageSource.none": "%s is plotseling doodgegaan",
+  "ultracraft.damageSource.none.player": "%1$s is plotseling doodgegaan vanwege %2$s"
 }

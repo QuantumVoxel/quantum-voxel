@@ -58,7 +58,7 @@ public abstract class TabbedUI extends Screen {
 
         this.contentBounds = tabbedUIBuilder.contentBounds;
         this.tabs = tabbedUIBuilder.tabs;
-        this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.getFirst();
+        this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.get(0);
 
         for (Tab tab : this.tabs) {
             this.defineRoot(tab);

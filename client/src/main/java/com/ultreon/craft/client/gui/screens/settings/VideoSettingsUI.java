@@ -98,7 +98,7 @@ public class VideoSettingsUI {
     private void setFov(Slider slider) {
         int fov = slider.value().get();
         Config.fov = fov;
-        this.client.camera.fieldOfView = fov;
+        this.client.camera.fov = fov;
         this.client.newConfig.save();
     }
 

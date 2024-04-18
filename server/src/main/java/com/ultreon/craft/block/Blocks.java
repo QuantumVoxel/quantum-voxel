@@ -29,7 +29,7 @@ public final class Blocks {
     public static final Block CRATE = Blocks.register("crate", new CrateBlock(new Properties().hardness(2.0F).effectiveTool(ToolType.AXE).usesCustomRender().dropsItems(Items.CRATE)));
     public static final Block CRAFTING_BENCH = Blocks.register("crafting_bench", new Block(new Properties().hardness(3.0F).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
     public static final Block TALL_GRASS = Blocks.register("tall_grass", new Block(new Properties().noOcclude().replaceable().transparent().noCollision().usesCustomRender().dropsItems(new RandomLoot(new RandomLoot.ChanceLootEntry(0.4f, Items.GRASS_FIBRE)))));
-    public static final Block CACTUS = Blocks.register("cactus", new Block(new Properties().noOcclude().replaceable().usesCustomRender().dropsItems(Items.CACTUS)));
+    public static final Block CACTUS = Blocks.register("cactus", new CactusBlock(new Properties().noOcclude().replaceable().usesCustomRender().dropsItems(Items.CACTUS)));
     public static final Block META_SWITCH_TEST = Blocks.register("meta_switch_test", new MetaSwitchTestBlock());
     public static final Block BLAST_FURNACE = Blocks.register("blast_furnace", new BlastFurnaceBlock(new Properties().hardness(12.0F).effectiveTool(ToolType.PICKAXE).requiresTool().dropsItems(Items.BLAST_FURNACE)));
     public static final Block IRON_ORE = Blocks.register("iron_ore", new Block(new Properties().hardness(3.0F).effectiveTool(ToolType.PICKAXE).toolRequirement(ToolLevel.STONE).requiresTool().dropsItems(Items.IRON_ORE)));

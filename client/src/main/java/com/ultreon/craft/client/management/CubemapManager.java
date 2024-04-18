@@ -1,6 +1,7 @@
 package com.ultreon.craft.client.management;
 
 import com.badlogic.gdx.graphics.Cubemap;
+import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.craft.CommonConstants;
 import com.ultreon.craft.resources.ReloadContext;
 import com.ultreon.craft.client.resources.ResourceFileHandle;
@@ -16,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CubemapManager implements Manager<Cubemap> {
+public class CubemapManager implements Manager<Cubemap>, Disposable {
     private final Map<Identifier, Cubemap> cubemaps = new LinkedHashMap<>();
     private final ResourceManager resourceManager;
 
@@ -84,6 +85,7 @@ public class CubemapManager implements Manager<Cubemap> {
         this.cubemaps.clear();
     }
 
+    @Override
     public void dispose() {
         for (Cubemap cubemap : this.cubemaps.values()) {
             cubemap.dispose();

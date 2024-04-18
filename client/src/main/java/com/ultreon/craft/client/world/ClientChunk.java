@@ -12,6 +12,7 @@ import com.ultreon.craft.block.entity.BlockEntityType;
 import com.ultreon.craft.block.state.BlockMetadata;
 import com.ultreon.craft.client.UltracraftClient;
 import com.ultreon.craft.client.api.events.ClientChunkEvents;
+import com.ultreon.craft.client.atlas.TextureStitcher;
 import com.ultreon.craft.client.init.Shaders;
 import com.ultreon.craft.client.model.block.BlockModel;
 import com.ultreon.craft.client.registry.BlockEntityModelRegistry;
@@ -27,9 +28,12 @@ import com.ultreon.craft.world.BlockPos;
 import com.ultreon.craft.world.Chunk;
 import com.ultreon.craft.world.ChunkPos;
 import com.ultreon.libs.commons.v0.Mth;
+import com.ultreon.libs.commons.v0.vector.Vec3i;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class ClientChunk extends Chunk {
@@ -47,6 +51,7 @@ public final class ClientChunk extends Chunk {
     public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
+    private final List<ModelObject> modelObjects = new ArrayList<>();
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
@@ -92,6 +97,10 @@ public final class ClientChunk extends Chunk {
         synchronized (this) {
             super.dispose();
 
+            for (ModelObject modelObject : this.modelObjects) {
+                modelObject.dispose();
+            }
+
             WorldRenderer worldRenderer = UltracraftClient.get().worldRenderer;
             if ((this.solidMesh != null || this.transparentMesh != null) && worldRenderer != null) {
                 worldRenderer.free(this);
@@ -105,18 +114,40 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public BlockMetadata getFast(int x, int y, int z) {
-        if (!UltracraftClient.isOnMainThread()) {
+        if (!UltracraftClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-        }
 
         return super.getFast(x, y, z);
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockMetadata block) {
-        if (!UltracraftClient.isOnMainThread()) {
+    public void setFast(Vec3i pos, BlockMetadata block) {
+        if (!UltracraftClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-        }
+
+        super.setFast(pos, block);
+    }
+
+    @Override
+    public boolean set(int x, int y, int z, BlockMetadata block) {
+        if (!UltracraftClient.isOnMainThread())
+            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
+
+        return super.set(x, y, z, block);
+    }
+
+    @Override
+    public void set(Vec3i pos, BlockMetadata block) {
+        if (!UltracraftClient.isOnMainThread())
+            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
+
+        super.set(pos, block);
+    }
+
+    @Override
+    public boolean setFast(int x, int y, int z, BlockMetadata block) {
+        if (!UltracraftClient.isOnMainThread())
+            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         this.models.remove(new BlockPos(x, y, z));
 
@@ -205,6 +236,8 @@ public final class ClientChunk extends Chunk {
             model.transform.setToTranslationAndScaling(this.renderOffset.x + x, this.renderOffset.y + (float) key.y() % 65536, this.renderOffset.z + z, 1 / 16f, 1 / 16f, 1 / 16f);
             model.getRenderables(modelObject.renderables(), RENDERABLE_POOL);
             output.addAll(modelObject.renderables());
+
+            this.modelObjects.add(modelObject);
         }
     }
 
@@ -231,5 +264,4 @@ public final class ClientChunk extends Chunk {
     public UltracraftClient getClient() {
         return client;
     }
-
 }

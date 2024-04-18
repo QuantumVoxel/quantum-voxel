@@ -16,7 +16,7 @@ public class ClientRegistries {
     public static final Registry<RenderType> RENDER_TYPE = ClientRegistries.<RenderType>builder("render_type").build();
 
     // Registry for Font
-    public static final Registry<Font> FONT = ClientRegistries.<Font>builder("font").build();
+    public static final Registry<Font> FONT = ClientRegistries.<Font>builder("fonts").build();
 
     // Registry for DebugPage
     public static final Registry<DebugPage> DEBUG_PAGE = ClientRegistries.<DebugPage>builder("debug_page").build();

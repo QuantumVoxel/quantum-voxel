@@ -20,7 +20,7 @@ public class EntityEvents {
 
     @FunctionalInterface
     public interface Death {
-        EventResult onEntityDeath(LivingEntity entity);
+        EventResult onEntityDeath(LivingEntity entity, DamageSource source);
     }
 
     @FunctionalInterface

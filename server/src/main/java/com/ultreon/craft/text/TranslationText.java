@@ -39,6 +39,11 @@ public class TranslationText extends MutableText {
 
     @Override
     public @NotNull String createString() {
+        Object @NotNull [] objects = this.args;
+        for (int i = 0, objectsLength = objects.length; i < objectsLength; i++) {
+            Object arg = objects[i];
+            if (arg instanceof TextObject textObject) objects[i] = textObject.createString();
+        }
         return LanguageBootstrap.translate(this.path, this.args);
     }
 

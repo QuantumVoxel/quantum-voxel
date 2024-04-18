@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.craft.client.api.events.RenderEvents;
 import com.ultreon.craft.client.config.Config;
 import com.ultreon.craft.client.gui.Renderer;
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static com.ultreon.craft.client.UltracraftClient.LOGGER;
 
-public class GameRenderer {
+public class GameRenderer implements Disposable {
     private final UltracraftClient client;
     private final ModelBatch modelBatch;
     private final RenderPipeline pipeline;
@@ -111,7 +112,7 @@ public class GameRenderer {
             this.renderOverlays(renderer, screen, world, deltaTime);
 
             if (this.client.crashOverlay != null) {
-                if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyPressed(Input.Keys.TAB)) {
+                if (Gdx.input.isKeyPressed(Input.Keys.F1) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
                     this.client.crashOverlay.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
                 } else {
                     this.client.crashOverlay.reset();
@@ -178,5 +179,11 @@ public class GameRenderer {
 
     public RenderContext getContext() {
         return this.context;
+    }
+
+    @Override
+    public void dispose() {
+        this.depthFbo.dispose();
+        this.fbo.dispose();
     }
 }

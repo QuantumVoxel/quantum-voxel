@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class PollingExecutorService implements ExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
     private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>());
+    private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
     protected Thread thread;
     private boolean isShutdown = false;
     @Nullable
@@ -33,6 +34,12 @@ public class PollingExecutorService implements ExecutorService {
     @Override
     public void shutdown() {
         this.isShutdown = true;
+        this.tasks.clear();
+
+        for (CompletableFuture<?> future : this.futures) {
+            future.cancel(true);
+        }
+        this.futures.clear();
     }
 
     @Override
@@ -40,6 +47,11 @@ public class PollingExecutorService implements ExecutorService {
         this.isShutdown = true;
         List<Runnable> remainingTasks = List.copyOf(this.tasks);
         this.tasks.clear();
+
+        for (CompletableFuture<?> future : this.futures) {
+            future.cancel(true);
+        }
+        this.futures.clear();
         return remainingTasks;
     }
 
@@ -128,6 +140,7 @@ public class PollingExecutorService implements ExecutorService {
                 }
                 future.completeExceptionally(throwable);
             }
+            futures.remove(future);
             return future;
         }
         this.execute(() -> {
@@ -142,7 +155,10 @@ public class PollingExecutorService implements ExecutorService {
                 PollingExecutorService.LOGGER.error("Failed to run task:", throwable);
                 future.completeExceptionally(throwable);
             }
+            futures.remove(future);
         });
+
+        this.futures.add(future);
         return future;
     }
 
@@ -230,7 +246,7 @@ public class PollingExecutorService implements ExecutorService {
     }
 
     private boolean isSameThread() {
-        return Thread.currentThread().threadId() == this.thread.threadId();
+        return Thread.currentThread().getId() == this.thread.getId();
     }
 
     public void poll() {

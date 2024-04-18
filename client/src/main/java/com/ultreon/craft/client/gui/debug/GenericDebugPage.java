@@ -9,6 +9,7 @@ import com.ultreon.craft.client.world.ClientChunk;
 import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.debug.ValueTracker;
 import com.ultreon.craft.entity.Player;
+import com.ultreon.craft.network.system.IConnection;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.util.HitResult;
 import com.ultreon.craft.world.BlockPos;
@@ -36,12 +37,12 @@ public class GenericDebugPage implements DebugPage {
         if (integratedServer != null) {
             context.left("Integrated Server")
                     .left("Server TPS", integratedServer.getCurrentTps())
-//                    .left("Packets", "rx = " + SocketConnection.getPacketsReceived() + ", tx = " + SocketConnection.getPacketsSent())
+                    .left("Packets", "rx = " + IConnection.rx.get() + ", tx = " + IConnection.tx.get())
                     .left();
         } else {
             context.left("Server Connection")
                     .left("Server TPS", "N/A (Coming Soon!)")
-//                    .left("Packets", "rx = " + SocketConnection.getPacketsReceived() + ", tx = " + SocketConnection.getPacketsSent())
+                    .left("Packets", "rx = " + IConnection.rx.get() + ", tx = " + IConnection.tx.get())
                     .left();
         }
 

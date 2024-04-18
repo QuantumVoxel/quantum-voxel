@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.collect.ImmutableMap;
 import com.ultreon.craft.client.UltracraftClient;
 import com.ultreon.craft.client.util.TextureOffset;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 import static com.ultreon.craft.client.UltracraftClient.isOnMainThread;
 
-public class TextureStitcher {
+public class TextureStitcher implements Disposable {
     private final Map<Identifier, Texture> textures = new HashMap<>();
     private final Map<Identifier, Texture> emissiveTextures = new HashMap<>();
     private FrameBuffer fbo;

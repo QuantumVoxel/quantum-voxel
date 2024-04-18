@@ -101,9 +101,9 @@ public class LivingEntity extends Entity {
             this.health = 0;
 
             // Trigger entity death event if not already dead and event is not canceled
-            if (!this.isDead && !EntityEvents.DEATH.factory().onEntityDeath(this).isCanceled()) {
+            if (!this.isDead && !EntityEvents.DEATH.factory().onEntityDeath(this, DamageSource.NOTHING).isCanceled()) {
                 this.isDead = true;
-                this.onDeath();
+                this.onDeath(DamageSource.NOTHING);
             }
         }
 
@@ -119,7 +119,7 @@ public class LivingEntity extends Entity {
         this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
         direction.x = (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xHeadRot)));
         direction.z = (float) (Math.cos(Math.toRadians(this.yRot)) * Math.cos(Math.toRadians(this.xHeadRot)));
-        direction.y = (float) (Math.sin(Math.toRadians(this.yRot)));
+        direction.y = (float) Math.sin(Math.toRadians(this.yRot));
 
         // Normalize the direction vector
         direction.nor();
@@ -158,7 +158,7 @@ public class LivingEntity extends Entity {
      */
     public final void hurt(float damage, DamageSource source) {
         // Check if the entity is already dead, has no health, or has temporary invincibility
-        if (this.isDead || this.health <= 0 || ((this.invincible || this.damageImmunity > 0) && source.byPassInvincibility()))
+        if (this.isDead() || this.getHealth() <= 0 || this.isInvincible() || (this.damageImmunity > 0 && source.byPassInvincibility()))
             return;
 
         // Trigger entity damage event
@@ -183,14 +183,16 @@ public class LivingEntity extends Entity {
         this.health = Math.max(this.health - damage, 0);
         this.damageImmunity = 10;
 
+        this.lastDamageSource = source;
+
         // Check if entity has died
         if (this.health <= 0) {
             this.health = 0;
 
             // Trigger entity death event and handle death
-            if (!EntityEvents.DEATH.factory().onEntityDeath(this).isCanceled()) {
+            if (!EntityEvents.DEATH.factory().onEntityDeath(this, source).isCanceled()) {
                 this.isDead = true;
-                this.onDeath();
+                this.onDeath(source);
             }
         }
     }
@@ -220,7 +222,7 @@ public class LivingEntity extends Entity {
     /**
      * Called when the entity dies.
      */
-    public void onDeath() {
+    public void onDeath(DamageSource source) {
         // Play death sound if available
         SoundEvent deathSound = this.getDeathSound();
         if (deathSound != null) {
@@ -306,7 +308,7 @@ public class LivingEntity extends Entity {
         this.isDead = true;
 
         // Trigger entity death event and handle death
-        this.onDeath();
+        this.onDeath(DamageSource.KILL);
     }
 
     public boolean isWalking() {
@@ -315,5 +317,9 @@ public class LivingEntity extends Entity {
 
     public int getAge() {
         return age;
+    }
+
+    public DamageSource getLastDamageSource() {
+        return lastDamageSource;
     }
 }

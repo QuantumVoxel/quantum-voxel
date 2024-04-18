@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.craft.client.UltracraftClient;
 import com.ultreon.craft.client.init.Shaders;
 import com.ultreon.craft.client.model.EntityModelInstance;
@@ -14,7 +15,7 @@ import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3f;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class EntityRenderer<E extends Entity> {
+public abstract class EntityRenderer<E extends Entity> implements Disposable {
     protected static Vec3d tmp0 = new Vec3d();
     protected static Vec3d tmp1 = new Vec3d();
     protected static Vec3d tmp2 = new Vec3d();

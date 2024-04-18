@@ -20,12 +20,8 @@ import java.util.List;
 
 public final class CrashLog extends CrashCategory {
     private static final String HEADER = """
-              ██╗ ██████╗██████╗  █████╗ ███████╗██╗  ██╗    ██████╗ ███████╗██████╗  ██████╗ ██████╗ ████████╗██╗
-             ██╔╝██╔════╝██╔══██╗██╔══██╗██╔════╝██║  ██║    ██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝╚██╗
-            ██╔╝ ██║     ██████╔╝███████║███████╗███████║    ██████╔╝█████╗  ██████╔╝██║   ██║██████╔╝   ██║    ╚██╗
-            ╚██╗ ██║     ██╔══██╗██╔══██║╚════██║██╔══██║    ██╔══██╗██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗   ██║    ██╔╝
-             ╚██╗╚██████╗██║  ██║██║  ██║███████║██║  ██║    ██║  ██║███████╗██║     ╚██████╔╝██║  ██║   ██║   ██╔╝
-              ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝
+            >>> FATAL ERROR: Crash Report <<<
+            
             """;
     private final List<CrashCategory> categories = new ArrayList<>();
 
@@ -121,11 +117,8 @@ public final class CrashLog extends CrashCategory {
         }
 
         for (CrashCategory category : this.categories) {
-            cs.append(System.lineSeparator()).append("=------------------------------------------------------------------=");
             cs.append(System.lineSeparator()).append(category.toString());
         }
-
-        cs.append("=------------------------------------------------------------------=");
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

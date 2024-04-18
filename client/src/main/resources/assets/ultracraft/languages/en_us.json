@@ -9,6 +9,8 @@
   "ultracraft.block.leaves.name": "Leaves",
   "ultracraft.block.planks.name": "Block of Planks",
   "ultracraft.block.cobblestone.name": "Cobblestone",
+  "ultracraft.block.crate.name": "Crate",
+  "ultracraft.block.wooden_crate.name": "Wooden Crate",
   "ultracraft.block.water.name": "Water",
   "ultracraft.block.air.name": "Air",
   "ultracraft.item.wooden_pickaxe.name": "Wooden Pickaxe",
@@ -113,5 +115,15 @@
 
   "ultracraft.screen.message.disconnected": "You have been disconnected.",
 
-  "ultracraft.commands.player.dumpData.success": "Dumped player data: "
+  "ultracraft.commands.player.dumpData.success": "Dumped player data: ",
+
+  "ultracraft.damageSource.kill": "%s was killed",
+  "ultracraft.damageSource.kill.player": "%1$s was killed by %2$s",
+  "ultracraft.damageSource.kill.item": "%1$s was killed by %2$s using %3$s",
+  "ultracraft.damageSource.falling": "%s fell from a high place",
+  "ultracraft.damageSource.falling.player": "%1$s got pushed off a high place by %2$s",
+  "ultracraft.damageSource.void": "%s got consumed by the void",
+  "ultracraft.damageSource.void.player": "%1$s was consumed by the void due to %2$s",
+  "ultracraft.damageSource.none": "%s just died out of thin air",
+  "ultracraft.damageSource.none.player": "%1$s just died out of thin air due to %2$s"
 }

@@ -91,8 +91,8 @@ public class Block implements DataWriter<MapType> {
         return this.transparent;
     }
 
-    public BoundingBox getBoundingBox(Vec3i posNext) {
-        return this.getBoundingBox(posNext.x, posNext.y, posNext.z, this.createMeta());
+    public BoundingBox getBoundingBox(Vec3i pos) {
+        return this.getBoundingBox(pos.x, pos.y, pos.z, this.createMeta());
     }
 
     @Override

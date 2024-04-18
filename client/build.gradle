@@ -43,8 +43,8 @@ apply plugin: 'maven-publish'
 java {
     withSourcesJar()
     
-    sourceCompatibility("21")
-    targetCompatibility("21")
+    sourceCompatibility("17")
+    targetCompatibility("17")
 }
 
 dependencies {

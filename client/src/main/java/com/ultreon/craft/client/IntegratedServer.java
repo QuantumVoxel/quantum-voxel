@@ -10,7 +10,8 @@ import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.crash.ApplicationCrash;
 import com.ultreon.craft.crash.CrashLog;
 import com.ultreon.craft.debug.DebugFlags;
-import com.ultreon.craft.network.system.IConnection;
+import com.ultreon.craft.network.MemoryConnectionContext;
+import com.ultreon.craft.network.MemoryNetworker;
 import com.ultreon.craft.network.packets.s2c.S2CPlayerSetPosPacket;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.server.player.ServerPlayer;
@@ -30,7 +31,6 @@ public class IntegratedServer extends UltracraftServer {
     private final UltracraftClient client = UltracraftClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
-    private IConnection connection;
 
     public IntegratedServer(WorldStorage storage) {
         super(storage, UltracraftClient.PROFILER, UltracraftClient.get().inspection);
@@ -42,6 +42,13 @@ public class IntegratedServer extends UltracraftServer {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void start() {
+        this.networker = new MemoryNetworker(this, MemoryConnectionContext.get());
+
+        super.start();
     }
 
     /**
@@ -60,7 +67,7 @@ public class IntegratedServer extends UltracraftServer {
                 var playerData = this.getStorage().<MapType>read("player.ubo");
                 player.loadWithPos(playerData);
 
-                // Send player position update packet to player connection
+                // Send player a position update packet to player connection
                 player.connection.send(new S2CPlayerSetPosPacket(player.getPosition()));
             } else if (player == null) {
                 // Throw exception if player not found
@@ -72,9 +79,8 @@ public class IntegratedServer extends UltracraftServer {
         }
 
         // Set the host player if the player UUID matches the local player UUID
-        if (player.getUuid().equals(localPlayer.getUuid())) {
+        if (this.host == null && (player.getUuid().equals(localPlayer.getUuid()) || player.getName().equals(localPlayer.getName()))) {
             this.host = player;
-            this.connection = player.connection;
         }
 
         // Create a debug node for host player if inspection is enabled
@@ -174,7 +180,6 @@ public class IntegratedServer extends UltracraftServer {
         super.shutdown();
 
         this.client.integratedServer = null;
-        this.client.showScreen(new TitleScreen());
     }
 
     @Override
@@ -234,8 +239,6 @@ public class IntegratedServer extends UltracraftServer {
         super.onInitialChunksLoaded();
 
         UltracraftClient.invoke(() -> {
-            this.client.worldRenderer = new WorldRenderer(this.client.world);
-            this.client.renderWorld = true;
             if (this.client.screen instanceof WorldLoadScreen loadScreen) {
                 loadScreen.done();
                 this.client.showScreen(null);

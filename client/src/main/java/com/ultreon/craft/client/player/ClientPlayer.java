@@ -4,12 +4,14 @@ import com.ultreon.craft.api.commands.perms.Permission;
 import com.ultreon.craft.client.UltracraftClient;
 import com.ultreon.craft.entity.EntityType;
 import com.ultreon.craft.entity.Player;
+import com.ultreon.craft.network.packets.c2s.C2SCommandPacket;
 import com.ultreon.craft.util.MathHelper;
 import com.ultreon.craft.world.World;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ClientPlayer extends Player {
+    private final UltracraftClient client = UltracraftClient.get();
     public float bodyXRot;
     public float bop;
     public boolean inverseBop;
@@ -29,6 +31,8 @@ public abstract class ClientPlayer extends Player {
     @Override
     public void tick() {
         super.tick();
+
+        this.client.camera.setFovModifier(((float) (getSpeed() / .09F) - 1.0F) * 0.125F + 1.0F);
 
         this.oXRot = this.xRot;
         this.oYRot = this.yRot;
@@ -72,6 +76,11 @@ public abstract class ClientPlayer extends Player {
     @Override
     public boolean hasExplicitPermission(@NotNull Permission permission) {
         return false;
+    }
+
+    @Override
+    public void execute(String input) {
+        this.client.connection.send(new C2SCommandPacket(input));
     }
 
     @Override

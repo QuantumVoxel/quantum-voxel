@@ -138,6 +138,28 @@ public class DesktopInput extends GameInput {
         Player player = this.client.player;
         Screen currentScreen = this.client.screen;
 
+        if (player != null && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                switch (player.getGamemode()) {
+                    case SURVIVAL -> player.execute("gm spectator");
+                    case BUILDER -> player.execute("gm survival");
+                    case BUILDER_PLUS -> player.execute("gm builder");
+                    case ADVENTUROUS -> player.execute("gm builder_plus");
+                    case SPECTATOR -> player.execute("gm adventurous");
+                }
+                return;
+            }
+            switch (player.getGamemode()) {
+                case SURVIVAL -> player.execute("gm builder");
+                case BUILDER -> player.execute("gm builder_plus");
+                case BUILDER_PLUS -> player.execute("gm adventurous");
+                case ADVENTUROUS -> player.execute("gm spectator");
+                case SPECTATOR -> player.execute("gm survival");
+            }
+
+            return;
+        }
+
         // Handle various input events
         handleInputEvents(player, currentScreen);
 
@@ -277,7 +299,8 @@ public class DesktopInput extends GameInput {
 
     /**
      * This method is called when a key is typed.
-     * It checks if there is a current screen and if so, it triggers the CHAR_TYPE event and calls the charType method of the current screen.
+     * It checks if the current screen is not null,
+     * and if so, it triggers the CHAR_TYPE event and calls the charType method of the current screen.
      * If there is no current screen, it returns true.
      *
      * @param character the character that was typed
@@ -310,7 +333,7 @@ public class DesktopInput extends GameInput {
         screenX -= this.client.getDrawOffset().x;
         screenY -= this.client.getDrawOffset().y;
 
-        // Check if cursor is caught
+        // Check if the cursor is already caught
         if (Gdx.input.isCursorCatched())
             return false;
 
@@ -352,7 +375,7 @@ public class DesktopInput extends GameInput {
     }
 
     /**
-     * Handles touch down events.
+     * Handles touch-down events.
      *
      * @param screenX The x-coordinate of the touch event
      * @param screenY The y-coordinate of the touch event
@@ -371,7 +394,7 @@ public class DesktopInput extends GameInput {
         Player player = this.client.player;
         HitResult hitResult = this.client.hitResult;
 
-        // Check if cursor is not caught and there is a current screen
+        // Check if the cursor is not caught and there is a current screen
         if (!Gdx.input.isCursorCatched() && currentScreen != null) {
             int mouseX = (int) (screenX / this.client.getGuiScale());
             int mouseY = (int) (screenY / this.client.getGuiScale());
@@ -386,7 +409,7 @@ public class DesktopInput extends GameInput {
         if (world == null || this.client.screen != null)
             return false;
 
-        // Check if cursor is not caught and ImGui is not showing
+        // Check if the cursor is not caught and ImGui is not showing
         if (!Gdx.input.isCursorCatched() && !UltracraftClient.get().isShowingImGui()) {
             return true;
         }
@@ -418,7 +441,7 @@ public class DesktopInput extends GameInput {
         if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
             // Check for instant mine ability
             if (player.abilities.instaMine) {
-                // Send block break packet if instant mine is active
+                // Send a block break packet if instant mine is active
                 this.client.connection.send(new C2SBlockBreakPacket(new BlockPos(hitResult.getPos())));
                 return;
             }

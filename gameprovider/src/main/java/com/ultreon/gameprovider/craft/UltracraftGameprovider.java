@@ -89,7 +89,7 @@ public class UltracraftGameprovider implements GameProvider {
      */
     @Override
     public String getGameName() {
-        return "Ultracraft";
+        return "Quantum Voxel";
     }
 
     /**
@@ -121,7 +121,7 @@ public class UltracraftGameprovider implements GameProvider {
                 // Creating a BuiltinMod for LibGDX
                 new BuiltinMod(List.of(this.libGdxJar), new BuiltinModMetadata.Builder("gdx", this.versions.getProperty("gdx"))
                         .setName("LibGDX")
-                        .setDescription("A game framework used by Ultracraft (and various other games).")
+                        .setDescription("A game framework used by Quantum Voxel (and various other games).")
                         .addLicense("Apache-2.0")
                         .addAuthor("libGDX", Map.of("homepage", "http://www.libgdx.com/", "patreon", "https://patreon.com/libgdx", "github", "https://github.com/libgdx", "sources", "https://github.com/libgdx/libgdx"))
                         .addAuthor("Mario Zechner", Map.of("github", "https://github.com/badlogic", "email", "badlogicgames@gmail.com"))
@@ -138,7 +138,7 @@ public class UltracraftGameprovider implements GameProvider {
                         .setEnvironment(ModEnvironment.UNIVERSAL)
                         .setContact(new ContactInformationImpl(Map.of("sources", "https://github.con/Ultreon/ultreon-craft", "email", "contact.ultreon@gmail.com", "discord", "https://discord.gg/sQsU7sE2Sx")))
                         .setDescription("It's the game you are now playing.")
-                        .setName("Ultracraft")
+                        .setName("Quantum Voxel")
                         .build())
         );
     }
@@ -160,7 +160,7 @@ public class UltracraftGameprovider implements GameProvider {
     public static Path getDataDir() {
         Path path;
         if (OS.isWindows())
-            path = Paths.get(System.getenv("APPDATA"), "Ultracraft");
+            path = Paths.get(System.getenv("APPDATA"), "QuantumVoxel");
         else if (OS.isMac())
             path = Paths.get(System.getProperty("user.home"), "Library/Application Support/Ultracraft");
         else if (OS.isLinux())
@@ -288,7 +288,7 @@ public class UltracraftGameprovider implements GameProvider {
         // Expose game jar locations to the FabricLoader share
         var share = FabricLoaderImpl.INSTANCE.getObjectShare();
 
-        share.put("fabric-loader:inputGameJar", this.gameJars.getFirst());
+        share.put("fabric-loader:inputGameJar", this.gameJars.get(0));
         share.put("fabric-loader:inputGameJars", this.gameJars);
 
         return true;
@@ -395,7 +395,7 @@ public class UltracraftGameprovider implements GameProvider {
      * @return the first game jar
      */
     public Path getGameJar() {
-        return this.gameJars.getFirst();
+        return this.gameJars.get(0);
     }
 
     /**
@@ -429,7 +429,7 @@ public class UltracraftGameprovider implements GameProvider {
             //noinspection ConfusingArgumentToVarargsMethod
             invoker.invokeExact(this.arguments.toArray());
         } catch (Throwable t) {
-            throw new FormattedException("Ultracraft has crashed", t);
+            throw new FormattedException("Quantum Voxel has crashed", t);
         }
     }
 

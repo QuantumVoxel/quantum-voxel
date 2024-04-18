@@ -44,12 +44,14 @@ public class WorldShaderProvider extends DefaultShaderProvider implements OpenSh
     }
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
-        return switch (userData) {
-            case OpenShaderProvider provider -> provider.createShader(renderable);
-            case Shader shader -> shader;
-            case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
-            case null, default -> new DefaultShader(renderable, new DefaultShader.Config());
-        };
+        if (userData instanceof OpenShaderProvider provider) {
+            return provider.createShader(renderable);
+        } else if (userData instanceof Shader shader) {
+            return shader;
+        } else if (userData instanceof ModelObject modelObject) {
+            return modelObject.shaderProvider().createShader(renderable);
+        }
+        return new DefaultShader(renderable, new DefaultShader.Config());
     }
 
 }

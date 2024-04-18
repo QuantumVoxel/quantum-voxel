@@ -415,7 +415,13 @@ public abstract class Chunk implements ServerDisposable, ChunkAccess {
      * @return The highest block Y coordinate.
      */
     public int getHighest(int x, int z) {
-        return this.heightMap.get(x, z);
+//        return this.heightMap.get(x, z);
+        for (int y = CHUNK_HEIGHT - 1; y >= 1; y--) {
+            if (!this.getFast(x, y, z).isAir()) {
+                return y;
+            }
+        }
+        return 64;
     }
 
     /**

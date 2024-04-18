@@ -12,7 +12,7 @@ public class DedicatedServerGui extends JFrame {
     private JTextField commandField;
 
     public DedicatedServerGui() throws HeadlessException {
-        super("Ultracraft Dedicated Server");
+        super("Quantum Voxel Dedicated Server");
 
         this.setSize(new Dimension(1024, 600));
 

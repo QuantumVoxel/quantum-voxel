@@ -3,24 +3,26 @@ package com.ultreon.craft.client.player;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.craft.client.UltracraftClient;
 import com.ultreon.craft.client.api.events.ClientReloadEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class SkinManager {
+public class SkinManager implements Disposable {
     private CompletableFuture<Texture> future = loadAsync();
+    private Texture localSkin;
 
     @NotNull
-    private static CompletableFuture<Texture> loadAsync() {
+    private CompletableFuture<Texture> loadAsync() {
         return CompletableFuture.supplyAsync(() -> {
             FileHandle data = UltracraftClient.data("skin.png");
             if (!data.exists()) return null;
             Pixmap pixmap = new Pixmap(data);
 
             return UltracraftClient.invokeAndWait(() -> {
-                Texture texture = new Texture(pixmap, false);
+                Texture texture = localSkin = new Texture(pixmap, false);
                 ClientReloadEvent.SKIN_LOADED.factory().onSkinLoaded(texture, pixmap);
 
                 pixmap.dispose();
@@ -47,5 +49,11 @@ public class SkinManager {
         future = loadAsync();
 
         ClientReloadEvent.SKIN_RELOAD.factory().onSkinReload();
+    }
+
+    @Override
+    public void dispose() {
+        if (!future.isDone()) future.cancel(true);
+        if (localSkin != null) localSkin.dispose();
     }
 }

@@ -10,8 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 class GarbageCollector implements Shutdownable {
     private static final Marker MARKER = MarkerFactory.getMarker("GC");
-    private final ScheduledExecutorService service = Executors.newScheduledThreadPool(3, r -> {
+    private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r);
+        thread.setName("GC");
         thread.setPriority(1);
         return thread;
     });

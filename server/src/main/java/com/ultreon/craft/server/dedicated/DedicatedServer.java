@@ -7,6 +7,7 @@ import com.ultreon.craft.debug.inspect.InspectionRoot;
 import com.ultreon.craft.debug.profiler.Profiler;
 import com.ultreon.craft.network.system.TcpNetworker;
 import com.ultreon.craft.server.UltracraftServer;
+import com.ultreon.craft.server.player.ServerPlayer;
 import com.ultreon.craft.text.ServerLanguage;
 import com.ultreon.craft.util.Identifier;
 import com.ultreon.craft.world.WorldStorage;
@@ -56,7 +57,7 @@ public class DedicatedServer extends UltracraftServer {
     @NotNull
     private ServerLanguage createServerLanguage() {
         // Specify the locale
-        Locale locale = Locale.of("en", "us");
+        Locale locale = new Locale("en", "us");
 
         // Load the language resource from the file system
         InputStream resourceAsStream = getClass().getResourceAsStream("/assets/ultracraft/languages/main.json");
@@ -122,10 +123,7 @@ public class DedicatedServer extends UltracraftServer {
         crash.printCrash();
         if (crash.getCrashLog().defaultSave().isFailure()) {
             CommonConstants.LOGGER.error("Failed to save crash log!", crash.getCrashLog().defaultSave().getFailure());
-            Runtime.getRuntime().halt(2);
         }
-
-        Runtime.getRuntime().halt(1); //* Halt server since the server crashed.
     }
 
     /**
@@ -141,6 +139,14 @@ public class DedicatedServer extends UltracraftServer {
         this.profiler.dispose();
     }
 
+    @Override
+    protected void kickAllPlayers() {
+        // Kick all the players and stop the connections.
+        for (ServerPlayer player : this.getPlayers()) {
+            player.kick("Server stopped");
+        }
+    }
+
     /**
      * {@inheritDoc}
      * This will crash and halt the server for the dedicated server.
@@ -148,7 +154,7 @@ public class DedicatedServer extends UltracraftServer {
     @Override
     protected void onTerminationFailed() {
         this.crash(new Error("Termination failed!"));
-        Runtime.getRuntime().halt(1);
+        System.exit(1);
     }
 
     @Override

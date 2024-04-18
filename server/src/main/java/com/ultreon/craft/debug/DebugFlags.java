@@ -25,7 +25,8 @@ public class DebugFlags {
     public static final DebugFlag WORLD_GEN = new DebugFlag(false);
     public static final DebugFlag LOG_POSITION_RESET_ON_CHUNK_LOAD = new DebugFlag(false);
     public static final DebugFlag PACKET_LOGGING = new DebugFlag(true);
-    public static final DebugFlag ORE_FEATURE = new DebugFlag(true);
+    public static final DebugFlag ORE_FEATURE = new DebugFlag(false);
+    public static final DebugFlag LOG_OUT_OF_BOUNDS = new DebugFlag(false);
 
     static {
         if (IS_RUNNING_IN_DEBUG)

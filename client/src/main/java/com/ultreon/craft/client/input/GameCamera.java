@@ -22,6 +22,9 @@ import com.ultreon.libs.commons.v0.vector.Vec3f;
  */
 public class GameCamera extends PerspectiveCamera {
     public final UltracraftClient client = UltracraftClient.get();
+    public float fov = 67;
+    private float fovModifier = 1;
+    private float fovModifierGoal = 1;
     private InspectionNode<GameCamera> node;
     private Vector3 hitPosition;
     private Vec3d camPos;
@@ -45,12 +48,20 @@ public class GameCamera extends PerspectiveCamera {
             this.node.create("far", () -> this.far);
             this.node.create("viewportWidth", () -> this.viewportWidth);
             this.node.create("viewportHeight", () -> this.viewportHeight);
-            this.node.create("fieldOfView", () -> this.fieldOfView);
+            this.node.create("fieldOfView", () -> this.fov);
             this.node.create("hitPosition", () -> this.hitResult.getPosition());
             this.node.create("relHitPosition", () -> this.hitPosition);
             this.node.create("eyePosition", () -> this.camPos);
             this.node.create("playerPosition", () -> this.player.getPosition(client.partialTick));
         }
+    }
+
+    public float getFovModifier() {
+        return fovModifier;
+    }
+
+    public void setFovModifier(float fovModifier) {
+        this.fovModifierGoal = fovModifier;
     }
 
     /**
@@ -62,6 +73,19 @@ public class GameCamera extends PerspectiveCamera {
         var lookVec = player.getLookVector(client.partialTick);
         this.camPos = player.getPosition(client.partialTick).div(WorldRenderer.SCALE).add(0, player.getEyeHeight() / WorldRenderer.SCALE, 0);
         this.player = player;
+
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        if (fovModifierGoal != fovModifier) {
+            if (fovModifierGoal > fovModifier) {
+                fovModifier += deltaTime * 2;
+                if (fovModifier > fovModifierGoal) fovModifier = fovModifierGoal;
+            } else {
+                fovModifier -= deltaTime * 2;
+                if (fovModifier < fovModifierGoal) fovModifier = fovModifierGoal;
+            }
+        }
+
+        this.fieldOfView = fov * fovModifier;
 
         if (this.client.isInThirdPerson()) {
             this.updateThirdPerson(lookVec);
@@ -77,7 +101,7 @@ public class GameCamera extends PerspectiveCamera {
             this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
         }
 
-        float delta = Gdx.graphics.getDeltaTime();
+        float delta = deltaTime;
         float duration = 0.5f;
         if (player.isWalking()) this.walking = true;
         if (!this.walking) this.cameraBop = 0;

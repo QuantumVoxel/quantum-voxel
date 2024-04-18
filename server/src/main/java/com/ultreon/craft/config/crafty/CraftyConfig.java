@@ -36,7 +36,12 @@ import java.util.concurrent.TimeUnit;
 public abstract class CraftyConfig {
     public static final String ENTRYPOINT_KEY = "config";
     private static final Map<String, CraftyConfig> CONFIGS = new HashMap<>();
-    private static final ScheduledExecutorService WATCHER = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService WATCHER = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+        thread.setName("CraftyConfig Watcher");
+        return thread;
+    });
     private static final WatchService WATCH_SERVICE;
 
     static {

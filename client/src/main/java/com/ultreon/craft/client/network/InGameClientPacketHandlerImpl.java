@@ -102,6 +102,10 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             player.resurrect();
         }
 
+        if (!(client.screen instanceof WorldLoadScreen)) {
+            client.showScreen(null);
+        }
+
         UltracraftClient.LOGGER.debug("Player respawned at %s".formatted(pos)); //! DEBUG
     }
 
@@ -144,7 +148,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             UltracraftClient.LOGGER.error("Hard error while loading chunk:", e);
             UltracraftClient.LOGGER.debug("What, why? Pls no!!!");
 
-            Runtime.getRuntime().halt(ExitCodes.FATAL_ERROR);
+            UltracraftClient.crash(e);
         }
     }
 

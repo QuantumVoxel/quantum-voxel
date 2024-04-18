@@ -7,6 +7,7 @@ import com.ultreon.craft.client.gui.screens.DisconnectedScreen;
 import com.ultreon.craft.client.player.LocalPlayer;
 import com.ultreon.craft.client.rpc.GameActivity;
 import com.ultreon.craft.client.world.ClientWorld;
+import com.ultreon.craft.client.world.WorldRenderer;
 import com.ultreon.craft.entity.EntityTypes;
 import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.server.ServerPacketHandler;
@@ -34,6 +35,8 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
         ClientWorld clientWorld = new ClientWorld(this.client);
         this.client.world = clientWorld;
+        this.client.worldRenderer = new WorldRenderer(this.client.world);
+        this.client.renderWorld = true;
         this.client.inspection.createNode("world", () -> this.client.world);
 
         var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, clientWorld, uuid);

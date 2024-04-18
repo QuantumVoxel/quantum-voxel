@@ -55,10 +55,14 @@ public final class ClientWorld extends World implements Disposable {
         if (!UltracraftClient.isOnMainThread()) {
             return UltracraftClient.invokeAndWait(() -> this.unloadChunk(chunk, pos));
         }
+
+        if (shouldStayLoaded(pos)) return false;
+
         boolean removed = this.chunks.remove(pos) == chunk;
         if (removed) {
             this.totalChunks--;
         }
+
         return removed;
     }
 
@@ -188,8 +192,9 @@ public final class ClientWorld extends World implements Disposable {
 
     public void loadChunk(ChunkPos pos, ClientChunk data) {
         var chunk = UltracraftClient.invokeAndWait(() -> this.chunks.get(pos));
-        if (chunk == null) chunk = data;
-        else {
+        if (chunk == null) {
+            chunk = data;
+        } else {
             World.LOGGER.warn("Duplicate chunk packet detected! Chunk {}", pos);
             return;
         }

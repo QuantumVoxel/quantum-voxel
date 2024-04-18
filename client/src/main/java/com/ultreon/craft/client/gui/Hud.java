@@ -10,6 +10,7 @@ import com.ultreon.craft.menu.ItemSlot;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.text.TextObject;
 import com.ultreon.craft.util.Color;
+import com.ultreon.craft.util.Gamemode;
 import com.ultreon.craft.util.Identifier;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class Hud implements GameRenderable {
         Player player = this.client.player;
         if (player == null) return;
 
-        if (!this.client.isInThirdPerson() || !Config.hideHotbarWhenThirdPerson) {
+        if (!this.client.isInThirdPerson() || !Config.hideHotbarWhenThirdPerson && player.getGamemode() != Gamemode.SPECTATOR) {
             this.renderHotbar(renderer, player);
         }
 

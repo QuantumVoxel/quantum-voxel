@@ -64,6 +64,9 @@ public class Entity implements CommandSender {
     private final RNG random = new JavaRNG();
     private MapType pipeline = new MapType();
     private boolean markedForRemoval;
+    private double oDx;
+    private double oDy;
+    private double oDz;
 
     /**
      * Creates a new entity.
@@ -322,11 +325,11 @@ public class Entity implements CommandSender {
      * @param dx Change in x-coordinate
      * @param dy Change in y-coordinate
      * @param dz Change in z-coordinate
-     * @param oDx Original change in x-coordinate
-     * @param oDy Original change in y-coordinate
-     * @param oDz Original change in z-coordinate
+     * @param oldDx Original change in x-coordinate
+     * @param oldDy Original change in y-coordinate
+     * @param oldDz Original change in z-coordinate
      */
-    private void moveWithCollision(BoundingBox ext, double dx, double dy, double dz, double oDx, double oDy, double oDz) {
+    private void moveWithCollision(BoundingBox ext, double dx, double dy, double dz, double oldDx, double oldDy, double oldDz) {
         // Get list of bounding boxes the entity collides with
         List<BoundingBox> boxes = this.world.collide(ext, false);
 
@@ -379,10 +382,10 @@ public class Entity implements CommandSender {
         pBox.update();
 
         // Check if entity is on the ground
-        this.onGround = oDy != dy && oDy < 0.0f;
+        this.onGround = oldDy != dy && oldDy < 0.0f;
 
         // Reset velocity if there was a collision in x-coordinate
-        if (oDx != dx) {
+        if (oldDx != dx) {
             this.velocityX = 0.0f;
         }
 
@@ -392,16 +395,17 @@ public class Entity implements CommandSender {
         }
 
         // Handle collision responses and update fall distance
-        if (oDy != dy) {
+        if (this.onGround && oDy < 0) {
             this.hitGround();
             this.fallDistance = 0.0F;
             this.velocityY = 0.0f;
+            this.oDy = 0.0f;
         } else if (dy < 0) {
             this.fallDistance -= dy;
         }
 
         // Reset velocity if there was a collision in z-coordinate
-        if (oDz != dz) {
+        if (oldDz != dz) {
             this.velocityZ = 0.0f;
         }
 
@@ -409,6 +413,10 @@ public class Entity implements CommandSender {
         this.x = (pBox.min.x + pBox.max.x) / 2.0f;
         this.y = pBox.min.y;
         this.z = (pBox.min.z + pBox.max.z) / 2.0f;
+
+        this.oDx = dx;
+        this.oDy = dy;
+        this.oDz = dz;
     }
 
     /**
@@ -606,8 +614,8 @@ public class Entity implements CommandSender {
     }
 
     public void rotate(float x, float y) {
-        this.xRot += x;
-        this.yRot += y;
+        this.xRot = this.xRot + x;
+        this.yRot = Mth.clamp(this.yRot + y, -90, 90);
     }
 
     public EntityType<?> getType() {

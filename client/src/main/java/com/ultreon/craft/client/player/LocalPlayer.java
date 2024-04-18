@@ -105,6 +105,7 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     protected void hurtFromVoid() {
         // The server should handle player void damage.
+        this.onVoidDamage();
     }
 
     @Override
@@ -128,10 +129,10 @@ public class LocalPlayer extends ClientPlayer {
     }
 
     @Override
-    public void onDeath() {
-        super.onDeath();
+    public void onDeath(@NotNull DamageSource source) {
+        super.onDeath(source);
 
-        this.client.showScreen(new DeathScreen());
+        this.client.showScreen(new DeathScreen(source));
     }
 
     @Override
@@ -139,11 +140,6 @@ public class LocalPlayer extends ClientPlayer {
         GameInput.startVibration(200, 1.0F);
 
         super.onVoidDamage();
-    }
-
-    @Override
-    public float getWalkingSpeed() {
-        return this.isRunning() ? super.getWalkingSpeed() * this.runModifier : super.getWalkingSpeed();
     }
 
     /**

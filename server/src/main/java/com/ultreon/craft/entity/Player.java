@@ -98,6 +98,13 @@ public abstract class Player extends LivingEntity {
         super.tick();
     }
 
+    @Override
+    protected void hurtFromVoid() {
+        super.hurtFromVoid();
+
+        this.onVoidDamage();
+    }
+
     protected void onVoidDamage() {
 
     }
@@ -127,7 +134,7 @@ public abstract class Player extends LivingEntity {
 
     public void rotateHead(float x, float y) {
         this.xHeadRot += x;
-        this.yRot += y;
+        this.yRot = Mth.clamp(this.yRot + y, -90, 90);
         this.xRot = Mth.clamp(this.xRot, this.xHeadRot - 50, this.xHeadRot + 50);
     }
 
@@ -144,7 +151,7 @@ public abstract class Player extends LivingEntity {
     }
 
     public float getWalkingSpeed() {
-        return this.walkingSpeed;
+        return this.isRunning() ? this.walkingSpeed * this.runModifier : this.walkingSpeed;
     }
 
     public void setWalkingSpeed(float walkingSpeed) {
@@ -152,7 +159,7 @@ public abstract class Player extends LivingEntity {
     }
 
     public float getFlyingSpeed() {
-        return this.flyingSpeed;
+        return isRunning() ? this.flyingSpeed * this.runModifier : this.flyingSpeed;
     }
 
     public void setFlyingSpeed(float flyingSpeed) {
@@ -295,8 +302,6 @@ public abstract class Player extends LivingEntity {
         this.x = Mth.clamp(this.x, -30000000, 30000000);
         this.z = Mth.clamp(this.z, -30000000, 30000000);
 
-        this.hurtFromVoid();
-
         super.onMoved();
     }
 
@@ -364,7 +369,7 @@ public abstract class Player extends LivingEntity {
                 this.abilities.blockBreak = true;
                 this.noClip = false;
             }
-            case MINI_GAME -> {
+            case ADVENTUROUS -> {
                 this.abilities.allowFlight = false;
                 this.abilities.instaMine = false;
                 this.abilities.invincible = false;
@@ -394,7 +399,7 @@ public abstract class Player extends LivingEntity {
     }
 
     public boolean isSurvival() {
-        return this.gamemode == Gamemode.SURVIVAL || this.gamemode == Gamemode.MINI_GAME;
+        return this.gamemode == Gamemode.SURVIVAL || this.gamemode == Gamemode.ADVENTUROUS;
     }
 
     public void drop(ItemStack itemStack) {

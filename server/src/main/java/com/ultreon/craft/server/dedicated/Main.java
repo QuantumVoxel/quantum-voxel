@@ -101,14 +101,14 @@ public class Main {
             UltracraftServer.getWatchManager().stop();
         } catch (ApplicationCrash e) {
             e.getCrashLog().createCrash().printCrash();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // Server crashed! Saving a crash log, and write it to the server console.
             CrashLog crashLog = new CrashLog("Server crashed!", e);
             crashLog.defaultSave();
 
             String string = crashLog.toString();
             Main.LOGGER.error(string);
-            Runtime.getRuntime().halt(1); //* Halt server since the server crashed.
+            System.exit(1);
         }
     }
 

@@ -126,7 +126,7 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
     public void send(Packet<? extends TheirHandler> packet) {
         if (this.readOnly)
             throw new ReadOnlyConnectionException();
-        if (ourPacketData.getId(packet) < 0)
+        if (theirPacketData.getId(packet) < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
         this.packetQueue.offer(packet);
@@ -136,7 +136,7 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
         if (this.readOnly)
             throw new ReadOnlyConnectionException();
-        if (ourPacketData.getId(packet) < 0)
+        if (theirPacketData.getId(packet) < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
 

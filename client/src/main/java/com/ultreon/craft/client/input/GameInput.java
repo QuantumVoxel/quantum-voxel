@@ -171,19 +171,19 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     public void update(float deltaTime) {
         if (this.client.isPlaying()) {
             Player player = this.client.player;
-            if (player != null) {
+            if (player != null && this.isControllerConnected()) {
                 this.updatePlayer(deltaTime, player);
             }
         }
 
         for (ControllerButton button : ControllerButton.values()) {
             if (isControllerButtonDown(button)) {
-                this.BUTTONS_JUST_PRESSED.remove(button);
-                if (!this.BUTTONS_DOWN.contains(button))
-                    this.BUTTONS_JUST_PRESSED.add(button);
-                this.BUTTONS_DOWN.add(button);
+                BUTTONS_JUST_PRESSED.remove(button);
+                if (!BUTTONS_DOWN.contains(button))
+                    BUTTONS_JUST_PRESSED.add(button);
+                BUTTONS_DOWN.add(button);
             } else {
-                this.BUTTONS_DOWN.remove(button);
+                BUTTONS_DOWN.remove(button);
             }
         }
     }

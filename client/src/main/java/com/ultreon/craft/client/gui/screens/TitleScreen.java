@@ -9,6 +9,7 @@ import com.ultreon.craft.client.gui.widget.Panel;
 import com.ultreon.craft.client.gui.widget.TextButton;
 import com.ultreon.craft.client.rpc.GameActivity;
 import com.ultreon.craft.client.util.Resizer;
+import com.ultreon.craft.text.Formatter;
 import com.ultreon.craft.text.TextObject;
 import com.ultreon.craft.util.Color;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
@@ -36,9 +37,9 @@ public class TitleScreen extends Screen {
                 .bounds(() -> new Bounds(0, 0, 250, this.size.height))
                 .backgroundColor(Color.BLACK.withAlpha(0x80)));
 
-        this.titleLabel = builder.add(Label.of(TextObject.literal("Ultracraft").setBold(true)).position(() -> new Position(125, 40))
+        this.titleLabel = builder.add(Label.of(Formatter.format("<bold>Quantum<gray><bold>Voxel")).position(() -> new Position(125, 40))
                 .alignment(Alignment.CENTER)
-                .scale(3));
+                .scale(2));
 
         this.singleplayerButton = builder.add(TextButton.of(TextObject.translation("ultracraft.screen.title.singleplayer"), 150)
                 .position(() -> new Position(50, this.size.height / 2 - 35))
@@ -62,7 +63,7 @@ public class TitleScreen extends Screen {
     }
 
     private void quitGame(TextButton caller) {
-        System.exit(0);
+        Gdx.app.exit();
     }
 
     private void openSingleplayer(TextButton caller) {

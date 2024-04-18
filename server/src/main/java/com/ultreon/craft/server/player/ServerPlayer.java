@@ -104,6 +104,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
      * @param message the kick message.
      */
     public void kick(String message) {
+        if (this.connection == null) return;
         this.connection.disconnect(message);
     }
 
@@ -220,6 +221,13 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
 
         // Call the superclass tick method
         super.tick();
+
+        // Move the player
+        move(velocityX, velocityY, velocityZ);
+
+        velocityX = 0;
+        velocityY = 0;
+        velocityZ = 0;
 
         // Check if the player's health has changed
         if (this.oldHealth != this.health) {
@@ -616,9 +624,20 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        double dx = x - this.ox;
+        double dy = y - this.oy;
+        double dz = z - this.oz;
+
+        System.out.println("dx = " + dx + ", dy = " + dy + ", dz = " + dz);
+//        System.out.println("x = " + x + ", y = " + y + ", z = " + z);
+        this.velocityX = dx;
+        this.velocityY = dy;
+        this.velocityZ = dz;
+//        System.out.println("x = " + x + ", y = " + y + ", z = " + z);
+
+//        this.x = x;
+//        this.y = y;
+//        this.z = z;
     }
 
     public boolean isSpawned() {

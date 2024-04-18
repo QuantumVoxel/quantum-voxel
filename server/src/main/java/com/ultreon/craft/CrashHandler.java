@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,12 +46,6 @@ public class CrashHandler {
             // Log error if crash handlers fail
             CrashHandler.LOGGER.error("Failed to run crash handlers:", t);
         }
-
-        // Display crash dialog
-        displayCrashDialog(crashLog);
-
-        // Halt the runtime
-        Runtime.getRuntime().halt(1);
     }
 
     /**
@@ -60,46 +55,50 @@ public class CrashHandler {
      */
     private static void displayCrashDialog(CrashLog crashLog) {
         // Display the crash dialog on the event dispatch thread
-        SwingUtilities.invokeLater(() -> {
-            // Create a new TaskDialog
-            TaskDialog dialog = new TaskDialog(null, "Game crashed!");
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                // Create a new TaskDialog
+                TaskDialog dialog = new TaskDialog(null, "Game crashed!");
 
-            // Set up title and description for the dialog
-            String title = "Game crashed!";
-            String description = "See crash report below:";
+                // Set up title and description for the dialog
+                String title = "Game crashed!";
+                String description = "See crash report below:";
 
-            // Check if the title is empty
-            boolean noMessage = Strings.isEmpty(title);
+                // Check if the title is empty
+                boolean noMessage = Strings.isEmpty(title);
 
-            // Set the instruction and text of the dialog based on the title and description
-            dialog.setInstruction(noMessage ? description : title);
-            dialog.setText(noMessage ? "" : description);
+                // Set the instruction and text of the dialog based on the title and description
+                dialog.setInstruction(noMessage ? description : title);
+                dialog.setText(noMessage ? "" : description);
 
-            // Set the error icon for the dialog
-            dialog.setIcon(UIManager.getIcon(TaskDialog.StandardIcon.ERROR));
+                // Set the error icon for the dialog
+                dialog.setIcon(UIManager.getIcon(TaskDialog.StandardIcon.ERROR));
 
-            // Set the commands for the dialog
-            dialog.setCommands(TaskDialog.StandardCommand.CANCEL.derive(TaskDialog.makeKey("Close")));
+                // Set the commands for the dialog
+                dialog.setCommands(TaskDialog.StandardCommand.CANCEL.derive(TaskDialog.makeKey("Close")));
 
-            // Create a JTextArea to display the crash log
-            JTextArea textArea = new JTextArea();
-            textArea.setEditable(false);
-            textArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
-            textArea.setText(crashLog.toString());
-            textArea.setCaretPosition(0);
+                // Create a JTextArea to display the crash log
+                JTextArea textArea = new JTextArea();
+                textArea.setEditable(false);
+                textArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
+                textArea.setText(crashLog.toString());
+                textArea.setCaretPosition(0);
 
-            // Create a JScrollPane to allow scrolling in the text area
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setPreferredSize(new Dimension(400, 200));
+                // Create a JScrollPane to allow scrolling in the text area
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(400, 200));
 
-            // Set the expandable component and expanded state in the details of the dialog
-            dialog.getDetails().setExpandableComponent(scrollPane);
-            dialog.getDetails().setExpanded(noMessage);
+                // Set the expandable component and expanded state in the details of the dialog
+                dialog.getDetails().setExpandableComponent(scrollPane);
+                dialog.getDetails().setExpanded(noMessage);
 
-            // Allow the dialog to be resizable and make it visible
-            dialog.setResizable(true);
-            dialog.setVisible(true);
-        });
+                // Allow the dialog to be resizable and make it visible
+                dialog.setResizable(true);
+                dialog.setVisible(true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

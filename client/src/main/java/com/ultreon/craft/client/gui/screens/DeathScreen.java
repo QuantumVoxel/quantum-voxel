@@ -7,22 +7,31 @@ import com.ultreon.craft.client.gui.Renderer;
 import com.ultreon.craft.client.gui.widget.Label;
 import com.ultreon.craft.client.gui.widget.TextButton;
 import com.ultreon.craft.client.text.Language;
+import com.ultreon.craft.entity.damagesource.DamageSource;
 import com.ultreon.craft.network.packets.c2s.C2SRespawnPacket;
 import com.ultreon.craft.text.TextObject;
+import org.jetbrains.annotations.NotNull;
 
 public class DeathScreen extends Screen {
+    private final DamageSource source;
     private TextButton respawnButton;
     private TextButton exitWorldButton;
 
-    public DeathScreen() {
+    public DeathScreen(@NotNull DamageSource source) {
         super(Language.translate("ultracraft.screen.death.title"));
+        this.source = source;
     }
 
     @Override
     public void build(GuiBuilder builder) {
         builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 2 - 50)));
+                .scale(2)
+                .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 50)));
+
+        builder.add(Label.of(source.getDescription(client.player != null ? client.player : null))
+                .alignment(Alignment.CENTER)
+                .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 25)));
 
         this.respawnButton = builder.add(TextButton.of(TextObject.translation("ultracraft.screen.death.respawn"))
                 .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3))

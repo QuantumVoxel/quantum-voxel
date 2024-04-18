@@ -1,6 +1,7 @@
 package com.ultreon.craft.network.system;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.ultreon.craft.CommonConstants;
 import com.ultreon.craft.network.PacketContext;
 import com.ultreon.craft.network.PacketData;
 import com.ultreon.craft.network.PacketHandler;
@@ -9,6 +10,7 @@ import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.stage.PacketStage;
 import com.ultreon.craft.server.player.ServerPlayer;
 import com.ultreon.craft.util.Result;
+import com.ultreon.craft.util.SanityCheckException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Executor;
@@ -27,6 +29,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         this.executor = executor;
     }
 
+    public static int getRx() {
+        return rx.get();
+    }
+
     @Override
     public void onPing(long ping) {
         // No-op
@@ -36,7 +42,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     public void send(Packet<? extends TheirHandler> packet) {
         if (otherSide == null || this.readOnly)
             throw new ReadOnlyConnectionException();
-        if (ourPacketData.getId(packet) < 0)
+        if (theirPacketData.getId(packet) < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
         this.otherSide.receive(packet, null);
@@ -44,12 +50,16 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @Override
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
-        if (otherSide == null || this.readOnly)
+        if (otherSide == null || this.readOnly) {
             throw new ReadOnlyConnectionException();
-        if (ourPacketData.getId(packet) < 0)
+        }
+        if (theirPacketData.getId(packet) < 0) {
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
+        }
 
+        tx.incrementAndGet();
         this.otherSide.queue(() -> this.otherSide.receive(packet, resultListener));
+        tx.decrementAndGet();
     }
 
     @Override
@@ -58,12 +68,19 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     }
 
     @SuppressWarnings("unchecked")
-    private void receive(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
+    protected void receive(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
         try {
+            if (handler == null) throw new SanityCheckException("No handler set");
+            if (ourPacketData.getId(packet) < 0) throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
+            rx.incrementAndGet();
             ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
+            rx.decrementAndGet();
         } catch (Exception e) {
             if (resultListener != null)
                 resultListener.onFailure();
+            else {
+                CommonConstants.LOGGER.error("Failed to handle packet", e);
+            }
 
             return;
         }

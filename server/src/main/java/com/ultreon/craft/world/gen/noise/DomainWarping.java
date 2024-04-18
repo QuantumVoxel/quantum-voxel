@@ -3,8 +3,9 @@ package com.ultreon.craft.world.gen.noise;
 import com.ultreon.craft.util.MathHelper;
 import com.ultreon.libs.commons.v0.vector.Vec2d;
 import com.ultreon.libs.commons.v0.vector.Vec2i;
+import reactor.core.Disposable;
 
-public class DomainWarping {
+public class DomainWarping implements Disposable {
     public final NoiseInstance domainX;
     public final NoiseInstance domainY;
     public int amplitudeX = 20, amplitudeY = 20;
@@ -34,6 +35,7 @@ public class DomainWarping {
         return MathHelper.round(this.generateDomainOffset(x, z));
     }
 
+    @Override
     public void dispose() {
         this.domainX.dispose();
         this.domainY.dispose();

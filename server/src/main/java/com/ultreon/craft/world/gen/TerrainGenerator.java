@@ -2,6 +2,7 @@ package com.ultreon.craft.world.gen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.craft.CommonConstants;
+import com.ultreon.craft.debug.DebugFlags;
 import com.ultreon.craft.debug.WorldGenDebugContext;
 import com.ultreon.craft.server.UltracraftServer;
 import com.ultreon.craft.util.MathHelper;
@@ -14,28 +15,25 @@ import com.ultreon.craft.world.gen.biome.BiomeGenerator;
 import com.ultreon.craft.world.gen.biome.BiomeIndex;
 import com.ultreon.craft.world.gen.noise.DomainWarping;
 import com.ultreon.craft.world.gen.noise.NoiseConfig;
-import com.ultreon.craft.world.gen.noise.NoiseInstance;
 import com.ultreon.libs.commons.v0.vector.Vec2i;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
-import de.articdive.jnoise.core.api.noisegen.NoiseGenerator;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
-import de.articdive.jnoise.generators.noisegen.opensimplex.FastSimplexNoiseGenerator;
 import de.articdive.jnoise.pipeline.JNoise;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import reactor.core.Disposable;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.ultreon.craft.world.World.CHUNK_SIZE;
 
-public class TerrainGenerator {
+public class TerrainGenerator implements Disposable {
     private final DomainWarping biomeDomain;
     private final DomainWarping layerDomain;
     private final NoiseConfig noiseConfig;
@@ -85,8 +83,8 @@ public class TerrainGenerator {
                 CommonConstants.LOGGER.info("Recorded change: " + change);
             }
 
-            if (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE) {
-                UltracraftServer.LOGGER.warn("Recorded change out of bounds: " + change);
+            if (DebugFlags.LOG_OUT_OF_BOUNDS.enabled() && (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE)) {
+                UltracraftServer.LOGGER.warn("Recorded change out of bounds: {}", change);
             }
 
             chunk.set(change.x(), change.y(), change.z(), change.block());
@@ -188,7 +186,10 @@ public class TerrainGenerator {
         return this.layerDomain;
     }
 
+    @Override
     public void dispose() {
+        this.biomeDomain.dispose();
+        this.layerDomain.dispose();
         this.biomeGenData.forEach(data -> data.biomeGen().dispose());
     }
 }

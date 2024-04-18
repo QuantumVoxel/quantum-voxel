@@ -1,6 +1,7 @@
 package com.ultreon.craft.entity.damagesource;
 
 import com.google.common.base.Suppliers;
+import com.ultreon.craft.entity.Entity;
 import com.ultreon.craft.registry.Registries;
 import com.ultreon.craft.text.Formatter;
 import com.ultreon.craft.text.TextObject;
@@ -16,12 +17,6 @@ public class DamageSource {
     public static final DamageSource VOID = DamageSource.register(new Identifier("void"), new DamageSource().byPassInvincibility(true));
     public static final DamageSource KILL = DamageSource.register(new Identifier("kill"), new DamageSource().byPassInvincibility(true));
 
-    private final Supplier<TextObject> description = Suppliers.memoize(() -> {
-        Identifier type = this.getType();
-        if (type == null) return Formatter.format("<red>NULL</>");
-        return TextObject.translation(type.namespace() + ".damageSource." + type.path().replaceAll("/", "."));
-    });
-
     private boolean byPassInvincibility;
 
     private static <T extends DamageSource> T register(Identifier id, T damageSource) {
@@ -33,8 +28,12 @@ public class DamageSource {
         return Registries.DAMAGE_SOURCE.getId(this);
     }
 
-    public TextObject getDescription() {
-        return this.description.get();
+    public TextObject getDescription(@Nullable Entity entity) {
+        Identifier type = this.getType();
+        if (type == null) return Formatter.format("<red>NULL</>");
+        if (entity == null) return TextObject.translation(type.namespace() + ".damageSource." + type.path().replaceAll("/", "."), Formatter.format("<red>NULL</>"));
+        TextObject displayName = entity.getDisplayName();
+        return TextObject.translation(type.namespace() + ".damageSource." + type.path().replaceAll("/", "."), displayName);
     }
 
     public boolean byPassInvincibility() {

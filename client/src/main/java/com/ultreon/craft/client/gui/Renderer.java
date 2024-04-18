@@ -120,7 +120,7 @@ public class Renderer implements Disposable {
         blurShader = new ShaderProgram(VERT, FRAG);
         if (!blurShader.isCompiled()) {
             System.err.println(blurShader.getLog());
-            System.exit(0);
+            UltracraftClient.crash(new IllegalStateException("Failed to compile blur shader!"));
         }
         if (!blurShader.getLog().isEmpty())
             System.out.println(blurShader.getLog());
@@ -133,7 +133,7 @@ public class Renderer implements Disposable {
         gridShader = new ShaderProgram(VERT, GRID_FRAG);
         if (!gridShader.isCompiled()) {
             System.err.println(gridShader.getLog());
-            System.exit(0);
+            UltracraftClient.crash(new IllegalStateException("Failed to compile grid shader!"));
         }
         if (!gridShader.getLog().isEmpty())
             System.out.println(gridShader.getLog());

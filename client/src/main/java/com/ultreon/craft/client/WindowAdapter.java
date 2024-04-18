@@ -33,6 +33,10 @@ class WindowAdapter extends Lwjgl3WindowAdapter {
 
     @Override
     public boolean closeRequested() {
+        if (GameLibGDXWrapper.onWindowClose()) {
+            return true;
+        }
+
         if (WindowEvents.WINDOW_CLOSE_REQUESTED.factory().onWindowCloseRequested(this.window).isCanceled())
             return false;
 

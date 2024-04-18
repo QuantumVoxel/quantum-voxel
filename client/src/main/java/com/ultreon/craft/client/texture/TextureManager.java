@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.craft.client.UltracraftClient;
@@ -24,7 +25,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TextureManager {
+public class TextureManager implements Disposable {
     private final Map<Identifier, Texture> textures = new HashMap<>();
 
     private final ResourceManager resourceManager;
@@ -184,10 +185,11 @@ public class TextureManager {
         return this.resourceManager;
     }
 
+    @Override
     public void dispose() {
         this.frozen = true;
         for (Texture texture : this.textures.values()) {
-            texture.dispose();
+            if (texture != null) texture.dispose();
         }
     }
 

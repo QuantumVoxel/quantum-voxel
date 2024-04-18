@@ -4,7 +4,7 @@ import com.ultreon.craft.entity.player.PlayerAbilities;
 
 public enum Gamemode {
     SURVIVAL(false, false, false, true),
-    MINI_GAME(false, false, false, false),
+    ADVENTUROUS(false, false, false, false),
     BUILDER(true, true, true, true),
     BUILDER_PLUS(true, true, true, true),
     SPECTATOR(true, false, true, false);

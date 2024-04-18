@@ -83,7 +83,7 @@ public class CrashCategory {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.details).append(": \r\n");
+        sb.append("@: ").append(this.details).append(": \r\n");
 
         if (!this.entries.isEmpty()) {
             ArrayList<AbstractMap.SimpleEntry<String, String>> simpleEntries = new ArrayList<>(this.entries);
@@ -96,7 +96,7 @@ public class CrashCategory {
                 sb.append(System.lineSeparator());
             }
 
-            AbstractMap.SimpleEntry<String, String> entry = simpleEntries.getLast();
+            AbstractMap.SimpleEntry<String, String> entry = simpleEntries.get(simpleEntries.size() - 1);
             sb.append("   ");
             sb.append(entry.getKey());
             sb.append(": ");

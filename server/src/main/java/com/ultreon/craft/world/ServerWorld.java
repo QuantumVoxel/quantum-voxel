@@ -18,6 +18,7 @@ import com.ultreon.craft.events.WorldEvents;
 import com.ultreon.craft.network.client.ClientPacketHandler;
 import com.ultreon.craft.network.packets.Packet;
 import com.ultreon.craft.network.packets.s2c.S2CAddEntityPacket;
+import com.ultreon.craft.network.packets.s2c.S2CAddPlayerPacket;
 import com.ultreon.craft.network.packets.s2c.S2CBlockEntitySetPacket;
 import com.ultreon.craft.network.packets.s2c.S2CBlockSetPacket;
 import com.ultreon.craft.registry.Registries;
@@ -46,7 +47,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -58,7 +58,11 @@ public class ServerWorld extends World {
     private CompletableFuture<Boolean> saveFuture;
     @Nullable
     private ScheduledFuture<?> saveSchedule;
-    private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "ServerWorld-Save");
+        thread.setDaemon(true);
+        return thread;
+    });
     private static long chunkUnloads;
 
     private final TerrainGenerator terrainGen;
@@ -72,6 +76,7 @@ public class ServerWorld extends World {
     private int playTime;
     private final Set<RecordedChange> recordedChanges = new CopyOnWriteArraySet<>();
     private int chunksToLoadCount;
+    private boolean saving;
 
     public ServerWorld(UltracraftServer server, WorldStorage storage, MapType worldData) {
         super((LongType) worldData.get("seed"));
@@ -80,15 +85,8 @@ public class ServerWorld extends World {
 
         this.load(worldData);
 
-        var biomeDomain = new DomainWarping(
-                UltracraftServer.get().disposeOnClose(NoiseConfigs.BIOME_X.create(this.seed)),
-                UltracraftServer.get().disposeOnClose(NoiseConfigs.BIOME_Y.create(this.seed))
-        );
-
-        var layerDomain = new DomainWarping(
-                UltracraftServer.get().disposeOnClose(NoiseConfigs.LAYER_X.create(this.seed)),
-                UltracraftServer.get().disposeOnClose(NoiseConfigs.LAYER_Y.create(this.seed))
-        );
+        final var biomeDomain = new DomainWarping(NoiseConfigs.BIOME_X.create(this.seed), NoiseConfigs.BIOME_Y.create(this.seed));
+        final var layerDomain = new DomainWarping(NoiseConfigs.LAYER_X.create(this.seed), NoiseConfigs.LAYER_Y.create(this.seed));
 
         this.terrainGen = new TerrainGenerator(biomeDomain, layerDomain, NoiseConfigs.BIOME_MAP);
 
@@ -226,6 +224,18 @@ public class ServerWorld extends World {
 
     public void sendAllTracking(int x, int y, int z, Packet<? extends ClientPacketHandler> packet) {
         for (var player : this.server.getPlayers()) {
+            if (player.getWorld() != this) continue;
+
+            if (player.isChunkActive(World.toChunkPos(x, y, z))) {
+                player.connection.send(packet);
+            }
+        }
+    }
+
+    public void sendAllTrackingExcept(int x, int y, int z, Packet<? extends ClientPacketHandler> packet, @NotNull ServerPlayer except) {
+        for (var player : this.server.getPlayers()) {
+            if (player == except) continue;
+
             if (player.getWorld() != this) continue;
 
             if (player.isChunkActive(World.toChunkPos(x, y, z))) {
@@ -501,24 +511,6 @@ public class ServerWorld extends World {
         }
     }
 
-    private List<ChunkPos> getChunksToLoad(List<ChunkPos> needed, Vec3d pos) {
-        return needed.stream().filter(chunkPos -> this.getChunk(chunkPos) == null).sorted(Comparator.comparingDouble(o -> o.getChunkOrigin().dst(pos))).collect(Collectors.toList());
-    }
-
-    private List<ChunkPos> getChunksToUnload(List<ChunkPos> needed) {
-        List<ChunkPos> toRemove = new ArrayList<>();
-        for (var pos : this.getLoadedChunks().stream().map(Chunk::getPos).filter(pos -> {
-            var chunk = this.getChunk(pos);
-            return chunk != null && !needed.contains(pos);
-        }).toList()) {
-            if (this.getChunk(pos) != null) {
-                toRemove.add(pos);
-            }
-        }
-
-        return toRemove;
-    }
-
     @Deprecated
     public void refreshChunks(float x, float z) {
         this.refreshChunks(new Vec3d(x, World.WORLD_DEPTH, z));
@@ -579,6 +571,8 @@ public class ServerWorld extends World {
      */
     public boolean unloadChunk(ChunkPos chunkPos, boolean save) {
         this.checkThread();
+
+        if (shouldStayLoaded(chunkPos)) return false;
 
         var region = this.regionStorage.getRegionAt(chunkPos);
         if (region == null) throw new IllegalStateException("Region is unloaded while unloading chunk " + chunkPos);
@@ -672,6 +666,7 @@ public class ServerWorld extends World {
     @Override
     @ApiStatus.Internal
     public void dispose() {
+        this.disposed = true;
         var saveSchedule = this.saveSchedule;
         if (saveSchedule != null) saveSchedule.cancel(true);
         this.saveExecutor.shutdownNow();
@@ -695,19 +690,20 @@ public class ServerWorld extends World {
     @Override
     public BlockPos getSpawnPoint() {
         ChunkPos chunkPos = World.toChunkPos(this.spawnX, 0, this.spawnZ);
-        Chunk chunkAt = this.getChunk(chunkPos);
-        if (chunkAt == null) {
-            Chunk chunk = this.loadChunkNow(chunkPos);
+        Chunk chunk = this.getChunk(chunkPos);
+        if (chunk == null) {
+            chunk = this.loadChunkNow(chunkPos);
             if (chunk == null)
                 throw new IllegalStateException("Failed to load chunk at spawn position");
         }
 
-        int highest = this.getHighest(this.spawnX, this.spawnZ);
-        int spawnY = 0;
+        BlockPos localPos = World.toLocalBlockPos(this.spawnX, 0, this.spawnZ);
+        int highest = chunk.getHighest(localPos.x(), localPos.z());
+        int spawnY = 64;
         if (highest != Integer.MIN_VALUE)
             spawnY = highest;
 
-        return new BlockPos(this.spawnX, spawnY, this.spawnZ);
+        return new BlockPos(this.spawnX, spawnY + 1, this.spawnZ);
     }
 
     /**
@@ -826,7 +822,10 @@ public class ServerWorld extends World {
      */
     @Blocking
     @ApiStatus.Internal
-    public void save(boolean silent) throws IOException {
+    public synchronized void save(boolean silent) throws IOException {
+        if (this.saving) return;
+        this.saving = true;
+
         // Log saving world message if not silent
         if (!silent) World.LOGGER.info(World.MARKER, "Saving world: " + this.storage.getDirectory().getFileName());
 
@@ -863,6 +862,7 @@ public class ServerWorld extends World {
 
         // Log saved world message if not silent
         if (!silent) World.LOGGER.info(World.MARKER, "Saved world: " + this.storage.getDirectory().getFileName());
+        this.saving = false;
     }
 
     /**
@@ -1014,7 +1014,12 @@ public class ServerWorld extends World {
             throw new IllegalStateException("Tried to spawn a non-server player in a server world.");
 
         T spawn = super.spawn(entity);
-        sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));
+
+        if (entity instanceof ServerPlayer player)
+            sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));
+        else
+            sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));
+
         return spawn;
     }
 
@@ -1390,6 +1395,9 @@ public class ServerWorld extends World {
             };
             try {
                 ref.builtChunk = this.buildChunk(globalPos);
+            } catch (CancellationException e) {
+                this.generatingChunks.remove(globalPos);
+                return null;
             } catch (Throwable t) {
                 this.generatingChunks.remove(globalPos);
                 World.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), t);
@@ -1434,6 +1442,8 @@ public class ServerWorld extends World {
             CompletableFuture.supplyAsync(() -> {
                 try {
                     return this.buildChunk(globalPos);
+                } catch (CancellationException | RejectedExecutionException e) {
+                    throw e;
                 } catch (Throwable e) {
                     UltracraftServer.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), e);
                     throw new Error(e);
@@ -1452,7 +1462,9 @@ public class ServerWorld extends World {
                     }
                 });
             }).exceptionallyAsync(e -> {
-                UltracraftServer.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), e);
+                if (!(e instanceof CancellationException))
+                    UltracraftServer.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), e);
+
                 return null;
             }));
         }
@@ -1477,6 +1489,8 @@ public class ServerWorld extends World {
             CompletableFuture.runAsync(() -> {
                 try {
                     this.world.server.sendChunk(globalPos, builtChunk);
+                } catch (CancellationException e) {
+                    this.generatingChunks.remove(globalPos);
                 } catch (IOException e) {
                     this.generatingChunks.remove(globalPos);
                     throw new RuntimeException(e);
@@ -1613,6 +1627,7 @@ public class ServerWorld extends World {
             for (var chunk : chunks) {
                 if (idx >= World.REGION_SIZE * World.REGION_SIZE)
                     throw new IllegalArgumentException("Too many chunks in region!");
+                if (chunk.isOriginal()) continue;
                 CommonConstants.LOGGER.info("Saving chunk " + chunk.getPos() + " in region " + pos);
                 var localChunkPos = World.toLocalChunkPos(chunk.getPos());
                 mapType.put("c" + localChunkPos.x() + ";" + localChunkPos.z(), chunk.save());

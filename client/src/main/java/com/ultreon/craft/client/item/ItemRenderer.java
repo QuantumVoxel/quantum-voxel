@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -43,12 +44,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class ItemRenderer {
+public class ItemRenderer implements Disposable {
     private final UltracraftClient client;
-    private final Environment environment;
+    private Environment environment;
     private final ModelBatch batch;
-    private final OrthographicCamera itemCam;
-    private final Material material;
+    private OrthographicCamera itemCam;
+    private Material material;
     private final Quaternion quaternion = new Quaternion();
     private final Vector3 rotation = new Vector3(-30, 45, 0);
     private final Vector3 position = new Vector3(0, 0, -1000);
@@ -239,5 +240,19 @@ public class ItemRenderer {
 
     public void reload() {
         this.modelsInstances.clear();
+    }
+
+    @Override
+    public void dispose() {
+        this.modelsInstances.clear();
+        this.models.clear();
+        this.blockModelCache.invalidateAll();
+        this.blockModelCache.cleanUp();
+
+        this.batch.dispose();
+
+        this.itemCam = null;
+        this.environment = null;
+        this.material = null;
     }
 }

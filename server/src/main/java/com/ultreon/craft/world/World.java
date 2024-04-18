@@ -71,8 +71,14 @@ public abstract class World implements ServerDisposable {
     private int curId;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final List<ChunkPos> alwaysLoaded = new ArrayList<>();
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 1));
-    private boolean disposed;
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors(), 1), r -> {
+        Thread thread = new Thread(r);
+        thread.setName("ChunkBuilder");
+        thread.setDaemon(true);
+        return thread;
+    });
+
+    boolean disposed;
     private final Set<ChunkPos> invalidatedChunks = new LinkedHashSet<>();
     private final List<ContainerMenu> menus = new ArrayList<>();
     private final DimensionInfo info = DimensionInfo.OVERWORLD; // TODO WIP
@@ -167,9 +173,8 @@ public abstract class World implements ServerDisposable {
 
     protected abstract int getRenderDistance();
 
-    private boolean shouldStayLoaded(ChunkPos pos) {
-        return false;
-//		return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
+    protected boolean shouldStayLoaded(ChunkPos pos) {
+		return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
     }
 
     public boolean isAlwaysLoaded(ChunkPos pos) {
@@ -627,10 +632,10 @@ public abstract class World implements ServerDisposable {
     @ApiStatus.Internal
     public void dispose() {
         this.disposed = true;
-        this.executor.shutdownNow().clear();
+        this.executor.shutdown();
         try {
-            if (!this.executor.awaitTermination(15, TimeUnit.SECONDS))
-                throw new Error("World async executor failed to shutdown in time.");
+            if (!this.executor.awaitTermination(60, TimeUnit.SECONDS))
+                throw new RuntimeException("Chunk builders executor failed to shutdown in time.");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -757,8 +762,8 @@ public abstract class World implements ServerDisposable {
      * @return {@code true} if the chunk is a spawn chunk, {@code false} otherwise
      */
     public boolean isSpawnChunk(ChunkPos pos) {
-        int x = pos.x();
-        int z = pos.z();
+        int x = pos.x() * 16;
+        int z = pos.z() * 16;
 
         return this.spawnPoint.x - 1 <= x && this.spawnPoint.x + 1 >= x &&
                this.spawnPoint.z - 1 <= z && this.spawnPoint.z + 1 >= z;

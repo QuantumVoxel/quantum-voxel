@@ -1,6 +1,5 @@
 package com.ultreon.craft.resources;
 
-import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.craft.util.PollingExecutorService;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
-public class ReloadContext implements Disposable {
+public class ReloadContext {
     private final PollingExecutorService executor;
     private final List<CompletableFuture<?>> futures = new ArrayList<>();
     private final ResourceManager resourceManager;
@@ -38,7 +37,7 @@ public class ReloadContext implements Disposable {
         return futures.stream().allMatch(CompletableFuture::isDone);
     }
 
-    public void dispose() {
+    public void finish() {
         if (!isDone()) {
             throw new IllegalStateException("Cannot dispose when not done");
         }

@@ -416,7 +416,7 @@ public class ImGuiOverlay {
         ImGui.setNextWindowSize(400, 200, ImGuiCond.Once);
         ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
         if (ImGui.begin("Utils", ImGuiOverlay.getDefaultFlags())) {
-            ImGuiEx.slider("FOV", "GameFOV", (int) client.camera.fieldOfView, 10, 150, i -> client.camera.fieldOfView = i);
+            ImGuiEx.slider("FOV", "GameFOV", (int) client.camera.fov, 10, 150, i -> client.camera.fov = i);
         }
         ImGui.end();
     }

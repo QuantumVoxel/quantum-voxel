@@ -82,7 +82,7 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderBackground(Renderer renderer) {
-        if (this.client.world != null) this.renderTransparentBackground(renderer);
+        if (this.client.world != null && this.client.worldRenderer != null && this.client.renderWorld) this.renderTransparentBackground(renderer);
         else this.renderSolidBackground(renderer);
     }
 

@@ -55,7 +55,7 @@ public class LoadingOverlay implements StaticWidget {
 
     public void log(String message) {
         if (this.messages.size() == 3) this.messages.remove(2);
-        this.messages.addFirst(message);
+        this.messages.add(0, message);
     }
 
     public float getProgress() {

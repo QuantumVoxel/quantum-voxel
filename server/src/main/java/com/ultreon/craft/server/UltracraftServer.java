@@ -72,13 +72,18 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
     public static final long NANOSECONDS_PER_TICK = UltracraftServer.NANOSECONDS_PER_SECOND / UltracraftServer.TPS;
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("UltracraftServer");
+    public static final Logger LOGGER = LoggerFactory.getLogger("QuantumVoxelServer");
     @Deprecated(since = "0.1.0", forRemoval = true)
     public static final String NAMESPACE = "ultracraft";
-    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("Ultracraft"));
+    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static UltracraftServer instance;
     private final List<ServerDisposable> disposables = new ArrayList<>();
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+        thread.setName("QuantumVoxelServer");
+        return thread;
+    });
     private final Queue<Pair<ServerPlayer, Supplier<Packet<? extends ClientPacketHandler>>>> chunkNetworkQueue = new ArrayDeque<>();
     private final Map<UUID, ServerPlayer> players = new ConcurrentHashMap<>();
     protected Networker networker;
@@ -182,8 +187,8 @@ public abstract class UltracraftServer extends PollingExecutorService implements
      * Submits a function to the server thread, and waits for it to complete.
      *
      * @param func the callable to be executed.
+     * @param <T>  the return type of the callable.
      * @return the result of the callable.
-     * @param <T> the return type of the callable.
      */
     @CanIgnoreReturnValue
     public static <T> T invokeAndWait(@NotNull Callable<T> func) {
@@ -214,8 +219,8 @@ public abstract class UltracraftServer extends PollingExecutorService implements
      * Submits a function to the server thread, and returns a future.
      *
      * @param func the callable to be executed.
+     * @param <T>  the return type of the callable.
      * @return the future.
-     * @param <T> the return type of the callable.
      */
     @CanIgnoreReturnValue
     public static <T> @NotNull CompletableFuture<T> invoke(Callable<T> func) {
@@ -250,7 +255,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     public static boolean isOnServerThread() {
         UltracraftServer instance = UltracraftServer.instance;
         if (instance == null) throw new IllegalStateException("Server closed!");
-        return instance.thread.threadId() == Thread.currentThread().threadId();
+        return instance.thread.getId() == Thread.currentThread().getId();
     }
 
     @ApiStatus.Internal
@@ -351,9 +356,12 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         this.players.clear();
         this.scheduler.shutdownNow();
 
-        this.resourceManager.close();
-
-        this.close();
+        try {
+            this.resourceManager.close();
+            this.close();
+        } catch (Exception e) {
+            this.fatalCrash(e);
+        }
 
         // Clear the instance.
         UltracraftServer.instance = null;
@@ -388,36 +396,34 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         // Send event for server stopping.
         ServerLifecycleEvents.SERVER_STOPPING.factory().onServerStopping(this);
 
-        // Kick all the players and stop the connections.
-        for (ServerPlayer player : this.getPlayers()) {
-            player.kick("Server stopped");
-        }
+        kickAllPlayers();
 
         // Set running flag to make server stop.
         this.running = false;
 
         long startTime = System.currentTimeMillis();
         try {
-            if (!this.scheduler.awaitTermination(60, TimeUnit.SECONDS) && !this.scheduler.isTerminated()) {
+            this.scheduler.shutdown();
+            if (!this.scheduler.awaitTermination(60, TimeUnit.SECONDS) && !this.scheduler.isTerminated())
                 this.onTerminationFailed();
-            }
         } catch (ApplicationCrash crash) {
             this.crash(crash.getCrashLog());
-            throw new Error();
         } catch (Exception exc) {
             this.crash(exc);
-            throw new Error();
         }
 
         try {
-            this.thread.join(6000 - (System.currentTimeMillis() - startTime));
+            this.thread.join(60000);
         } catch (InterruptedException e) {
-            this.crash(new RuntimeException("Safe shutdown got interrupted."));
-            Runtime.getRuntime().halt(1);
+            this.fatalCrash(new RuntimeException("Safe shutdown got interrupted."));
         }
 
         // Shut down the parent executor service.
         super.shutdownNow();
+    }
+
+    protected void kickAllPlayers() {
+
     }
 
     public abstract void crash(CrashLog crashLog);
@@ -429,7 +435,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
         this.onlineTicks++;
 
         // Poll all the tasks in the queue.
-        this.profiler.section("taskPolling", this::poll);
+        this.profiler.section("taskPolling", this::pollAll);
 
         // Tick connections.
         this.profiler.section("connections", this.networker::tick);
@@ -516,8 +522,8 @@ public abstract class UltracraftServer extends PollingExecutorService implements
      * Defer a server disposable to be disposed when the server is closed.
      *
      * @param disposable the server disposable.
+     * @param <T>        the type of the server disposable.
      * @return the same server disposable.
-     * @param <T> the type of the server disposable.
      */
     public <T extends ServerDisposable> T disposeOnClose(T disposable) {
         this.disposables.add(disposable);
@@ -528,23 +534,20 @@ public abstract class UltracraftServer extends PollingExecutorService implements
      * Schedules a runnable to be executed after the specified delay.
      *
      * @param runnable the runnable.
-     * @param time the delay.
-     * @param unit the time unit of the delay.
+     * @param time     the delay.
+     * @param unit     the time unit of the delay.
      * @return the scheduled future.
      */
     public ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit unit) {
         return this.scheduler.schedule(runnable, time, unit);
     }
 
-    @Override
     public void close() {
         for (ServerDisposable disposable : this.disposables) {
             disposable.dispose();
         }
 
         this.world.dispose();
-
-        this.scheduler.shutdown();
 
         this.recipeManager.unload();
         this.cachedPlayers.invalidateAll();
@@ -701,7 +704,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
      * Sends a chunk to all players that are within the render distance.
      *
      * @param globalPos the global position of the chunk.
-     * @param chunk the chunk to send.
+     * @param chunk     the chunk to send.
      * @throws IOException if an I/O error occurs.
      */
     public void sendChunk(ChunkPos globalPos, Chunk chunk) throws IOException {
@@ -726,7 +729,7 @@ public abstract class UltracraftServer extends PollingExecutorService implements
     /**
      * Called when the player has disconnected from the server.
      *
-     * @param player the player that disconnected.
+     * @param player  the player that disconnected.
      * @param message the disconnect message.
      */
     @ApiStatus.Internal

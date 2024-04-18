@@ -31,7 +31,6 @@ import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.datetime.v0.Duration;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class CommandData {
     
     private final Reference2BooleanMap<CommandFlag> flags = new Reference2BooleanArrayMap<>();
     private final Map<CommandSpec, Method> methodMap = new HashMap<>();
-    private final Map<CommandSpec, @Nullable String> permissionMap = new HashMap<>();
+    private final Map<CommandSpec, String> permissionMap = new HashMap<>();
     public CommandData(Command executor) {
         this.executor = executor;
     }
@@ -258,7 +257,7 @@ public class CommandData {
     }
 
     private static Entity readEntity(CommandReader ctx) throws CommandParseException {
-        EntityBaseSelector<@NotNull Entity> parsed = new EntityBaseSelector<>(ctx.getSender(), Entity.class, ctx.readString());
+        EntityBaseSelector<Entity> parsed = new EntityBaseSelector<>(ctx.getSender(), Entity.class, ctx.readString());
         var error = parsed.getError();
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
@@ -269,7 +268,7 @@ public class CommandData {
     }
 
     private static LivingEntity readLivingEntity(CommandReader ctx) throws CommandParseException {
-        EntityBaseSelector<@NotNull LivingEntity> parsed = new EntityBaseSelector<>(ctx.getSender(), LivingEntity.class, ctx.readString());
+        EntityBaseSelector<LivingEntity> parsed = new EntityBaseSelector<>(ctx.getSender(), LivingEntity.class, ctx.readString());
         var error = parsed.getError();
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
@@ -439,7 +438,7 @@ public class CommandData {
     private static Gamemode readGamemode(CommandReader ctx) throws CommandParseException {
         return switch (ctx.readString()) {
             case "survival" -> Gamemode.SURVIVAL;
-            case "mini_game" -> Gamemode.MINI_GAME;
+            case "mini_game" -> Gamemode.ADVENTUROUS;
             case "builder" -> Gamemode.BUILDER;
             case "builder_plus" -> Gamemode.BUILDER_PLUS;
             case "spectator" -> Gamemode.SPECTATOR;
@@ -630,7 +629,7 @@ public class CommandData {
         return AnyPlayerBaseSelector.tabComplete(sender, commandCtx, ctx.readString());
     }
 
-    private List<@Nullable String> completeDuration(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
+    private List<String> completeDuration(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
         var currentArgument = ctx.readString();
         List<String> list = new ArrayList<>();
         list.add(currentArgument);
@@ -639,12 +638,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.getLast().length() > 2) {
+            if (parts.get(parts.size() - 1).length() > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add(":");
             }
-        } else if (!parts.getLast().isEmpty()) {
+        } else if (!parts.get(parts.size() - 1).isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -661,9 +660,9 @@ public class CommandData {
         if (parts.size() > 3) {
             return List.of();
         }
-        if (parts.getLast().length() > 2) {
+        if (parts.get(parts.size() - 1).length() > 2) {
             return List.of("$currentArgument:");
-        } else if (!parts.getLast().isEmpty()) {
+        } else if (!parts.get(parts.size() - 1).isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -681,12 +680,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.getLast().length()     > 2) {
+            if (parts.get(parts.size() - 1).length()     > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add("-");
             }
-        } else if (!parts.getLast().isEmpty()) {
+        } else if (!parts.get(parts.size() - 1).isEmpty()) {
             list.add("-");
         }
         for (var i : new Range(0, 9)) {
@@ -705,12 +704,12 @@ public class CommandData {
                 return List.of(" ");
             }
             if (parts.size() > 1) {
-                if (parts.getLast().length() > 2) {
+                if (parts.get(parts.size() - 1).length() > 2) {
                     return List.of("$date:");
-                } else if (!parts.getLast().isEmpty()) {
+                } else if (!parts.get(parts.size() - 1).isEmpty()) {
                     list.add("-");
                 }
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add("-");
             }
             for (var i : new Range(0, 9)) {
@@ -724,9 +723,9 @@ public class CommandData {
             if (parts.size() > 3) {
                 return List.of();
             }
-            if (parts.getLast().length()     > 2) {
+            if (parts.get(parts.size() - 1).length()     > 2) {
                 return List.of("$time:");
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add(":");
             }
             for (var i : new Range(0, 9)) {

@@ -71,6 +71,6 @@ public final class PartialMergeData {
     }
 
     public int packetId() {
-        return parts.getFirst().packetId();
+        return parts.get(0).packetId();
     }
 }

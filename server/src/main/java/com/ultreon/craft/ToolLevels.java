@@ -31,12 +31,12 @@ public class ToolLevels {
     }
 
     public static ToolLevel registerFirst(ToolLevel toolLevel) {
-        levels.addFirst(toolLevel);
+        levels.add(0, toolLevel);
         return toolLevel;
     }
 
     public static ToolLevel registerLast(ToolLevel toolLevel) {
-        levels.addLast(toolLevel);
+        levels.add(toolLevel);
         return toolLevel;
     }
 
