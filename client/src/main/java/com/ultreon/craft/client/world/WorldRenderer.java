@@ -88,7 +88,7 @@ public final class WorldRenderer implements DisposableContainer {
             return new ChunkMesh();
         }
     };
-    private final Renderable cursor;
+    private Renderable cursor;
     private boolean disposed;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
@@ -98,6 +98,7 @@ public final class WorldRenderer implements DisposableContainer {
     private final List<Disposable> disposables = new ArrayList<>();
     private final MeshBuilder meshBuilder = new MeshBuilder();
     private long lastChunkBuild;
+    private final List<Disposable> disposesNextFrame = new ArrayList<>();
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;
@@ -120,9 +121,6 @@ public final class WorldRenderer implements DisposableContainer {
         MeshMaterial result = createChunkOutline();
         this.sectionBorderMaterial = result.material();
         this.sectionBorder = result.mesh();
-
-        // Block outline.
-        this.cursor = createBlockOutline();
 
         // Breaking animation meshes.
         this.breakingTex = this.client.getTextureManager().getTexture(id("textures/break_stages.png"));
@@ -168,7 +166,7 @@ public final class WorldRenderer implements DisposableContainer {
 
     @NotNull
     private MeshMaterial createChunkOutline() {
-        Mesh mesh = this.deferDispose(WorldRenderer.buildOutlineBox(1 / 16f, CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE));
+        Mesh mesh = this.deferDispose(WorldRenderer.buildOutlineBox(2 / 16f, CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE));
 
         Material material = new Material();
         material.set(ColorAttribute.createDiffuse(0, 0f, 0f, 0.25f));
@@ -177,8 +175,8 @@ public final class WorldRenderer implements DisposableContainer {
         return new MeshMaterial(mesh, material);
     }
 
-    private Renderable createBlockOutline() {
-        Mesh mesh = this.deferDispose(WorldRenderer.buildOutlineBox(0.005f));
+    private Renderable createBlockOutline(float x, float y, float z, float sizeX, float sizeY, float sizeZ) {
+        Mesh mesh = this.deferDisposeNextFrame(WorldRenderer.buildOutlineBox(0.01f, sizeX, sizeY, sizeZ));
 
         int numIndices = mesh.getNumIndices();
         int numVertices = mesh.getNumVertices();
@@ -192,7 +190,13 @@ public final class WorldRenderer implements DisposableContainer {
         material.set(new BlendingAttribute(1.0f));
         material.set(new DepthTestAttribute(false));
         renderable.material = material;
+        renderable.worldTransform.setToTranslation(x, y, z);
         return renderable;
+    }
+
+    private Mesh deferDisposeNextFrame(Mesh mesh) {
+        this.disposesNextFrame.add(mesh);
+        return mesh;
     }
 
     public Environment getEnvironment() {
@@ -240,6 +244,9 @@ public final class WorldRenderer implements DisposableContainer {
         var player = this.client.player;
         if (player == null) return;
 
+        this.disposesNextFrame.forEach(Disposable::dispose);
+        this.disposesNextFrame.clear();
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.F7)) { // TODO: DEBUG
             this.pool.flush();
         }
@@ -262,11 +269,22 @@ public final class WorldRenderer implements DisposableContainer {
         HitResult gameCursor = this.client.cursor;
         if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             UltracraftClient.PROFILER.section("cursor", () -> {
+                // Block outline.
                 Vec3i pos = gameCursor.getPos();
                 Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
+                var boundingBox = gameCursor.block.getBoundingBox(0, 0, 0, gameCursor.blockMeta);
+                renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
+                this.cursor = createBlockOutline(
+                        renderOffsetC.x,
+                        renderOffsetC.y,
+                        renderOffsetC.z,
+                        (float) (boundingBox.max.x - boundingBox.min.x),
+                        (float) (boundingBox.max.y - boundingBox.min.y),
+                        (float) (boundingBox.max.z - boundingBox.min.z)
+                );
+
 
                 this.cursor.meshPart.id = OUTLINE_CURSOR_ID;
-                this.cursor.worldTransform.setToTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
                 output.add(verifyOutput(this.cursor));
             });
         }
@@ -292,7 +310,7 @@ public final class WorldRenderer implements DisposableContainer {
     private void collectChunks(Array<Renderable> output, Pool<Renderable> renderablePool, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
         for (var chunk : chunks) {
             if (positions.contains(chunk.getPos(), false)) {
-                UltracraftClient.LOGGER.warn("Duplicate chunk: " + chunk.getPos());
+                UltracraftClient.LOGGER.warn("Duplicate chunk: {}", chunk.getPos());
                 continue;
             }
 
@@ -443,7 +461,7 @@ public final class WorldRenderer implements DisposableContainer {
                 }
                 model = renderer.createModel(entity);
                 if (model == null) {
-                    UltracraftClient.LOGGER.warn("Failed to render entity " + entity.getId() + " because it's model instance is still null");
+                    UltracraftClient.LOGGER.warn("Failed to render entity {} because it's model instance is still null", entity.getId());
                     return;
                 }
                 this.modelInstances.put(entity.getId(), model);
@@ -454,7 +472,7 @@ public final class WorldRenderer implements DisposableContainer {
             renderer.animate(instance, context);
             renderer.render(instance, context);
         } catch (Exception e) {
-            UltracraftClient.LOGGER.error("Failed to render entity " + entity.getId(), e);
+            UltracraftClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);
             CrashLog crashLog = new CrashLog("Error rendering entity " + entity.getId(), new Exception());
             CrashCategory category = new CrashCategory("Entity", e);
             category.add("Entity ID", entity.getId());
@@ -492,14 +510,16 @@ public final class WorldRenderer implements DisposableContainer {
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-thickness, -thickness, depth - thickness), new Vector3(width + thickness, thickness, depth + thickness)));
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-thickness, height - thickness, depth - thickness), new Vector3(width + thickness, height + thickness, depth + thickness)));
 
+        // Bottom face
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-thickness, -thickness, -thickness), new Vector3(thickness, height + thickness, thickness)));
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(width - thickness, -thickness, -thickness), new Vector3(width + thickness, height + thickness, thickness)));
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(width - thickness, -thickness, depth - thickness), new Vector3(width + thickness, height + thickness, depth + thickness)));
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-thickness, -thickness, depth - thickness), new Vector3(thickness, height + thickness, depth + thickness)));
 
+        // Sides
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-thickness, -thickness, -thickness), new Vector3(thickness, thickness, depth + thickness)));
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(width - thickness, -thickness, -thickness), new Vector3(width + thickness, thickness, depth + thickness)));
-        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(width - thickness, height - thickness, -thickness), new Vector3(width + thickness, depth + thickness, depth + thickness)));
+        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(width - thickness, height - thickness, -thickness), new Vector3(width + thickness, height + thickness, depth + thickness)));
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-thickness, height - thickness, -thickness), new Vector3(thickness, height + thickness, depth + thickness)));
     }
 
