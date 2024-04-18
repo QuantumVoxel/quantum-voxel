@@ -15,22 +15,14 @@ public class GiveCommand extends Command {
     }
 
     @DefineCommand("<player> <item>")
-    public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Item item) {
-        if (sender instanceof Player player) {
-            player.inventory.addItem(item.defaultStack());
-            return successMessage("Gave " + player.getName() + " " + item.getTranslation().getText());
-        }
-
-        return needPlayer();
+    public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Player player, Item item) {
+        player.inventory.addItem(item.defaultStack());
+        return successMessage("Gave " + player.getName() + " " + item.getTranslation().getText());
     }
 
     @DefineCommand("<player> <item> <int:count>")
-    public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Item item, int count) {
-        if (sender instanceof Player player) {
-            player.inventory.addItem(new ItemStack(item, count));
-            return successMessage("Gave " + player.getName() + " " + count + "x " + item.getTranslation().getText());
-        }
-
-        return needPlayer();
+    public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Player player, Item item, Integer count) {
+        player.inventory.addItem(new ItemStack(item, count));
+        return successMessage("Gave " + player.getName() + " " + count + "x " + item.getTranslation().getText());
     }
 }
