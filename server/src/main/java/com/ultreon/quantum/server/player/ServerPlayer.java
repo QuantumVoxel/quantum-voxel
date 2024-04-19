@@ -601,6 +601,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         this.inventory.addItem(Items.WOODEN_SHOVEL.defaultStack());
         this.inventory.addItem(new ItemStack(Items.CRATE, 32));
         this.inventory.addItem(new ItemStack(Items.BLAST_FURNACE, 32));
+        this.inventory.addItem(new ItemStack(Items.BACON, 64));
     }
 
     /**

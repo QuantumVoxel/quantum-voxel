@@ -131,5 +131,6 @@
   "quantum.damageSource.void": "%s got consumed by the void",
   "quantum.damageSource.void.player": "%1$s was consumed by the void due to %2$s",
   "quantum.damageSource.none": "%s just died out of thin air",
-  "quantum.damageSource.none.player": "%1$s just died out of thin air due to %2$s"
+  "quantum.damageSource.none.player": "%1$s just died out of thin air due to %2$s",
+  "quantum.damageSource.hunger": "%1$s was starved to death"
 }

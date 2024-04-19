@@ -18,13 +18,13 @@ public class HotbarOverlay extends Overlay {
     protected void render(Renderer renderer, float deltaTime) {
         Player player = this.client.player;
         if (player == null) return;
+        if (player.isSpectator()) return;
 
         int x = player.selected * 20;
         ItemStack selectedItem = player.getSelectedItem();
         Identifier key = Registries.ITEM.getId(selectedItem.getItem());
 
         var widgetsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/widgets.png"));
-        var iconsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/icons.png"));
         renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90, leftY - 43, 180, 41, 0, 42);
         renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90 + x, leftY - 26, 20, 24, 0, 83);
 

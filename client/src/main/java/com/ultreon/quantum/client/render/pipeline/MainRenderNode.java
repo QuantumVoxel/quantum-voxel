@@ -47,8 +47,12 @@ public class MainRenderNode extends RenderNode {
         this.blurScale = blurScale;
 
         if (blurScale > 0f) {
-            this.client.renderer.blurred(blurScale, Config.blurRadius * blurScale, true, 1, () -> this.drawDiffuse(diffuseTexture));
+            this.client.renderer.blurred(blurScale, Config.blurRadius * blurScale, true, 1, () -> {
+                this.drawDiffuse(skyboxTexture);
+                this.drawDiffuse(diffuseTexture);
+            });
         } else {
+            this.drawDiffuse(skyboxTexture);
             this.drawDiffuse(diffuseTexture);
         }
         this.client.renderer.end();
@@ -58,8 +62,6 @@ public class MainRenderNode extends RenderNode {
 
         if (ImGuiOverlay.SHOW_RENDER_PIPELINE.get()) {
             this.client.renderer.begin();
-            this.client.spriteBatch.draw(depthMap, (float) (3 * Gdx.graphics.getWidth()) / 4, 0, (float) Gdx.graphics.getWidth() / 4, (float) Gdx.graphics.getHeight() / 4);
-            this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(diffuseTexture, (float) (2 * Gdx.graphics.getWidth()) / 4, 0, (float) Gdx.graphics.getWidth() / 4, (float) Gdx.graphics.getHeight() / 4);
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(skyboxTexture, (float) Gdx.graphics.getWidth() / 4, 0, (float) Gdx.graphics.getWidth() / 4, (float) Gdx.graphics.getHeight() / 4);

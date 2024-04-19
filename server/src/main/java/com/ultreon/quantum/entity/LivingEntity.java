@@ -3,6 +3,7 @@ package com.ultreon.quantum.entity;
 import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.events.EntityEvents;
 import com.ultreon.quantum.events.api.ValueEventResult;
+import com.ultreon.quantum.item.food.AppliedEffect;
 import com.ultreon.quantum.server.util.Utils;
 import com.ultreon.quantum.world.ChunkPos;
 import com.ultreon.quantum.world.SoundEvent;
@@ -12,6 +13,9 @@ import com.ultreon.libs.commons.v0.Mth;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.include.com.google.common.collect.Lists;
+
+import java.util.List;
 
 public class LivingEntity extends Entity {
     public boolean walking;
@@ -30,6 +34,7 @@ public class LivingEntity extends Entity {
     protected float lastDamage;
     protected @Nullable DamageSource lastDamageSource;
     private int age;
+    private final List<AppliedEffect> appliedEffects = Lists.newArrayList();
 
     public LivingEntity(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -81,6 +86,8 @@ public class LivingEntity extends Entity {
         // If the entity is dead, do nothing
         if (this.isDead) return;
 
+        age++;
+
         // Handle jumping logic
         if (this.jumping && this.onGround) {
             this.jump();
@@ -100,7 +107,7 @@ public class LivingEntity extends Entity {
         if (this.health <= 0) {
             this.health = 0;
 
-            // Trigger entity death event if not already dead and event is not canceled
+            // Trigger entity death event if not already dead and the event is not canceled
             if (!this.isDead && !EntityEvents.DEATH.factory().onEntityDeath(this, DamageSource.NOTHING).isCanceled()) {
                 this.isDead = true;
                 this.onDeath(DamageSource.NOTHING);
@@ -158,7 +165,7 @@ public class LivingEntity extends Entity {
      */
     public final void hurt(float damage, DamageSource source) {
         // Check if the entity is already dead, has no health, or has temporary invincibility
-        if (this.isDead() || this.getHealth() <= 0 || this.isInvincible() || (this.damageImmunity > 0 && source.byPassInvincibility()))
+        if (this.isDead() || this.getHealth() <= 0 || (this.isInvincible() && !source.byPassInvincibility()) || (this.damageImmunity > 0))
             return;
 
         // Trigger entity damage event
@@ -251,7 +258,7 @@ public class LivingEntity extends Entity {
 
         this.health = data.getFloat("health", this.health);
         this.maxHeath = data.getFloat("maxHealth", this.maxHeath);
-        this.damageImmunity = data.getInt("damageImmuhghnity", this.damageImmunity);
+        this.damageImmunity = data.getInt("damageImmunity", this.damageImmunity);
         this.isDead = data.getBoolean("isDead", this.isDead);
         this.jumpVel = data.getFloat("jumpVelocity", this.jumpVel);
         this.jumping = data.getBoolean("jumping", this.jumping);
@@ -319,7 +326,11 @@ public class LivingEntity extends Entity {
         return age;
     }
 
-    public DamageSource getLastDamageSource() {
+    public @Nullable DamageSource getLastDamageSource() {
         return lastDamageSource;
+    }
+
+    public void applyEffect(AppliedEffect appliedEffect) {
+        this.appliedEffects.add(appliedEffect);
     }
 }

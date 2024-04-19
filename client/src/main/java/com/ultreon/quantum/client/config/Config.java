@@ -135,4 +135,7 @@ public class Config extends CraftyConfig {
     @ConfigEntry(path = "camera.cameraSensitivity", comment = "The camera sensitivity.")
     @Ranged(min = 0, max = 2)
     public static float cameraSensitivity = 0.5F;
+
+    @ConfigEntry(path = "camera.showSunAndMoon", comment = "Whether the sun and moon are shown in the sky.")
+    public static boolean showSunAndMoon = true;
 }

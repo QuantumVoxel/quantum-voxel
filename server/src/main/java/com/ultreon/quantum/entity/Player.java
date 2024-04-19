@@ -2,6 +2,7 @@ package com.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
 import com.ultreon.quantum.CommonConstants;
+import com.ultreon.quantum.entity.player.FoodStatus;
 import com.ultreon.quantum.entity.player.PlayerAbilities;
 import com.ultreon.quantum.events.ItemEvents;
 import com.ultreon.quantum.events.MenuEvents;
@@ -33,6 +34,7 @@ import java.util.Objects;
 public abstract class Player extends LivingEntity {
     public int selected;
     public Inventory inventory;
+    public int regenFlashTimer = -1;
     private boolean running = false;
     private float walkingSpeed = .09F;
     private float flyingSpeed = 0.5F;
@@ -45,6 +47,7 @@ public abstract class Player extends LivingEntity {
     private ItemStack cursor = new ItemStack();
     private final String name;
     private Gamemode gamemode = Gamemode.SURVIVAL;
+    private final FoodStatus foodStatus = new FoodStatus(this);
 
     protected Player(EntityType<? extends Player> entityType, World world, String name) {
         super(entityType, world);
@@ -95,7 +98,27 @@ public abstract class Player extends LivingEntity {
         this.x = Mth.clamp(this.x, -30000000, 30000000);
         this.z = Mth.clamp(this.z, -30000000, 30000000);
 
+        if (health > oldHealth) regenFlashTimer = 4;
+        if (regenFlashTimer >= 0) regenFlashTimer--;
+
         super.tick();
+
+        this.foodStatus.tick();
+
+        if (this.isHurt()) {
+            this.regenerate();
+        }
+    }
+
+    private void regenerate() {
+        if (foodStatus.exhaust(0.1f)) {
+            this.oldHealth = this.health;
+            this.health = Mth.clamp(this.health + 1, 0, this.getMaxHealth());
+        }
+    }
+
+    private boolean isHurt() {
+        return this.health < this.getMaxHealth();
     }
 
     @Override
@@ -420,5 +443,13 @@ public abstract class Player extends LivingEntity {
         if (this.openMenu == menu) {
             this.closeMenu();
         }
+    }
+
+    public FoodStatus getFoodStatus() {
+        return this.foodStatus;
+    }
+
+    public boolean isSwimming() {
+        return this.isInWater() && (this.x != this.ox || this.z != this.oz || this.y > this.oy);
     }
 }

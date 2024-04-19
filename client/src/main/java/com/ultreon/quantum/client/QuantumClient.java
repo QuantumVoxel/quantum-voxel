@@ -72,10 +72,7 @@ import com.ultreon.quantum.client.network.system.ClientTcpConnection;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.player.SkinManager;
 import com.ultreon.quantum.client.registry.*;
-import com.ultreon.quantum.client.render.pipeline.CollectNode;
-import com.ultreon.quantum.client.render.pipeline.MainRenderNode;
-import com.ultreon.quantum.client.render.pipeline.RenderPipeline;
-import com.ultreon.quantum.client.render.pipeline.WorldDiffuseNode;
+import com.ultreon.quantum.client.render.pipeline.*;
 import com.ultreon.quantum.client.render.shader.GameShaderProvider;
 import com.ultreon.quantum.network.MemoryConnectionContext;
 import com.ultreon.quantum.network.MemoryNetworker;
@@ -454,6 +451,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //                .node(new SkyboxNode())
                 .node(new CollectNode())
                 .node(new WorldDiffuseNode())
+                .node(new SkyboxNode())
                 .node(new MainRenderNode()));
 
         // Create a white pixel for the shape drawer

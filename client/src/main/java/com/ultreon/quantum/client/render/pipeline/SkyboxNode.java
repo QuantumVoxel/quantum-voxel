@@ -1,89 +1,63 @@
 package com.ultreon.quantum.client.render.pipeline;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.ultreon.quantum.client.init.ShaderPrograms;
+import com.google.common.base.Supplier;
+import com.ultreon.libs.commons.v0.vector.Vec3d;
+import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.input.GameCamera;
-import com.ultreon.quantum.util.Identifier;
-import org.checkerframework.common.reflection.qual.NewInstance;
+import com.ultreon.quantum.client.player.LocalPlayer;
+import com.ultreon.quantum.client.render.ShaderContext;
+import com.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import com.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
+import com.ultreon.quantum.client.world.ClientWorld;
+import com.ultreon.quantum.client.world.WorldRenderer;
 
-import java.util.function.Supplier;
+public class SkyboxNode extends RenderPipeline.RenderNode {
+    private final Supplier<WorldShaderProvider> shaderProvider = Shaders.WORLD;
+    private Shader shader;
 
-public class SkyboxNode extends WorldRenderNode {
-    public static final float SIZE = 1.0f;
-    private final Mesh mesh;
-    private final Supplier<ShaderProgram> shader;
-    private Renderable renderable;
-
-    public SkyboxNode() {
-        super();
-
-        MeshBuilder skybox = new MeshBuilder();
-        skybox.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorUnpacked, GL20.GL_TRIANGLES);
-        BoxShapeBuilder.build(skybox, SIZE*4, SIZE*4, SIZE*4, -SIZE, -SIZE, -SIZE);
-
-        this.mesh = skybox.end();
-
-        this.shader = getShaderProgram();
-
-        Renderable renderable = new Renderable();
-        renderable.material = new Material();
-        renderable.meshPart.mesh = this.mesh;
-        renderable.meshPart.size = this.mesh.getNumIndices() > 0 ? this.mesh.getNumIndices() : this.mesh.getNumVertices();
-        renderable.meshPart.offset = 0;
-        renderable.worldTransform.setToTranslationAndScaling(0, 0, 0, 1, 1, 1);
-        renderable.userData = new Identifier("skybox");
-        renderable.environment = this.client.getEnvironment();
-//        renderable.shader = Shaders.SKYBOX.getShader(renderable);
-
-        this.renderable = renderable;
+    protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
+        for (Renderable renderable : input) {
+            renderable.environment = this.client.getEnvironment();
+            renderable.shader = null;
+            this.shader = shaderProvider.getShader(renderable);
+            if (this.shader == null) throw new IllegalStateException("Shader not found");
+            renderable.shader = this.shader;
+            modelBatch.render(renderable);
+        }
     }
 
-    private static Supplier<ShaderProgram> getShaderProgram() {
-//        @Language("GLSL")
-//        String vertexShader = """
-//                attribute vec4 a_position;
-//                varying vec3 v_position;
-//                void main() {
-//                  v_position = a_position.xyz;
-//                  gl_Position = a_position;
-//                }""";
-//
-//        @Language("GLSL")
-//        String fragmentShader = """
-//                #version 130
-//                varying vec3 v_position;
-//                void main() {
-//                  vec3 color = normalize(v_position);
-//                  gl_FragColor = vec4(color, 1.0);
-//                }""";
+    public void renderWorld(ModelBatch batch) {
+        ClientWorld world = this.client.world;
+        WorldRenderer worldRenderer = this.client.worldRenderer;
+        LocalPlayer localPlayer = this.client.player;
 
-        return ShaderPrograms.SKYBOX;
+        if (world != null && worldRenderer != null && this.client.renderWorld && localPlayer != null) {
+            this.renderWorldOnce(worldRenderer, world, localPlayer.getPosition(client.partialTick), batch);
+        }
     }
 
-    @NewInstance
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
-        Gdx.gl.glDepthMask(false);
-        modelBatch.render(renderable);
-        Gdx.gl.glDepthMask(true);
-
+        WorldShaderProvider shaderProvider = this.shaderProvider.get();
+        ShaderContext.set(shaderProvider);
+        this.renderWorld(modelBatch);
         textures.put("skybox", this.getFrameBuffer().getColorBufferTexture());
         return input;
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
+    public boolean requiresModel() {
+        return true;
+    }
 
-        this.mesh.dispose();
+    private void renderWorldOnce(WorldRenderer worldRenderer, ClientWorld world, Vec3d position, ModelBatch batch) {
+        batch.render(worldRenderer::collectPre, worldRenderer.getEnvironment());
     }
 }

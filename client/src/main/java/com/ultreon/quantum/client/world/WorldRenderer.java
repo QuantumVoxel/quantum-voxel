@@ -10,9 +10,9 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -42,7 +42,6 @@ import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.Player;
-import com.ultreon.quantum.util.Axis;
 import com.ultreon.quantum.util.HitResult;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.quantum.world.BlockPos;
@@ -54,6 +53,7 @@ import com.ultreon.libs.commons.v0.vector.Vec3f;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,6 +92,8 @@ public final class WorldRenderer implements DisposableContainer {
         }
     };
     private Renderable cursor;
+    private Renderable sun;
+    private Renderable moon;
     private boolean disposed;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
@@ -119,6 +121,32 @@ public final class WorldRenderer implements DisposableContainer {
 //        this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         this.transparentMaterial.set(new DepthTestAttribute(GL20.GL_DEPTH_FUNC));
 //        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.02f));
+
+        // Sun and moon
+        this.sun = new Renderable();
+        this.moon = new Renderable();
+
+        this.sun.meshPart.mesh = createSun();
+        this.moon.meshPart.mesh = createMoon();
+
+        this.sun.meshPart.size = this.sun.meshPart.mesh.getNumIndices() > 0 ? this.sun.meshPart.mesh.getNumIndices() : this.sun.meshPart.mesh.getNumVertices();
+        this.moon.meshPart.size = this.moon.meshPart.mesh.getNumIndices() > 0 ? this.moon.meshPart.mesh.getNumIndices() : this.moon.meshPart.mesh.getNumVertices();
+
+        Material sunmat = new Material();
+        sunmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/sun.png"))));
+        sunmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/sun.png"))));
+        sunmat.set(new DepthTestAttribute(GL20.GL_LEQUAL));
+        sunmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        sunmat.set(IntAttribute.createCullFace(GL20.GL_FRONT));
+        this.sun.material = sunmat;
+
+        Material moonmat = new Material();
+        moonmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/moon.png"))));
+        moonmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/moon.png"))));
+        moonmat.set(new DepthTestAttribute(GL20.GL_LEQUAL));
+        moonmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        moonmat.set(IntAttribute.createCullFace(GL20.GL_FRONT));
+        this.moon.material = moonmat;
 
         // Chunk border outline
         MeshMaterial result = createChunkOutline();
@@ -165,6 +193,34 @@ public final class WorldRenderer implements DisposableContainer {
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
         this.environment.set(new ColorAttribute(ColorAttribute.Specular, 1, 1, 1, 1f));
         this.environment.set(new CubemapAttribute(CubemapAttribute.EnvironmentMap, cubemap));
+    }
+
+    private Mesh createSun() {
+        MeshBuilder meshBuilder = new MeshBuilder();
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+
+        meshBuilder.rect(
+                new VertexInfo().setPos(-5, -5, 20).setNor(0, 0, -1).setUV(0, 0),
+                new VertexInfo().setPos(-5, 5, 20).setNor(0, 0, -1).setUV(0, 1),
+                new VertexInfo().setPos(5, 5, 20).setNor(0, 0, -1).setUV(1, 1),
+                new VertexInfo().setPos(5, -5, 20).setNor(0, 0, -1).setUV(1, 0)
+        );
+
+        return meshBuilder.end();
+    }
+
+    private Mesh createMoon() {
+        MeshBuilder meshBuilder = new MeshBuilder();
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+
+        meshBuilder.rect(
+                new VertexInfo().setPos(-5, -5, -20).setNor(0, 0, 1).setUV(0, 0),
+                new VertexInfo().setPos(-5, 5, -20).setNor(0, 0, 1).setUV(0, 1),
+                new VertexInfo().setPos(5, 5, -20).setNor(0, 0, 1).setUV(1, 1),
+                new VertexInfo().setPos(5, -5, -20).setNor(0, 0, 1).setUV(1, 0)
+        );
+
+        return meshBuilder.end();
     }
 
     @NotNull
@@ -244,6 +300,10 @@ public final class WorldRenderer implements DisposableContainer {
             throw new IllegalStateException("Should only be called on the main thread!");
     }
 
+    public void collectPre(final Array<Renderable> output, final Pool<Renderable> renderablePool) {
+        QuantumClient.PROFILER.section("environment", () -> renderSunAndMoon(output, renderablePool));
+    }
+
     public void collect(final Array<Renderable> output, final Pool<Renderable> renderablePool) {
         var player = this.client.player;
         if (player == null) return;
@@ -309,6 +369,50 @@ public final class WorldRenderer implements DisposableContainer {
                 });
             }
         });
+    }
+
+    private void renderSunAndMoon(Array<Renderable> output, Pool<Renderable> renderablePool) {
+        if (!Config.showSunAndMoon) return;
+        material.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
+        var world = this.world;
+        if (world == null) return;
+
+        int daytime = world.getDaytime();
+
+        // Sun angle
+        float sunAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);
+
+        // Moon on the opposite side
+        float moonAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);
+
+        Material sunmat = new Material();
+        sunmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
+//        sunmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
+        sunmat.set(new DepthTestAttribute(GL_LEQUAL, true));
+        sunmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        sunmat.set(IntAttribute.createCullFace(0));
+        sunmat.set(FogAttribute.createFog(1, 1, 1));
+        this.sun.material = sunmat;
+
+        Material moonmat = new Material();
+        moonmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
+//        moonmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
+        moonmat.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
+        moonmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        moonmat.set(IntAttribute.createCullFace(0));
+        this.moon.material = moonmat;
+
+        this.sun.environment = new Environment();
+        this.moon.environment = new Environment();
+
+        this.sun.meshPart.primitiveType = GL_TRIANGLES;
+        this.moon.meshPart.primitiveType = GL_TRIANGLES;
+
+        this.sun.worldTransform.setToRotation(Vector3.X, sunAngle * MathUtils.radDeg - 180);
+        this.moon.worldTransform.setToRotation(Vector3.X, (moonAngle * MathUtils.radDeg) - 180);
+
+        output.add(verifyOutput(this.sun));
+        output.add(verifyOutput(this.moon));
     }
 
     private void collectChunks(Array<Renderable> output, Pool<Renderable> renderablePool, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {

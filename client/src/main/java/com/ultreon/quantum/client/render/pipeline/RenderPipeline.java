@@ -17,6 +17,7 @@ import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.input.GameCamera;
 import com.ultreon.quantum.client.world.ClientWorld;
 import com.ultreon.quantum.debug.ValueTracker;
+import com.ultreon.quantum.util.Color;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -46,11 +47,8 @@ public class RenderPipeline implements Disposable {
     @SuppressWarnings("GDXJavaFlushInsideLoop") // We need to flush before the next node.
     public void render(ModelBatch modelBatch) {
         ClientWorld world = QuantumClient.get().world;
-        if (world != null) {
-            ScreenUtils.clear(world.getSkyColor().toGdx(), true);
-        } else {
-            ScreenUtils.clear(0F, 0F, 0F, 1F, true);
-        }
+        if (world != null) ScreenUtils.clear(world.getSkyColor().toGdx(), true);
+        else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
 
         ValueTracker.resetObtainRequests();
         ValueTracker.resetFlushed();
@@ -80,7 +78,7 @@ public class RenderPipeline implements Disposable {
     private Array<Renderable> modelRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures) {
         FrameBuffer frameBuffer = node.getFrameBuffer();
         frameBuffer.begin();
-        gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        ScreenUtils.clear(Color.TRANSPARENT.toGdx(), true);
 
         modelBatch.begin(this.camera);
         node.textureBinder.begin();
@@ -102,7 +100,7 @@ public class RenderPipeline implements Disposable {
     private Array<Renderable> plainRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures) {
         FrameBuffer frameBuffer = node.getFrameBuffer();
         frameBuffer.begin();
-        gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        ScreenUtils.clear(Color.TRANSPARENT.toGdx(), true);
 
         node.textureBinder.begin();
         node.time += Gdx.graphics.getDeltaTime();
@@ -152,7 +150,7 @@ public class RenderPipeline implements Disposable {
         private FrameBuffer fbo = new FrameBuffer(this.getFormat(), Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         protected final QuantumClient client = QuantumClient.get();
 
-        private Pixmap.Format getFormat() {
+        protected Pixmap.Format getFormat() {
             return Pixmap.Format.RGBA8888;
         }
 

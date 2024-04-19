@@ -1,5 +1,7 @@
 package com.ultreon.quantum.item;
 
+import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.item.food.FoodData;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Identifier;
@@ -12,12 +14,25 @@ import java.util.List;
 
 public class Item {
     private final int maxStackSize;
+    private final FoodData food;
 
     public Item(Properties properties) {
         this.maxStackSize = properties.maxStackSize;
+        this.food = properties.food;
     }
 
     public UseResult use(UseItemContext useItemContext) {
+        if (food != null) {
+            int remained = useItemContext.stack().shrink(1);
+            if (remained > 0) {
+                return UseResult.SKIP;
+            }
+
+            Player player = useItemContext.player();
+            food.onEaten(player);
+
+            player.getFoodStatus().eat(food);
+        }
         return UseResult.SKIP;
     }
 
@@ -58,6 +73,7 @@ public class Item {
      */
     public static class Properties {
         private int maxStackSize = 64;
+        private FoodData food;
 
         /**
          * Set the max stack size.
@@ -66,6 +82,11 @@ public class Item {
          */
         public @This Properties stackSize(int size) {
             this.maxStackSize = size;
+            return this;
+        }
+
+        public Properties food(FoodData food) {
+            this.food = food;
             return this;
         }
     }

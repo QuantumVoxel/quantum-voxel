@@ -1,6 +1,6 @@
 {
   /*
-   * This is the credits file for quantum.
+   * This is the "credits" file for quantum.
    * Any person that has contributed to the project will be added here.
    * External libraries will be linked in this file. (Currently not all linked, as it's a lot of libraries lmao)
    */
@@ -8,43 +8,79 @@
   // Contributors that contributed with code.
   Code: {
     XyperCode: {
-      url: "https://github.com/XyperCode"
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Founder",
+        "Lead Maintainer"
+      ]
     },
     MaroonShaded: {
-      url: "https://github.com/MaroonShaded"
+      url: "https://github.com/MaroonShaded",
+      roles: [
+        "Contributor",
+      ]
     }
   },
   // Contributors that contributed language changes/additions through GitHub pull requests.
   Translations: {
     Oszoou: {
-      url: "https://github.com/Oszoou"
+      url: "https://github.com/Oszoou",
+      roles: [
+        "Contributor"
+      ]
     },
     XyperCode: {
-      url: "https://github.com/XyperCode"
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Contributor"
+      ]
     },
   },
   // People that tested the game.
   Testing: {
     XyperCode: {
-      url: "https://github.com/XyperCode"
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Testing",
+      ]
     },
     MincraftEinstein: {
-      url: "https://github.com/MincraftEinstein"
+      url: "https://github.com/MincraftEinstein",
+      roles: [
+        "Testing",
+      ]
     }
   },
   // Contributions to documentation.
   Documentation: {
     XyperCode: {
-      url: "https://github.com/XyperCode"
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Documentation Contributor",
+      ]
     }
+  },
+  SoundEffects: {
+    PixaBay: {
+      url: "https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=36186",
+      license: "Pixabay",
+      for: [
+        "Eating Sound Effect"
+      ],
+      roles: [
+        "External Source"
+      ]
+    },
   },
   // External libraries that are included with the game.
   ExternalLibraries: {
     LibGDX: {
-      url: "https://libgdx.com/"
+      url: "https://libgdx.com/",
+      license: "Apache 2.0",
     },
     "Fabric Loader": {
-      url: "https://fabricmc.net/"
+      url: "https://fabricmc.net/",
+      license: "Apache 2.0",
     },
     LWJGL: {
       url: "https://www.lwjgl.org/"
