@@ -2,7 +2,7 @@ package com.ultreon.quantum.client.util;
 
 /**
  * This class represents a GG utility.
- * Yes this is a seriously important class. (Sarcastic)
+ * Yes, this is a seriously important class. (Sarcastic)
  */
 public class GG {
     /**

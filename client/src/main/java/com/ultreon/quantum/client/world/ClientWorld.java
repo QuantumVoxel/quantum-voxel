@@ -7,6 +7,7 @@ import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.player.LocalPlayer;
+import com.ultreon.quantum.client.util.Rot;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
 import com.ultreon.quantum.entity.Player;
@@ -27,11 +28,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
+import static com.ultreon.quantum.client.util.ExtKt.deg;
 
 public final class ClientWorld extends World implements Disposable {
-    private static final int DAY_CYCLE = 24000;
-    private static final Color DAY_COLOR = new Color(0.6F, 0.7F, 1.0F, 1.0F);
-    private static final Color NIGHT_COLOR = new Color(0.05F, 0.075F, 0.15F, 1.0F);
+    public static final int DAY_CYCLE = 24000;
+    public static Rot SKYBOX_ROTATION = deg(0);
+    public static Color DAY_TOP_COLOR = Color.rgb(0x7fb0fe);
+    public static Color DAY_BOTTOM_COLOR = Color.rgb(0xc1d3f1);
+    public static Color NIGHT_TOP_COLOR = Color.rgb(0x01010b);
+    public static Color NIGHT_BOTTOM_COLOR = Color.rgb(0x0a0c16);
+    public static Color SUN_RISE_COLOR = Color.rgb(0xff3000);
     @NotNull
     private final QuantumClient client;
     private final Map<ChunkPos, ClientChunk> chunks = new HashMap<>();
@@ -269,33 +275,16 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
+    @Deprecated
     public Color getSkyColor() {
-        int daytime = this.getDaytime();
-        final int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
-        if (daytime < riseSetDuration / 2) {
-            return ClientWorld.mixColors(
-                    ClientWorld.DAY_COLOR, ClientWorld.NIGHT_COLOR,
-                    0.5f + daytime / (float) riseSetDuration);
-        } else if (daytime <= ClientWorld.DAY_CYCLE / 2 - riseSetDuration / 2) {
-            return ClientWorld.DAY_COLOR;
-        } else if (daytime <= ClientWorld.DAY_CYCLE / 2 + riseSetDuration / 2) {
-            return ClientWorld.mixColors(
-                    ClientWorld.NIGHT_COLOR, ClientWorld.DAY_COLOR,
-                    (daytime - ((double) ClientWorld.DAY_CYCLE / 2 - (float) riseSetDuration / 2)) / riseSetDuration);
-        } else if (daytime <= ClientWorld.DAY_CYCLE - riseSetDuration / 2) {
-            return ClientWorld.NIGHT_COLOR;
-        } else {
-            return ClientWorld.mixColors(
-                    ClientWorld.DAY_COLOR, ClientWorld.NIGHT_COLOR,
-                    (daytime - (ClientWorld.DAY_CYCLE - (float) riseSetDuration / 2)) / riseSetDuration);
-        }
+        return Color.gdx(QuantumClient.get().worldRenderer.getSkybox().topColor);
     }
 
     public int getDaytime() {
         return this.time % DAY_CYCLE;
     }
 
-    private static Color mixColors(Color color1, Color color2, double percent) {
+    static Color mixColors(Color color1, Color color2, double percent) {
         percent = Mth.clamp(percent, 0.0, 1.0);
         double inversePercent = 1.0 - percent;
         int redPart = (int) (color1.getRed() * percent + color2.getRed() * inversePercent);

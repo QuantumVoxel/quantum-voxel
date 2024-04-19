@@ -37,6 +37,8 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import static com.ultreon.quantum.client.util.ExtKt.deg;
+
 public class ImGuiOverlay {
     public static final ImFloat I_GAMMA = new ImFloat(1.5f);
     public static final ImFloat U_CAP = new ImFloat(0.45f);
@@ -51,6 +53,7 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_GUI_UTILS = new ImBoolean(false);
     private static final ImBoolean SHOW_UTILS = new ImBoolean(false);
     private static final ImBoolean SHOW_SHADER_EDITOR = new ImBoolean(false);
+    private static final ImBoolean SHOW_SKYBOX_EDITOR = new ImBoolean(false);
     private static final ImBoolean SHOW_MODEL_VIEWER = new ImBoolean(false);
     private static final ImBoolean SHOW_CHUNK_SECTION_BORDERS = new ImBoolean(false);
     private static final ImBoolean SHOW_CHUNK_DEBUGGER = new ImBoolean(false);
@@ -168,6 +171,7 @@ public class ImGuiOverlay {
         if (ImGuiOverlay.SHOW_UTILS.get()) ImGuiOverlay.showUtils(client);
         if (ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get()) ImGuiOverlay.showChunkDebugger(client);
         if (ImGuiOverlay.SHOW_SHADER_EDITOR.get()) ImGuiOverlay.showShaderEditor();
+        if (ImGuiOverlay.SHOW_SKYBOX_EDITOR.get()) ImGuiOverlay.showSkyboxEditor();
         if (ImGuiOverlay.SHOW_MODEL_VIEWER.get()) ImGuiOverlay.showModelViewer();
     }
 
@@ -288,6 +292,7 @@ public class ImGuiOverlay {
                 ImGui.menuItem("Player Editor", "Ctrl+P", ImGuiOverlay.SHOW_PLAYER_UTILS);
                 ImGui.menuItem("Gui Editor", "Ctrl+G", ImGuiOverlay.SHOW_GUI_UTILS);
                 ImGui.menuItem("Shader Editor", "", ImGuiOverlay.SHOW_SHADER_EDITOR);
+                ImGui.menuItem("Skybox Editor", "", ImGuiOverlay.SHOW_SKYBOX_EDITOR);
                 ImGui.endMenu();
             }
             if (ImGui.beginMenu("View")) {
@@ -344,6 +349,20 @@ public class ImGuiOverlay {
         ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
         if (ImGui.begin("Shader Editor", ImGuiOverlay.getDefaultFlags())) {
             ImGuiEx.editFloat("iGamma", "Shader::SSAO::iGamma", ImGuiOverlay.I_GAMMA::get, ImGuiOverlay.I_GAMMA::set);
+            ImGui.end();
+        }
+    }
+
+    private static void showSkyboxEditor() {
+        ImGui.setNextWindowSize(400, 200, ImGuiCond.Once);
+        ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
+        if (ImGui.begin("Skybox Editor", ImGuiOverlay.getDefaultFlags())) {
+            ImGuiEx.editColor3("DayTopColor", "Shader::SkyBox::DayTopColor", () -> ClientWorld.DAY_TOP_COLOR, color -> ClientWorld.DAY_TOP_COLOR = color);
+            ImGuiEx.editColor3("DayBottomColor", "Shader::SkyBox::DayBottomColor", () -> ClientWorld.DAY_BOTTOM_COLOR, color -> ClientWorld.DAY_BOTTOM_COLOR = color);
+            ImGuiEx.editColor3("NightTopColor", "Shader::SkyBox::NightTopColor", () -> ClientWorld.NIGHT_TOP_COLOR, color -> ClientWorld.NIGHT_TOP_COLOR = color);
+            ImGuiEx.editColor3("NightBottomColor", "Shader::SkyBox::NightBottomColor", () -> ClientWorld.NIGHT_BOTTOM_COLOR, color -> ClientWorld.NIGHT_BOTTOM_COLOR = color);
+            ImGuiEx.editColor3("SunRiseSetColor", "Shader::SkyBox::SunRiseSetColor", () -> ClientWorld.SUN_RISE_COLOR, color -> ClientWorld.SUN_RISE_COLOR = color);
+            ImGuiEx.editFloat("Rotation", "Shader::SkyBox::Rotation", () -> ClientWorld.SKYBOX_ROTATION.getDegrees(), v -> ClientWorld.SKYBOX_ROTATION = deg(v));
             ImGui.end();
         }
     }

@@ -1,5 +1,6 @@
 package com.ultreon.quantum.client.shaders;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Attributes;
@@ -10,11 +11,20 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.world.ClientWorld;
+import com.ultreon.quantum.client.world.WorldRenderer;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 
 public class SkyboxShader extends DefaultShader {
     private final static Attributes tmpAttributes = new Attributes();
     private static String version = "140";
-    public final int u_globalSunlight;
+    public final int u_topColor;
+    public final int u_midColor;
+    public final int u_bottomColor;
+
+    public final int u_negZColor;
+    public final int u_posZColor;
 
     public SkyboxShader(final Renderable renderable) {
         this(renderable, new Config());
@@ -37,30 +47,49 @@ public class SkyboxShader extends DefaultShader {
     public SkyboxShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
         super(renderable, config, shaderProgram);
 
-        this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
+        this.u_topColor = this.register(Inputs.topColor, Setters.topColor);
+        this.u_midColor = this.register(Inputs.midColor, Setters.midColor);
+        this.u_bottomColor = this.register(Inputs.bottomColor, Setters.bottomColor);
+
+        this.u_negZColor = this.register(Inputs.negZColor, Setters.negZColor);
+        this.u_posZColor = this.register(Inputs.posZColor, Setters.posZColor);
     }
 
     public static class Inputs extends DefaultShader.Inputs {
-        public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
+        public final static Uniform topColor = new Uniform("u_topColor");
+        public final static Uniform midColor = new Uniform("u_midColor");
+        public final static Uniform bottomColor = new Uniform("u_bottomColor");
+
+        public final static Uniform negZColor = new Uniform("u_negZColor");
+        public final static Uniform posZColor = new Uniform("u_posZColor");
     }
 
 
     public static class Setters extends DefaultShader.Setters {
-        public final static Setter globalSunlight = new LocalSetter() {
-            @Override
-            public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                if (renderable == null) {
-                    shader.set(inputID, 1.0f);
-                    return;
+        public final static Setter topColor = create((w) -> w.getSkybox().topColor);
+        public final static Setter midColor = create((w) -> w.getSkybox().midColor);
+        public final static Setter bottomColor = create((w) -> w.getSkybox().bottomColor);
+
+        public final static Setter negZColor = create((w) -> w.getSkybox().negZColor);
+        public final static Setter posZColor = create((w) -> w.getSkybox().posZColor);
+
+        public static Setter create(Function<WorldRenderer, Color> getter) {
+            return new LocalSetter() {
+                @Override
+                public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                    if (renderable == null) {
+                        shader.set(inputID, Color.WHITE);
+                        return;
+                    }
+                    @Nullable WorldRenderer world = QuantumClient.get().worldRenderer;
+                    if (world == null) {
+                        shader.set(inputID, Color.WHITE);
+                        return;
+                    }
+                    shader.set(inputID, getter.apply(QuantumClient.get().worldRenderer));
                 }
-                ClientWorld world = QuantumClient.get().world;
-                if (world == null) {
-                    shader.set(inputID, 1.0f);
-                    return;
-                }
-                shader.set(inputID, world.getGlobalSunlight());
-            }
-        };
+            };
+        }
     }
     public static String createPrefix (final Renderable renderable, final Config config) {
         final Attributes attributes = SkyboxShader.combineAttributes(renderable);

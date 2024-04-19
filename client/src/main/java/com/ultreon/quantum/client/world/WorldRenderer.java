@@ -27,6 +27,7 @@ import com.ultreon.quantum.client.DisposableContainer;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
+import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.model.EntityModelInstance;
 import com.ultreon.quantum.client.model.WorldRenderContextImpl;
 import com.ultreon.quantum.client.model.block.BakedCubeModel;
@@ -104,6 +105,8 @@ public final class WorldRenderer implements DisposableContainer {
     private final MeshBuilder meshBuilder = new MeshBuilder();
     private long lastChunkBuild;
     private final List<Disposable> disposesNextFrame = new ArrayList<>();
+    private final Renderable skyboxRender;
+    private final Skybox skybox = new Skybox();
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;
@@ -111,42 +114,13 @@ public final class WorldRenderer implements DisposableContainer {
         Texture blockTex = this.client.blocksTextureAtlas.getTexture();
         Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
 
-        this.material = new Material();
-        this.material.set(TextureAttribute.createDiffuse(blockTex));
-        this.material.set(TextureAttribute.createEmissive(emissiveBlockTex));
-        this.material.set(new DepthTestAttribute(GL20.GL_DEPTH_FUNC));
-        this.transparentMaterial = new Material();
-        this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
-        this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
-//        this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
-        this.transparentMaterial.set(new DepthTestAttribute(GL20.GL_DEPTH_FUNC));
-//        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.02f));
+        this.setupMaterials(blockTex, emissiveBlockTex);
 
         // Sun and moon
-        this.sun = new Renderable();
-        this.moon = new Renderable();
+        this.setupSunAndMoon();
 
-        this.sun.meshPart.mesh = createSun();
-        this.moon.meshPart.mesh = createMoon();
-
-        this.sun.meshPart.size = this.sun.meshPart.mesh.getNumIndices() > 0 ? this.sun.meshPart.mesh.getNumIndices() : this.sun.meshPart.mesh.getNumVertices();
-        this.moon.meshPart.size = this.moon.meshPart.mesh.getNumIndices() > 0 ? this.moon.meshPart.mesh.getNumIndices() : this.moon.meshPart.mesh.getNumVertices();
-
-        Material sunmat = new Material();
-        sunmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/sun.png"))));
-        sunmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/sun.png"))));
-        sunmat.set(new DepthTestAttribute(GL20.GL_LEQUAL));
-        sunmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
-        sunmat.set(IntAttribute.createCullFace(GL20.GL_FRONT));
-        this.sun.material = sunmat;
-
-        Material moonmat = new Material();
-        moonmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/moon.png"))));
-        moonmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/moon.png"))));
-        moonmat.set(new DepthTestAttribute(GL20.GL_LEQUAL));
-        moonmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
-        moonmat.set(IntAttribute.createCullFace(GL20.GL_FRONT));
-        this.moon.material = moonmat;
+        // Dynamic Skybox
+        this.skyboxRender = this.setupDynamicSkybox();
 
         // Chunk border outline
         MeshMaterial result = createChunkOutline();
@@ -195,15 +169,82 @@ public final class WorldRenderer implements DisposableContainer {
         this.environment.set(new CubemapAttribute(CubemapAttribute.EnvironmentMap, cubemap));
     }
 
+    private Renderable setupDynamicSkybox() {
+        Renderable renderable = new Renderable();
+        MeshBuilder meshBuilder = new MeshBuilder();
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+        meshBuilder.setColor(1, 1, 1, 1);
+        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-30, -30, -30), new Vector3(30, 30, 30)));
+
+        Material material = new Material();
+        material.set(ColorAttribute.createDiffuse(0, 1, 0, 1));
+        material.set(new BlendingAttribute());
+        material.set(new DepthTestAttribute(GL_LEQUAL, true));
+        material.set(IntAttribute.createCullFace(0));
+
+        renderable.meshPart.id = "skybox";
+        renderable.meshPart.mesh = meshBuilder.end();
+        renderable.meshPart.size = renderable.meshPart.mesh.getNumIndices() > 0 ? renderable.meshPart.mesh.getNumIndices() : renderable.meshPart.mesh.getNumVertices();
+        renderable.meshPart.primitiveType = GL_TRIANGLES;
+        renderable.environment = new Environment();
+        renderable.material = material;
+        renderable.worldTransform.setToTranslationAndScaling(0, 0, 0, 1, 1, 1);
+
+        renderable.shader = Shaders.SKYBOX.get().getShader(renderable);
+        renderable.userData = Shaders.SKYBOX.get();
+
+        return renderable;
+    }
+
+    private void setupMaterials(Texture blockTex, Texture emissiveBlockTex) {
+        this.material = new Material();
+        this.material.set(TextureAttribute.createDiffuse(blockTex));
+        this.material.set(TextureAttribute.createEmissive(emissiveBlockTex));
+        this.material.set(new DepthTestAttribute(GL_DEPTH_FUNC));
+        this.transparentMaterial = new Material();
+        this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
+        this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
+//        this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        this.transparentMaterial.set(new DepthTestAttribute(GL_DEPTH_FUNC));
+//        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.02f));
+    }
+
+    private void setupSunAndMoon() {
+        this.sun = new Renderable();
+        this.moon = new Renderable();
+
+        this.sun.meshPart.mesh = createSun();
+        this.moon.meshPart.mesh = createMoon();
+
+        this.sun.meshPart.size = this.sun.meshPart.mesh.getNumIndices() > 0 ? this.sun.meshPart.mesh.getNumIndices() : this.sun.meshPart.mesh.getNumVertices();
+        this.moon.meshPart.size = this.moon.meshPart.mesh.getNumIndices() > 0 ? this.moon.meshPart.mesh.getNumIndices() : this.moon.meshPart.mesh.getNumVertices();
+
+        Material sunmat = new Material();
+        sunmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/sun.png"))));
+        sunmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/sun.png"))));
+        sunmat.set(new DepthTestAttribute(GL_LEQUAL));
+        sunmat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        sunmat.set(IntAttribute.createCullFace(GL_FRONT));
+        this.sun.material = sunmat;
+
+        Material moonmat = new Material();
+        moonmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/moon.png"))));
+        moonmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/moon.png"))));
+        moonmat.set(new DepthTestAttribute(GL_LEQUAL));
+        moonmat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        moonmat.set(IntAttribute.createCullFace(GL_FRONT));
+        this.moon.material = moonmat;
+    }
+
     private Mesh createSun() {
         MeshBuilder meshBuilder = new MeshBuilder();
-        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
 
         meshBuilder.rect(
-                new VertexInfo().setPos(-5, -5, 20).setNor(0, 0, -1).setUV(0, 0),
-                new VertexInfo().setPos(-5, 5, 20).setNor(0, 0, -1).setUV(0, 1),
-                new VertexInfo().setPos(5, 5, 20).setNor(0, 0, -1).setUV(1, 1),
-                new VertexInfo().setPos(5, -5, 20).setNor(0, 0, -1).setUV(1, 0)
+                new VertexInfo().setPos(-2, -2, 15).setNor(0, 0, -1).setUV(0, 0),
+                new VertexInfo().setPos(-2, 2, 15).setNor(0, 0, -1).setUV(0, 1),
+                new VertexInfo().setPos(2, 2, 15).setNor(0, 0, -1).setUV(1, 1),
+                new VertexInfo().setPos(2, -2, 15).setNor(0, 0, -1).setUV(1, 0)
         );
 
         return meshBuilder.end();
@@ -211,13 +252,13 @@ public final class WorldRenderer implements DisposableContainer {
 
     private Mesh createMoon() {
         MeshBuilder meshBuilder = new MeshBuilder();
-        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
 
         meshBuilder.rect(
-                new VertexInfo().setPos(-5, -5, -20).setNor(0, 0, 1).setUV(0, 0),
-                new VertexInfo().setPos(-5, 5, -20).setNor(0, 0, 1).setUV(0, 1),
-                new VertexInfo().setPos(5, 5, -20).setNor(0, 0, 1).setUV(1, 1),
-                new VertexInfo().setPos(5, -5, -20).setNor(0, 0, 1).setUV(1, 0)
+                new VertexInfo().setPos(-2, -2, -15).setNor(0, 0, 1).setUV(0, 0),
+                new VertexInfo().setPos(-2, 2, -15).setNor(0, 0, 1).setUV(0, 1),
+                new VertexInfo().setPos(2, 2, -15).setNor(0, 0, 1).setUV(1, 1),
+                new VertexInfo().setPos(2, -2, -15).setNor(0, 0, 1).setUV(1, 0)
         );
 
         return meshBuilder.end();
@@ -301,7 +342,18 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     public void collectPre(final Array<Renderable> output, final Pool<Renderable> renderablePool) {
-        QuantumClient.PROFILER.section("environment", () -> renderSunAndMoon(output, renderablePool));
+        skybox.update(this.world.getDaytime());
+
+        QuantumClient.PROFILER.section("skybox", () -> this.renderDynamicSkybox(output, renderablePool));
+        QuantumClient.PROFILER.section("sun-and-moon", () -> renderSunAndMoon(output, renderablePool));
+    }
+
+    private void renderDynamicSkybox(Array<Renderable> output, Pool<Renderable> renderablePool) {
+        if (this.skyboxRender == null) return;
+        
+        this.skyboxRender.userData = Shaders.SKYBOX.get();
+
+        output.add(this.skyboxRender);
     }
 
     public void collect(final Array<Renderable> output, final Pool<Renderable> renderablePool) {
@@ -373,7 +425,7 @@ public final class WorldRenderer implements DisposableContainer {
 
     private void renderSunAndMoon(Array<Renderable> output, Pool<Renderable> renderablePool) {
         if (!Config.showSunAndMoon) return;
-        material.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
+        material.set(new DepthTestAttribute(GL_LEQUAL, true));
         var world = this.world;
         if (world == null) return;
 
@@ -387,18 +439,18 @@ public final class WorldRenderer implements DisposableContainer {
 
         Material sunmat = new Material();
         sunmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
-//        sunmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
+        sunmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
         sunmat.set(new DepthTestAttribute(GL_LEQUAL, true));
-        sunmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        sunmat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         sunmat.set(IntAttribute.createCullFace(0));
         sunmat.set(FogAttribute.createFog(1, 1, 1));
         this.sun.material = sunmat;
 
         Material moonmat = new Material();
         moonmat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
-//        moonmat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
-        moonmat.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
-        moonmat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        moonmat.set(ColorAttribute.createEmissive(new Color(0.2f, 0.2f, 0.2f, 1f)));
+        moonmat.set(new DepthTestAttribute(GL_LEQUAL, true));
+        moonmat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         moonmat.set(IntAttribute.createCullFace(0));
         this.moon.material = moonmat;
 
@@ -726,15 +778,7 @@ public final class WorldRenderer implements DisposableContainer {
             Texture blockTex = this.client.blocksTextureAtlas.getTexture();
             Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
 
-            this.material = new Material();
-            this.material.set(TextureAttribute.createDiffuse(blockTex));
-            this.material.set(TextureAttribute.createEmissive(emissiveBlockTex));
-            this.material.set(new DepthTestAttribute(GL20.GL_DEPTH_FUNC));
-            this.transparentMaterial = new Material();
-            this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
-            this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
-//            this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
-            this.transparentMaterial.set(new DepthTestAttribute(GL20.GL_DEPTH_FUNC));
+            setupMaterials(blockTex, emissiveBlockTex);
 //            this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.02f));
 
             for (ClientChunk loadedChunk : this.world.getLoadedChunks()) {
@@ -746,6 +790,10 @@ public final class WorldRenderer implements DisposableContainer {
 
             this.modelInstances.clear();
         });
+    }
+
+    public Skybox getSkybox() {
+        return skybox;
     }
 
     private record MeshMaterial(Mesh mesh, Material material) {

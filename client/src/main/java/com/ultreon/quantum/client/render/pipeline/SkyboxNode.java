@@ -20,15 +20,14 @@ import com.ultreon.quantum.client.world.WorldRenderer;
 
 public class SkyboxNode extends RenderPipeline.RenderNode {
     private final Supplier<WorldShaderProvider> shaderProvider = Shaders.WORLD;
-    private Shader shader;
 
     protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
         for (Renderable renderable : input) {
             renderable.environment = this.client.getEnvironment();
             renderable.shader = null;
-            this.shader = shaderProvider.getShader(renderable);
-            if (this.shader == null) throw new IllegalStateException("Shader not found");
-            renderable.shader = this.shader;
+            Shader shader = shaderProvider.getShader(renderable);
+            if (shader == null) throw new IllegalStateException("Shader not found");
+            renderable.shader = shader;
             modelBatch.render(renderable);
         }
     }

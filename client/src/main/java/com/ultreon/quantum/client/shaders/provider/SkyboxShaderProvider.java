@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.render.shader.OpenShaderProvider;
 import com.ultreon.quantum.client.shaders.ModelViewShader;
+import com.ultreon.quantum.client.shaders.SkyboxShader;
 
 public class SkyboxShaderProvider extends DefaultShaderProvider implements OpenShaderProvider {
     public SkyboxShaderProvider(final DefaultShader.Config config) {
@@ -28,8 +29,8 @@ public class SkyboxShaderProvider extends DefaultShaderProvider implements OpenS
 
     @Override
     public Shader createShader(Renderable renderable) {
-        ModelViewShader modelViewShader = new ModelViewShader(renderable, this.config);
-        Shaders.checkShaderCompilation(modelViewShader.program, "ModelViewShader");
+        SkyboxShader modelViewShader = new SkyboxShader(renderable, this.config);
+        Shaders.checkShaderCompilation(modelViewShader.program, "SkyboxShader");
         
         return modelViewShader; 
     }

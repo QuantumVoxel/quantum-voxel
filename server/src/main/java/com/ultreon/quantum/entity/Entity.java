@@ -198,9 +198,11 @@ public class Entity implements CommandSender {
             // If affected by fluid and swimming up, stop swimming up
             if (this.isAffectedByFluid() && this.swimUp) {
                 this.swimUp = false;
-            } else {
+            } else if (!this.onGround) {
                 // Apply gravity to the velocityY
                 this.velocityY -= this.gravity;
+            } else {
+                this.velocityY = Math.max(0, this.velocityY);
             }
         }
 
