@@ -2,12 +2,18 @@ package com.ultreon.quantum.client;
 
 import com.ultreon.quantum.client.gui.Notification;
 
-public class PerformanceWatcher {
-    public PerformanceWatcher() {
-        Thread t = new Thread(this::watch);
+public class MemoryMonitor {
+    private static Thread t;
+
+    public static synchronized void start() {
+        if (t != null) return;
+
+        t = new Thread(MemoryMonitor::watch);
+        t.setDaemon(true);
+        t.start();
     }
 
-    private void watch() {
+    private static void watch() {
         Notification memNotify = null;
 
         while (true) {

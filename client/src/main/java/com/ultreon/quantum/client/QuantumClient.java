@@ -500,6 +500,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Set normal cursor
         Gdx.graphics.setCursor(this.normalCursor);
 
+        MemoryMonitor.start();
+
         // Create inspection nodes for libGdx and graphics
         if (DebugFlags.INSPECTION_ENABLED.enabled()) {
             InspectionNode<Application> libGdxNode = this.inspection.createNode("libGdx", value -> Gdx.app);
