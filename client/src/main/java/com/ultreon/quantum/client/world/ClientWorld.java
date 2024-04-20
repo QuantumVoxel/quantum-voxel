@@ -32,7 +32,7 @@ import static com.ultreon.quantum.client.util.ExtKt.deg;
 
 public final class ClientWorld extends World implements Disposable {
     public static final int DAY_CYCLE = 24000;
-    public static Rot SKYBOX_ROTATION = deg(0);
+    public static Rot SKYBOX_ROTATION = deg(-60);
     public static Color DAY_TOP_COLOR = Color.rgb(0x7fb0fe);
     public static Color DAY_BOTTOM_COLOR = Color.rgb(0xc1d3f1);
     public static Color NIGHT_TOP_COLOR = Color.rgb(0x01010b);

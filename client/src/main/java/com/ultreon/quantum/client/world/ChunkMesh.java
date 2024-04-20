@@ -14,6 +14,7 @@ public class ChunkMesh implements Pool.Poolable {
     public final MeshPart meshPart;
     public final Matrix4 transform;
     public ClientChunk chunk;
+    public boolean built = false;
 
     public static long getMeshesDisposed() {
         return ValueTracker.getMeshDisposes();
@@ -75,5 +76,7 @@ public class ChunkMesh implements Pool.Poolable {
         if (chunk.transparentMesh == this) {
             chunk.transparentMesh = null;
         }
+
+        this.built = false;
     }
 }

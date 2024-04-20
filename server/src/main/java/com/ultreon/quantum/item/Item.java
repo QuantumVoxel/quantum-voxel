@@ -15,10 +15,12 @@ import java.util.List;
 public class Item {
     private final int maxStackSize;
     private final FoodData food;
+    private final ItemRarity rarity;
 
     public Item(Properties properties) {
         this.maxStackSize = properties.maxStackSize;
         this.food = properties.food;
+        this.rarity = properties.rarity;
     }
 
     public UseResult use(UseItemContext useItemContext) {
@@ -37,7 +39,7 @@ public class Item {
     }
 
     public TextObject getTranslation() {
-        return TextObject.translation(this.getTranslationId());
+        return TextObject.translation(this.getTranslationId()).style(this.rarity::applyStyle);
     }
 
     @NotNull
@@ -72,6 +74,7 @@ public class Item {
      * Item properties.
      */
     public static class Properties {
+        private ItemRarity rarity = ItemRarity.COMMON;
         private int maxStackSize = 64;
         private FoodData food;
 
@@ -87,6 +90,11 @@ public class Item {
 
         public Properties food(FoodData food) {
             this.food = food;
+            return this;
+        }
+
+        public Properties rarity(ItemRarity rarity) {
+            this.rarity = rarity;
             return this;
         }
     }

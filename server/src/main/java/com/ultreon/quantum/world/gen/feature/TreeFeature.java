@@ -37,11 +37,16 @@ public class TreeFeature extends WorldGenFeature {
     @Override
     public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
         if (this.noiseConfig == null) return false;
+        height += 1;
 
         int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
         long seed = (world.getSeed() ^ this.noiseConfig.seed() << 32) ^ posSeed;
         this.random.setSeed(seed);
         this.random.setSeed(this.random.nextLong());
+
+        if (!chunk.get(x, height - 1, z).is(Blocks.DIRT)) {
+            return false;
+        }
 
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {

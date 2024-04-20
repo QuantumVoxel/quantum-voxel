@@ -20,9 +20,9 @@ public class TextObjectRenderer {
     private float lineHeight;
     private float currentY;
 
-    public TextObjectRenderer(TextObject text) {
+    public TextObjectRenderer(Font font, TextObject text) {
+        this.font = font;
         this.text = text;
-        this.font = QuantumClient.get().font;
         this.originalFont = this.font.bitmapFont;
         this.currentFont = this.font.bitmapFont;
         this.lineHeight = this.font.lineHeight;

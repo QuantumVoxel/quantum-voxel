@@ -37,8 +37,8 @@ public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
             instance.getNode("right_pants").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (-clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
             instance.getNode("left_arm").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (-clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
             instance.getNode("right_arm").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
-            instance.getNode("left_sleeve").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (-clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
-            instance.getNode("right_sleeve").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
+            instance.getNode("left_sleve").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (-clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
+            instance.getNode("right_sleve").rotation.idt().setFromMatrix(this.tmp.idt().rotate(Vector3.X, (float) (clientPlayer.walkAnim * 3000 * clientPlayer.getSpeed())));
 
         } catch (Exception ignored) {
             // ignore
@@ -88,9 +88,8 @@ public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
         instance.getNode("headwear").rotation.setFromMatrix(this.tmp.idt().rotate(Vector3.Y, player.xHeadRot - xRot).rotate(Vector3.X, yRot));
 //        EntityRenderer.tmp0.set(localPlayer.getPosition(client.partialTick));
 //        EntityRenderer.tmp0.sub(player.getPosition());
-//        instance.translate(0, -1.625, 0);
-//        instance.scale(1 / 125.0, 1 / 125.0, 1 / 125.0);
-//        instance.rotateY(xRot - 180);
+        instance.translate(0, -1.625, 0);
+        instance.rotateY(xRot - 180);
 
 //        TextureManager textureManager = client.getTextureManager();
 //        Identifier id = Identifier.parse("dynamic/player_skin/" + this.client.player.getUuid().toString().replace("-", ""));

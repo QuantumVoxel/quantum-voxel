@@ -3,6 +3,7 @@ package com.ultreon.quantum.text;
 import com.ultreon.quantum.util.Color;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.data.types.MapType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TextStyle {
@@ -103,7 +104,7 @@ public class TextStyle {
         return this.color;
     }
 
-    public TextStyle color(Color color) {
+    public TextStyle color(@NotNull Color color) {
         this.color = color;
         return this;
     }
@@ -123,5 +124,11 @@ public class TextStyle {
 
     public static TextStyle defaultStyle() {
         return new TextStyle().color(Color.WHITE).bold(false).italic(false).underline(false).strikethrough(false);
+    }
+
+    public void color(ChatColor color) {
+        Integer c = color.getColor();
+        if (!color.isColor()) return;
+        this.color = Color.rgb(c);
     }
 }

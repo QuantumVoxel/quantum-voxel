@@ -1,6 +1,11 @@
 package com.ultreon.quantum.client.model.entity.renderer;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.quantum.client.QuantumClient;
@@ -12,6 +17,7 @@ import com.ultreon.quantum.entity.Entity;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3f;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL20;
 
 public abstract class EntityRenderer<E extends Entity> implements Disposable {
     protected static Vec3d tmp0 = new Vec3d();
@@ -35,8 +41,19 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
         if (instance.getModel().nodes.size == 0)
             throw new IllegalStateException("Cannot render entity " + instance.getEntity().getType().getId() + " without nodes");
 
-        instance.getModel().userData = Shaders.MODEL_VIEW;
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        instance.getModel().materials.forEach(m -> {
+            m.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+            m.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
+            m.set(IntAttribute.createCullFace(GL20.GL_BACK));
+            m.set(FloatAttribute.createAlphaTest(0.01f));
+        });
+        instance.getModel().userData = Shaders.MODEL_VIEW.get();
         instance.render(context);
+
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     public abstract void animate(EntityModelInstance<E> instance, WorldRenderContext<E> context);

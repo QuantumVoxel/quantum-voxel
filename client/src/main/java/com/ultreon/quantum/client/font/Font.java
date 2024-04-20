@@ -9,6 +9,7 @@ import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.text.*;
+import com.ultreon.quantum.text.Formatter;
 import com.ultreon.quantum.util.Color;
 
 import java.util.*;
@@ -34,30 +35,11 @@ public class Font implements Disposable {
     }
 
     public void drawText(Renderer renderer, String text, float x, float y, Color color, boolean shadow) {
-        float currentX = x;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            BitmapFont currentFont = this.bitmapFont;
-            float scale = 1;
-            if (!currentFont.getData().hasGlyph(c) || this.isForcingUnicode()) {
-                currentFont = Font.UNIFONT;
-                scale = 0.5F;
-            }
-            if (currentFont == Font.UNIFONT) {
-                this.drawTextScaled(renderer, currentFont, renderer.getBatch(), String.valueOf(c), currentX, y + (this.bitmapFont.getLineHeight() - Font.UNIFONT.getLineHeight() * 0.5F) / 2, scale, color, shadow);
-            } else {
-                this.drawTextScaled(renderer, currentFont, renderer.getBatch(), String.valueOf(c), currentX, y, scale, color, shadow);
-            }
-            this.layout.setText(currentFont, String.valueOf(c));
-            BitmapFont.Glyph glyph = currentFont.getData().getGlyph(c);
-            if (glyph != null) {
-                currentX += glyph.xadvance * scale;
-            }
-        }
+        this.drawText(renderer, Formatter.format("&#" + color.toString().substring(1, 7) + text), x, y, color, shadow);
     }
 
     public void drawText(Renderer renderer, TextObject text, float x, float y, Color color, boolean shadow) {
-        TextObjectRenderer textRenderer = new TextObjectRenderer(text);
+        TextObjectRenderer textRenderer = new TextObjectRenderer(this, text);
         textRenderer.render(renderer, color, x, y, shadow);
     }
 

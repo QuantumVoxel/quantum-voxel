@@ -236,4 +236,8 @@ public class BlockProperties {
     public boolean canBeReplacedBy(UseItemContext context) {
         return block.canBeReplacedBy(context, this);
     }
+
+    public boolean is(Block block) {
+        return this.block == block;
+    }
 }

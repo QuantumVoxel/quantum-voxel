@@ -350,7 +350,7 @@ public final class WorldRenderer implements DisposableContainer {
 
     private void renderDynamicSkybox(Array<Renderable> output, Pool<Renderable> renderablePool) {
         if (this.skyboxRender == null) return;
-        
+
         this.skyboxRender.userData = Shaders.SKYBOX.get();
 
         output.add(this.skyboxRender);
@@ -460,8 +460,8 @@ public final class WorldRenderer implements DisposableContainer {
         this.sun.meshPart.primitiveType = GL_TRIANGLES;
         this.moon.meshPart.primitiveType = GL_TRIANGLES;
 
-        this.sun.worldTransform.setToRotation(Vector3.X, sunAngle * MathUtils.radDeg - 180);
-        this.moon.worldTransform.setToRotation(Vector3.X, (moonAngle * MathUtils.radDeg) - 180);
+        this.sun.worldTransform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
+        this.moon.worldTransform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, (moonAngle * MathUtils.radDeg) - 180);
 
         output.add(verifyOutput(this.sun));
         output.add(verifyOutput(this.moon));
@@ -616,7 +616,7 @@ public final class WorldRenderer implements DisposableContainer {
             var renderer = (EntityRenderer<@NotNull Entity>) this.client.entityRendererManager.get(entity.getType());
             if (model == null) {
                 if (renderer == null) {
-//                    QuantumClient.LOGGER.warn("Failed to render entity " + entity.getId() + " because it's renderer is null");
+                    QuantumClient.LOGGER.warn("Failed to render entity " + entity.getId() + " because it's renderer is null");
                     return;
                 }
                 model = renderer.createModel(entity);

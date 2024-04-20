@@ -7,6 +7,7 @@ import com.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import com.ultreon.quantum.client.model.blockbench.BlockBenchModelImporter;
 import com.ultreon.quantum.client.model.entity.EntityModel;
 import com.ultreon.quantum.client.resources.ContextAwareReloadable;
+import com.ultreon.quantum.client.resources.ResourceFileHandle;
 import com.ultreon.quantum.resources.ReloadContext;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 public class EntityModelRegistry implements ContextAwareReloadable {
     private final Map<EntityType<?>, EntityModel<?>> registry = new HashMap<>();
+    private final Map<EntityType<?>, Identifier> g3dRegistry = new HashMap<>();
     private final Map<EntityType<?>, Model> finishedRegistry = new HashMap<>();
     final ModelLoader<ModelLoader.ModelParameters> modelLoader;
     private final QuantumClient client;
@@ -34,6 +36,10 @@ public class EntityModelRegistry implements ContextAwareReloadable {
 
     public <T extends Entity> void register(EntityType<@NotNull T> entityType, EntityModel<T> model) {
         this.registry.put(entityType, model);
+    }
+
+    public <T extends Entity> void registerG3d(EntityType<@NotNull T> entityType, Identifier id) {
+        this.g3dRegistry.put(entityType, id);
     }
 
     @Nullable
@@ -62,6 +68,17 @@ public class EntityModelRegistry implements ContextAwareReloadable {
     public void reload(ResourceManager resourceManager, ReloadContext context) {
         this.registry.clear();
         this.finishedRegistry.clear();
+
+        for (Map.Entry<EntityType<?>, Identifier> e : this.g3dRegistry.entrySet()) {
+            Identifier id = e.getValue();
+            Model model = QuantumClient.invokeAndWait(() -> this.modelLoader.loadModel(new ResourceFileHandle(id.mapPath(path -> "models/entity/" + path + ".g3dj")),fileName -> client.getTextureManager().getTexture(new Identifier(fileName).mapPath(path -> {
+                if (path.startsWith("models/entity/")) {
+                    path = path.substring("models/entity/".length());
+                }
+                return "textures/entity/" + path;
+            }))));
+            this.finishedRegistry.put(e.getKey(), model);
+        }
 
         Model somethingModel = this.blockBenchModel(new Identifier("entity/something"));
         this.registerFinished(EntityTypes.SOMETHING, somethingModel);

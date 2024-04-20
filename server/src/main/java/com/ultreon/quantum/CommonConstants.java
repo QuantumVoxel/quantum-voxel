@@ -28,6 +28,7 @@ public class CommonConstants {
             .allowInvalidSurrogate()
             .quoteless()
             .build();
+    public static final int MAX_BLOCK_REGISTRY = 128;
 
     private CommonConstants() {
 

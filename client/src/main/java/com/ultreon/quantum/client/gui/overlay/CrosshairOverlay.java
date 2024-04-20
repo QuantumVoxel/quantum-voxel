@@ -10,7 +10,7 @@ public class CrosshairOverlay extends Overlay {
 
         float x = this.width / 2f;
         float y = this.height / 2f;
-        renderer.blit(QuantumClient.id("textures/gui/crosshair.png"), x - 4.5f, y - 4.5f, 9, 9);
+        renderer.blit(QuantumClient.id("textures/gui/crosshair.png"), width / 2f, height / 2f, 9, 9, 0, 0, 9, 9, 9, 9);
 
         renderer.invertOff();
     }

@@ -362,7 +362,7 @@ public class ImGuiOverlay {
             ImGuiEx.editColor3("NightTopColor", "Shader::SkyBox::NightTopColor", () -> ClientWorld.NIGHT_TOP_COLOR, color -> ClientWorld.NIGHT_TOP_COLOR = color);
             ImGuiEx.editColor3("NightBottomColor", "Shader::SkyBox::NightBottomColor", () -> ClientWorld.NIGHT_BOTTOM_COLOR, color -> ClientWorld.NIGHT_BOTTOM_COLOR = color);
             ImGuiEx.editColor3("SunRiseSetColor", "Shader::SkyBox::SunRiseSetColor", () -> ClientWorld.SUN_RISE_COLOR, color -> ClientWorld.SUN_RISE_COLOR = color);
-            ImGuiEx.editFloat("Rotation", "Shader::SkyBox::Rotation", () -> ClientWorld.SKYBOX_ROTATION.getDegrees(), v -> ClientWorld.SKYBOX_ROTATION = deg(v));
+            ImGuiEx.editFloat("Rotation", "Shader::SkyBox::Rotation", ClientWorld.SKYBOX_ROTATION::getDegrees, ImGuiOverlay::setSkyboxRot);
             ImGui.end();
         }
     }
@@ -471,5 +471,9 @@ public class ImGuiOverlay {
                 ImPlot.destroyContext(ImGuiOverlay.imPlotCtx);
             }
         }
+    }
+
+    private static void setSkyboxRot(float v) {
+        ClientWorld.SKYBOX_ROTATION = deg(v);
     }
 }

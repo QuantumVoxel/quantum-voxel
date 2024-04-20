@@ -89,8 +89,14 @@ public class TextureStitcher implements Disposable {
 
             region.flip(false, true);
             spriteBatch.draw(region, textureOffset.u(), textureOffset.v() - texture.getHeight());
+            spriteBatch.flush();
 
             uvMap.put(id, textureOffset);
+
+            if (DebugFlags.DUMP_TEXTURE_ATLAS.enabled()) {
+                Pixmap frameBufferPixmap = Pixmap.createFromFrameBuffer(0, 0, width, height);
+                PixmapIO.writePNG(Gdx.files.local("%s.%s-%d.atlas-png".formatted(this.atlasId.toString().replace(':', '.').replace('/', '_'), type.name().toLowerCase(Locale.ROOT), x)), frameBufferPixmap);
+            }
 
             texHeight = Math.max(texture.getHeight(), texHeight);
             x += texture.getWidth();

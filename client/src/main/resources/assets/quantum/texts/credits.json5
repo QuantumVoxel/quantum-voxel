@@ -21,6 +21,42 @@
       ]
     }
   },
+  // Contributors that contributed with assets.
+  Assets: {
+    POTATO_XD: {
+      url: null,
+      roles: [
+        "Artist",
+      ],
+      for: [
+        "Hotbar",
+        "Item name display",
+        "Health bar",
+        "Hunger bar",
+        "XP bar",
+        "Crosshairs"
+      ]
+    },
+    Scrappy412: {
+      url: null,
+      roles: [
+        "Artist",
+      ],
+      for: [
+        "Leaves Block Texture"
+      ]
+    },
+    XyperCode: {
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Contributor"
+      ],
+      for: [
+        "Quantium Font",
+        "All remaining assets"
+      ]
+    }
+  },
   // Contributors that contributed language changes/additions through GitHub pull requests.
   Translations: {
     Oszoou: {
@@ -41,11 +77,18 @@
     XyperCode: {
       url: "https://github.com/XyperCode",
       roles: [
-        "Testing",
+        "Contributor",
+        "Testing"
       ]
     },
     MincraftEinstein: {
       url: "https://github.com/MincraftEinstein",
+      roles: [
+        "Testing",
+      ]
+    },
+    CreatomatGaming: {
+      url: "https://github.com/creatomat",
       roles: [
         "Testing",
       ]

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
+import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
@@ -22,10 +23,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class BlockModelRegistry {
-    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<CubeModel>>>> REGISTRY = new HashMap<>();
-    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> CUSTOM_REGISTRY = new HashMap<>();
+    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<CubeModel>>>> REGISTRY = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> CUSTOM_REGISTRY = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private static final Set<Identifier> TEXTURES = new HashSet<>();
-    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> FINISHED_REGISTRY = new HashMap<>();
+    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> FINISHED_REGISTRY = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
 
     static {
         BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking1"));
@@ -37,11 +38,12 @@ public class BlockModelRegistry {
     }
 
     public static BlockModel get(BlockProperties meta) {
-        return BlockModelRegistry.CUSTOM_REGISTRY.getOrDefault(meta.getBlock(), new ArrayList<>())
-                .stream()
-                .filter(p -> p.getFirst().test(meta)).map(p -> p.getSecond().get())
-                .findFirst()
-                .orElse(null);
+        for (Pair<Predicate<BlockProperties>, Supplier<BlockModel>> p : BlockModelRegistry.CUSTOM_REGISTRY.getOrDefault(meta.getBlock(), new ArrayList<>())) {
+            if (p.getFirst().test(meta)) {
+                return p.getSecond().get();
+            }
+        }
+        return null;
     }
 
     public static void register(Block block, Predicate<BlockProperties> predicate, CubeModel model) {

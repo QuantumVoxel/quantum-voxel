@@ -10,6 +10,7 @@ import com.ultreon.quantum.client.gui.widget.TextButton;
 import com.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import com.ultreon.quantum.client.text.UITranslations;
 import com.ultreon.quantum.client.texture.TextureManager;
+import com.ultreon.quantum.text.Formatter;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Color;
 import com.ultreon.quantum.util.Identifier;
@@ -64,8 +65,8 @@ public class ModListScreen extends Screen {
         ModMetadata metadata = modContainer.getMetadata();
         var x = this.list.getX();
 
-        renderer.textLeft(metadata.getName(), x + 50, y + this.list.getItemHeight() - 34);
-        renderer.textLeft("Version: " + metadata.getVersion().getFriendlyString(), x + 50, y + this.list.getItemHeight() - 34 + 12, Color.rgb(0x808080));
+        renderer.textLeft(Formatter.format("<bold>" + metadata.getName()), x + 50, y + this.list.getItemHeight() - 34);
+        renderer.textLeft("Version: " + metadata.getVersion().getFriendlyString(), x + 50, y + this.list.getItemHeight() - 34 + 12, Color.rgb(0xa0a0a0));
 
         this.drawIcon(renderer, metadata, x + 7, y + 7, 32);
     }
@@ -114,13 +115,13 @@ public class ModListScreen extends Screen {
             this.drawIcon(renderer, metadata, x, y, 64);
 
             int xIcon = x + 84;
-            renderer.textLeft(metadata.getName(), 2, xIcon, y);
-            renderer.textLeft("ID: " + metadata.getId(), xIcon, y + 24, Color.rgb(0x808080));
-            renderer.textLeft("Version: " + metadata.getVersion().getFriendlyString(), xIcon, y + 36, Color.rgb(0x808080));
-            renderer.textLeft(metadata.getAuthors().stream().findFirst().map(modContributor -> "Made By: " + modContributor.getName()).orElse("Made By Anonymous"), xIcon, y + 54, Color.rgb(0x505050));
+            renderer.textLeft(TextObject.literal(metadata.getName()).setBold(true), 2, xIcon, y);
+            renderer.textLeft("<aqua>ID: <light-gray>" + metadata.getId(), xIcon, y + 24, Color.rgb(0xa0a0a0));
+            renderer.textLeft("<aqua>Version: <light-gray>" + metadata.getVersion().getFriendlyString(), xIcon, y + 36, Color.rgb(0xa0a0a0));
+            renderer.textLeft(metadata.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor.getName())).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, Color.rgb(0x808080));
 
             y += 84;
-            renderer.textMultiline(metadata.getDescription(), x, y, Color.rgb(0x808080));
+            renderer.textMultiline("<gray>" + metadata.getDescription(), x, y, Color.rgb(0x808080));
         }
     }
 

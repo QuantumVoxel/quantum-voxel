@@ -212,7 +212,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public NotifyManager notifications = new NotifyManager(this);
     @SuppressWarnings("FieldMayBeFinal")
     private boolean booted;
-    public Font font;
+    public final Font font;
+    public final Font newFont;
     @UnknownNullability
     public BitmapFont unifont;
     public GameInput input;
@@ -358,7 +359,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Initialize the unifont and font
         this.unifont = deferDispose(new BitmapFont(Gdx.files.internal("assets/quantum/font/unifont/unifont.fnt"), true));
-        this.font = new Font(new BitmapFont(Gdx.files.internal("assets/quantum/font/dogica/dogicapixel.fnt"), true));
+        this.font = new Font(new BitmapFont(Gdx.files.internal("assets/quantum/font/quantium.fnt"), true));
+        this.newFont = new Font(new BitmapFont(Gdx.files.internal("assets/quantum/font/quantium.fnt"), true));
 
         // Initialize the game window
         this.window = new GameWindow();
@@ -953,11 +955,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     @CanIgnoreReturnValue
     public static <T> T invokeAndWait(@NotNull Callable<T> func) {
-        try {
-            return QuantumClient.instance.submit(func).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new GdxRuntimeException(e);
-        }
+        return QuantumClient.instance.submit(func).join();
     }
 
     /**
@@ -2412,7 +2410,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.itemRenderer != null)
             this.itemRenderer.reload();
         this.skinManager.reload();
-
+        
+        RenderingRegistration.registerRendering(this);
+        
         if (this.worldRenderer != null) {
             this.worldRenderer.reload(context, materialManager);
         }

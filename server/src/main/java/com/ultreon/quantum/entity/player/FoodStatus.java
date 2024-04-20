@@ -80,7 +80,7 @@ public class FoodStatus {
     public void eat(FoodData foodData) {
         this.foodLevel += foodData.getFood();
         this.saturationLevel += foodData.getSaturation();
-        if (this.foodLevel > 20) {
+        if (this.foodLevel >= 20) {
             this.foodLevel = 20;
         }
 

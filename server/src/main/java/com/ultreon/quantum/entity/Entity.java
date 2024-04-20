@@ -44,7 +44,7 @@ public class Entity implements CommandSender {
     public double velocityX;
     public double velocityY;
     public double velocityZ;
-    public float gravity = 0.08f;
+    public float gravity = 0.09f;
     public float drag = 0.98f;
     public boolean noGravity;
     public boolean isColliding;
