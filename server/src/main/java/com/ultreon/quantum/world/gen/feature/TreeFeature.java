@@ -44,7 +44,7 @@ public class TreeFeature extends WorldGenFeature {
         this.random.setSeed(seed);
         this.random.setSeed(this.random.nextLong());
 
-        if (!chunk.get(x, height - 1, z).is(Blocks.DIRT)) {
+        if (!chunk.get(x, height - 1, z).is(Blocks.GRASS_BLOCK)) {
             return false;
         }
 

@@ -12,7 +12,7 @@ public class Notification {
     private MutableText title;
     private MutableText summary;
     private final MutableText subText;
-    private final long duration;
+    private long duration;
     private long createTime = System.currentTimeMillis();
     private boolean sticky;
     private Icon icon;
@@ -89,6 +89,16 @@ public class Notification {
         this.title = title;
         this.summary = summary;
         this.sticky = false;
+    }
+
+    public boolean isSticky() {
+        return this.sticky;
+    }
+
+    public void close() {
+        this.sticky = false;
+        this.createTime = System.currentTimeMillis();
+        this.duration = 0;
     }
 
     public Icon getIcon() {

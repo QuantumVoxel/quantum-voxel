@@ -3,6 +3,7 @@ package com.ultreon.quantum.client.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
+import com.ultreon.quantum.client.PlayerView;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.world.WorldRenderer;
@@ -139,19 +140,35 @@ public class GameCamera extends PerspectiveCamera {
         var ray = new Ray(this.camPos, lookVec.cpy().neg().nor());
         var world = this.client.world;
         if (world != null) {
-            this.hitResult = world.rayCast(ray, 5.1f);
-            this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
-            if (this.hitResult.isCollide()) {
-                Vec3f normal = this.hitResult.getNormal().f();
-                Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
-                Vector3 hitOffset = TMP_2.set(this.direction).nor()
-                        .scl((float) -this.hitResult.distance)
-                        .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
-                this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
-            } else {
-                this.hitPosition = TMP_1.set(this.direction).nor().scl(-5);
+            if (client.getPlayerView() == PlayerView.THIRD_PERSON) {
+                this.hitResult = world.rayCast(ray, 5.1f);
+                this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
+                if (this.hitResult.isCollide()) {
+                    Vec3f normal = this.hitResult.getNormal().f();
+                    Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
+                    Vector3 hitOffset = TMP_2.set(this.direction).nor()
+                            .scl((float) -this.hitResult.distance)
+                            .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
+                    this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
+                } else {
+                    this.hitPosition = TMP_1.set(this.direction).nor().scl(-5);
+                }
+                this.position.set(this.hitPosition.x, this.hitPosition.y, this.hitPosition.z);
+            } else if (client.getPlayerView() == PlayerView.THIRD_PERSON_FRONT) {
+                this.hitPosition = TMP_1.set(this.direction).nor().scl(-5.1f);
+                this.direction.set(-(float) lookVec.x, -(float) lookVec.y, -(float) lookVec.z);
+                if (this.hitResult.isCollide()) {
+                    Vec3f normal = this.hitResult.getNormal().f();
+                    Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
+                    Vector3 hitOffset = TMP_2.set(this.direction).nor()
+                            .scl((float) -this.hitResult.distance)
+                            .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
+                    this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
+                } else {
+                    this.hitPosition = TMP_1.set(this.direction).nor().scl(-5);
+                }
+                this.position.set(this.hitPosition.x, this.hitPosition.y, this.hitPosition.z);
             }
-            this.position.set(this.hitPosition.x, this.hitPosition.y, this.hitPosition.z);
         }
     }
 

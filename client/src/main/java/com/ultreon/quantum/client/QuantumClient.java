@@ -301,7 +301,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private GameActivity activity = null;
     private GameActivity oldActivity = null;
     private Vec2i oldMode;
-    private boolean isInThirdPerson;
     private boolean triggerScreenshot;
     private boolean captureScreenshot;
     public int screenshotScale = 4;
@@ -332,6 +331,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final TextureAtlasManager textureAtlasManager;
     private final FontManager fontManager = new FontManager();
     private final Queue<Disposable> disposalQueue = new ArrayDeque<>();
+    private PlayerView playerView = PlayerView.FIRST_PERSON;
 
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
@@ -1872,7 +1872,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             cur.resize(ceil(width / this.getGuiScale()), ceil(height / this.getGuiScale()));
         }
 
-        OverlayManager.resize(ceil(width / this.getGuiScale()), ceil(height / this.getGuiScale()));;
+        OverlayManager.resize(ceil(width / this.getGuiScale()), ceil(height / this.getGuiScale()));
     }
 
     @Override
@@ -2297,14 +2297,28 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return true if the player is in the third person, false otherwise.
      */
     public boolean isInThirdPerson() {
-        return this.isInThirdPerson;
+        return this.playerView == PlayerView.THIRD_PERSON || this.playerView == PlayerView.THIRD_PERSON_FRONT;
     }
 
     /**
      * @param thirdPerson true to set the player to be in the third person, false for first person.
+     * @deprecated Use {@link #setPlayerView(PlayerView)}
      */
+    @Deprecated
     public void setInThirdPerson(boolean thirdPerson) {
-        this.isInThirdPerson = thirdPerson;
+        if (thirdPerson) {
+            this.playerView = PlayerView.THIRD_PERSON;
+        } else {
+            this.playerView = PlayerView.FIRST_PERSON;
+        }
+    }
+
+    public void setPlayerView(PlayerView playerView) {
+        this.playerView = playerView;
+    }
+
+    public PlayerView getPlayerView() {
+        return this.playerView;
     }
 
     /**
@@ -2410,9 +2424,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.itemRenderer != null)
             this.itemRenderer.reload();
         this.skinManager.reload();
-        
+
         RenderingRegistration.registerRendering(this);
-        
+
         if (this.worldRenderer != null) {
             this.worldRenderer.reload(context, materialManager);
         }
@@ -2441,5 +2455,15 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public void onDisconnect(String message) {
         this.showScreen(new DisconnectedScreen(message, !connection.isMemoryConnection()));
+    }
+
+    public void cyclePlayerView() {
+        if (this.playerView == PlayerView.FIRST_PERSON) {
+            this.playerView = PlayerView.THIRD_PERSON;
+        } else if (this.playerView == PlayerView.THIRD_PERSON) {
+            this.playerView = PlayerView.THIRD_PERSON_FRONT;
+        } else if (this.playerView == PlayerView.THIRD_PERSON_FRONT) {
+            this.playerView = PlayerView.FIRST_PERSON;
+        }
     }
 }
