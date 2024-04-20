@@ -35,6 +35,8 @@ public class CactiFeature extends WorldGenFeature {
     public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
         if (this.noiseConfig == null) return false;
 
+        height++;
+
         int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
         long seed = (world.getSeed() ^ this.noiseConfig.seed() << 32) ^ posSeed;
         this.random.setSeed(seed);

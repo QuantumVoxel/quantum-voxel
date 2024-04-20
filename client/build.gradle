@@ -119,6 +119,10 @@ dependencies {
     implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
 
     implementation api("com.formdev:flatlaf:3.2.1")
+
+    // For hardware information
+    implementation api("com.github.oshi:oshi-core:$project.oshi_version")
+
     // fabric-loader dependencies
     implementation api("org.ow2.asm:asm:$project.asm_version")
     implementation api("org.ow2.asm:asm-analysis:$project.asm_version")
@@ -130,6 +134,7 @@ dependencies {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
+
 
     //noinspection GradleDynamicVersion
     implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')

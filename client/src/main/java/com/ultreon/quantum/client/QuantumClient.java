@@ -50,13 +50,7 @@ import com.ultreon.quantum.client.gui.overlay.LoadingOverlay;
 import com.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import com.ultreon.quantum.client.gui.overlay.OverlayManager;
 import com.ultreon.quantum.client.gui.screens.*;
-import com.ultreon.quantum.client.gui.screens.container.CrateScreen;
-import com.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
-import com.ultreon.quantum.client.init.Fonts;
-import com.ultreon.quantum.client.init.Overlays;
-import com.ultreon.quantum.client.init.ShaderPrograms;
-import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.input.DesktopInput;
 import com.ultreon.quantum.client.input.GameCamera;
 import com.ultreon.quantum.client.input.GameInput;
@@ -67,7 +61,6 @@ import com.ultreon.quantum.client.model.block.BakedCubeModel;
 import com.ultreon.quantum.client.model.block.BakedModelRegistry;
 import com.ultreon.quantum.client.model.block.BlockModel;
 import com.ultreon.quantum.client.model.block.BlockModelRegistry;
-import com.ultreon.quantum.client.model.model.Json5ModelLoader;
 import com.ultreon.quantum.client.multiplayer.MultiplayerData;
 import com.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
 import com.ultreon.quantum.client.network.system.ClientTcpConnection;
@@ -82,7 +75,6 @@ import com.ultreon.quantum.network.client.ClientPacketHandler;
 import com.ultreon.quantum.network.server.ServerPacketHandler;
 import com.ultreon.quantum.resources.ReloadContext;
 import com.ultreon.quantum.client.resources.ResourceLoader;
-import com.ultreon.quantum.client.resources.ResourceNotFoundException;
 import com.ultreon.quantum.client.rpc.GameActivity;
 import com.ultreon.quantum.client.rpc.RpcHandler;
 import com.ultreon.quantum.client.sound.ClientSoundRegistry;
@@ -106,12 +98,8 @@ import com.ultreon.quantum.entity.Player;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.item.tool.ToolItem;
-import com.ultreon.quantum.menu.MenuTypes;
 import com.ultreon.quantum.network.system.IConnection;
 import com.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
-import com.ultreon.quantum.registry.Registries;
-import com.ultreon.quantum.registry.Registry;
-import com.ultreon.quantum.registry.event.RegistryEvents;
 import com.ultreon.quantum.resources.ResourceManager;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.sound.event.SoundEvents;
@@ -119,15 +107,11 @@ import com.ultreon.quantum.text.LanguageBootstrap;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.*;
 import com.ultreon.quantum.world.*;
-import com.ultreon.quantum.world.gen.biome.Biomes;
 import com.ultreon.libs.commons.v0.Mth;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.libs.commons.v0.vector.Vec2i;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
 import com.ultreon.libs.datetime.v0.Duration;
-import de.marhali.json5.Json5Array;
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
 import net.fabricmc.loader.api.FabricLoader;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
@@ -188,15 +172,15 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         thread.setName("ChunkLoadingExecutor");
         return thread;
     });
-    private final boolean devWorld;
-    private boolean imGui = false;
+    final boolean devWorld;
+    boolean imGui = false;
     public InspectionRoot<QuantumClient> inspection;
     public Config newConfig;
     public boolean hideHud = false;
 
-    private Duration bootTime;
-    private GarbageCollector garbageCollector;
-    private GameEnvironment gameEnv;
+    Duration bootTime;
+    GarbageCollector garbageCollector;
+    GameEnvironment gameEnv;
     private final Sound logoRevealSound;
     private final Texture ultreonBgTex;
     private final Texture ultreonLogoTex;
@@ -214,7 +198,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public ItemRenderer itemRenderer;
     public NotifyManager notifications = new NotifyManager(this);
     @SuppressWarnings("FieldMayBeFinal")
-    private boolean booted;
+    boolean booted;
     public final Font font;
     public final Font newFont;
     @UnknownNullability
@@ -234,7 +218,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public final ModelBatch modelBatch;
     public final GameCamera camera;
     public final PlayerInput playerInput = new PlayerInput(this);
-    private boolean isDevMode;
+    boolean isDevMode;
     @Nullable
     public Screen screen;
     @Deprecated
@@ -264,7 +248,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public TextureAtlas emmisiveTextureAtlas;
     @UnknownNullability
     public TextureAtlas itemTextureAtlas;
-    private BakedModelRegistry bakedBlockModels;
+    BakedModelRegistry bakedBlockModels;
 
     // Advanced Shadows
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
@@ -276,22 +260,22 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return thread;
     });
     @Nullable
-    private Integer deferredWidth;
+    Integer deferredWidth;
     @Nullable
-    private Integer deferredHeight;
-    private Texture windowTex;
+    Integer deferredHeight;
+    Texture windowTex;
     public DebugOverlay debugGui;
     private boolean closingWorld;
     private int oldSelected;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
     private final List<Shutdownable> shutdownables = new CopyOnWriteArrayList<>();
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
-    private boolean loading = true;
+    boolean loading = true;
     private final Thread mainThread;
     public HitResult cursor;
-    private LoadingOverlay loadingOverlay;
-    private final String[] argv;
-    private final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
+    LoadingOverlay loadingOverlay;
+    final String[] argv;
+    public final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
     public IntegratedServer integratedServer;
     private final User user;
     private int currentTps;
@@ -335,6 +319,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final FontManager fontManager = new FontManager();
     private final Queue<Disposable> disposalQueue = new ArrayDeque<>();
     private PlayerView playerView = PlayerView.FIRST_PERSON;
+
+    private final QuantumClientLoader loader = new QuantumClientLoader();
 
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
@@ -504,7 +490,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         Gdx.graphics.setCursor(this.normalCursor);
 
         // Start memory monitor
-        MemoryMonitor.start();
+        HardwareMonitor.start();
 
         // Create inspection nodes for libGdx and graphics
         if (DebugFlags.INSPECTION_ENABLED.enabled()) {
@@ -717,201 +703,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return FabricLoader.getInstance().getGameDir();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    private void load() {
-        var argList = Arrays.asList(this.argv);
-        this.isDevMode = argList.contains("--dev") && FabricLoader.getInstance().isDevelopmentEnvironment();
-
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) this.gameEnv = GameEnvironment.DEVELOPMENT;
-        else if (Objects.equals(System.getProperty("quantum.environment", "normal"), "packaged"))
-            this.gameEnv = GameEnvironment.PACKAGED;
-        else this.gameEnv = GameEnvironment.NORMAL;
-
-        if (this.isDevMode) QuantumClient.LOGGER.info("Developer mode is enabled");
-
-//        Thread.setDefaultUncaughtExceptionHandler(QuantumClient::uncaughtException);
-
-        this.loadingOverlay.setProgress(0.075F);
-
-        Gdx.app.setApplicationLogger(new LibGDXLogger());
-
-        this.configDir = QuantumClient.createDir("config/");
-        this.garbageCollector = new GarbageCollector();
-
-        QuantumClient.createDir("screenshots/");
-        QuantumClient.createDir("game-crashes/");
-        QuantumClient.createDir("logs/");
-
-        int scale = Config.guiScale;
-        if (scale == 0) {
-            this.setAutomaticScale(true);
-        }
-        this.setGuiScale(scale);
-
-        Gdx.input.setCatchKey(Input.Keys.BACK, true);
-
-        this.loadingOverlay.setProgress(0.15F);
-
-        QuantumClient.LOGGER.info("Importing resources");
-        this.resourceManager.importModResources();
-
-        this.loadingOverlay.setProgress(0.35F);
-
-        QuantumClient.LOGGER.info("Generating bitmap fonts");
-        var resource = this.resourceManager.getResource(QuantumClient.id("texts/unicode.txt"));
-        if (resource == null) {
-            throw new ApplicationCrash(new CrashLog("Where are my symbols", new ResourceNotFoundException(QuantumClient.id("texts/unicode.txt"))));
-        }
-
-        this.crashOverlay = new ManualCrashOverlay(this);
-
-        this.loadingOverlay.setProgress(0.7F);
-
-        //----------------------
-        // Setting up rendering
-        //----------------------
-        QuantumClient.LOGGER.info("Initializing rendering stuffs");
-        QuantumClient.invokeAndWait(() -> {
-            this.input = deferDispose(this.createInput());
-        });
-        Gdx.input.setInputProcessor(this.input);
-
-        QuantumClient.LOGGER.info("Setting up HUD");
-        this.hud = QuantumClient.invokeAndWait(() -> new Hud(this));
-
-        QuantumClient.LOGGER.info("Setting up Debug Renderer");
-        this.debugGui = new DebugOverlay(this);
-
-        this.loadingOverlay.setProgress(0.83F);
-
-        //--------------------------
-        // Registering game content
-        //--------------------------
-        QuantumClient.LOGGER.info("Loading languages");
-        this.loadLanguages();
-
-        QuantumClient.LOGGER.info("Registering stuff");
-
-        LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
-            Registries.nopInit();
-            RegistryEvents.REGISTRY_CREATION.factory().onRegistryCreation();
-        });
-
-        LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
-            CommonRegistries.registerGameStuff();
-
-            // Client registry
-            Fonts.nopInit();
-            Overlays.nopInit();
-            QuantumClient.invokeAndWait(() -> {
-                Shaders.nopInit();
-                ShaderPrograms.nopInit();
-            });
-
-            QuantumClient.registerDebugPages();
-
-            Biomes.nopInit();
-        });
-
-        for (var mod : FabricLoader.getInstance().getAllMods()) {
-            final String id = mod.getMetadata().getId();
-            LoadingContext.withinContext(new LoadingContext(id), () -> {
-                for (Registry<?> registry : Registry.getRegistries()) {
-                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
-                }
-            });
-        }
-
-        Registry.freeze();
-
-        for (Biome biome : Registries.BIOME.values()) {
-            biome.buildLayers();
-        }
-
-        QuantumClient.LOGGER.info("Registering models");
-        this.registerMenuScreens();
-        RenderingRegistration.registerRendering(this);
-
-        QuantumClient.LOGGER.info("Reloading resources");
-        this.reloadResources();
-
-        this.loadingOverlay.setProgress(0.95F);
-
-        //*
-        //* Post-initialize game content
-        //* Such as model baking and texture stitching
-        //*
-        QuantumClient.LOGGER.info("Stitching textures");
-        this.stitchTextures();
-
-        this.loadingOverlay.setProgress(0.98F);
-
-        Json5ModelLoader j5ModelLoader = new Json5ModelLoader(this.resourceManager);
-
-        BlockModelRegistry.load(j5ModelLoader);
-        QuantumClient.LOGGER.info("Initializing sounds");
-        this.soundRegistry.registerSounds();
-
-        QuantumClient.LOGGER.info("Baking models");
-        BlockModelRegistry.bakeJsonModels(this);
-        this.bakedBlockModels = BlockModelRegistry.bake(this.blocksTextureAtlas);
-
-        this.itemRenderer = QuantumClient.invokeAndWait(() -> new ItemRenderer(this));
-        this.itemRenderer.registerModels(j5ModelLoader);
-        this.itemRenderer.loadModels(this);
-
-        if (this.deferredWidth != null && this.deferredHeight != null) {
-            this.camera.viewportWidth = this.deferredWidth;
-            this.camera.viewportHeight = this.deferredHeight;
-            this.camera.update();
-        }
-
-        this.windowTex = this.textureManager.getTexture(QuantumClient.id("textures/gui/window.png"));
-
-        this.loadingOverlay.setProgress(0.99F);
-
-        ClientLifecycleEvents.CLIENT_STARTED.factory().onGameLoaded(this);
-
-        this.loading = false;
-
-        //*************//
-        // Final stuff //
-        //*************//
-        QuantumClient.LOGGER.info("Opening title screen");
-
-        if (this.imGui) {
-            ImGuiOverlay.setupImGui();
-        }
-
-        this.booted = true;
-
-        this.loadingOverlay.setProgress(1.0F);
-
-        this.bootTime = Duration.ofMilliseconds(System.currentTimeMillis() - QuantumClient.BOOT_TIMESTAMP);
-        QuantumClient.LOGGER.info("Game booted in {}.", this.bootTime.toSimpleString());
-
-        QuantumClient.invokeAndWait(new Task<>(QuantumClient.id("main/show_title_screen"), () -> {
-            if (this.devWorld) {
-                this.startDevWorld();
-            }
-        }));
-        this.loadingOverlay = null;
-    }
-
     public void setAutomaticScale(boolean b) {
         this.autoScale = b;
         this.guiScale = this.calcMaxGuiScale();
         this.resize(this.width, this.height);
     }
 
-    private static void registerDebugPages() {
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("simple"), new SimpleDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("generic"), new GenericDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("profiler"), new ProfilerDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("inspector"), new InspectorDebugPage());
-    }
-
-    private void startDevWorld() {
+    public void startDevWorld() {
         WorldStorage storage = new WorldStorage("worlds/dev");
         try {
             if (Gdx.files.local("worlds/dev").exists())
@@ -923,11 +721,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         this.startWorld(storage);
-    }
-
-    private void registerMenuScreens() {
-        MenuRegistry.registerScreen(MenuTypes.INVENTORY, InventoryScreen::new);
-        MenuRegistry.registerScreen(MenuTypes.CRATE, CrateScreen::new);
     }
 
     /**
@@ -1123,50 +916,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return new GG();
     }
 
-    private void loadLanguages() {
-        var internal = QuantumClient.resource(new Identifier("languages.json5"));
-        Json5Element parse = CommonConstants.JSON5.parse(internal.reader());
-        Json5Object asJson5Object = parse.getAsJson5Object();
-
-        Json5Array languagesJ5 = asJson5Object.get("Languages").getAsJson5Array();
-
-        if (languagesJ5.isEmpty()) {
-            this.registerLanguage(QuantumClient.id("en_us"));
-            return;
-        }
-
-        List<String> languages = new ArrayList<>();
-
-        for (var language : languagesJ5) {
-            if (language == null) continue;
-            if (!language.isJson5Primitive()) continue;
-            if (language.getAsJson5Primitive().isString()) {
-                languages.add(language.getAsString());
-            }
-        }
-
-        for (var language : languages) {
-            this.registerLanguage(QuantumClient.id(language));
-        }
-
-        LanguageRegistry.doRegistration(this::registerLanguage);
-    }
-
-    private void registerLanguage(Identifier id) {
-        var s = id.path().split("_", 2);
-        var locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
-        LanguageManager.INSTANCE.register(locale, id);
-        LanguageManager.INSTANCE.load(locale, id, this.resourceManager);
-    }
-
-    private void stitchTextures() {
-    }
-
-    private GameInput createInput() {
-        return new DesktopInput(this, this.camera);
-    }
-
-    private static FileHandle createDir(String dirName) {
+    static FileHandle createDir(String dirName) {
         var directory = QuantumClient.data(dirName);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -1464,7 +1214,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.loadingOverlay = new LoadingOverlay();
 
-        CompletableFuture.runAsync(this::load).exceptionally(throwable -> {
+        CompletableFuture.runAsync(loader).exceptionally(throwable -> {
             // Clear the crash handling
             QuantumClient.crashHook = null;
 
@@ -2430,7 +2180,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         });
     }
 
-    private void reloadResources() {
+    public void reloadResources() {
         ReloadContext context = ReloadContext.create(this, this.resourceManager);
         this.resourceManager.reload();
         this.textureManager.reload(context);
