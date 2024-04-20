@@ -125,7 +125,7 @@ public class ItemRenderer implements Disposable {
             this.itemCam.zoom = 4.0f / guiScale;
             this.itemCam.far = 100000;
             this.itemCam.update();
-            @NotNull BlockModel blockModel = this.client.getBakedBlockModel(block);
+            @NotNull BlockModel blockModel = this.client.getBlockModel(block);
             if (blockModel == BakedCubeModel.DEFAULT) {
                 renderCustomBlock(item, block, renderer, x, y);
                 return;
@@ -215,7 +215,7 @@ public class ItemRenderer implements Disposable {
         Registries.ITEM.values().forEach((e) -> {
             try {
                 if (e instanceof BlockItem blockItem) {
-                    this.registerBlockModel(blockItem, () -> this.client.getBakedBlockModel(blockItem.createBlockMeta()));
+                    this.registerBlockModel(blockItem, () -> this.client.getBlockModel(blockItem.createBlockMeta()));
                     return;
                 }
 

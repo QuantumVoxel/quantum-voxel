@@ -610,7 +610,7 @@ public class GreedyMesher implements Mesher {
 
         // Other block renderers may alter shape in an unpredictable way
         boolean considerAsSame = sameLight && !sameBlock && tooDarkToTell
-                && QuantumClient.get().getBakedBlockModel(id1) == QuantumClient.get().getBakedBlockModel(id2)
+                && QuantumClient.get().getBlockModel(id1) == QuantumClient.get().getBlockModel(id2)
                 && GreedyMesher.isFullCubeRender(id1.getBlock()) && GreedyMesher.isFullCubeRender(id2.getBlock())
                 && (!id1.isTransparent() && !id2.isTransparent());
 
@@ -654,7 +654,7 @@ public class GreedyMesher implements Mesher {
 
             QuantumClient client = QuantumClient.get();
             this.renderer = BlockRendererRegistry.get(block.getBlock());
-            this.bakedBlockModel = (BakedCubeModel) client.getBakedBlockModel(block);
+            this.bakedBlockModel = (BakedCubeModel) client.getBlockModel(block);
         }
 
         public void render(MeshBuilder builder) {

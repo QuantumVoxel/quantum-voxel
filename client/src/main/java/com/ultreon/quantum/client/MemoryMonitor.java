@@ -2,7 +2,14 @@ package com.ultreon.quantum.client;
 
 import com.ultreon.quantum.client.gui.Notification;
 
-public class MemoryMonitor {
+/**
+ * Memory monitor, used to monitor the memory usage of the game.
+ * Shows a notification if the free memory available is below 10 MB.
+ *
+ * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @since 0.1.0
+ */
+public final class MemoryMonitor {
     private static Thread t;
 
     public static synchronized void start() {
@@ -14,21 +21,25 @@ public class MemoryMonitor {
     }
 
     private static void watch() {
-        Notification memNotify = null;
+        var ref = new Object() {
+            Notification memNotify = null;
+        };
 
         while (true) {
             Runtime runtime = Runtime.getRuntime();
             long remaining = runtime.freeMemory();
 
             if (remaining < 10_000_000) {
-                memNotify = QuantumClient.invokeAndWait(() -> {
+                ref.memNotify = QuantumClient.invokeAndWait(() -> {
                     Notification build = Notification.builder("Low memory.", "Remaining: " + (remaining / 1024 / 1024) + " MB").sticky().build();
                     QuantumClient.get().notifications.add(build);
                     return build;
                 });
-            } else if (memNotify != null) {
-                memNotify.close();
-                memNotify = null;
+            } else if (ref.memNotify != null) {
+                QuantumClient.invokeAndWait(() -> {
+                    ref.memNotify.close();
+                    ref.memNotify = null;
+                });
             }
         }
     }

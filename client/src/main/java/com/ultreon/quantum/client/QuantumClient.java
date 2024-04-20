@@ -32,6 +32,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ultreon.libs.commons.v0.tuple.Pair;
 import com.ultreon.quantum.*;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.api.events.ClientLifecycleEvents;
@@ -62,6 +63,7 @@ import com.ultreon.quantum.client.input.GameInput;
 import com.ultreon.quantum.client.input.PlayerInput;
 import com.ultreon.quantum.client.item.ItemRenderer;
 import com.ultreon.quantum.client.management.*;
+import com.ultreon.quantum.client.model.block.BakedCubeModel;
 import com.ultreon.quantum.client.model.block.BakedModelRegistry;
 import com.ultreon.quantum.client.model.block.BlockModel;
 import com.ultreon.quantum.client.model.block.BlockModelRegistry;
@@ -151,6 +153,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Predicate;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static com.badlogic.gdx.math.MathUtils.ceil;
@@ -500,6 +503,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Set normal cursor
         Gdx.graphics.setCursor(this.normalCursor);
 
+        // Start memory monitor
         MemoryMonitor.start();
 
         // Create inspection nodes for libGdx and graphics
@@ -1015,7 +1019,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Gets an Quantum Voxel identifier from a path, but as a string.
+     * Gets an identifier from a path with the Quantum Voxel namespace, but as a string.
      *
      * @param path the path.
      * @return the identifier as string.
@@ -2096,13 +2100,25 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.futures.add(future);
     }
 
-    public @NotNull BlockModel getBakedBlockModel(BlockProperties block) {
-        return Objects.requireNonNull(this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of()))
+    public @NotNull BlockModel getBlockModel(BlockProperties block) {
+        List<Pair<Predicate<BlockProperties>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
+
+        if (orDefault == null) {
+            BlockModel blockModel = BlockModelRegistry.get(block);
+            return Objects.requireNonNullElse(blockModel, BakedCubeModel.DEFAULT);
+
+        }
+        
+        BlockModel blockModel = orDefault
                 .stream()
                 .filter(pair -> pair.getFirst().test(block))
                 .findFirst()
                 .map(pair -> (BlockModel) pair.getSecond())
                 .orElseGet(() -> BlockModelRegistry.get(block));
+
+        if (blockModel == null) return BakedCubeModel.DEFAULT;
+
+        return blockModel;
     }
 
     /**
