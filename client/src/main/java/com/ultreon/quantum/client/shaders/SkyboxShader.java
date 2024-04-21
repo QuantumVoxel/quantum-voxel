@@ -94,7 +94,6 @@ public class SkyboxShader extends DefaultShader {
     public static String createPrefix (final Renderable renderable, final Config config) {
         final Attributes attributes = SkyboxShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
-        prefix.append("#version ").append(SkyboxShader.version).append("\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (SkyboxShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");

@@ -119,6 +119,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.Configuration;
+import org.lwjgl.system.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -163,7 +165,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Cursor clickCursor;
     private final RenderPipeline pipeline;
     public final Renderer renderer;
-    public final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    public final IClipboard clipboard = getClipboard();
+
+    private IClipboard getClipboard() {
+        if (Platform.get() != Platform.MACOSX) {
+            return new GameClipbard(Toolkit.getDefaultToolkit().getSystemClipboard());
+        }
+
+        return new NullClipboard();
+    }
+
     public final G3dModelLoader modelLoader;
     public IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     public ServerData serverData;
@@ -639,7 +650,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private static void launch(String[] argv) {
         QuantumClient.logDebug();
 
-        FlatMacLightLaf.setup();
+        if (Platform.get() == Platform.MACOSX) {
+            Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
+        }
 
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
@@ -648,7 +661,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 QuantumClient.crash(e);
             }
         }
@@ -661,7 +674,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         config.setForegroundFPS(120);
         config.setIdleFPS(10);
         config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 0);
-        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
         config.setTitle("Quantum Voxel");
         config.setWindowIcon(QuantumClient.getIcons());

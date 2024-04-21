@@ -13,7 +13,7 @@ import com.ultreon.quantum.client.world.ClientWorld;
 
 public class ModelViewShader extends DefaultShader {
     private final static Attributes tmpAttributes = new Attributes();
-    private static String version = "330";
+    private static String version = "140";
     public final int u_globalSunlight;
 
     public ModelViewShader(final Renderable renderable) {

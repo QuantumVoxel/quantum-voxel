@@ -95,7 +95,7 @@ public class ImGuiOverlay {
 
         QuantumClient.invokeAndWait(() -> {
             ImGuiOverlay.imGuiGlfw.init(windowHandle, true);
-            ImGuiOverlay.imGuiGl3.init("#version 110");
+            ImGuiOverlay.imGuiGl3.init("#version 140");
         });
     }
 

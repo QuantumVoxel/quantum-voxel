@@ -2140,37 +2140,35 @@ public class Renderer implements Disposable {
     @Language("GLSL")
     final String FRAG =
             """
-                    #version 130
-                                
                     // Fragment shader
                     #ifdef GL_ES
                     precision mediump float;
                     #endif
-                                
+                               \s
                     varying vec4 vColor;
                     varying vec2 vTexCoord;
-                                
+                               \s
                     uniform sampler2D u_texture;
                     uniform vec2 iResolution;
                     uniform float iBlurRadius; // Radius of the blur
                     uniform vec2 iBlurDirection; // Direction of the blur
-                                
+                               \s
                     void main() {
                       float Pi = 6.28318530718; // Pi*2
-                                
+                               \s
                       // GAUSSIAN BLUR SETTINGS {{{
                       float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
                       float Quality = 4.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
                       float Size = iBlurRadius; // BLUR SIZE (Radius)
                       // GAUSSIAN BLUR SETTINGS }}}
-                                
+                               \s
                       vec2 Radius = Size/iResolution.xy;
-                                
+                               \s
                       // Normalized pixel coordinates (from 0 to 1)
                       vec2 uv = gl_FragCoord.xy/iResolution.xy;
                       // Pixel colour
-                      vec4 color = texture(u_texture, uv);
-                                
+                      vec4 color = texture2D(u_texture, uv);
+                               \s
                       // Blur calculations
                       for( float d=0.0; d<Pi; d+=Pi/Directions)
                       {
@@ -2179,11 +2177,11 @@ public class Renderer implements Disposable {
                           color += texture2D(u_texture, uv+vec2(cos(d),sin(d))*Radius*i);
                         }
                       }
-                      
+                     \s
                       // Gamma correction
                       float Gamma = 1.05;
                       color.rgba = pow(color.rgba, vec4(1.0/Gamma));
-                                
+                               \s
                       // Output to screen
                       color /= Quality * Directions;
                       gl_FragColor = color;

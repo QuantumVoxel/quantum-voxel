@@ -1,3 +1,8 @@
+#ifdef GL_ES
+precision mediump float;
+precision mediump vec4;
+precision mediump vec2;
+#endif
 attribute vec4 a_position;
 attribute vec4 a_diffuseColor;
 attribute vec2 a_texCoord0;
@@ -13,3 +18,4 @@ void main()
     v_texCoords = a_texCoord0;
     gl_Position = u_projTrans * a_position;
 }
+
