@@ -1,10 +1,9 @@
 package com.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.block.entity.BlockEntity;
@@ -15,9 +14,8 @@ import com.ultreon.quantum.client.api.events.ClientChunkEvents;
 import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.model.block.BlockModel;
 import com.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import com.ultreon.quantum.client.render.ModelObject;
+import com.ultreon.quantum.client.render.Scene3D;
 import com.ultreon.quantum.client.render.meshing.GreedyMesher;
-import com.ultreon.quantum.client.util.RenderableArray;
 import com.ultreon.quantum.collection.Storage;
 import com.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import com.ultreon.quantum.util.InvalidThreadException;
@@ -30,27 +28,29 @@ import com.ultreon.libs.commons.v0.Mth;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ClientChunk extends Chunk {
     public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
     final GreedyMesher mesher;
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
-    public ChunkMesh solidMesh;
-    public ChunkMesh transparentMesh;
+
+    public Model model;
+    public ModelInstance modelInstance;
+
     public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();
     private final Map<BlockPos, BlockProperties> customRendered = new HashMap<>();
-    private final Map<BlockPos, ModelInstance> models = new HashMap<>();
     public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
-    private final List<ModelObject> modelObjects = new ArrayList<>();
+    private final Map<BlockPos, ModelInstance> addedModels = new ConcurrentHashMap<>();
+    private final Map<BlockPos, ModelInstance> models = new ConcurrentHashMap<>();
+    private final Array<BlockPos> removedModels = new Array<>();
+    public boolean visible;
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
@@ -96,14 +96,13 @@ public final class ClientChunk extends Chunk {
         synchronized (this) {
             super.dispose();
 
-            for (ModelObject modelObject : this.modelObjects) {
-                modelObject.dispose();
+            WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
+            if (this.model != null && this.modelInstance != null) {
+                if (worldRenderer != null) {
+                    worldRenderer.unload(this);
+                }
             }
 
-            WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
-            if ((this.solidMesh != null || this.transparentMesh != null) && worldRenderer != null) {
-                worldRenderer.free(this);
-            }
             this.tmp.setZero();
             this.tmp1.setZero();
 
@@ -148,7 +147,7 @@ public final class ClientChunk extends Chunk {
         if (!QuantumClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
-        this.models.remove(new BlockPos(x, y, z));
+        this.removedModels.add(new BlockPos(x, y, z));
 
         boolean isBlockSet = super.setFast(x, y, z, block);
 
@@ -210,34 +209,26 @@ public final class ClientChunk extends Chunk {
     }
 
     @CanIgnoreReturnValue
+    @Deprecated
     public ModelInstance addModel(BlockPos pos, ModelInstance instance) {
-        return this.models.put(pos, instance);
+        return this.addedModels.put(pos, instance);
     }
 
-    public void renderModels(Array<Renderable> output, Pool<Renderable> pool) {
-        for (Map.Entry<BlockPos, ModelInstance> entry : this.models.entrySet()) {
-            ModelInstance model = entry.getValue();
-            if (model == null) continue;
-
-            BlockPos key = entry.getKey();
-
-            float x = (float) key.x() % 16;
-            float z = (float) key.z() % 16;
-            if (x < 0) x += 16;
-            if (z < 0) z += 16;
-            ModelObject modelObject = model.userData instanceof ModelObject ? (ModelObject) model.userData : null;
-            if (modelObject == null) {
-                RenderableArray renderables = new RenderableArray();
-                model.getRenderables(renderables, RENDERABLE_POOL);
-                model.userData = modelObject = new ModelObject(Shaders.MODEL_VIEW.get(), model, renderables);
-            }
-            modelObject.renderables().clear();
-            model.transform.setToTranslationAndScaling(this.renderOffset.x + x, this.renderOffset.y + (float) key.y() % 65536, this.renderOffset.z + z, 1 / 16f, 1 / 16f, 1 / 16f);
-            model.getRenderables(modelObject.renderables(), RENDERABLE_POOL);
-            output.addAll(modelObject.renderables());
-
-            this.modelObjects.add(modelObject);
-        }
+    public void renderModels(Scene3D scene3D) {
+//        for (BlockPos pos : this.addedModels.keySet()) {
+//            ModelInstance model = this.addedModels.get(pos);
+//            model.userData = Shaders.MODEL_VIEW.get();
+//            this.addedModels.remove(pos);
+//            this.models.put(pos, model);
+//            scene3D.add(model);
+//        }
+//
+//        for (BlockPos pos : this.removedModels) {
+//            this.removedModels.removeValue(pos, false);
+//            ModelInstance model = this.models.remove(pos);
+//            if (model != null)
+//                scene3D.destroy(model);
+//        }
     }
 
     public void loadCustomRendered() {
@@ -262,5 +253,13 @@ public final class ClientChunk extends Chunk {
 
     public QuantumClient getClient() {
         return client;
+    }
+
+    public void invalidate() {
+
+        WorldRenderer worldRenderer = this.client.worldRenderer;
+        if (worldRenderer != null) {
+            worldRenderer.remove(this);
+        }
     }
 }

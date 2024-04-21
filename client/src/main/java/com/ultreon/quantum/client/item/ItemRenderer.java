@@ -133,7 +133,7 @@ public class ItemRenderer implements Disposable {
             if (blockModel instanceof BakedCubeModel bakedModel) {
                 this.batch.begin(this.itemCam);
                 Mesh mesh = bakedModel.getMesh();
-                Renderable renderable = new Renderable();
+                Renderable renderable = renderer.obtainRenderable();
                 renderable.meshPart.mesh = mesh;
                 renderable.meshPart.center.set(0F, 0F, 0F);
                 renderable.meshPart.offset = 0;

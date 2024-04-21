@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client.render.meshing;
 
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.ultreon.quantum.block.Block;
 
 /**
@@ -12,10 +12,10 @@ public interface Mesher {
     /**
      * Meshes the specified voxels.
      *
-     * @param builder     MeshBuilder to build the mesh onto
-     * @param condition   Condition to check if the block should be used in the mesh
+     * @param builder   MeshBuilder to build the mesh onto
+     * @param condition Condition to check if the block should be used in the mesh
      */
-    Mesh meshVoxels(MeshBuilder builder, UseCondition condition);
+    void meshVoxels(ModelBuilder builder, MeshPartBuilder meshBuilder, UseCondition condition);
 
     interface UseCondition {
         /**

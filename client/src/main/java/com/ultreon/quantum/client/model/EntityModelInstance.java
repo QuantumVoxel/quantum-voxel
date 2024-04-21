@@ -91,8 +91,6 @@ public class EntityModelInstance<T extends Entity> {
         model.transform.setTranslation(tmp);
 
         model.calculateTransforms();
-
-        context.render(model);
     }
 
     public void setTextures(Identifier textureLocation) {

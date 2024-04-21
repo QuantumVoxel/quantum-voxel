@@ -479,7 +479,7 @@ public class ServerWorld extends World {
         if (!this.chunksToLoad.isEmpty()) return;
         if (!this.chunksToUnload.isEmpty()) return;
 
-        if (!this.server.isInitialChunksLoaded()) {
+        if (!this.server.isInitialChunksLoaded() && !refresher.toLoad.isEmpty()) {
             if (this.chunksToLoadCount > 0) {
                 this.chunksToLoadCount = -1;
                 this.server.onInitialChunksLoaded();
@@ -487,8 +487,6 @@ public class ServerWorld extends World {
             if (this.chunksToLoadCount == 0) {
                 this.chunksToLoadCount = refresher.toLoad.size();
             }
-
-            return;
         }
 
         for (ChunkPos pos : refresher.toLoad) {
@@ -530,7 +528,7 @@ public class ServerWorld extends World {
         this.chunkLock.lock();
         try {
             if (this.chunksToLoad.contains(chunkPos)) return;
-            this.chunksToLoad.offer(chunkPos);
+            this.chunksToLoad.add(chunkPos);
         } catch (Throwable t) {
             World.LOGGER.error("Failed to defer chunk " + chunkPos + ":", t);
         }

@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
@@ -24,6 +25,7 @@ import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.font.Font;
 import com.ultreon.quantum.client.texture.TextureManager;
 import com.ultreon.quantum.client.util.InvalidValueException;
+import com.ultreon.quantum.client.world.RenderablePool;
 import com.ultreon.quantum.text.ChatColor;
 import com.ultreon.quantum.text.FormattedText;
 import com.ultreon.quantum.text.TextObject;
@@ -68,7 +70,7 @@ public class Renderer implements Disposable {
     private final ShaderProgram gridShader;
     private float strokeWidth = 1;
     private Font font;
-    private final Matrices matrixStack;
+    private final Matrices matrices;
     private Color blitColor = Color.rgb(0xffffff);
     private final Vector2 tmp2A = new Vector2();
     private final Vector3 tmp3A = new Vector3();
@@ -81,6 +83,7 @@ public class Renderer implements Disposable {
 
     private FrameBuffer grid;
     private float iTime;
+    private final RenderablePool renderablePool = new RenderablePool();
 
     /**
      * @param shapes shape drawer instance from {@link QuantumClient}
@@ -91,20 +94,20 @@ public class Renderer implements Disposable {
 
     /**
      * @param shapes      shape drawer instance from {@link QuantumClient}
-     * @param matrixStack current matrix stack.
+     * @param matrices current matrix stack.
      */
-    public Renderer(ShapeDrawer shapes, Matrices matrixStack) {
+    public Renderer(ShapeDrawer shapes, Matrices matrices) {
         this.globalTranslation.push(new Vector3());
         this.font = this.client.font;
         GL30 gl30 = Gdx.gl30;
         this.batch = shapes.getBatch();
         this.shapes = shapes;
-        this.matrixStack = matrixStack;
+        this.matrices = matrices;
         this.textureManager = this.client.getTextureManager();
         if (this.textureManager == null) throw new IllegalArgumentException("Texture manager isn't initialized yet!");
 
         // Projection matrix.
-        this.matrixStack.onEdit = matrix -> shapes.getBatch().setTransformMatrix(matrix);
+        this.matrices.onEdit = matrix -> shapes.getBatch().setTransformMatrix(matrix);
 
 
         // VfxManager is a host for the effects.
@@ -139,8 +142,8 @@ public class Renderer implements Disposable {
             System.out.println(gridShader.getLog());
     }
 
-    public Matrices getMatrixStack() {
-        return this.matrixStack;
+    public Matrices getMatrices() {
+        return this.matrices;
     }
 
     @CanIgnoreReturnValue
@@ -1713,8 +1716,8 @@ public class Renderer implements Disposable {
         if (translation != null) {
             translation.add(x, y, 0);
         }
-        this.matrixStack.translate(x, y);
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.translate(x, y);
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
@@ -1724,8 +1727,8 @@ public class Renderer implements Disposable {
         if (translation != null) {
             translation.add(x, y, 0);
         }
-        this.matrixStack.translate(x, y);
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.translate(x, y);
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
@@ -1735,8 +1738,8 @@ public class Renderer implements Disposable {
         if (translation != null) {
             translation.add(x, y, z);
         }
-        this.matrixStack.translate(x, y, z);
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.translate(x, y, z);
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
@@ -1746,28 +1749,28 @@ public class Renderer implements Disposable {
         if (translation != null) {
             translation.add(x, y, z);
         }
-        this.matrixStack.translate(x, y, z);
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.translate(x, y, z);
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer rotate(double x, double y) {
-        this.matrixStack.rotate(new Quaternion(1, 0, 0, (float) x));
-        this.matrixStack.rotate(new Quaternion(0, 1, 0, (float) y));
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.rotate(new Quaternion(1, 0, 0, (float) x));
+        this.matrices.rotate(new Quaternion(0, 1, 0, (float) y));
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer scale(double sx, double sy) {
-        this.matrixStack.scale((float) sx, (float) sy);
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.scale((float) sx, (float) sy);
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
     public Matrix4 getTransform() {
-        return this.matrixStack.last();
+        return this.matrices.last();
     }
 
     public float getStrokeWidth() {
@@ -1912,16 +1915,16 @@ public class Renderer implements Disposable {
             throw new IllegalStateException("Global translation is null");
 
         this.globalTranslation.push(peek.cpy());
-        this.matrixStack.push();
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.push();
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer popMatrix() {
         this.globalTranslation.pop();
-        this.matrixStack.pop();
-        this.batch.setTransformMatrix(this.matrixStack.last());
+        this.matrices.pop();
+        this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
@@ -2494,5 +2497,18 @@ public class Renderer implements Disposable {
 
     public boolean isBlurred() {
         return blurred;
+    }
+
+    public void finish() {
+        if (this.batch.isDrawing()) {
+            QuantumClient.LOGGER.warn("Batch still drawing!");
+            this.batch.end();
+        }
+        this.matrices.reset();
+        this.renderablePool.flush();
+    }
+
+    public Renderable obtainRenderable() {
+        return this.renderablePool.obtain();
     }
 }

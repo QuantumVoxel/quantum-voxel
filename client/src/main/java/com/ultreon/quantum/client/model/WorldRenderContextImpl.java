@@ -1,24 +1,18 @@
 package com.ultreon.quantum.client.model;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Pool;
+import com.ultreon.quantum.client.render.Scene3D;
 import com.ultreon.quantum.world.World;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 
-public class WorldRenderContextImpl<T> implements Disposable, WorldRenderContext<T> {
-    final Array<Renderable> output;
-    final Pool<Renderable> pool;
+public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
+    final Scene3D scene3D;
     final T holder;
     private final World world;
     private final float worldScale;
     private final Vec3d cameraPos;
 
-    public WorldRenderContextImpl(Array<Renderable> output, Pool<Renderable> pool, T holder, World world, float worldScale, Vec3d cameraPos) {
-        this.output = output;
-        this.pool = pool;
+    public WorldRenderContextImpl(Scene3D scene3D, T holder, World world, float worldScale, Vec3d cameraPos) {
+        this.scene3D = scene3D;
         this.holder = holder;
         this.world = world;
         this.worldScale = worldScale;
@@ -28,17 +22,6 @@ public class WorldRenderContextImpl<T> implements Disposable, WorldRenderContext
     @Override
     public T getHolder() {
         return holder;
-    }
-
-    @Override
-    public void render(RenderableProvider renderableProvider) {
-        renderableProvider.getRenderables(output, pool);
-    }
-
-    @Override
-    public void dispose() {
-        pool.clear();
-        output.clear();
     }
 
     public Vec3d relative(Vec3d translation, Vec3d tmp) {

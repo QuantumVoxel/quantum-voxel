@@ -19,6 +19,7 @@ public class BlastFurnaceBlock extends Block {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public BlockProperties onPlacedBy(World world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
         System.out.println("On placed by " + player.getName() + " at " + blockPos + " facing " + direction);
 

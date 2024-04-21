@@ -123,7 +123,9 @@ public class WorldLoadScreen extends Screen {
         ServerWorld world = this.world;
         if (world != null) {
             int chunksToLoad = world.getChunksToLoad();
-            if (chunksToLoad != 0) {
+            if (chunksToLoad == -1) {
+                this.subTitleLabel.text().setRaw("Entering your world");
+            } else if (chunksToLoad != 0) {
 //                int ratio = world.getChunksLoaded() / chunksToLoad;
                 float ratio = (float) world.getChunksLoaded() / chunksToLoad;
                 String percent = (int) (100 * ratio) + "%";

@@ -15,9 +15,4 @@ public class EntityDrawBuffer implements RenderContext<Entity> {
     public Entity getHolder() {
         return entity;
     }
-
-    @Override
-    public void render(RenderableProvider renderableProvider) {
-
-    }
 }

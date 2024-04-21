@@ -35,8 +35,6 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
         ClientWorld clientWorld = new ClientWorld(this.client);
         this.client.world = clientWorld;
-        this.client.worldRenderer = new WorldRenderer(this.client.world);
-        this.client.renderWorld = true;
         this.client.inspection.createNode("world", () -> this.client.world);
 
         var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, clientWorld, uuid);

@@ -2,6 +2,7 @@ package com.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.utils.FlushablePool;
 import com.badlogic.gdx.utils.Pool;
 import com.google.common.collect.Queues;
 import com.ultreon.quantum.client.util.Utils;
@@ -10,7 +11,7 @@ import java.util.Deque;
 import java.util.function.Consumer;
 
 public class Matrices {
-    private final Pool<Matrix4> pool = new Pool<>() {
+    private final FlushablePool<Matrix4> pool = new FlushablePool<Matrix4>() {
         @Override
         protected Matrix4 newObject() {
             return new Matrix4();
@@ -79,5 +80,9 @@ public class Matrices {
     @Override
     public String toString() {
         return this.stack.toString();
+    }
+
+    public void reset() {
+        pool.flush();
     }
 }

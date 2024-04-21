@@ -12,13 +12,13 @@ import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.input.GameCamera;
 import com.ultreon.quantum.client.player.LocalPlayer;
+import com.ultreon.quantum.client.render.Scene3D;
 import com.ultreon.quantum.client.render.ShaderContext;
-import com.ultreon.quantum.client.render.shader.OpenShaderProvider;
 import com.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
 import com.ultreon.quantum.client.world.ClientWorld;
 import com.ultreon.quantum.client.world.WorldRenderer;
 
-public class SkyboxNode extends RenderPipeline.RenderNode {
+public class BackgroundNode extends RenderPipeline.RenderNode {
     private final Supplier<WorldShaderProvider> shaderProvider = Shaders.WORLD;
 
     protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
@@ -57,6 +57,7 @@ public class SkyboxNode extends RenderPipeline.RenderNode {
     }
 
     private void renderWorldOnce(WorldRenderer worldRenderer, ClientWorld world, Vec3d position, ModelBatch batch) {
-        batch.render(worldRenderer::collectPre, worldRenderer.getEnvironment());
+        worldRenderer.updateBackground();
+        batch.render(Scene3D.BACKGROUND::finish);
     }
 }

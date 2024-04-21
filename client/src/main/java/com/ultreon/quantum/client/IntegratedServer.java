@@ -5,6 +5,7 @@ import com.ultreon.quantum.client.gui.Notification;
 import com.ultreon.quantum.client.gui.icon.MessageIcon;
 import com.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import com.ultreon.quantum.client.player.LocalPlayer;
+import com.ultreon.quantum.client.world.WorldRenderer;
 import com.ultreon.quantum.crash.ApplicationCrash;
 import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.debug.DebugFlags;
@@ -237,6 +238,9 @@ public class IntegratedServer extends QuantumServer {
         super.onInitialChunksLoaded();
 
         QuantumClient.invoke(() -> {
+            this.client.worldRenderer = new WorldRenderer(this.client.world);
+            this.client.renderWorld = true;
+
             if (this.client.screen instanceof WorldLoadScreen loadScreen) {
                 loadScreen.done();
                 this.client.showScreen(null);

@@ -39,7 +39,7 @@ public final class HardwareMonitor {
             long total = memory.getTotal();
             double ratio = available / (double) total;
 
-            if (ratio < 0.1) {
+            if (available < 100_000_000) {
                 if (ref.memNotify == null)
                     ref.memNotify = QuantumClient.invokeAndWait(() -> {
                         Notification build = Notification.builder("Low memory.", "Available: " + (available / 1024 / 1024) + " MB").sticky().build();

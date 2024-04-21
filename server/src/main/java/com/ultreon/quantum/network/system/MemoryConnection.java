@@ -76,11 +76,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
             rx.decrementAndGet();
         } catch (Exception e) {
-            if (resultListener != null)
+            if (resultListener != null) {
                 resultListener.onFailure();
-            else {
-                CommonConstants.LOGGER.error("Failed to handle packet", e);
             }
+            CommonConstants.LOGGER.error("Failed to handle packet", e);
 
             return;
         }

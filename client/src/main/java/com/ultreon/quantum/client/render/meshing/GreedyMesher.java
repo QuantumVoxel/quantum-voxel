@@ -1,10 +1,9 @@
 package com.ultreon.quantum.client.render.meshing;
 
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.Blocks;
@@ -83,13 +82,13 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public Mesh meshVoxels(MeshBuilder builder, UseCondition condition) {
-        List<Face> faces = this.getFaces(condition);
+    public void meshVoxels(ModelBuilder builder, MeshPartBuilder meshBuilder, UseCondition condition) {
+        List<Face> faces = this.getFaces(builder, condition);
 
-        return this.meshFaces(faces, builder);
+        this.meshFaces(faces, meshBuilder);
     }
 
-    public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
+    public List<Face> getFaces(ModelBuilder builder, UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
         PerCornerLightData bright;
@@ -375,8 +374,8 @@ public class GreedyMesher implements Mesher {
         return new LightLevelData(sunBrightness, blockBrightness);
     }
 
-    public List<Face> getFaces(UseCondition condition) {
-        return this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+    public List<Face> getFaces(ModelBuilder builder, UseCondition condition) {
+        return this.getFaces(builder, condition, this::shouldOcclude, this::shouldMerge);
     }
 
     private boolean shouldNotRenderNormally(Block blockToBlockFace) {
@@ -489,14 +488,11 @@ public class GreedyMesher implements Mesher {
         }
     }
 
-    public Mesh meshFaces(List<Face> faces, MeshBuilder builder) {
-        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
-
+    public void meshFaces(List<Face> faces, MeshPartBuilder builder) {
         builder.ensureVertices(faces.size() * 4);
         for (Face f : faces) {
             f.render(builder);
         }
-        return builder.end();
     }
 
     /**
@@ -657,7 +653,7 @@ public class GreedyMesher implements Mesher {
             this.bakedBlockModel = (BakedCubeModel) client.getBlockModel(block);
         }
 
-        public void render(MeshBuilder builder) {
+        public void render(MeshPartBuilder builder) {
             LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);
             if (this.bakedBlockModel == null) return;
             switch (this.side) {

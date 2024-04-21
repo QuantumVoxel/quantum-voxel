@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MaterialManager implements Manager<Material> {
+    public static final @NotNull Identifier DEFAULT_ID = Identifier.parse("default");
     private final ResourceManager resourceManager;
     private final TextureManager textureManager;
     private final CubemapManager cubemapManager;
@@ -55,7 +56,7 @@ public class MaterialManager implements Manager<Material> {
     }
 
     public @Nullable Material get(Identifier id) {
-        if (id.equals(Identifier.parse("default"))) {
+        if (id.equals(DEFAULT_ID)) {
             return this.defaultMaterial;
         }
 

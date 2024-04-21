@@ -1,5 +1,6 @@
 package com.ultreon.quantum.network.system;
 
+import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.network.PacketContext;
 import com.ultreon.quantum.network.PacketData;
 import com.ultreon.quantum.network.PacketListener;
@@ -26,7 +27,13 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
 
     @Override
     protected void receive(Packet<? extends ServerPacketHandler> packet, @Nullable PacketListener resultListener) {
-        QuantumServer.invoke(() -> super.receive(packet, resultListener));
+        QuantumServer.invoke(() -> {
+            try {
+                super.receive(packet, resultListener);
+            } catch (Exception e) {
+                CommonConstants.LOGGER.warn("Packet failed to receive!", e);
+            }
+        });
     }
 
     @Override

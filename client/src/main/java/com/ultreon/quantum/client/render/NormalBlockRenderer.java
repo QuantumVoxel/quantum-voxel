@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.ultreon.quantum.client.render.meshing.GreedyMesher.LightLevelData;
 import com.ultreon.quantum.client.render.meshing.PerCornerLightData;
@@ -17,7 +17,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     private final VertexInfo c11 = new VertexInfo();
 
     @Override
-    public void renderNorth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshBuilder builder) {
+    public void renderNorth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
         var lightLevel = lld.lightLevel();
 
         if (region == null) return;
@@ -47,7 +47,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     }
 
     @Override
-    public void renderSouth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshBuilder builder) {
+    public void renderSouth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
         var lightLevel = lld.lightLevel();
 
         if (region == null) return;
@@ -77,7 +77,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     }
 
     @Override
-    public void renderWest(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshBuilder builder) {
+    public void renderWest(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
         var lightLevel = lld.lightLevel();
 
         if (region == null) return;
@@ -107,7 +107,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     }
 
     @Override
-    public void renderEast(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshBuilder builder) {
+    public void renderEast(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
         var lightLevel = lld.lightLevel();
 
         if (region == null) return;
@@ -137,7 +137,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     }
 
     @Override
-    public void renderTop(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshBuilder builder) {
+    public void renderTop(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
         var lightLevel = lld.lightLevel();
 
         if (region == null) return;
@@ -167,7 +167,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     }
 
     @Override
-    public void renderBottom(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshBuilder builder) {
+    public void renderBottom(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
         var lightLevel = lld.lightLevel();
 
         if (region == null) return;

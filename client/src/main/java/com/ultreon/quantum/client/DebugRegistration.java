@@ -28,8 +28,6 @@ public class DebugRegistration {
     public static void registerAutoFillers() {
         // Register auto filler for ClientChunk class
         InspectionRoot.registerAutoFill(ClientChunk.class, node -> {
-            node.createNode("mesh", value -> value.solidMesh);
-            node.createNode("transparentMesh", value -> value.transparentMesh);
             node.createNode("dirty", value -> value.dirty);
             node.createNode("renderOffset", value -> value.renderOffset);
         });

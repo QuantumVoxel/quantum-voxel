@@ -18,6 +18,7 @@ import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.client.gui.overlay.OverlayManager;
 import com.ultreon.quantum.client.gui.screens.Screen;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
+import com.ultreon.quantum.client.init.Overlays;
 import com.ultreon.quantum.client.init.ShaderPrograms;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.render.pipeline.RenderPipeline;
@@ -168,6 +169,8 @@ public class GameRenderer implements Disposable {
                 float y = (Gdx.input.getY() + this.client.getDrawOffset().y) / this.client.getGuiScale();
                 RenderEvents.PRE_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
                 screen.render(renderer, (int) x, (int) y, deltaTime);
+
+                Overlays.MEMORY.render(renderer, deltaTime);
                 RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
             });
         }

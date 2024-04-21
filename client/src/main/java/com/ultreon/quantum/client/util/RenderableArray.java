@@ -91,7 +91,7 @@ public class RenderableArray extends Array<Renderable> {
     @Override
     public void addAll(Array<? extends Renderable> array) {
         if (translation != null) {
-            for (Renderable renderable : array.items) {
+            for (Renderable renderable : array) {
                 renderable.worldTransform.setToTranslation(translation);
             }
         }
@@ -102,7 +102,7 @@ public class RenderableArray extends Array<Renderable> {
     @Override
     public void addAll(Array<? extends Renderable> array, int start, int count) {
         if (translation != null) {
-            for (Renderable renderable : array.items) {
+            for (Renderable renderable : array) {
                 renderable.worldTransform.setToTranslation(translation);
             }
         }

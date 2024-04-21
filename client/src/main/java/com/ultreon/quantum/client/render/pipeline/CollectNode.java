@@ -1,11 +1,14 @@
 package com.ultreon.quantum.client.render.pipeline;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.ultreon.quantum.client.input.GameCamera;
+import com.ultreon.quantum.client.render.Scene3D;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Entity;
 import org.checkerframework.common.reflection.qual.NewInstance;
@@ -19,6 +22,8 @@ public class CollectNode extends RenderPipeline.RenderNode {
     @NewInstance
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
         var localPlayer = this.client.player;
         var worldRenderer = this.client.worldRenderer;
         var world = this.client.world;
@@ -28,15 +33,17 @@ public class CollectNode extends RenderPipeline.RenderNode {
         }
         var position = localPlayer.getPosition(client.partialTick);
         List<Entity> toSort = new ArrayList<>(world.getAllEntities());
-        worldRenderer.collect(input, this.pool());
+        worldRenderer.render(Scene3D.WORLD);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);
             return Double.compare(d1, d2);
         });
         for (Entity entity : toSort) {
-            worldRenderer.collectEntity(entity, input, this.pool());
+            worldRenderer.collectEntity(entity, Scene3D.WORLD);
         }
+
+        Scene3D.WORLD.finish(input, this.pool());
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
         return input;

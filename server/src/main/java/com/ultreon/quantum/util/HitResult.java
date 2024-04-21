@@ -9,6 +9,8 @@ import com.ultreon.quantum.world.CubicDirection;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
 
+import java.util.Objects;
+
 public class HitResult {
     public CubicDirection direction;
     // input
@@ -65,7 +67,7 @@ public class HitResult {
         buffer.writeDouble(this.distance);
     }
 
-    public HitResult setInput(Ray ray){
+    public HitResult setInput(Ray ray) {
         this.ray = ray;
         this.direction = ray.getDirection();
         return this;
@@ -109,5 +111,18 @@ public class HitResult {
 
     public double getDistance() {
         return this.distance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HitResult hitResult = (HitResult) o;
+        return Float.compare(distanceMax, hitResult.distanceMax) == 0 && collide == hitResult.collide && Double.compare(distance, hitResult.distance) == 0 && direction == hitResult.direction && Objects.equals(ray, hitResult.ray) && Objects.equals(position, hitResult.position) && Objects.equals(normal, hitResult.normal) && Objects.equals(pos, hitResult.pos) && Objects.equals(next, hitResult.next) && Objects.equals(blockMeta, hitResult.blockMeta) && Objects.equals(block, hitResult.block);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(direction, ray, distanceMax, position, normal, pos, next, blockMeta, block, collide, distance);
     }
 }

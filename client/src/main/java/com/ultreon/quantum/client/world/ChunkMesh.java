@@ -47,8 +47,7 @@ public class ChunkMesh implements Pool.Poolable {
         if (this.meshPart.mesh != null) {
             ValueTracker.setVertexCount(ValueTracker.getVertexCount() - this.meshPart.mesh.getMaxVertices());
             try {
-                this.meshPart.mesh.dispose();
-                this.meshPart.mesh = null;
+
             } catch (NullPointerException ignored) {
 
             } catch (Exception e) {
@@ -70,12 +69,7 @@ public class ChunkMesh implements Pool.Poolable {
 //        this.renderable.shader = null;
         this.renderable.userData = null;
 
-        if (chunk.solidMesh == this) {
-            chunk.solidMesh = null;
-        }
-        if (chunk.transparentMesh == this) {
-            chunk.transparentMesh = null;
-        }
+        chunk.invalidate();
 
         this.built = false;
     }

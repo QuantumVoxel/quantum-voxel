@@ -19,6 +19,7 @@ import com.ultreon.quantum.entity.EntityTypes;
 import com.ultreon.quantum.events.WorldEvents;
 import com.ultreon.quantum.gamerule.GameRules;
 import com.ultreon.quantum.network.Networker;
+import com.ultreon.quantum.network.ServerStatusException;
 import com.ultreon.quantum.network.system.IConnection;
 import com.ultreon.quantum.network.client.ClientPacketHandler;
 import com.ultreon.quantum.network.packets.Packet;
@@ -213,7 +214,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     @CanIgnoreReturnValue
     public static @NotNull CompletableFuture<Void> invoke(Runnable func) {
-        return QuantumServer.instance.submit(func);
+        QuantumServer server = QuantumServer.instance;
+        if (server == null) return CompletableFuture.failedFuture(new ServerStatusException("Server is offline!"));
+        return server.submit(func);
     }
 
     /**

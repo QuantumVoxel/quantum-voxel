@@ -138,4 +138,7 @@ public class Config extends CraftyConfig {
 
     @ConfigEntry(path = "camera.showSunAndMoon", comment = "Whether the sun and moon are shown in the sky.")
     public static boolean showSunAndMoon = true;
+
+    @ConfigEntry(path = "personalisation.showMemoryUsage", comment = "Whether the memory usage is shown in the game's GUI / HUD.")
+    public static boolean showMemoryUsage = FabricLoader.getInstance().isDevelopmentEnvironment();
 }

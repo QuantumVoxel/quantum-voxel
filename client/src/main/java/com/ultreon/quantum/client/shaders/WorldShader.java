@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.world.ClientWorld;
 
@@ -140,6 +141,15 @@ public class WorldShader extends DefaultShader {
         if (renderable.environment != null) WorldShader.tmpAttributes.set(renderable.environment);
         if (renderable.material != null) WorldShader.tmpAttributes.set(renderable.material);
         return WorldShader.tmpAttributes;
+    }
+
+    @Override
+    public void render(Renderable renderable) {
+        try {
+            super.render(renderable);
+        } catch (GdxRuntimeException e) {
+            QuantumClient.LOGGER.error("Failed to render renderable with mesh part ID: " + renderable.meshPart.id, e);
+        }
     }
 
     private static boolean and(final long mask, final long flag) {

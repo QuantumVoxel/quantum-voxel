@@ -2,7 +2,7 @@ package com.ultreon.quantum.network;
 
 import java.io.IOException;
 
-public class ServerHostingException extends IOException {
+public class ServerHostingException extends ServerStatusException {
     public ServerHostingException() {
     }
 

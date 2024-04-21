@@ -164,6 +164,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final RenderPipeline pipeline;
     public final Renderer renderer;
     public final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    public final G3dModelLoader modelLoader;
     public IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     public ServerData serverData;
     public ExecutorService chunkLoadingExecutor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 1), r -> {
@@ -431,6 +432,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         G3dModelLoader modelLoader = new G3dModelLoader(new JsonReader());
         this.entityModelManager = new EntityModelRegistry(modelLoader, this);
         this.entityRendererManager = new EntityRendererRegistry(this.entityModelManager);
+        this.modelLoader = modelLoader;
 
         // Initialize the game camera
         this.camera = new GameCamera(67, this.getWidth(), this.getHeight());
@@ -442,7 +444,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //                .node(new SkyboxNode())
                 .node(new CollectNode())
                 .node(new WorldDiffuseNode())
-                .node(new SkyboxNode())
+                .node(new BackgroundNode())
                 .node(new MainRenderNode()));
 
         // Create a white pixel for the shape drawer
@@ -1065,6 +1067,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         Gdx.gl.glDisable(GL_CULL_FACE);
+
+        renderer.finish();
     }
 
     private void doRender(float deltaTime) {
@@ -1774,7 +1778,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.invoke(() -> {
                     QuantumClient.cleanUp(worldRenderer);
                     QuantumClient.cleanUp(this.world);
-                    this.connection = null;
                     this.renderWorld = false;
                     this.worldRenderer = null;
                     this.world = null;
