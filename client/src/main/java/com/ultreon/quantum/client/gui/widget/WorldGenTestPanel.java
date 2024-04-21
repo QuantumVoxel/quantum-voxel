@@ -64,4 +64,8 @@ public class WorldGenTestPanel extends Panel {
     public static WorldGenTestPanel create() {
         return new WorldGenTestPanel();
     }
+
+    public void random() {
+        this.terrainNoise = new TerrainNoise(new Random(0).nextLong());
+    }
 }

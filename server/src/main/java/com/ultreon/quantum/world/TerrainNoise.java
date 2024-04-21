@@ -15,69 +15,75 @@ public class TerrainNoise implements NoiseSource {
                 .fastSimplex(seed, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                 .combine(
                         // Smaller island generation
-                        JNoise.newBuilder().fastSimplex(seed + 1, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                                .scale(1 / 4096f)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                                .scale(1 / 2048f)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 1, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                                .scale(1 / 256f)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                                .scale(1 / 512f)
                                 .addModifier(result -> result * 64)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        // Smaller island generation
-                        JNoise.newBuilder().fastSimplex(seed + 1, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                                .scale(1 / 2048f)
-                                .addModifier(result -> result * 48)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                                .scale(1 / 256f)
+                                .addModifier(result -> result * 64 + 64)
                                 .build(),
                         Combiner.ADD
                 ).combine(
                         // Smaller island generation
-                        JNoise.newBuilder().fastSimplex(seed + 1, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                                .scale(1 / 256f)
+                                .addModifier(result -> result * 36)
+                                .build(),
+                        Combiner.ADD
+                ).combine(
+                        // Smaller island generation
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 1024f)
                                 .addModifier(result -> result * 12)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 2, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 128f)
                                 .addModifier(result -> result * 8)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 2, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 64f)
                                 .addModifier(result -> result * 12)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 2, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 16f)
                                 .addModifier(result -> -result * 14)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 3, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 8f)
                                 .addModifier(result -> -result * 16)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 4, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 8f)
                                 .addModifier(result -> result * 16)
                                 .build(),
                         Combiner.ADD
                 ).combine(
-                        JNoise.newBuilder().fastSimplex(seed + 4, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 4f)
                                 .addModifier(result -> result * 8)
                                 .build(),
                         Combiner.ADD
                 )
+                .addModifier(result -> (result + 16) < 68 ? ((result + 16) - 68) / 1.5 + 68 : result + 16)
                 .addModifier(result -> result < 32 ? (result - 32) / 8 + 32 : result)
-                .addModifier(result -> result)
                 .scale(1 / 16f).build();
     }
 
