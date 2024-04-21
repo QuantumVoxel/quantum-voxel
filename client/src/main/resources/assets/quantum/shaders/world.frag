@@ -252,10 +252,6 @@ void main() {
 
     gl_FragColor.rgb = (diffuse.rgb) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
 
-    #ifdef fogFlag
-//        gl_FragColor.rgb = mix(gl_FragColor.rgb, u_fogColor.rgb, v_fog);
-    #endif // end fogFlag
-
     #ifdef blendedFlag
         gl_FragColor.a = diffuse.a * v_opacity;
         #ifdef alphaTestFlag
@@ -270,4 +266,8 @@ void main() {
     #ifdef normalFlag
         gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
     #endif
+
+    #ifdef fogFlag
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);
+    #endif // end fogFlag
 }

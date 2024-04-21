@@ -1626,7 +1626,6 @@ public class ServerWorld extends World {
                 if (idx >= World.REGION_SIZE * World.REGION_SIZE)
                     throw new IllegalArgumentException("Too many chunks in region!");
                 if (chunk.isOriginal()) continue;
-                CommonConstants.LOGGER.info("Saving chunk " + chunk.getPos() + " in region " + pos);
                 var localChunkPos = World.toLocalChunkPos(chunk.getPos());
                 mapType.put("c" + localChunkPos.x() + ";" + localChunkPos.z(), chunk.save());
                 idx++;

@@ -89,7 +89,7 @@ public class LivingEntity extends Entity {
         age++;
 
         // Handle jumping logic
-        if (this.jumping && this.onGround) {
+        if (this.jumping && (this.onGround || isAffectedByFluid())) {
             this.jump();
         }
 

@@ -3,6 +3,7 @@ package com.ultreon.quantum.world;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.collection.PaletteStorage;
 import com.ultreon.quantum.collection.Storage;
+import com.ultreon.quantum.util.BlockMetaPredicate;
 import com.ultreon.quantum.util.InvalidThreadException;
 import com.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import com.ultreon.quantum.world.gen.biome.Biomes;
@@ -109,5 +110,10 @@ public final class BuilderChunk extends Chunk {
 
     public LightMap getLightMap() {
         return this.lightMap;
+    }
+
+    @Override
+    public int getHighest(int x, int z) {
+        return super.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK);
     }
 }

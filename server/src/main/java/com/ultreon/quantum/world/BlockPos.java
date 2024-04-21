@@ -20,7 +20,7 @@ public record BlockPos(int x, int y, int z) {
      * @param z the z-coordinate.
      */
     public BlockPos(double x, double y, double z) {
-        this((int) x, (int) y, (int) z);
+        this((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
     }
 
     /**

@@ -590,7 +590,8 @@ public class GreedyMesher implements Mesher {
     }
 
     private boolean shouldOcclude(Block curBlock, Block blockToBlockFace) {
-        return !(shouldNotRenderNormally(blockToBlockFace) || blockToBlockFace.isTransparent() && (curBlock.doesOcclude() && blockToBlockFace.doesOcclude()) && (BlockRenderTypeRegistry.get(curBlock) == BlockRenderTypeRegistry.get(blockToBlockFace)));
+        boolean bothOcclude = curBlock.doesOcclude() && blockToBlockFace.doesOcclude();
+        return !(shouldNotRenderNormally(blockToBlockFace) || blockToBlockFace.isTransparent() && bothOcclude || (BlockRenderTypeRegistry.get(curBlock) != BlockRenderTypeRegistry.get(blockToBlockFace) && !bothOcclude));
     }
 
     private boolean shouldMerge(BlockProperties id1, float light1, PerCornerLightData lightData1, BlockProperties id2, float light2, PerCornerLightData lightData2) {

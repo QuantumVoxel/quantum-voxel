@@ -69,8 +69,6 @@ public class ChunkMesh implements Pool.Poolable {
 //        this.renderable.shader = null;
         this.renderable.userData = null;
 
-        chunk.invalidate();
-
         this.built = false;
     }
 }

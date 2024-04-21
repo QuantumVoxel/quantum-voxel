@@ -33,11 +33,11 @@ public class Scene3D {
     }
 
     public ModelInstance create(Model model, float x, float y, float z) {
-        return create(model, this.matrixTemp.translate(x, y, z));
+        return create(model, this.matrixTemp.setToTranslation(x, y, z));
     }
 
     public ModelInstance create(Model model, Vector3 position) {
-        return create(model, this.matrixTemp.translate(position));
+        return create(model, this.matrixTemp.setToTranslation(position));
     }
 
     public void add(ModelInstance model) {
@@ -75,5 +75,10 @@ public class Scene3D {
         for (ModelInstance modelInstance : this.activeObjects) {
             modelInstance.getRenderables(output, pool);
         }
+    }
+
+    public void clear() {
+        for (var obj : this.activeObjects) destroy(obj);
+        for (var obj : this.inactiveObjects) destroy(obj);
     }
 }

@@ -5,6 +5,7 @@ import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.debug.DebugFlags;
 import com.ultreon.quantum.debug.WorldGenDebugContext;
 import com.ultreon.quantum.server.QuantumServer;
+import com.ultreon.quantum.util.BlockMetaPredicate;
 import com.ultreon.quantum.util.MathHelper;
 import com.ultreon.quantum.world.Biome;
 import com.ultreon.quantum.world.BuilderChunk;
@@ -74,7 +75,7 @@ public class TerrainGenerator implements Disposable {
                 var index = this.findGenerator(chunk, new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z));
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
                 chunk = index.biomeGenerator.processColumn(chunk, x, z, recordedChanges);
-                index.biomeGenerator.generateTerrainFeatures(recordingChunk, x, z, chunk.getHighest(x, z));
+                index.biomeGenerator.generateTerrainFeatures(recordingChunk, x, z, chunk.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK));
             }
         }
 
@@ -140,12 +141,12 @@ public class TerrainGenerator implements Disposable {
 
         var localOffset = World.toLocalBlockPos(offset.x, offset.y, offset.z);
         var temp = this.noise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
-        chunk.getHighest(localOffset.x(), localOffset.z());
+        int height = chunk.getHighest(localOffset.x(), localOffset.z(), BlockMetaPredicate.WG_HEIGHT_CHK);
         BiomeGenerator biomeGen = this.biomeGenData.get(0).biomeGen();
 
         for (var data : this.biomeGenData) {
-//            var currentlyOcean = height < World.SEA_LEVEL - 4;
-            if (temp >= data.temperatureStartThreshold() && temp < data.temperatureEndThreshold() && !data.isOcean())
+            var currentlyOcean = height < World.SEA_LEVEL - 4;
+            if (temp >= data.temperatureStartThreshold() && temp < data.temperatureEndThreshold() && data.isOcean() == currentlyOcean)
                 biomeGen = data.biomeGen();
         }
 

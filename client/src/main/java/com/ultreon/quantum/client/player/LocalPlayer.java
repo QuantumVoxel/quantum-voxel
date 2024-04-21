@@ -110,7 +110,11 @@ public class LocalPlayer extends ClientPlayer {
 
     @Override
     public void jump() {
-        if (this.isInWater()) return;
+        if (isAffectedByFluid()) {
+            this.swimUp();
+            return;
+        }
+
         this.velocityY = this.jumpVel;
 
         if (this.isRunning()) {

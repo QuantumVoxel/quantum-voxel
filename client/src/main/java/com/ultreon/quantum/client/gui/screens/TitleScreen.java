@@ -13,6 +13,8 @@ import com.ultreon.quantum.text.Formatter;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Color;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
+import net.fabricmc.loader.api.FabricLoader;
+import org.jetbrains.annotations.Nullable;
 
 public class TitleScreen extends Screen {
     private Label titleLabel;
@@ -22,6 +24,7 @@ public class TitleScreen extends Screen {
     private TextButton optionsButton;
     private TextButton quitButton;
     private final Resizer resizer;
+    private TextButton worldGenTestButton;
 
     public TitleScreen() {
         super(TextObject.translation("quantum.screen.title"));
@@ -45,6 +48,12 @@ public class TitleScreen extends Screen {
                 .position(() -> new Position(50, this.size.height / 2 - 35))
                 .callback(this::openSingleplayer));
 
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 150)
+                    .position(() -> new Position(50, this.size.height / 2 - 60))
+                    .callback(this::openTest));
+        }
+
         this.multiplayerButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.multiplayer"), 150)
                         .position(() -> new Position(50, this.size.height / 2 - 10)))
                 .callback(this::openMultiplayer);
@@ -60,6 +69,10 @@ public class TitleScreen extends Screen {
         this.quitButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.title.quit"), 150)
                 .position(() -> new Position(50, this.size.height / 2 + 78))
                 .callback(this::quitGame));
+    }
+
+    private void openTest(TextButton textButton) {
+        this.client.showScreen(new WorldGenTestScreen());
     }
 
     private void quitGame(TextButton caller) {
@@ -100,6 +113,11 @@ public class TitleScreen extends Screen {
 
     public TextButton getSingleplayerButton() {
         return this.singleplayerButton;
+    }
+
+    @Nullable
+    public TextButton getWorldGenTestButton() {
+        return worldGenTestButton;
     }
 
     public TextButton getMultiplayerButton() {

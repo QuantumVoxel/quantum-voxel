@@ -40,10 +40,7 @@ import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.quantum.util.Gamemode;
-import com.ultreon.quantum.world.Biome;
-import com.ultreon.quantum.world.BlockPos;
-import com.ultreon.quantum.world.Chunk;
-import com.ultreon.quantum.world.ChunkPos;
+import com.ultreon.quantum.world.*;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import net.fabricmc.api.EnvType;
@@ -266,7 +263,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onBlockSet(BlockPos pos, BlockProperties block) {
         ClientWorld world = this.client.world;
         if (this.client.world != null) {
-            this.client.submit(() -> world.set(pos, block));
+            this.client.submit(() -> world.set(pos, block, BlockFlags.UPDATE));
         }
     }
 

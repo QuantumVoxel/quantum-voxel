@@ -123,7 +123,7 @@ public class IntegratedServer extends QuantumServer {
 
     @Override
     protected void onTerminationFailed() {
-        throw new ApplicationCrash(new CrashLog("onTerminationFailed", new Throwable("Failed termination of integrated server.")));
+        client.delayCrash(new CrashLog("onTerminationFailed", new Throwable("Failed termination of integrated server.")));
     }
 
     @Override

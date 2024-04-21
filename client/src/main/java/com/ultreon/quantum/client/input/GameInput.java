@@ -224,6 +224,13 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         if (player.isInWater() && this.client.playerInput.up) {
             tmp.set(0, 1, 0).nor().mul(speed);
             this.vel.add(tmp);
+
+
+            // If not affected by fluid, reset the flag and set the vertical velocity
+            if (player.wasInFluid && !player.isAffectedByFluid()) {
+                player.wasInFluid = false;
+                player.velocityY = 0.3;
+            }
         }
 
         // Flight movement

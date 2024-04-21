@@ -3,6 +3,7 @@ package com.ultreon.quantum.world.gen.biome;
 import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.debug.WorldGenDebugContext;
 import com.ultreon.quantum.server.ServerDisposable;
+import com.ultreon.quantum.util.BlockMetaPredicate;
 import com.ultreon.quantum.world.*;
 import com.ultreon.quantum.world.gen.*;
 import com.ultreon.quantum.world.gen.layer.TerrainLayer;
@@ -51,7 +52,7 @@ public class BiomeGenerator implements ServerDisposable {
     }
 
     private static void updateLightMap(BuilderChunk chunk, int x, int z, LightMap lightMap) {
-        int highest = chunk.getHighest(x, z);
+        int highest = chunk.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK);
         for (int y = chunk.getOffset().y; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
             lightMap.setSunlight(x, y, z, y >= highest ? 15 : 7);
         }

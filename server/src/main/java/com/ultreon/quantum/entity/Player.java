@@ -93,8 +93,6 @@ public abstract class Player extends LivingEntity {
 
     @Override
     public void tick() {
-        if (this.jumping && !this.abilities.flying) this.swimUp();
-
         this.x = Mth.clamp(this.x, -30000000, 30000000);
         this.z = Mth.clamp(this.z, -30000000, 30000000);
 
@@ -130,6 +128,16 @@ public abstract class Player extends LivingEntity {
 
     protected void onVoidDamage() {
 
+    }
+
+    @Override
+    public void jump() {
+        if (isAffectedByFluid()) {
+            this.swimUp();
+            return;
+        }
+
+        super.jump();
     }
 
     @Override

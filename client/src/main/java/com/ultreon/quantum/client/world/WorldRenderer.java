@@ -1,7 +1,5 @@
 package com.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
@@ -15,7 +13,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.FlushablePool;
 import com.google.common.base.Preconditions;
 import com.ultreon.libs.commons.v0.tuple.Pair;
 import com.ultreon.quantum.CommonConstants;
@@ -86,12 +83,6 @@ public final class WorldRenderer implements DisposableContainer {
     private final ClientWorld world;
     private final QuantumClient client = QuantumClient.get();
 
-    private final FlushablePool<ChunkMesh> pool = new FlushablePool<>() {
-        @Override
-        protected ChunkMesh newObject() {
-            return new ChunkMesh();
-        }
-    };
     private ModelInstance skyboxInstance = null;
     private ModelInstance cursor = null;
     private ModelInstance sun = null;
@@ -192,9 +183,9 @@ public final class WorldRenderer implements DisposableContainer {
         this.transparentMaterial = new Material();
         this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
         this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
-//        this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         this.transparentMaterial.set(new DepthTestAttribute(GL_DEPTH_FUNC));
-//        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.02f));
+//        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
     }
 
     private void setupSunAndMoon() {
@@ -321,10 +312,7 @@ public final class WorldRenderer implements DisposableContainer {
         if (this.disposed) return;
 
         this.skybox.update(this.world.getDaytime());
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F7)) { // TODO: DEBUG
-            this.pool.flush();
-        }
+        this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
 
         var chunks = WorldRenderer.chunksInViewSorted(this.world.getLoadedChunks(), player);
         this.loadedChunks = chunks.size();
@@ -357,12 +345,12 @@ public final class WorldRenderer implements DisposableContainer {
                         material.id = id("generated/selection_outline_material").toString();
                         material.set(ColorAttribute.createDiffuse(0, 0, 0, 1f));
                         material.set(new BlendingAttribute(1.0f));
-                        material.set(new DepthTestAttribute(true));
-                        material.set(IntAttribute.createCullFace(GL_FRONT));
+                        material.set(IntAttribute.createCullFace(GL_BACK));
 
                         var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
                         var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                         var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
+
 
                         WorldRenderer.buildOutlineBox(0.02f, sizeX, sizeY, sizeZ, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
                     });
@@ -370,6 +358,8 @@ public final class WorldRenderer implements DisposableContainer {
                     this.cursor = Scene3D.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
                 }
             });
+        } else if (this.cursor != null) {
+            Scene3D.WORLD.deactivate(this.cursor);
         }
 
         QuantumClient.PROFILER.section("(Local Player)", () -> {
@@ -425,20 +415,20 @@ public final class WorldRenderer implements DisposableContainer {
                 chunk.visible = true;
             }
 
-            if (chunk.dirty && !ref.chunkRendered && chunk.modelInstance != null || chunk.modelInstance != null && chunk.getWorld().isChunkInvalidated(chunk)) {
-                if (chunk.isDisposed() || client.screen instanceof WorldLoadScreen) continue;
+            if ((chunk.dirty && !ref.chunkRendered && chunk.modelInstance != null) || (chunk.modelInstance != null && chunk.getWorld().isChunkInvalidated(chunk))) {
+                if (client.screen instanceof WorldLoadScreen) continue;
                 this.unload(chunk);
                 chunk.immediateRebuild = true;
                 chunk.getWorld().onChunkUpdated(chunk);
                 chunk.dirty = false;
                 ref.chunkRendered = true;
-                continue;
             }
 
             chunk.dirty = false;
 
             if (chunk.modelInstance == null) {
                 if (!this.shouldBuildChunks() && !chunk.immediateRebuild) continue;
+                chunk.immediateRebuild = false;
                 chunk.whileLocked(() -> {
                     if (chunk.modelInstance == null) {
                         Models3D models3D = Models3D.INSTANCE;
@@ -502,8 +492,6 @@ public final class WorldRenderer implements DisposableContainer {
             }
 
             this.visibleChunks++;
-
-            this.doPoolStatistics();
         }
     }
 
@@ -530,6 +518,8 @@ public final class WorldRenderer implements DisposableContainer {
         chunk.modelInstance = null;
         chunk.model = null;
 
+        chunk.destroyModels();
+
         Identifier id = createId(chunk.getPos());
         if (!Models3D.INSTANCE.unloadModel(id)) {
             QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
@@ -545,7 +535,6 @@ public final class WorldRenderer implements DisposableContainer {
             }
         }
 
-        chunk.initialized = false;
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
 
@@ -690,12 +679,6 @@ public final class WorldRenderer implements DisposableContainer {
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(x1 - thickness, y1 - thickness, z1 - thickness), new Vector3(x2 + thickness, y2 + thickness, z2 + thickness)));
     }
 
-    private void doPoolStatistics() {
-        ValueTracker.setPoolFree(this.pool.getFree());
-        ValueTracker.setPoolPeak(this.pool.peak);
-        ValueTracker.setPoolMax(this.pool.max);
-    }
-
     @NotNull
     private static List<ClientChunk> chunksInViewSorted(Collection<ClientChunk> chunks, Player player) {
         List<ClientChunk> list = new ArrayList<>(chunks);
@@ -735,9 +718,6 @@ public final class WorldRenderer implements DisposableContainer {
     public void dispose() {
         this.disposed = true;
 
-        this.pool.flush();
-        this.pool.clear();
-
         Scene3D.BACKGROUND.destroy(this.skyboxInstance);
         Models3D.INSTANCE.unloadModel(id("generated/skybox"));
 
@@ -745,6 +725,9 @@ public final class WorldRenderer implements DisposableContainer {
             ClientChunk first = entry.getValue().getFirst();
             unload(first);
         }
+
+        Scene3D.WORLD.clear();
+        Scene3D.BACKGROUND.clear();
 
         this.disposables.forEach(Disposable::dispose);
     }

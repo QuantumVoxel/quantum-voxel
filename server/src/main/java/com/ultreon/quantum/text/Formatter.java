@@ -477,6 +477,9 @@ public class Formatter {
     }
 
     private void parseMention() {
+        if (this.offset + 1 == this.message.length()) {
+            return;
+        }
 
         this.offset++;
 

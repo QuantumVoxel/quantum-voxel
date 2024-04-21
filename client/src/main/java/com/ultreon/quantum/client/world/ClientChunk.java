@@ -209,26 +209,35 @@ public final class ClientChunk extends Chunk {
     }
 
     @CanIgnoreReturnValue
-    @Deprecated
     public ModelInstance addModel(BlockPos pos, ModelInstance instance) {
+        if (models.containsKey(pos)) {
+            ModelInstance modelInstance1 = this.models.get(pos);
+            Scene3D.WORLD.destroy(modelInstance1);
+            this.models.remove(pos);
+        }
         return this.addedModels.put(pos, instance);
     }
 
     public void renderModels(Scene3D scene3D) {
-//        for (BlockPos pos : this.addedModels.keySet()) {
-//            ModelInstance model = this.addedModels.get(pos);
-//            model.userData = Shaders.MODEL_VIEW.get();
-//            this.addedModels.remove(pos);
-//            this.models.put(pos, model);
-//            scene3D.add(model);
-//        }
-//
-//        for (BlockPos pos : this.removedModels) {
-//            this.removedModels.removeValue(pos, false);
-//            ModelInstance model = this.models.remove(pos);
-//            if (model != null)
-//                scene3D.destroy(model);
-//        }
+        for (BlockPos pos : this.addedModels.keySet()) {
+            ModelInstance model = this.addedModels.get(pos);
+            model.userData = Shaders.MODEL_VIEW.get();
+            this.addedModels.remove(pos);
+            this.models.put(pos, model);
+            scene3D.add(model);
+        }
+
+        for (BlockPos pos : this.models.keySet()) {
+            ModelInstance inst = this.models.get(pos);
+            inst.transform.setToTranslationAndScaling(renderOffset.x + pos.x(), renderOffset.y + pos.y(), renderOffset.z + pos.z(), 1 / 16f, 1 / 16f, 1 / 16f);
+        }
+
+        for (BlockPos pos : this.removedModels) {
+            this.removedModels.removeValue(pos, false);
+            ModelInstance model = this.models.remove(pos);
+            if (model != null)
+                scene3D.destroy(model);
+        }
     }
 
     public void loadCustomRendered() {
@@ -255,11 +264,9 @@ public final class ClientChunk extends Chunk {
         return client;
     }
 
-    public void invalidate() {
-
-        WorldRenderer worldRenderer = this.client.worldRenderer;
-        if (worldRenderer != null) {
-            worldRenderer.remove(this);
+    public void destroyModels() {
+        for (var model : this.models.values()) {
+            Scene3D.WORLD.destroy(model);
         }
     }
 }

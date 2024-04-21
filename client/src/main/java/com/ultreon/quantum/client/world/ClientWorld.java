@@ -180,8 +180,8 @@ public final class ClientWorld extends World implements Disposable {
         }
         boolean isBlockSet = super.set(x, y, z, block, flags);
         BlockPos blockPos = new BlockPos(x, y, z);
-        if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
-        if (~(flags & BlockFlags.UPDATE) != 0) {
+        if ((flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
+        if ((flags & BlockFlags.UPDATE) != 0) {
             for (CubicDirection direction : CubicDirection.values()) {
                 BlockPos offset = blockPos.offset(direction);
                 BlockProperties blockProperties = this.get(offset);

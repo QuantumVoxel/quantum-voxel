@@ -9,6 +9,8 @@ import com.ultreon.quantum.collection.Storage;
 import com.ultreon.quantum.network.PacketIO;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.server.ServerDisposable;
+import com.ultreon.quantum.util.BlockMetaPredicate;
+import com.ultreon.quantum.util.BlockPredicate;
 import com.ultreon.quantum.util.PosOutOfBoundsException;
 import com.ultreon.quantum.util.ValidationError;
 import com.ultreon.quantum.world.gen.TreeData;
@@ -418,6 +420,23 @@ public abstract class Chunk implements ServerDisposable, ChunkAccess {
 //        return this.heightMap.get(x, z);
         for (int y = CHUNK_HEIGHT - 1; y >= 1; y--) {
             if (!this.getFast(x, y, z).isAir()) {
+                return y;
+            }
+        }
+        return 64;
+    }
+
+    /**
+     * Find the highest block at the given position.
+     *
+     * @param x the x coordinate
+     * @param z the z coordinate
+     * @return The highest block Y coordinate.
+     */
+    public int getHighest(int x, int z, BlockMetaPredicate blockPredicate) {
+//        return this.heightMap.get(x, z);
+        for (int y = CHUNK_HEIGHT - 1; y >= 1; y--) {
+            if (!blockPredicate.test(this.getFast(x, y, z))) {
                 return y;
             }
         }

@@ -54,7 +54,7 @@ public class Entity implements CommandSender {
 
     public boolean noClip;
     protected double fallDistance = 0;
-    private boolean wasInFluid = false;
+    public boolean wasInFluid = false;
     private boolean swimUp;
     protected double ox, oy, oz;
     private @Nullable String formatName;
@@ -198,6 +198,8 @@ public class Entity implements CommandSender {
             // If affected by fluid and swimming up, stop swimming up
             if (this.isAffectedByFluid() && this.swimUp) {
                 this.swimUp = false;
+            } else if (this.isAffectedByFluid()) {
+                this.velocityY -= this.gravity / 3;
             } else if (!this.onGround) {
                 // Apply gravity to the velocityY
                 this.velocityY -= this.gravity;
@@ -254,11 +256,6 @@ public class Entity implements CommandSender {
             this.wasInFluid = true;
             return;
         }
-
-        // If not affected by fluid, reset the flag and set the vertical velocity
-        if (!this.wasInFluid || this.isAffectedByFluid()) return;
-        this.wasInFluid = false;
-        this.velocityY = 0.3;
     }
 
     /**

@@ -194,27 +194,40 @@ varying vec3 v_position;
 
 void main() {
 	#ifdef diffuseTextureFlag
-	v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
-	v_position = a_position.xyz;
+		v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
+		v_position = a_position.xyz;
 	#endif //diffuseTextureFlag
 
 	#ifdef emissiveTextureFlag
-	v_emissiveUV = u_emissiveUVTransform.xy + a_texCoord0 * u_emissiveUVTransform.zw;
+		v_emissiveUV = u_emissiveUVTransform.xy + a_texCoord0 * u_emissiveUVTransform.zw;
 	#endif //emissiveTextureFlag
 
 	#if defined(colorFlag)
-	v_color = a_color;
+		v_color = a_color;
 	#endif // colorFlag
 
 	#ifdef blendedFlag
-	#ifdef alphaTestFlag
-	v_alphaTest = u_alphaTest;
-	#endif //alphaTestFlag
+		v_opacity = u_opacity;
+		#ifdef alphaTestFlag
+			v_alphaTest = u_alphaTest;
+		#endif //alphaTestFlag
 	#endif // blendedFlag
 
-	gl_Position = u_projViewTrans * u_worldTrans *  vec4(a_position, 1.0);
+	#ifdef skinningFlag
+		vec4 pos = u_worldTrans * skinning * vec4(a_position, 1.0);
+	#else
+		vec4 pos = u_worldTrans * vec4(a_position, 1.0);
+	#endif
+
+	#ifdef fogFlag
+		vec3 flen = u_cameraPosition.xyz - pos.xyz;
+		float fog = dot(flen, flen) * u_cameraPosition.w;
+		v_fog = min(fog, 1.0);
+	#endif
+
+	gl_Position = u_projViewTrans * pos;
 
 	#ifdef normalFlag
-	v_normal = a_normal;
+		v_normal = a_normal;
 	#endif
 }

@@ -8,7 +8,7 @@ public class WaterTerrainLayer extends TerrainLayer {
     private final int waterLevel;
 
     public WaterTerrainLayer() {
-        this(64);
+        this(World.SEA_LEVEL);
     }
 
     public WaterTerrainLayer(int waterLevel) {
@@ -19,8 +19,7 @@ public class WaterTerrainLayer extends TerrainLayer {
     public boolean handle(World world, Chunk chunk, int x, int y, int z, int height) {
         // Set water layer from height up to water level y
         if (y <= this.waterLevel + 1 && y > height) {
-            chunk.set(x, y, z, Blocks.WATER.createMeta());
-            return true;
+            return false;
         }
 
         // Set sand layer from the height - 3 up to water level + 2
