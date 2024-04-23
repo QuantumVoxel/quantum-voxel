@@ -1,16 +1,20 @@
 package com.ultreon.quantum.api.commands;
 
 import com.google.common.collect.Lists;
+import com.ultreon.libs.commons.v0.Either;
 import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.api.commands.error.CommandError;
 import com.ultreon.quantum.api.commands.error.InvalidError;
 import com.ultreon.quantum.api.commands.output.BasicCommandResult;
+import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.api.commands.selector.*;
+import com.ultreon.quantum.api.commands.variables.*;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.entity.*;
 import com.ultreon.quantum.gamerule.Rule;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.item.ItemStack;
+import com.ultreon.quantum.registry.CommandRegistry;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.registry.Registry;
 import com.ultreon.quantum.server.QuantumServer;
@@ -31,6 +35,7 @@ import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.datetime.v0.Duration;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -197,7 +202,7 @@ public class CommandData {
         CommandData.registerArgument("block", CommandData::readBlock, CommandData::completeBlocks);
         CommandData.registerArgument("boolean", CommandReader::readBoolean, CommandData::completeBooleans);
         CommandData.registerArgument("byte", CommandReader::readByteHex, CommandData::completeHex);
-        CommandData.registerArgument("command", CommandReader::readMessage, CommandData::completeCommand);
+        CommandData.registerArgument("command", CommandData::readCommand, CommandData::completeCommand);
         CommandData.registerArgument("command-sender", CommandData::readCommandSender, CommandData::completeCommandSender);
         CommandData.registerArgument("date", CommandData::readDate, CommandData::completeDate);
         CommandData.registerArgument("date-time", CommandData::readDateTime, CommandData::completeDateTime);
@@ -232,8 +237,147 @@ public class CommandData {
         CommandData.registerArgument("time", CommandData::readTime, CommandData::completeTime);
         CommandData.registerArgument("ubo", CommandData::readUbo, CommandData::completeVoid);
         CommandData.registerArgument("uuid", CommandData::readUuid, CommandData::completeVoidArg);
+        CommandData.registerArgument("value", CommandData::readObject, CommandData::completeObject);
+        CommandData.registerArgument("variable", CommandData::readVariableAssignment, CommandData::completeVariables);
+        CommandData.registerArgument("variable-assign", CommandData::readVariableAssignment, CommandData::completeVariables);
         CommandData.registerArgument("weather", CommandData::readWeather, CommandData::completeWeather);
         CommandData.registerArgument("world", CommandData::readDimension, CommandData::completeDimensions);
+    }
+
+    private static CommandResult readCommand(CommandReader commandReader) throws CommandParseException {
+        String s = commandReader.readMessage();
+        return commandReader.getSender().execute(s, false);
+    }
+
+    public static Object readObject(CommandReader ctx) throws CommandParseException {
+        CommandSender sender = ctx.getSender();
+        if (!(sender instanceof ServerPlayer serverPlayer)) {
+            throw new CommandParseException("Not ran from a server player.", ctx.getOffset());
+        }
+        String first = ctx.readUntil('.');
+        Object object;
+        if (first.startsWith(":")) {
+            var code = first.substring(1);
+            object = switch (code) {
+                case "true" -> true;
+                case "false" -> false;
+                case "null" -> null;
+                case "root" -> {
+                    RootVariableSource<?> source = RootVariables.get(ctx.readUntil('.'));
+                    if (source == null) {
+                        throw new CommandParseException("Unknown root variable: " + code, ctx.getOffset());
+                    }
+
+                    yield source.get(sender, ctx);
+                }
+                default -> throw new CommandParseException("Unknown value: " + code, ctx.getOffset());
+            };
+        } else if (first.startsWith("$")) {
+            String name = first.substring(1);
+            object = PlayerVariables.get(serverPlayer).getVariable(name);
+            if (object == null) {
+                throw new CommandParseException("Unknown variable: " + name, ctx.getOffset());
+            }
+        } else {
+            throw new CommandParseException("Invalid value: " + first, ctx.getOffset());
+        }
+
+        if (object == null) throw new CommandParseException.NotFound("object", ctx.getOffset());
+
+        ctx.readChar();
+        char lastChar = ctx.getCurChar();
+
+        ObjectType<?> objectType = ObjectType.get(object.getClass());
+        if (objectType == null) {
+            throw new CommandParseException("Illegal object type: " + object.getClass().getSimpleName(), ctx.getOffset());
+        }
+
+        if (lastChar == '.') {
+            object = objectType.get(sender, ctx);
+        }
+
+        // TODO Handle arrays
+
+        ctx.tryNextArg();
+
+        return object;
+    }
+
+    public static List<String> completeObject(CommandSender commandSender, CommandContext commandCtx, CommandReader ctx, String[] strings) throws CommandParseException {
+        if (!(commandSender instanceof ServerPlayer serverPlayer)) {
+            throw new CommandParseException("Not ran from a server player.", ctx.getOffset());
+        }
+
+        if (ctx.isAtEndOfCmd()) {
+            return List.of(":", "$");
+        }
+        char c = ctx.readChar();
+        Object object;
+        StringBuilder code;
+        if (c == '$') {
+            String name = ctx.readUntil('.');
+            if (ctx.getLastChar() != '.') {
+                return TabCompleting.prefixed("$", ctx.getArgument(), TabCompleting.variables(new ArrayList<>(), name, serverPlayer, Object.class));
+            }
+
+            code = new StringBuilder("$" + name);
+            object = PlayerVariables.get(serverPlayer).getVariable(name);
+
+            if (object == null) {
+                return List.of();
+            }
+        } else if (c == ':') {
+            String name = ctx.readUntil('.');
+
+            if (ctx.getLastChar() != '.') {
+                return switch (name) {
+                    case "true", "false", "null", "root" -> List.of(":" + name + ".");
+                    default -> TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
+                };
+            }
+
+            if (!Objects.equals(name, "root")) {
+                return List.of();
+            }
+
+            name = ctx.readUntil('.');
+            RootVariableSource<?> rootVariableSource = RootVariables.get(name);
+            if (rootVariableSource == null) {
+                return TabCompleting.prefixed(":root.", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(":root.".length()), RootVariables.names().toArray(new String[0])));
+            }
+
+            object = rootVariableSource.get(serverPlayer, ctx);
+            code = new StringBuilder(":root." + name);
+        } else {
+            return List.of(":", "$");
+        }
+
+        String name;
+        while (ctx.getLastChar() == '.') {
+            code.append(".");
+            if (object == null) {
+                return List.of();
+            }
+
+            ObjectType<?> objectType = ObjectType.get(object.getClass());
+            if (objectType == null) {
+                return List.of();
+            }
+            Either<Object, List<String>> objectListEither = objectType.tabComplete(serverPlayer, ctx, code);
+            if (objectListEither.isLeftPresent()) {
+                object = objectListEither.getLeft();
+            } else {
+                return objectListEither.getRight();
+            }
+
+            if (object == null) {
+                return List.of();
+            }
+
+            name = ctx.readUntil('.');
+            code.append(name);
+        }
+        return List.of();
     }
 
     private static List<String> completeVoid(CommandSender commandSender, CommandContext commandCtx, CommandReader ctx, String[] strings) throws CommandParseException {
@@ -257,7 +401,7 @@ public class CommandData {
     }
 
     private static Entity readEntity(CommandReader ctx) throws CommandParseException {
-        EntityBaseSelector<Entity> parsed = new EntityBaseSelector<>(ctx.getSender(), Entity.class, ctx.readString());
+        EntityBaseSelector<@NotNull Entity> parsed = new EntityBaseSelector<>(ctx.getSender(), Entity.class, ctx.readString());
         var error = parsed.getError();
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
@@ -268,7 +412,7 @@ public class CommandData {
     }
 
     private static LivingEntity readLivingEntity(CommandReader ctx) throws CommandParseException {
-        EntityBaseSelector<LivingEntity> parsed = new EntityBaseSelector<>(ctx.getSender(), LivingEntity.class, ctx.readString());
+        EntityBaseSelector<@NotNull LivingEntity> parsed = new EntityBaseSelector<>(ctx.getSender(), LivingEntity.class, ctx.readString());
         var error = parsed.getError();
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
@@ -319,6 +463,15 @@ public class CommandData {
         } catch (IOException e) {
             throw new CommandParseException.Invalid("ubo data", ctx.getOffset());
         }
+    }
+
+    private static PlayerVariable readVariableAssignment(CommandReader commandReader) throws CommandParseException {
+        CommandSender sender = commandReader.getSender();
+        if (!(sender instanceof ServerPlayer serverPlayer)) throw new CommandParseException.NotFound("player", commandReader.getOffset());
+        Selector selector = commandReader.readSelector();
+        SelectorKey key = selector.getKey();
+        if (key != SelectorKey.VARIABLE) throw new CommandParseException.Invalid("variable assignment", commandReader.getOffset());
+        return new PlayerVariable(PlayerVariables.get(serverPlayer), selector.getStringValue());
     }
 
     private Rule<?> readRule(CommandReader ctx) throws CommandParseException {
@@ -484,7 +637,7 @@ public class CommandData {
         try {
             return ctx.readString();
         } catch (Exception e) {
-            CommonConstants.LOGGER.error("Failed to read string in command " + ctx.getCommand(), e);
+            CommonConstants.LOGGER.error("Failed to read string in command {}", ctx.getCommand(), e);
             throw new CommandParseException(e.getMessage(), ctx.getOffset());
         }
     }
@@ -775,12 +928,33 @@ public class CommandData {
         return EntityBaseSelector.tabComplete(LivingEntity.class, sender, commandCtx, ctx.readString());
     }
 
-    private static List<String> completeCommand(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) {
-        return List.of();
+    private static List<String> completeCommand(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
+        List<Command> list = CommandRegistry.getCommands().toList();
+        String s = ctx.readString();
+        if (!ctx.isAtEndOfCmd()) {
+            Command command = CommandRegistry.get(s);
+            if (command != null) {
+                String s1 = ctx.readMessage();
+
+                return command.onTabComplete(sender, commandCtx, s, s1.split(" "));
+            }
+
+            return List.of();
+        }
+
+        return TabCompleting.strings(s, CommandRegistry.getCommandNames().toArray(String[]::new));
     }
 
     private static List<String> completeCommandSender(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
         return CommandSenderBaseSelector.tabComplete(sender, commandCtx, ctx.readString());
+    }
+
+    private static List<String> completeVariables(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
+        if (sender instanceof ServerPlayer serverPlayer) {
+            return TabCompleting.variables(new ArrayList<>(), ctx.readString(), serverPlayer, Object.class);
+        }
+
+        return List.of();
     }
 
     private static List<String> completeWeather(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {

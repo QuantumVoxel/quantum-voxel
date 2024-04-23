@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract;
 
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -143,6 +144,18 @@ public class Result<T> {
     public Throwable expectFailure(String message) {
         if (this.failure == null) throw new NoSuchElementException(message);
         return this.failure.throwable;
+    }
+
+    public <R> Result<R> map(Function<T, R> mapper, Function<Throwable, Throwable> mapperFailure) {
+        if (this.ok != null) return ok(mapper.apply(this.ok.value));
+        if (this.failure != null) return failure(mapperFailure.apply(this.failure.throwable));
+        throw new VerifyError("Unreachable code.");
+    }
+
+    public <R> R flatMap(Function<T, R> mapper, Function<Throwable, R> mapperFailure) {
+        if (this.ok != null) return mapper.apply(this.ok.value);
+        if (this.failure != null) return mapperFailure.apply(this.failure.throwable);
+        throw new VerifyError("Unreachable code.");
     }
 
     private static class Ok<L> {

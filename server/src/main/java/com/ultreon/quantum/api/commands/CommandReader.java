@@ -485,4 +485,12 @@ public class CommandReader {
     public String[] getArguments() {
         return this.args;
     }
+
+    public char getLastChar() {
+        return this.arg.charAt(this.arg.length() - 1);
+    }
+
+    public char getCurChar() {
+        return this.cmd.charAt(this.off);
+    }
 }

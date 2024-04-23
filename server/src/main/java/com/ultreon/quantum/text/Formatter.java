@@ -76,7 +76,11 @@ public class Formatter {
     }
 
     public ParseResult parse() {
-        return this.parse0();
+        try {
+            return this.parse0();
+        } catch (Exception e) {
+            return ParseResult.error(e);
+        }
     }
 
     private ParseResult parse0() {
@@ -187,7 +191,7 @@ public class Formatter {
     }
 
     public static TextObject format(String message) {
-        return Formatter.format(message, false);
+        return Formatter.format(message, QuantumServer.get() != null);
     }
 
     public static TextObject format(String message, boolean doPing) {
@@ -260,9 +264,18 @@ public class Formatter {
 
     public void parseId() {
         this.offset++;
-        if (this.offset >= this.message.length()) return;
+        if (this.offset >= this.message.length()) {
+            this.currentBuilder.append('&');
+            return;
+        }
         switch (this.c()) {
             case '#' -> {
+                if (this.offset + 6 > this.message.length()) {
+                    this.currentBuilder.append('&');
+                    this.currentBuilder.append(this.c());
+                    this.offset++;
+                    return;
+                }
                 this.pushBuilder();
                 this.currentColor = Color.rgb(Integer.parseInt(this.message.substring(this.offset + 1, this.offset + 7), 16));
                 this.offset += 7;
@@ -300,6 +313,7 @@ public class Formatter {
                 this.offset++;
             }
             default -> {
+                this.currentBuilder.append('&');
                 this.currentBuilder.append(this.c());
                 this.offset++;
             }
@@ -312,6 +326,8 @@ public class Formatter {
         do {
             this.offset++;
             if (this.offset >= this.message.length()) {
+                this.currentBuilder.append('%');
+                this.currentBuilder.append(characters.toCharArray());
                 return;
             }
             characters.add(this.c());
@@ -319,7 +335,7 @@ public class Formatter {
 
         this.offset++;
 
-        var key = String.valueOf(characters).replace("%", "");
+        var key = String.valueOf(characters.toCharArray()).replace("%", "");
         this.pushBuilder();
 
         switch (key) {
@@ -350,9 +366,19 @@ public class Formatter {
             case "date" -> this.currentBuilder.append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
             default -> {
                 var identifier = Identifier.tryParse(key);
-                if (identifier == null) break;
+                if (identifier == null) {
+                    this.currentBuilder.append('%');
+                    this.currentBuilder.append(key);
+                    this.currentBuilder.append('%');
+                    break;
+                }
                 var textKey = CustomKeyRegistry.get(identifier);
-                if (textKey == null) break;
+                if (textKey == null) {
+                    this.currentBuilder.append('%');
+                    this.currentBuilder.append(key);
+                    this.currentBuilder.append('%');
+                    break;
+                }
                 this.currentBuilder.append(textKey.get(this.sender));
             }
         }
@@ -478,6 +504,7 @@ public class Formatter {
 
     private void parseMention() {
         if (this.offset + 1 == this.message.length()) {
+            this.offset++;
             return;
         }
 
@@ -488,14 +515,15 @@ public class Formatter {
             if (!("_-".contains(String.valueOf(this.c())) || Character.isLetterOrDigit(this.c())))
                 break;
 
-            this.offset++;
             name.append(this.c());
-            if (this.offset >= this.message.length()) {
+            this.offset++;
+            if (this.offset + 1 >= this.message.length()) {
                 break;
             }
         }
 
-        var player = QuantumServer.get().getPlayer(name.toString());
+        QuantumServer quantumServer = QuantumServer.get();
+        var player = quantumServer == null ? null : quantumServer.getPlayer(name.toString());
 
         if (player != null && !name.toString().isEmpty() && player.getName().contentEquals(name) && this.doPing) {
             this.pushBuilder();
@@ -518,7 +546,6 @@ public class Formatter {
 
             this.builder.append(textComponent1);
             this.pinged.add(player);
-
         } else {
             this.currentBuilder.append("@").append(name);
         }
@@ -530,6 +557,8 @@ public class Formatter {
         while (this.c() != '>') {
             this.offset++;
             if (this.offset >= this.message.length()) {
+                this.currentBuilder.append('<');
+                this.currentBuilder.append(characters.toCharArray());
                 return;
             }
             characters.push(this.c());
@@ -607,7 +636,9 @@ public class Formatter {
             case "enum-value" -> this.currentColor = Color.rgb(0xEF596F);
             case "keyword" -> this.currentColor = Color.rgb(0xD55FDE);
             default -> {
-
+                this.currentBuilder.append('<');
+                this.currentBuilder.append(arg);
+                this.currentBuilder.append('>');
             }
         }
 

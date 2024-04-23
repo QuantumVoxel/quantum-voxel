@@ -26,7 +26,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.*;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -127,7 +126,6 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -1870,7 +1868,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (orDefault == null) {
             BlockModel blockModel = BlockModelRegistry.get(block);
-            return Objects.requireNonNullElse(blockModel, BakedCubeModel.DEFAULT);
+            return Objects.requireNonNullElse(blockModel, BakedCubeModel.defaultModel());
 
         }
         
@@ -1881,7 +1879,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 .map(pair -> (BlockModel) pair.getSecond())
                 .orElseGet(() -> BlockModelRegistry.get(block));
 
-        if (blockModel == null) return BakedCubeModel.DEFAULT;
+        if (blockModel == null) return BakedCubeModel.defaultModel();
 
         return blockModel;
     }

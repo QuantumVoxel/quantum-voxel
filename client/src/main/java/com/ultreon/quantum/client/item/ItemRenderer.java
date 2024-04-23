@@ -126,7 +126,7 @@ public class ItemRenderer implements Disposable {
             this.itemCam.far = 100000;
             this.itemCam.update();
             @NotNull BlockModel blockModel = this.client.getBlockModel(block);
-            if (blockModel == BakedCubeModel.DEFAULT) {
+            if (blockModel == BakedCubeModel.defaultModel()) {
                 renderCustomBlock(item, block, renderer, x, y);
                 return;
             }
@@ -166,7 +166,7 @@ public class ItemRenderer implements Disposable {
 
     private static Model getModel(BlockProperties block) {
         BlockModel blockModel = BlockModelRegistry.get(block);
-        Model defaultModel = BakedCubeModel.DEFAULT.getModel();
+        Model defaultModel = BakedCubeModel.defaultModel().getModel();
         if (blockModel == null) return defaultModel;
         Model model = blockModel.getModel();
         return model == null ? defaultModel : model;
@@ -183,7 +183,15 @@ public class ItemRenderer implements Disposable {
     }
 
     public ModelInstance createModelInstance(ItemStack stack) {
-        return new ModelInstance(models.get(stack.getItem()).getModel());
+        ItemModel itemModel = models.get(stack.getItem());
+        if (itemModel == null) {
+            ModelInstance modelInstance = new ModelInstance(BakedCubeModel.defaultModel().getModel());
+            modelInstance.userData = new BlockItemModel(() -> BakedCubeModel.defaultModel());
+            return modelInstance;
+        }
+        ModelInstance modelInstance = new ModelInstance(itemModel.getModel());
+        modelInstance.userData = itemModel;
+        return modelInstance;
     }
 
     public void registerModel(Item item, ItemModel model) {
@@ -219,14 +227,14 @@ public class ItemRenderer implements Disposable {
                     return;
                 }
 
-                Json5Model load = loader.load(e);
+                ItemModel load = loader.load(e);
                 if (load == null) {
-                    fallbackModel(e);
-                    return;
+                    load = new FlatItemModel(e);
                 }
 
                 this.registerModel(e, Objects.requireNonNullElseGet(load, () -> new FlatItemModel(e)));
             } catch (IOException ex) {
+                QuantumClient.LOGGER.error("Failed to load item model for {}", e, ex);
                 fallbackModel(e);
             }
         });

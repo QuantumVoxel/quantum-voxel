@@ -427,6 +427,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (world != null) {
             this.client.execute(() -> {
                 Entity entity = world.getEntity(id);
+                if (entity == null) return;
                 entity.onPipeline(pipeline);
             });
         }
@@ -437,6 +438,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         var player = this.client.player;
         if (player != null) {
             this.client.execute(player::closeMenu);
+        }
+    }
+
+    @Override
+    public void onRemoveEntity(int id) {
+        if (this.client.world != null) {
+            this.client.world.removeEntity(id);
         }
     }
 

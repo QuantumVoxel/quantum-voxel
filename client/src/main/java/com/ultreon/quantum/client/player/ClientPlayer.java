@@ -1,5 +1,6 @@
 package com.ultreon.quantum.client.player;
 
+import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.api.commands.perms.Permission;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.entity.EntityType;
@@ -79,8 +80,9 @@ public abstract class ClientPlayer extends Player {
     }
 
     @Override
-    public void execute(String input) {
+    public CommandResult execute(String input) {
         this.client.connection.send(new C2SCommandPacket(input));
+        return null;
     }
 
     @Override

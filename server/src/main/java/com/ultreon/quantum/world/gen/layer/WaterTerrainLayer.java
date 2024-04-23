@@ -3,6 +3,7 @@ package com.ultreon.quantum.world.gen.layer;
 import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.world.Chunk;
 import com.ultreon.quantum.world.World;
+import com.ultreon.quantum.world.rng.RNG;
 
 public class WaterTerrainLayer extends TerrainLayer {
     private final int waterLevel;
@@ -16,7 +17,7 @@ public class WaterTerrainLayer extends TerrainLayer {
     }
 
     @Override
-    public boolean handle(World world, Chunk chunk, int x, int y, int z, int height) {
+    public boolean handle(World world, Chunk chunk, RNG rng, int x, int y, int z, int height) {
         // Set water layer from height up to water level y
         if (y <= this.waterLevel + 1 && y > height) {
             return false;

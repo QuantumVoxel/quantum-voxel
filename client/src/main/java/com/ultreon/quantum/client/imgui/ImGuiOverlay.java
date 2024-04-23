@@ -46,6 +46,7 @@ public class ImGuiOverlay {
     public static final ImFloat U_INTENSITY = new ImFloat(1.5f);
     public static final ImFloat U_MULTIPLIER = new ImFloat(1000.0f);
     public static final ImFloat U_DEPTH_TOLERANCE = new ImFloat(0.0001f);
+    public static final ImInt U_ATLAS_SIZE = new ImInt(512);
     public static final ImInt MODEL_VIEWER_LIST_INDEX = new ImInt(0);
     public static final ImBoolean SHOW_RENDER_PIPELINE = new ImBoolean(false);
     private static final ImBoolean SHOW_IM_GUI = new ImBoolean(false);
@@ -348,7 +349,31 @@ public class ImGuiOverlay {
         ImGui.setNextWindowSize(400, 200, ImGuiCond.Once);
         ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
         if (ImGui.begin("Shader Editor", ImGuiOverlay.getDefaultFlags())) {
-            ImGuiEx.editFloat("iGamma", "Shader::SSAO::iGamma", ImGuiOverlay.I_GAMMA::get, ImGuiOverlay.I_GAMMA::set);
+            if (ImGui.treeNode("Shader::SSAO", "SSAO")) {
+                ImGuiEx.editFloat("iGamma", "Shader::SSAO::iGamma", ImGuiOverlay.I_GAMMA::get, ImGuiOverlay.I_GAMMA::set);
+                ImGui.treePop();
+            }
+
+            if (ImGui.treeNode("Shader::SkyBox", "SkyBox")) {
+                ImGuiEx.editColor3("DayTopColor", "Shader::SkyBox::DayTopColor", () -> ClientWorld.DAY_TOP_COLOR, color -> ClientWorld.DAY_TOP_COLOR = color);
+                ImGuiEx.editColor3("DayBottomColor", "Shader::SkyBox::DayBottomColor", () -> ClientWorld.DAY_BOTTOM_COLOR, color -> ClientWorld.DAY_BOTTOM_COLOR = color);
+                ImGuiEx.editColor3("NightTopColor", "Shader::SkyBox::NightTopColor", () -> ClientWorld.NIGHT_TOP_COLOR, color -> ClientWorld.NIGHT_TOP_COLOR = color);
+                ImGuiEx.editColor3("NightBottomColor", "Shader::SkyBox::NightBottomColor", () -> ClientWorld.NIGHT_BOTTOM_COLOR, color -> ClientWorld.NIGHT_BOTTOM_COLOR = color);
+                ImGuiEx.editColor3("SunRiseSetColor", "Shader::SkyBox::SunRiseSetColor", () -> ClientWorld.SUN_RISE_COLOR, color -> ClientWorld.SUN_RISE_COLOR = color);
+                ImGuiEx.editFloat("Rotation", "Shader::SkyBox::Rotation", ClientWorld.SKYBOX_ROTATION::getDegrees, ImGuiOverlay::setSkyboxRot);
+                ImGui.treePop();
+            }
+
+            if (ImGui.treeNode("Shader::World", "World")) {
+                ImGuiEx.editColor3("FogColor", "Shader::World::FogColor", ClientWorld.FOG_COLOR::get, ClientWorld.FOG_COLOR::set);
+                ImGuiEx.editDouble("FogDensity", "Shader::World::FogDensity", ClientWorld.FOG_DENSITY::get, ClientWorld.FOG_DENSITY::set);
+                ImGuiEx.editDouble("FogStart", "Shader::World::FogStart", ClientWorld.FOG_START::get, ClientWorld.FOG_START::set);
+                ImGuiEx.editDouble("FogEnd", "Shader::World::FogEnd", ClientWorld.FOG_END::get, ClientWorld.FOG_END::set);
+                ImGuiEx.editVec2f("AtlasSize", "Shader::World::AtlasSize", ClientWorld.ATLAS_SIZE::get, ClientWorld.ATLAS_SIZE::set);
+                ImGuiEx.editVec2f("AtlasOffset", "Shader::World::AtlasOffset", ClientWorld.ATLAS_OFFSET::get, ClientWorld.ATLAS_OFFSET::set);
+                ImGui.treePop();
+            }
+
             ImGui.end();
         }
     }

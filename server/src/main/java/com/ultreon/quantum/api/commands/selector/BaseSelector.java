@@ -40,7 +40,7 @@ public abstract class BaseSelector<T> {
     }
 
     public CommandError getError(){
-        return this.result.error();
+        return this.result == null ? null : this.result.error();
     }
 
     public record Result<T>(@Nullable T value, @Nullable CommandError error) {

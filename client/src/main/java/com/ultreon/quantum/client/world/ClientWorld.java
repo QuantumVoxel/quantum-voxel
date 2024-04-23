@@ -1,7 +1,11 @@
 package com.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.utils.Disposable;
+import com.google.common.util.concurrent.AtomicDouble;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.quantum.CommonConstants;
+import com.ultreon.quantum.api.commands.IndexedCommandSpecValues;
 import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
@@ -26,12 +30,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
 import static com.ultreon.quantum.client.util.ExtKt.deg;
 
 public final class ClientWorld extends World implements Disposable {
     public static final int DAY_CYCLE = 24000;
+    public static final AtomicReference<Color> FOG_COLOR = new AtomicReference<>(Color.rgb(0x7fb0fe));
+    public static final AtomicDouble FOG_DENSITY = new AtomicDouble(0.001);
+    public static final AtomicDouble FOG_START = new AtomicDouble(0.0);
+    public static final AtomicDouble FOG_END = new AtomicDouble(1.0);
+    public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(512, 512));
+    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(0.99908f, 1.03125f));
     public static Rot SKYBOX_ROTATION = deg(-60);
     public static Color DAY_TOP_COLOR = Color.rgb(0x7fb0fe);
     public static Color DAY_BOTTOM_COLOR = Color.rgb(0xc1d3f1);
@@ -139,7 +150,7 @@ public final class ClientWorld extends World implements Disposable {
         if (breakResult == BreakResult.BROKEN) {
             this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.STOP));
             this.client.connection.send(new C2SBlockBreakPacket(breaking));
-            this.set(breaking, Blocks.AIR.createMeta());
+            this.set(breaking, Blocks.AIR.createMeta(), BlockFlags.UPDATE);
         }
         return breakResult;
     }
@@ -249,8 +260,8 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
-    public List<Entity> getAllEntities() {
-        return this.entities;
+    public Collection<Entity> getAllEntities() {
+        return this.entitiesById.values();
     }
 
     public float getGlobalSunlight() {
@@ -323,6 +334,15 @@ public final class ClientWorld extends World implements Disposable {
         entity.setPosition(position);
         entity.onPipeline(pipeline);
         this.entitiesById.put(id, entity);
-        this.entities.add(entity);
+    }
+
+    @CanIgnoreReturnValue
+    public Entity removeEntity(int id) {
+        Entity remove = this.entitiesById.remove(id);
+        WorldRenderer worldRenderer = client.worldRenderer;
+        if (worldRenderer != null) {
+            worldRenderer.removeEntity(id);
+        }
+        return remove;
     }
 }

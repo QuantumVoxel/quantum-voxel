@@ -146,7 +146,7 @@ public final class CubeModel {
                 }
             }
 
-            BakedCubeModel baked = new BakedCubeModel(
+            BakedCubeModel baked = BakedCubeModel.of(
                     resourceId,
                     topTex, bottomTex,
                     leftTex, rightTex,

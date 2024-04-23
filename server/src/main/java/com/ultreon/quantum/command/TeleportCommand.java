@@ -52,8 +52,8 @@ public class TeleportCommand extends Command {
         return this.successMessage("Teleported to " + player.getPosition() + " in " + world.getDimension().getName());
     }
 
-    @DefineCommand("to <player>")
-    public @Nullable CommandResult executePlayer(CommandSender sender, CommandContext commandContext, String alias, Player target) {
+    @DefineCommand("to <entity>")
+    public @Nullable CommandResult executePlayer(CommandSender sender, CommandContext commandContext, String alias, Entity target) {
         if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         player.teleportTo(target);

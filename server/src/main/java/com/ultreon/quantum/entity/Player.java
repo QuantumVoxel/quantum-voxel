@@ -55,6 +55,8 @@ public abstract class Player extends LivingEntity {
         this.inventory = new Inventory(MenuTypes.INVENTORY, world, this, null);
         this.name = name;
         this.inventory.build();
+
+        this.inventory.addWatcher(this);
     }
 
     @Override
@@ -318,7 +320,9 @@ public abstract class Player extends LivingEntity {
         if (this instanceof ServerPlayer serverPlayer)
             MenuEvents.MENU_CLOSE.factory().onMenuClose(this.openMenu, serverPlayer);
 
-        this.openMenu.removeWatcher(this);
+        if (!(this.openMenu instanceof Inventory)) {
+            this.openMenu.removeWatcher(this);
+        }
         this.openMenu = null;
     }
 
@@ -439,8 +443,9 @@ public abstract class Player extends LivingEntity {
     }
 
     public void dropItem() {
+        if (this.world.isClientSide()) return;
         ItemStack itemStack = this.getSelectedItem();
-        if (itemStack.shrink(1) == 0) return;
+        if (itemStack.shrink(1) != 0) return;
 
         ItemStack copy = itemStack.copy();
         copy.setCount(1);

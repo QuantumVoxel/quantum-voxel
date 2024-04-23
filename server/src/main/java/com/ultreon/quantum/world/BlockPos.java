@@ -95,6 +95,6 @@ public record BlockPos(int x, int y, int z) {
     }
 
     private BlockPos offset(BlockPos offset) {
-        return this.offset(offset.x, offset.y, offset.z);
+        return this.offset(x + offset.x, y + offset.y, z +  offset.z);
     }
 }

@@ -151,71 +151,62 @@ public abstract class Command {
      * @param commandCtx the command context
      * @param alias      the command alias
      * @param args       the command arguments
-     * @return true if the command is executed successfully
+     * @return the command result
      */
-    public boolean onCommand(CommandSender sender, CommandContext commandCtx, String alias, String[] args) {
+    public CommandResult onCommand(CommandSender sender, CommandContext commandCtx, String alias, String[] args) {
         try {
             // Check if permission is required and send error if not provided
             if (this.getRequiredPermission() == null) {
-                new PermissionsBrokenError().send(sender);
-                return true;
+                return new PermissionsBrokenError();
             }
 
             // Check if the command needs an entity to execute
-            if (this.requiresEntity && !(sender instanceof Entity entity)) {
-                this.needEntity().send(sender, this.data);
-                return true;
+            if (this.requiresEntity && !(sender instanceof Entity)) {
+                return this.needEntity();
             }
 
             // Check if the command needs a living entity to execute
-            if (this.requiresLivingEntity && !(sender instanceof LivingEntity livingEntity)) {
-                this.needLivingEntity().send(sender, this.data);
-                return true;
+            if (this.requiresLivingEntity && !(sender instanceof LivingEntity)) {
+                return this.needLivingEntity();
             }
 
             // Check if the command needs a player to execute
-            if (this.requiresPlayer && !(sender instanceof Player player)) {
-                this.needPlayer().send(sender, this.data);
-                return true;
+            if (this.requiresPlayer && !(sender instanceof Player)) {
+                return this.needPlayer();
             }
 
             // Check if the command is in DEBUG mode and sender has explicit permission
             if (this.data.getStatus() == CommandStatus.DEBUG
                 && sender.hasExplicitPermission("quantum.debug_command")) {
                 QuantumServer.LOGGER.warn("Access to <!>DEBUG</> command: ${sender.name}");
-                this.noPermission().send(sender);
-                return true;
+                return this.noPermission();
             }
 
             // Check for WIP status and sender has permission
             if (this.data.getStatus() == CommandStatus.WIP && sender.hasPermission("quantum.status.unfinished_command")) {
                 QuantumServer.LOGGER.warn("Access to <!>WIP</> command: ${sender.name}");
-                this.noPermission().send(sender);
-                return true;
+                return this.noPermission();
             }
 
             // Check for required permission and send error if not provided
             if (!sender.hasExplicitPermission(this.getRequiredPermission())) {
-                this.noPermission().send(sender);
-                return true;
+                return this.noPermission();
             }
 
             // Check for required permission and send error if not provided
             if (!this.isCreatedYet && !sender.hasPermission("quantum.status.empty_command")) {
-                this.noPermission().send(sender);
-                return true;
+                return this.noPermission();
             }
 
             // Send error message if the command is not created yet
             if (!this.isCreatedYet) {
-                this.errorMessage("Command not created properly yet.").send(sender);
-                return true;
+                return this.errorMessage("Command not created properly yet.");
             }
 
             // Send help if --help argument is provided
             if (args.length == 1 && Objects.equals(args[0], "--help")) {
                 this.data.sendHelp("Help", sender, alias);
-                return true;
+                return null;
             }
 
             // Execute command on the command parser and handle exceptions
@@ -224,7 +215,7 @@ public abstract class Command {
                 commandResult = this.parser.execute(this, sender, commandCtx, alias, args);
             } catch (CommandParseException e) {
                 e.send(sender);
-                return true;
+                return errorMessage(e.getMessage());
             } catch (CommandArgumentMismatch e) {
                 // Handle command argument mismatch
                 final var dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH.mm.ss.SSS"));
@@ -238,19 +229,13 @@ public abstract class Command {
                 if (sender.hasPermission("quantum.error.command.argument_mismatch")) {
                     Chat.sendFatal(sender, "Possibly a command argument mismatch has occurred.");
                 }
-                return true;
+                return errorMessage("Internal error occurred, please check the console for details.");
             }
             if (commandResult != null) {
-                if (commandResult instanceof CommandError error) {
-                    // Command has an error
-                    error.send(sender, this.data);
-                } else {
-                    // Command has an output
-                    commandResult.send(sender);
-                }
+                return commandResult;
             }
         } catch (IllegalCommandException e) {
-            // Handle command crash report
+            // Handle the command crash report
             final var crashReport = new CommandCrashReport(e, alias, args);
             final var consoleSender = QuantumServer.get().getConsoleSender();
 
@@ -266,7 +251,7 @@ public abstract class Command {
             Chat.sendFatal(sender, e.getCode(), "Report ID:<i> " + details.id());
             Chat.sendFatal(sender, e.getMessage());
         }
-        return true;
+        return errorMessage("Internal error occurred, please check the console for details.");
     }
 
     /**
@@ -323,7 +308,7 @@ public abstract class Command {
      * @return The new void result
      */
     protected CommandResult voidResult() {
-        return new ObjectCommandResult(null, ObjectCommandResult.TYPE.VOID);
+        return new ObjectCommandResult(null, ObjectCommandResult.Type.Void);
     }
 
     /**
@@ -335,11 +320,7 @@ public abstract class Command {
     protected CommandResult objectResult(@Nullable Object object) {
         CommandResult result;
         CommandError commandError = (CommandError) object;
-        if (commandError == null) {
-            result = new ObjectCommandResult(object, ObjectCommandResult.TYPE.OBJECT);
-        } else {
-            result = commandError;
-        }
+        result = Objects.requireNonNullElseGet(commandError, () -> new ObjectCommandResult(object, ObjectCommandResult.Type.Object));
         return result;
     }
 

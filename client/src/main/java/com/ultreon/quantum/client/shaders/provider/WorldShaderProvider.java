@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.model.block.BlockModel;
+import com.ultreon.quantum.client.model.item.ItemModel;
 import com.ultreon.quantum.client.render.ModelObject;
 import com.ultreon.quantum.client.render.shader.OpenShaderProvider;
 import com.ultreon.quantum.client.shaders.WorldShader;
@@ -46,6 +48,8 @@ public class WorldShaderProvider extends DefaultShaderProvider implements OpenSh
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
         if (userData instanceof OpenShaderProvider provider) {
             return provider.createShader(renderable);
+        } else if (userData instanceof ItemModel || userData instanceof BlockModel) {
+            return Shaders.MODEL_VIEW.get().createShader(renderable);
         } else if (userData instanceof Shader shader) {
             return shader;
         } else if (userData instanceof ModelObject modelObject) {

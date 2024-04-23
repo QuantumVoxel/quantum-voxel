@@ -50,7 +50,8 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
             m.set(IntAttribute.createCullFace(GL20.GL_BACK));
             m.set(FloatAttribute.createAlphaTest(0.01f));
         });
-        instance.getModel().userData = Shaders.MODEL_VIEW.get();
+        if (instance.getModel().userData == null)
+            instance.getModel().userData = Shaders.MODEL_VIEW.get();
         instance.render(context);
 
         Gdx.gl.glDisable(GL20.GL_BLEND);

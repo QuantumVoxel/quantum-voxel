@@ -1,6 +1,7 @@
 package com.ultreon.quantum.server.dedicated.gui;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.server.QuantumServer;
 
 import javax.swing.*;

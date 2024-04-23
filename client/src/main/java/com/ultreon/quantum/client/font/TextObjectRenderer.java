@@ -98,7 +98,7 @@ public class TextObjectRenderer {
         this.originalFont = this.currentFont;
 
         this.layout.setText(this.currentFont, part);
-        float width = this.font.width(part);
+        float width = this.font.width0(part);
         this.currentX += width * scale;
 
         this.partBuilder = new StringBuilder();

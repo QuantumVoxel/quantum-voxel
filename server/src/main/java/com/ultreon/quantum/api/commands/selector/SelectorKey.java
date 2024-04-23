@@ -1,8 +1,15 @@
 package com.ultreon.quantum.api.commands.selector;
 
 public enum SelectorKey {
-
-    TAG('#'), TYPE('$'), NAME('@'), DATA('?'), UUID(':'), ID('%'), DISPLAY_NAME('='), CUSTOM_NAME('+');
+    TAG('#'),
+    TYPE('!'),
+    NAME('@'),
+    DATA('?'),
+    UUID(':'),
+    ID('%'),
+    DISPLAY_NAME('='),
+    CUSTOM_NAME('+'),
+    VARIABLE('$');
 
     private final char key;
 

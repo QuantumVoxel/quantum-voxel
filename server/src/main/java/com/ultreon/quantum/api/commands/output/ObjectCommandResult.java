@@ -5,9 +5,9 @@ import com.ultreon.quantum.server.chat.Chat;
 
 public class ObjectCommandResult implements CommandResult {
     private final Object object;
-    private final TYPE type;
+    private final Type type;
 
-    public ObjectCommandResult(Object object, TYPE type) {
+    public ObjectCommandResult(Object object, Type type) {
         this.object = object;
         this.type = type;
     }
@@ -15,17 +15,25 @@ public class ObjectCommandResult implements CommandResult {
     @Override
     public void send(CommandSender sender) {
         switch (this.type) {
-            case VOID:
+            case Void:
                 Chat.sendVoidObject(sender);
                 break;
 
-            case OBJECT:
+            case Object:
                 Chat.sendObject(sender, this.object);
                 break;
         }
     }
 
-    public enum TYPE {
-        VOID, OBJECT
+    public Object getObject() {
+        return object;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public enum Type {
+        Void, Object
     }
 }

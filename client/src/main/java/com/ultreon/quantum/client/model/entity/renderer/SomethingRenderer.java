@@ -9,9 +9,10 @@ import com.ultreon.quantum.client.model.entity.EntityModel;
 import com.ultreon.quantum.client.render.EntityTextures;
 import com.ultreon.quantum.entity.Something;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class SomethingRenderer extends LivingEntityRenderer<@NotNull Something> {
-    public SomethingRenderer(EntityModel<@NotNull Something> droppedItemModel, Model model) {
+    public SomethingRenderer(EntityModel<@NotNull Something> droppedItemModel, @Nullable Model model) {
         super(droppedItemModel, model);
     }
 

@@ -7,6 +7,7 @@ import com.ultreon.quantum.api.commands.Command;
 import com.ultreon.quantum.api.commands.CommandContext;
 import com.ultreon.quantum.api.commands.TabCompleting;
 import com.ultreon.quantum.api.commands.perms.Permission;
+import com.ultreon.quantum.api.commands.variables.PlayerVariables;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.debug.DebugFlags;

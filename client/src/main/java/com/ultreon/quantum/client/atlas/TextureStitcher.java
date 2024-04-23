@@ -47,8 +47,8 @@ public class TextureStitcher implements Disposable {
         }
 
         // Determine the dimensions of the final texture atlas
-        int width = 2048; // calculate the width of the atlas
-        int height = 2048;
+        int width = 512; // calculate the width of the atlas
+        int height = 512;
 
         Result diffuseResult = this.generateAtlas(width, height, Type.DIFFUSE, this.textures, Collections.emptyMap());
         Map<Identifier, TextureOffset> map = diffuseResult.uvMap().build();

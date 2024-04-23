@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.ultreon.quantum.client.input.GameCamera;
+import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.render.Scene3D;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Entity;
@@ -40,6 +41,7 @@ public class CollectNode extends RenderPipeline.RenderNode {
             return Double.compare(d1, d2);
         });
         for (Entity entity : toSort) {
+            if (entity instanceof LocalPlayer) continue;
             worldRenderer.collectEntity(entity, Scene3D.WORLD);
         }
 

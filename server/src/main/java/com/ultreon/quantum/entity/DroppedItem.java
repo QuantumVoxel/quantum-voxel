@@ -1,7 +1,9 @@
 package com.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
+import com.ultreon.data.types.IntType;
 import com.ultreon.quantum.item.ItemStack;
+import com.ultreon.quantum.server.player.ServerPlayer;
 import com.ultreon.quantum.world.World;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
@@ -9,6 +11,7 @@ import com.ultreon.libs.commons.v0.vector.Vec3d;
 public class DroppedItem extends Entity {
     private ItemStack stack;
     private int age;
+    private int pickupDelay = 0;
 
     public DroppedItem(EntityType<? extends Entity> entityType, World world) {
         super(entityType, world);
@@ -29,6 +32,12 @@ public class DroppedItem extends Entity {
 
         if (this.stack.isEmpty()) {
             markRemoved();
+        } else {
+            this.pickupDelay = 40;
+            if (spawnData.<IntType>contains("pickupDelay"))
+                this.pickupDelay = spawnData.getInt("pickupDelay");
+
+            pipeline.put("Item", this.stack.save());
         }
     }
 
@@ -36,6 +45,36 @@ public class DroppedItem extends Entity {
     public void tick() {
         super.tick();
         this.age++;
+
+        pipeline.putInt("age", this.age);
+        pipeline.put("Item", this.stack.save());
+
+        if (this.pickupDelay <= 0) {
+            for (Entity entity : this.world.entitiesWithinDst(this, 4)) {
+                if (entity instanceof Player player) {
+                    double deltaX = (player.getX() - this.getX()) / 10;
+                    double deltaY = (player.getY() - this.getY()) / 10;
+                    double deltaZ = (player.getZ() - this.getZ()) / 10;
+                    this.move(deltaX, deltaY, deltaZ);
+                }
+            }
+
+            for (Entity entity : this.world.collideEntities(this, getBoundingBox().ext(0.5, 0.5, 0.5))) {
+                if (this.isMarkedForRemoval()) continue;
+                if (entity instanceof ServerPlayer player) {
+                    this.markRemoved();
+                    player.inventory.addItem(this.stack);
+                }
+            }
+        }
+
+        if (pickupDelay-- <= 0) {
+            pickupDelay = 0;
+        }
+
+        if (age > 12000) {
+            markRemoved();
+        }
 
         sendPipeline();
     }
@@ -49,14 +88,6 @@ public class DroppedItem extends Entity {
         if (item != null) this.stack = ItemStack.load(item);
     }
 
-    @Override
-    public MapType getPipeline() {
-        MapType pipeline = super.getPipeline();
-        pipeline.putInt("age", this.age);
-        pipeline.put("Item", this.stack.save());
-        return pipeline;
-    }
-
     public ItemStack getStack() {
         return this.stack;
     }
@@ -64,10 +95,19 @@ public class DroppedItem extends Entity {
     public void setStack(ItemStack stack) {
         Preconditions.checkNotNull(stack, "Stack cannot be null");
         this.stack = stack;
+        this.pipeline.put("Item", stack.save());
     }
 
     public int getAge() {
         return this.age;
+    }
+
+    public int getPickupDelay() {
+        return pickupDelay;
+    }
+
+    public void setPickupDelay(int pickupDelay) {
+        this.pickupDelay = pickupDelay;
     }
 
     @Override

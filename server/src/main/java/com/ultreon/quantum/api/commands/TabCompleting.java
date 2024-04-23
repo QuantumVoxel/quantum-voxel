@@ -3,6 +3,7 @@ package com.ultreon.quantum.api.commands;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.ultreon.quantum.api.commands.selector.SelectorKey;
+import com.ultreon.quantum.api.commands.variables.PlayerVariables;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityTypes;
 import com.ultreon.quantum.gamerule.Rule;
@@ -10,8 +11,10 @@ import com.ultreon.quantum.registry.CommandRegistry;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.server.player.CacheablePlayer;
+import com.ultreon.quantum.server.player.ServerPlayer;
 import com.ultreon.quantum.util.Difficulty;
 import com.ultreon.quantum.util.Identifier;
+import com.ultreon.quantum.world.ServerWorld;
 import com.ultreon.quantum.world.World;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -322,6 +325,17 @@ public class TabCompleting {
         return list;
     }
 
+    public static List<String> variables(ArrayList<Object> objects, String s, ServerPlayer player, Class<?> clazz) {
+        List<String> list = PlayerVariables.get(player).getVariablesByType(clazz).toList();
+        for (var variable : list) {
+            if (variable.startsWith(s)) {
+                objects.add(variable);
+            }
+        }
+
+        return list;
+    }
+
     public static String[] forceToString(char... chars) {
         return (String[]) Stream.of(chars).map(String::valueOf).toArray();
     }
@@ -369,5 +383,13 @@ public class TabCompleting {
         if (!text.contains(" ") && text.startsWith(startsWith)) {
             list.add(text);
         }
+    }
+
+    public static List<String> entityIds(List<String> list, ServerWorld world, String currentArgument) {
+        for (var id : world.getEntities().stream().map(Entity::getId).toList()) {
+            TabCompleting.addIfStartsWith(list, id, currentArgument);
+        }
+
+        return list;
     }
 }

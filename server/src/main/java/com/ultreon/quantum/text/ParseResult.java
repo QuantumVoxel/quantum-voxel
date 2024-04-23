@@ -9,6 +9,10 @@ public class ParseResult {
     private final MutableText textResult;
     private final TextObject[] textObject;
 
+    public static ParseResult error(Exception e) {
+        return new ParseResult(List.of(), TextObject.empty(), TextObject.empty(), MutableText.literal(e.getMessage()).setColor(ChatColor.RED));
+    }
+
     @Deprecated
     public TextObject[] getMutableTexts() {
         return this.textObject;

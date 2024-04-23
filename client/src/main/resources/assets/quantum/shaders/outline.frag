@@ -1,7 +1,10 @@
 #ifdef GL_ES
 precision mediump float;
 #endif
-uniform vec4 u_outlineColor;
+
+varying vec4 v_color;
+varying vec2 v_texCoords;
+
 void main() {
-    gl_FragColor = u_outlineColor;
+    gl_FragColor = v_color;
 }

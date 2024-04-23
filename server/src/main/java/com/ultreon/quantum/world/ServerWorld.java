@@ -14,13 +14,11 @@ import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.debug.WorldGenDebugContext;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.events.EntityEvents;
 import com.ultreon.quantum.events.WorldEvents;
 import com.ultreon.quantum.network.client.ClientPacketHandler;
 import com.ultreon.quantum.network.packets.Packet;
-import com.ultreon.quantum.network.packets.s2c.S2CAddEntityPacket;
-import com.ultreon.quantum.network.packets.s2c.S2CAddPlayerPacket;
-import com.ultreon.quantum.network.packets.s2c.S2CBlockEntitySetPacket;
-import com.ultreon.quantum.network.packets.s2c.S2CBlockSetPacket;
+import com.ultreon.quantum.network.packets.s2c.*;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.server.ServerDisposable;
 import com.ultreon.quantum.server.QuantumServer;
@@ -419,14 +417,14 @@ public class ServerWorld extends World {
     public void tick() {
         this.playTime++;
 
-        this.entities.removeIf(entity -> {
-            if (entity.isMarkedForRemoval()) {
-                this.entitiesById.remove(entity.getId());
-                return true;
+        for (Entity entity1 : List.copyOf(this.entitiesById.values())) {
+            if (entity1.isMarkedForRemoval()) {
+                this.entitiesById.remove(entity1.getId());
+                BlockPos blockPos = entity1.getBlockPos();
+                this.sendAllTracking(blockPos.x(), blockPos.y(), blockPos.z(), new S2CRemoveEntityPacket(entity1.getId()));
+                EntityEvents.REMOVED.factory().onEntityRemoved(entity1);
             }
-
-            return false;
-        });
+        }
 
         for (var entity : this.entitiesById.values()) {
             entity.tick();
@@ -1012,6 +1010,21 @@ public class ServerWorld extends World {
             throw new IllegalStateException("Tried to spawn a non-server player in a server world.");
 
         T spawn = super.spawn(entity);
+
+        if (entity instanceof ServerPlayer player)
+            sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));
+        else
+            sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));
+
+        return spawn;
+    }
+
+    @Override
+    public <T extends Entity> T spawn(@NotNull T entity, @NotNull MapType spawnData) {
+        if (!(entity instanceof ServerPlayer) && entity instanceof Player)
+            throw new IllegalStateException("Tried to spawn a non-server player in a server world.");
+
+        T spawn = super.spawn(entity, spawnData);
 
         if (entity instanceof ServerPlayer player)
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));

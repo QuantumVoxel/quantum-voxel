@@ -87,13 +87,13 @@ public class Font implements Disposable {
             this.draw(renderer, font, color, batch, text, x + 1, y, false, italic, underlined, strikethrough, scale);
 
         if (underlined)
-            renderer.line(x, (int) (y + (font.getLineHeight() + 2)) - 0.5f, x + (this.width(text)), (int) (y + (font.getLineHeight() + 2)) - 0.5f, color);
+            renderer.line(x, (int) (y + (font.getLineHeight() + 2)) - 0.5f, x + (this.width0(text)), (int) (y + (font.getLineHeight() + 2)) - 0.5f, color);
 
         if (strikethrough)
-            renderer.line(x, (int) (y + (font.getLineHeight()) / 2), x + (this.width(text)), (int) (y + (font.getLineHeight()) / 2), color);
+            renderer.line(x, (int) (y + (font.getLineHeight()) / 2), x + (this.width0(text)), (int) (y + (font.getLineHeight()) / 2), color);
     }
 
-    public float width(String text) {
+    float width0(String text) {
         if (text.isEmpty()) {
             return 0;
         }
@@ -117,7 +117,7 @@ public class Font implements Disposable {
                 width += glyph.xadvance * scale;
             }
         }
-        return width - 1;
+        return width;
     }
 
     public void setColor(float r, float g, float b, float a) {
@@ -162,7 +162,7 @@ public class Font implements Disposable {
         String text = element.text();
         TextStyle style = element.style();
 
-        return this.width(text) + (style.isBold() ? 1 : 0);
+        return this.width0(text) + (style.isBold() ? 1 : 0);
     }
 
     public int width(List<FormattedText> text) {
@@ -179,5 +179,13 @@ public class Font implements Disposable {
             width += (int) width(element);
         }
         return width;
+    }
+
+    public int width(String text) {
+        if (text.isEmpty()) {
+            return 0;
+        }
+
+        return width(Formatter.format(text));
     }
 }

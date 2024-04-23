@@ -61,4 +61,9 @@ public class LiteralText extends MutableText {
         literalText.extras.addAll(copy);
         return literalText;
     }
+
+    public MutableText setColor(ChatColor chatColor) {
+        this.style.color(chatColor);
+        return this;
+    }
 }

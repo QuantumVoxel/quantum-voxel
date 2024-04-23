@@ -36,6 +36,10 @@ public class Shaders {
             new ResourceFileHandle(id("shaders/model_view.vert")),
             new ResourceFileHandle(id("shaders/model_view.frag"))
     ));
+    public static final Supplier<ModelViewShaderProvider> OUTLINE = Shaders.register("outline", () -> new ModelViewShaderProvider(
+            new ResourceFileHandle(id("shaders/outline.vert")),
+            new ResourceFileHandle(id("shaders/outline.frag"))
+    ));
 
     private static <T extends ShaderProvider> Supplier<T> register(String name, Supplier<T> provider) {
         return get().getShaderProviderManager().register(id(name), provider);

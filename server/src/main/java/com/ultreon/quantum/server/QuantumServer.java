@@ -57,7 +57,9 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -875,5 +877,24 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public PlayerManager getPlayerManager() {
         return this.playerManager;
+    }
+
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    @Nullable
+    @ApiStatus.Experimental
+    public final <T extends Entity> T getEntity(int id, T... typeGetter) {
+        Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
+        Entity entityById = this.worlds.values().stream().map(World::getEntities).flatMap(Collection::stream).filter(entity -> entity.getId() == id).findAny().orElse(null);;
+
+        if (type.isInstance(entityById)) {
+            return type.cast(entityById);
+        }
+
+        return null;
+    }
+
+    public Map<String, ServerPlayer> getPlayersByName() {
+        return Collections.unmodifiableMap(this.players.values().stream().collect(Collectors.toMap(ServerPlayer::getName, Function.identity())));
     }
 }

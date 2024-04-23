@@ -8,13 +8,19 @@ import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.quantum.client.QuantumClient;
+import com.ultreon.quantum.client.imgui.ImGuiOverlay;
 import com.ultreon.quantum.client.world.ClientWorld;
 
 public class WorldShader extends DefaultShader {
     private final static Attributes tmpAttributes = new Attributes();
+    private static String version = "430";
     public final int u_globalSunlight;
+    public final int u_atlasSize;
+    public final int u_atlasOffset;
 
     public WorldShader(final Renderable renderable) {
         this(renderable, new Config());
@@ -38,12 +44,15 @@ public class WorldShader extends DefaultShader {
         super(renderable, config, shaderProgram);
 
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
+        this.u_atlasSize = this.register(Inputs.atlasSize, Setters.atlasSize);
+        this.u_atlasOffset = this.register(Inputs.atlasOffset, Setters.atlasOffset);
     }
 
     public static class Inputs extends DefaultShader.Inputs {
         public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
+        public final static Uniform atlasSize = new Uniform("u_atlasSize");
+        public final static Uniform atlasOffset = new Uniform("u_atlasOffset");
     }
-
 
     public static class Setters extends DefaultShader.Setters {
         public final static Setter globalSunlight = new LocalSetter() {
@@ -57,10 +66,27 @@ public class WorldShader extends DefaultShader {
                 }
             }
         };
+
+        public final static Setter atlasSize = new LocalSetter() {
+            @Override
+            public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                Vec2f f = ClientWorld.ATLAS_SIZE.get().f();
+                shader.set(inputID, new Vector2(f.x, f.y));
+            }
+        };
+
+        public final static Setter atlasOffset = new LocalSetter() {
+            @Override
+            public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                Vec2f f = ClientWorld.ATLAS_OFFSET.get().f();
+                shader.set(inputID, new Vector2(f.x, f.y));
+            }
+        };
     }
     public static String createPrefix (final Renderable renderable, final Config config) {
         final Attributes attributes = WorldShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
+        prefix.append("#version ").append(WorldShader.version).append("\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");
@@ -160,6 +186,6 @@ public class WorldShader extends DefaultShader {
 
     @Deprecated
     public static void setVersion(String version) {
-
+        WorldShader.version = version;
     }
 }

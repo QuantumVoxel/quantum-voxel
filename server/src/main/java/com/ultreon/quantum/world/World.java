@@ -3,6 +3,7 @@ package com.ultreon.quantum.world;
 import com.badlogic.gdx.math.Vector3;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.block.entity.BlockEntity;
 import com.ultreon.quantum.block.state.BlockProperties;
@@ -67,7 +68,6 @@ public abstract class World implements ServerDisposable {
     private int renderedChunks;
 
     protected final Int2ReferenceMap<Entity> entitiesById = new Int2ReferenceArrayMap<>();
-    protected final List<Entity> entities = new CopyOnWriteArrayList<>();
     private int curId;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final List<ChunkPos> alwaysLoaded = new ArrayList<>();
@@ -520,12 +520,24 @@ public abstract class World implements ServerDisposable {
     }
 
     /**
+     * Spawns an entity.
+     * <p>
      * <b>NOTE:</b> This method is obsolete, {@link #spawn(Entity, MapType)} exists with more functionality.
+     *
+     * @param entity The entity to spawn
+     * @return The spawned entity
      */
     @ApiStatus.Obsolete
     public <T extends Entity> T spawn(T entity) {
         Preconditions.checkNotNull(entity, "Cannot spawn null entity");
+
+        // Set the entity ID
         this.setEntityId(entity);
+
+        // Prepare the entity for spawn
+        entity.onPrepareSpawn(new MapType());
+
+        // Add the entity to the map of entities
         this.entitiesById.put(entity.getId(), entity);
         return entity;
     }
@@ -887,8 +899,19 @@ public abstract class World implements ServerDisposable {
     }
 
     public void drop(ItemStack itemStack, Vec3d position, Vec3d velocity) {
-        if (this.isClientSide()) return;
+        if (this.isClientSide()) {
+            CommonConstants.LOGGER.warn("Tried to drop an item on the client side!");
+            return;
+        }
 
-        this.spawn(new DroppedItem(this, itemStack, position, velocity));
+        this.spawn(new DroppedItem(this, itemStack, position, velocity), new MapType());
+    }
+
+    public List<Entity> entitiesWithinDst(Entity entity, int distance) {
+        return entitiesById.values().stream().filter(entity1 -> entity1.distanceTo(entity) <= distance).toList();
+    }
+
+    public List<Entity> collideEntities(Entity droppedItem, BoundingBox ext) {
+        return entitiesById.values().stream().filter(entity -> entity.getBoundingBox().intersects(ext)).toList();
     }
 }

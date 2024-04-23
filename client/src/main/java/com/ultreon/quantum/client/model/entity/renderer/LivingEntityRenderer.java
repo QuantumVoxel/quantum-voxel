@@ -11,7 +11,7 @@ public abstract class LivingEntityRenderer<E extends LivingEntity> extends Entit
     private final EntityModel<E> entityModel;
     private final Model model;
 
-    protected LivingEntityRenderer(EntityModel<E> entityModel, Model model) {
+    protected LivingEntityRenderer(EntityModel<E> entityModel, @Nullable Model model) {
         super();
 
         Preconditions.checkNotNull(model, "Model cannot be null");

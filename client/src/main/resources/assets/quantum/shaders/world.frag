@@ -9,6 +9,12 @@ precision mediump float;
 #define HIGH
 #endif
 
+#if __VERSION__ < 130
+#define TEXTURE2D texture2D
+#else
+#define TEXTURE2D texture
+#endif
+
 #if defined(specularTextureFlag) || defined(specularColorFlag)
 #define specularFlag
 #endif
@@ -92,7 +98,7 @@ varying vec3 v_shadowMapUv;
 float getShadowness(vec2 offset)
 {
     const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0);
-    return step(v_shadowMapUv.z, dot(texture2D(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));
+    return step(v_shadowMapUv.z, dot(TEXTURE2D(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));
 }
 
 float getShadow()
@@ -120,11 +126,8 @@ varying vec2 v_rawUV;
 varying vec3 v_position;
 
 uniform float u_globalSunlight;
-
-const int mapWidth = 2048, mapHeight = 2048, blockWidth = 16;
-const int blocksPerRow = mapWidth/blockWidth;
-const float uPerBlock = float(blockWidth) / float(mapWidth),
-vPerBlock = float(blockWidth) / float(mapHeight);
+uniform vec2 u_atlasSize;
+uniform vec2 u_atlasOffset;
 
 struct SHC{
     vec3 L00, L1m1, L10, L11, L2m2, L2m1, L20, L21, L22;
@@ -196,6 +199,11 @@ vec3 gamma(vec3 color){
 }
 
 vec2 transformUV(vec2 uv) {
+    int blockWidth = 16;
+    int blocksPerRow = int(u_atlasSize.x)/blockWidth;
+    float uPerBlock = float(blockWidth) / float(u_atlasSize.x);
+    float vPerBlock = float(blockWidth) / float(u_atlasSize.y);
+
     #ifdef normalFlag
         vec3 texGetNormal = -abs(v_normal);
         vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
@@ -203,9 +211,9 @@ vec2 transformUV(vec2 uv) {
         vec2 uvStart = uv;
         vec2 v_texUV;
         if(v_normal.x != 0.0) {
-            v_texUV = uvStart+vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);
+            v_texUV = uvStart / u_atlasOffset + vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);
         } else {
-            v_texUV = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
+            v_texUV = uvStart / u_atlasOffset + vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
         }
     #else
         vec2 v_texUV = uv;
@@ -231,9 +239,9 @@ void main() {
     #endif // normalFlag
 
     #if defined(diffuseTextureFlag) && defined(colorFlag)
-        vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV) * v_color;
+        vec4 diffuse = TEXTURE2D(u_diffuseTexture, v_diffuseTexUV) * v_color;
     #elif defined(diffuseTextureFlag)
-        vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
+        vec4 diffuse = TEXTURE2D(u_diffuseTexture, v_diffuseTexUV);
     #elif defined(diffuseColorFlag) && defined(colorFlag)
         vec4 diffuse = u_diffuseColor * v_color;
     #elif defined(diffuseColorFlag)
@@ -245,7 +253,7 @@ void main() {
     #endif
 
     #if defined(emissiveTextureFlag)
-        vec4 emissive = texture2D(u_emissiveTexture, v_emissiveTexUV);
+        vec4 emissive = TEXTURE2D(u_emissiveTexture, v_emissiveTexUV);
     #else
         vec4 emissive = vec4(0.0);
     #endif

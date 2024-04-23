@@ -8,6 +8,8 @@ import com.ultreon.quantum.world.*;
 import com.ultreon.quantum.world.gen.*;
 import com.ultreon.quantum.world.gen.layer.TerrainLayer;
 import com.ultreon.quantum.world.gen.noise.DomainWarping;
+import com.ultreon.quantum.world.rng.JavaRNG;
+import com.ultreon.quantum.world.rng.RNG;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -65,11 +67,12 @@ public class BiomeGenerator implements ServerDisposable {
     }
 
     private void generateTerrainLayers(BuilderChunk chunk, int x, int z, int groundPos) {
+        RNG rng = chunk.getRNG();
         for (int y = chunk.getOffset().y + 1; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
             if (chunk.get(x, y, z).isAir()) continue;
 
             for (var layer : this.layers) {
-                if (layer.handle(this.world, chunk, x, y, z, groundPos)) {
+                if (layer.handle(this.world, chunk, rng, x, y, z, groundPos)) {
                     break;
                 }
             }

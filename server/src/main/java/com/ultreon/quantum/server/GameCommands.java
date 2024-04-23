@@ -19,6 +19,7 @@ public final class GameCommands {
         CommandRegistry.register(new GiveCommand());
         CommandRegistry.register(new SummonCommand());
         CommandRegistry.register(new SummonItemCommand());
+        CommandRegistry.register(new SetVarCommand());
 
         LoadingEvent.REGISTER_COMMANDS.factory().onRegisterCommands();
 

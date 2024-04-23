@@ -439,7 +439,7 @@ public class GreedyMesher implements Mesher {
                         if (shouldPass) {
                             endX++;
                             used[newX][y] = true;
-                        } else { // done on initial pass right. Start passing up.
+                        } else { // Done on initial pass right. Start passing up.
                             while (true) {
                                 if (endY == height) break;
                                 boolean allPassed = true;

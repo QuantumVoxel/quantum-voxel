@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.world.Chunk;
 import com.ultreon.quantum.world.World;
+import com.ultreon.quantum.world.rng.RNG;
 
 public class GroundTerrainLayer extends TerrainLayer {
     private final Block block;
@@ -19,7 +20,7 @@ public class GroundTerrainLayer extends TerrainLayer {
     }
 
     @Override
-    public boolean handle(World world, Chunk chunk, int x, int y, int z, int height) {
+    public boolean handle(World world, Chunk chunk, RNG rng, int x, int y, int z, int height) {
         if (y > height - this.offset - this.height && y <= height - this.offset) {
             chunk.set(x, y, z, this.block.createMeta());
             return true;

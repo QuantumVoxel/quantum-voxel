@@ -139,7 +139,7 @@ public final class WorldRenderer implements DisposableContainer {
         boundingBox.max.add(v);
 
         for (int i = 0; i < 6; i++) {
-            BakedCubeModel bakedCubeModel = this.deferDispose(new BakedCubeModel(new Identifier("break_stage/stub_" + i), breakingTexRegions.get(i)));
+            BakedCubeModel bakedCubeModel = this.deferDispose(BakedCubeModel.of(new Identifier("break_stage/stub_" + i), breakingTexRegions.get(i)));
             Mesh mesh = bakedCubeModel.getMesh();
             Model model = Models3D.INSTANCE.generateModel(id("generated/breaking/stage_" + i), modelBuilder -> {
                 modelBuilder.part("breaking", mesh, GL_TRIANGLES, this.breakingMaterial);
@@ -298,7 +298,9 @@ public final class WorldRenderer implements DisposableContainer {
 
     public void removeEntity(int id) {
         this.checkThread();
-        this.modelInstances.remove(id);
+        ModelInstance remove = this.modelInstances.remove(id);
+        if (remove == null) return;
+        Scene3D.WORLD.destroy(remove);
     }
 
     private void checkThread() {
@@ -364,7 +366,12 @@ public final class WorldRenderer implements DisposableContainer {
 
         QuantumClient.PROFILER.section("(Local Player)", () -> {
             LocalPlayer localPlayer = this.client.player;
-            if (localPlayer == null || !this.client.isInThirdPerson() && Config.hideFirstPersonPlayer) return;
+            if (localPlayer == null || !this.client.isInThirdPerson() && Config.hideFirstPersonPlayer) {
+                if (localPlayer != null) {
+                    scene3D.deactivate(modelInstances.get(localPlayer.getId()));
+                }
+                return;
+            }
 
             this.collectEntity(localPlayer, scene3D);
         });
@@ -503,7 +510,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         if (!chunk.initialized) return;
 
-        if (client.screen instanceof WorldLoadScreen){
+        if (client.screen instanceof WorldLoadScreen) {
             QuantumClient.LOGGER.warn("Chunk unloaded when loading game: ", new Throwable());
         }
 
@@ -599,10 +606,13 @@ public final class WorldRenderer implements DisposableContainer {
         try {
             ModelInstance model = this.modelInstances.get(entity.getId());
             LocalPlayer player = QuantumClient.get().player;
-            if (player == null) return;
-            if (player.getPosition(client.partialTick).dst(entity.getPosition()) > 64) return;
-
-            if (entity instanceof Player playerEntity && playerEntity.isSpectator()) return;
+            if (player == null
+                    || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64
+                    || entity instanceof Player playerEntity && playerEntity.isSpectator()) {
+                if (model != null)
+                    scene3D.deactivate(model);
+                return;
+            }
 
             //noinspection unchecked
             var renderer = (EntityRenderer<@NotNull Entity>) this.client.entityRendererManager.get(entity.getType());
@@ -617,7 +627,10 @@ public final class WorldRenderer implements DisposableContainer {
                     return;
                 }
                 this.modelInstances.put(entity.getId(), model);
+                scene3D.add(model);
             }
+
+            scene3D.activate(model);
 
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(scene3D, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));

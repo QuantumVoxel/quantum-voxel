@@ -1,5 +1,6 @@
 package com.ultreon.quantum.network.server;
 
+import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.entity.Attribute;
@@ -187,7 +188,9 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
                 return;
             }
 
-            this.player.inventory.addItems(original.getLootGen().generate(this.player.getRng()));
+            for (ItemStack itemStack : original.getLootGen().generate(this.player.getRng())) {
+                world.drop(itemStack, new Vec3d(pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5), new Vec3d(0.0, 0.0, 0.0));
+            }
         });
     }
 

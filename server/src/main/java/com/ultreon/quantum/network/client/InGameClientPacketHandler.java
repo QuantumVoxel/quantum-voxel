@@ -89,4 +89,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onEntityPipeline(int id, MapType pipeline);
 
     void onCloseContainerMenu();
+
+    void onRemoveEntity(int id);
 }

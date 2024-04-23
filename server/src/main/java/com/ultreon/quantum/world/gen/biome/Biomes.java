@@ -29,6 +29,7 @@ public class Biomes {
             .layer(new UndergroundTerrainLayer(Blocks.STONE, 4))
             .layer(new GroundTerrainLayer(Blocks.DIRT, 1, 3))
             .layer(new SurfaceTerrainLayer(Blocks.GRASS_BLOCK, 0))
+            .layer(new StoneyPeaksTerrainLayer(Blocks.STONE, 108))
             .layer(new WaterTerrainLayer(64))
             .feature(new PatchFeature(NoiseConfigs.PATCH, Blocks.DIRT, -0.5f, 4))
             .feature(new RockFeature(NoiseConfigs.ROCK, Blocks.STONE, 0.0005f))

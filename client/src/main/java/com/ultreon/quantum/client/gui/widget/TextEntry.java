@@ -147,7 +147,12 @@ public class TextEntry extends Widget {
     }
 
     public void revalidateCursor() {
-        this.cursorX = this.font.width(this.value.substring(0, this.cursorIdx));
+        if (this.value.isEmpty()) {
+            this.cursorX = 0;
+            return;
+        }
+
+        this.cursorX = this.font.width(this.value.substring(0, this.cursorIdx)) + 3;
 
         this.callback.call(this);
     }

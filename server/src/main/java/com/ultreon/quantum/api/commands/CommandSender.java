@@ -1,5 +1,9 @@
 package com.ultreon.quantum.api.commands;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.ultreon.quantum.api.commands.error.CommandError;
+import com.ultreon.quantum.api.commands.output.BasicCommandResult;
+import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.api.commands.perms.Permission;
 import com.ultreon.quantum.registry.CommandRegistry;
 import com.ultreon.quantum.server.QuantumServer;
@@ -67,14 +71,33 @@ public interface CommandSender {
      * This method doesn't need to be implemented. As it executes the command already by default.
      *
      * @param input The input string containing the command and arguments.
+     * @return
      */
-    default void execute(String input) {
+    @CanIgnoreReturnValue
+    default CommandResult execute(String input) {
+        return execute(input, true);
+    }
+
+    /**
+     * Executes a slash command with the given input.
+     * The method expects to have the first slash pre-removed from the input.
+     * <p>
+     * So, if the actual command is "/example", the method should be called with "example" as the input.<br>
+     * And if the actual command is "//example", the method should be called with "/example" as the input.
+     * <p>
+     * This method doesn't need to be implemented. As it executes the command already by default.
+     *
+     * @param input The input string containing the command and arguments.
+     * @return
+     */
+    @CanIgnoreReturnValue
+    default CommandResult execute(String input, boolean sendToChat) {
         // Trim the input to remove any leading or trailing whitespace
         var commandline = input.trim();
 
         // If the input is empty, do nothing
         if (commandline.isEmpty()) {
-            return;
+            return null;
         }
 
         // Separate the command and arguments
@@ -98,13 +121,19 @@ public interface CommandSender {
         Command baseCommand = CommandRegistry.get(command);
         if (baseCommand == null) {
             // If the command is not found, send an error message
-            Chat.sendError(this, "Unknown command&: " + command);
-            return;
+            return new BasicCommandResult("Unknown command&: " + command, BasicCommandResult.MessageType.ERROR);
         }
 
-        if (!baseCommand.onCommand(this, new CommandContext(command), command, argv)) {
-            // If the command fails, send an error message
-            Chat.sendError(this, "Command failed&: " + command);
+        CommandResult commandResult = baseCommand.onCommand(this, new CommandContext(command), command, argv);
+        if (sendToChat) {
+            if (commandResult instanceof CommandError error) {
+                // Command has an error
+                error.send(this, baseCommand.data());
+            } else {
+                // Command has an output
+                commandResult.send(this);
+            }
         }
+        return commandResult;
     }
 }

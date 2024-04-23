@@ -8,6 +8,8 @@ import com.ultreon.quantum.util.InvalidThreadException;
 import com.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import com.ultreon.quantum.world.gen.biome.Biomes;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
+import com.ultreon.quantum.world.rng.JavaRNG;
+import com.ultreon.quantum.world.rng.RNG;
 
 import java.util.List;
 
@@ -17,13 +19,15 @@ public final class BuilderChunk extends Chunk {
     private final Storage<BiomeGenerator> biomeData;
     private List<Vec3i> biomeCenters;
     private final ServerWorld.Region region;
+    private final RNG rng;
 
     public BuilderChunk(ServerWorld world, Thread thread, ChunkPos pos, ServerWorld.Region region) {
         super(world, pos);
         this.world = world;
         this.thread = thread;
         this.region = region;
-        biomeData = new PaletteStorage<>(Biomes.PLAINS.create(this.world, world.getSeed()), 256);
+        this.rng = new JavaRNG(this.world.getSeed() + (pos.x() ^ ((long) pos.z() << 4)) & 0x3FFFFFFF);
+        this.biomeData = new PaletteStorage<>(Biomes.PLAINS.create(this.world, world.getSeed()), 256);
     }
 
     @Override
@@ -115,5 +119,9 @@ public final class BuilderChunk extends Chunk {
     @Override
     public int getHighest(int x, int z) {
         return super.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK);
+    }
+
+    public RNG getRNG() {
+        return this.rng;
     }
 }

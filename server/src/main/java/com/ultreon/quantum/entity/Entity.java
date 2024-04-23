@@ -62,11 +62,12 @@ public class Entity implements CommandSender {
     private UUID uuid = Utils.ZEROED_UUID;
     protected AttributeMap attributes = new AttributeMap();
     private final RNG random = new JavaRNG();
-    private MapType pipeline = new MapType();
+    protected MapType pipeline = new MapType();
     private boolean markedForRemoval;
     private double oDx;
     private double oDy;
     private double oDz;
+    private boolean wasOnGround;
 
     /**
      * Creates a new entity.
@@ -277,7 +278,9 @@ public class Entity implements CommandSender {
 
         // Check if the deltas are too small to cause a significant move
         if (absDeltaX < 0.001 && absDeltaY < 0.001 && absDeltaZ < 0.001) {
-            return this.isColliding;
+            absDeltaX = 0.0;
+            absDeltaY = 0.0;
+            absDeltaZ = 0.0;
         }
 
         // Trigger an event to allow modification of the move
@@ -309,9 +312,15 @@ public class Entity implements CommandSender {
             this.y += deltaY;
             this.z += deltaZ;
             this.onMoved();
+            this.pipeline.putDouble("x", this.x);
+            this.pipeline.putDouble("y", this.y);
+            this.pipeline.putDouble("z", this.z);
         } else {
             this.moveWithCollision(updatedBoundingBox, deltaX, deltaY, deltaZ, originalDeltaXModified, originalDeltaYModified, originalDeltaZModified);
             this.onMoved();
+            this.pipeline.putDouble("x", this.x);
+            this.pipeline.putDouble("y", this.y);
+            this.pipeline.putDouble("z", this.z);
         }
 
         return this.isColliding;
@@ -381,6 +390,7 @@ public class Entity implements CommandSender {
         pBox.update();
 
         // Check if entity is on the ground
+        this.wasOnGround = this.onGround;
         this.onGround = oldDy != dy && oldDy < 0.0f;
 
         // Reset velocity if there was a collision in x-coordinate
@@ -394,11 +404,11 @@ public class Entity implements CommandSender {
         }
 
         // Handle collision responses and update fall distance
-        if (this.onGround && oDy < 0) {
+        if (this.onGround && !this.wasOnGround) {
             this.hitGround();
             this.fallDistance = 0.0F;
             this.velocityY = 0.0f;
-            this.oDy = 0.0f;
+            dy = 0.0f;
         } else if (dy < 0) {
             this.fallDistance -= dy;
         }
@@ -742,7 +752,9 @@ public class Entity implements CommandSender {
     public void sendPipeline() {
         if (this.world instanceof ServerWorld serverWorld) {
             // Send the entity to all tracking players
-            serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), this.getPipeline()));
+            MapType pipeline1 = this.getPipeline();
+            if (pipeline1.entries().isEmpty()) return;
+            serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), pipeline1));
         }
     }
 
@@ -752,7 +764,9 @@ public class Entity implements CommandSender {
      * @param pipeline the pipeline data
      */
     public void onPipeline(MapType pipeline) {
-
+        this.x = pipeline.getDouble("x", x);
+        this.y = pipeline.getDouble("y", y);
+        this.z = pipeline.getDouble("z", z);
     }
 
     /**
@@ -777,5 +791,16 @@ public class Entity implements CommandSender {
         this.getWorld().despawn(this);
         this.teleportTo(position);
         world.spawn(this);
+    }
+
+    public double distanceTo(Entity entity) {
+        return distanceTo(entity.getX(), entity.getY(), entity.getZ());
+    }
+
+    public double distanceTo(double x, double y, double z) {
+        double a = x - this.x;
+        double b = y - this.y;
+        double c = z - this.z;
+        return Math.sqrt(a * a + b * b + c * c);
     }
 }

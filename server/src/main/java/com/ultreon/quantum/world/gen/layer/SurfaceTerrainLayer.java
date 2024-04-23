@@ -3,6 +3,7 @@ package com.ultreon.quantum.world.gen.layer;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.world.Chunk;
 import com.ultreon.quantum.world.World;
+import com.ultreon.quantum.world.rng.RNG;
 
 public class SurfaceTerrainLayer extends TerrainLayer {
     private final Block surfaceBlock;
@@ -14,7 +15,7 @@ public class SurfaceTerrainLayer extends TerrainLayer {
     }
 
     @Override
-    public boolean handle(World world, Chunk chunk, int x, int y, int z, int height) {
+    public boolean handle(World world, Chunk chunk, RNG rng, int x, int y, int z, int height) {
         if (y >= height - this.height && y <= height) {
             chunk.set(x, y, z, this.surfaceBlock.createMeta());
             return true;

@@ -13,9 +13,10 @@ import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.render.EntityTextures;
 import com.ultreon.quantum.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
-    public PlayerRenderer(PlayerModel<@NotNull Player> playerModel, Model model) {
+    public PlayerRenderer(PlayerModel<@NotNull Player> playerModel, @Nullable Model model) {
         super(playerModel, model);
     }
 
