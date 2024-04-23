@@ -7,10 +7,7 @@ import com.ultreon.quantum.debug.WorldGenDebugContext;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.util.BlockMetaPredicate;
 import com.ultreon.quantum.util.MathHelper;
-import com.ultreon.quantum.world.Biome;
-import com.ultreon.quantum.world.BuilderChunk;
-import com.ultreon.quantum.world.ServerWorld;
-import com.ultreon.quantum.world.World;
+import com.ultreon.quantum.world.*;
 import com.ultreon.quantum.world.gen.biome.BiomeData;
 import com.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import com.ultreon.quantum.world.gen.biome.BiomeIndex;
@@ -42,6 +39,7 @@ public class TerrainGenerator implements Disposable {
     private NoiseSource noise;
     private FloatList biomeNoise = new FloatArrayList();
     private final List<BiomeData> biomeGenData = new ArrayList<>();
+    private Carver carver;
 
     public TerrainGenerator(DomainWarping biomeDomain, DomainWarping layerDomain, NoiseConfig noiseConfig) {
         this.biomeDomain = biomeDomain;
@@ -54,6 +52,9 @@ public class TerrainGenerator implements Disposable {
                 .fastSimplex(seed, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                 .abs()
                 .build();
+
+        TerrainNoise noise = new TerrainNoise(world.getSeed());
+        this.carver = new Carver(biomeDomain, noise, world.getSeed() + 1);
     }
 
     @CanIgnoreReturnValue
@@ -72,9 +73,11 @@ public class TerrainGenerator implements Disposable {
 
         for (var x = 0; x < CHUNK_SIZE; x++) {
             for (var z = 0; z < CHUNK_SIZE; z++) {
-                var index = this.findGenerator(chunk, new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z));
+                int groundPos = this.carver.carve(chunk, x, z);
+
+                var index = this.findGenerator(chunk, new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
-                chunk = index.biomeGenerator.processColumn(chunk, x, z, recordedChanges);
+                chunk = index.biomeGenerator.processColumn(chunk, x, groundPos, z, recordedChanges);
                 index.biomeGenerator.generateTerrainFeatures(recordingChunk, x, z, chunk.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK));
             }
         }
@@ -129,19 +132,17 @@ public class TerrainGenerator implements Disposable {
         return centers.stream().map(center -> (float) this.noise.evaluateNoise(center.x, center.y)).collect(Collectors.toCollection(FloatArrayList::new));
     }
 
-    private BiomeGenerator.Index findGenerator(BuilderChunk chunk, Vec3i offset) {
-        return this.findGenerator(chunk, offset, true);
+    private BiomeGenerator.Index findGenerator(BuilderChunk chunk, Vec3i offset, int height) {
+        return this.findGenerator(chunk, offset, height, true);
     }
 
-    private BiomeGenerator.Index findGenerator(BuilderChunk chunk, Vec3i offset, boolean useDomainWarping) {
+    private BiomeGenerator.Index findGenerator(BuilderChunk chunk, Vec3i offset, int height, boolean useDomainWarping) {
         if (useDomainWarping) {
             Vec2i domainOffset = MathHelper.round(this.biomeDomain.generateDomainOffset(offset.x, offset.z));
             offset.add(domainOffset.x, 0, domainOffset.y);
         }
 
-        var localOffset = World.toLocalBlockPos(offset.x, offset.y, offset.z);
         var temp = this.noise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
-        int height = chunk.getHighest(localOffset.x(), localOffset.z(), BlockMetaPredicate.WG_HEIGHT_CHK);
         BiomeGenerator biomeGen = this.biomeGenData.get(0).biomeGen();
 
         for (var data : this.biomeGenData) {

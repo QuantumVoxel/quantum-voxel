@@ -8,9 +8,7 @@ import com.ultreon.quantum.world.*;
 import com.ultreon.quantum.world.gen.*;
 import com.ultreon.quantum.world.gen.layer.TerrainLayer;
 import com.ultreon.quantum.world.gen.noise.DomainWarping;
-import com.ultreon.quantum.world.rng.JavaRNG;
 import com.ultreon.quantum.world.rng.RNG;
-import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -21,29 +19,24 @@ import static com.ultreon.quantum.world.World.CHUNK_HEIGHT;
 
 public class BiomeGenerator implements ServerDisposable {
     private final World world;
-    private final NoiseSource biomeNoise;
     private final List<TerrainLayer> layers;
     private final List<WorldGenFeature> features;
     public static final boolean USE_DOMAIN_WARPING = true;
     @UnknownNullability
     public TreeGenerator treeGenerator;
     private final Biome biome;
-    private final Carver carver;
 
-    public BiomeGenerator(World world, Biome biome, NoiseSource noise, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features) {
+    public BiomeGenerator(World world, Biome biome, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features) {
         this.world = world;
         this.biome = biome;
-        this.biomeNoise = noise;
-        this.carver = new Carver(domainWarping, noise, world.getSeed() + 1);
         this.layers = layers;
         this.features = features;
     }
 
-    public BuilderChunk processColumn(BuilderChunk chunk, int x, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
-        int groundPos = this.carver.carve(chunk, x, z);
+    public BuilderChunk processColumn(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
         LightMap lightMap = chunk.getLightMap();
 
-        this.generateTerrainLayers(chunk, x, z, groundPos);
+        this.generateTerrainLayers(chunk, x, z, y);
 
         BiomeGenerator.setRecordedChanges(chunk, x, z, recordedChanges);
 
@@ -112,10 +105,6 @@ public class BiomeGenerator implements ServerDisposable {
 
     public Biome getBiome() {
         return this.biome;
-    }
-
-    public Carver getCarver() {
-        return this.carver;
     }
 
     public static class Index {

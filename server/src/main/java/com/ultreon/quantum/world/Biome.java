@@ -51,15 +51,14 @@ public abstract class Biome {
     }
 
     public BiomeGenerator create(ServerWorld world, long seed) {
-        TerrainNoise noise = new TerrainNoise(seed);
-        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, noise, world.getTerrainGenerator().getLayerDomain(), this.layers, this.features);
+        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getTerrainGenerator().getLayerDomain(), this.layers, this.features);
 
         this.layers.forEach(layer -> layer.create(world));
         this.features.forEach(layer -> layer.create(world));
 
         DomainWarping domainWarping = new DomainWarping(QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_X.create(seed)), QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_Y.create(seed)));
 
-        return new BiomeGenerator(world, this, noise, domainWarping, this.layers, this.features);
+        return new BiomeGenerator(world, this, domainWarping, this.layers, this.features);
     }
 
     public NoiseConfig getSettings() {

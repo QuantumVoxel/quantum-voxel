@@ -6,7 +6,6 @@ import com.ultreon.quantum.world.gen.WorldGenFeature;
 import com.ultreon.quantum.world.gen.layer.TerrainLayer;
 import com.ultreon.quantum.world.gen.noise.DomainWarping;
 import com.ultreon.data.types.MapType;
-import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class WorldEvents {
 
     @FunctionalInterface
     public interface CreateBiome {
-        void onCreateBiome(World world, NoiseSource noise, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features);
+        void onCreateBiome(World world, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features);
     }
 
     @FunctionalInterface
