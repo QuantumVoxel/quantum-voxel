@@ -17,7 +17,6 @@ import com.ultreon.quantum.client.world.ClientWorld;
 
 public class WorldShader extends DefaultShader {
     private final static Attributes tmpAttributes = new Attributes();
-    private static String version = "430";
     public final int u_globalSunlight;
     public final int u_atlasSize;
     public final int u_atlasOffset;
@@ -86,7 +85,6 @@ public class WorldShader extends DefaultShader {
     public static String createPrefix (final Renderable renderable, final Config config) {
         final Attributes attributes = WorldShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
-        prefix.append("#version ").append(WorldShader.version).append("\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");
@@ -186,6 +184,6 @@ public class WorldShader extends DefaultShader {
 
     @Deprecated
     public static void setVersion(String version) {
-        WorldShader.version = version;
+
     }
 }
