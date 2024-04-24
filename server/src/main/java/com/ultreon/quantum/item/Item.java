@@ -70,6 +70,10 @@ public class Item {
         return this.maxStackSize;
     }
 
+    public float getAttackDamage(ItemStack itemStack) {
+        return 0;
+    }
+
     /**
      * Item properties.
      */

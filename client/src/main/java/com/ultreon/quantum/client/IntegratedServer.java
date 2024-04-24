@@ -6,7 +6,6 @@ import com.ultreon.quantum.client.gui.icon.MessageIcon;
 import com.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.world.WorldRenderer;
-import com.ultreon.quantum.crash.ApplicationCrash;
 import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.debug.DebugFlags;
 import com.ultreon.quantum.network.MemoryConnectionContext;

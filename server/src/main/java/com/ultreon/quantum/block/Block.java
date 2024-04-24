@@ -1,5 +1,6 @@
 package com.ultreon.quantum.block;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.entity.Player;
@@ -85,6 +86,11 @@ public class Block implements DataWriter<MapType> {
 
     public BoundingBox getBoundingBox(int x, int y, int z, BlockProperties blockProperties) {
         return new BoundingBox(new Vec3d(x, y, z), new Vec3d(x + 1, y + 1, z + 1));
+    }
+
+    @CanIgnoreReturnValue
+    public BoundingBox boundingBox(int x, int y, int z, BlockProperties blockProperties, BoundingBox box) {
+        return box.set(box.min.set(x, y, z), box.max.set(x + 1, y + 1, z + 1));
     }
 
     public boolean isTransparent() {
@@ -193,7 +199,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockPos at, UseItemContext context) {
-        return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), context.result().direction);
+        return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), context.result().getDirection());
     }
 
     public void update(World serverWorld, BlockPos offset, BlockProperties meta) {

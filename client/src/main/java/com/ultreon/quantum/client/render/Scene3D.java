@@ -3,12 +3,14 @@ package com.ultreon.quantum.client.render;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.ultreon.quantum.client.model.QVModel;
 
 public class Scene3D {
     public static final Scene3D BACKGROUND = new Scene3D();
@@ -16,6 +18,7 @@ public class Scene3D {
 
     private final Array<ModelInstance> inactiveObjects = new Array<>();
     private final Array<ModelInstance> activeObjects = new Array<>();
+    private final Array<AnimationController> animationControllers = new Array<>();
     private final Matrix4 matrixTemp = new Matrix4();
 
     private Scene3D() { }
@@ -47,6 +50,16 @@ public class Scene3D {
             this.activeObjects.add(model);
     }
 
+    public void add(AnimationController controller) {
+        if (!this.animationControllers.contains(controller, true))
+            this.animationControllers.add(controller);
+    }
+
+    public void add(QVModel model) {
+        this.add(model.getInstance());
+        this.add(model.getAnimationController());
+    }
+
     public ModelInstance create(Model model) {
         return this.create(model, 0, 0, 0);
     }
@@ -55,6 +68,15 @@ public class Scene3D {
     public boolean destroy(ModelInstance instance) {
         boolean flag = this.inactiveObjects.removeValue(instance, true);
         return this.activeObjects.removeValue(instance, true) || flag;
+    }
+
+    public boolean destroy(AnimationController controller) {
+        return this.animationControllers.removeValue(controller, true);
+    }
+
+    public boolean destroy(QVModel model) {
+        boolean destroy = destroy(model.getAnimationController());
+        return destroy(model.getInstance()) || destroy;
     }
 
     public void activate(ModelInstance instance) {
@@ -74,6 +96,12 @@ public class Scene3D {
     public void finish(Array<Renderable> output, Pool<Renderable> pool) {
         for (ModelInstance modelInstance : this.activeObjects) {
             modelInstance.getRenderables(output, pool);
+        }
+    }
+
+    public void update(float delta) {
+        for (AnimationController controller : this.animationControllers) {
+            controller.update(delta);
         }
     }
 

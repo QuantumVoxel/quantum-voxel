@@ -20,8 +20,8 @@ import com.ultreon.libs.commons.v0.vector.Vec3f;
 import com.ultreon.libs.commons.v0.vector.Vec4f;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -116,10 +116,10 @@ public class BlockBenchModelImporter implements ModelImporter {
         UUID uuid = UUID.fromString(textureJson.getAsJsonPrimitive("uuid").getAsString());
         String relativePath = textureJson.getAsJsonPrimitive("relative_path").getAsString();
 
-        URL source = null;
+        URI source = null;
         try {
-            source = new URL(textureJson.getAsJsonPrimitive("source").getAsString());
-        } catch (MalformedURLException e) {
+            source = new URI(textureJson.getAsJsonPrimitive("source").getAsString());
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         Base64.Decoder decoder = Base64.getDecoder();

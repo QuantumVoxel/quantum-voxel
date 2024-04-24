@@ -2,7 +2,6 @@ package com.ultreon.quantum.client.render.pipeline;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,17 +14,17 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.input.GameCamera;
-import com.ultreon.quantum.client.world.ClientWorld;
+import com.ultreon.quantum.client.world.WorldRenderer;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.util.Color;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.zip.Deflater;
 
-import static com.badlogic.gdx.Gdx.gl;
 import static com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder.LRU;
 
 public class RenderPipeline implements Disposable {
@@ -46,8 +45,8 @@ public class RenderPipeline implements Disposable {
 
     @SuppressWarnings("GDXJavaFlushInsideLoop") // We need to flush before the next node.
     public void render(ModelBatch modelBatch) {
-        ClientWorld world = QuantumClient.get().world;
-        if (world != null) ScreenUtils.clear(world.getSkyColor().toGdx(), true);
+        @Nullable WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
+        if (worldRenderer != null) ScreenUtils.clear(worldRenderer.getSkybox().bottomColor, true);
         else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
 
         ValueTracker.resetObtainRequests();

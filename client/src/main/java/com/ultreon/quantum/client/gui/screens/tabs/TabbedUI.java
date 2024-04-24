@@ -2,7 +2,6 @@ package com.ultreon.quantum.client.gui.screens.tabs;
 
 import com.ultreon.quantum.client.gui.Bounds;
 import com.ultreon.quantum.client.gui.GuiBuilder;
-import com.ultreon.quantum.client.gui.Position;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.client.gui.screens.Screen;
 import com.ultreon.quantum.client.gui.widget.Tab;
@@ -293,20 +292,6 @@ public abstract class TabbedUI extends Screen {
             Tab tab = new Tab(name, parent, bottom, index, builder -> builder.add(container));
             this.tabs.add(tab);
             return tab;
-        }
-
-        @Deprecated
-        public <T extends Widget> T addWithPos(T widget, Supplier<Position> pos) {
-            T add = this.guiBuilder.screen().add(widget);
-            add.onRevalidate(caller -> caller.setPos(pos.get()));
-            return add;
-        }
-
-        @Deprecated
-        public <T extends Widget> T addWithBounds(T widget, Supplier<Bounds> bounds) {
-            T add = this.guiBuilder.screen().add(widget);
-            add.onRevalidate(caller -> caller.setBounds(bounds.get()));
-            return add;
         }
 
         public <T extends Widget> T add(T widget) {

@@ -29,7 +29,7 @@ import com.ultreon.quantum.recipe.RecipeType;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.server.player.ServerPlayer;
-import com.ultreon.quantum.util.HitResult;
+import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.quantum.world.*;
 import net.fabricmc.api.EnvType;
@@ -201,7 +201,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.player.selected = hotbarIdx;
     }
 
-    public void onItemUse(HitResult hitResult) {
+    public void onItemUse(BlockHitResult hitResult) {
         var player = this.player;
         var inventory = player.inventory;
         ItemSlot slot = inventory.hotbar[player.selected];
@@ -256,6 +256,10 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     public void onPlaceBlock(int x, int y, int z, BlockProperties block) {
         this.server.execute(() -> this.player.placeBlock(x, y, z, block));
+    }
+
+    public void onAttack(int id) {
+        this.player.onAttack(id);
     }
 
 //    public void handleContainerClick(int slot, ContainerInteraction interaction) {

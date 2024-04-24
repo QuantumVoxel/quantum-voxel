@@ -14,6 +14,8 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -432,39 +434,39 @@ public class Formatter {
 
         switch (type) {
             case "click":
-                var actionName = arguments.remove(0);
+                var actionName = arguments.removeFirst();
                 ClickEvent event = null;
                 switch (actionName) {
                     case "@", "web", "url", "open-url" -> {
                         if (arguments.isEmpty()) return;
-                        var url = arguments.remove(0);
+                        var url = arguments.removeFirst();
                         try {
-                            event = ClickEvent.openUrl(new URL(url));
-                        } catch (MalformedURLException ignored) {
+                            event = ClickEvent.openUri(new URI(url));
+                        } catch (URISyntaxException ignored) {
 
                         }
                     }
                     case "#", "clip", "clipboard", "copy", "cp", "copy-to-clipboard" -> {
                         if (arguments.isEmpty()) return;
-                        var text = arguments.remove(0);
+                        var text = arguments.removeFirst();
                         event = ClickEvent.copyToClipboard(text);
                     }
                     case "/", "cmd", "command" -> {
                         if (arguments.isEmpty()) return;
-                        var cmd = arguments.remove(0);
+                        var cmd = arguments.removeFirst();
                         event = ClickEvent.runCommand(cmd);
                     }
                     case ">", "suggest", "suggest-msg", "put-msg", "put", "example", "example-msg" -> {
                         if (arguments.isEmpty()) return;
-                        var cmd = arguments.remove(0);
+                        var cmd = arguments.removeFirst();
                         event = ClickEvent.suggestMessage(cmd);
                     }
                     default -> {
                         if (actionName.startsWith("@")) {
                             var url = actionName.substring(1);
                             try {
-                                event = ClickEvent.openUrl(new URL(url));
-                            } catch (MalformedURLException ignored) {
+                                event = ClickEvent.openUri(new URI(url));
+                            } catch (URISyntaxException ignored) {
 
                             }
                         }
@@ -490,7 +492,7 @@ public class Formatter {
                         new Formatter(
                                 true,
                                 false,
-                                arguments.remove(0),
+                                arguments.removeFirst(),
                                 TextObject.empty(),
                                 this.textPrefix,
                                 null,
@@ -717,6 +719,10 @@ public class Formatter {
                 <gray>Name <i>%s</i>
                 <dark-gray>%s
                 """.formatted(ChatColor.stripColor(player.getPublicName()), player.getName(), player.getUuid());
+    }
+
+    public Identifier getCurrentFont() {
+        return currentFont;
     }
 
     private enum Mode {

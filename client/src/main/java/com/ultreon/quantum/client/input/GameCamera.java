@@ -9,7 +9,7 @@ import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.world.WorldRenderer;
 import com.ultreon.quantum.debug.DebugFlags;
 import com.ultreon.quantum.debug.inspect.InspectionNode;
-import com.ultreon.quantum.util.HitResult;
+import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Ray;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3f;
@@ -29,7 +29,7 @@ public class GameCamera extends PerspectiveCamera {
     private InspectionNode<GameCamera> node;
     private Vector3 hitPosition;
     private Vec3d camPos;
-    private HitResult hitResult;
+    private BlockHitResult hitResult;
     private LocalPlayer player;
     private float cameraBop;
     private boolean inverseBop;
@@ -147,7 +147,7 @@ public class GameCamera extends PerspectiveCamera {
                     Vec3f normal = this.hitResult.getNormal().f();
                     Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
                     Vector3 hitOffset = TMP_2.set(this.direction).nor()
-                            .scl((float) -this.hitResult.distance)
+                            .scl((float) -this.hitResult.getDistance())
                             .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
                     this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
                 } else {
@@ -161,7 +161,7 @@ public class GameCamera extends PerspectiveCamera {
                     Vec3f normal = this.hitResult.getNormal().f();
                     Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
                     Vector3 hitOffset = TMP_2.set(this.direction).nor()
-                            .scl((float) -this.hitResult.distance)
+                            .scl((float) -this.hitResult.getDistance())
                             .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
                     this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
                 } else {

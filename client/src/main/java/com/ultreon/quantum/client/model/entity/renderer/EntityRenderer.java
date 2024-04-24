@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.model.EntityModelInstance;
+import com.ultreon.quantum.client.model.QVModel;
 import com.ultreon.quantum.client.model.WorldRenderContext;
 import com.ultreon.quantum.client.render.EntityTextures;
 import com.ultreon.quantum.entity.Entity;
@@ -38,20 +39,20 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
         if (instance.getModel() == null)
             throw new IllegalStateException("Cannot render entity " + instance.getEntity().getType().getId() + " without model");
 
-        if (instance.getModel().nodes.size == 0)
+        if (instance.getModel().getInstance().nodes.size == 0)
             throw new IllegalStateException("Cannot render entity " + instance.getEntity().getType().getId() + " without nodes");
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-        instance.getModel().materials.forEach(m -> {
+        instance.getModel().getInstance().materials.forEach(m -> {
             m.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
             m.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
             m.set(IntAttribute.createCullFace(GL20.GL_BACK));
             m.set(FloatAttribute.createAlphaTest(0.01f));
         });
-        if (instance.getModel().userData == null)
-            instance.getModel().userData = Shaders.MODEL_VIEW.get();
+        if (instance.getModel().getInstance().userData == null)
+            instance.getModel().getInstance().userData = Shaders.MODEL_VIEW.get();
         instance.render(context);
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -60,7 +61,7 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
     public abstract void animate(EntityModelInstance<E> instance, WorldRenderContext<E> context);
 
     @Nullable
-    public abstract ModelInstance createModel(E entity);
+    public abstract QVModel createModel(E entity);
 
     public abstract EntityTextures getTextures();
 

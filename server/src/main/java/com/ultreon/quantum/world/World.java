@@ -9,9 +9,7 @@ import com.ultreon.quantum.block.entity.BlockEntity;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.crash.CrashCategory;
 import com.ultreon.quantum.crash.CrashLog;
-import com.ultreon.quantum.entity.DroppedItem;
-import com.ultreon.quantum.entity.Entity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.*;
 import com.ultreon.quantum.events.BlockEvents;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.menu.ContainerMenu;
@@ -25,6 +23,7 @@ import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec2i;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
+import com.ultreon.quantum.world.particles.ParticleType;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import org.intellij.lang.annotations.MagicConstant;
@@ -39,6 +38,8 @@ import org.slf4j.MarkerFactory;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Base class for client/server worlds.
@@ -87,7 +88,7 @@ public abstract class World implements ServerDisposable {
     protected int spawnZ;
 
     protected World() {
-        // Shh, the original seed was 512.
+        // Shh, the original seed was 512.S
         this(512/*new Random().nextLong()*/);
     }
 
@@ -224,8 +225,61 @@ public abstract class World implements ServerDisposable {
      * @param ray the ray to cast
      * @return the result
      */
-    public HitResult rayCast(Ray ray) {
-        return WorldRayCaster.rayCast(new HitResult(ray), this);
+    public BlockHitResult rayCast(Ray ray) {
+        return WorldRayCaster.rayCast(new BlockHitResult(ray), this);
+    }
+
+    public EntityHitResult rayCastEntity(Ray ray) {
+        return rayCastEntity(ray, 5);
+    }
+
+    public EntityHitResult rayCastEntity(Ray ray, float distance) {
+        EntityHitResult result = new EntityHitResult(ray, distance);
+        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
+        entitiesWithin.forEach(entity -> {
+            double curDistance = ray.origin.dst(entity.getPosition());
+            Vec3d intersection = new Vec3d();
+            if (Intersector.intersectRayBounds(ray, entity.getBoundingBox(), intersection) && (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax())) {
+                result.entity = entity;
+                result.distance = curDistance;
+                result.position = intersection;
+                result.collide = true;
+            }
+        });
+
+        return result;
+    }
+
+    public EntityHitResult rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
+        EntityHitResult result = new EntityHitResult(ray, distance);
+        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
+        entitiesWithin.forEach(entity -> {
+            if (filter.test(entity)) {
+                double curDistance = ray.origin.dst(entity.getPosition());
+                if (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax()) {
+                    result.entity = entity;
+                    result.distance = curDistance;
+                }
+            }
+        });
+
+        if (result.getEntity() != null) {
+            result.collide = true;
+        }
+
+        return result;
+    }
+
+    public EntityHitResult rayCastEntity(Ray ray, float distance, EntityType<?> type) {
+        return rayCastEntity(ray, distance, e -> e.getType() == type);
+    }
+
+    public EntityHitResult rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
+        return rayCastEntity(ray, distance, type::isInstance);
+    }
+
+    private Stream<Entity> getEntitiesWithin(BoundingBox boundingBox) {
+        return this.entitiesById.values().stream().filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
     }
 
     /**
@@ -235,8 +289,8 @@ public abstract class World implements ServerDisposable {
      * @param distance the maximum distance that the ray can travel
      * @return the result
      */
-    public HitResult rayCast(Ray ray, float distance) {
-        HitResult hitResult = new HitResult(ray, distance);
+    public BlockHitResult rayCast(Ray ray, float distance) {
+        BlockHitResult hitResult = new BlockHitResult(ray, distance);
         return WorldRayCaster.rayCast(hitResult, this);
     }
 
@@ -913,5 +967,9 @@ public abstract class World implements ServerDisposable {
 
     public List<Entity> collideEntities(Entity droppedItem, BoundingBox ext) {
         return entitiesById.values().stream().filter(entity -> entity.getBoundingBox().intersects(ext)).toList();
+    }
+
+    public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+
     }
 }

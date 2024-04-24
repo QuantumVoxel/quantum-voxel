@@ -170,7 +170,7 @@ public class WorldShader extends DefaultShader {
         try {
             super.render(renderable);
         } catch (GdxRuntimeException e) {
-            QuantumClient.LOGGER.error("Failed to render renderable with mesh part ID: " + renderable.meshPart.id, e);
+            QuantumClient.LOGGER.error("Failed to render renderable with mesh part ID: {}", renderable.meshPart.id, e);
         }
     }
 

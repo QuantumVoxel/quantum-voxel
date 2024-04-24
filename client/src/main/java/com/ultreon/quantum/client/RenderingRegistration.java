@@ -128,6 +128,7 @@ public class RenderingRegistration {
     public static void registerEntityRenderers() {
         EntityModelRegistry entityModelManager = QuantumClient.get().entityModelManager;
         entityModelManager.registerG3d(EntityTypes.PLAYER, QuantumClient.id("player"));
+        entityModelManager.registerG3d(EntityTypes.SOMETHING, QuantumClient.id("something"));
 
         // Register the player entity renderer
         EntityRendererRegistry.register(EntityTypes.PLAYER, PlayerRenderer::new);

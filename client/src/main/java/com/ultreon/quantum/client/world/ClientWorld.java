@@ -5,12 +5,12 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.quantum.CommonConstants;
-import com.ultreon.quantum.api.commands.IndexedCommandSpecValues;
 import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.player.LocalPlayer;
+import com.ultreon.quantum.client.player.RemotePlayer;
 import com.ultreon.quantum.client.util.Rot;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
@@ -26,6 +26,7 @@ import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.Mth;
 import com.ultreon.libs.commons.v0.vector.Vec2d;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
+import com.ultreon.quantum.world.particles.ParticleType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -203,6 +204,15 @@ public final class ClientWorld extends World implements Disposable {
         return isBlockSet;
     }
 
+    @Override
+    public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+        if (!QuantumClient.isOnMainThread()) {
+            QuantumClient.invokeAndWait(() -> this.spawnParticles(particleType, position, motion, count));
+        }
+
+        super.spawnParticles(particleType, position, motion, count);
+    }
+
     private void sync(int x, int y, int z, BlockProperties block) {
         this.client.connection.send(new C2SPlaceBlockPacket(x, y, z, block));
     }
@@ -344,5 +354,19 @@ public final class ClientWorld extends World implements Disposable {
             worldRenderer.removeEntity(id);
         }
         return remove;
+    }
+
+    public void onPlayerAttack(int playerId, int entityId) {
+        Entity player = this.entitiesById.get(playerId);
+        Entity entity = this.entitiesById.get(entityId);
+
+        if (entity != null && player instanceof RemotePlayer remotePlayer) {
+            remotePlayer.onAttack(entity);
+        }
+
+        if (player instanceof LocalPlayer localPlayer) {
+            //??? This should not happen...
+            LOGGER.warn("SANITY CHECK: local player tried to attack entity {}!", entityId);
+        }
     }
 }

@@ -44,14 +44,14 @@ public class ToolLevels {
         return Collections.unmodifiableList(levels);
     }
 
-    public static ToolLevel level(int level) {
+    public static ToolLevel get(int level) {
         if (level < 1 || level > levels.size()) {
             throw new IllegalArgumentException("Invalid tool level: " + level);
         }
         return levels.get(level - 1);
     }
 
-    public static int level(ToolLevel toolLevel) {
+    public static int get(ToolLevel toolLevel) {
         if (!levels.contains(toolLevel)) {
             throw new IllegalArgumentException("Invalid tool requirement: " + toolLevel);
         }

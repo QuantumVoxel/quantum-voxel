@@ -11,6 +11,7 @@ import com.ultreon.quantum.world.World;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.Mth;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
+import com.ultreon.quantum.world.particles.ParticleTypes;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.include.com.google.common.collect.Lists;
@@ -22,7 +23,7 @@ public class LivingEntity extends Entity {
     public boolean inverseAnim;
     public float walkAnim;
     protected float health;
-    private float maxHeath = 20;
+    private float maxHealth = 20;
     protected boolean isDead = false;
     protected int damageImmunity = 0;
 
@@ -45,15 +46,15 @@ public class LivingEntity extends Entity {
     }
 
     public void setHealth(float health) {
-        this.health = Mth.clamp(health, 0, this.maxHeath);
+        this.health = Mth.clamp(health, 0, this.maxHealth);
     }
 
     public float getMaxHealth() {
-        return this.maxHeath;
+        return this.maxHealth;
     }
 
-    public void setMaxHeath(float maxHeath) {
-        this.maxHeath = maxHeath;
+    public void setMaxHealth(float maxHealth) {
+        this.maxHealth = maxHealth;
     }
 
     public float getJumpVel() {
@@ -116,6 +117,13 @@ public class LivingEntity extends Entity {
 
         // Call the superclass tick method
         super.tick();
+    }
+
+    @Override
+    public void onPrepareSpawn(MapType spawnData) {
+        super.onPrepareSpawn(spawnData);
+
+        this.setHealth(this.maxHealth);
     }
 
     @Override
@@ -235,6 +243,14 @@ public class LivingEntity extends Entity {
         if (deathSound != null) {
             this.world.playSound(deathSound, this.x, this.y, this.z);
         }
+
+        this.onDropItems(source);
+
+        this.world.spawnParticles(ParticleTypes.ENTITY_SMOKE, new Vec3d(this.x, this.y, this.z), new Vec3d(0, 0, 0), 20);
+    }
+
+    public void onDropItems(DamageSource source) {
+
     }
 
     /**
@@ -257,7 +273,7 @@ public class LivingEntity extends Entity {
         super.load(data);
 
         this.health = data.getFloat("health", this.health);
-        this.maxHeath = data.getFloat("maxHealth", this.maxHeath);
+        this.maxHealth = data.getFloat("maxHealth", this.maxHealth);
         this.damageImmunity = data.getInt("damageImmunity", this.damageImmunity);
         this.isDead = data.getBoolean("isDead", this.isDead);
         this.jumpVel = data.getFloat("jumpVelocity", this.jumpVel);
@@ -276,7 +292,7 @@ public class LivingEntity extends Entity {
         data = super.save(data);
 
         data.putFloat("health", this.health);
-        data.putFloat("maxHealth", this.maxHeath);
+        data.putFloat("maxHealth", this.maxHealth);
         data.putInt("damageImmunity", this.damageImmunity);
         data.putBoolean("isDead", this.isDead);
         data.putFloat("jumpVelocity", this.jumpVel);

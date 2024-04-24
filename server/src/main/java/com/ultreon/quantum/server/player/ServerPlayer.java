@@ -7,11 +7,12 @@ import com.ultreon.quantum.api.commands.Command;
 import com.ultreon.quantum.api.commands.CommandContext;
 import com.ultreon.quantum.api.commands.TabCompleting;
 import com.ultreon.quantum.api.commands.perms.Permission;
-import com.ultreon.quantum.api.commands.variables.PlayerVariables;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.debug.DebugFlags;
+import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
+import com.ultreon.quantum.entity.LivingEntity;
 import com.ultreon.quantum.entity.Player;
 import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.events.MenuEvents;
@@ -34,7 +35,7 @@ import com.ultreon.quantum.text.Formatter;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Color;
 import com.ultreon.quantum.util.Gamemode;
-import com.ultreon.quantum.util.HitResult;
+import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Unit;
 import com.ultreon.quantum.world.*;
 import com.ultreon.libs.commons.v0.vector.Vec2d;
@@ -166,7 +167,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         // Check if the damage immunity is active
         if (this.damageImmunity > 0) return true;
 
-        // Call the superclass to handle the damage as player/living entity. To get if the damage was cancelled.
+        // Call the superclass to handle the damage as player/living entity. To get if the damage was canceled.
         boolean noDamage = super.onHurt(damage, source);
 
         if (!noDamage) {
@@ -707,13 +708,13 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
         this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().toList()));
     }
 
-    public UseResult useItem(HitResult hitResult, ItemStack stack, ItemSlot slot) {
+    public UseResult useItem(BlockHitResult hitResult, ItemStack stack, ItemSlot slot) {
         UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack);
-        HitResult result = ctx.result();
+        BlockHitResult result = ctx.result();
         if (result == null)
             return UseResult.SKIP;
 
-        Block block = result.block;
+        Block block = result.getBlock();
         if (block != null && !block.isAir()) {
             UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockPos(result.getPos()));
 
@@ -729,7 +730,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     /**
-     * Called when a block is placed by the player on the client side.
+     * Called when the player places a block on the client side.
      * This is called from the packet when handled.
      *
      * @param x     the x-coordinate
@@ -746,5 +747,19 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
 
     public void onDisconnect(String message) {
         QuantumServer.LOGGER.info("Player %s disconnected: %s".formatted(this.getName(), message));
+    }
+
+    public void onAttack(int id) {
+        Entity entity = this.world.getEntity(id);
+        if (entity == null) return;
+        this.world.sendAllTrackingExcept((int) entity.getX(), (int) entity.getY(), (int) entity.getZ(), new S2CPlayerAttackPacket(this.getId(), id), this);
+        if (entity instanceof LivingEntity livingEntity) {
+            livingEntity.hurt(this.getAttackDamage(), DamageSource.PLAYER);
+        }
+    }
+
+    public float getAttackDamage() {
+        ItemStack selectedItem = this.getSelectedItem();
+        return selectedItem.getAttackDamage() + 1f;
     }
 }

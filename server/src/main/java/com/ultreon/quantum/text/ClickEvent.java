@@ -1,10 +1,10 @@
 package com.ultreon.quantum.text;
 
 import java.io.Serializable;
-import java.net.URL;
+import java.net.URI;
 
 public record ClickEvent(ClickEvent.Action action, String value) implements Serializable {
-    public static ClickEvent openUrl(URL url) {
+    public static ClickEvent openUri(URI url) {
         return new ClickEvent(Action.OPEN_URL, url.toString());
     }
 

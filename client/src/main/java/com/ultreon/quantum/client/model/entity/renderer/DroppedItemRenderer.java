@@ -1,12 +1,11 @@
 package com.ultreon.quantum.client.model.entity.renderer;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.model.EntityModelInstance;
+import com.ultreon.quantum.client.model.QVModel;
 import com.ultreon.quantum.client.model.WorldRenderContext;
 import com.ultreon.quantum.client.model.entity.EntityModel;
 import com.ultreon.quantum.client.model.item.ItemModel;
@@ -29,26 +28,30 @@ public class DroppedItemRenderer extends EntityRenderer<@NotNull DroppedItem> {
         float rotation = age * 5f % 360;
         float translation = MathUtils.sinDeg(age % 180 * 2) / 8f;
 
-        ItemModel userData = (ItemModel) instance.getModel().userData;
-        Vector3 offset = userData.getOffset();
-        Vector3 scale = userData.getScale();
+        ItemModel userData;
+        if (instance.getModel() != null) {
+            userData = (ItemModel) instance.getModel().getInstance().userData;
 
-        instance.rotateY(rotation);
-        instance.translate(0, translation - 1, 0);
-        instance.scale(-0.15f, -0.15f, -0.15f);
-        instance.scale(scale.x, scale.y, scale.z);
-        instance.translate(offset.x, offset.y, offset.z);
-        instance.translate(0.5, 0, -0.5);
+            Vector3 offset = userData.getOffset();
+            Vector3 scale = userData.getScale();
+
+            instance.rotateY(rotation);
+            instance.translate(0, translation - 1, 0);
+            instance.scale(-0.15f, -0.15f, -0.15f);
+            instance.scale(scale.x, scale.y, scale.z);
+            instance.translate(offset.x, offset.y, offset.z);
+            instance.translate(0.5, 0, -0.5);
+        }
     }
 
     @Override
-    public ModelInstance createModel(@NotNull DroppedItem entity) {
+    public @Nullable QVModel createModel(@NotNull DroppedItem entity) {
         if (entity.getStack().isEmpty()) {
             QuantumClient.LOGGER.warn("Tried to render empty item stack");
             return null;
         }
 
-        return Objects.requireNonNull(client.itemRenderer.createModelInstance(entity.getStack()));
+        return new QVModel(Objects.requireNonNull(client.itemRenderer.createModelInstance(entity.getStack())));
     }
 
     @Override

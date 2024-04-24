@@ -37,7 +37,7 @@ public class BlockItem extends Item {
         var stack = useItemContext.stack();
         var pos = useItemContext.result().getPos();
         var next = useItemContext.result().getNext();
-        var direction = useItemContext.result().direction;
+        var direction = useItemContext.result().getDirection();
         var player = useItemContext.player();
 
         BlockPos blockPos = new BlockPos(next);

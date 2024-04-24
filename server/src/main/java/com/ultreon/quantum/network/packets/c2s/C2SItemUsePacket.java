@@ -4,17 +4,17 @@ import com.ultreon.quantum.network.PacketIO;
 import com.ultreon.quantum.network.PacketContext;
 import com.ultreon.quantum.network.packets.Packet;
 import com.ultreon.quantum.network.server.InGameServerPacketHandler;
-import com.ultreon.quantum.util.HitResult;
+import com.ultreon.quantum.util.BlockHitResult;
 
 public class C2SItemUsePacket extends Packet<InGameServerPacketHandler> {
-    private final HitResult hitResult;
+    private final BlockHitResult hitResult;
 
-    public C2SItemUsePacket(HitResult hitResult) {
+    public C2SItemUsePacket(BlockHitResult hitResult) {
         this.hitResult = hitResult;
     }
 
     public C2SItemUsePacket(PacketIO buffer) {
-        this.hitResult = new HitResult(buffer);
+        this.hitResult = new BlockHitResult(buffer);
     }
 
     @Override

@@ -15,10 +15,7 @@ import com.ultreon.quantum.network.packets.AbilitiesPacket;
 import com.ultreon.quantum.server.player.ServerPlayer;
 import com.ultreon.quantum.sound.event.SoundEvents;
 import com.ultreon.quantum.text.TextObject;
-import com.ultreon.quantum.util.Gamemode;
-import com.ultreon.quantum.util.HitResult;
-import com.ultreon.quantum.util.Intersector;
-import com.ultreon.quantum.util.Ray;
+import com.ultreon.quantum.util.*;
 import com.ultreon.quantum.world.SoundEvent;
 import com.ultreon.quantum.world.World;
 import com.ultreon.data.types.MapType;
@@ -236,7 +233,10 @@ public abstract class Player extends LivingEntity {
     }
 
     public HitResult rayCast() {
-        return this.world.rayCast(new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector()));
+        Ray ray = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
+        EntityHitResult entityHitResult = this.world.rayCastEntity(ray);
+        if (entityHitResult.isCollide()) return entityHitResult;
+        return this.world.rayCast(ray);
     }
 
     @Override

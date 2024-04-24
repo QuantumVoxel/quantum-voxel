@@ -13,6 +13,7 @@ import com.ultreon.quantum.weather.Weather;
 import com.ultreon.quantum.world.Biome;
 import com.ultreon.quantum.world.SoundEvent;
 import com.ultreon.quantum.world.gen.noise.NoiseConfig;
+import com.ultreon.quantum.world.particles.ParticleType;
 
 public class RegistryKeys {
     public static final RegistryKey<Registry<Block>> BLOCK = RegistryKey.registry(new Identifier("block"));
@@ -27,4 +28,5 @@ public class RegistryKeys {
     public static final RegistryKey<Registry<DamageSource>> DAMAGE_SOURCE = RegistryKey.registry(new Identifier("damage_source"));
     public static final RegistryKey<Registry<RecipeType<?>>> RECIPE_TYPE = RegistryKey.registry(new Identifier("recipe_type"));
     public static final RegistryKey<Registry<BlockEntityType<?>>> BLOCK_ENTITY_TYPE = RegistryKey.registry(new Identifier("block_entity_type"));
+    public static final RegistryKey<Registry<ParticleType>> PARTICLE_TYPE = RegistryKey.registry(new Identifier("particle_type"));
 }

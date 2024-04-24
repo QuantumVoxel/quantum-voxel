@@ -14,6 +14,7 @@ public class DamageSource {
     public static final DamageSource VOID = DamageSource.register(new Identifier("void"), new DamageSource().byPassInvincibility(true));
     public static final DamageSource KILL = DamageSource.register(new Identifier("kill"), new DamageSource().byPassInvincibility(true));
     public static final DamageSource HUNGER = DamageSource.register(new Identifier("hunger"), new DamageSource());
+    public static final DamageSource PLAYER = DamageSource.register(new Identifier("player"), new DamageSource());
 
     private boolean byPassInvincibility;
 

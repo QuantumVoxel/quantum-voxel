@@ -25,6 +25,7 @@ import com.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
 import com.ultreon.quantum.client.init.Shaders;
 import com.ultreon.quantum.client.model.EntityModelInstance;
+import com.ultreon.quantum.client.model.QVModel;
 import com.ultreon.quantum.client.model.WorldRenderContextImpl;
 import com.ultreon.quantum.client.model.block.BakedCubeModel;
 import com.ultreon.quantum.client.model.block.BlockModel;
@@ -41,7 +42,7 @@ import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.Player;
-import com.ultreon.quantum.util.HitResult;
+import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.ChunkPos;
@@ -54,6 +55,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,8 +74,6 @@ public final class WorldRenderer implements DisposableContainer {
     private Material material;
     private Material transparentMaterial;
     private final Texture breakingTex;
-    private final Mesh sectionBorder;
-    private final Material sectionBorderMaterial;
     private final Environment environment;
     private int visibleChunks;
     private int loadedChunks;
@@ -89,19 +89,19 @@ public final class WorldRenderer implements DisposableContainer {
     private ModelInstance moon = null;
     private boolean disposed = false;
     private final Vector3 tmp = new Vector3();
-    private final Vector3 tmp1 = new Vector3();
     private Material breakingMaterial;
     private final Array<Model> breakingModels = new Array<>();
     private final Int2ObjectMap<ModelInstance> modelInstances = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<QVModel> qvModels = new Int2ObjectOpenHashMap<>();
     private final List<Disposable> disposables = new ArrayList<>();
     private long lastChunkBuild;
     private final Skybox skybox = new Skybox();
-    private HitResult lastHitResult;
+    private BlockHitResult lastHitResult;
     private final Map<BlockPos, ModelInstance> breakingInstances = new HashMap<>();
     private final Map<BlockPos, ModelInstance> blockInstances = new ConcurrentHashMap<>();
     private final Array<ClientChunk> removedChunks = new Array<>();
     private final Map<ChunkPos, Pair<ClientChunk, ModelInstance>> chunkModels = new ConcurrentHashMap<>();
-    private boolean wasSunMoonShown = true;
+    private final boolean wasSunMoonShown = true;
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;
@@ -116,11 +116,6 @@ public final class WorldRenderer implements DisposableContainer {
 
         // Sun and moon
         this.setupSunAndMoon();
-
-        // Chunk border outline
-        MeshMaterial result = createChunkOutline();
-        this.sectionBorderMaterial = result.material();
-        this.sectionBorder = result.mesh();
 
         // Breaking animation meshes.
         this.breakingTex = this.client.getTextureManager().getTexture(id("textures/break_stages.png"));
@@ -325,13 +320,13 @@ public final class WorldRenderer implements DisposableContainer {
         Array<ChunkPos> positions = new Array<>();
         QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(scene3D, chunks, positions, player, ref));
 
-        HitResult gameCursor = this.client.cursor;
+        BlockHitResult gameCursor = this.client.cursor;
         if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             QuantumClient.PROFILER.section("cursor", () -> {
                 // Block outline.
                 Vec3i pos = gameCursor.getPos();
                 Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
-                var boundingBox = gameCursor.block.getBoundingBox(0, 0, 0, gameCursor.blockMeta);
+                var boundingBox = gameCursor.getBlock().getBoundingBox(0, 0, 0, gameCursor.getBlockMeta());
                 renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
 
                 if (lastHitResult == null || !this.lastHitResult.equals(gameCursor)) {
@@ -604,13 +599,13 @@ public final class WorldRenderer implements DisposableContainer {
 
     public void collectEntity(Entity entity, Scene3D scene3D) {
         try {
-            ModelInstance model = this.modelInstances.get(entity.getId());
+            @Nullable QVModel model = this.qvModels.get(entity.getId());
             LocalPlayer player = QuantumClient.get().player;
             if (player == null
                     || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64
                     || entity instanceof Player playerEntity && playerEntity.isSpectator()) {
                 if (model != null)
-                    scene3D.deactivate(model);
+                    scene3D.deactivate(model.getInstance());
                 return;
             }
 
@@ -626,11 +621,12 @@ public final class WorldRenderer implements DisposableContainer {
                     QuantumClient.LOGGER.warn("Failed to render entity {} because it's model instance is still null", entity.getId());
                     return;
                 }
-                this.modelInstances.put(entity.getId(), model);
+                this.modelInstances.put(entity.getId(), model.getInstance());
+                this.qvModels.put(entity.getId(), model);
                 scene3D.add(model);
             }
 
-            scene3D.activate(model);
+            scene3D.activate(model.getInstance());
 
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(scene3D, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
@@ -782,7 +778,6 @@ public final class WorldRenderer implements DisposableContainer {
             Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
 
             setupMaterials(blockTex, emissiveBlockTex);
-//            this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.02f));
 
             // TODO Implement reloading for chunks
 

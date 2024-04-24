@@ -1,5 +1,6 @@
 package com.ultreon.quantum.registry;
 
+import com.ultreon.quantum.ToolLevels;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.entity.BlockEntityType;
 import com.ultreon.quantum.entity.Attribute;
@@ -13,6 +14,7 @@ import com.ultreon.quantum.weather.Weather;
 import com.ultreon.quantum.world.Biome;
 import com.ultreon.quantum.world.SoundEvent;
 import com.ultreon.quantum.world.gen.noise.NoiseConfig;
+import com.ultreon.quantum.world.particles.ParticleType;
 
 public final class Registries {
     public static final Registry<Registry<?>> REGISTRY = Registry.REGISTRY;
@@ -29,6 +31,7 @@ public final class Registries {
     public static final Registry<DamageSource> DAMAGE_SOURCE = Registries.create(RegistryKeys.DAMAGE_SOURCE);
     public static final Registry<RecipeType<?>> RECIPE_TYPE = Registries.create(RegistryKeys.RECIPE_TYPE);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = Registries.create(RegistryKeys.BLOCK_ENTITY_TYPE);
+    public static final Registry<ParticleType> PARTICLE_TYPES = Registries.create(RegistryKeys.PARTICLE_TYPE);
 
     public static void nopInit() {
         // Load class

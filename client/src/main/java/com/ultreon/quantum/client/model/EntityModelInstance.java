@@ -11,22 +11,23 @@ import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3f;
+import org.jetbrains.annotations.Nullable;
 
 public class EntityModelInstance<T extends Entity> {
     private static final Vec3d TMP = new Vec3d();
     private static final Vector3 TMP_1 = new Vector3();
-    private final ModelInstance model;
+    private final @Nullable QVModel model;
     private final T entity;
     private final Matrix4 transform = new Matrix4();
 
-    public EntityModelInstance(ModelInstance model, T entity) {
+    public EntityModelInstance(@Nullable QVModel model, T entity) {
         this.model = model;
         this.entity = entity;
 
-        transform.setToScaling(1, 1, 1);
+        this.transform.setToScaling(1, 1, 1);
     }
 
-    public ModelInstance getModel() {
+    public @Nullable QVModel getModel() {
         return model;
     }
 
@@ -84,19 +85,26 @@ public class EntityModelInstance<T extends Entity> {
 
     public void render(WorldRenderContext<? super T> context) {
         WorldRenderContextImpl<? super T> ctx = (WorldRenderContextImpl<? super T>) context;
-        model.transform.set(transform);
+        ModelInstance instance;
 
-        Vec3f translation = ctx.relative(entity.getPosition(), TMP).f();
-        Vector3 tmp = model.transform.getTranslation(TMP_1).add(translation.x, translation.y, translation.z);
-        model.transform.setTranslation(tmp);
+        if (model != null) {
+            instance = model.getInstance();
+            instance.transform.set(transform);
 
-        model.calculateTransforms();
+            Vec3f translation = ctx.relative(entity.getPosition(), TMP).f();
+            Vector3 tmp = instance.transform.getTranslation(TMP_1).add(translation.x, translation.y, translation.z);
+            instance.transform.setTranslation(tmp);
+
+            instance.calculateTransforms();
+        }
     }
 
     public void setTextures(Identifier textureLocation) {
         TextureManager textureManager = QuantumClient.get().getTextureManager();
         TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(textureManager.getTexture(textureLocation));
-        model.getMaterial("player.png").set(diffuseTexture);
+        if (model != null) {
+            model.getInstance().getMaterial("player.png").set(diffuseTexture);
+        }
     }
 
     public T getEntity() {
@@ -132,6 +140,10 @@ public class EntityModelInstance<T extends Entity> {
     }
 
     public Node getNode(String name) {
-        return model.getNode(name);
+        if (model != null) {
+            return model.getInstance().getNode(name);
+        }
+
+        return null;
     }
 }

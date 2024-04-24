@@ -57,7 +57,7 @@ public class DedicatedServer extends QuantumServer {
     @NotNull
     private ServerLanguage createServerLanguage() {
         // Specify the locale
-        Locale locale = new Locale("en", "us");
+        Locale locale = Locale.of("en", "us");
 
         // Load the language resource from the file system
         InputStream resourceAsStream = getClass().getResourceAsStream("/assets/quantum/languages/main.json");

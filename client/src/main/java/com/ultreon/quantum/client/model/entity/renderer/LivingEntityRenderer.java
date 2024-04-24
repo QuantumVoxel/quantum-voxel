@@ -3,6 +3,7 @@ package com.ultreon.quantum.client.model.entity.renderer;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.google.common.base.Preconditions;
+import com.ultreon.quantum.client.model.QVModel;
 import com.ultreon.quantum.client.model.entity.EntityModel;
 import com.ultreon.quantum.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -44,8 +45,8 @@ public abstract class LivingEntityRenderer<E extends LivingEntity> extends Entit
     }
 
     @Override
-    public @Nullable ModelInstance createModel(E entity) {
-        return new ModelInstance(model);
+    public @Nullable QVModel createModel(E entity) {
+        return new QVModel(new ModelInstance(model));
     }
 
     public EntityModel<E> getEntityModel() {

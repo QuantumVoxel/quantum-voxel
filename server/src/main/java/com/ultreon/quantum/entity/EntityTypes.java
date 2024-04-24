@@ -9,7 +9,7 @@ public class EntityTypes {
         throw new IllegalArgumentException("Cannot create player entity");
     }));
     public static final EntityType<DroppedItem> DROPPED_ITEM = EntityTypes.register("dropped_item", new EntityType.Builder<DroppedItem>().size(0.25f, 0.25f).factory(DroppedItem::new));
-    public static final EntityType<Something> SOMETHING = EntityTypes.register("something", new EntityType.Builder<Something>().size(0.25f, 0.25f).factory(Something::new));
+    public static final EntityType<Something> SOMETHING = EntityTypes.register("something", new EntityType.Builder<Something>().size(1f, 1f).factory(Something::new));
 
     private static <T extends Entity> EntityType<T> register(String name, EntityType.Builder<T> builder) {
         EntityType<T> entityType = builder.build();

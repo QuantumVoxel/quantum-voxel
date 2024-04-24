@@ -449,6 +449,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
+    public void onPlayerAttack(int playerId, int entityId) {
+        if (this.client.world != null) {
+            this.client.world.
+                    onPlayerAttack(playerId, entityId);
+        }
+    }
+
+    @Override
     public boolean isDisconnected() {
         return disconnected;
     }

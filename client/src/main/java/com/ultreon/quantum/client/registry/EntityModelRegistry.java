@@ -80,8 +80,8 @@ public class EntityModelRegistry implements ContextAwareReloadable {
             this.finishedRegistry.put(e.getKey(), model);
         }
 
-        Model somethingModel = this.blockBenchModel(new Identifier("entity/something"));
-        this.registerFinished(EntityTypes.SOMETHING, somethingModel);
+//        Model somethingModel = this.blockBenchModel(new Identifier("entity/something"));
+//        this.registerFinished(EntityTypes.SOMETHING, somethingModel);
 
         // Call the onRegister method of the factory in ENTITY_MODELS
         ClientRegistrationEvents.ENTITY_MODELS.factory().onRegister();

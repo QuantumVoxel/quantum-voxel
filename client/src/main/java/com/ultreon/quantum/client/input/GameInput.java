@@ -26,7 +26,7 @@ import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.item.UseItemContext;
 import com.ultreon.quantum.network.packets.c2s.C2SItemUsePacket;
 import com.ultreon.quantum.server.QuantumServer;
-import com.ultreon.quantum.util.HitResult;
+import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Ray;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.UseResult;
@@ -68,7 +68,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     private boolean using;
     private final Vec3d vel = new Vec3d();
     @Nullable
-    protected HitResult hitResult;
+    protected BlockHitResult hitResult;
     private static final Set<ControllerButton> BUTTONS_DOWN = new HashSet<>();
     private static final Set<ControllerButton> BUTTONS_JUST_PRESSED = new HashSet<>();
     private long itemUseCooldown;
@@ -252,7 +252,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     }
 
     private void updateInGame(Player player, @NotNull World world) {
-        HitResult hitResult = world.rayCast(new Ray(player.getPosition().add(0, player.getEyeHeight(), 0), player.getLookVector()));
+        BlockHitResult hitResult = world.rayCast(new Ray(player.getPosition().add(0, player.getEyeHeight(), 0), player.getLookVector()));
         Vec3i pos = hitResult.getPos();
         BlockProperties block = world.get(pos.x, pos.y, pos.z);
         if (!hitResult.isCollide() || block == null || block.isAir()) return;
@@ -261,7 +261,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         this.updateControllerBlockPlace(player, world, hitResult);
     }
 
-    private void updateControllerBlockPlace(Player player, @NotNull World world, HitResult hitResult) {
+    private void updateControllerBlockPlace(Player player, @NotNull World world, BlockHitResult hitResult) {
         float left = GameInput.TRIGGERS.get(TriggerType.LEFT).value;
         if (left >= 0.3F && this.itemUse < System.currentTimeMillis()) {
             this.useItem(player, world, hitResult);
@@ -288,7 +288,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     }
 
     @CanIgnoreReturnValue
-    public UseResult useItem(Player player, World world, HitResult hitResult) {
+    public UseResult useItem(Player player, World world, BlockHitResult hitResult) {
         if (this.itemUseCooldown > System.currentTimeMillis())
             return UseResult.DENY;
 
@@ -298,7 +298,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         return useResult;
     }
 
-    private UseResult useItem0(Player player, World world, HitResult hitResult) {
+    private UseResult useItem0(Player player, World world, BlockHitResult hitResult) {
         ItemStack stack = player.getSelectedItem();
         UseItemContext context = new UseItemContext(world, player, hitResult, stack);
         Item item = stack.getItem();
@@ -306,11 +306,11 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         this.client.connection.send(new C2SItemUsePacket(hitResult));
 
         UseItemContext ctx = new UseItemContext(world, player, hitResult, stack);
-        HitResult result = ctx.result();
+        BlockHitResult result = ctx.result();
         if (result == null)
             return UseResult.SKIP;
 
-        Block block = result.block;
+        Block block = result.getBlock();
         if (block != null && !block.isAir()) {
             UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockPos(result.getPos()));
 

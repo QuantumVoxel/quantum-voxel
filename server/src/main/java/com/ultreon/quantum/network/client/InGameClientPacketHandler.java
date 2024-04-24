@@ -91,4 +91,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onCloseContainerMenu();
 
     void onRemoveEntity(int id);
+
+    void onPlayerAttack(int playerId, int entityId);
 }

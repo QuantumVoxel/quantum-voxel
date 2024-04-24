@@ -261,7 +261,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static boolean isOnServerThread() {
         QuantumServer instance = QuantumServer.instance;
         if (instance == null) throw new IllegalStateException("Server closed!");
-        return instance.thread.getId() == Thread.currentThread().getId();
+        return instance.thread.threadId() == Thread.currentThread().threadId();
     }
 
     @ApiStatus.Internal

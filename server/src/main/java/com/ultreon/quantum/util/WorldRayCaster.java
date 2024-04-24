@@ -1,5 +1,6 @@
 package com.ultreon.quantum.util;
 
+import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.world.Chunk;
 import com.ultreon.quantum.world.World;
@@ -20,19 +21,19 @@ public class WorldRayCaster {
 	private static final Vec3d local = new Vec3d();
 	private static final BoundingBox box = new BoundingBox();
 
-	public static HitResult rayCast(World map) {
-		return rayCast(new HitResult(), map);
+	public static BlockHitResult rayCast(World map) {
+		return rayCast(new BlockHitResult(), map);
 	}
 
 	// sources : https://www.researchgate.net/publication/2611491_A_Fast_Voxel_Traversal_Algorithm_for_Ray_Tracing
 	// and https://www.gamedev.net/blogs/entry/2265248-voxel-traversal-algorithm-ray-casting/
-	public static HitResult rayCast(HitResult result, World world) {
+	public static BlockHitResult rayCast(BlockHitResult result, World world) {
 		return rayCast(result, world, BlockMetaPredicate.NON_FLUID);
 	}
 
 	// sources : https://www.researchgate.net/publication/2611491_A_Fast_Voxel_Traversal_Algorithm_for_Ray_Tracing
 	// and https://www.gamedev.net/blogs/entry/2265248-voxel-traversal-algorithm-ray-casting/
-	public static HitResult rayCast(HitResult result, World world, BlockMetaPredicate predicate) {
+	public static BlockHitResult rayCast(BlockHitResult result, World world, BlockMetaPredicate predicate) {
 		result.collide = false;
 
 		final Ray ray = result.ray;
@@ -82,22 +83,13 @@ public class WorldRayCaster {
 				continue;
 			}
 
-			BlockProperties block = chunk.get(loc.cpy());
-			if(block != null && !block.isAir() && predicate.test(block)) {
-				box.set(box.min.set(abs.x, abs.y, abs.z), box.max.set(abs.x+1,abs.y+1,abs.z+1));
+			BlockProperties blockProperties = chunk.get(loc.cpy());
+			if(blockProperties != null && !blockProperties.isAir() && predicate.test(blockProperties)) {
+				Block block = blockProperties.getBlock();
+				block.boundingBox(abs.x, abs.y, abs.z, blockProperties, box);
 				box.update();
 
-				if(Intersector.intersectRayBounds(ray, box, intersection)){
-					double dst = intersection.dst(ray.origin);
-					result.collide = true;
-					result.distance = dst;
-					result.position.set(intersection);
-					result.pos.set(abs);
-					result.blockMeta = block;
-					result.block = block.getBlock();
-
-					computeFace(result);
-				}
+				doIntersect(result, ray, blockProperties);
 
 				return result;
 			}
@@ -121,8 +113,22 @@ public class WorldRayCaster {
 		}
 	}
 
+	private static void doIntersect(BlockHitResult result, Ray ray, BlockProperties block) {
+		if(Intersector.intersectRayBounds(ray, box, intersection)){
+			double dst = intersection.dst(ray.origin);
+			result.collide = true;
+			result.distance = dst;
+			result.position.set(intersection);
+			result.pos.set(abs);
+			result.blockMeta = block;
+			result.block = block.getBlock();
 
-	private static void computeFace(HitResult result) {
+			computeFace(result);
+		}
+	}
+
+
+	private static void computeFace(BlockHitResult result) {
 		// compute face
 		local.set(result.position)
 			.sub(result.pos.x,result.pos.y,result.pos.z)

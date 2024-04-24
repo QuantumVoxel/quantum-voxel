@@ -17,8 +17,11 @@ import com.ultreon.quantum.client.input.key.KeyBind;
 import com.ultreon.quantum.client.input.key.KeyBinds;
 import com.ultreon.quantum.client.world.ClientWorld;
 import com.ultreon.quantum.debug.DebugFlags;
+import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.Player;
 import com.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
+import com.ultreon.quantum.util.BlockHitResult;
+import com.ultreon.quantum.util.EntityHitResult;
 import com.ultreon.quantum.util.HitResult;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.World;
@@ -429,34 +432,44 @@ public class DesktopInput extends GameInput {
     private void doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
         // Get the position and metadata of the current and next blocks
         Vec3i pos = hitResult.getPos();
-        BlockProperties block = world.get(new BlockPos(pos));
-        Vec3i posNext = hitResult.getNext();
-        BlockProperties blockNext = world.get(new BlockPos(posNext));
+        if (hitResult instanceof BlockHitResult blockHitResult){
+            BlockProperties block = world.get(new BlockPos(pos));
+            Vec3i posNext = blockHitResult.getNext();
+            BlockProperties blockNext = world.get(new BlockPos(posNext));
 
-        // Check if the hit result is valid and the current block is not air
-        if (!hitResult.isCollide() || block == null || block.isAir())
-            return;
+            // Check if the hit result is valid and the current block is not air
+            if (!blockHitResult.isCollide() || block == null || block.isAir())
+                return;
 
-        // Handle left button input for block breaking
-        if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
-            // Check for instant mine ability
-            if (player.abilities.instaMine) {
-                // Send a block break packet if instant mine is active
-                this.client.connection.send(new C2SBlockBreakPacket(new BlockPos(hitResult.getPos())));
+            // Handle left button input for block breaking
+            if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
+                // Check for instant mine ability
+                if (player.abilities.instaMine) {
+                    // Send a block break packet if instant mine is active
+                    this.client.connection.send(new C2SBlockBreakPacket(new BlockPos(blockHitResult.getPos())));
+                    return;
+                }
+
+                // Start breaking the block
+                this.client.startBreaking();
+                return;
+            } else {
+                // Stop breaking if the left button is not pressed
+                this.client.stopBreaking();
+            }
+
+            // Handle right button input for using items on the next block
+            if (button == Input.Buttons.RIGHT && blockNext != null && blockNext.isAir()) {
+                this.useItem(player, world, blockHitResult);
+            }
+        } else if (hitResult instanceof EntityHitResult entityHitResult) {
+            if (!entityHitResult.isCollide()) {
                 return;
             }
 
-            // Start breaking the block
-            this.client.startBreaking();
-            return;
-        } else {
-            // Stop breaking if the left button is not pressed
-            this.client.stopBreaking();
-        }
-
-        // Handle right button input for using items on the next block
-        if (button == Input.Buttons.RIGHT && blockNext != null && blockNext.isAir()) {
-            this.useItem(player, world, hitResult);
+            if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
+                this.client.attack(entityHitResult.getEntity());
+            }
         }
     }
 

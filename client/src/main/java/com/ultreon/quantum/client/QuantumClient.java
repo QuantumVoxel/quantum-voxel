@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
@@ -20,6 +21,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
+import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
+import com.badlogic.gdx.graphics.g3d.particles.batches.ParticleBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -68,9 +72,12 @@ import com.ultreon.quantum.client.player.SkinManager;
 import com.ultreon.quantum.client.registry.*;
 import com.ultreon.quantum.client.render.pipeline.*;
 import com.ultreon.quantum.client.render.shader.GameShaderProvider;
+import com.ultreon.quantum.client.resources.ResourceFileHandle;
+import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.network.MemoryConnectionContext;
 import com.ultreon.quantum.network.MemoryNetworker;
 import com.ultreon.quantum.network.client.ClientPacketHandler;
+import com.ultreon.quantum.network.packets.C2SAttackPacket;
 import com.ultreon.quantum.network.server.ServerPacketHandler;
 import com.ultreon.quantum.resources.ReloadContext;
 import com.ultreon.quantum.client.resources.ResourceLoader;
@@ -164,6 +171,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final RenderPipeline pipeline;
     public final Renderer renderer;
     public final IClipboard clipboard = getClipboard();
+    public Array<ParticleBatch<?>> batches = new Array<ParticleBatch<?>>(new ParticleBatch[]{
+            new BillboardParticleBatch(ParticleShader.AlignMode.Screen, true, 5000)
+    });
+    private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
 
     private IClipboard getClipboard() {
         if (Platform.get() != Platform.MACOSX) {
@@ -282,7 +293,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
     boolean loading = true;
     private final Thread mainThread;
-    public HitResult cursor;
+    public BlockHitResult cursor;
     LoadingOverlay loadingOverlay;
     final String[] argv;
     public final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
@@ -495,7 +506,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.clickCursor = Gdx.graphics.newCursor(new Pixmap(Gdx.files.internal("assets/quantum/textures/cursors/click.png")), 0, 0);
 
         // Set current language
-        LanguageManager.setCurrentLanguage(new Locale("en", "us"));
+        LanguageManager.setCurrentLanguage(Locale.of("en", "us"));
 
         // Set normal cursor
         Gdx.graphics.setCursor(this.normalCursor);
@@ -552,10 +563,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         String[] split = Config.language.path().split("_");
         if (split.length == 2) {
-            LanguageManager.setCurrentLanguage(new Locale(split[0], split[1]));
+            LanguageManager.setCurrentLanguage(Locale.of(split[0], split[1]));
         } else {
             QuantumClient.LOGGER.error("Invalid language: {}", Config.language);
-            LanguageManager.setCurrentLanguage(new Locale("en", "us"));
+            LanguageManager.setCurrentLanguage(Locale.of("en", "us"));
             Config.language = QuantumClient.id("en_us");
             this.newConfig.save();
         }
@@ -820,7 +831,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return true if the current thread is the main thread, false otherwise.
      */
     public static boolean isOnMainThread() {
-        return Thread.currentThread().getId() == QuantumClient.instance.mainThread.getId();
+        return Thread.currentThread().threadId() == QuantumClient.instance.mainThread.threadId();
     }
 
     /**
@@ -1535,8 +1546,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.world != null && breaking != null) {
             HitResult hitResult = this.hitResult;
 
-            if (hitResult != null) {
-                this.handleBlockBreaking(breaking, hitResult);
+            if (hitResult instanceof BlockHitResult blockHitResult) {
+                this.handleBlockBreaking(breaking, blockHitResult);
             }
         }
 
@@ -1549,7 +1560,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         ClientTickEvents.POST_GAME_TICK.factory().onGameTick(this);
     }
 
-    private void handleBlockBreaking(BlockPos breaking, HitResult hitResult) {
+    private void handleBlockBreaking(BlockPos breaking, BlockHitResult hitResult) {
         World world = this.world;
         if (world == null) return;
         if (!hitResult.getPos().equals(breaking.vec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
@@ -1573,7 +1584,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
     }
 
-    private void resetBreaking(HitResult hitResult) {
+    private void resetBreaking(BlockHitResult hitResult) {
         LocalPlayer player = this.player;
 
         if (this.world == null) return;
@@ -1897,17 +1908,18 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         HitResult hitResult = this.hitResult;
         Player player = this.player;
 
+        if (!(hitResult instanceof BlockHitResult blockHitResult)) return;
+
         // Check for null conditions and return if any are true
-        if (hitResult == null || this.world == null) return;
-        if (player == null) return;
+        if (this.world == null || player == null) return;
 
         // Stop and start breaking at the hit position for the player
-        this.world.stopBreaking(new BlockPos(hitResult.getPos()), player);
-        this.world.startBreaking(new BlockPos(hitResult.getPos()), player);
+        this.world.stopBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.world.startBreaking(new BlockPos(blockHitResult.getPos()), player);
 
         // Update the breaking position and block meta
-        this.breaking = hitResult.getPos();
-        this.breakingBlock = hitResult.getBlockMeta();
+        this.breaking = blockHitResult.getPos();
+        this.breakingBlock = blockHitResult.getBlockMeta();
     }
 
     /**
@@ -1919,13 +1931,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         HitResult hitResult = this.hitResult;
         LocalPlayer player = this.player;
 
+        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+            this.breaking = null;
+            this.breakingBlock = null;
+            return;
+        }
+
         // If hit result or world is null, return
-        if (hitResult == null || this.world == null) {
+        if (this.world == null) {
             return;
         }
 
         // If the block being hit is already broken, return
-        if (this.world.getBreakProgress(new BlockPos(hitResult.getPos())) >= 0.0F) {
+        if (this.world.getBreakProgress(new BlockPos(blockHitResult.getPos())) >= 0.0F) {
             return;
         }
 
@@ -1940,17 +1958,24 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         // Start breaking the block and update the breaking position and block metadata
-        this.world.startBreaking(new BlockPos(hitResult.getPos()), player);
-        this.breaking = hitResult.getPos();
-        this.breakingBlock = hitResult.getBlockMeta();
+        this.world.startBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.breaking = blockHitResult.getPos();
+        this.breakingBlock = blockHitResult.getBlockMeta();
     }
 
     public void stopBreaking() {
         HitResult hitResult = this.hitResult;
         LocalPlayer player = this.player;
-        if (hitResult == null || this.world == null || player == null || this.breaking == null) return;
 
-        this.world.stopBreaking(new BlockPos(hitResult.getPos()), player);
+        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+            this.breaking = null;
+            this.breakingBlock = null;
+            return;
+        }
+
+        if (this.world == null || player == null || this.breaking == null) return;
+
+        this.world.stopBreaking(new BlockPos(blockHitResult.getPos()), player);
         this.breaking = null;
         this.breakingBlock = null;
     }
@@ -2030,7 +2055,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.integratedServer.start();
 
-        mem.setOtherSide(((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().get(0));
+        mem.setOtherSide(((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
 
         // Initialize (memory) connection.
         this.multiplayerData = new MultiplayerData(this);
@@ -2246,5 +2271,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         } else if (this.playerView == PlayerView.THIRD_PERSON_FRONT) {
             this.playerView = PlayerView.FIRST_PERSON;
         }
+    }
+
+    public void attack(Entity entity) {
+        this.connection.send(new C2SAttackPacket(entity));
+    }
+
+    public AssetManager getAssetManager() {
+        return assetManager;
     }
 }

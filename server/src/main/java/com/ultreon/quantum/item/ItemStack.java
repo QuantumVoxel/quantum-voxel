@@ -326,4 +326,8 @@ public class ItemStack {
         this.count += with.count;
         return with;
     }
+
+    public float getAttackDamage() {
+        return item.getAttackDamage(this);
+    }
 }

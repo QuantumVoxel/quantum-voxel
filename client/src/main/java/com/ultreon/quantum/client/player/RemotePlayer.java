@@ -1,5 +1,6 @@
 package com.ultreon.quantum.client.player;
 
+import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityTypes;
 import com.ultreon.quantum.network.packets.AbilitiesPacket;
 import com.ultreon.quantum.util.Gamemode;
@@ -35,5 +36,9 @@ public class RemotePlayer extends ClientPlayer {
     @Override
     public void setGamemode(@NotNull Gamemode gamemode) {
 
+    }
+
+    public void onAttack(Entity entity) {
+        // TODO
     }
 }

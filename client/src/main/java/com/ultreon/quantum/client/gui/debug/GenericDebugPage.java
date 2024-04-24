@@ -11,6 +11,7 @@ import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Player;
 import com.ultreon.quantum.network.system.IConnection;
 import com.ultreon.quantum.registry.Registries;
+import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.HitResult;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.ChunkPos;
@@ -106,9 +107,9 @@ public class GenericDebugPage implements DebugPage {
                     .left();
         }
 
-        HitResult cursor = client.cursor;
+        BlockHitResult cursor = client.cursor;
         if (cursor != null && cursor.isCollide()) {
-            BlockProperties block = cursor.blockMeta;
+            BlockProperties block = cursor.getBlockMeta();
             if (block != null && !block.isAir()) {
                 context.right("Block", block);
             }

@@ -1,8 +1,10 @@
 package com.ultreon.quantum.network.stage;
 
 import com.ultreon.quantum.entity.S2CEntityPipeline;
+import com.ultreon.quantum.network.packets.C2SAttackPacket;
 import com.ultreon.quantum.network.packets.c2s.*;
 import com.ultreon.quantum.network.packets.s2c.*;
+import com.ultreon.quantum.server.player.S2CPlayerAttackPacket;
 
 public class InGamePacketStage extends PacketStage {
     @SuppressWarnings("unchecked")
@@ -32,6 +34,7 @@ public class InGamePacketStage extends PacketStage {
         this.addServerBound(C2SAbilitiesPacket::new);
         this.addServerBound(C2SCraftRecipePacket::new);
         this.addServerBound(C2SDropItemPacket::new);
+        this.addServerBound(C2SAttackPacket::new);
 
         this.addClientBound(S2CKeepAlivePacket::new);
         this.addClientBound(S2CPingPacket::new);
@@ -62,5 +65,6 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CAddEntityPacket::new);
         this.addClientBound(S2CRemoveEntityPacket::new);
         this.addClientBound(S2CEntityPipeline::new);
+        this.addClientBound(S2CPlayerAttackPacket::new);
     }
 }

@@ -21,6 +21,7 @@ import com.ultreon.quantum.client.imgui.ImGuiOverlay;
 import com.ultreon.quantum.client.init.Overlays;
 import com.ultreon.quantum.client.init.ShaderPrograms;
 import com.ultreon.quantum.client.player.LocalPlayer;
+import com.ultreon.quantum.client.render.Scene3D;
 import com.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import com.ultreon.quantum.client.world.WorldRenderer;
 import com.ultreon.quantum.world.World;
@@ -94,7 +95,11 @@ public class GameRenderer implements Disposable {
             });
         }
 
+        Scene3D.BACKGROUND.update(deltaTime);
+        Scene3D.WORLD.update(deltaTime);
+
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
+
             QuantumClient.PROFILER.section("world", () -> {
                 RenderEvents.PRE_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
                 this.renderWorld();
