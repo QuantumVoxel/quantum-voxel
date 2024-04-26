@@ -30,6 +30,8 @@ jobs:
         run: chmod +x ./gradlew && ./gradlew pack
         env:
           GH_BUILD_NUMBER: ${{ github.run_number }}
+          USERNAME: ${{ github.actor }}
+          TOKEN: ${{ github.token }}
       - name: Capture the build artifacts
         uses: actions/upload-artifact@v2
         with:
