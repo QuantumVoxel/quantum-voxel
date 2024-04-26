@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         # Use these Java versions
-        java: [17]
+        java: [21]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     name: Build package.zip
