@@ -1,4 +1,4 @@
-package com.ultreon.quantum.client.init;
+package com.ultreon.quantum.client.gui;
 
 import com.ultreon.quantum.client.gui.overlay.*;
 import com.ultreon.quantum.util.Identifier;
@@ -11,7 +11,7 @@ public class Overlays {
     public static final HungerOverlay HUNGER = OverlayManager.registerTop(new Identifier("hunger"), new HungerOverlay());
     public static final MemoryUsageOverlay MEMORY = OverlayManager.registerTop(new Identifier("memory"), new MemoryUsageOverlay());
 
-    public static void nopInit() {
+    public static void init() {
 
     }
 }

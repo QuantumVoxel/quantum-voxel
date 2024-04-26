@@ -8,7 +8,7 @@ import org.slf4j.MarkerFactory;
 /**
  * Custom logger implementation for LibGDX.
  */
-class LibGDXLogger implements ApplicationLogger {
+class GdxLogWrapper implements ApplicationLogger {
     private final Logger LOGGER = LoggerFactory.getLogger("LibGDX");
 
     /**

@@ -4,6 +4,11 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
+import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
+import com.badlogic.gdx.graphics.g3d.particles.renderers.BillboardRenderer;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
@@ -23,7 +28,7 @@ import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.model.EntityModelInstance;
 import com.ultreon.quantum.client.model.QVModel;
 import com.ultreon.quantum.client.model.WorldRenderContextImpl;
@@ -71,6 +76,8 @@ public final class WorldRenderer implements DisposableContainer {
     private static final Vec3d TMp_3D_B = new Vec3d();
     public static final String OUTLINE_CURSOR_ID = CommonConstants.strId("outline_cursor");
     public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
+    public ParticleSystem particleSystem = new ParticleSystem();
+    public ParticleController particleController = new ParticleController("world", new RegularEmitter(), new BillboardRenderer());
     private Material material;
     private Material transparentMaterial;
     private final Texture breakingTex;
@@ -817,6 +824,16 @@ public final class WorldRenderer implements DisposableContainer {
 
     public void remove(ClientChunk clientChunk) {
         this.removedChunks.add(clientChunk);
+    }
+
+    public void addParticles(ParticleEffect obtained, Vec3d position, Vec3d motion, int count) {
+        LocalPlayer player = client.player;
+        if (player == null) return;
+        Vec3f div = position.sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
+
+        Vector3 vector3 = new Vector3(div.x, div.y, div.z);
+        obtained.translate(vector3);
+        particleSystem.add(obtained);
     }
 
     private record MeshMaterial(Mesh mesh, Material material) {

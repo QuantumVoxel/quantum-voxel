@@ -1,7 +1,6 @@
 package com.ultreon.quantum.client.model.entity.renderer;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -9,7 +8,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.model.EntityModelInstance;
 import com.ultreon.quantum.client.model.QVModel;
 import com.ultreon.quantum.client.model.WorldRenderContext;

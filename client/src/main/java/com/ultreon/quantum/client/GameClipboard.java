@@ -3,10 +3,10 @@ package com.ultreon.quantum.client;
 import java.awt.datatransfer.Clipboard;
 import java.awt.image.BufferedImage;
 
-public class GameClipbard implements IClipboard {
+public class GameClipboard implements IClipboard {
     private final Clipboard toolkitClipboard;
 
-    public GameClipbard(Clipboard toolkitClipboard) {
+    public GameClipboard(Clipboard toolkitClipboard) {
         super();
 
         this.toolkitClipboard = toolkitClipboard;

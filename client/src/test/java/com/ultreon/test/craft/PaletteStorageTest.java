@@ -20,8 +20,8 @@ import java.nio.file.Files;
 class PaletteStorageTest {
     @Test
     void readWriteTestDual() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 4096);
@@ -70,8 +70,8 @@ class PaletteStorageTest {
 
     @Test
     void readWriteTestTrio() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 12);
@@ -117,8 +117,8 @@ class PaletteStorageTest {
 
     @Test
     void writeRandom5K() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 5000);
@@ -136,8 +136,8 @@ class PaletteStorageTest {
 
     @Test
     void writeRandom5KAndUpdate10x() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 5000);
@@ -161,8 +161,8 @@ class PaletteStorageTest {
 
     @Test
     void writeRandom100KAndUpdate10x() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 100000);
@@ -186,8 +186,8 @@ class PaletteStorageTest {
 
     @Test
     void write100KAndUpdateLastSingle() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 100000);
@@ -218,8 +218,8 @@ class PaletteStorageTest {
 
     @Test
     void write100KAndUpdateLastSingleWithExisting() {
-        Blocks.nopInit();
-        Items.nopInit();
+        Blocks.init();
+        Items.init();
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.BLOCK);
         RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(CommonConstants.NAMESPACE, Registries.ITEM);
         PaletteStorage<Block> blocks = new PaletteStorage<>(Blocks.AIR, 100000);

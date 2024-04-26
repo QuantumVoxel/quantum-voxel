@@ -5,12 +5,10 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.google.common.base.Supplier;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.input.GameCamera;
 import com.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
-import com.ultreon.quantum.util.Color;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 public class WorldDiffuseNode extends WorldRenderNode {

@@ -15,7 +15,7 @@ public class SoundEvents {
         return event;
     }
 
-    public static void nopInit() {
+    public static void init() {
 
     }
 }

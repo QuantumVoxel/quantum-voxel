@@ -136,7 +136,7 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .addContributor("Creatomat Gaming", Map.of("github", "https://github.com/Creatomat"))
                         .addIcon(128, "assets/craft/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.con/Ultreon/ultracraft", "email", "contact.ultreon@gmail.com", "discord", "https://discord.gg/sQsU7sE2Sx")))
+                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.con/Ultreon/quantum-voxel", "email", "contact.ultreon@gmail.com", "discord", "https://discord.gg/sQsU7sE2Sx")))
                         .setDescription("It's the game you are now playing.")
                         .setName("Quantum Voxel")
                         .build())
@@ -247,6 +247,7 @@ public class QuantumVxlGameProvider implements GameProvider {
                 this.gameJars.add(this.libGdxJar);
             }
 
+            // Get the entry point class name from the classifier
             // Get the entry point class name from the classifier
             this.entrypoint = classifier.getClassName(clientLib);
             if (this.entrypoint == null) {

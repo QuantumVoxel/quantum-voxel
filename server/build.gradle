@@ -156,6 +156,9 @@ dependencies {
     implementation api('net.fabricmc:access-widener:2.1.0')
 
     implementation api("net.fabricmc:fabric-loader:$fabric_version")
+
+    implementation(api("org.graalvm.polyglot:polyglot:23.1.2"))
+    implementation(api("org.graalvm.polyglot:python:23.1.2"))
 }
 
 processResources {

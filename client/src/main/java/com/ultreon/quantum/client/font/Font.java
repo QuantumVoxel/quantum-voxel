@@ -54,7 +54,7 @@ public class Font implements Disposable {
     }
 
     boolean isForcingUnicode() {
-        return this.client.forceUnicode && !this.isSpecial();
+        return Config.enforceUnicode && !this.isSpecial();
     }
 
     public boolean isSpecial() {
@@ -70,7 +70,7 @@ public class Font implements Disposable {
         renderer.scale(scale, scale);
         if (shadow) {
             float shadowX = x;
-            if (Config.diagonalFontShadow) shadowX += 1;
+            if (Config.diagonalFontShadow) shadowX += (font == UNIFONT ? 0.5F : 1);
             this.draw(renderer, font, color.darker().darker(), batch, text, shadowX, y / scale + 1, bold, italic, underlined, strikethrough, scale);
         }
 
@@ -84,7 +84,7 @@ public class Font implements Disposable {
         font.draw(batch, text, x / scale, y);
 
         if (bold)
-            this.draw(renderer, font, color, batch, text, x + 1, y, false, italic, underlined, strikethrough, scale);
+            this.draw(renderer, font, color, batch, text, x + (font == UNIFONT ? .5F : 1.F), y, false, italic, underlined, strikethrough, scale);
 
         if (underlined)
             renderer.line(x, (int) (y + (font.getLineHeight() + 2)) - 0.5f, x + (this.width0(text)), (int) (y + (font.getLineHeight() + 2)) - 0.5f, color);
@@ -101,12 +101,14 @@ public class Font implements Disposable {
         float width = 0;
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            BitmapFont currentFont = this.bitmapFont;
+            BitmapFont currentFont = this.isForcingUnicode() ? Font.UNIFONT : this.bitmapFont;
             float scale = 1;
+
             if (c == ' ') {
                 width += currentFont.getData().spaceXadvance * scale;
                 continue;
             }
+
             if (!currentFont.getData().hasGlyph(c) || this.isForcingUnicode()) {
                 currentFont = Font.UNIFONT;
                 scale = 0.5F;
@@ -132,17 +134,16 @@ public class Font implements Disposable {
     }
 
     public int width(TextObject text) {
-        int width = 0;
+        float width = 0;
 
         for (TextObject child : text) {
             boolean isBold = false;
             if (child instanceof MutableText mutableText) {
                 isBold = mutableText.isBold();
             }
-            this.layout.setText(this.bitmapFont, child.createString());
-            width += (int) (this.layout.width + (isBold ? 1 : 0));
+            width += (int) (this.width0(child.createString()) + (isBold ? (isForcingUnicode() ? 0.5F : 1) : 0));
         }
-        return width;
+        return (int) width;
     }
 
     public void dispose() {

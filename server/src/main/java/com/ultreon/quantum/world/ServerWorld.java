@@ -33,6 +33,7 @@ import com.ultreon.data.types.LongType;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import com.ultreon.libs.commons.v0.vector.Vec3i;
+import com.ultreon.quantum.world.particles.ParticleType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import org.checkerframework.common.reflection.qual.NewInstance;
@@ -214,6 +215,13 @@ public class ServerWorld extends World {
         if (this.getBlockEntity(pos) == blockEntity) {
             this.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockEntitySetPacket(pos, blockEntity.getType().getRawId()));
         }
+    }
+
+    @Override
+    public void spawnParticles(@NotNull ParticleType particleType, @NotNull Vec3d position, @NotNull Vec3d motion, int count) {
+        super.spawnParticles(particleType, position, motion, count);
+
+        this.sendAllTracking((int) position.x, (int) position.y, (int) position.z, new S2CSpawnParticlesPacket(particleType, position, motion, count));
     }
 
     private void sync(int x, int y, int z, BlockProperties block) {

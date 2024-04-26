@@ -1,5 +1,6 @@
 package com.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -9,6 +10,9 @@ import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.particle.ClientParticle;
+import com.ultreon.quantum.client.particle.ClientParticleRegistry;
+import com.ultreon.quantum.client.particle.PFXPool;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.player.RemotePlayer;
 import com.ultreon.quantum.client.util.Rot;
@@ -205,12 +209,20 @@ public final class ClientWorld extends World implements Disposable {
     }
 
     @Override
-    public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+    public void spawnParticles(@NotNull ParticleType particleType, @NotNull Vec3d position, @NotNull Vec3d motion, int count) {
         if (!QuantumClient.isOnMainThread()) {
             QuantumClient.invokeAndWait(() -> this.spawnParticles(particleType, position, motion, count));
         }
 
         super.spawnParticles(particleType, position, motion, count);
+
+        ClientParticle clientParticle = ClientParticleRegistry.getParticle(particleType);
+        WorldRenderer worldRenderer = this.client.worldRenderer;
+        if (worldRenderer != null) {
+            PFXPool particleController = clientParticle.getPool();
+            ParticleEffect obtained = particleController.obtain();
+            worldRenderer.addParticles(obtained, position, motion, count);
+        }
     }
 
     private void sync(int x, int y, int z, BlockProperties block) {
@@ -298,7 +310,9 @@ public final class ClientWorld extends World implements Disposable {
 
     @Deprecated
     public Color getSkyColor() {
-        return Color.gdx(QuantumClient.get().worldRenderer.getSkybox().topColor);
+        WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
+        if (worldRenderer == null) return Color.BLACK;
+        return Color.gdx(worldRenderer.getSkybox().topColor);
     }
 
     public int getDaytime() {
@@ -337,7 +351,7 @@ public final class ClientWorld extends World implements Disposable {
     }
 
     public void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
-        QuantumClient.LOGGER.debug("Adding entity with id " + id + " of type " + type.getId() + " at " + position);
+        QuantumClient.LOGGER.debug("Adding entity with id {} of type {} at {}", new Object[]{id, type.getId(), position});
 
         Entity entity = type.create(this);
         entity.setId(id);
@@ -364,7 +378,7 @@ public final class ClientWorld extends World implements Disposable {
             remotePlayer.onAttack(entity);
         }
 
-        if (player instanceof LocalPlayer localPlayer) {
+        if (player instanceof LocalPlayer) {
             //??? This should not happen...
             LOGGER.warn("SANITY CHECK: local player tried to attack entity {}!", entityId);
         }

@@ -3,6 +3,7 @@ package com.ultreon.quantum.client.font;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.ultreon.quantum.client.QuantumClient;
+import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.text.MutableText;
 import com.ultreon.quantum.text.TextObject;
@@ -23,8 +24,8 @@ public class TextObjectRenderer {
     public TextObjectRenderer(Font font, TextObject text) {
         this.font = font;
         this.text = text;
-        this.originalFont = this.font.bitmapFont;
-        this.currentFont = this.font.bitmapFont;
+        this.originalFont = Config.enforceUnicode ? Font.UNIFONT : this.font.bitmapFont;
+        this.currentFont = Config.enforceUnicode ? Font.UNIFONT : this.font.bitmapFont;
         this.lineHeight = this.font.lineHeight;
     }
 
@@ -66,7 +67,7 @@ public class TextObjectRenderer {
         for (char c : rawText.toCharArray()) {
             if (!this.currentFont.getData().hasGlyph(c) || this.font.isForcingUnicode()) {
                 this.currentFont = Font.UNIFONT;
-                scale = 0.5F;
+                scale = .5F;
             } else {
                 this.currentFont = this.font.bitmapFont;
             }
@@ -106,7 +107,7 @@ public class TextObjectRenderer {
 
     private void renderPart(Renderer renderer, boolean shadow, Color color, boolean bold, boolean italic, boolean underlined, boolean strikethrough, String part, float scale) {
         if (this.currentFont == Font.UNIFONT)
-            this.font.drawTextScaled(renderer, this.currentFont, renderer.getBatch(), part, this.currentX, currentY + (this.font.bitmapFont.getLineHeight() - Font.UNIFONT.getLineHeight() * 0.5F) / 2, bold, italic, underlined, strikethrough, scale, color, shadow);
+            this.font.drawTextScaled(renderer, this.currentFont, renderer.getBatch(), part, this.currentX, currentY + (this.font.bitmapFont.getLineHeight() / .5F - Font.UNIFONT.getLineHeight() * .5F) * .5F, bold, italic, underlined, strikethrough, scale, color, shadow);
         else
             this.font.drawTextScaled(renderer, this.currentFont, renderer.getBatch(), part, this.currentX, currentY, bold, italic, underlined, strikethrough, scale, color, shadow);
     }

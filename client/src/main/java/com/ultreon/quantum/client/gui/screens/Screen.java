@@ -3,6 +3,7 @@ package com.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.gui.GuiBuilder;
 import com.ultreon.quantum.client.gui.Renderer;

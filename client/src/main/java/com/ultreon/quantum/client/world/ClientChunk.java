@@ -11,7 +11,7 @@ import com.ultreon.quantum.block.entity.BlockEntityType;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.api.events.ClientChunkEvents;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.model.block.BlockModel;
 import com.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import com.ultreon.quantum.client.render.Scene3D;

@@ -11,4 +11,8 @@ public class ParticleType {
     public Identifier getId() {
         return Registries.PARTICLE_TYPES.getId(this);
     }
+
+    public int getRawId() {
+        return Registries.PARTICLE_TYPES.getRawId(this);
+    }
 }

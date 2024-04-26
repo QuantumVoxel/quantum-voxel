@@ -49,7 +49,7 @@ public class Items {
         return block;
     }
 
-    public static void nopInit() {
+    public static void init() {
 
     }
 }

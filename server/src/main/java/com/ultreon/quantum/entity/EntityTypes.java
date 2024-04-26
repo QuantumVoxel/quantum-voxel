@@ -17,7 +17,7 @@ public class EntityTypes {
         return entityType;
     }
 
-    public static void nopInit() {
+    public static void init() {
 
     }
 }

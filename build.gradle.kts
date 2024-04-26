@@ -287,7 +287,7 @@ publishProjects.forEach {
                     this@pom.name.set("QuantumVoxel")
                     this@pom.description.set("Quantum Voxel is a voxel game that focuses on technology based survival.")
 
-                    this@pom.url.set("https://github.com/Ultreon/ultracraft")
+                    this@pom.url.set("https://github.com/Ultreon/quantum-voxel")
                     this@pom.inceptionYear.set("2023")
 
                     this@pom.developers {
@@ -300,7 +300,7 @@ publishProjects.forEach {
 
                             roles.set(listOf("Owner", "Maintainer"))
 
-                            url.set("https://github.com/Ultreon/ultracraft")
+                            url.set("https://github.com/Ultreon/quantum-voxel")
                         }
                     }
 
@@ -311,18 +311,18 @@ publishProjects.forEach {
 
                     this@pom.issueManagement {
                         system.set("GitHub")
-                        url.set("https://github.com/Ultreon/ultracraft/issues")
+                        url.set("https://github.com/Ultreon/quantum-voxel/issues")
                     }
 
                     this@pom.scm {
-                        url.set("https://github.com/Ultreon/ultracraft")
+                        url.set("https://github.com/Ultreon/quantum-voxel")
                         connection.set("scm:git:git://github.com/Ultreon/quantum.git")
                     }
 
                     this@pom.licenses {
                         license {
                             name.set("AGPL-3.0")
-                            url.set("https://github.com/Ultreon/ultracraft/blob/main/LICENSE")
+                            url.set("https://github.com/Ultreon/quantum-voxel/blob/main/LICENSE")
                         }
                     }
 
@@ -362,7 +362,7 @@ publishProjects.forEach {
         repositories {
             maven {
                 name = "QuantumVoxelGitHub"
-                url = uri("https://maven.pkg.github.com/Ultreon/ultracraft")
+                url = uri("https://maven.pkg.github.com/Ultreon/quantum-voxel")
                 credentials {
                     username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
                     password = (project.findProperty("gpr.key") ?: getenv("TOKEN")) as String?
@@ -385,7 +385,7 @@ publishing {
                 this@pom.name.set("QuantumVoxel")
                 this@pom.description.set("Quantum Voxel is a voxel game that focuses on technology based survival.")
 
-                this@pom.url.set("https://github.com/Ultreon/ultracraft")
+                this@pom.url.set("https://github.com/Ultreon/quantum-voxel")
                 this@pom.inceptionYear.set("2023")
 
                 this@pom.developers {
@@ -398,7 +398,7 @@ publishing {
 
                         roles.set(listOf("Owner", "Maintainer"))
 
-                        url.set("https://github.com/Ultreon/ultracraft")
+                        url.set("https://github.com/Ultreon/quantum-voxel")
                     }
                 }
 
@@ -409,18 +409,18 @@ publishing {
 
                 this@pom.issueManagement {
                     system.set("GitHub")
-                    url.set("https://github.com/Ultreon/ultracraft/issues")
+                    url.set("https://github.com/Ultreon/quantum-voxel/issues")
                 }
 
                 this@pom.scm {
-                    url.set("https://github.com/Ultreon/ultracraft")
+                    url.set("https://github.com/Ultreon/quantum-voxel")
                     connection.set("scm:git:git://github.com/Ultreon/quantum.git")
                 }
 
                 this@pom.licenses {
                     license {
                         name.set("AGPL-3.0")
-                        url.set("https://github.com/Ultreon/ultracraft/blob/main/LICENSE")
+                        url.set("https://github.com/Ultreon/quantum-voxel/blob/main/LICENSE")
                     }
                 }
 
@@ -460,7 +460,7 @@ publishing {
     repositories {
         maven {
             name = "QuantumVoxelGitHub"
-            url = uri("https://maven.pkg.github.com/Ultreon/ultracraft")
+            url = uri("https://maven.pkg.github.com/Ultreon/quantum-voxel")
             credentials {
                 username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
                 password = (project.findProperty("gpr.key") ?: getenv("TOKEN")) as String?
@@ -527,7 +527,7 @@ commonProperties
                         jvmArgs =
                             "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
                         mainClass = "net.fabricmc.devlaunchinjector.Main"
-                        moduleName = idea.module.name + ".${project.name.substring(1)}.main"
+                        moduleName = idea.module.name + ".${dependency.name}.main"
                         workingDirectory = "$projectDir/run/client/main/"
                         programParameters = "--gameDir=."
                     }
@@ -538,7 +538,7 @@ commonProperties
                         jvmArgs =
                             "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
                         mainClass = "net.fabricmc.devlaunchinjector.Main"
-                        moduleName = idea.module.name + ".${project.name.substring(1)}.main"
+                        moduleName = idea.module.name + ".${dependency.name}.main"
                         workingDirectory = "$projectDir/run/client/alt/"
                         programParameters = "--gameDir=."
                     }
@@ -549,14 +549,14 @@ commonProperties
                         jvmArgs =
                             "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
                         mainClass = "net.fabricmc.devlaunchinjector.Main"
-                        moduleName = idea.module.name + ".${project.name.substring(1)}.main"
+                        moduleName = idea.module.name + ".${dependency.name}.main"
                         workingDirectory = "$projectDir/run/server/"
                         programParameters = "--gameDir=."
                     }
                 }
             }
 
-            setupIdea(rootProject.project(":desktop"), "Java")
+            setupIdea(rootProject.project(":desktop"), "Desktop")
             setupIdea(rootProject.project(":testmod"), "Test Mod")
         }
     }
@@ -656,10 +656,10 @@ tasks.register<DefaultTask>("docker-push") {
                     "org.opencontainers.image.description=A WIP voxel game that aims to have a lot of features",
 
                     "--label",
-                    "org.opencontainers.image.url=https://github.com/Ultreon/ultracraft",
+                    "org.opencontainers.image.url=https://github.com/Ultreon/quantum-voxel",
 
                     "--label",
-                    "org.opencontainers.image.source=https://github.com/Ultreon/ultracraft",
+                    "org.opencontainers.image.source=https://github.com/Ultreon/quantum-voxel",
 
                     "--label",
                     "org.opencontainers.image.version=latest",
@@ -681,10 +681,10 @@ tasks.register<DefaultTask>("docker-push") {
                     "org.opencontainers.image.description=A WIP voxel game that aims to have a lot of features",
 
                     "--label",
-                    "org.opencontainers.image.url=https://github.com/Ultreon/ultracraft",
+                    "org.opencontainers.image.url=https://github.com/Ultreon/quantum-voxel",
 
                     "--label",
-                    "org.opencontainers.image.source=https://github.com/Ultreon/ultracraft",
+                    "org.opencontainers.image.source=https://github.com/Ultreon/quantum-voxel",
 
                     "--label",
                     "org.opencontainers.image.version=${gameVersion}",

@@ -9,13 +9,13 @@ import com.ultreon.quantum.sound.event.SoundEvents;
 import com.ultreon.quantum.world.gen.noise.NoiseConfigs;
 
 public class CommonRegistries {
-    public static void registerGameStuff() {
-        Blocks.nopInit();
-        BlockEntityTypes.nopInit();
-        Items.nopInit();
-        NoiseConfigs.nopInit();
-        EntityTypes.nopInit();
-        SoundEvents.nopInit();
+    public static void register() {
+        Blocks.init();
+        BlockEntityTypes.init();
+        Items.init();
+        NoiseConfigs.init();
+        EntityTypes.init();
+        SoundEvents.init();
 
         GameCommands.register();
     }

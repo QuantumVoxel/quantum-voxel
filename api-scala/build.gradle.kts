@@ -166,7 +166,7 @@ publishing {
     repositories {
         maven {
             name = "CoreLibsGitHub"
-            url = uri("https://maven.pkg.github.com/Ultreon/ultracraft-scala")
+            url = uri("https://maven.pkg.github.com/Ultreon/quantum-voxel-scala")
             credentials {
                 username = (project.findProperty("gpr.user") ?: System.getenv("USERNAME")) as String?
                 password = (project.findProperty("gpr.key") ?: System.getenv("TOKEN")) as String?

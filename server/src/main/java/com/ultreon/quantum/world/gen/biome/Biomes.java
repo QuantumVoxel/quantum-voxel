@@ -85,7 +85,7 @@ public class Biomes {
         return biome;
     }
 
-    public static void nopInit() {
+    public static void init() {
         // NOOP
     }
 }

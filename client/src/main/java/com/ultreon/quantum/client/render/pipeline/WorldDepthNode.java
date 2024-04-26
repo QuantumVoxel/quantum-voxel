@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.input.GameCamera;
 import org.checkerframework.common.reflection.qual.NewInstance;
 

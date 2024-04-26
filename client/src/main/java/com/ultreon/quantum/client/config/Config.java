@@ -1,5 +1,6 @@
 package com.ultreon.quantum.client.config;
 
+import com.ultreon.gameprovider.quantum.OS;
 import com.ultreon.quantum.config.crafty.ConfigEntry;
 import com.ultreon.quantum.config.crafty.ConfigInfo;
 import com.ultreon.quantum.config.crafty.CraftyConfig;
@@ -140,5 +141,5 @@ public class Config extends CraftyConfig {
     public static boolean showSunAndMoon = true;
 
     @ConfigEntry(path = "personalisation.showMemoryUsage", comment = "Whether the memory usage is shown in the game's GUI / HUD.")
-    public static boolean showMemoryUsage = FabricLoader.getInstance().isDevelopmentEnvironment();
+    public static boolean showMemoryUsage = FabricLoader.getInstance().isDevelopmentEnvironment() && OS.isWindows();
 }

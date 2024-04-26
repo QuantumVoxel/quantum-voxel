@@ -22,6 +22,7 @@ import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.ChunkPos;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
+import com.ultreon.quantum.world.particles.ParticleType;
 
 import java.util.List;
 import java.util.Map;
@@ -93,4 +94,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onRemoveEntity(int id);
 
     void onPlayerAttack(int playerId, int entityId);
+
+    void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
 }

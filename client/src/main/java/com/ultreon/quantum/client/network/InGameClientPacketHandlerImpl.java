@@ -43,6 +43,7 @@ import com.ultreon.quantum.util.Gamemode;
 import com.ultreon.quantum.world.*;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
+import com.ultreon.quantum.world.particles.ParticleType;
 import net.fabricmc.api.EnvType;
 import org.jetbrains.annotations.Nullable;
 
@@ -454,6 +455,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             this.client.world.
                     onPlayerAttack(playerId, entityId);
         }
+    }
+
+    @Override
+    public void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+        ClientWorld world = this.client.world;
+        if (world == null) return;
+
+        world.spawnParticles(particleType, position, motion, count);
     }
 
     @Override

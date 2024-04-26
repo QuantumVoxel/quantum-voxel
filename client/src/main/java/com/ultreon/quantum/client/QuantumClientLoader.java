@@ -15,16 +15,19 @@ import com.ultreon.quantum.client.gui.overlay.OverlayManager;
 import com.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import com.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
-import com.ultreon.quantum.client.init.Fonts;
-import com.ultreon.quantum.client.init.Overlays;
-import com.ultreon.quantum.client.init.ShaderPrograms;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.gui.Fonts;
+import com.ultreon.quantum.client.gui.Overlays;
+import com.ultreon.quantum.client.render.ShaderPrograms;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.input.DesktopInput;
 import com.ultreon.quantum.client.input.GameInput;
 import com.ultreon.quantum.client.item.ItemRenderer;
 import com.ultreon.quantum.client.model.block.BlockModelRegistry;
 import com.ultreon.quantum.client.model.model.Json5ModelLoader;
 import com.ultreon.quantum.client.particle.ClientParticleRegistry;
+import com.ultreon.quantum.client.particle.ParticleControllerRenderers;
+import com.ultreon.quantum.client.particle.ParticleControllers;
+import com.ultreon.quantum.client.particle.ParticleEmitters;
 import com.ultreon.quantum.client.registry.LanguageRegistry;
 import com.ultreon.quantum.client.registry.MenuRegistry;
 import com.ultreon.quantum.client.resources.ResourceNotFoundException;
@@ -32,6 +35,7 @@ import com.ultreon.quantum.client.text.LanguageManager;
 import com.ultreon.quantum.crash.ApplicationCrash;
 import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.menu.MenuTypes;
+import com.ultreon.quantum.python.PyLoader;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.registry.Registry;
 import com.ultreon.quantum.registry.event.RegistryEvents;
@@ -78,7 +82,7 @@ class QuantumClientLoader implements Runnable {
 
         client.loadingOverlay.setProgress(0.075F);
 
-        Gdx.app.setApplicationLogger(new LibGDXLogger());
+        Gdx.app.setApplicationLogger(new GdxLogWrapper());
 
         client.configDir = QuantumClient.createDir("config/");
         client.garbageCollector = new GarbageCollector();
@@ -143,19 +147,24 @@ class QuantumClientLoader implements Runnable {
         });
 
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
-            CommonRegistries.registerGameStuff();
+            CommonRegistries.register();
 
             // Client registry
-            Fonts.nopInit();
-            Overlays.nopInit();
+            Fonts.register();
+            Overlays.init();
+            Biomes.init();
+
+            // Stuff that needs to be initialized on the render thread
             QuantumClient.invokeAndWait(() -> {
-                Shaders.nopInit();
-                ShaderPrograms.nopInit();
+                Shaders.init();
+                ShaderPrograms.init();
+                ParticleEmitters.init();
+                ParticleControllerRenderers.init();
+                ParticleControllers.init();
             });
 
+            // Register debug pages
             QuantumClientLoader.registerDebugPages();
-
-            Biomes.nopInit();
         });
 
         for (var mod : FabricLoader.getInstance().getAllMods()) {
@@ -163,6 +172,14 @@ class QuantumClientLoader implements Runnable {
             LoadingContext.withinContext(new LoadingContext(id), () -> {
                 for (Registry<?> registry : Registry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
+                }
+            });
+        }
+
+        for (var pyMod : PyLoader.getInstance().getMods()) {
+            LoadingContext.withinContext(new LoadingContext(pyMod.id), () -> {
+                for (Registry<?> registry : Registry.getRegistries()) {
+                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(pyMod.id, registry);
                 }
             });
         }

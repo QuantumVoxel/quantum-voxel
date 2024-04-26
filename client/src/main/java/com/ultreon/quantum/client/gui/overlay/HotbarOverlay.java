@@ -33,7 +33,7 @@ public class HotbarOverlay extends Overlay {
             this.drawHotbarSlot(renderer, allowed, index);
         }
 
-        if (key != null && !selectedItem.isEmpty() && renderer.pushScissors((int) ((float) this.client.getScaledWidth() / 2) - 83, leftY - 41, 166, 17)) {
+        if (key != null && !selectedItem.isEmpty()) {
             TextObject name = selectedItem.getItem().getTranslation();
             int tWidth = font.width(name);
 
@@ -42,113 +42,7 @@ public class HotbarOverlay extends Overlay {
             renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 + tWidth, leftY - 40, 4, 14, 97, 42, 4, 17);
 
             renderer.textCenter(name, (int) ((float) this.client.getScaledWidth()) / 2, leftY - 39);
-            renderer.popScissors();
         }
-
-        var a = 0;
-        a = 2;
-        a = 2;
-        a = 7;
-        a = 6;
-        a = 8;
-        a = 7;
-        a = 3;
-        a = 3;
-        a = 3;
-        a = 4;
-        a = 6;
-        a = 2;
-        a = 6;
-        a = 2;
-        a = 5;
-        a = 6;
-        a = 4;
-        a = 5;
-        a = 5;
-        a = 6;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 2;
-        a = 2;
-        a = 4;
-        a = 7;
-        a = 4;
-        a = 5;
-        a = 8;
-        a = 6;
-        a = 6;
-        a = 5;
-        a = 6;
-        a = 5;
-        a = 5;
-        a = 6;
-        a = 6;
-        a = 4;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 6;
-        a = 7;
-        a = 6;
-        a = 5;
-        a = 6;
-        a = 5;
-        a = 5;
-        a = 6;
-        a = 6;
-        a = 6;
-        a = 8;
-        a = 6;
-        a = 6;
-        a = 6;
-        a = 4;
-        a = 5;
-        a = 4;
-        a = 6;
-        a = 6;
-        a = 3;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 4;
-        a = 5;
-        a = 5;
-        a = 2;
-        a = 3;
-        a = 5;
-        a = 3;
-        a = 8;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 6;
-        a = 3;
-        a = 3;
-        a = 6;
-        a = 6;
-        a = 6;
-        a = 5;
-        a = 5;
-        a = 5;
-        a = 2;
-        a = 5;
-        a = 8;
-        a = -1;
-        a = 2;
-        a = 6;
-        a = 7;
-        a = 7;
-        a = 6;
-        a = 2;
-
-        a = 9829;
 
         leftY -= 47;
         rightY -= 47;

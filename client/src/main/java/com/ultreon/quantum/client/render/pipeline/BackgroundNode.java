@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.input.GameCamera;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.render.Scene3D;

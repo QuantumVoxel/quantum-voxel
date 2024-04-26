@@ -1,4 +1,4 @@
-package com.ultreon.quantum.client.init;
+package com.ultreon.quantum.client.render.shader;
 
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
@@ -53,7 +53,7 @@ public class Shaders {
         } else throw new GdxRuntimeException("Shader compilation failed for " + filename + ":\n" + shaderLog);
     }
 
-    public static void nopInit() {
+    public static void init() {
         // NOOP
     }
 }

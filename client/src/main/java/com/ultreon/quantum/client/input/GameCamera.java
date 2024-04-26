@@ -3,7 +3,7 @@ package com.ultreon.quantum.client.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
-import com.ultreon.quantum.client.PlayerView;
+import com.ultreon.quantum.client.util.PlayerView;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.world.WorldRenderer;

@@ -61,7 +61,7 @@ public final class NoiseConfigs {
         return settings;
     }
 
-    public static void nopInit() {
+    public static void init() {
 
     }
 }

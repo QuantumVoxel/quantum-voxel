@@ -2,7 +2,7 @@ package com.ultreon.quantum.client.model;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import com.ultreon.quantum.client.init.Shaders;
+import com.ultreon.quantum.client.render.shader.Shaders;
 import com.ultreon.quantum.client.render.shader.OpenShaderProvider;
 
 import static com.badlogic.gdx.graphics.g3d.utils.AnimationController.*;

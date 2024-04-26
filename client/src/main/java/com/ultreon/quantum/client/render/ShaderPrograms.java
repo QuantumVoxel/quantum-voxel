@@ -1,4 +1,4 @@
-package com.ultreon.quantum.client.init;
+package com.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -38,7 +38,7 @@ public class ShaderPrograms {
         return program;
     }
 
-    public static void nopInit() {
+    public static void init() {
         // NOOP
     }
 }

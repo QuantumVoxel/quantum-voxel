@@ -1,5 +1,8 @@
 package com.ultreon.quantum.client;
 
+import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
+import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
+import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRenderer;
 import com.ultreon.quantum.client.font.Font;
 import com.ultreon.quantum.client.gui.debug.DebugPage;
 import com.ultreon.quantum.client.render.RenderLayer;
@@ -20,6 +23,11 @@ public class ClientRegistries {
 
     // Registry for DebugPage
     public static final Registry<DebugPage> DEBUG_PAGE = ClientRegistries.<DebugPage>builder("debug_page").build();
+
+    // Registries for particles
+    public static final Registry<ParticleControllerRenderer<?, ?>> PARTICLE_CONTROLLER_RENDERER = ClientRegistries.<ParticleControllerRenderer<?, ?>>builder("particle_controller_renderer").build();
+    public static final Registry<Emitter> PARTICLE_EMITTER = ClientRegistries.<Emitter>builder("particle_emitter").build();
+    public static final Registry<ParticleController> PARTICLE_CONTROLLER = ClientRegistries.<ParticleController>builder("particle_controller").build();
 
     /**
      * Creates a Registry builder with the specified name and type getter.

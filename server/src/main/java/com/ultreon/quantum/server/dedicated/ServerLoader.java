@@ -24,11 +24,11 @@ public class ServerLoader {
 
         // Initialize registries
         Registries.nopInit();
-        Blocks.nopInit();
-        Items.nopInit();
-        NoiseConfigs.nopInit();
-        EntityTypes.nopInit();
-        Biomes.nopInit();
+        Blocks.init();
+        Items.init();
+        NoiseConfigs.init();
+        EntityTypes.init();
+        Biomes.init();
 
         // Register game commands
         GameCommands.register();

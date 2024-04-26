@@ -1,11 +1,10 @@
-package com.ultreon.quantum.client.init;
+package com.ultreon.quantum.client.render.shader;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.ultreon.quantum.client.render.shader.OpenShaderProvider;
 
 class MyDefaultShaderProvider extends DefaultShaderProvider implements OpenShaderProvider {
     public MyDefaultShaderProvider(DefaultShader.Config config) {

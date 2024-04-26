@@ -1,4 +1,4 @@
-package com.ultreon.quantum.client;
+package com.ultreon.quantum.client.util;
 
 public enum PlayerView {
     FIRST_PERSON,

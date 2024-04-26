@@ -30,6 +30,8 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.video.VideoPlayer;
+import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -73,12 +75,15 @@ import com.ultreon.quantum.client.registry.*;
 import com.ultreon.quantum.client.render.pipeline.*;
 import com.ultreon.quantum.client.render.shader.GameShaderProvider;
 import com.ultreon.quantum.client.resources.ResourceFileHandle;
+import com.ultreon.quantum.client.util.PlayerView;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.network.MemoryConnectionContext;
 import com.ultreon.quantum.network.MemoryNetworker;
 import com.ultreon.quantum.network.client.ClientPacketHandler;
 import com.ultreon.quantum.network.packets.C2SAttackPacket;
 import com.ultreon.quantum.network.server.ServerPacketHandler;
+import com.ultreon.quantum.python.PyLang;
+import com.ultreon.quantum.python.PyLoader;
 import com.ultreon.quantum.resources.ReloadContext;
 import com.ultreon.quantum.client.resources.ResourceLoader;
 import com.ultreon.quantum.client.rpc.GameActivity;
@@ -175,10 +180,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             new BillboardParticleBatch(ParticleShader.AlignMode.Screen, true, 5000)
     });
     private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
+    public VideoPlayer backgroundVideo = VideoPlayerCreator.createVideoPlayer();
 
     private IClipboard getClipboard() {
         if (Platform.get() != Platform.MACOSX) {
-            return new GameClipbard(Toolkit.getDefaultToolkit().getSystemClipboard());
+            return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
         }
 
         return new NullClipboard();
@@ -337,7 +343,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final ShaderProviderManager shaderProviderManager;
     private final ShaderProgramManager shaderProgramManager;
     private final TextureAtlasManager textureAtlasManager;
-    private final FontManager fontManager = new FontManager();
+    private final FontManager fontManager = FontManager.get();
     private final Queue<Disposable> disposalQueue = new ArrayDeque<>();
     private PlayerView playerView = PlayerView.FIRST_PERSON;
 
@@ -368,7 +374,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         QuantumClient.instance = this;
 
         // Initialize the unifont and font
-        this.unifont = deferDispose(new BitmapFont(Gdx.files.internal("assets/quantum/font/unifont/unifont.fnt"), true));
+        this.unifont = deferDispose(new BitmapFont(Gdx.files.internal("assets/quantum/unifont/unifont.fnt"), true));
         this.font = new Font(new BitmapFont(Gdx.files.internal("assets/quantum/font/quantium.fnt"), true));
         this.newFont = new Font(new BitmapFont(Gdx.files.internal("assets/quantum/font/quantium.fnt"), true));
 
@@ -550,7 +556,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     @RestrictedApi(
             explanation = "Only use this if you know what you are doing",
-            link = "https://github.com/Ultreon/ultracraft/wiki/Crash-Hooks#important",
+            link = "https://github.com/Ultreon/quantum-voxel/wiki/Crash-Hooks#important",
             allowlistAnnotations = UnsafeApi.class
     )
     @UnsafeApi
@@ -663,6 +669,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
         }
 
+        new PyLang().init();
+
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
             try {
@@ -754,6 +762,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * Thi also initializes and loads configurations from entry points.
      */
     private void setupMods() {
+        PyLoader.getInstance().initMods();
+
         // Set mod icon overrides.
         ModIconOverrideRegistry.set("quantum", QuantumClient.id("icon.png"));
         ModIconOverrideRegistry.set("gdx", new Identifier("gdx", "icon.png"));
@@ -1156,7 +1166,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     private boolean renderGame(Renderer renderer, float deltaTime) {
         if (Gdx.graphics.getFrameId() == 2) {
-            QuantumClient.firstRender();
+            this.firstRender();
             Gdx.graphics.setTitle("Quantum Voxel %s".formatted(QuantumClient.getGameVersion()));
         }
 
@@ -1323,7 +1333,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Retrieves the game version of the UltraCraft mod.
+     * Retrieves the game version of the Quantum Voxel mod.
      *
      * @return The game version as a {@code String}.
      */
@@ -1398,7 +1408,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.screenshotFuture.complete(grabbed);
     }
 
-    private static void firstRender() {
+    private void firstRender() {
         Lwjgl3Graphics graphics = (Lwjgl3Graphics) Gdx.graphics;
         Lwjgl3Window window = graphics.getWindow();
         window.setVisible(true);

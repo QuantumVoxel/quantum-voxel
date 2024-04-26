@@ -40,7 +40,7 @@ public final class Blocks {
         return block;
     }
 
-    public static void nopInit() {
+    public static void init() {
         // Load class
     }
 }
