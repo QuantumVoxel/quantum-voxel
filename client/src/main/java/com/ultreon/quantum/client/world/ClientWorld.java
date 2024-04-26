@@ -218,10 +218,12 @@ public final class ClientWorld extends World implements Disposable {
 
         ClientParticle clientParticle = ClientParticleRegistry.getParticle(particleType);
         WorldRenderer worldRenderer = this.client.worldRenderer;
-        if (worldRenderer != null) {
+        if (worldRenderer != null && clientParticle != null) {
             PFXPool particleController = clientParticle.getPool();
             ParticleEffect obtained = particleController.obtain();
             worldRenderer.addParticles(obtained, position, motion, count);
+        } else if (clientParticle == null) {
+            World.LOGGER.warn("Unknown particle type: {}", particleType.getId());
         }
     }
 

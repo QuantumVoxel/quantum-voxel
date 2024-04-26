@@ -66,5 +66,6 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CRemoveEntityPacket::new);
         this.addClientBound(S2CEntityPipeline::new);
         this.addClientBound(S2CPlayerAttackPacket::new);
+        this.addClientBound(S2CSpawnParticlesPacket::new);
     }
 }

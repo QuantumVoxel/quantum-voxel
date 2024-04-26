@@ -37,4 +37,6 @@ jobs:
       - name: Build Project using Gradle
         env:
           GH_SHA: ${{ github.sha }}
+          USERNAME: ${{ github.actor }}
+          TOKEN: ${{ github.token }}
         run: chmod +x ./gradlew && ./gradlew docker-push
