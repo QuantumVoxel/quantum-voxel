@@ -52,6 +52,7 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
         });
         if (instance.getModel().getInstance().userData == null)
             instance.getModel().getInstance().userData = Shaders.MODEL_VIEW.get();
+        instance.translate(0, -1.625, 0);
         instance.render(context);
 
         Gdx.gl.glDisable(GL20.GL_BLEND);

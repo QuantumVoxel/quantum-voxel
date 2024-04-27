@@ -33,7 +33,7 @@ public abstract class ClientPlayer extends Player {
     public void tick() {
         super.tick();
 
-        this.client.camera.setFovModifier(((float) (getSpeed() / .09F) - 1.0F) * 0.125F + 1.0F);
+        this.client.camera.setFovModifier(((float) (getSpeed() / .09F) - 1.0F) * 0.05F + 1.0F);
 
         this.oXRot = this.xRot;
         this.oYRot = this.yRot;

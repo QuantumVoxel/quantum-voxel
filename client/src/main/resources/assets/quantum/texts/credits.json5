@@ -23,7 +23,7 @@
   },
   // Contributors that contributed with assets.
   Assets: {
-    POTATO_XD: {
+    P0TAT0_XD: {
       url: null,
       roles: [
         "Artist",
@@ -37,6 +37,16 @@
         "Crosshairs",
         "Sand texture",
         "Leaves texture"
+      ]
+    },
+    ItsBeck: {
+      url: null,
+      roles: [
+        "Artist",
+        "Modeler"
+      ],
+      for: [
+        "Pig Model & Texture"
       ]
     },
     Scrappy412: {
@@ -54,8 +64,7 @@
         "Contributor"
       ],
       for: [
-        "Quantium Font",
-        "All remaining assets"
+        "Quantium Font"
       ]
     }
   },

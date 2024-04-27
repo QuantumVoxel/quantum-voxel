@@ -89,7 +89,6 @@ public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
         instance.getNode("headwear").rotation.setFromMatrix(this.tmp.idt().rotate(Vector3.Y, player.xHeadRot - xRot).rotate(Vector3.X, yRot));
 //        EntityRenderer.tmp0.set(localPlayer.getPosition(client.partialTick));
 //        EntityRenderer.tmp0.sub(player.getPosition());
-        instance.translate(0, -1.625, 0);
         instance.rotateY(xRot - 180);
 
 //        TextureManager textureManager = client.getTextureManager();

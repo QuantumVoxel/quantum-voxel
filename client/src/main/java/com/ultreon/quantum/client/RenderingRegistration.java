@@ -7,6 +7,7 @@ import com.ultreon.quantum.client.model.block.BlockModelRegistry;
 import com.ultreon.quantum.client.model.block.CubeModel;
 import com.ultreon.quantum.client.model.block.ModelProperties;
 import com.ultreon.quantum.client.model.entity.renderer.DroppedItemRenderer;
+import com.ultreon.quantum.client.model.entity.renderer.PigRenderer;
 import com.ultreon.quantum.client.model.entity.renderer.PlayerRenderer;
 import com.ultreon.quantum.client.model.entity.renderer.SomethingRenderer;
 import com.ultreon.quantum.client.model.model.Json5ModelLoader;
@@ -129,6 +130,7 @@ public class RenderingRegistration {
         EntityModelRegistry entityModelManager = QuantumClient.get().entityModelManager;
         entityModelManager.registerG3d(EntityTypes.PLAYER, QuantumClient.id("player"));
         entityModelManager.registerG3d(EntityTypes.SOMETHING, QuantumClient.id("something"));
+        entityModelManager.registerG3d(EntityTypes.PIG, QuantumClient.id("pig"));
 
         // Register the player entity renderer
         EntityRendererRegistry.register(EntityTypes.PLAYER, PlayerRenderer::new);
@@ -136,6 +138,7 @@ public class RenderingRegistration {
         // Register the dropped item entity renderer
         EntityRendererRegistry.register(EntityTypes.DROPPED_ITEM, DroppedItemRenderer::new);
         EntityRendererRegistry.register(EntityTypes.SOMETHING, SomethingRenderer::new);
+        EntityRendererRegistry.register(EntityTypes.PIG, PigRenderer::new);
 
         // Call the onRegister method of the factory in ENTITY_RENDERERS
         ClientRegistrationEvents.ENTITY_RENDERERS.factory().onRegister();

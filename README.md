@@ -1,5 +1,7 @@
 # Quantum Voxel
 **[THIS PROJECT IS LICENSED UNDER AGPL-v3](LICENSE)**  
+ASSETS ARE ALL RIGHTS RESERVED UNLESS STATED OTHERWISE
+
 A voxel game that aims to do stuff differently.
 
 ## Build From Source

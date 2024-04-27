@@ -35,7 +35,7 @@ public abstract class Player extends LivingEntity {
     private boolean running = false;
     private float walkingSpeed = .09F;
     private float flyingSpeed = 0.5F;
-    public float runModifier = 1.5F;
+    public float runModifier = 1.8F;
     public float crouchModifier = 0.5F;
     public final PlayerAbilities abilities = new PlayerAbilities();
     private boolean crouching = false;

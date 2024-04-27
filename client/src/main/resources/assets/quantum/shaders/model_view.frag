@@ -116,15 +116,7 @@ uniform vec4 u_fogColor;
 varying float v_fog;
 #endif // fogFlag
 
-varying vec2 v_rawUV;
-varying vec3 v_position;
-
 uniform float u_globalSunlight;
-
-const int mapWidth = 2048, mapHeight = 2048, blockWidth = 16;
-const int blocksPerRow = mapWidth/blockWidth;
-const float uPerBlock = float(blockWidth) / float(mapWidth),
-vPerBlock = float(blockWidth) / float(mapHeight);
 
 struct SHC{
     vec3 L00, L1m1, L10, L11, L2m2, L2m1, L20, L21, L22;
@@ -200,26 +192,18 @@ vec2 transformUV(vec2 uv) {
 }
 
 void main() {
-    #if defined(diffuseTextureFlag)
-    vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
-    #endif
-
-    #if defined(emissiveTextureFlag)
-    vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
-    #endif
-
-    #if defined(specularTextureFlag)
-    vec2 v_specularTexUV = transformUV(v_specularUV);
-    #endif
-
     #if defined(normalFlag)
     vec3 normal = v_normal;
     #endif // normalFlag
 
-    #if defined(diffuseTextureFlag) && defined(colorFlag)
-    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV) * v_color;
+    #if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor * v_color;
+    #elif defined(diffuseTextureFlag) && defined(diffuseColorFlag)
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
+    #elif defined(diffuseTextureFlag) && defined(colorFlag)
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * v_color;
     #elif defined(diffuseTextureFlag)
-    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV);
     #elif defined(diffuseColorFlag) && defined(colorFlag)
     vec4 diffuse = u_diffuseColor * v_color;
     #elif defined(diffuseColorFlag)
@@ -230,17 +214,62 @@ void main() {
     vec4 diffuse = vec4(1.0);
     #endif
 
-    #if defined(emissiveTextureFlag)
-    vec4 emissive = texture2D(u_emissiveTexture, v_emissiveTexUV);
+    #if defined(emissiveTextureFlag) && defined(emissiveColorFlag)
+    vec4 emissive = texture2D(u_emissiveTexture, v_emissiveUV) * u_emissiveColor;
+    #elif defined(emissiveTextureFlag)
+    vec4 emissive = texture2D(u_emissiveTexture, v_emissiveUV);
+    #elif defined(emissiveColorFlag)
+    vec4 emissive = u_emissiveColor;
     #else
     vec4 emissive = vec4(0.0);
     #endif
 
+//    #if (!defined(lightingFlag))
     gl_FragColor.rgb = (diffuse.rgb) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #elif (!defined(specularFlag))
+//    #if defined(ambientFlag) && defined(separateAmbientFlag)
+//    #ifdef shadowMapFlag
+//    gl_FragColor.rgb = (diffuse.rgb * (v_ambientLight + getShadow() * v_lightDiffuse)) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #else
+//    gl_FragColor.rgb = (diffuse.rgb * (v_ambientLight + v_lightDiffuse)) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #endif //shadowMapFlag
+//    #else
+//    #ifdef shadowMapFlag
+//    gl_FragColor.rgb = getShadow() * (diffuse.rgb * v_lightDiffuse) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #else
+//    gl_FragColor.rgb = (diffuse.rgb) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #endif //shadowMapFlag
+//    #endif
+//    #else
+//    #if defined(specularTextureFlag) && defined(specularColorFlag)
+//    vec3 specular = texture2D(u_specularTexture, v_specularUV).rgb * u_specularColor.rgb * v_lightSpecular;
+//    #elif defined(specularTextureFlag)
+//    vec3 specular = texture2D(u_specularTexture, v_specularUV).rgb * v_lightSpecular;
+//    #elif defined(specularColorFlag)
+//    vec3 specular = u_specularColor.rgb * v_lightSpecular;
+//    #else
+//    vec3 specular = v_lightSpecular;
+//    #endif
+//
+//    #if defined(ambientFlag) && defined(separateAmbientFlag)
+//    #ifdef shadowMapFlag
+//    gl_FragColor.rgb = (diffuse.rgb * (getShadow() * v_lightDiffuse + v_ambientLight)) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    //gl_FragColor.rgb = texture2D(u_shadowTexture, v_shadowMapUv.xy);
+//    #else
+//    gl_FragColor.rgb = (diffuse.rgb * (v_lightDiffuse + v_ambientLight)) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #endif //shadowMapFlag
+//    #else
+//    #ifdef shadowMapFlag
+//    gl_FragColor.rgb = getShadow() * ((diffuse.rgb * v_lightDiffuse) + specular) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #else
+//    gl_FragColor.rgb = (diffuse.rgb * v_lightDiffuse) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+//    #endif //shadowMapFlag
+//    #endif
+//    #endif //lightingFlag
 
     #ifdef fogFlag
     gl_FragColor.rgb = mix(gl_FragColor.rgb, u_fogColor.rgb, v_fog);
-    #endif // end fogFlag
+    #endif // end fogFlag_
 
     #ifdef blendedFlag
     gl_FragColor.a = diffuse.a * v_opacity;
@@ -251,8 +280,7 @@ void main() {
     #else
     gl_FragColor.a = 1.0;
     #endif
-
     #ifdef normalFlag
-    gl_FragColor.rgba = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
+//        gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
     #endif
 }

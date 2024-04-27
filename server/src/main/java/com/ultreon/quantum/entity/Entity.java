@@ -229,6 +229,10 @@ public class Entity implements CommandSender {
             this.velocityX *= 0.9f;
             this.velocityZ *= 0.9f;
         }
+
+        if (!(this instanceof Player)) {
+            sendPipeline();
+        }
     }
 
     protected void move() {
@@ -802,5 +806,10 @@ public class Entity implements CommandSender {
         double b = y - this.y;
         double c = z - this.z;
         return Math.sqrt(a * a + b * b + c * c);
+    }
+
+    public enum Pose {
+        IDLE,
+        WALKING
     }
 }
