@@ -4,8 +4,10 @@ import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.events.EntityEvents;
 import com.ultreon.quantum.events.api.ValueEventResult;
 import com.ultreon.quantum.item.food.AppliedEffect;
+import com.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
 import com.ultreon.quantum.server.util.Utils;
 import com.ultreon.quantum.world.ChunkPos;
+import com.ultreon.quantum.world.ServerWorld;
 import com.ultreon.quantum.world.SoundEvent;
 import com.ultreon.quantum.world.World;
 import com.ultreon.data.types.MapType;
@@ -247,6 +249,16 @@ public class LivingEntity extends Entity {
         this.onDropItems(source);
 
         this.world.spawnParticles(ParticleTypes.ENTITY_SMOKE, new Vec3d(this.x, this.y, this.z), new Vec3d(0, 0, 0), 20);
+
+        this.removeDead();
+    }
+
+    protected void removeDead() {
+        if (this.world instanceof ServerWorld serverWorld) {
+            serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CRemoveEntityPacket(this.getId()));
+        }
+
+        this.markRemoved();
     }
 
     public void onDropItems(DamageSource source) {

@@ -232,6 +232,12 @@ public abstract class Player extends LivingEntity {
         return SoundEvents.PLAYER_HURT;
     }
 
+    @Override
+    protected final void removeDead() {
+        // Don't remove dead players, removing them causes the player to get completely unresponsive
+        //    and will break client <-> server connection. DO NOT CALL SUPER HERE!
+    }
+
     public HitResult rayCast() {
         Ray ray = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
         EntityHitResult entityHitResult = this.world.rayCastEntity(ray);

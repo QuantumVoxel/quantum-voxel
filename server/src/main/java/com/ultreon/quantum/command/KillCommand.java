@@ -2,6 +2,7 @@ package com.ultreon.quantum.command;
 
 import com.ultreon.quantum.api.commands.*;
 import com.ultreon.quantum.api.commands.output.CommandResult;
+import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.LivingEntity;
 import com.ultreon.quantum.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -23,12 +24,13 @@ public class KillCommand extends Command {
     }
 
     @DefineCommand("<entity>")
-    public @Nullable CommandResult executeCoords(CommandSender sender, CommandContext commandContext, String alias, Player player) {
-        if (sender != player && !sender.hasPermission("quantum.commands.kill.others")) return this.noPermission();
+    public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Entity entity) {
+        if (sender != entity && !sender.hasPermission("quantum.commands.kill.others")) return this.noPermission();
+        if (!(entity instanceof LivingEntity livingEntity)) return errorMessage("Cannot kill " + entity.getName() + " because it is not a living entity");
 
-        player.kill();
+        livingEntity.kill();
 
-        if (sender == player) return this.successMessage("You successfully killed yourself");
-        return this.successMessage("You successfully killed " + player.getName());
+        if (sender == entity) return this.successMessage("You successfully killed yourself");
+        return this.successMessage("You successfully killed " + entity.getName());
     }
 }

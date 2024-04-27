@@ -97,7 +97,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private InspectionNode<Object> playersNode;
     protected ServerWorld world;
     protected int port;
-    protected int renderDistance = 16;
+    protected int renderDistance = 8;
     protected int entityRenderDistance = 6 * World.CHUNK_SIZE;
     private int chunkRefresh;
     private long onlineTicks;

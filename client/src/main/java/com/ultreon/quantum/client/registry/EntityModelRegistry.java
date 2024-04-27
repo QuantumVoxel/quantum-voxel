@@ -4,6 +4,7 @@ import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.api.events.ClientRegistrationEvents;
+import com.ultreon.quantum.client.model.block.GLTFModel;
 import com.ultreon.quantum.client.model.blockbench.BlockBenchModelImporter;
 import com.ultreon.quantum.client.model.entity.EntityModel;
 import com.ultreon.quantum.client.resources.ContextAwareReloadable;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class EntityModelRegistry implements ContextAwareReloadable {
     private final Map<EntityType<?>, EntityModel<?>> registry = new HashMap<>();
     private final Map<EntityType<?>, Identifier> g3dRegistry = new HashMap<>();
+    private final Map<EntityType<?>, Identifier> gltfRegistry = new HashMap<>();
     private final Map<EntityType<?>, Model> finishedRegistry = new HashMap<>();
     final ModelLoader<ModelLoader.ModelParameters> modelLoader;
     private final QuantumClient client;
@@ -40,6 +42,10 @@ public class EntityModelRegistry implements ContextAwareReloadable {
 
     public <T extends Entity> void registerG3d(EntityType<@NotNull T> entityType, Identifier id) {
         this.g3dRegistry.put(entityType, id);
+    }
+
+    public <T extends Entity> void registerGltf(EntityType<@NotNull T> entityType, Identifier id) {
+        this.gltfRegistry.put(entityType, id);
     }
 
     @Nullable
@@ -80,8 +86,15 @@ public class EntityModelRegistry implements ContextAwareReloadable {
             this.finishedRegistry.put(e.getKey(), model);
         }
 
-//        Model somethingModel = this.blockBenchModel(new Identifier("entity/something"));
-//        this.registerFinished(EntityTypes.SOMETHING, somethingModel);
+        for (Map.Entry<EntityType<?>, Identifier> e : this.gltfRegistry.entrySet()) {
+            Identifier id = e.getValue();
+            GLTFModel gltfModel = QuantumClient.invokeAndWait(() -> {
+                GLTFModel toLoad = new GLTFModel(id.mapPath(path -> "entity/" + path + ".gltf"));
+                toLoad.load(client);
+                return toLoad;
+            });
+            this.finishedRegistry.put(e.getKey(), gltfModel.getModel());
+        }
 
         // Call the onRegister method of the factory in ENTITY_MODELS
         ClientRegistrationEvents.ENTITY_MODELS.factory().onRegister();

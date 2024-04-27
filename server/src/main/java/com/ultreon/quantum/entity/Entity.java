@@ -31,6 +31,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Entity base class.
+ * An entity is an object in the world that can freely move and can store data.
+ * Entities can be spawned using the {@link World#spawn(Entity)} method and despawned using the {@link World#despawn(Entity)} method.
+ * Or they can be marked for removal using the {@link #markRemoved()} method.
+ * <p>
+ * Entities can be loaded from a {@link MapType} object using the {@link #loadFrom(World, MapType)} method.
+ * And they can be saved to a {@link MapType} object using the {@link #save(MapType)} method.
+ *
+ * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @see World#spawn(Entity)
+ * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
+ */
 public class Entity implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected final World world;
@@ -182,10 +195,25 @@ public class Entity implements CommandSender {
         return this.type.getSize();
     }
 
+    /**
+     * Marks the entity for removal.
+     * When this is called the entity will be removed from the world in the next tick.
+     * Removing players is not recommended, and should be avoided as it will cause the
+     *    player connection to bug out.
+     *
+     * @see #isMarkedForRemoval()
+     * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities#entity-removal">Entity Removal</a>
+     */
     public void markRemoved() {
         this.markedForRemoval = true;
     }
 
+    /**
+     * Returns whether the entity is marked for removal.
+     * @return {@code true} if the entity is marked for removal, {@code false} otherwise
+     * @see #markRemoved()
+     * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities#entity-removal">Entity Removal</a>
+     */
     public boolean isMarkedForRemoval() {
         return this.markedForRemoval;
     }
