@@ -1,6 +1,6 @@
 package com.ultreon.quantum.world.container;
 
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.ItemStack;
 
 public interface ContainerView {

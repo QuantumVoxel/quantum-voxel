@@ -6,7 +6,7 @@ import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.api.commands.output.ObjectCommandResult;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.LivingEntity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.server.chat.Chat;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

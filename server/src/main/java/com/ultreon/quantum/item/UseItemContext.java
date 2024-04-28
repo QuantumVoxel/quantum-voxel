@@ -1,6 +1,6 @@
 package com.ultreon.quantum.item;
 
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.world.World;
 

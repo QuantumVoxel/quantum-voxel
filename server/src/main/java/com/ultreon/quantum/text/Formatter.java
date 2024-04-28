@@ -1,6 +1,6 @@
 package com.ultreon.quantum.text;
 
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.registry.CustomKeyRegistry;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.server.player.ServerPlayer;
@@ -13,10 +13,8 @@ import org.apache.commons.lang3.CharUtils;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;

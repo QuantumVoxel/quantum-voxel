@@ -3,7 +3,7 @@ package com.ultreon.quantum.command;
 import com.ultreon.quantum.api.commands.*;
 import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.entity.DroppedItem;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import org.jetbrains.annotations.Nullable;

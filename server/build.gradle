@@ -83,6 +83,9 @@ dependencies {
     implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
     implementation api("io.netty:netty-all:$netty_version")
 
+    implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
+    runtimeOnly "com.badlogicgames.gdx:gdx-backend-headless:$gdx_version"
+
     // JNA
     implementation api("net.java.dev.jna:jna:$jna_version")
     implementation api("net.java.dev.jna:jna-platform:$jna_version")

@@ -2,7 +2,7 @@ package com.ultreon.quantum.client.gui.overlay;
 
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.gui.Renderer;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 
 public class HungerOverlay extends Overlay {
     @Override

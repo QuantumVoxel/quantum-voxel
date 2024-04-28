@@ -3,7 +3,7 @@ package com.ultreon.quantum.block;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.block.state.BlockProperties;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.item.UseItemContext;

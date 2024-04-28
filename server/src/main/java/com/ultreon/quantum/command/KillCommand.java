@@ -4,7 +4,6 @@ import com.ultreon.quantum.api.commands.*;
 import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.LivingEntity;
-import com.ultreon.quantum.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 public class KillCommand extends Command {

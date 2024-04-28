@@ -1,5 +1,6 @@
 package com.ultreon.quantum.entity;
 
+import com.ultreon.quantum.entity.ai.Navigator;
 import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.events.EntityEvents;
 import com.ultreon.quantum.events.api.ValueEventResult;
@@ -38,9 +39,15 @@ public class LivingEntity extends Entity {
     protected @Nullable DamageSource lastDamageSource;
     private int age;
     private final List<AppliedEffect> appliedEffects = Lists.newArrayList();
+    private boolean tagged;
+    private Navigator navigator;
 
     public LivingEntity(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    public void createAiGoals() {
+
     }
 
     public float getHealth() {
@@ -360,5 +367,11 @@ public class LivingEntity extends Entity {
 
     public void applyEffect(AppliedEffect appliedEffect) {
         this.appliedEffects.add(appliedEffect);
+    }
+
+    public void moveTowards(double x, double y, double z, double speed) {
+        this.x += (x - this.x) / speed;
+        this.y += (y - this.y) / speed;
+        this.z += (z - this.z) / speed;
     }
 }

@@ -13,7 +13,7 @@ import com.ultreon.quantum.config.QuantumServerConfig;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.debug.WorldGenDebugContext;
 import com.ultreon.quantum.entity.Entity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.events.EntityEvents;
 import com.ultreon.quantum.events.WorldEvents;
 import com.ultreon.quantum.network.client.ClientPacketHandler;

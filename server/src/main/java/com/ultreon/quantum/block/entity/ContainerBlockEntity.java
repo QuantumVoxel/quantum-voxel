@@ -1,6 +1,6 @@
 package com.ultreon.quantum.block.entity;
 
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.menu.ContainerMenu;
 import com.ultreon.quantum.menu.CrateMenu;

@@ -3,7 +3,7 @@ package com.ultreon.quantum.client.player;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityTypes;
 import com.ultreon.quantum.network.packets.AbilitiesPacket;
-import com.ultreon.quantum.util.Gamemode;
+import com.ultreon.quantum.util.GameMode;
 import com.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class RemotePlayer extends ClientPlayer {
     }
 
     @Override
-    public void setGamemode(@NotNull Gamemode gamemode) {
+    public void setGameMode(@NotNull GameMode gamemode) {
 
     }
 

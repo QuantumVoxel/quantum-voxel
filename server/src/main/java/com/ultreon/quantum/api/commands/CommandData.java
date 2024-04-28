@@ -23,7 +23,7 @@ import com.ultreon.quantum.server.player.CacheablePlayer;
 import com.ultreon.quantum.server.player.ServerPlayer;
 import com.ultreon.quantum.server.util.Utils;
 import com.ultreon.quantum.util.Identifier;
-import com.ultreon.quantum.util.Gamemode;
+import com.ultreon.quantum.util.GameMode;
 import com.ultreon.quantum.weather.Weather;
 import com.ultreon.quantum.world.Biome;
 import com.ultreon.quantum.world.Location;
@@ -212,7 +212,7 @@ public class CommandData {
         CommandData.registerArgument("entity", CommandData::readEntity, CommandData::completeEntities);
         CommandData.registerArgument("entity-type", CommandData::readEntityTypeExceptPlayer, CommandData::completeEntityTypesExceptPlayer);
         CommandData.registerArgument("entity-type-all", CommandData::readEntityType, CommandData::completeEntityTypes);
-        CommandData.registerArgument("gamemode", CommandData::readGamemode, CommandData::completeGamemode);
+        CommandData.registerArgument("game-mode", CommandData::readGamemode, CommandData::completeGameMode);
         CommandData.registerArgument("give-item", CommandData::readItem, CommandData::completeItems);
         CommandData.registerArgument("int", CommandReader::readInt, CommandData::completeInts);
         CommandData.registerArgument("int8", CommandReader::readByte, CommandData::completeInts);
@@ -314,42 +314,47 @@ public class CommandData {
         char c = ctx.readChar();
         Object object;
         StringBuilder code;
-        if (c == '$') {
-            String name = ctx.readUntil('.');
-            if (ctx.getLastChar() != '.') {
-                return TabCompleting.prefixed("$", ctx.getArgument(), TabCompleting.variables(new ArrayList<>(), name, serverPlayer, Object.class));
+        switch (c) {
+            case '$' -> {
+                String name = ctx.readUntil('.');
+                if (ctx.getLastChar() != '.') {
+                    return TabCompleting.prefixed("$", ctx.getArgument(), TabCompleting.variables(new ArrayList<>(), name, serverPlayer, Object.class));
+                }
+
+                code = new StringBuilder("$" + name);
+                object = PlayerVariables.get(serverPlayer).getVariable(name);
+
+                if (object == null) {
+                    return List.of();
+                }
             }
+            case ':' -> {
+                String name = ctx.readUntil('.');
 
-            code = new StringBuilder("$" + name);
-            object = PlayerVariables.get(serverPlayer).getVariable(name);
+                if (ctx.getLastChar() != '.') {
+                    return switch (name) {
+                        case "true", "false", "null", "root" -> List.of(":" + name + ".");
+                        default ->
+                                TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
+                    };
+                }
 
-            if (object == null) {
-                return List.of();
+                if (!Objects.equals(name, "root")) {
+                    return List.of();
+                }
+
+                name = ctx.readUntil('.');
+                RootVariableSource<?> rootVariableSource = RootVariables.get(name);
+                if (rootVariableSource == null) {
+                    return TabCompleting.prefixed(":root.", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(":root.".length()), RootVariables.names().toArray(new String[0])));
+                }
+
+                object = rootVariableSource.get(serverPlayer, ctx);
+                code = new StringBuilder(":root." + name);
             }
-        } else if (c == ':') {
-            String name = ctx.readUntil('.');
-
-            if (ctx.getLastChar() != '.') {
-                return switch (name) {
-                    case "true", "false", "null", "root" -> List.of(":" + name + ".");
-                    default -> TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
-                };
+            default -> {
+                return List.of(":", "$");
             }
-
-            if (!Objects.equals(name, "root")) {
-                return List.of();
-            }
-
-            name = ctx.readUntil('.');
-            RootVariableSource<?> rootVariableSource = RootVariables.get(name);
-            if (rootVariableSource == null) {
-                return TabCompleting.prefixed(":root.", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(":root.".length()), RootVariables.names().toArray(new String[0])));
-            }
-
-            object = rootVariableSource.get(serverPlayer, ctx);
-            code = new StringBuilder(":root." + name);
-        } else {
-            return List.of(":", "$");
         }
 
         String name;
@@ -588,14 +593,14 @@ public class CommandData {
         throw new CommandParseException("Not ran from a living entity.");
     }
 
-    private static Gamemode readGamemode(CommandReader ctx) throws CommandParseException {
+    private static GameMode readGamemode(CommandReader ctx) throws CommandParseException {
         return switch (ctx.readString()) {
-            case "survival" -> Gamemode.SURVIVAL;
-            case "mini_game" -> Gamemode.ADVENTUROUS;
-            case "builder" -> Gamemode.BUILDER;
-            case "builder_plus" -> Gamemode.BUILDER_PLUS;
-            case "spectator" -> Gamemode.SPECTATOR;
-            default -> throw new CommandParseException.NotFound("gamemode", ctx.getOffset());
+            case "survival" -> GameMode.SURVIVAL;
+            case "adventurous" -> GameMode.ADVENTUROUS;
+            case "builder" -> GameMode.BUILDER;
+            case "builder_plus" -> GameMode.BUILDER_PLUS;
+            case "spectator" -> GameMode.SPECTATOR;
+            default -> throw new CommandParseException.NotFound("game mode", ctx.getOffset());
         };
     }
 
@@ -717,8 +722,8 @@ public class CommandData {
         return new Location(dimension, x, y, z, xRot, yRot);
     }
 
-    private static List<String> completeGamemode(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
-        return TabCompleting.strings(ctx.readString(), "survival", "mini_game", "builder", "builder_plus", "spectator");
+    private static List<String> completeGameMode(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
+        return TabCompleting.strings(ctx.readString(), Arrays.stream(GameMode.values()).map(GameMode::name).map(String::toLowerCase).toArray(String[]::new));
     }
 
     private static List<String> completeBiome(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
@@ -791,12 +796,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.get(parts.size() - 1).length() > 2) {
+            if (parts.getLast().length() > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add(":");
             }
-        } else if (!parts.get(parts.size() - 1).isEmpty()) {
+        } else if (!parts.getLast().isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -813,9 +818,9 @@ public class CommandData {
         if (parts.size() > 3) {
             return List.of();
         }
-        if (parts.get(parts.size() - 1).length() > 2) {
+        if (parts.getLast().length() > 2) {
             return List.of("$currentArgument:");
-        } else if (!parts.get(parts.size() - 1).isEmpty()) {
+        } else if (!parts.getLast().isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -833,12 +838,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.get(parts.size() - 1).length()     > 2) {
+            if (parts.getLast().length()     > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add("-");
             }
-        } else if (!parts.get(parts.size() - 1).isEmpty()) {
+        } else if (!parts.getLast().isEmpty()) {
             list.add("-");
         }
         for (var i : new Range(0, 9)) {
@@ -857,12 +862,12 @@ public class CommandData {
                 return List.of(" ");
             }
             if (parts.size() > 1) {
-                if (parts.get(parts.size() - 1).length() > 2) {
+                if (parts.getLast().length() > 2) {
                     return List.of("$date:");
-                } else if (!parts.get(parts.size() - 1).isEmpty()) {
+                } else if (!parts.getLast().isEmpty()) {
                     list.add("-");
                 }
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add("-");
             }
             for (var i : new Range(0, 9)) {
@@ -876,9 +881,9 @@ public class CommandData {
             if (parts.size() > 3) {
                 return List.of();
             }
-            if (parts.get(parts.size() - 1).length()     > 2) {
+            if (parts.getLast().length()     > 2) {
                 return List.of("$time:");
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add(":");
             }
             for (var i : new Range(0, 9)) {

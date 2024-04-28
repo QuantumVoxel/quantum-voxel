@@ -2,6 +2,7 @@ package com.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
 import com.ultreon.data.types.IntType;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.server.player.ServerPlayer;
 import com.ultreon.quantum.world.World;

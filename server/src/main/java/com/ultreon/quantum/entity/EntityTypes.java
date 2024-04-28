@@ -1,6 +1,7 @@
 package com.ultreon.quantum.entity;
 
 import com.ultreon.quantum.CommonConstants;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.util.Identifier;
 

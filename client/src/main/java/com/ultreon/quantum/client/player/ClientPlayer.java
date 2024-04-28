@@ -4,7 +4,7 @@ import com.ultreon.quantum.api.commands.output.CommandResult;
 import com.ultreon.quantum.api.commands.perms.Permission;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.entity.EntityType;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.network.packets.c2s.C2SCommandPacket;
 import com.ultreon.quantum.util.MathHelper;
 import com.ultreon.quantum.world.World;

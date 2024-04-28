@@ -2,7 +2,7 @@ package com.ultreon.quantum.events;
 
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.events.api.Event;
 import com.ultreon.quantum.events.api.EventResult;
 import com.ultreon.quantum.item.ItemStack;

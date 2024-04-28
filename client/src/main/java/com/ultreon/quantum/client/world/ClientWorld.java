@@ -18,7 +18,7 @@ import com.ultreon.quantum.client.player.RemotePlayer;
 import com.ultreon.quantum.client.util.Rot;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import com.ultreon.quantum.network.packets.c2s.C2SBlockBreakingPacket;
 import com.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;

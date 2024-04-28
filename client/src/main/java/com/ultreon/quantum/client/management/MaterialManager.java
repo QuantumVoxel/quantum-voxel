@@ -2,13 +2,13 @@ package com.ultreon.quantum.client.management;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.ultreon.quantum.CommonConstants;
 import com.ultreon.quantum.client.QuantumClient;
+import com.ultreon.quantum.client.data.gen.provider.DepthFunc;
 import com.ultreon.quantum.client.render.DestinationBlending;
 import com.ultreon.quantum.client.render.SourceBlending;
 import com.ultreon.quantum.resources.ReloadContext;
@@ -131,6 +131,7 @@ public class MaterialManager implements Manager<Material> {
 
     private Attribute loadDepthTest(Json5Object attrObj) {
         Json5Primitive depthMask1 = attrObj.getAsJson5Primitive("depth_mask");
+        DepthFunc func = DepthFunc.valueOf(attrObj.getAsJson5Primitive("func").getAsString().toUpperCase(Locale.ROOT));
         boolean depthMask = depthMask1 == null || depthMask1.getAsBoolean();
 
         Json5Object rangeObj = attrObj.getAsJson5Object("range");
@@ -141,7 +142,7 @@ public class MaterialManager implements Manager<Material> {
             far = rangeObj.getAsJson5Primitive("far").getAsFloat();
         }
 
-        return new DepthTestAttribute(GL20.GL_DEPTH_FUNC, near, far, depthMask);
+        return new DepthTestAttribute(func.getGlFunc(), near, far, depthMask);
     }
 
     private Attribute loadColor(Json5Object attrObj) {

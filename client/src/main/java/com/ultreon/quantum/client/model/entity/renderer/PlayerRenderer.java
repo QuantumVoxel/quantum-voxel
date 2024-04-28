@@ -11,7 +11,7 @@ import com.ultreon.quantum.client.model.entity.PlayerModel;
 import com.ultreon.quantum.client.player.ClientPlayer;
 import com.ultreon.quantum.client.player.LocalPlayer;
 import com.ultreon.quantum.client.render.EntityTextures;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,8 +85,13 @@ public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
 
         clientPlayer.bopZ = bopZ;
 
-        instance.getNode("head").rotation.setFromMatrix(this.tmp.idt().rotate(Vector3.Y, player.xHeadRot - xRot).rotate(Vector3.X, yRot));
-        instance.getNode("headwear").rotation.setFromMatrix(this.tmp.idt().rotate(Vector3.Y, player.xHeadRot - xRot).rotate(Vector3.X, yRot));
+        try {
+            instance.getNode("head").rotation.setFromMatrix(this.tmp.idt().rotate(Vector3.Y, player.xHeadRot - xRot).rotate(Vector3.X, yRot));
+            instance.getNode("headwear").rotation.setFromMatrix(this.tmp.idt().rotate(Vector3.Y, player.xHeadRot - xRot).rotate(Vector3.X, yRot));
+        } catch (Exception ignored) {
+            // ignore
+        }
+
 //        EntityRenderer.tmp0.set(localPlayer.getPosition(client.partialTick));
 //        EntityRenderer.tmp0.sub(player.getPosition());
         instance.rotateY(xRot - 180);

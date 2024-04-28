@@ -7,7 +7,7 @@ import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.input.key.KeyBinds;
 import com.ultreon.quantum.client.input.util.JoystickType;
 import com.ultreon.quantum.client.util.Utils;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
 import org.jetbrains.annotations.NotNull;
 

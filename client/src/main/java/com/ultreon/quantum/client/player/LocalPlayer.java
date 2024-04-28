@@ -12,7 +12,7 @@ import com.ultreon.quantum.client.input.util.ControllerButton;
 import com.ultreon.quantum.client.registry.MenuRegistry;
 import com.ultreon.quantum.client.world.ClientWorld;
 import com.ultreon.quantum.entity.EntityType;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.menu.ContainerMenu;

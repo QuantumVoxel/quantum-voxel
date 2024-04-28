@@ -1,6 +1,5 @@
 package com.ultreon.quantum.entity.player;
 
-import com.ultreon.quantum.entity.Player;
 import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.item.food.FoodData;
 

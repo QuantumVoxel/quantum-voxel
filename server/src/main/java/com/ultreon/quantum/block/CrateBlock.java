@@ -3,7 +3,7 @@ package com.ultreon.quantum.block;
 import com.ultreon.quantum.block.entity.BlockEntity;
 import com.ultreon.quantum.block.entity.BlockEntityTypes;
 import com.ultreon.quantum.block.entity.CrateBlockEntity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.UseResult;

@@ -4,7 +4,7 @@ import com.ultreon.quantum.api.commands.error.InternalError;
 import com.ultreon.quantum.api.commands.error.NoPermissionError;
 import com.ultreon.quantum.api.commands.error.OverloadError;
 import com.ultreon.quantum.api.commands.output.CommandResult;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.server.chat.Chat;
 import com.ultreon.libs.commons.v0.tuple.Pair;

@@ -3,7 +3,6 @@ package com.ultreon.quantum.client.gui.overlay;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.gui.Renderer;
-import com.ultreon.quantum.entity.Player;
 import com.ultreon.quantum.util.Color;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;

@@ -2,7 +2,7 @@ package com.ultreon.quantum.command;
 
 import com.ultreon.quantum.api.commands.*;
 import com.ultreon.quantum.api.commands.output.CommandResult;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 public class FlyCommand extends Command {

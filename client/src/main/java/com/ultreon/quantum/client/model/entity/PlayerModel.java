@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.ultreon.quantum.client.render.EntityTextures;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerModel<T extends Player> extends LivingEntityModel<T> {

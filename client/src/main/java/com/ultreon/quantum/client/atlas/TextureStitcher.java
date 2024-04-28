@@ -26,7 +26,7 @@ public class TextureStitcher implements Disposable {
     private final Map<Identifier, Texture> textures = new HashMap<>();
     private final Map<Identifier, Texture> emissiveTextures = new HashMap<>();
     private FrameBuffer fbo;
-    private Identifier atlasId;
+    private final Identifier atlasId;
 
     public TextureStitcher(Identifier atlasId) {
         this.atlasId = atlasId;
@@ -55,7 +55,7 @@ public class TextureStitcher implements Disposable {
 
         Result emissiveResult = this.generateAtlas(width, height, Type.EMISSIVE, this.emissiveTextures, map);
 
-        return new TextureAtlas(this, diffuseResult.textureAtlas(), emissiveResult.textureAtlas(), map);
+        return new TextureAtlas(this, this.atlasId, diffuseResult.textureAtlas(), emissiveResult.textureAtlas(), map);
     }
 
     @NotNull

@@ -1,9 +1,11 @@
-package com.ultreon.quantum.entity;
+package com.ultreon.quantum.entity.player;
 
 import com.google.common.base.Preconditions;
 import com.ultreon.quantum.CommonConstants;
-import com.ultreon.quantum.entity.player.FoodStatus;
-import com.ultreon.quantum.entity.player.PlayerAbilities;
+import com.ultreon.quantum.entity.Attribute;
+import com.ultreon.quantum.entity.Entity;
+import com.ultreon.quantum.entity.EntityType;
+import com.ultreon.quantum.entity.LivingEntity;
 import com.ultreon.quantum.events.ItemEvents;
 import com.ultreon.quantum.events.MenuEvents;
 import com.ultreon.quantum.item.ItemStack;
@@ -22,6 +24,7 @@ import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.Mth;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -43,7 +46,7 @@ public abstract class Player extends LivingEntity {
     protected ContainerMenu openMenu;
     private ItemStack cursor = new ItemStack();
     private final String name;
-    private Gamemode gamemode = Gamemode.SURVIVAL;
+    private GameMode gamemode = GameMode.SURVIVAL;
     private final FoodStatus foodStatus = new FoodStatus(this);
 
     protected Player(EntityType<? extends Player> entityType, World world, String name) {
@@ -145,7 +148,7 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
-    public void setRotation(Vec2f position) {
+    public void setRotation(@NotNull Vec2f position) {
         super.setRotation(position);
         this.xHeadRot = position.x;
     }
@@ -158,7 +161,7 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
-    public TextObject getDisplayName() {
+    public @NotNull TextObject getDisplayName() {
         return TextObject.literal(this.name);
     }
 
@@ -214,7 +217,7 @@ public abstract class Player extends LivingEntity {
     }
 
     public boolean isSpectator() {
-        return this.gamemode == Gamemode.SPECTATOR;
+        return this.gamemode == GameMode.SPECTATOR;
     }
 
     @Deprecated
@@ -224,7 +227,7 @@ public abstract class Player extends LivingEntity {
 
     @Deprecated
     public void setSpectating(boolean spectating) {
-        this.setGamemode(spectating ? Gamemode.SPECTATOR : Gamemode.SURVIVAL);
+        this.setGameMode(spectating ? GameMode.SPECTATOR : GameMode.SURVIVAL);
     }
 
     @Override
@@ -246,7 +249,7 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
-    public void load(MapType data) {
+    public void load(@NotNull MapType data) {
         super.load(data);
 
         this.selected = data.getByte("selectedItem", (byte) this.selected);
@@ -256,12 +259,12 @@ public abstract class Player extends LivingEntity {
         this.flyingSpeed = data.getFloat("flyingSpeed", this.flyingSpeed);
         this.crouchModifier = data.getFloat("crouchingModifier", this.crouchModifier);
         this.runModifier = data.getFloat("runModifier", this.runModifier);
-        this.gamemode = Objects.requireNonNullElse(Gamemode.byOrdinal(data.getByte("gamemode", (byte) 0)), Gamemode.SURVIVAL);
+        this.gamemode = Objects.requireNonNullElse(GameMode.byOrdinal(data.getByte("gamemode", (byte) 0)), GameMode.SURVIVAL);
         this.abilities.load(data.getMap("Abilities"));
     }
 
     @Override
-    public MapType save(MapType data) {
+    public @NotNull MapType save(@NotNull MapType data) {
         data = super.save(data);
 
         data.putByte("selectedItem", this.selected);
@@ -369,16 +372,14 @@ public abstract class Player extends LivingEntity {
         Ray ray = new Ray(this.getPosition(), this.getLookVector());
         return entities.stream()
                 .filter(entity -> Intersector.intersectRayBounds(ray, entity.getBoundingBox(), null))
-                .sorted(Comparator.comparing(entity -> entity.getPosition().dst(ray.origin)))
-                .findFirst()
+                .min(Comparator.comparing(entity -> entity.getPosition().dst(ray.origin)))
                 .orElse(null);
     }
 
     public @Nullable Entity nearestEntity() {
         return this.world.getEntities()
                 .stream()
-                .sorted(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
-                .findFirst()
+                .min(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
                 .orElse(null);
     }
 
@@ -387,12 +388,11 @@ public abstract class Player extends LivingEntity {
                 .stream()
                 .filter(clazz::isInstance)
                 .map(clazz::cast)
-                .sorted(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
-                .findFirst()
+                .min(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
                 .orElse(null);
     }
 
-    public void setGamemode(Gamemode gamemode) {
+    public void setGameMode(GameMode gamemode) {
         this.gamemode = gamemode;
         switch (gamemode) {
             case SURVIVAL -> {
@@ -431,16 +431,16 @@ public abstract class Player extends LivingEntity {
         this.sendAbilities();
     }
 
-    public Gamemode getGamemode() {
+    public GameMode getGamemode() {
         return this.gamemode;
     }
 
     public boolean isBuilder() {
-        return this.gamemode == Gamemode.BUILDER || this.gamemode == Gamemode.BUILDER_PLUS;
+        return this.gamemode == GameMode.BUILDER || this.gamemode == GameMode.BUILDER_PLUS;
     }
 
     public boolean isSurvival() {
-        return this.gamemode == Gamemode.SURVIVAL || this.gamemode == Gamemode.ADVENTUROUS;
+        return this.gamemode == GameMode.SURVIVAL || this.gamemode == GameMode.ADVENTUROUS;
     }
 
     public void drop(ItemStack itemStack) {

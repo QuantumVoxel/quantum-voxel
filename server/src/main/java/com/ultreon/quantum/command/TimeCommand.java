@@ -2,7 +2,7 @@ package com.ultreon.quantum.command;
 
 import com.ultreon.quantum.api.commands.*;
 import com.ultreon.quantum.api.commands.output.CommandResult;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.network.packets.s2c.S2CTimePacket;
 import com.ultreon.quantum.server.player.ServerPlayer;
 import org.jetbrains.annotations.Nullable;

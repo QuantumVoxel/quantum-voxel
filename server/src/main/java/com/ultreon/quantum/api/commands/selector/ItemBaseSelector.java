@@ -6,7 +6,7 @@ import com.ultreon.quantum.api.commands.TabCompleting;
 import com.ultreon.quantum.api.commands.error.InvalidIntegerError;
 import com.ultreon.quantum.api.commands.error.NeedPlayerError;
 import com.ultreon.quantum.api.commands.error.OverloadError;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.util.Numbers;
 

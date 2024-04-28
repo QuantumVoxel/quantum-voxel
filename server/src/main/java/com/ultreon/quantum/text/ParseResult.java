@@ -1,6 +1,6 @@
 package com.ultreon.quantum.text;
 
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 
 import java.util.List;
 

@@ -105,7 +105,7 @@ import com.ultreon.quantum.debug.Debugger;
 import com.ultreon.quantum.debug.inspect.InspectionNode;
 import com.ultreon.quantum.debug.inspect.InspectionRoot;
 import com.ultreon.quantum.debug.profiler.Profiler;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.item.tool.ToolItem;

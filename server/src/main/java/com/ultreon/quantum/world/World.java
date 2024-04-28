@@ -10,6 +10,7 @@ import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.crash.CrashCategory;
 import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.entity.*;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.events.BlockEvents;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.menu.ContainerMenu;

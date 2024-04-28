@@ -19,7 +19,7 @@ import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.gui.screens.Screen;
 import com.ultreon.quantum.client.input.util.*;
 import com.ultreon.quantum.debug.Debugger;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.events.ItemEvents;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.item.ItemStack;

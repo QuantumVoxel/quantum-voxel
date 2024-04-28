@@ -1,7 +1,7 @@
 package com.ultreon.quantum.api.commands;
 
 import com.ultreon.quantum.entity.Entity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.world.ServerChunk;
 import com.ultreon.quantum.world.ServerWorld;
 

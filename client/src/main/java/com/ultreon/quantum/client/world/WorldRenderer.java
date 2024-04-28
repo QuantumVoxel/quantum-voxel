@@ -46,7 +46,7 @@ import com.ultreon.quantum.crash.CrashCategory;
 import com.ultreon.quantum.crash.CrashLog;
 import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Entity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Identifier;
 import com.ultreon.quantum.world.BlockPos;
@@ -108,7 +108,7 @@ public final class WorldRenderer implements DisposableContainer {
     private final Map<BlockPos, ModelInstance> blockInstances = new ConcurrentHashMap<>();
     private final Array<ClientChunk> removedChunks = new Array<>();
     private final Map<ChunkPos, Pair<ClientChunk, ModelInstance>> chunkModels = new ConcurrentHashMap<>();
-    private final boolean wasSunMoonShown = true;
+    private boolean wasSunMoonShown = true;
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;
@@ -651,16 +651,6 @@ public final class WorldRenderer implements DisposableContainer {
         }
     }
 
-    public static Renderable verifyOutput(Renderable renderable) {
-        Preconditions.checkNotNull(renderable.meshPart.mesh, "Mesh of renderable is null");
-        Preconditions.checkNotNull(renderable.material, "Material of renderable is null");
-        return renderable;
-    }
-
-    public static Mesh buildOutlineBox(float thickness) {
-        return WorldRenderer.buildOutlineBox(thickness, 1, 1, 1);
-    }
-
     public static Mesh buildOutlineBox(float thickness, float width, float height, float depth) {
         MeshBuilder meshBuilder = new MeshBuilder();
         meshBuilder.begin(new VertexAttributes(VertexAttribute.Position()), GL_TRIANGLES);
@@ -788,8 +778,18 @@ public final class WorldRenderer implements DisposableContainer {
 
             // TODO Implement reloading for chunks
 
+            this.unloadAllChunks();
             this.modelInstances.clear();
         });
+    }
+
+    private void unloadAllChunks() {
+        new HashSet<>(this.chunkModels.keySet()).forEach(this::unload);
+    }
+
+    private void unload(ChunkPos chunkPos) {
+        ClientChunk clientChunk = this.world.getChunk(chunkPos);
+        if (clientChunk != null) this.unload(clientChunk);
     }
 
     public Skybox getSkybox() {
@@ -802,6 +802,9 @@ public final class WorldRenderer implements DisposableContainer {
                 Scene3D.BACKGROUND.activate(this.sun);
                 Scene3D.BACKGROUND.activate(this.moon);
             }
+
+            wasSunMoonShown = true;
+
             material.set(new DepthTestAttribute(GL_LEQUAL, true));
             var world = this.world;
             if (world == null) return;
@@ -819,6 +822,8 @@ public final class WorldRenderer implements DisposableContainer {
         } else if (wasSunMoonShown) {
             Scene3D.BACKGROUND.deactivate(this.sun);
             Scene3D.BACKGROUND.deactivate(this.moon);
+
+            wasSunMoonShown = false;
         }
     }
 

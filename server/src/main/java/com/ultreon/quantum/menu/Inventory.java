@@ -3,7 +3,7 @@ package com.ultreon.quantum.menu;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.quantum.entity.Entity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.network.client.InGameClientPacketHandler;
 import com.ultreon.quantum.network.packets.Packet;

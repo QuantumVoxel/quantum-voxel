@@ -39,7 +39,7 @@ import com.ultreon.quantum.network.packets.s2c.S2CTimePacket;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Identifier;
-import com.ultreon.quantum.util.Gamemode;
+import com.ultreon.quantum.util.GameMode;
 import com.ultreon.quantum.world.*;
 import com.ultreon.data.types.MapType;
 import com.ultreon.libs.commons.v0.vector.Vec3d;
@@ -383,10 +383,10 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onGamemode(Gamemode gamemode) {
+    public void onGamemode(GameMode gamemode) {
         LocalPlayer player = this.client.player;
         if (player != null) {
-            player.setGamemode(gamemode);
+            player.setGameMode(gamemode);
         }
     }
 

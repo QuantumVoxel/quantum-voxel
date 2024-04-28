@@ -6,7 +6,7 @@ import com.ultreon.quantum.api.commands.CommandSender;
 import com.ultreon.quantum.api.commands.TabCompleting;
 import com.ultreon.quantum.api.commands.error.*;
 import com.ultreon.quantum.entity.Entity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.server.QuantumServer;
 
 import java.util.ArrayList;

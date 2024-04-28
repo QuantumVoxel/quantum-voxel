@@ -6,7 +6,7 @@ import com.ultreon.quantum.api.commands.Selections;
 import com.ultreon.quantum.api.commands.TabCompleting;
 import com.ultreon.quantum.api.commands.error.*;
 import com.ultreon.quantum.api.commands.variables.PlayerVariables;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.server.QuantumServer;
 import com.ultreon.quantum.server.player.ServerPlayer;
 import org.jetbrains.annotations.NotNull;

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.events.BlockEvents;
 import com.ultreon.quantum.events.api.EventResult;
 import com.ultreon.quantum.text.TextObject;

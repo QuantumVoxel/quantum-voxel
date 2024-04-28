@@ -16,7 +16,7 @@ import com.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import com.ultreon.quantum.network.packets.s2c.S2CTimePacket;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Identifier;
-import com.ultreon.quantum.util.Gamemode;
+import com.ultreon.quantum.util.GameMode;
 import com.ultreon.quantum.world.Biome;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.ChunkPos;
@@ -79,7 +79,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onPing(long serverTime, long time);
 
-    void onGamemode(Gamemode gamemode);
+    void onGamemode(GameMode gamemode);
 
     void onBlockEntitySet(BlockPos pos, BlockEntityType<?> blockEntity);
 

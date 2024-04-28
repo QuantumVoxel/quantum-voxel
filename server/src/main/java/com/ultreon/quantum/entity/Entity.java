@@ -2,6 +2,7 @@ package com.ultreon.quantum.entity;
 
 import com.ultreon.quantum.api.commands.CommandSender;
 import com.ultreon.quantum.api.commands.perms.Permission;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.entity.util.EntitySize;
 import com.ultreon.quantum.events.EntityEvents;
 import com.ultreon.quantum.events.api.ValueEventResult;

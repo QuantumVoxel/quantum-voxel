@@ -2,7 +2,7 @@ package com.ultreon.quantum.block;
 
 import com.ultreon.quantum.block.state.BlockDataEntry;
 import com.ultreon.quantum.block.state.BlockProperties;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.world.BlockPos;
 import com.ultreon.quantum.world.CubicDirection;

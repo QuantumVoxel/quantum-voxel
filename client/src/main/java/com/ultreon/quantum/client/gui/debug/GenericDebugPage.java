@@ -8,7 +8,7 @@ import com.ultreon.quantum.client.world.ChunkMesh;
 import com.ultreon.quantum.client.world.ClientChunk;
 import com.ultreon.quantum.client.world.WorldRenderer;
 import com.ultreon.quantum.debug.ValueTracker;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.network.system.IConnection;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.util.BlockHitResult;

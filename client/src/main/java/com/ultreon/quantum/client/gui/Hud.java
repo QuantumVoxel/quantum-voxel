@@ -2,7 +2,7 @@ package com.ultreon.quantum.client.gui;
 
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.util.GameRenderable;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 
 public class Hud implements GameRenderable {
     private final QuantumClient client;

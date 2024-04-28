@@ -13,7 +13,7 @@ import com.ultreon.quantum.debug.DebugFlags;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
 import com.ultreon.quantum.entity.LivingEntity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.entity.damagesource.DamageSource;
 import com.ultreon.quantum.events.MenuEvents;
 import com.ultreon.quantum.events.PlayerEvents;
@@ -34,7 +34,7 @@ import com.ultreon.quantum.server.chat.Chat;
 import com.ultreon.quantum.text.Formatter;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Color;
-import com.ultreon.quantum.util.Gamemode;
+import com.ultreon.quantum.util.GameMode;
 import com.ultreon.quantum.util.BlockHitResult;
 import com.ultreon.quantum.util.Unit;
 import com.ultreon.quantum.world.*;
@@ -563,9 +563,9 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
      * @param gamemode the new gamemode to set
      */
     @Override
-    public void setGamemode(@NotNull Gamemode gamemode) {
-        Gamemode old = this.getGamemode();
-        super.setGamemode(gamemode);
+    public void setGameMode(@NotNull GameMode gamemode) {
+        GameMode old = this.getGamemode();
+        super.setGameMode(gamemode);
 
         // If the gamemode has changed, send relevant packets
         if (old != gamemode) {

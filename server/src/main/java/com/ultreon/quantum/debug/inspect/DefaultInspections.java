@@ -5,7 +5,7 @@ import com.ultreon.quantum.debug.ValueTracker;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
 import com.ultreon.quantum.entity.LivingEntity;
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.entity.util.EntitySize;
 import com.ultreon.quantum.item.Item;
 import com.ultreon.quantum.item.ItemStack;

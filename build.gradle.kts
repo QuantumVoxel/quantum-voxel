@@ -532,6 +532,17 @@ commonProperties
                         programParameters = "--gameDir=."
                     }
                     create(
+                        "Quantum Voxel Data $name",
+                        Application::class.java
+                    ) {                       // Create new run configuration "MyApp" that will run class foo.App
+                        jvmArgs =
+                            "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                        mainClass = "com.ultreon.quantum.data.gen.DataGenerator"
+                        moduleName = idea.module.name + ".desktop.main"
+                        workingDirectory = "$projectDir/run/data/main/"
+                        programParameters = "--gameDir=."
+                    }
+                    create(
                         "Quantum Voxel Client $name Alt",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App

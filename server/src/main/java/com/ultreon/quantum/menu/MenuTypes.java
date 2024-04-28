@@ -1,6 +1,6 @@
 package com.ultreon.quantum.menu;
 
-import com.ultreon.quantum.entity.Player;
+import com.ultreon.quantum.entity.player.Player;
 import com.ultreon.quantum.registry.Registries;
 import com.ultreon.quantum.util.Identifier;
 

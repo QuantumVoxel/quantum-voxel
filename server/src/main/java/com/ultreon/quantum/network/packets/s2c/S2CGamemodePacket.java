@@ -4,17 +4,17 @@ import com.ultreon.quantum.network.PacketIO;
 import com.ultreon.quantum.network.PacketContext;
 import com.ultreon.quantum.network.client.InGameClientPacketHandler;
 import com.ultreon.quantum.network.packets.Packet;
-import com.ultreon.quantum.util.Gamemode;
+import com.ultreon.quantum.util.GameMode;
 
 public class S2CGamemodePacket extends Packet<InGameClientPacketHandler> {
-    private final Gamemode gamemode;
+    private final GameMode gamemode;
 
-    public S2CGamemodePacket(Gamemode gamemode) {
+    public S2CGamemodePacket(GameMode gamemode) {
         this.gamemode = gamemode;
     }
 
     public S2CGamemodePacket(PacketIO buffer) {
-        this.gamemode = Gamemode.byOrdinal(buffer.readByte());
+        this.gamemode = GameMode.byOrdinal(buffer.readByte());
     }
 
     @Override
