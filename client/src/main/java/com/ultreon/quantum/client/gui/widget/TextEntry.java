@@ -8,6 +8,7 @@ import com.ultreon.quantum.client.gui.Position;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import com.ultreon.quantum.client.gui.widget.components.TextComponent;
+import com.ultreon.quantum.client.input.DesktopInput;
 import com.ultreon.quantum.text.TextObject;
 import com.ultreon.quantum.util.Color;
 import it.unimi.dsi.fastutil.chars.CharPredicate;
@@ -72,12 +73,8 @@ public class TextEntry extends Widget {
 
     @Override
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        final int u;
-        if (this.enabled) {
-            u = this.focused ? 12 : 0;
-        } else {
-            u = 24;
-        }
+        final int u = this.enabled ? this.focused ? 12 : 0 : 24;
+
         final int v = 0;
         final int tx = this.pos.x;
         final int ty = this.pos.y - 2;
@@ -96,21 +93,27 @@ public class TextEntry extends Widget {
                 .blit(texture, tx + 4, ty + th - 4, tw - 8, 4, 4 + u, 8 + v, 4, 4, 36, 12)
                 .blit(texture, tx + tw - 4, ty + th - 4, 4, 4, 8 + u, 8 + v, 4, 4, 36, 12);
 
-        renderer.textLeft(this.value, this.pos.x + 5, this.pos.y + 6, false);
-        TextObject textObject = this.hint.get();
-        if (this.value.isEmpty() && textObject != null) {
-            renderer.textLeft(textObject, this.pos.x + 5, this.pos.y + 6, Color.WHITE.withAlpha(0x80), false);
-        }
+        if (renderer.pushScissors(this.getBounds().shrink(1, 1, 1, 4))) {
+            renderer.textLeft(this.value, this.pos.x + 5, this.pos.y + 6, false);
+            TextObject textObject = this.hint.get();
+            if (this.value.isEmpty() && textObject != null) {
+                renderer.textLeft(textObject, this.pos.x + 5, this.pos.y + 6, Color.WHITE.withAlpha(0x80), false);
+            }
 
-        if (this.focused) {
-            renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
+            if (this.focused) {
+                renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
+            }
+
+            renderer.popScissors();
         }
     }
 
     @Override
     public boolean charType(char character) {
         if (!Character.isISOControl(character) && this.filter.test(character)) {
-            this.value += character;
+            var start = this.value.substring(0, this.cursorIdx);
+            var end = this.value.substring(this.cursorIdx);
+            this.value = start + character + end;
             this.cursorIdx++;
             this.revalidateCursor();
             return true;
@@ -141,6 +144,13 @@ public class TextEntry extends Widget {
         if (keyCode == Input.Keys.RIGHT && this.cursorIdx < this.value.length()) {
             this.cursorIdx++;
             this.revalidateCursor();
+        }
+
+        if (keyCode == Input.Keys.V && DesktopInput.isCtrlDown()) {
+            String pasted = client.clipboard.paste();
+            var start = this.value.substring(0, this.cursorIdx);
+            var end = this.value.substring(this.cursorIdx);
+            this.value = start + pasted + end;
         }
 
         return super.keyPress(keyCode);

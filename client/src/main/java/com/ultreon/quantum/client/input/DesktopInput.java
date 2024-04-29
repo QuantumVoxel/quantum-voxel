@@ -85,6 +85,18 @@ public class DesktopInput extends GameInput {
         Gdx.input.setCursorCatched(caught);
     }
 
+    public static boolean isCtrlDown() {
+        return Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT);
+    }
+
+    public static boolean isShiftDown() {
+        return Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+    }
+
+    public static boolean isAltDown() {
+        return Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT);
+    }
+
     /**
      * Handles key down events.
      *

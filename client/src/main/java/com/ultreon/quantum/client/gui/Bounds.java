@@ -146,4 +146,28 @@ public record Bounds(Position pos, Size size) implements Copyable<Bounds> {
         return x >= this.pos.x && x <= this.pos.x + this.size.width &&
                 y >= this.pos.y && y <= this.pos.y + this.size.height;
     }
+
+    public Bounds shrink(int left, int right, int top, int bottom) {
+        return new Bounds(this.pos.x + left, this.pos.y + top, this.size.width - left - right, this.size.height - top - bottom);
+    }
+
+    public Bounds shrink(int horizontal, int vertical) {
+        return new Bounds(this.pos.x + horizontal, this.pos.y + vertical, this.size.width - horizontal * 2, this.size.height - vertical * 2);
+    }
+
+    public Bounds shrink(int amount) {
+        return new Bounds(this.pos.x + amount, this.pos.y + amount, this.size.width - amount * 2, this.size.height - amount * 2);
+    }
+
+    public Bounds grow(int left, int right, int top, int bottom) {
+        return new Bounds(this.pos.x - left, this.pos.y - top, this.size.width + left + right, this.size.height + top + bottom);
+    }
+
+    public Bounds grow(int horizontal, int vertical) {
+        return new Bounds(this.pos.x - horizontal, this.pos.y - vertical, this.size.width + horizontal * 2, this.size.height + vertical * 2);
+    }
+
+    public Bounds grow(int amount) {
+        return new Bounds(this.pos.x - amount, this.pos.y - amount, this.size.width + amount * 2, this.size.height + amount * 2);
+    }
 }
