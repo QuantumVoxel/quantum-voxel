@@ -1,6 +1,7 @@
 package com.ultreon.quantum.client.model.blockbench;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -11,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.model.ModelImporter;
+import com.ultreon.quantum.client.model.blockbench.anim.*;
 import com.ultreon.quantum.resources.Resource;
 import com.ultreon.quantum.util.Color;
 import com.ultreon.quantum.util.Identifier;
@@ -18,6 +20,7 @@ import com.ultreon.quantum.world.CubicDirection;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.libs.commons.v0.vector.Vec3f;
 import com.ultreon.libs.commons.v0.vector.Vec4f;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -26,7 +29,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class BlockBenchModelImporter implements ModelImporter {
+public class BBModelLoader implements ModelImporter {
     private static final Matrix4 TEMP_MATRIX = new Matrix4();
     private static final Vector3 TEMP_VEC3 = new Vector3();
     private static final Quaternion TEMP_ROTATION = new Quaternion();
@@ -42,13 +45,12 @@ public class BlockBenchModelImporter implements ModelImporter {
     private final List<BBTexture> textures;
     private Model model;
 
-    public BlockBenchModelImporter(Identifier id) {
+    public BBModelLoader(Identifier id) {
+        this(id, BBModelLoader.getResource(id));
+    }
+
+    public BBModelLoader(Identifier id, Resource resource) {
         this.id = id;
-        QuantumClient client = QuantumClient.get();
-        Resource resource = client.getResourceManager().getResource(id);
-        if (resource == null) {
-            throw new IllegalArgumentException("Resource not found: " + id);
-        }
 
         JsonObject jsonObject = resource.loadJson(JsonObject.class);
         this.meta = loadMeta(jsonObject.getAsJsonObject("meta"));
@@ -69,6 +71,15 @@ public class BlockBenchModelImporter implements ModelImporter {
         this.animations = loadAnimations(animations1);
     }
 
+    private static @NotNull Resource getResource(Identifier id) {
+        QuantumClient client = QuantumClient.get();
+        Resource resource = client.getResourceManager().getResource(id);
+        if (resource == null) {
+            throw new IllegalArgumentException("Resource not found: " + id);
+        }
+        return resource;
+    }
+
     private Vec2f loadVec2Size(JsonObject resolution) {
         return new Vec2f(resolution.get("width").getAsFloat(), resolution.get("height").getAsFloat());
     }
@@ -76,9 +87,76 @@ public class BlockBenchModelImporter implements ModelImporter {
     private List<BBAnimation> loadAnimations(JsonArray animations) {
         List<BBAnimation> list = new ArrayList<>();
         for (JsonElement elem : animations) {
-//            list.add(loadAnimation(elem.getAsJsonObject()));
+            list.add(loadAnimation(elem.getAsJsonObject()));
         }
         return list;
+    }
+
+    private BBAnimation loadAnimation(JsonObject asJsonObject) {
+        UUID uuid = UUID.fromString(asJsonObject.get("uuid").getAsString());
+        String name = asJsonObject.get("name").getAsString();
+        BBAnimation.Loop loop = BBAnimation.Loop.valueOf(asJsonObject.get("loop").getAsString().toUpperCase());
+        boolean override = asJsonObject.get("override").getAsBoolean();
+        float length = asJsonObject.get("length").getAsFloat();
+        int snapping = asJsonObject.get("snapping").getAsInt();
+        boolean selected = asJsonObject.get("selected").getAsBoolean();
+        String animTimeUpdate = asJsonObject.get("anim_time_update").getAsString();
+        String blendWeight = asJsonObject.get("blend_weight").getAsString();
+        String startDelay = asJsonObject.get("start_delay").getAsString();
+        String loopDelay = asJsonObject.get("loop_delay").getAsString();
+
+        JsonElement animatorsJson = asJsonObject.get("animators");
+        Map<UUID, BBAnimator> animators = new HashMap<>();
+        if (animatorsJson != null) {
+            for (Map.Entry<String, JsonElement> entry : animatorsJson.getAsJsonObject().entrySet()) {
+                animators.put(UUID.fromString(entry.getKey()), loadAnimator(entry.getValue().getAsJsonObject()));
+            }
+        }
+
+        return new BBAnimation(uuid, name, loop, override, length, snapping, selected, animTimeUpdate, blendWeight, startDelay, loopDelay, animators);
+    }
+
+    private BBAnimator loadAnimator(JsonObject asJsonObject) {
+        String name = asJsonObject.get("name").getAsString();
+        BBAnimator.Type type = BBAnimator.Type.valueOf(asJsonObject.get("type").getAsString().toUpperCase());
+        List<BBAnimKeyFrame> keyFrames = new ArrayList<>();
+        JsonElement keyFramesJson = asJsonObject.get("keyframes");
+        if (keyFramesJson != null) {
+            for (JsonElement elem : keyFramesJson.getAsJsonArray()) {
+                keyFrames.add(loadKeyFrame(elem.getAsJsonObject()));
+            }
+        }
+
+        return new BBAnimator(name, type, keyFrames);
+    }
+
+    private BBAnimKeyFrame loadKeyFrame(JsonObject asJsonObject) {
+        BBAnimChannel channel = BBAnimChannel.valueOf(asJsonObject.get("channel").getAsString().toUpperCase());
+        List<Vector3> dataPoints = new ArrayList<>();
+        for (JsonElement elem : asJsonObject.get("data_points").getAsJsonArray()) {
+            dataPoints.add(loadVector3(elem.getAsJsonObject()));
+        }
+
+        UUID uuid = UUID.fromString(asJsonObject.get("uuid").getAsString());
+        float time = asJsonObject.get("time").getAsFloat();
+        int colorIdx = asJsonObject.get("color").getAsInt();
+        BBColor color = colorIdx == -1 ? null : BBColor.values()[colorIdx];
+        BBAnimInterpolation interpolation = BBAnimInterpolation.valueOf(asJsonObject.get("interpolation").getAsString().toUpperCase());
+        boolean bezierLinked = asJsonObject.get("bezier_linked").getAsBoolean();
+        Vector3 bezierLeftTime = loadVector3(asJsonObject.get("bezier_left_time").getAsJsonArray());
+        Vector3 bezierLeftValue = loadVector3(asJsonObject.get("bezier_left_value").getAsJsonArray());
+        Vector3 bezierRightTime = loadVector3(asJsonObject.get("bezier_right_time").getAsJsonArray());
+        Vector3 bezierRightValue = loadVector3(asJsonObject.get("bezier_right_value").getAsJsonArray());
+
+        return new BBAnimKeyFrame(channel, dataPoints, uuid, time, color, interpolation, bezierLinked, bezierLeftTime, bezierLeftValue, bezierRightTime, bezierRightValue);
+    }
+
+    private Vector3 loadVector3(JsonObject asJsonObject) {
+        return new Vector3(asJsonObject.get("x").getAsFloat(), asJsonObject.get("y").getAsFloat(), asJsonObject.get("z").getAsFloat());
+    }
+
+    private Vector3 loadVector3(JsonArray asJsonArray) {
+        return new Vector3(asJsonArray.get(0).getAsFloat(), asJsonArray.get(1).getAsFloat(), asJsonArray.get(2).getAsFloat());
     }
 
     private List<BBTexture> loadTextures(JsonArray textures) {
@@ -116,13 +194,12 @@ public class BlockBenchModelImporter implements ModelImporter {
         UUID uuid = UUID.fromString(textureJson.getAsJsonPrimitive("uuid").getAsString());
         String relativePath = textureJson.getAsJsonPrimitive("relative_path").getAsString();
 
-        URI source = null;
+        URI source;
         try {
             source = new URI(textureJson.getAsJsonPrimitive("source").getAsString());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        Base64.Decoder decoder = Base64.getDecoder();
         return new BBTexture(path, name, folder, namespace, id, width, height, uvWidth, uvHeight, particle, layersEnabled, syncToProject, renderMode, renderSides, frameTime, frameOrderType, frameOrder, frameInterpolate, visible, internal, saved, uuid, relativePath, source);
     }
 
@@ -133,7 +210,7 @@ public class BlockBenchModelImporter implements ModelImporter {
             BBModelOutlineInfo node;
             node = loadNode(elem);
             if (node == null) {
-                QuantumClient.LOGGER.warn("Failed to load BlockBench model node: " + elem);
+                QuantumClient.LOGGER.warn("Failed to load BlockBench model node: {}", elem);
             }
             values.add(node);
         }
@@ -143,7 +220,6 @@ public class BlockBenchModelImporter implements ModelImporter {
 
     @Nullable
     private BBModelOutlineInfo loadNode(JsonElement elem) {
-        BBModelOutlineInfo node;
         if (!elem.isJsonObject()) {
             if (elem.isJsonPrimitive() && elem.getAsJsonPrimitive().isString()) {
                 return new BBModelElementReference(UUID.fromString(elem.getAsString()));
@@ -391,8 +467,10 @@ public class BlockBenchModelImporter implements ModelImporter {
 //            writeElement(model, subNodes, texture2texture, element);
 //        }
 
+        Map<UUID, Node> nodes = new HashMap<>();
+
         List<BBModelOutlineInfo> data = outliner.entries();
-        extracted(data, null, model, subNodes, texture2texture);
+        extracted(data, null, model, subNodes, nodes, texture2texture);
 
         for (Map.Entry<Integer, BBTexture> builder : texture2texture.entrySet()) {
             QuantumClient.invokeAndWait(() -> {
@@ -409,103 +487,93 @@ public class BlockBenchModelImporter implements ModelImporter {
                 } catch (Exception e) {
                     throw new RuntimeException("Texture " + textures.get(builder.getKey()).id() + " failed to load", e);
                 }
-
             });
         }
 
-        this.model = model.end();
+
+        this.model = QuantumClient.invokeAndWait(model::end);
+
+        for (BBAnimation animation : animations) {
+            Animation animations = animation.create(nodes, this);
+            this.model.animations.add(animations);
+        }
+
         this.model.calculateTransforms();
         return this.model;
     }
 
-    private void extracted(List<BBModelOutlineInfo> data, BBModelGroup parent, ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes0, Map<Integer, BBTexture> texture2texture) {
+    private void extracted(List<BBModelOutlineInfo> data, BBModelGroup parent, ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes0, Map<UUID, Node> nodes, Map<Integer, BBTexture> texture2texture) {
         for (BBModelOutlineInfo node : data) {
             if (node instanceof BBModelGroup group) {
                 group.parent = parent;
-                Vec3f origin = group.origin();
-                if (origin.x != 0 || origin.y != 0 || origin.z != 0) {
-                    ModelBuilder wrapperBuilder = new ModelBuilder();
-                    wrapperBuilder.begin();
-                    writeGroup(wrapperBuilder, subNodes0, texture2texture, group);
-                    Node node1 = groupBuilder.node(group.name() + "::PivotWrapper", wrapperBuilder.end());
-                    node1.localTransform.translate(origin.x, origin.y, origin.z);
-                    Vec3f rotation = this.chain(group, BBModelNode::rotation, (a, b) -> a.add(b));
-                    node1.localTransform.rotate(Vector3.X, rotation.x);
-                    node1.localTransform.rotate(Vector3.Y, rotation.y);
-                    node1.localTransform.rotate(Vector3.Z, rotation.z);
-                    node1.localTransform.translate(-origin.x, -origin.y, -origin.z);
+                ModelBuilder wrapperBuilder = new ModelBuilder();
+                wrapperBuilder.begin();
 
-                    node1.translation.set(node1.localTransform.getTranslation(new Vector3()));
-                    node1.rotation.set(node1.localTransform.getRotation(new Quaternion()));
-                    node1.scale.set(node1.localTransform.getScale(new Vector3()));
-                } else {
-                    writeGroup(groupBuilder, subNodes0, texture2texture, group);
-                }
+                Vec3f rotation = group.rotation();
+                Vec3f pivot = group.origin();
+
+                writeGroup(wrapperBuilder, subNodes0, nodes, texture2texture, group);
+                Node wrapper = groupBuilder.node(group.name(), wrapperBuilder.end());
+
+                wrapper.translation.set(pivot.x / 16f, pivot.y / 16f, pivot.z / 16f);
+                wrapper.rotation.setEulerAngles(rotation.y, rotation.x, rotation.z);
+
+                wrapper.calculateLocalTransform();
+
+                nodes.put(group.uuid(), wrapper);
             } else if (node instanceof BBModelElementReference ref) {
-                writeElement(groupBuilder, parent, subNodes0, texture2texture, ref);
+                writeElement(groupBuilder, parent, subNodes0, nodes, texture2texture, ref);
             }
         }
     }
 
-    private static Vec3f createPivotPoint(Vec3f origin) {
-        return origin.cpy().neg();
-    }
-
-    private void writeElement(ModelBuilder groupBuilder, BBModelGroup group, Map<UUID, ModelBuilder> subNodes0, Map<Integer, BBTexture> texture2texture, BBModelElementReference ref) {
+    private void writeElement(ModelBuilder groupBuilder, BBModelGroup group, Map<UUID, ModelBuilder> subNodes0, Map<UUID, Node> nodes, Map<Integer, BBTexture> texture2texture, BBModelElementReference ref) {
         BBModelElement element = this.getElement(ref.uuid());
         if (element == null) {
             throw new RuntimeException("Element not found: " + ref.uuid());
         }
+
         element.parent = group;
 
-        Vec3f origin = element.origin();
-        if (origin.x != 0 || origin.y != 0 || origin.z != 0) {
-            Vec3f cpy = createPivotPoint(origin);
-            ModelBuilder wrapperBuilder = new ModelBuilder();
-            wrapperBuilder.begin();
-            writeElement(groupBuilder, subNodes0, texture2texture, element);
-            groupBuilder.node(element.name() + "::PivotWrapper", wrapperBuilder.end());
-        } else {
-            writeElement(groupBuilder, subNodes0, texture2texture, element);
-        }
+        ModelBuilder wrapperBuilder = new ModelBuilder();
+        wrapperBuilder.begin();
+
+        Vec3f pivot = element.origin();
+        Vec3f rotation = element.rotation();
+
+        writeElement(groupBuilder, subNodes0, nodes, texture2texture, element);
+        Node wrapper = groupBuilder.node(element.name(), wrapperBuilder.end());
+
+        wrapper.translation.set(pivot.x / 16f, pivot.y / 16f, pivot.z / 16f);
+        wrapper.rotation.setEulerAngles(rotation.y, rotation.x, rotation.z);
+
+        wrapper.calculateLocalTransform();
+
+        nodes.put(element.uuid(), wrapper);
     }
 
-    private void writeGroup(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes0, Map<Integer, BBTexture> texture2texture, BBModelGroup group) {
+    private void writeGroup(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes0, Map<UUID, Node> nodes, Map<Integer, BBTexture> texture2texture, BBModelGroup group) {
         List<BBModelOutlineInfo> children = group.children();
 
         ModelBuilder nodeBuilder = new ModelBuilder();
         nodeBuilder.begin();
-        extracted(children, group, nodeBuilder, subNodes0, texture2texture);
+        extracted(children, group, nodeBuilder, subNodes0, nodes, texture2texture);
         Model childModel = nodeBuilder.end();
-        Node written = groupBuilder.node(group.name(), childModel);
+        Node wrapped = groupBuilder.node(group.name() + "::PivotWrapped", childModel);
 
-        Vec3f origin = group.origin();
-
-        written.localTransform.translate(-origin.x, -origin.y, -origin.z);
-        Vec3f rotation = this.chain(group, BBModelNode::rotation, (a, b) -> a.add(b));
-        written.localTransform.rotate(Vector3.X, rotation.x);
-        written.localTransform.rotate(Vector3.Y, rotation.y);
-        written.localTransform.rotate(Vector3.Z, rotation.z);
-        written.localTransform.translate(origin.x, origin.y, origin.z);
-
-        written.translation.set(written.localTransform.getTranslation(new Vector3()));
-        written.rotation.set(written.localTransform.getRotation(new Quaternion()));
-        written.scale.set(written.localTransform.getScale(new Vector3()));
+        Vec3f pivot = group.origin();
+        wrapped.translation.set(-pivot.x / 16f, -pivot.y / 16f, -pivot.z / 16f);
     }
 
-    private void writeElement(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2builder, BBModelElement element) {
+    private Node writeElement(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<UUID, Node> nodes, Map<Integer, BBTexture> texture2builder, BBModelElement element) {
         Node written = element.write(groupBuilder, subNodes, texture2builder, this, resolution);
         if (written != null) {
-//            written.rotation.set(rotationMatrix.getRotation(TEMP_ROTATION));
-            if (element.origin().x != 0 || element.origin().y != 0 || element.origin().z != 0) {
-                Vector3 origin;
-                if (element instanceof BBCubeModelElement cube) {
-                    origin = new Vector3(cube.from().x / 16f - element.origin().x / 16f, cube.from().y / 16f - element.origin().y / 16f, cube.from().z / 16f - element.origin().z / 16f);
-                } else {
-                    origin = new Vector3(element.origin().x / 16f, element.origin().y / 16f, element.origin().z / 16f);
-                }
-            }
+            Vec3f pivot = element.origin();
+            written.translation.set(-pivot.x / 16f, -pivot.y / 16f, -pivot.z / 16f);
+            return written;
         }
+
+        throw new RuntimeException("Element not written: " + element);
     }
 
     private <T> T chain(BBModelNode group, Function<BBModelNode, T> func, BiFunction<T, T, T> func2) {
@@ -519,6 +587,20 @@ public class BlockBenchModelImporter implements ModelImporter {
         for (BBModelNode g : groups) {
             sum = func2.apply(sum, func.apply(g));
         }
+        return sum;
+    }
+
+    private Vec3f relativize(BBModelNode group, Function<BBModelNode, Vec3f> func) {
+        List<BBModelNode> groups = new ArrayList<>();
+        groups.add(group);
+        while (group.parent() != null) {
+            group = group.parent();
+            groups.add(group);
+        }
+        Vec3f sum = func.apply(group).cpy();
+        for (BBModelNode g : groups)
+            sum.add(func.apply(g).cpy().sub(sum));
+
         return sum;
     }
 

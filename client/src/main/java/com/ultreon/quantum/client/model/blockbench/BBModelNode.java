@@ -8,6 +8,8 @@ import java.util.UUID;
 public sealed interface BBModelNode permits BBModelElement, BBModelGroup {
     Matrix4 rotationMatrix();
 
+    Vec3f origin();
+
     UUID uuid();
 
     Vec3f rotation();

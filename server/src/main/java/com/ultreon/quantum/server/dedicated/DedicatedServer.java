@@ -158,6 +158,11 @@ public class DedicatedServer extends QuantumServer {
     }
 
     @Override
+    public int getRenderDistance() {
+        return ServerConfig.renderDistance;
+    }
+
+    @Override
     public void fatalCrash(Throwable throwable) {
         this.crash(throwable);
     }

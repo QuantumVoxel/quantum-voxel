@@ -16,7 +16,7 @@ public class GamemodeCommand extends Command {
         this.data().aliases("gamemode", "gm");
     }
 
-    @DefineCommand("<gamemode>")
+    @DefineCommand("<game-mode>")
     @Perm("quantum.commands.gamemode.self")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, GameMode gamemode) {
         if (!(sender instanceof Player target)) return this.needPlayer();
@@ -26,7 +26,7 @@ public class GamemodeCommand extends Command {
         return this.successMessage("Gamemode set to %s".formatted(gamemode.name().toLowerCase(Locale.ROOT)));
     }
 
-    @DefineCommand("<player> <gamemode>")
+    @DefineCommand("<player> <game-mode>")
     public @Nullable CommandResult executeOnPlayer(CommandSender sender, CommandContext commandContext, String alias, Player target, GameMode gamemode) {
         if (sender != target && !sender.hasPermission("quantum.commands.gamemode.others")) return this.errorMessage("Cannot set gamemode for other players");
 

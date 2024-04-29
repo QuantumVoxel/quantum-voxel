@@ -86,6 +86,12 @@ public class QVModel {
     }
 
     public AnimationDesc queue(String animation, int loopCount, float speed, AnimationListener listener, float transitionTime) {
+        instance.animations.forEach(animation1 -> {
+            System.out.println("animation1.id = " + animation1.id);
+        });
+        instance.model.animations.forEach(animation1 -> {
+            System.out.println("animation1.id = " + animation1.id);
+        });
         return animationController.queue(animation, loopCount, speed, listener, transitionTime);
     }
 

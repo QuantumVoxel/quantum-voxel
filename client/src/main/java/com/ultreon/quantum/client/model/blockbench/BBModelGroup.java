@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
-    private final BlockBenchModelImporter model;
+    private final BBModelLoader model;
     private final String name;
     private final Vec3f origin;
     private final Color color;
@@ -24,7 +24,7 @@ public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
     private final Vec3f rotation;
     BBModelGroup parent;
 
-    public BBModelGroup(BlockBenchModelImporter model, String name, Vec3f origin, Color color, UUID uuid, boolean export, boolean mirrorUV,
+    public BBModelGroup(BBModelLoader model, String name, Vec3f origin, Color color, UUID uuid, boolean export, boolean mirrorUV,
                         boolean isOpen, boolean visibility, int autouv, List<BBModelOutlineInfo> children, Vec3f rotation) {
         this.model = model;
         this.name = name;
@@ -57,7 +57,7 @@ public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
         return this.rotationMatrix;
     }
 
-    public BlockBenchModelImporter model() {
+    public BBModelLoader model() {
         return model;
     }
 
@@ -65,6 +65,7 @@ public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
         return name;
     }
 
+    @Override
     public Vec3f origin() {
         return origin;
     }

@@ -5,14 +5,13 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import com.ultreon.quantum.client.model.block.GLTFModel;
-import com.ultreon.quantum.client.model.blockbench.BlockBenchModelImporter;
+import com.ultreon.quantum.client.model.blockbench.BBModelLoader;
 import com.ultreon.quantum.client.model.entity.EntityModel;
 import com.ultreon.quantum.client.resources.ContextAwareReloadable;
 import com.ultreon.quantum.client.resources.ResourceFileHandle;
 import com.ultreon.quantum.resources.ReloadContext;
 import com.ultreon.quantum.entity.Entity;
 import com.ultreon.quantum.entity.EntityType;
-import com.ultreon.quantum.entity.EntityTypes;
 import com.ultreon.quantum.resources.ResourceManager;
 import com.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +26,7 @@ public class EntityModelRegistry implements ContextAwareReloadable {
     private final Map<EntityType<?>, EntityModel<?>> registry = new HashMap<>();
     private final Map<EntityType<?>, Identifier> g3dRegistry = new HashMap<>();
     private final Map<EntityType<?>, Identifier> gltfRegistry = new HashMap<>();
+    private final Map<EntityType<?>, Identifier> bbModelRegistry = new HashMap<>();
     private final Map<EntityType<?>, Model> finishedRegistry = new HashMap<>();
     final ModelLoader<ModelLoader.ModelParameters> modelLoader;
     private final QuantumClient client;
@@ -44,8 +44,20 @@ public class EntityModelRegistry implements ContextAwareReloadable {
         this.g3dRegistry.put(entityType, id);
     }
 
+    /**
+     * @param entityType
+     * @param id
+     * @param <T>
+     * @deprecated Use {@link #registerBBModel(EntityType, Identifier)} or {@link #registerG3d(EntityType, Identifier)} instead.
+     *             This method breaks models when having multiple in a scene and will be removed in the future.
+     */
+    @Deprecated(forRemoval = true)
     public <T extends Entity> void registerGltf(EntityType<@NotNull T> entityType, Identifier id) {
         this.gltfRegistry.put(entityType, id);
+    }
+
+    public <T extends Entity> void registerBBModel(EntityType<@NotNull T> player, Identifier player1) {
+        this.bbModelRegistry.put(player, player1);
     }
 
     @Nullable
@@ -96,11 +108,17 @@ public class EntityModelRegistry implements ContextAwareReloadable {
             this.finishedRegistry.put(e.getKey(), gltfModel.getModel());
         }
 
+        for (Map.Entry<EntityType<?>, Identifier> e : this.bbModelRegistry.entrySet()) {
+            Identifier id = e.getValue();
+            Model model = blockBenchModel(id.mapPath(path -> "entity/" + path));
+            this.finishedRegistry.put(e.getKey(), model);
+        }
+
         // Call the onRegister method of the factory in ENTITY_MODELS
         ClientRegistrationEvents.ENTITY_MODELS.factory().onRegister();
     }
 
     private Model blockBenchModel(Identifier id) {
-        return new BlockBenchModelImporter(id.mapPath(path -> "models/" + path + ".bbmodel")).createModel();
+        return new BBModelLoader(id.mapPath(path -> "models/" + path + ".bbmodel")).createModel();
     }
 }

@@ -787,6 +787,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     @CanIgnoreReturnValue
     public static <T> T invokeAndWait(@NotNull Callable<T> func) {
+        if (isOnMainThread()) {
+            try {
+                return func.call();
+            } catch (Exception e) {
+                throw new RejectedExecutionException("Failed to execute task", e);
+            }
+        }
         return QuantumClient.instance.submit(func).join();
     }
 
@@ -798,6 +805,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param func the {@link Runnable} function to be executed on the QuantumClient thread
      */
     public static void invokeAndWait(Runnable func) {
+        if (isOnMainThread()) {
+            func.run();
+            return;
+        }
+
         QuantumClient.instance.submit(func).join();
     }
 

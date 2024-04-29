@@ -1,15 +1,24 @@
 package com.ultreon.quantum.client.model.blockbench;
 
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.model.NodePart;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
+import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.util.Color;
 import com.ultreon.libs.commons.v0.vector.Vec2f;
 import com.ultreon.libs.commons.v0.vector.Vec3f;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public final class BBMeshModelElement extends BBModelElement {
     private final String name;
@@ -129,10 +138,20 @@ public final class BBMeshModelElement extends BBModelElement {
     }
 
     @Override
-    public Node write(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2texture, BlockBenchModelImporter modelData, Vec2f resolution) {
+    public Node write(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2texture, BBModelLoader modelData, Vec2f resolution) {
+        Map<BBTexture, MeshPartBuilder> meshes = new HashMap<>();
+        ModelBuilder nodeBuilder = new ModelBuilder();
+        nodeBuilder.begin();
         for (BBModelMeshFace face : faces) {
-            face.write(groupBuilder, texture2texture, resolution);
+            face.write(nodeBuilder, texture2texture, meshes, resolution);
         }
-        return null;
+
+        Model nodeModel = QuantumClient.invokeAndWait(nodeBuilder::end);
+        Node node = groupBuilder.node(name, nodeModel);
+
+        node.rotation.setEulerAngles(rotation.x, rotation.y, rotation.z);
+        node.translation.set(origin.x / 16f, origin.y / 16f, origin.z / 16f);
+
+        return node;
     }
 }

@@ -15,7 +15,7 @@ public class EntityTypes {
 
     private static <T extends Entity> EntityType<T> register(String name, EntityType.Builder<T> builder) {
         EntityType<T> entityType = builder.build();
-        Registries.ENTITY_TYPE.register(new Identifier(CommonConstants.NAMESPACE, name), entityType);
+        Registries.ENTITY_TYPE.register(new Identifier(name), entityType);
         return entityType;
     }
 

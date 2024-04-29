@@ -20,4 +20,7 @@ public class ServerConfig extends CraftyConfig {
 
     @ConfigEntry(path = "security.maxPlayers", comment = "The maximum number of players allowed on the server.")
     public static int maxPlayers = 10;
+
+    @ConfigEntry(path = "server.renderDistance", comment = "The render distance of the server.")
+    public static int renderDistance;
 }

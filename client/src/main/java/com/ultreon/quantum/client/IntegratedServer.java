@@ -1,6 +1,7 @@
 package com.ultreon.quantum.client;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
+import com.ultreon.quantum.client.config.Config;
 import com.ultreon.quantum.client.gui.Notification;
 import com.ultreon.quantum.client.gui.icon.MessageIcon;
 import com.ultreon.quantum.client.gui.screens.WorldLoadScreen;
@@ -123,6 +124,11 @@ public class IntegratedServer extends QuantumServer {
     @Override
     protected void onTerminationFailed() {
         client.delayCrash(new CrashLog("onTerminationFailed", new Throwable("Failed termination of integrated server.")));
+    }
+
+    @Override
+    public int getRenderDistance() {
+        return Config.renderDistance;
     }
 
     @Override

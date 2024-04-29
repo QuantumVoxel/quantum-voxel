@@ -153,17 +153,21 @@ public class CommandData {
         for (var method : this.executor.getClass().getMethods()) {
             final var annotation = method.getAnnotation(DefineCommand.class);
             if (annotation == null) continue;
-            @Nullable String permission = null;
-            final var perm = method.getAnnotation(Perm.class);
-            if (perm != null) permission = perm.value();
             final var stringSpec = annotation.value();
-            final var info = annotation.comment();
-            final var compiled = Objects.equals(info, "")
-                    ? new CommandSpecParser().parse("/" + commandCtx.name())
-                    : new CommandSpecParser().parse("/" + commandCtx.name() + " " + stringSpec);
-            this.overloads0.put(compiled, info);
-            this.methodMap.put(compiled, method);
-            this.permissionMap.put(compiled, permission);
+            try {
+                @Nullable String permission = null;
+                final var perm = method.getAnnotation(Perm.class);
+                if (perm != null) permission = perm.value();
+                final var info = annotation.comment();
+                final var compiled = Objects.equals(info, "")
+                        ? new CommandSpecParser().parse("/" + commandCtx.name())
+                        : new CommandSpecParser().parse("/" + commandCtx.name() + " " + stringSpec);
+                this.overloads0.put(compiled, info);
+                this.methodMap.put(compiled, method);
+                this.permissionMap.put(compiled, permission);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse command: /" + commandCtx.name() + " " + stringSpec, e);
+            }
         }
     }
 

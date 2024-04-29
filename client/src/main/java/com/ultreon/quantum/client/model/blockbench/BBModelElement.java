@@ -19,6 +19,7 @@ public abstract sealed class BBModelElement implements BBModelNode permits BBCub
 
     public abstract Color color();
 
+    @Override
     public abstract Vec3f origin();
 
     public abstract boolean locked();
@@ -31,7 +32,7 @@ public abstract sealed class BBModelElement implements BBModelNode permits BBCub
 
     public abstract Vec3f rotation();
 
-    public abstract Node write(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2texture, BlockBenchModelImporter modelData, Vec2f resolution);
+    public abstract Node write(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2texture, BBModelLoader modelData, Vec2f resolution);
 
     public Matrix4 rotationMatrix() {
         if (rotationMatrix == null) {

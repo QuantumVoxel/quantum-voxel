@@ -1,6 +1,7 @@
 package com.ultreon.quantum.client.model.blockbench;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.resources.ByteArrayFileHandle;
 
 import java.io.IOException;
@@ -15,10 +16,11 @@ public record BBTexture(String path, String name, String folder, String namespac
                         String relativePath, URI data) {
     public Texture loadOrGetTexture() throws IOException {
         try (InputStream inputStream = data.toURL().openStream()) {
-            Texture texture = new Texture(new ByteArrayFileHandle(".png", inputStream.readAllBytes()));
-            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-            return texture;
+            return QuantumClient.invokeAndWait(() -> {
+                Texture texture1 = new Texture(new ByteArrayFileHandle(".png", inputStream.readAllBytes()));
+                texture1.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                return texture1;
+            });
         }
     }
 }

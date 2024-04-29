@@ -26,8 +26,8 @@ public class TextureAtlas implements Disposable {
 
         QuantumClient client = QuantumClient.get();
         TextureManager textureManager = client.getTextureManager();
-        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".png-atlas"), atlas);
-        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".emissive.png-atlas"), emissiveAtlas);
+        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".atlas"), atlas);
+        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".emissive.atlas"), emissiveAtlas);
     }
 
     public TextureRegion get(Identifier id) {

@@ -20,6 +20,7 @@ public class PigRenderer extends LivingEntityRenderer<@NotNull Pig> {
     @Override
     public void animate(EntityModelInstance<@NotNull Pig> instance, WorldRenderContext<@NotNull Pig> context) {
         Pig entity = instance.getEntity();
+
         Entity.Pose pose = entity.getPose();
 
         switch (pose) {

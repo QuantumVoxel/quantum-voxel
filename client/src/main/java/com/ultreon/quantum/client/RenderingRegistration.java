@@ -128,9 +128,9 @@ public class RenderingRegistration {
      */
     public static void registerEntityRenderers() {
         EntityModelRegistry entityModelManager = QuantumClient.get().entityModelManager;
-        entityModelManager.registerGltf(EntityTypes.PLAYER, QuantumClient.id("player"));
-        entityModelManager.registerGltf(EntityTypes.SOMETHING, QuantumClient.id("something"));
-        entityModelManager.registerGltf(EntityTypes.PIG, QuantumClient.id("pig"));
+        entityModelManager.registerBBModel(EntityTypes.PLAYER, QuantumClient.id("player"));
+        entityModelManager.registerBBModel(EntityTypes.SOMETHING, QuantumClient.id("something"));
+        entityModelManager.registerBBModel(EntityTypes.PIG, QuantumClient.id("pig"));
 
         // Register the player entity renderer
         EntityRendererRegistry.register(EntityTypes.PLAYER, PlayerRenderer::new);

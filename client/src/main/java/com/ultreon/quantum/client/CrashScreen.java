@@ -147,4 +147,14 @@ public class CrashScreen extends Screen {
         renderer.textLeft(throwableName + ": " + errorMessage, 20, y + 32, ChatColor.GRAY);
         renderer.textLeft("    " + usableStackTrace, 20, y + 44, ChatColor.DARK_GRAY);
     }
+
+    @Override
+    public boolean canCloseWithEsc() {
+        return false;
+    }
+
+    @Override
+    public boolean canClose() {
+        return false;
+    }
 }

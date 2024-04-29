@@ -97,7 +97,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private InspectionNode<Object> playersNode;
     protected ServerWorld world;
     protected int port;
-    protected int renderDistance = 8;
     protected int entityRenderDistance = 6 * World.CHUNK_SIZE;
     private int chunkRefresh;
     private long onlineTicks;
@@ -151,7 +150,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             this.playersNode = this.node.createNode("players", this.players::values);
             this.node.createNode("world", () -> this.world);
             this.node.create("refreshChunks", () -> this.chunkRefresh);
-            this.node.create("renderDistance", () -> this.renderDistance);
+            this.node.create("renderDistance", this::getRenderDistance);
             this.node.create("entityRenderDistance", () -> this.entityRenderDistance);
             this.node.create("maxPlayers", () -> this.maxPlayers);
             this.node.create("tps", () -> this.currentTps);
@@ -580,9 +579,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     /**
      * @return the render distance.
      */
-    public int getRenderDistance() {
-        return this.renderDistance;
-    }
+    public abstract int getRenderDistance();
 
     /**
      * @return the entity render distance.

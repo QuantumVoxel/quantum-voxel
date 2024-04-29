@@ -1221,7 +1221,7 @@
   "animations": [
     {
       "uuid": "2132fe55-ae04-dd57-fbaf-ba524b28605f",
-      "name": "animation.model.new",
+      "name": "animation.model.idle",
       "loop": "loop",
       "override": false,
       "length": 4,

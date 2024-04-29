@@ -170,7 +170,7 @@ public final class BBCubeModelElement extends BBModelElement {
     }
 
     @Override
-    public Node write(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2texture, BlockBenchModelImporter modelData, Vec2f resolution) {
+    public Node write(ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes, Map<Integer, BBTexture> texture2texture, BBModelLoader modelData, Vec2f resolution) {
         return this.bake(groupBuilder, texture2texture, resolution);
     }
 
@@ -280,10 +280,7 @@ public final class BBCubeModelElement extends BBModelElement {
             });
         });
 
-        Node node = groupBuilder.node(name, elementBuilder.end());
-//        node.rotation.setFromMatrix(this.rotationMatrix());
-
-        return node;
+        return groupBuilder.node(name + "::PivotWrapped", elementBuilder.end());
     }
 
     public Matrix4 rotationMatrix() {
