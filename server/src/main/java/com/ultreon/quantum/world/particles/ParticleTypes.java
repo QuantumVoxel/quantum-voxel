@@ -10,4 +10,8 @@ public class ParticleTypes {
         Registries.PARTICLE_TYPES.register(new Identifier(name), particleType);
         return particleType;
     }
+
+    public static void init() {
+
+    }
 }

@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.quantum.client.api.events.RenderEvents;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.client.gui.overlay.OverlayManager;
 import com.ultreon.quantum.client.gui.screens.Screen;
@@ -73,11 +73,11 @@ public class GameRenderer implements Disposable {
         if (player != null) {
             QuantumClient.PROFILER.section("camera", () -> {
                 if (this.client.screen == null && !ImGuiOverlay.isShown()) {
-                    player.rotateHead(-Gdx.input.getDeltaX() * Config.cameraSensitivity, -Gdx.input.getDeltaY() * Config.cameraSensitivity);
+                    player.rotateHead(-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity, -Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
                 }
 
                 this.client.camera.update(player);
-                this.client.camera.far = (Config.renderDistance - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
+                this.client.camera.far = (ClientConfig.renderDistance - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
 
                 var rotation = this.tmp.set(player.xHeadRot, player.yRot);
                 var quaternion = new Quaternion();

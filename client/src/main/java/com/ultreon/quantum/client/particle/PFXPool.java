@@ -18,6 +18,9 @@ public class PFXPool extends Pool<ParticleEffect> {
 
 	@Override
 	protected ParticleEffect newObject() {
-		return sourceEffect.copy();
+		ParticleEffect copy = sourceEffect.copy();
+		copy.init();
+		copy.start();
+		return copy;
 	}
 }

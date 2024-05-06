@@ -6,9 +6,7 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
-import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
-import com.badlogic.gdx.graphics.g3d.particles.renderers.BillboardRenderer;
+import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
@@ -25,7 +23,7 @@ import com.ultreon.quantum.block.Blocks;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.DisposableContainer;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
 import com.ultreon.quantum.client.render.shader.Shaders;
@@ -77,7 +75,6 @@ public final class WorldRenderer implements DisposableContainer {
     public static final String OUTLINE_CURSOR_ID = CommonConstants.strId("outline_cursor");
     public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
     public ParticleSystem particleSystem = new ParticleSystem();
-    public ParticleController particleController = new ParticleController("world", new RegularEmitter(), new BillboardRenderer());
     private Material material;
     private Material transparentMaterial;
     private final Texture breakingTex;
@@ -156,6 +153,10 @@ public final class WorldRenderer implements DisposableContainer {
         this.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
         this.environment.set(new ColorAttribute(ColorAttribute.Specular, 1, 1, 1, 1f));
+
+        BillboardParticleBatch billboardParticleBatch = new BillboardParticleBatch();
+        billboardParticleBatch.setCamera(this.client.camera);
+        this.particleSystem.add(billboardParticleBatch);
     }
 
     private ModelInstance setupDynamicSkybox() {
@@ -185,7 +186,7 @@ public final class WorldRenderer implements DisposableContainer {
         this.transparentMaterial = new Material();
         this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
         this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
-        this.transparentMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+        this.transparentMaterial.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         this.transparentMaterial.set(new DepthTestAttribute(GL_DEPTH_FUNC));
 //        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
     }
@@ -368,7 +369,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         QuantumClient.PROFILER.section("(Local Player)", () -> {
             LocalPlayer localPlayer = this.client.player;
-            if (localPlayer == null || !this.client.isInThirdPerson() && Config.hideFirstPersonPlayer) {
+            if (localPlayer == null || !this.client.isInThirdPerson() && ClientConfig.hideFirstPersonPlayer) {
                 if (localPlayer != null) {
                     scene3D.deactivate(modelInstances.get(localPlayer.getId()));
                 }
@@ -797,7 +798,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     public void updateBackground() {
-        if (Config.showSunAndMoon) {
+        if (ClientConfig.showSunAndMoon) {
             if (!wasSunMoonShown) {
                 Scene3D.BACKGROUND.activate(this.sun);
                 Scene3D.BACKGROUND.activate(this.moon);
@@ -839,6 +840,10 @@ public final class WorldRenderer implements DisposableContainer {
         Vector3 vector3 = new Vector3(div.x, div.y, div.z);
         obtained.translate(vector3);
         particleSystem.add(obtained);
+    }
+
+    public ParticleSystem getParticleSystem() {
+        return particleSystem;
     }
 
     private record MeshMaterial(Mesh mesh, Material material) {

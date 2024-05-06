@@ -15,7 +15,7 @@ import com.ultreon.quantum.block.Block;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.Constants;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.screens.Screen;
 import com.ultreon.quantum.client.input.util.*;
 import com.ultreon.quantum.debug.Debugger;
@@ -346,7 +346,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
 
     @CanIgnoreReturnValue
     public static boolean startVibration(int duration, float strength) {
-        if (!Config.vibration) return false;
+        if (!ClientConfig.vibration) return false;
 
         Controller current = Controllers.getCurrent();
         if (current == null) return false;

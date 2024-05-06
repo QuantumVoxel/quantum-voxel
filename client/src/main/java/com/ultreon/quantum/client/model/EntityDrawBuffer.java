@@ -5,7 +5,7 @@ import com.ultreon.quantum.client.render.RenderContext;
 import com.ultreon.quantum.entity.Entity;
 
 public class EntityDrawBuffer implements RenderContext<Entity> {
-    private Entity entity;
+    private final Entity entity;
 
     public EntityDrawBuffer(Entity entity) {
         this.entity = entity;

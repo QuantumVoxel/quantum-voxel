@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client;
 
 import com.ultreon.libs.datetime.v0.Duration;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Notification;
 import com.ultreon.quantum.text.TextObject;
 import oshi.SystemInfo;
@@ -37,7 +37,7 @@ public final class HardwareMonitor {
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
 
         while (true) {
-            if (!Config.showMemoryUsage){
+            if (!ClientConfig.showMemoryUsage){
                 try {
                     Duration.ofSeconds(5).sleep();
                 } catch (InterruptedException e) {

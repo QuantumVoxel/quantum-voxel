@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client.rpc;
 
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Callable;
@@ -14,7 +14,7 @@ public enum GameActivity {
     SINGLEPLAYER("Playing singleplayer"),
     MULTIPLAYER("Playing multiplayer", () -> {
         QuantumClient client = QuantumClient.get();
-        if (client.serverData == null || Config.hideActiveServerFromRPC) {
+        if (client.serverData == null || ClientConfig.hideActiveServerFromRPC) {
             return null;
         }
         return "On " + client.serverData.name();

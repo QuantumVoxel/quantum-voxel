@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.ultreon.quantum.client.input.GameCamera;
@@ -44,6 +45,13 @@ public class CollectNode extends RenderPipeline.RenderNode {
             if (entity instanceof LocalPlayer) continue;
             worldRenderer.collectEntity(entity, Scene3D.WORLD);
         }
+
+        ParticleSystem particleSystem = worldRenderer.getParticleSystem();
+        particleSystem.begin();
+        particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
+        particleSystem.end();
+
+        modelBatch.render(particleSystem);
 
         Scene3D.WORLD.finish(input, this.pool());
 

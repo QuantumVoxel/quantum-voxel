@@ -15,7 +15,7 @@ import net.fabricmc.loader.api.FabricLoader;
  * @since 0.1.0
  */
 @ConfigInfo(fileName = "quantum-client")
-public class Config extends CraftyConfig {
+public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.renderDistance", comment = "The render distance of chunks in the game.")
     @Ranged(min = 4, max = 32)
     public static int renderDistance = 16;
@@ -142,4 +142,10 @@ public class Config extends CraftyConfig {
 
     @ConfigEntry(path = "personalisation.showMemoryUsage", comment = "Whether the memory usage is shown in the game's GUI / HUD.")
     public static boolean showMemoryUsage = FabricLoader.getInstance().isDevelopmentEnvironment() && OS.isWindows();
+
+    @ConfigEntry(path = "accessibility.doublePressDelay", comment = "The delay between double presses or clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
+    public static int doublePressDelay = 30;
+
+    @ConfigEntry(path = "accessibility.doubleTapDelay", comment = "The delay between double presses or clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
+    public static int doubleTapDelay = 40;
 }

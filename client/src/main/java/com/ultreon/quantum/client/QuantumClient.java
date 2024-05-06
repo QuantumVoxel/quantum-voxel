@@ -46,7 +46,7 @@ import com.ultreon.quantum.client.api.events.RenderEvents;
 import com.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import com.ultreon.quantum.client.atlas.TextureAtlas;
 import com.ultreon.quantum.client.audio.ClientSound;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.config.GameSettings;
 import com.ultreon.quantum.client.font.Font;
 import com.ultreon.quantum.client.gui.*;
@@ -202,7 +202,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     final boolean devWorld;
     boolean imGui = false;
     public InspectionRoot<QuantumClient> inspection;
-    public Config newConfig;
+    public ClientConfig newConfig;
     public boolean hideHud = false;
 
     Duration bootTime;
@@ -431,7 +431,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Load the configuration
         ModLoadingContext.withinContext(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow(), () -> {
-            this.newConfig = new Config();
+            this.newConfig = new ClientConfig();
             this.newConfig.event.subscribe(this::onReloadConfig);
             this.newConfig.load();
         });
@@ -565,28 +565,28 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     private void onReloadConfig() {
-        if (Config.fullscreen) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        if (ClientConfig.fullscreen) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
-        String[] split = Config.language.path().split("_");
+        String[] split = ClientConfig.language.path().split("_");
         if (split.length == 2) {
             LanguageManager.setCurrentLanguage(Locale.of(split[0], split[1]));
         } else {
-            QuantumClient.LOGGER.error("Invalid language: {}", Config.language);
+            QuantumClient.LOGGER.error("Invalid language: {}", ClientConfig.language);
             LanguageManager.setCurrentLanguage(Locale.of("en", "us"));
-            Config.language = QuantumClient.id("en_us");
+            ClientConfig.language = QuantumClient.id("en_us");
             this.newConfig.save();
         }
 
-        if (Config.guiScale != 0) {
+        if (ClientConfig.guiScale != 0) {
             this.setAutomaticScale(false);
-            this.setGuiScale(Config.guiScale);
+            this.setGuiScale(ClientConfig.guiScale);
         } else {
             this.setAutomaticScale(true);
         }
 
-        this.camera.fov = Config.fov;
+        this.camera.fov = ClientConfig.fov;
 
-        if (Config.hideRPC) {
+        if (ClientConfig.hideRPC) {
             RpcHandler.disable();
         } else {
             RpcHandler.enable();
@@ -596,15 +596,15 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
         }
 
-        if (!Config.vibration) {
+        if (!ClientConfig.vibration) {
             GameInput.cancelVibration();
         }
 
         QuantumClient.invoke(() -> {
-            boolean enableVsync = Config.enableVsync;
+            boolean enableVsync = ClientConfig.enableVsync;
             Gdx.graphics.setVSync(enableVsync);
 
-            int fpsLimit = Config.fpsLimit;
+            int fpsLimit = ClientConfig.fpsLimit;
             if (fpsLimit >= 240) QuantumClient.setFpsLimit(240);
             else QuantumClient.setFpsLimit(fpsLimit < 10 ? 60 : fpsLimit);
 
@@ -1141,7 +1141,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void prepareScreenshot() {
         this.screenshotScale = 1;
 
-        if (Config.enable4xScreenshot && (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))) {
+        if (ClientConfig.enable4xScreenshot && (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))) {
             this.screenshotScale = 4;
         }
 
@@ -2217,11 +2217,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public boolean isShowDebugHud() {
-        return Config.enableDebugUtils;
+        return ClientConfig.enableDebugUtils;
     }
 
     public void setShowDebugHud(boolean showDebugHud) {
-        Config.enableDebugUtils = showDebugHud;
+        ClientConfig.enableDebugUtils = showDebugHud;
         this.newConfig.save();
     }
 

@@ -1,6 +1,6 @@
 package com.ultreon.quantum.client.gui.screens;
 
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.*;
 import com.ultreon.quantum.client.gui.widget.Label;
 import com.ultreon.quantum.client.gui.widget.SelectionList;
@@ -64,7 +64,7 @@ public class LanguageScreen extends Screen {
     }
 
     private void setLanguage(Locale locale) {
-        Config.language = LanguageManager.INSTANCE.getLanguageID(locale);
+        ClientConfig.language = LanguageManager.INSTANCE.getLanguageID(locale);
         this.client.newConfig.save();
     }
 }

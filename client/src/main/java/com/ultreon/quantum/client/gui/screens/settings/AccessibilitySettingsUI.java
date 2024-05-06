@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client.gui.screens.settings;
 
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Alignment;
 import com.ultreon.quantum.client.gui.Bounds;
 import com.ultreon.quantum.client.gui.Position;
@@ -28,14 +28,14 @@ public class AccessibilitySettingsUI {
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.hideFirstPersonPlayer"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(Config.hideFirstPersonPlayer ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfig.hideFirstPersonPlayer ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.hidden") : TextObject.translation("quantum.ui.visible"))
                 .callback(this::setHideFirstPersonPlayer));
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.hideHotbarWhenThirdPerson"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(Config.hideHotbarWhenThirdPerson ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfig.hideHotbarWhenThirdPerson ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.hidden" : "quantum.ui.visible"))
                 .callback(this::setHideHotbarWhenThirdPerson)
@@ -43,24 +43,24 @@ public class AccessibilitySettingsUI {
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.vibration"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(Config.vibration ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfig.vibration ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
                 .callback(this::setVibration));
     }
 
     private void setHideFirstPersonPlayer(CycleButton<BooleanEnum> value) {
-        Config.hideFirstPersonPlayer = value.getValue() == BooleanEnum.TRUE;
+        ClientConfig.hideFirstPersonPlayer = value.getValue() == BooleanEnum.TRUE;
         this.client.newConfig.save();
     }
 
     private void setHideHotbarWhenThirdPerson(CycleButton<BooleanEnum> value) {
-        Config.hideHotbarWhenThirdPerson = value.getValue() == BooleanEnum.TRUE;
+        ClientConfig.hideHotbarWhenThirdPerson = value.getValue() == BooleanEnum.TRUE;
         this.client.newConfig.save();
     }
 
     private void setVibration(CycleButton<BooleanEnum> value) {
-        Config.vibration = value.getValue() == BooleanEnum.TRUE;
+        ClientConfig.vibration = value.getValue() == BooleanEnum.TRUE;
         this.client.newConfig.save();
     }
 }

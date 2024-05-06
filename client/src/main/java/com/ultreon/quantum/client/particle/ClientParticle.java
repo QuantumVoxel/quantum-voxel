@@ -1,9 +1,11 @@
 package com.ultreon.quantum.client.particle;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader.ParticleEffectLoadParameter;
+import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.batches.ParticleBatch;
 import com.badlogic.gdx.utils.Array;
 import com.ultreon.quantum.client.QuantumClient;
@@ -15,6 +17,7 @@ public class ClientParticle {
     private ParticleEffect particleEffect;
     private final ParticleType type;
     private ParticleController particleController;
+    private BillboardParticleBatch billboardParticleBatch;
     private PFXPool pool;
 
     public ClientParticle(ParticleType type) {
@@ -22,11 +25,12 @@ public class ClientParticle {
     }
 
     public void load(Array<ParticleBatch<?>> batches) {
-        Identifier identifier = this.type.getId().mapPath(path -> "particles/" + path);
+        Identifier identifier = this.type.getId().mapPath(path -> "particles/" + path + ".pfx");
         var param = new ParticleEffectLoadParameter(batches);
 
-        this.particleEffect = new ParticleEffectLoader(fileName -> new ResourceFileHandle(Identifier.parse(fileName)))
-                .loadSync(QuantumClient.get().getAssetManager(), identifier.toString(), new ResourceFileHandle(identifier), param);
+        AssetManager assetManager = QuantumClient.get().getAssetManager();
+        assetManager.load(identifier.toString(), ParticleEffect.class, param);
+        this.particleEffect = QuantumClient.invokeAndWait(() -> assetManager.finishLoadingAsset(identifier.toString()));
 
         this.pool = new PFXPool(particleEffect);
     }

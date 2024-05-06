@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.imgui.ImGuiOverlay;
 import com.ultreon.quantum.client.render.ShaderPrograms;
 import com.ultreon.quantum.client.input.GameCamera;
@@ -47,7 +47,7 @@ public class MainRenderNode extends RenderNode {
         this.blurScale = blurScale;
 
         if (blurScale > 0f) {
-            this.client.renderer.blurred(blurScale, Config.blurRadius * blurScale, true, 1, () -> {
+            this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
                 this.drawDiffuse(skyboxTexture);
                 this.drawDiffuse(diffuseTexture);
             });

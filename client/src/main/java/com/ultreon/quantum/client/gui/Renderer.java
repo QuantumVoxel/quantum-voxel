@@ -21,7 +21,7 @@ import com.crashinvaders.vfx.effects.GaussianBlurEffect;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.font.Font;
 import com.ultreon.quantum.client.texture.TextureManager;
 import com.ultreon.quantum.client.util.InvalidValueException;
@@ -2288,7 +2288,7 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(boolean grid, int guiScale, Runnable block) {
-        blurred(Config.blurRadius, grid, guiScale, block);
+        blurred(ClientConfig.blurRadius, grid, guiScale, block);
     }
 
     @ApiStatus.Experimental
@@ -2436,7 +2436,7 @@ public class Renderer implements Disposable {
 
         Color hexagonColor;
         try {
-            String hexagonColorHex = Config.hexagonColor;
+            String hexagonColorHex = ClientConfig.hexagonColor;
             if (hexagonColorHex.length() > 7) hexagonColorHex = hexagonColorHex.substring(0, 7);
             if (hexagonColorHex.length() < 7 && hexagonColorHex.length() > 4)
                 hexagonColorHex = hexagonColorHex.substring(0, 4);
@@ -2446,7 +2446,7 @@ public class Renderer implements Disposable {
             hexagonColor = Color.WHITE;
         }
 
-        float hexagonTransparency = Config.hexagonTransparency;
+        float hexagonTransparency = ClientConfig.hexagonTransparency;
 
         this.batch.begin();
         this.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);

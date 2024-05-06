@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.ultreon.quantum.block.state.BlockProperties;
 import com.ultreon.quantum.client.QuantumClient;
 import com.ultreon.quantum.client.api.events.gui.ScreenEvents;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.screens.ChatScreen;
 import com.ultreon.quantum.client.gui.screens.PauseScreen;
 import com.ultreon.quantum.client.gui.screens.Screen;
@@ -256,7 +256,7 @@ public class DesktopInput extends GameInput {
      */
     private void handleImGuiKey() {
         // Check if debug utils are enabled in the configuration
-        if (!Config.enableDebugUtils) return;
+        if (!ClientConfig.enableDebugUtils) return;
 
         // Toggle ImGui visibility and cursor caught status
         if (this.client.isShowingImGui() && this.client.world != null)
@@ -270,7 +270,7 @@ public class DesktopInput extends GameInput {
      */
     private void handleInspectKey() {
         // Check if debug utilities are enabled and inspection is enabled
-        if (Config.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.enabled()) {
             // Toggle the inspection mode
             this.client.inspection.setInspecting(!this.client.inspection.isInspecting());
         }
@@ -293,7 +293,7 @@ public class DesktopInput extends GameInput {
         if (!this.client.isShowDebugHud()) {
             // Disable profiling
             QuantumClient.PROFILER.setProfiling(false);
-        } else if (Config.enableDebugUtils && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+        } else if (ClientConfig.enableDebugUtils && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
             // Enable profiling if debug HUD is shown and specific conditions are met
             QuantumClient.PROFILER.setProfiling(true);
         }

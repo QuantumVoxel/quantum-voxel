@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.text.*;
 import com.ultreon.quantum.text.Formatter;
@@ -54,7 +54,7 @@ public class Font implements Disposable {
     }
 
     boolean isForcingUnicode() {
-        return Config.enforceUnicode && !this.isSpecial();
+        return ClientConfig.enforceUnicode && !this.isSpecial();
     }
 
     public boolean isSpecial() {
@@ -70,7 +70,7 @@ public class Font implements Disposable {
         renderer.scale(scale, scale);
         if (shadow) {
             float shadowX = x;
-            if (Config.diagonalFontShadow) shadowX += (font == UNIFONT ? 0.5F : 1);
+            if (ClientConfig.diagonalFontShadow) shadowX += (font == UNIFONT ? 0.5F : 1);
             this.draw(renderer, font, color.darker().darker(), batch, text, shadowX, y / scale + 1, bold, italic, underlined, strikethrough, scale);
         }
 

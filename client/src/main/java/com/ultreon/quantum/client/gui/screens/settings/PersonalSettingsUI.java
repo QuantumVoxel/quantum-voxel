@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client.gui.screens.settings;
 
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Alignment;
 import com.ultreon.quantum.client.gui.Bounds;
 import com.ultreon.quantum.client.gui.Position;
@@ -26,36 +26,36 @@ public class PersonalSettingsUI {
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.diagonalFontShadow"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(Config.diagonalFontShadow ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfig.diagonalFontShadow ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
                 .callback(this::setDiagonalFontShadow));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.enforceUnicode"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(Config.enforceUnicode ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfig.enforceUnicode ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
                 .callback(this::setEnforceUnicode));
 
-        builder.add(TextObject.translation("quantum.screen.options.personalisation.blurRadius"), new Slider(Config.blurRadius == 0 ? 32 : (int) Config.blurRadius, 4, 128)
+        builder.add(TextObject.translation("quantum.screen.options.personalisation.blurRadius"), new Slider(ClientConfig.blurRadius == 0 ? 32 : (int) ClientConfig.blurRadius, 4, 128)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
                 .text(TextObject.translation("quantum.screen.options.personalisation.blurRadius.text"))
                 .callback(this::setBlurRadius));
     }
 
     private void setBlurRadius(Slider integerCycleButton) {
-        Config.blurRadius = (float) integerCycleButton.value().get();
+        ClientConfig.blurRadius = (float) integerCycleButton.value().get();
         this.client.newConfig.save();
     }
 
     private void setEnforceUnicode(CycleButton<BooleanEnum> booleanEnumCycleButton) {
-        Config.enforceUnicode = booleanEnumCycleButton.getValue().get();
+        ClientConfig.enforceUnicode = booleanEnumCycleButton.getValue().get();
         this.client.newConfig.save();
     }
 
     private void setDiagonalFontShadow(CycleButton<BooleanEnum> booleanEnumCycleButton) {
-        Config.diagonalFontShadow = booleanEnumCycleButton.getValue().get();
+        ClientConfig.diagonalFontShadow = booleanEnumCycleButton.getValue().get();
         this.client.newConfig.save();
     }
 }

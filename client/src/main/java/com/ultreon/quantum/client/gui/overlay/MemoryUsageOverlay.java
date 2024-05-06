@@ -1,7 +1,7 @@
 package com.ultreon.quantum.client.gui.overlay;
 
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.util.Color;
 import oshi.SystemInfo;
@@ -12,7 +12,7 @@ public class MemoryUsageOverlay extends Overlay {
 
     @Override
     public void render(Renderer renderer, float deltaTime) {
-        if (!Config.showMemoryUsage) return;
+        if (!ClientConfig.showMemoryUsage) return;
 
         int scrWidth = QuantumClient.get().getScaledWidth();
         int scrHeight = QuantumClient.get().getScaledHeight();

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.ultreon.quantum.client.QuantumClient;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.input.key.KeyBinds;
 import com.ultreon.quantum.client.input.util.JoystickType;
 import com.ultreon.quantum.client.util.Utils;
@@ -47,16 +48,13 @@ public class PlayerInput {
         if (this.flyCountdown > 0) {
             this.flyCountdown--;
 
-            if (KeyBinds.jumpKey.isJustPressed() && player.isAllowFlight() && !player.isSpectator()) {
+            if (KeyBinds.jumpKey.isJustPressed() && player.isAllowFlight() && !player.isSpectator())
                 player.setFlying(!player.isFlying());
-            }
         } else if (KeyBinds.jumpKey.isJustPressed() && player.isAllowFlight()) {
-            this.flyCountdown = 10;
+            this.flyCountdown = ClientConfig.doublePressDelay;
         }
 
-
         this.move();
-
         this.controllerMove();
 
         if (this.moveX > 0)

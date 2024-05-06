@@ -2,7 +2,7 @@ package com.ultreon.quantum.client.gui.screens.container;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.ultreon.quantum.client.QuantumClient;
-import com.ultreon.quantum.client.config.Config;
+import com.ultreon.quantum.client.config.ClientConfig;
 import com.ultreon.quantum.client.gui.Renderer;
 import com.ultreon.quantum.item.ItemStack;
 import com.ultreon.quantum.menu.Inventory;
@@ -165,7 +165,7 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     private boolean showOnlyCraftable() {
-        return Config.showOnlyCraftable;
+        return ClientConfig.showOnlyCraftable;
     }
 
     @Nullable
