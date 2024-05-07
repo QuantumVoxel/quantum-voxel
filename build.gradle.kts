@@ -155,7 +155,6 @@ allprojects {
 
         maven("https://raw.githubusercontent.com/Ultreon/corelibs/main/.mvnrepo/")
         maven("https://raw.githubusercontent.com/Ultreon/ultreon-data/main/.mvnrepo/")
-        }
 
         flatDir {
             name = "Project Libraries"
