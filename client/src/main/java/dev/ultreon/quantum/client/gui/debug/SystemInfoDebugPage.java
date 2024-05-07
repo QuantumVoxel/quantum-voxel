@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.util.RenderableArray;

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.item;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.player.Player;

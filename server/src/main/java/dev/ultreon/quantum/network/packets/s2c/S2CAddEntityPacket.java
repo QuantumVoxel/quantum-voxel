@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.network.PacketContext;

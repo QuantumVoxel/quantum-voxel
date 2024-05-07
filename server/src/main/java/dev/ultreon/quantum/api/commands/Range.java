@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.api.commands;
 
-import com.ultreon.libs.collections.v0.iterator.IntIterable;
-import com.ultreon.libs.collections.v0.iterator.IntIterator;
+import dev.ultreon.libs.collections.v0.iterator.IntIterable;
+import dev.ultreon.libs.collections.v0.iterator.IntIterator;
 import org.jetbrains.annotations.NotNull;
 
 public class Range implements IntIterable {

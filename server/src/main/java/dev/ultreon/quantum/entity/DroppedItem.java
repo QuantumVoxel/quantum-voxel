@@ -3,7 +3,7 @@ package dev.ultreon.quantum.entity;
 import com.google.common.base.Preconditions;
 import com.ultreon.data.types.IntType;
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.server.player.ServerPlayer;

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Color;

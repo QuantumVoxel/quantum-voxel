@@ -12,9 +12,9 @@ import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
 import com.ultreon.data.TypeRegistry;
 import com.ultreon.data.types.IType;
-import com.ultreon.libs.commons.v0.tuple.Pair;
-import com.ultreon.libs.commons.v0.util.EnumUtils;
-import com.ultreon.libs.commons.v0.vector.*;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.util.EnumUtils;
+import dev.ultreon.libs.commons.v0.vector.*;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 

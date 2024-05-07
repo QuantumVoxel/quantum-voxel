@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.util;
 
-import com.ultreon.libs.commons.v0.util.EnumUtils;
-import com.ultreon.libs.commons.v0.vector.*;
-import com.ultreon.libs.functions.v0.consumer.*;
-import com.ultreon.libs.functions.v0.supplier.FloatSupplier;
+import dev.ultreon.libs.commons.v0.util.EnumUtils;
+import dev.ultreon.libs.commons.v0.vector.*;
+import dev.ultreon.libs.functions.v0.consumer.*;
+import dev.ultreon.libs.functions.v0.supplier.FloatSupplier;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiInputTextFlags;

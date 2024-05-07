@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client;
 
-import com.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Notification;
 import dev.ultreon.quantum.text.TextObject;

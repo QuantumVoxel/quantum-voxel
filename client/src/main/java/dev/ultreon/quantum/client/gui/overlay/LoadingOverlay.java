@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.StaticWidget;

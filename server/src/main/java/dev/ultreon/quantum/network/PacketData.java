@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.network;
 
-import com.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.network.packets.Packet;
 
 public class PacketData<T extends PacketHandler> {

@@ -2,8 +2,8 @@ package dev.ultreon.quantum.client.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.ultreon.libs.commons.v0.Mth;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;

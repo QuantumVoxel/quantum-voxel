@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.api.commands;
 
-import com.ultreon.libs.commons.v0.tuple.Pair;
-import com.ultreon.libs.commons.v0.util.ExceptionUtils;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
 import dev.ultreon.quantum.api.commands.error.InternalError;
 import dev.ultreon.quantum.api.commands.error.NoPermissionError;
 import dev.ultreon.quantum.api.commands.error.OverloadError;

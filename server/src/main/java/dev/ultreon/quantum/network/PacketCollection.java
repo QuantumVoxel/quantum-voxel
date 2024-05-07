@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.network.packets.Packet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

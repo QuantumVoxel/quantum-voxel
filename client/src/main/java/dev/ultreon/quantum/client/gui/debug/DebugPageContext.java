@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.gui.debug;
 
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.BlockPos;

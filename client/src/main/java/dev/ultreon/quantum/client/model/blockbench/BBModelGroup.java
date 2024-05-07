@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.model.blockbench;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.ultreon.libs.commons.v0.vector.Vec3f;
+import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.util.Color;
 
 import java.util.List;

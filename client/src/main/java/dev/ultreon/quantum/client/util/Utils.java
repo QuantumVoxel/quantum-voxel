@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.util;
 
 import com.badlogic.gdx.math.Vector3;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

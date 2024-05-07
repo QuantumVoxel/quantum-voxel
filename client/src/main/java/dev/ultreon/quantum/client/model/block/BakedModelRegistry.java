@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.model.block;
 
 import com.google.common.collect.ImmutableMap;
-import com.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;

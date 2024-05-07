@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui.widget;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.util.Color;
 import org.checkerframework.common.value.qual.IntRange;

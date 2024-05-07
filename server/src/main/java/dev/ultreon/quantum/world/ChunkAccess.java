@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 
 public interface ChunkAccess {

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;

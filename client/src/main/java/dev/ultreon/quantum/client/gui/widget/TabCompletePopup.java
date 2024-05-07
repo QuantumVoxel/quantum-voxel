@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-import com.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.Renderer;

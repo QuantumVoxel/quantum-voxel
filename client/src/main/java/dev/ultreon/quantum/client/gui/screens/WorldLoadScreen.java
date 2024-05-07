@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.ultreon.libs.commons.v0.Mth;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Alignment;

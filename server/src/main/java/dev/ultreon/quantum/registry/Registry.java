@@ -2,7 +2,7 @@ package dev.ultreon.quantum.registry;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.ultreon.libs.commons.v0.Logger;
+import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.LoadingContext;
 import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.registry.event.RegistryEvents;

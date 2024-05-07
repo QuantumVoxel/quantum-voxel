@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.collection;
 
-import com.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

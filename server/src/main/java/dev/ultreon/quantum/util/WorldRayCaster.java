@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.util;
 
-import com.ultreon.libs.commons.v0.vector.Vec3d;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.world.Chunk;

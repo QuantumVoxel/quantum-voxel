@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.tests;
 
-import com.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.world.gen.CaveNoiseGenerator;
 
 import javax.swing.*;

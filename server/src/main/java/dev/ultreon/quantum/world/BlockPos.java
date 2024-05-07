@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 /**

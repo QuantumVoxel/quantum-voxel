@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.util;
 
-import com.ultreon.libs.commons.v0.exceptions.SyntaxException;
-import com.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.CommonConstants;
 import org.jetbrains.annotations.*;
 

@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.entity;
 
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.Mth;
-import com.ultreon.libs.commons.v0.vector.Vec2f;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.entity.player.Player;

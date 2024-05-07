@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.Mth;
 
 public class AdvancedVertexInfo extends MeshPartBuilder.VertexInfo {
     public GreedyMesher.LightLevelData lightLevelData;

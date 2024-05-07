@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.block;
 
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.util.BoundingBox;
 

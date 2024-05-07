@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.world.gen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.libs.commons.v0.vector.Vec2i;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;

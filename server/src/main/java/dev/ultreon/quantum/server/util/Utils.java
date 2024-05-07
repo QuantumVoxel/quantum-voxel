@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.server.util;
 
-import com.ultreon.libs.commons.v0.vector.Vec3d;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
-import com.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
 import dev.ultreon.quantum.world.World;

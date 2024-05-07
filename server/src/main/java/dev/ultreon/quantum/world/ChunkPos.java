@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world;
 
-import com.ultreon.libs.commons.v0.vector.Vec2d;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec2d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;

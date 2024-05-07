@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.entity;
 
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.Mth;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.entity.ai.Navigator;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.events.EntityEvents;

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.libs.datetime.v0.Duration;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;

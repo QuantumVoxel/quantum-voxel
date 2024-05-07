@@ -2,7 +2,7 @@ package dev.ultreon.quantum.command;
 
 import com.ultreon.data.types.IType;
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.api.ubo.UboFormatter;

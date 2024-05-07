@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.gen.noise;
 
-import com.ultreon.libs.commons.v0.vector.Vec2d;
-import com.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.libs.commons.v0.vector.Vec2d;
+import dev.ultreon.libs.commons.v0.vector.Vec2i;
 import dev.ultreon.quantum.util.MathHelper;
 import reactor.core.Disposable;
 

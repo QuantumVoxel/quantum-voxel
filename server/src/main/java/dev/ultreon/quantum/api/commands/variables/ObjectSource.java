@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.api.commands.variables;
 
-import com.ultreon.libs.commons.v0.Either;
+import dev.ultreon.libs.commons.v0.Either;
 import dev.ultreon.quantum.api.commands.CommandParseException;
 import dev.ultreon.quantum.api.commands.CommandReader;
 import dev.ultreon.quantum.api.commands.CommandSender;

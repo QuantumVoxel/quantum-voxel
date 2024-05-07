@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.resources;
 
-import com.ultreon.libs.commons.v0.Logger;
-import com.ultreon.libs.commons.v0.exceptions.SyntaxException;
-import com.ultreon.libs.commons.v0.util.IOUtils;
-import com.ultreon.libs.functions.v0.misc.ThrowingSupplier;
+import dev.ultreon.libs.commons.v0.Logger;
+import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
+import dev.ultreon.libs.commons.v0.util.IOUtils;
+import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.events.ResourceEvent;
 import dev.ultreon.quantum.resources.android.DeferredResourcePackage;

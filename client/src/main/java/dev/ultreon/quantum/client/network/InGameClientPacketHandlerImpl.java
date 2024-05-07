@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.network;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;

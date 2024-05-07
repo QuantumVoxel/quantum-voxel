@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.ultreon.libs.commons.v0.vector.Vec2f;
-import com.ultreon.libs.commons.v0.vector.Vec3f;
+import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.Color;
 

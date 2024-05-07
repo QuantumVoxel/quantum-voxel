@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;

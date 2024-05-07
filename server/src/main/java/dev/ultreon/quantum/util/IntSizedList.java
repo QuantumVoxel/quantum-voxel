@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.util;
 
-import com.ultreon.libs.collections.v0.exceptions.OutOfRangeException;
-import com.ultreon.libs.collections.v0.exceptions.ValueExistsException;
-import com.ultreon.libs.collections.v0.util.ArrayUtils;
-import com.ultreon.libs.collections.v0.util.Range;
+import dev.ultreon.libs.collections.v0.exceptions.OutOfRangeException;
+import dev.ultreon.libs.collections.v0.exceptions.ValueExistsException;
+import dev.ultreon.libs.collections.v0.util.ArrayUtils;
+import dev.ultreon.libs.collections.v0.util.Range;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Reference2IntFunction;

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.util;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.ultreon.libs.commons.v0.vector.*;
+import dev.ultreon.libs.commons.v0.vector.*;
 
 public final class MathHelper {
     private static final String EX_INVALID_NUMBER_OF_VERTICES = "Invalid number of vertices";

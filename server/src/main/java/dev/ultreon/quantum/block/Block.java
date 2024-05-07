@@ -2,8 +2,8 @@ package dev.ultreon.quantum.block;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.vector.Vec3d;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.player.Player;

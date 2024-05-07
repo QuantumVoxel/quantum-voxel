@@ -7,7 +7,7 @@ import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 

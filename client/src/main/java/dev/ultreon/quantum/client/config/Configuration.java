@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.config;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.ultreon.libs.collections.v0.maps.OrderedHashMap;
+import dev.ultreon.libs.collections.v0.maps.OrderedHashMap;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.entries.*;

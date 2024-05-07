@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget.components;
 
-import com.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.ImGuiEx;

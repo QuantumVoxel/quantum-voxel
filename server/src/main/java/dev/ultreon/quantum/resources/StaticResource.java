@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.resources;
 
-import com.ultreon.libs.commons.v0.util.IOUtils;
-import com.ultreon.libs.functions.v0.misc.ThrowingSupplier;
+import dev.ultreon.libs.commons.v0.util.IOUtils;
+import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import de.marhali.json5.Json5Element;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.Identifier;

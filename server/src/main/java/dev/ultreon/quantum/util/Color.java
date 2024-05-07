@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.util;
 
-import com.ultreon.libs.commons.v0.exceptions.InvalidValueException;
+import dev.ultreon.libs.commons.v0.exceptions.InvalidValueException;
 import dev.ultreon.quantum.text.ChatColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

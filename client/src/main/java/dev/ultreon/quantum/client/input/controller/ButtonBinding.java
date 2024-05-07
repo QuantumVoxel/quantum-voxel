@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.input.controller;
 import com.google.gson.JsonObject;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.util.ControllerButton;
-import com.ultreon.libs.commons.v0.Identifier;
+import dev.ultreon.libs.commons.v0.Identifier;
 
 public class ButtonBinding {
     private final Identifier id;

@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.util;
 
-import com.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.libs.commons.v0.vector.Vec2f;
 
 public class Resizer {
     private final float ratio;

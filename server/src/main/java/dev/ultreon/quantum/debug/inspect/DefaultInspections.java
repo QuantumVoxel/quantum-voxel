@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.debug.inspect;
 
 import com.ultreon.data.types.*;
-import com.ultreon.libs.commons.v0.tuple.Pair;
-import com.ultreon.libs.commons.v0.tuple.Quadruple;
-import com.ultreon.libs.commons.v0.tuple.Quintuple;
-import com.ultreon.libs.commons.v0.tuple.Triple;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.tuple.Quadruple;
+import dev.ultreon.libs.commons.v0.tuple.Quintuple;
+import dev.ultreon.libs.commons.v0.tuple.Triple;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;

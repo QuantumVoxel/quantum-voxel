@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.entity;
 
-import com.ultreon.libs.functions.v0.BiDouble2DoubleFunction;
+import dev.ultreon.libs.functions.v0.BiDouble2DoubleFunction;
 
 import java.util.UUID;
 

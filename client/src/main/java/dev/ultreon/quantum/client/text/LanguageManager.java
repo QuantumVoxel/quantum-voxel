@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.text;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.ultreon.libs.commons.v0.Logger;
+import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Identifier;

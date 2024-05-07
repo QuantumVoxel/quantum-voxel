@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.server.dedicated;
 
-import com.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.ModInit;
 import dev.ultreon.quantum.config.QuantumServerConfig;

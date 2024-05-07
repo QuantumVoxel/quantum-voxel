@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.world;
 
 import com.ultreon.data.types.MapType;
-import com.ultreon.libs.commons.v0.Mth;
-import com.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
@@ -23,7 +23,7 @@ import org.jetbrains.annotations.ApiStatus;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
 
-import static com.ultreon.libs.commons.v0.Mth.lerp;
+import static dev.ultreon.libs.commons.v0.Mth.lerp;
 import static dev.ultreon.quantum.world.World.*;
 
 /**

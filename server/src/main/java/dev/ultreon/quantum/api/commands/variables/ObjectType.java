@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.api.commands.variables;
 
-import com.ultreon.libs.commons.v0.Either;
+import dev.ultreon.libs.commons.v0.Either;
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.entity.Entity;
