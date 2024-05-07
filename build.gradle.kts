@@ -1,12 +1,5 @@
 import com.ultreon.gameutils.GameUtilsExt
-import org.jetbrains.gradle.ext.Application
-import org.jetbrains.gradle.ext.GradleTask
-import org.jetbrains.gradle.ext.runConfigurations
-import org.jetbrains.gradle.ext.settings
 import java.lang.System.getenv
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -162,15 +155,6 @@ allprojects {
 
         maven("https://raw.githubusercontent.com/Ultreon/corelibs/main/.mvnrepo/")
         maven("https://raw.githubusercontent.com/Ultreon/ultreon-data/main/.mvnrepo/")
-
-        maven {
-            name = "CoreLibsGitHub"
-            url = uri("https://maven.pkg.github.com/Ultreon/corelibs")
-
-            credentials {
-                username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
-                password = (project.findProperty("gpr.key") ?: getenv("TOKEN")) as String?
-            }
         }
 
         flatDir {
@@ -358,17 +342,6 @@ publishProjects.forEach {
                 }
             }
         }
-
-        repositories {
-            maven {
-                name = "QuantumVoxelGitHub"
-                url = uri("https://maven.pkg.github.com/Ultreon/quantum-voxel")
-                credentials {
-                    username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
-                    password = (project.findProperty("gpr.key") ?: getenv("TOKEN")) as String?
-                }
-            }
-        }
     }
 }
 
@@ -453,17 +426,6 @@ publishing {
                         roles.set(listOf("Tester", "Modeler"))
                     }
                 }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            name = "QuantumVoxelGitHub"
-            url = uri("https://maven.pkg.github.com/Ultreon/quantum-voxel")
-            credentials {
-                username = (project.findProperty("gpr.user") ?: getenv("USERNAME")) as String?
-                password = (project.findProperty("gpr.key") ?: getenv("TOKEN")) as String?
             }
         }
     }
