@@ -50,6 +50,8 @@ apply plugin: 'maven-publish'
 // Setting up main properties //
 //****************************//
 
+group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
+
 tasks.register('runClient', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 

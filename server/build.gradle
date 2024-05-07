@@ -43,6 +43,8 @@ apply plugin: 'maven-publish'
 @Language("jvm-class-name")
 def mainClass = 'dev.ultreon.quantum.server.dedicated.PreMain'
 
+group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
+
 java {
     withSourcesJar()
     withJavadocJar()
