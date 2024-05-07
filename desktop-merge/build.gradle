@@ -171,7 +171,7 @@ dependencies {
     pack implementation('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     pack implementation('net.fabricmc:access-widener:2.1.0')
 
-    pack implementation("net.fabricmc:fabric-loader:$fabric_version")
+    pack implementation("dev.ultreon:quantum-fabric-loader:$fabric_version")
 }
 
 processResources {

@@ -145,7 +145,7 @@ dependencies {
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     implementation api('net.fabricmc:access-widener:2.1.0')
 
-    implementation api("net.fabricmc:fabric-loader:$fabric_version")
+    implementation api("dev.ultreon:quantum-fabric-loader:$fabric_version")
 
     //noinspection GradleDynamicVersion
     implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
@@ -154,7 +154,7 @@ dependencies {
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     implementation api('net.fabricmc:access-widener:2.1.0')
 
-    implementation api("net.fabricmc:fabric-loader:$fabric_version")
+    implementation api("dev.ultreon:quantum-fabric-loader:$fabric_version")
 }
 
 compileJava {
