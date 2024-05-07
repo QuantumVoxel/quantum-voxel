@@ -3,6 +3,7 @@ package dev.ultreon.quantum.util;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.libs.commons.v0.vector.*;
 import dev.ultreon.libs.functions.v0.consumer.*;
+import dev.ultreon.libs.functions.v0.consumer.IntConsumer;
 import dev.ultreon.libs.functions.v0.supplier.FloatSupplier;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.function.*;
+import java.util.function.DoubleConsumer;
+import java.util.function.LongConsumer;
 
 public class ImGuiEx {
     public static void text(String label, Supplier<Object> value) {
