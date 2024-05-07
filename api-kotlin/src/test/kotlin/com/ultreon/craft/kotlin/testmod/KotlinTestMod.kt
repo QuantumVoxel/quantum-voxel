@@ -1,4 +1,4 @@
-package com.ultreon.quantum.kotlin.testmod
+package dev.ultreon.quantum.kotlin.testmod
 
 import net.fabricmc.api.ModInitializer
 

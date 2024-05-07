@@ -1,14 +1,14 @@
 package com.ultreon.test.craft;
 
-import com.ultreon.quantum.CommonConstants;
-import com.ultreon.quantum.block.Block;
-import com.ultreon.quantum.block.Blocks;
-import com.ultreon.quantum.collection.PaletteStorage;
-import com.ultreon.quantum.item.Items;
-import com.ultreon.quantum.registry.Registries;
-import com.ultreon.quantum.registry.event.RegistryEvents;
 import com.ultreon.data.DataIo;
 import com.ultreon.data.types.MapType;
+import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.collection.PaletteStorage;
+import dev.ultreon.quantum.item.Items;
+import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.event.RegistryEvents;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

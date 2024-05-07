@@ -15,7 +15,7 @@ plugins {
 
 apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
 
-group = "io.github.ultreon.quantummods"
+group = "dev.ultreon.quantummods"
 version = "0.1.0"
 
 base {

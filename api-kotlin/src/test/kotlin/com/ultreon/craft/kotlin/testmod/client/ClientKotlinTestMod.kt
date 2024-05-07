@@ -1,16 +1,16 @@
-package com.ultreon.quantum.kotlin.testmod.client
+package dev.ultreon.quantum.kotlin.testmod.client
 
-import com.ultreon.quantum.client.ClientModInit
-import com.ultreon.quantum.client.api.events.gui.ScreenEvents
-import com.ultreon.quantum.client.gui.screens.TitleScreen
-import com.ultreon.quantum.client.gui.widget.Button
-import com.ultreon.quantum.client.gui.widget.TextButton
-import com.ultreon.quantum.events.api.ValueEventResult
-import com.ultreon.quantum.kotlin.api.button
-import com.ultreon.quantum.kotlin.api.literal
-import com.ultreon.quantum.util.Color
-import com.ultreon.quantum.util.Color.hex
-import com.ultreon.quantum.util.Color.rgb
+import dev.ultreon.quantum.client.ClientModInit
+import dev.ultreon.quantum.client.api.events.gui.ScreenEvents
+import dev.ultreon.quantum.client.gui.screens.TitleScreen
+import dev.ultreon.quantum.client.gui.widget.Button
+import dev.ultreon.quantum.client.gui.widget.TextButton
+import dev.ultreon.quantum.events.api.ValueEventResult
+import dev.ultreon.quantum.kotlin.api.button
+import dev.ultreon.quantum.kotlin.api.literal
+import dev.ultreon.quantum.util.Color
+import dev.ultreon.quantum.util.Color.hex
+import dev.ultreon.quantum.util.Color.rgb
 
 class ClientKotlinTestMod : ClientModInit {
     override fun onInitializeClient() {

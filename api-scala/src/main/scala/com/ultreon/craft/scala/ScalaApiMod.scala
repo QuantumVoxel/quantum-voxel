@@ -1,4 +1,4 @@
-package com.ultreon.quantum.scala
+package dev.ultreon.quantum.scala
 
 import net.fabricmc.api.ModInitializer
 

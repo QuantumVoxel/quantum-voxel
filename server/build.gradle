@@ -7,7 +7,8 @@ import org.intellij.lang.annotations.Language
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import static org.gradle.api.file.DuplicatesStrategy.*
+import static org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
 
 buildscript {
     repositories {
@@ -40,7 +41,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 @Language("jvm-class-name")
-def mainClass = 'com.ultreon.quantum.server.dedicated.PreMain'
+def mainClass = 'dev.ultreon.quantum.server.dedicated.PreMain'
 
 java {
     withSourcesJar()
@@ -65,11 +66,11 @@ dependencies {
     api 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
 
     // CoreLibs
-    implementation api("io.github.ultreon.corelibs:collections-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:commons-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:datetime-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:functions-v0:$corelibs_version")
-    implementation api("io.github.ultreon:ubo:$ultreon_data_version")
+    implementation api("dev.ultreon.corelibs:collections-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:commons-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:datetime-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:functions-v0:$corelibs_version")
+    implementation api("dev.ultreon:ubo:$ultreon_data_version")
     implementation api("io.projectreactor:reactor-core:$reactor_version")
 
     // Apache Log4J
@@ -97,7 +98,7 @@ dependencies {
     implementation api("org.slf4j:slf4j-api:$slf4j_version")
 
     // JSON5
-    implementation api("com.github.Ultreon:json5-api:d0a559bc9b")
+    implementation api("dev.ultreon:json5-api:d0a559bc9b")
 
     // Google
     implementation api("com.google.code.gson:gson:2.10.1")
@@ -108,7 +109,7 @@ dependencies {
     implementation api("com.raylabz:opensimplex:1.0.3")
     implementation api("de.articdive:jnoise-pipeline:4.1.0")
 
-    implementation api('com.github.Ultreon:libnoiseforjava:f77e0827da')
+    implementation api('dev.ultreon:libnoiseforjava:f77e0827da')
     implementation api('com.flowpowered:flow-noise:1.0.0')
 
     implementation api("space.earlygrey:shapedrawer:$shapedrawer_version")

@@ -1,4 +1,4 @@
-package com.ultreon.quantum.kotlin
+package dev.ultreon.quantum.kotlin
 
 import net.fabricmc.api.ModInitializer
 

@@ -1,7 +1,7 @@
-package com.ultreon.quantum.groovy
+package dev.ultreon.quantum.groovy
 
-import com.ultreon.quantum.client.api.events.ClientLifecycleEvents
-import com.ultreon.quantum.client.api.events.ClientTickEvents
+import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents
+import dev.ultreon.quantum.client.api.events.ClientTickEvents
 import net.fabricmc.api.ModInitializer
 
 class GroovyApiMod implements ModInitializer {

@@ -1,7 +1,7 @@
-package com.ultreon.quantum.groovy
+package dev.ultreon.quantum.groovy
 
-import com.ultreon.quantum.client.QuantumClient
-import com.ultreon.quantum.server.QuantumServer
+import dev.ultreon.quantum.client.QuantumClient
+import dev.ultreon.quantum.server.QuantumServer
 import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.LoggerFactory
 

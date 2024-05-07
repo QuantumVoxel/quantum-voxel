@@ -1,7 +1,7 @@
-package com.ultreon.quantum.scala.testmod.client
+package dev.ultreon.quantum.scala.testmod.client
 
-import com.ultreon.quantum.client.api.events.ClientLifecycleEvents
-import com.ultreon.quantum.client.{ClientModInit, QuantumClient}
+import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents
+import dev.ultreon.quantum.client.{ClientModInit, QuantumClient}
 import net.fabricmc.api.ModInitializer
 
 class ClientScalaTestMod extends ClientModInit {

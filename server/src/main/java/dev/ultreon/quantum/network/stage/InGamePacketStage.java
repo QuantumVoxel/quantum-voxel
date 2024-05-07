@@ -1,0 +1,71 @@
+package dev.ultreon.quantum.network.stage;
+
+import dev.ultreon.quantum.entity.S2CEntityPipeline;
+import dev.ultreon.quantum.network.packets.C2SAttackPacket;
+import dev.ultreon.quantum.network.packets.c2s.*;
+import dev.ultreon.quantum.network.packets.s2c.*;
+import dev.ultreon.quantum.server.player.S2CPlayerAttackPacket;
+
+public class InGamePacketStage extends PacketStage {
+    @SuppressWarnings("unchecked")
+    @Override
+    public void registerPackets() {
+        this.addServerBound(C2SDisconnectPacket::new);
+        this.addClientBound(S2CDisconnectPacket::new);
+
+        this.addServerBound(C2SKeepAlivePacket::new);
+        this.addServerBound(C2SPingPacket::new);
+        this.addServerBound(C2SModPacket::new);
+        this.addServerBound(C2SRespawnPacket::new);
+        this.addServerBound(C2SPlayerMovePacket::new);
+        this.addServerBound(C2SChunkStatusPacket::new);
+        this.addServerBound(C2SMenuTakeItemPacket::new);
+        this.addServerBound(C2SBlockBreakingPacket::new);
+        this.addServerBound(C2SBlockBreakPacket::new);
+        this.addServerBound(C2SPlaceBlockPacket::new);
+        this.addServerBound(C2SHotbarIndexPacket::new);
+        this.addServerBound(C2SItemUsePacket::new);
+        this.addServerBound(C2SCloseMenuPacket::new);
+        this.addServerBound(C2SOpenInventoryPacket::new);
+        this.addServerBound(C2SOpenMenuPacket::new);
+        this.addServerBound(C2SChatPacket::new);
+        this.addServerBound(C2SCommandPacket::new);
+        this.addServerBound(C2SRequestTabComplete::new);
+        this.addServerBound(C2SAbilitiesPacket::new);
+        this.addServerBound(C2SCraftRecipePacket::new);
+        this.addServerBound(C2SDropItemPacket::new);
+        this.addServerBound(C2SAttackPacket::new);
+
+        this.addClientBound(S2CKeepAlivePacket::new);
+        this.addClientBound(S2CPingPacket::new);
+        this.addClientBound(S2CModPacket::new);
+        this.addClientBound(S2CChunkDataPacket::new);
+        this.addClientBound(S2CChunkCancelPacket::new);
+        this.addClientBound(S2CRespawnPacket::new);
+        this.addClientBound(S2CPlayerHealthPacket::new);
+        this.addClientBound(S2CPlayerSetPosPacket::new);
+        this.addClientBound(S2CPlayerPositionPacket::new);
+        this.addClientBound(S2CPlaySoundPacket::new);
+        this.addClientBound(S2CAddPlayerPacket::new);
+        this.addClientBound(S2CRemovePlayerPacket::new);
+        this.addClientBound(S2CInventoryItemChangedPacket::new);
+        this.addClientBound(S2CMenuItemChanged::new);
+        this.addClientBound(S2CMenuCursorPacket::new);
+        this.addClientBound(S2CBlockSetPacket::new);
+        this.addClientBound(S2CBlockEntitySetPacket::new);
+        this.addClientBound(S2COpenMenuPacket::new);
+        this.addClientBound(S2CCloseMenuPacket::new);
+        this.addClientBound(S2CChatPacket::new);
+        this.addClientBound(S2CCommandSyncPacket::new);
+        this.addClientBound(S2CTabCompletePacket::new);
+        this.addClientBound(S2CAbilitiesPacket::new);
+        this.addClientBound(S2CPlayerHurtPacket::new);
+        this.addClientBound(S2CGamemodePacket::new);
+        this.addClientBound(S2CTimePacket::new);
+        this.addClientBound(S2CAddEntityPacket::new);
+        this.addClientBound(S2CRemoveEntityPacket::new);
+        this.addClientBound(S2CEntityPipeline::new);
+        this.addClientBound(S2CPlayerAttackPacket::new);
+        this.addClientBound(S2CSpawnParticlesPacket::new);
+    }
+}

@@ -1,7 +1,7 @@
-package com.ultreon.quantum.kotlin.dsl
+package dev.ultreon.quantum.kotlin.dsl
 
-import com.ultreon.quantum.client.gui.icon.Icon
-import com.ultreon.quantum.client.gui.widget.IconButton
+import dev.ultreon.quantum.client.gui.icon.Icon
+import dev.ultreon.quantum.client.gui.widget.IconButton
 
 class IconButtonDSL(val icon: Icon) {
     private var position: () -> PositionDSL = { PositionDSL() }

@@ -65,7 +65,7 @@ extensions.configure<GameUtilsExt> {
     projectVersion =
         if (ghBuildNumber != null) "$gameVersion+build.$ghBuildNumber"
         else gameVersion
-    projectGroup = "io.github.ultreon.quantum"
+    projectGroup = "dev.ultreon.quantum"
     projectId = "quantum"
     production = true
 
@@ -73,7 +73,7 @@ extensions.configure<GameUtilsExt> {
     desktopProject = project(":desktop")
     packageProject = project(":desktop-merge")
 
-    mainClass = "com.ultreon.quantum.premain.PreMain"
+    mainClass = "dev.ultreon.quantum.premain.PreMain"
     javaVersion = 17
 }
 
@@ -89,7 +89,7 @@ repositories {
     maven("https://repo.runelite.net/")
     maven("https://jitpack.io") {
         content {
-            includeGroup("com.github.Ultreon")
+            includeGroup("dev.ultreon")
             includeGroup("com.github.mgsx-dev.gdx-gltf")
             includeGroup("com.github.JnCrMx")
             includeGroup("com.github.jagrosh")
@@ -279,7 +279,7 @@ publishProjects.forEach {
             create<MavenPublication>("mavenJava") {
                 from(it.components["java"])
 
-                groupId = "io.github.ultreon.quantum"
+                groupId = "dev.ultreon.quantum"
                 artifactId = "quantum-${it.name}"
                 version = gameVersion
 
@@ -377,7 +377,7 @@ publishing {
         create("maven", MavenPublication::class) {
             from(components["java"])
 
-            groupId = "io.github.ultreon.quantum"
+            groupId = "dev.ultreon.quantum"
             artifactId = "quantum"
             version = gameVersion
 
@@ -537,7 +537,7 @@ commonProperties
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
                             "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
-                        mainClass = "com.ultreon.quantum.data.gen.DataGenerator"
+                        mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
                         moduleName = idea.module.name + ".desktop.main"
                         workingDirectory = "$projectDir/run/data/main/"
                         programParameters = "--gameDir=."

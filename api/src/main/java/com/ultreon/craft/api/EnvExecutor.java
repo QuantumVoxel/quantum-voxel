@@ -1,4 +1,4 @@
-package com.ultreon.quantum.api;
+package dev.ultreon.quantum.api;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;

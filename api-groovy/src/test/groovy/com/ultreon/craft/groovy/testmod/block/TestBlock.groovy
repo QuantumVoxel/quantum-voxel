@@ -1,7 +1,7 @@
-package com.ultreon.quantum.groovy.testmod.block
+package dev.ultreon.quantum.groovy.testmod.block
 
-import com.ultreon.quantum.block.Block
-import com.ultreon.quantum.groovy.testmod.init.ModItems
+import dev.ultreon.quantum.block.Block
+import dev.ultreon.quantum.groovy.testmod.init.ModItems
 
 class TestBlock extends Block {
     TestBlock() {

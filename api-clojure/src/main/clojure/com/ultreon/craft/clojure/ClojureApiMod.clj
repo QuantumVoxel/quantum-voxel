@@ -1,5 +1,5 @@
-(ns com.ultreon.quantum.clojure.ClojureApiMod
-  (:import (com.ultreon.quantum ModInit)))
+(ns dev.ultreon.quantum.clojure.ClojureApiMod
+  (:import (dev.ultreon.quantum ModInit)))
 
 (def mod-id "clojure_testmod")
 

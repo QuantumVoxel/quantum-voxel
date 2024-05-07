@@ -1,4 +1,4 @@
-package com.ultreon.quantum.scala.testmod
+package dev.ultreon.quantum.scala.testmod
 
 object Constants {
   final val MOD_ID: String = "testmod"

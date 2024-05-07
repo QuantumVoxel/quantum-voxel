@@ -52,17 +52,17 @@ dependencies {
     implementation api(project(":gameprovider"))
 
     // CoreLibs
-    implementation api("io.github.ultreon.corelibs:collections-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:commons-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:crash-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:datetime-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:events-v1:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:functions-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:registries-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:resources-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:text-v0:$corelibs_version")
-    implementation api("io.github.ultreon.corelibs:translations-v1:$corelibs_version")
-    implementation api("io.github.ultreon:ubo:$ultreon_data_version")
+    implementation api("dev.ultreon.corelibs:collections-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:commons-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:crash-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:datetime-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:events-v1:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:functions-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:registries-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:resources-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:text-v0:$corelibs_version")
+    implementation api("dev.ultreon.corelibs:translations-v1:$corelibs_version")
+    implementation api("dev.ultreon:ubo:$ultreon_data_version")
 
     // LibGDX
     implementation api("com.badlogicgames.gdx:gdx:$gdx_version")
@@ -190,7 +190,7 @@ jar {
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Team',
                 project_version: project.version,
-                'Main-Class': 'com.ultreon.quantum.DesktopLauncher',
+                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
                 'Multi-Release': 'true'
     }
 

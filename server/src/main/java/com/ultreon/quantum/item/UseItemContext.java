@@ -1,9 +1,0 @@
-package com.ultreon.quantum.item;
-
-import com.ultreon.quantum.entity.player.Player;
-import com.ultreon.quantum.util.BlockHitResult;
-import com.ultreon.quantum.world.World;
-
-public record UseItemContext(World world, Player player, BlockHitResult result, ItemStack stack) {
-
-}

@@ -1,11 +1,3 @@
-import org.jetbrains.gradle.ext.Application
-import org.jetbrains.gradle.ext.GradleTask
-import org.jetbrains.gradle.ext.runConfigurations
-import org.jetbrains.gradle.ext.settings
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.StandardOpenOption
-
 plugins {
     id("idea")
     id("java")
@@ -16,7 +8,7 @@ plugins {
 
 apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
 
-group = "io.github.ultreon.quantummods"
+group = "dev.ultreon.quantummods"
 version = "0.1-SNAPSHOT"
 
 base {

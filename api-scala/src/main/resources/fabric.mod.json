@@ -7,7 +7,7 @@
 
   "entrypoints": {
     "init": [
-      "com.ultreon.quantum.scala.ScalaApiMod"
+      "dev.ultreon.quantum.scala.ScalaApiMod"
     ]
   }
 }
