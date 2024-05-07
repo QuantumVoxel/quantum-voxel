@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.ubo;
 
-import com.ultreon.data.types.IType;
+import dev.ultreon.ubo.types.DataType;
 
 /**
  * Interface for data readers.
  *
  * @param <T>
  */
-public interface DataReader<T extends IType<?>> {
+public interface DataReader<T extends DataType<?>> {
     /**
      * Loads this object from a UBO object.
      *

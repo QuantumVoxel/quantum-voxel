@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.collection;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.data.types.ListType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.DataKeys;
 import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;

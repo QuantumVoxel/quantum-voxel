@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.data.types.IntType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.IntType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;

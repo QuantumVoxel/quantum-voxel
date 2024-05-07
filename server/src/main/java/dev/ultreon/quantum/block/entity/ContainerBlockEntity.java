@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.block.entity;
 
-import com.ultreon.data.types.ListType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;

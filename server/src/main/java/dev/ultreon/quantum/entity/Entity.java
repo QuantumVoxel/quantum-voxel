@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.entity;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;

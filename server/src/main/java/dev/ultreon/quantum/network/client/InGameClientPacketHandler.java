@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.network.client;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockProperties;

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.command;
 
-import com.ultreon.data.types.IType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
@@ -52,7 +52,7 @@ public class SummonCommand extends Command {
     }
 
     @DefineCommand("<entity-type> <position> <world> using <ubo:spawn-data>")
-    public @Nullable CommandResult executeUsingSpawnData(CommandSender sender, CommandContext commandContext, String alias, EntityType<?> entityType, Vec3d position, World world, IType<?> ubo) {
+    public @Nullable CommandResult executeUsingSpawnData(CommandSender sender, CommandContext commandContext, String alias, EntityType<?> entityType, Vec3d position, World world, DataType<?> ubo) {
         Entity entity = entityType.create(world);
         entity.setPosition(position);
 
@@ -69,7 +69,7 @@ public class SummonCommand extends Command {
     }
 
     @DefineCommand("<entity-type> <position> <world> with <ubo:data>")
-    public @Nullable CommandResult executeWithData(CommandSender sender, CommandContext commandContext, String alias, EntityType<?> entityType, Vec3d position, World world, IType<?> ubo) {
+    public @Nullable CommandResult executeWithData(CommandSender sender, CommandContext commandContext, String alias, EntityType<?> entityType, Vec3d position, World world, DataType<?> ubo) {
         Entity entity = entityType.create(world);
         entity.setPosition(position);
 

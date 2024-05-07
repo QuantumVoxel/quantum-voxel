@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.command;
 
-import com.ultreon.data.DataIo;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.DataIo;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.server.QuantumServer;

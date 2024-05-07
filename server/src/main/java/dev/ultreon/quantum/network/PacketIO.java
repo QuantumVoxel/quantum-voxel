@@ -10,8 +10,8 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
-import com.ultreon.data.TypeRegistry;
-import com.ultreon.data.types.IType;
+import dev.ultreon.ubo.DataTypeRegistry;
+import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.libs.commons.v0.vector.*;
@@ -554,7 +554,7 @@ public class PacketIO {
         return size + 1;
     }
 
-    public void writeUbo(IType<?> ubo) {
+    public void writeUbo(DataType<?> ubo) {
         this.writeByte(ubo.id());
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -574,15 +574,15 @@ public class PacketIO {
 
     @SafeVarargs
     @SuppressWarnings("unchecked")
-    public final <T extends IType<?>> T readUbo(T... typeGetter) {
+    public final <T extends DataType<?>> T readUbo(T... typeGetter) {
         T data;
         int id = this.readUnsignedByte();
         byte[] bytes = this.readByteArray(PacketIO.MAX_UBO_SIZE);
 
         try(DataInputStream stream = new DataInputStream(new ByteArrayInputStream(bytes))) {
             Class<?> componentType = typeGetter.getClass().getComponentType();
-            if (id != TypeRegistry.getId(componentType)) throw new PacketException("Id doesn't match requested type.");
-            data = (T) TypeRegistry.read(TypeRegistry.getId(componentType), stream);
+            if (id != DataTypeRegistry.getId(componentType)) throw new PacketException("Id doesn't match requested type.");
+            data = (T) DataTypeRegistry.read(DataTypeRegistry.getId(componentType), stream);
         } catch (IOException e) {
             throw new PacketException(e);
         }

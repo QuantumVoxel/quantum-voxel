@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.api.ubo;
 
-import com.ultreon.data.types.IType;
+import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.quantum.text.TextObject;
 
 public class UboFormatter {
-    public static TextObject format(IType<?> message) {
+    public static TextObject format(DataType<?> message) {
         return message.accept(new UboFormatterVisitor(0));
     }
-    public static TextObject format(IType<?> message, int ident) {
+    public static TextObject format(DataType<?> message, int ident) {
         return message.accept(new UboFormatterVisitor(ident));
     }
 }

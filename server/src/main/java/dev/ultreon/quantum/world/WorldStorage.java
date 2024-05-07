@@ -2,8 +2,8 @@ package dev.ultreon.quantum.world;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.data.DataIo;
-import com.ultreon.data.types.IType;
+import dev.ultreon.ubo.DataIo;
+import dev.ultreon.ubo.types.DataType;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +57,7 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     @SafeVarargs
-    public final <T extends IType<?>> T read(String path, T... typeGetter) throws IOException {
+    public final <T extends DataType<?>> T read(String path, T... typeGetter) throws IOException {
         Preconditions.checkNotNull(path, "Path is null");
         Preconditions.checkNotNull(typeGetter, "TypeGetter is null");
         return DataIo.readCompressed(this.validatePath(path).toFile(), typeGetter);
@@ -70,7 +70,7 @@ public final class WorldStorage {
      * @param path the path to the UBO object.
      * @throws IOException if an I/O error occurs.
      */
-    public void write(IType<?> data, String path) throws IOException {
+    public void write(DataType<?> data, String path) throws IOException {
         Preconditions.checkNotNull(data, "Data is null");
         DataIo.writeCompressed(data, this.validatePath(path).toFile());
     }

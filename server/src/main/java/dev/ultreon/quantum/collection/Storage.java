@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.collection;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.network.PacketIO;
 
 import java.util.function.BiConsumer;

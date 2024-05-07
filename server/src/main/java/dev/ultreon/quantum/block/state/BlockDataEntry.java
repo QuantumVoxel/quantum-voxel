@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.block.state;
 
-import com.ultreon.data.types.BooleanType;
-import com.ultreon.data.types.IType;
-import com.ultreon.data.types.IntType;
+import dev.ultreon.ubo.types.BooleanType;
+import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.ubo.types.IntType;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.network.PacketIO;
 
@@ -31,7 +31,7 @@ public abstract class BlockDataEntry<T> {
 
     public abstract BlockDataEntry<?> read(PacketIO packetBuffer);
 
-    public abstract BlockDataEntry<?> load(IType<?> type);
+    public abstract BlockDataEntry<?> load(DataType<?> type);
 
     public T getValue() {
         return value;
@@ -50,7 +50,7 @@ public abstract class BlockDataEntry<T> {
         return String.valueOf(value);
     }
 
-    public abstract IType<?> save();
+    public abstract DataType<?> save();
 
     public abstract void write(PacketIO packetBuffer);
 
@@ -92,12 +92,12 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public BlockDataEntry<?> load(IType<?> type) {
+        public BlockDataEntry<?> load(DataType<?> type) {
             return this.with(((BooleanType) type).getValue());
         }
 
         @Override
-        public IType<?> save() {
+        public DataType<?> save() {
             return new BooleanType(this.value);
         }
 
@@ -153,12 +153,12 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public BlockDataEntry<?> load(IType<?> type) {
+        public BlockDataEntry<?> load(DataType<?> type) {
             return this.with(((IntType) type).getValue());
         }
 
         @Override
-        public IType<?> save() {
+        public DataType<?> save() {
             return new IntType(this.value);
         }
 
@@ -196,12 +196,12 @@ public abstract class BlockDataEntry<T> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockDataEntry<?> load(IType<?> type) {
+        public BlockDataEntry<?> load(DataType<?> type) {
             return this.with((T) this.value.getClass().getEnumConstants()[((IntType) type).getValue()]);
         }
 
         @Override
-        public IType<?> save() {
+        public DataType<?> save() {
             return new IntType(this.value.ordinal());
         }
 

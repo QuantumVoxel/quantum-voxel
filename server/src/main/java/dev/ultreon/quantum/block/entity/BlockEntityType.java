@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.block.entity;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.text;
 
-import com.ultreon.data.types.ListType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;

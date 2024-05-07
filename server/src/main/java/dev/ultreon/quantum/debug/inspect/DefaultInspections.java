@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.debug.inspect;
 
-import com.ultreon.data.types.*;
+import dev.ultreon.ubo.types.*;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.tuple.Quadruple;
 import dev.ultreon.libs.commons.v0.tuple.Quintuple;

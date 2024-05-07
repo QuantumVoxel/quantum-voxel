@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.text;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;

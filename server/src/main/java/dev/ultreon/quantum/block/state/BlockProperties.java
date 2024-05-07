@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.block.state;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.UnsafeApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;

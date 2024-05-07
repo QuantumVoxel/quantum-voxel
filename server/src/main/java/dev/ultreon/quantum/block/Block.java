@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.block;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;

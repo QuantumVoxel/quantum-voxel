@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Identifier;

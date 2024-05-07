@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.events;
 
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;

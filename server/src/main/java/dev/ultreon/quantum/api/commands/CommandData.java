@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.api.commands;
 
 import com.google.common.collect.Lists;
-import com.ultreon.data.UsoParser;
-import com.ultreon.data.types.IType;
+import dev.ultreon.ubo.UsoParser;
+import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.libs.commons.v0.Either;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
@@ -463,7 +463,7 @@ public class CommandData {
         }
     }
 
-    private static IType<?> readUbo(CommandReader ctx) throws CommandParseException {
+    private static DataType<?> readUbo(CommandReader ctx) throws CommandParseException {
         String s = ctx.readMessage();
         if (s == null) throw new CommandParseException.Invalid("ubo data", ctx.getOffset());
 

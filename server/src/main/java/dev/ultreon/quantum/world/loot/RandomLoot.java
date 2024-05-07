@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.loot;
 
 import com.google.common.collect.ImmutableList;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.rng.RNG;

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.item;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ultreon.quantum.registry.Registries;

@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.ubo;
 
-import com.ultreon.data.types.IType;
+import dev.ultreon.ubo.types.DataType;
 
 /**
  * Interface for data writers.
@@ -8,7 +8,7 @@ import com.ultreon.data.types.IType;
  * @param <T>
  */
 @FunctionalInterface
-public interface DataWriter<T extends IType<?>> {
+public interface DataWriter<T extends DataType<?>> {
     /**
      * Saves this object to a UBO object.
      *

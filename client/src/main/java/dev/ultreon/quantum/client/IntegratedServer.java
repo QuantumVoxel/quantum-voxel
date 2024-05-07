@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Notification;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;

@@ -1,7 +1,7 @@
 package com.ultreon.test.craft;
 
-import com.ultreon.data.DataIo;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.DataIo;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;

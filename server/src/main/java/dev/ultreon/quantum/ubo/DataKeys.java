@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.ubo;
 
-import com.ultreon.data.types.IType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.ubo.types.MapType;
 
 /**
  * UBO data keys.
  *
  * @see MapType#get(String)
- * @see MapType#put(String, IType)
+ * @see MapType#put(String, DataType)
  */
 public class DataKeys {
     public static final String PALETTE = "Palette";

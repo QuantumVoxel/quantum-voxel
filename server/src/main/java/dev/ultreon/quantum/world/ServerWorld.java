@@ -6,10 +6,10 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import com.ultreon.data.DataIo;
-import com.ultreon.data.types.ListType;
-import com.ultreon.data.types.LongType;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.DataIo;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.LongType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
@@ -1653,7 +1653,7 @@ public class ServerWorld extends World {
             }
 
             // Write region metadata.
-            DataIo.write(mapType, stream);
+            DataIo.write(mapType, (DataOutput) stream);
 
             // Dispose the region if requested.
             if (dispose) {
@@ -1673,7 +1673,7 @@ public class ServerWorld extends World {
          */
         public Region load(ServerWorld world, DataInputStream stream) throws IOException {
             // Read region metadata.
-            MapType read = DataIo.read(stream);
+            MapType read = DataIo.read((DataInput) stream);
             int dataVersion = read.getInt("dataVersion");
             String lastPlayedIn = read.getString("lastPlayedIn");
             int x = read.getInt("x");

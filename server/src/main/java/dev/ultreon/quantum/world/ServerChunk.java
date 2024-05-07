@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.world;
 
-import com.ultreon.data.types.ByteArrayType;
-import com.ultreon.data.types.ListType;
-import com.ultreon.data.types.MapType;
-import com.ultreon.data.types.ShortArrayType;
+import dev.ultreon.ubo.types.ByteArrayType;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.ubo.types.ShortArrayType;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.collection.PaletteStorage;

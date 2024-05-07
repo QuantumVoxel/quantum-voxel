@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import com.google.common.base.Preconditions;
-import com.ultreon.data.types.MapType;
+import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.events.WorldLifecycleEvents;
 import dev.ultreon.quantum.registry.Registries;
