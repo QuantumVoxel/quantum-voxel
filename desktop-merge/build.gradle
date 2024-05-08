@@ -116,7 +116,7 @@ dependencies {
     pack implementation("org.apache.logging.log4j:log4j:$log4j_version")
     pack implementation("org.apache.logging.log4j:log4j-core:$log4j_version")
     pack implementation("org.apache.logging.log4j:log4j-api:$log4j_version")
-    pack implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version")
+    pack implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
 
     // JNA
     pack implementation("net.java.dev.jna:jna:$jna_version")
