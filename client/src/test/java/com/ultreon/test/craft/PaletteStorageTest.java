@@ -1,4 +1,4 @@
-package com.ultreon.test.craft;
+package dev.ultreon.test.craft;
 
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.MapType;

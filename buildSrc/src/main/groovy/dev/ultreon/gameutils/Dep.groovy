@@ -1,4 +1,4 @@
-package com.ultreon.gameutils
+package dev.ultreon.gameutils
 
 class Dep {
     String group

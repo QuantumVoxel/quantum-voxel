@@ -1,13 +1,13 @@
-package com.ultreon.gameutils
+package dev.ultreon.gameutils
 
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonWriter
-import com.ultreon.gameutils.tasks.ClearQuiltCacheTask
-import com.ultreon.gameutils.tasks.MetadataTask
-import com.ultreon.gameutils.tasks.PrepareRunTask
+import dev.ultreon.gameutils.tasks.ClearQuiltCacheTask
+import dev.ultreon.gameutils.tasks.MetadataTask
+import dev.ultreon.gameutils.tasks.PrepareRunTask
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin

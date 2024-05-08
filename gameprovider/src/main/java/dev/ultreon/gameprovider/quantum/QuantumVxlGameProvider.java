@@ -37,7 +37,7 @@ import java.util.*;
  */
 @SuppressWarnings({"FieldCanBeLocal", "SameParameterValue", "unused"})
 public class QuantumVxlGameProvider implements GameProvider {
-    private static final String[] ALLOWED_EARLY_CLASS_PREFIXES = { "org.apache.logging.log4j.", "com.ultreon.gameprovider.quantum.", "com.ultreon.premain." };
+    private static final String[] ALLOWED_EARLY_CLASS_PREFIXES = { "org.apache.logging.log4j.", "dev.ultreon.gameprovider.quantum.", "dev.ultreon.premain." };
 
     private final GameTransformer transformer = new GameTransformer();
     private EnvType envType;
@@ -335,7 +335,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
         try {
             // Specify the class name for the custom log handler
-            final var logHandlerClsName = "com.ultreon.gameprovider.quantum.QuantumVxlLogHandler";
+            final var logHandlerClsName = "dev.ultreon.gameprovider.quantum.QuantumVxlLogHandler";
 
             // Save the previous class loader
             var prevCl = Thread.currentThread().getContextClassLoader();

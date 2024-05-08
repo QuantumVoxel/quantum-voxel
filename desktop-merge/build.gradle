@@ -1,8 +1,8 @@
 //file:noinspection GroovyUnusedCatchParameter
 
 
-//import com.ultreon.gameutils.GameUtilsPlugin
-//import com.ultreon.gameutils.ProjectType
+//import dev.ultreon.gameutils.GameUtilsPlugin
+//import dev.ultreon.gameutils.ProjectType
 import org.panteleyev.jpackage.ImageType
 
 import java.nio.file.Files

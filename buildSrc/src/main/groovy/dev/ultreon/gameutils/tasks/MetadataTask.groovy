@@ -1,9 +1,9 @@
-package com.ultreon.gameutils.tasks
+package dev.ultreon.gameutils.tasks
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonWriter
-import com.ultreon.gameutils.GameUtilsExt
+import dev.ultreon.gameutils.GameUtilsExt
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction

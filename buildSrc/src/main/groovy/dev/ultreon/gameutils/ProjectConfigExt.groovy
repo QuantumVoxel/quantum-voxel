@@ -1,4 +1,4 @@
-package com.ultreon.gameutils
+package dev.ultreon.gameutils
 
 import org.gradle.api.Task
 

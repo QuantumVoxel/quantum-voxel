@@ -33,7 +33,7 @@ gradlePlugin {
     plugins {
         register("gameutils") {
             id = "gameutils"
-            implementationClass = "com.ultreon.gameutils.GameUtilsPlugin"
+            implementationClass = "dev.ultreon.gameutils.GameUtilsPlugin"
         }
     }
 

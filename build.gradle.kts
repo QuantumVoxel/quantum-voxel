@@ -1,4 +1,4 @@
-import com.ultreon.gameutils.GameUtilsExt
+import dev.ultreon.gameutils.GameUtilsExt
 import org.jetbrains.gradle.ext.runConfigurations
 import org.jetbrains.gradle.ext.settings
 import org.jetbrains.gradle.ext.Application

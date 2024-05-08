@@ -1,6 +1,6 @@
-package com.ultreon.gameutils.tasks
+package dev.ultreon.gameutils.tasks
 
-import com.ultreon.gameutils.GameUtilsExt
+import dev.ultreon.gameutils.GameUtilsExt
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
