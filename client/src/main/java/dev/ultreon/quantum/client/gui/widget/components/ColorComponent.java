@@ -1,52 +1,52 @@
 package dev.ultreon.quantum.client.gui.widget.components;
 
 import dev.ultreon.quantum.client.gui.widget.Widget;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.ImGuiEx;
 
 public class ColorComponent extends UIComponent {
-    private Color color;
+    private RgbColor color;
 
-    public ColorComponent(Color color) {
+    public ColorComponent(RgbColor color) {
         super();
         this.color = color;
     }
 
-    public Color get() {
+    public RgbColor get() {
         return this.color;
     }
 
-    public void set(Color color) {
+    public void set(RgbColor color) {
         this.color = color;
     }
 
     public void rgba(int r, int g, int b, int a) {
-        this.color = Color.rgba(r, g, b, a);
+        this.color = RgbColor.rgba(r, g, b, a);
     }
 
     public void rgba(float r, float g, float b, float a) {
-        this.color = Color.rgba(r, g, b, a);
+        this.color = RgbColor.rgba(r, g, b, a);
     }
 
     public void rgb(int r, int g, int b) {
-        this.color = Color.rgb(r, g, b);
+        this.color = RgbColor.rgb(r, g, b);
     }
 
     public void rgb(float r, float g, float b) {
-        this.color = Color.rgb(r, g, b);
+        this.color = RgbColor.rgb(r, g, b);
     }
 
     public void rgb(int rgb) {
-        this.color = Color.rgb(rgb);
+        this.color = RgbColor.rgb(rgb);
     }
 
     public void argb(int argb) {
-        this.color = Color.argb(argb);
+        this.color = RgbColor.argb(argb);
     }
 
     public void hex(String hex) {
-        this.color = Color.hex(hex);
+        this.color = RgbColor.hex(hex);
     }
 
     @Override

@@ -6,7 +6,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import it.unimi.dsi.fastutil.longs.LongList;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,14 +37,14 @@ public class ChatOverlay extends Overlay {
                 long millisAgo = System.currentTimeMillis() - messageTimestamp;
                 if (millisAgo <= 4000 || showAnyways) {
                     if (millisAgo <= 3000 || showAnyways) {
-                        renderer.textLeft(text, 10, y, Color.WHITE);
+                        renderer.textLeft(text, 10, y, RgbColor.WHITE);
                     } else {
                         int alpha = (int) (255 * (millisAgo - 3000) / 1000) % 1000;
-                        renderer.setColor(Color.WHITE.withAlpha(alpha));
-                        renderer.setBlitColor(Color.WHITE.withAlpha(alpha));
+                        renderer.setColor(RgbColor.WHITE.withAlpha(alpha));
+                        renderer.setBlitColor(RgbColor.WHITE.withAlpha(alpha));
                         renderer.textLeft(text, 10, y);
-                        renderer.setColor(Color.WHITE);
-                        renderer.setBlitColor(Color.WHITE);
+                        renderer.setColor(RgbColor.WHITE);
+                        renderer.setBlitColor(RgbColor.WHITE);
                     }
                 }
                 y -= font.lineHeight + 2;

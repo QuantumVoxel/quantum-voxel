@@ -5,7 +5,7 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 
 public class DisconnectedScreen extends Screen {
@@ -28,11 +28,11 @@ public class DisconnectedScreen extends Screen {
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
-        renderer.textCenter(this.title, 2, this.size.width / 2, this.size.height / 3, Color.WHITE);
+        renderer.textCenter(this.title, 2, this.size.width / 2, this.size.height / 3, RgbColor.WHITE);
 
         int lineY = 0;
         for (String line : this.message.lines().toList()) {
-            renderer.textCenter(line, this.size.width / 2, this.size.height / 3 + 30 + lineY * (this.font.lineHeight + 1) - 1, Color.WHITE, false);
+            renderer.textCenter(line, this.size.width / 2, this.size.height / 3 + 30 + lineY * (this.font.lineHeight + 1) - 1, RgbColor.WHITE, false);
             lineY++;
         }
     }

@@ -7,7 +7,7 @@ import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Size;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     protected int contentHeight;
     protected int contentWidth;
-    private Color backgroundColor = Color.argb(0x40000000);
+    private RgbColor backgroundColor = RgbColor.argb(0x40000000);
 
     public ScrollableContainer(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
@@ -185,12 +185,12 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         return this;
     }
 
-    public ScrollableContainer backgroundColor(Color color) {
+    public ScrollableContainer backgroundColor(RgbColor color) {
         this.backgroundColor = color;
         return this;
     }
 
-    public Color backgroundColor() {
+    public RgbColor backgroundColor() {
         return this.backgroundColor;
     }
 }

@@ -160,28 +160,28 @@ public class ImGuiEx {
         }
     }
 
-    public static void editColor3(String color, String s, Supplier<@NotNull Color> getter, Consumer<@NotNull Color> setter) {
+    public static void editColor3(String color, String s, Supplier<@NotNull RgbColor> getter, Consumer<@NotNull RgbColor> setter) {
         ImGui.text(color);
         ImGui.sameLine();
         try {
-            Color c = getter.get();
+            RgbColor c = getter.get();
             float[] floats = {c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1f};
             if (ImGui.colorEdit3("##" + s, floats)) {
-                setter.accept(new Color(floats[0], floats[1], floats[2], 1f));
+                setter.accept(new RgbColor(floats[0], floats[1], floats[2], 1f));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editColor4(String color, String s, Supplier<Color> getter, Consumer<Color> setter) {
+    public static void editColor4(String color, String s, Supplier<RgbColor> getter, Consumer<RgbColor> setter) {
         ImGui.text(color);
         ImGui.sameLine();
         try {
-            Color c = getter.get();
+            RgbColor c = getter.get();
             float[] floats = {c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f};
             if (ImGui.colorEdit4("##" + s, floats)) {
-                setter.accept(new Color(floats[0], floats[1], floats[2], floats[3]));
+                setter.accept(new RgbColor(floats[0], floats[1], floats[2], floats[3]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));

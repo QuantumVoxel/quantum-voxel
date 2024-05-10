@@ -6,7 +6,7 @@ import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.icon.Icon;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.function.Supplier;
 
@@ -35,9 +35,9 @@ public class IconButton extends Button<IconButton> {
         this.renderButton(renderer, mouseX, mouseY, texture, x, y);
 
         if (this.isPressed()) y += 2;
-        renderer.blitColor(Color.WHITE.darker().darker());
+        renderer.blitColor(RgbColor.WHITE.darker().darker());
         this.icon.render(renderer, x + 3, y + 3, 16, 16, deltaTime);
-        renderer.blitColor(Color.WHITE);
+        renderer.blitColor(RgbColor.WHITE);
         this.icon.render(renderer, x + 3, y + 2, 16, 16, deltaTime);
     }
 

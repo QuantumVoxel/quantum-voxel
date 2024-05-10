@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.CubicDirection;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public final class BBCubeModelElement extends BBModelElement {
     private final Vec3f from;
     private final Vec3f to;
     private final float autouv;
-    private final Color color;
+    private final RgbColor color;
     private final Vec3f origin;
     private final List<BBModelFace> faces;
     private final UUID uuid;
@@ -38,13 +38,13 @@ public final class BBCubeModelElement extends BBModelElement {
     private Matrix4 rotationMatrix;
 
     public BBCubeModelElement(String name, boolean boxUv, boolean rescale, boolean locked, String renderOrder,
-                              boolean allowMirrorModeling, Vec3f from, Vec3f to, float autouv, Color color,
+                              boolean allowMirrorModeling, Vec3f from, Vec3f to, float autouv, RgbColor color,
                               Vec3f origin, List<BBModelFace> faces, UUID uuid) {
         this(name, boxUv, rescale, locked, renderOrder, allowMirrorModeling, from, to, autouv, color, origin, faces, uuid, new Vec3f());
     }
 
     public BBCubeModelElement(String name, boolean boxUv, boolean rescale, boolean locked, String renderOrder,
-                              boolean allowMirrorModeling, Vec3f from, Vec3f to, float autouv, Color color,
+                              boolean allowMirrorModeling, Vec3f from, Vec3f to, float autouv, RgbColor color,
                               Vec3f origin, List<BBModelFace> faces, UUID uuid, Vec3f rotation) {
         this.name = name;
         this.boxUv = boxUv;
@@ -103,7 +103,7 @@ public final class BBCubeModelElement extends BBModelElement {
     }
 
     @Override
-    public Color color() {
+    public RgbColor color() {
         return color;
     }
 
@@ -210,10 +210,10 @@ public final class BBCubeModelElement extends BBModelElement {
                 return meshBuilder;
             });
 
-            v00.setCol(Color.WHITE.toGdx());
-            v01.setCol(Color.WHITE.toGdx());
-            v10.setCol(Color.WHITE.toGdx());
-            v11.setCol(Color.WHITE.toGdx());
+            v00.setCol(RgbColor.WHITE.toGdx());
+            v01.setCol(RgbColor.WHITE.toGdx());
+            v10.setCol(RgbColor.WHITE.toGdx());
+            v11.setCol(RgbColor.WHITE.toGdx());
 
             v00.setNor(blockFace.getNormal());
             v01.setNor(blockFace.getNormal());

@@ -6,7 +6,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 public class DebugOverlay {
     private static final int OFFSET = 10;
@@ -139,9 +139,9 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay left(Renderer renderer, String name, Object value) {
-        MutableText textObject = TextObject.literal(name).append(": ").append(TextObject.literal(String.valueOf(value)).setColor(Color.LIGHT_GRAY));
+        MutableText textObject = TextObject.literal(name).append(": ").append(TextObject.literal(String.valueOf(value)).setColor(RgbColor.LIGHT_GRAY));
         int width = renderer.getFont().width(textObject);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, width + 5, 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, width + 5, 11, RgbColor.BLACK.withAlpha(128));
         renderer.textLeft(textObject, DebugOverlay.OFFSET, this.leftY);
         this.leftY += 11;
         return this;
@@ -149,9 +149,9 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay left(Renderer renderer, String text) {
-        MutableText textObject = TextObject.literal(text).setBold(true).setUnderlined(true).setColor(Color.GOLD);
+        MutableText textObject = TextObject.literal(text).setBold(true).setUnderlined(true).setColor(RgbColor.GOLD);
         int width = renderer.getFont().width(textObject);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, width + 5, 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, width + 5, 11, RgbColor.BLACK.withAlpha(128));
         renderer.textLeft(textObject, DebugOverlay.OFFSET, this.leftY);
         this.leftY += 11;
         return this;
@@ -165,10 +165,10 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay right(Renderer renderer, String name, Object value) {
-        MutableText textObject = TextObject.literal(name).append(": ").append(TextObject.literal(String.valueOf(value)).setColor(Color.LIGHT_GRAY));
+        MutableText textObject = TextObject.literal(name).append(": ").append(TextObject.literal(String.valueOf(value)).setColor(RgbColor.LIGHT_GRAY));
         int width = renderer.getFont().width(textObject);
         int screenWidth = this.client.getScaledWidth();
-        renderer.fill(screenWidth - DebugOverlay.OFFSET - 3 - width, this.rightY - 1, width + 5, 11, Color.BLACK.withAlpha(128));
+        renderer.fill(screenWidth - DebugOverlay.OFFSET - 3 - width, this.rightY - 1, width + 5, 11, RgbColor.BLACK.withAlpha(128));
         renderer.textRight(textObject, screenWidth - DebugOverlay.OFFSET, this.rightY);
         this.rightY += 11;
         return this;
@@ -176,9 +176,9 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay right(Renderer renderer, String text) {
-        MutableText textObject = TextObject.literal(text).setBold(true).setUnderlined(true).setColor(Color.GOLD);
+        MutableText textObject = TextObject.literal(text).setBold(true).setUnderlined(true).setColor(RgbColor.GOLD);
         int width = renderer.getFont().width(textObject);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.rightY - 1, width + 5, 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.rightY - 1, width + 5, 11, RgbColor.BLACK.withAlpha(128));
         renderer.textRight(textObject, DebugOverlay.OFFSET, this.rightY);
         this.rightY += 11;
         return this;
@@ -192,17 +192,17 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay entryLine(Renderer renderer, int idx, String name, long nanos) {
-        MutableText lText = TextObject.literal("[" + idx + "] ").setColor(Color.GOLD).append(TextObject.literal(name).setColor(Color.WHITE));
+        MutableText lText = TextObject.literal("[" + idx + "] ").setColor(RgbColor.GOLD).append(TextObject.literal(name).setColor(RgbColor.WHITE));
         MutableText rText;
         if (nanos < 10000.0)
-            rText = TextObject.literal("< 0.01").setColor(Color.LIGHT_GRAY)
-                    .append(TextObject.literal(" ms").setColor(Color.rgb(0xa0a0a0)));
+            rText = TextObject.literal("< 0.01").setColor(RgbColor.LIGHT_GRAY)
+                    .append(TextObject.literal(" ms").setColor(RgbColor.rgb(0xa0a0a0)));
         else
-            rText = TextObject.literal("%.2f".formatted(nanos / 1000000.0)).setColor(Color.LIGHT_GRAY)
-                    .append(TextObject.literal(" ms").setColor(Color.rgb(0xa0a0a0)));
+            rText = TextObject.literal("%.2f".formatted(nanos / 1000000.0)).setColor(RgbColor.LIGHT_GRAY)
+                    .append(TextObject.literal(" ms").setColor(RgbColor.rgb(0xa0a0a0)));
         int lWidth = renderer.getFont().width(lText);
         int rWidth = renderer.getFont().width(rText);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(lWidth + rWidth + 18, 304), 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(lWidth + rWidth + 18, 304), 11, RgbColor.BLACK.withAlpha(128));
         renderer.textLeft(lText, DebugOverlay.OFFSET, this.leftY);
         renderer.textRight(rText, DebugOverlay.OFFSET + Math.max(lWidth + rWidth + 16, 300), this.leftY);
         this.leftY += 11;
@@ -211,9 +211,9 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     DebugOverlay entryLine(Renderer renderer, int idx, String name) {
-        MutableText text = TextObject.literal("[" + idx + "] ").setColor(Color.GOLD).append(TextObject.literal(name).setColor(Color.WHITE));
+        MutableText text = TextObject.literal("[" + idx + "] ").setColor(RgbColor.GOLD).append(TextObject.literal(name).setColor(RgbColor.WHITE));
         int width = renderer.getFont().width(text);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(width + 2, 304), 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(width + 2, 304), 11, RgbColor.BLACK.withAlpha(128));
         renderer.textLeft(text, DebugOverlay.OFFSET, this.leftY);
         this.leftY += 11;
         return this;
@@ -222,7 +222,7 @@ public class DebugOverlay {
     @CanIgnoreReturnValue
     DebugOverlay entryLine(Renderer renderer, TextObject text) {
         int width = renderer.getFont().width(text);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(width + 2, 304), 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(width + 2, 304), 11, RgbColor.BLACK.withAlpha(128));
         renderer.textLeft(text, DebugOverlay.OFFSET, this.leftY);
         this.leftY += 11;
         return this;
@@ -230,11 +230,11 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay entryLine(Renderer renderer, String name, String value) {
-        MutableText lText = TextObject.literal(name).setColor(Color.WHITE);
-        MutableText rText = TextObject.literal(value).setColor(Color.LIGHT_GRAY);
+        MutableText lText = TextObject.literal(name).setColor(RgbColor.WHITE);
+        MutableText rText = TextObject.literal(value).setColor(RgbColor.LIGHT_GRAY);
         int lWidth = renderer.getFont().width(lText);
         int rWidth = renderer.getFont().width(rText);
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(lWidth + rWidth + 18, 304), 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(lWidth + rWidth + 18, 304), 11, RgbColor.BLACK.withAlpha(128));
         renderer.textLeft(lText, DebugOverlay.OFFSET, this.leftY);
         renderer.textRight(rText, DebugOverlay.OFFSET + Math.max(lWidth + rWidth + 16, 300), this.leftY);
         this.leftY += 11;
@@ -243,7 +243,7 @@ public class DebugOverlay {
 
     @CanIgnoreReturnValue
     public DebugOverlay entryLine(Renderer renderer) {
-        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, 304, 11, Color.BLACK.withAlpha(128));
+        renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, 304, 11, RgbColor.BLACK.withAlpha(128));
         this.leftY += 11;
         return this;
     }

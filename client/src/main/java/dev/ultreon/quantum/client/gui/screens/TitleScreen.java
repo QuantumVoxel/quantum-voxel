@@ -5,14 +5,15 @@ import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
+import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
-import dev.ultreon.quantum.client.gui.widget.Panel;
+import dev.ultreon.quantum.client.gui.widget.Rectangle;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,9 +37,9 @@ public class TitleScreen extends Screen {
     public void build(GuiBuilder builder) {
         this.client.setActivity(GameActivity.MAIN_MENU);
 
-        builder.add(Panel.create()
+        builder.add(Rectangle.create()
                 .bounds(() -> new Bounds(0, 0, 250, this.size.height))
-                .backgroundColor(Color.BLACK.withAlpha(0x80)));
+                .backgroundColor(RgbColor.BLACK.withAlpha(0x80)));
 
         this.titleLabel = builder.add(Label.of(Formatter.format("<bold>Quantum<gray><bold>Voxel")).position(() -> new Position(125, 40))
                 .alignment(Alignment.CENTER)
@@ -108,7 +109,7 @@ public class TitleScreen extends Screen {
         float drawY = (this.size.height - drawHeight) / 2;
         renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
 
-        client.newFont.drawText(renderer, "!\"#", 20, 20, Color.WHITE, true);
+        client.newFont.drawText(renderer, "!\"#", 20, 20, RgbColor.WHITE, true);
     }
 
     public TextButton getSingleplayerButton() {

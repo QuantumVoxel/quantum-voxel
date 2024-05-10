@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui.overlay;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 
@@ -24,14 +24,14 @@ public class MemoryUsageOverlay extends Overlay {
 
         GlobalMemory memory = systemInfo.getHardware().getMemory();
 
-        renderer.fill(x + 1, y, width + 4, height + 6, Color.rgb(0x202020));
-        renderer.fill(x, y + 1, width + 6, height + 4, Color.rgb(0x202020));
-        renderer.box(x + 1, y + 1, width + 4, height + 4, Color.rgb(0x303030));
+        renderer.fill(x + 1, y, width + 4, height + 6, RgbColor.rgb(0x202020));
+        renderer.fill(x, y + 1, width + 6, height + 4, RgbColor.rgb(0x202020));
+        renderer.box(x + 1, y + 1, width + 4, height + 4, RgbColor.rgb(0x303030));
 
-        renderer.textLeft("<bold>Memory Usage", x + 5, y + 5, Color.WHITE);
-        renderer.textLeft("Used: " + ((memory.getTotal() - memory.getAvailable()) / 1000000) + " MB / " + (memory.getTotal() / 1000000) + " MB", x + 5, y + 15, Color.WHITE);
-        renderer.textLeft("VM Free: " + (Runtime.getRuntime().freeMemory() / 1000000) + " MB", x + 5, y + 25, Color.WHITE);
+        renderer.textLeft("<bold>Memory Usage", x + 5, y + 5, RgbColor.WHITE);
+        renderer.textLeft("Used: " + ((memory.getTotal() - memory.getAvailable()) / 1000000) + " MB / " + (memory.getTotal() / 1000000) + " MB", x + 5, y + 15, RgbColor.WHITE);
+        renderer.textLeft("VM Free: " + (Runtime.getRuntime().freeMemory() / 1000000) + " MB", x + 5, y + 25, RgbColor.WHITE);
 
-        renderer.line(x + 1, y + height + 4, x + ((float) (memory.getTotal() - memory.getAvailable()) / memory.getTotal() * width + 4) - 1, y + height + 4, Color.AZURE);
+        renderer.line(x + 1, y + height + 4, x + ((float) (memory.getTotal() - memory.getAvailable()) / memory.getTotal() * width + 4) - 1, y + height + 4, RgbColor.AZURE);
     }
 }

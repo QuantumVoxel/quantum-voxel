@@ -5,7 +5,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.StaticWidget;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -39,8 +39,8 @@ public class ManualCrashOverlay implements StaticWidget {
         var width = QuantumClient.get().getScaledWidth();
         var height = QuantumClient.get().getScaledHeight();
 
-        renderer.fill(0, 0, width, height, Color.rgb(0x101010))
-                .fill(0, 0, width, 2, Color.rgb(0xff0000));
+        renderer.fill(0, 0, width, height, RgbColor.rgb(0x101010))
+                .fill(0, 0, width, 2, RgbColor.rgb(0xff0000));
 
         renderer.textCenter("Manual Initiating Crash", 3, width / 2, height / 2 - 100)
                 .textCenter("Crashing the game in " + (this.endTime - millis) / 1000 + " seconds.", width / 2, height / 2 - 50)

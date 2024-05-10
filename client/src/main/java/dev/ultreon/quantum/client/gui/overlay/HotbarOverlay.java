@@ -7,7 +7,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 
 import java.util.List;
@@ -55,7 +55,7 @@ public class HotbarOverlay extends Overlay {
         int count = item.getCount();
         if (!item.isEmpty() && count > 1) {
             String text = Integer.toString(count);
-            renderer.textLeft(text, ix + 18 - this.client.font.width(text), this.client.getScaledHeight() - 7 - this.client.font.lineHeight, Color.WHITE, false);
+            renderer.textLeft(text, ix + 18 - this.client.font.width(text), this.client.getScaledHeight() - 7 - this.client.font.lineHeight, RgbColor.WHITE, false);
         }
     }
 }

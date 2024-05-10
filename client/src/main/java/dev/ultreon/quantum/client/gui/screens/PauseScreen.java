@@ -2,17 +2,22 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
+import dev.ultreon.quantum.client.gui.widget.Label;
+import dev.ultreon.quantum.client.gui.widget.Panel;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.ServerWorld;
 
 public class PauseScreen extends Screen {
+    private Label gamePausedLabel;
     private TextButton backToGameButton;
     private TextButton optionsButton;
     private TextButton exitWorldButton;
+    private Panel panel;
 
     public PauseScreen() {
         super("Game Paused");
@@ -25,16 +30,22 @@ public class PauseScreen extends Screen {
         if (world != null)
             this.client.addFuture(world.saveAsync(false));
 
+        this.panel = builder.add(Panel.create()
+                        .bounds(() -> new Bounds(10, 10, 130, this.size.height - 20)));
+
+        this.gamePausedLabel = builder.add(Label.of(TextObject.translation("quantum.ui.gamePaused"))
+                        .bounds(() -> new Bounds(15, this.size.height - 100, 120, 21)));
+
         this.backToGameButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.backToGame"))
-                        .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3 - 25)))
+                        .bounds(() -> new Bounds(15, this.size.height - 100, 120, 21)))
                 .callback(this::resumeGame);
 
         this.optionsButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.options"), 95)
-                        .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3)))
+                        .bounds(() -> new Bounds(15, this.size.height - 75, 120, 21)))
                 .callback(caller -> QuantumClient.get().showScreen(new SettingsScreen()));
 
         this.exitWorldButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"), 95)
-                        .position(() -> new Position(this.size.width / 2 + 5, this.size.height / 3)))
+                        .bounds(() -> new Bounds(15, this.size.height - 36, 120, 21)))
                 .callback(this::exitWorld);
     }
 
@@ -61,5 +72,13 @@ public class PauseScreen extends Screen {
 
     private void resumeGame(TextButton caller) {
         this.client.resume();
+    }
+
+    public Panel getPanel() {
+        return panel;
+    }
+
+    public Label getGamePausedLabel() {
+        return gamePausedLabel;
     }
 }

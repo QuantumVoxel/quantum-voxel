@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.gui.screens.Screen;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.text.ChatColor;
+import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
@@ -143,9 +143,9 @@ public class CrashScreen extends Screen {
                 .trim();
 
         // Render the crash log details using the renderer
-        renderer.textLeft(value.getDetails().trim(), 20, y + 20, ChatColor.RED);
-        renderer.textLeft(throwableName + ": " + errorMessage, 20, y + 32, ChatColor.GRAY);
-        renderer.textLeft("    " + usableStackTrace, 20, y + 44, ChatColor.DARK_GRAY);
+        renderer.textLeft(value.getDetails().trim(), 20, y + 20, ColorCode.RED);
+        renderer.textLeft(throwableName + ": " + errorMessage, 20, y + 32, ColorCode.GRAY);
+        renderer.textLeft("    " + usableStackTrace, 20, y + 44, ColorCode.DARK_GRAY);
     }
 
     @Override

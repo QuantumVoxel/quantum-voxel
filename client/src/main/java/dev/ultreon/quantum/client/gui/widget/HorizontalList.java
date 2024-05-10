@@ -13,41 +13,47 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @ApiStatus.NonExtendable
-public class SelectionList<T> extends UIContainer<SelectionList<T>> {
+public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<HorizontalList<? extends HorizontalList.Entry>> {
     private static final int SCROLLBAR_WIDTH = 5;
-    private final List<Entry<T>> entries = new ArrayList<>();
-    private float scrollY = 0;
-    private int itemHeight = 20;
-    private Entry<T> selected;
+    public static final int SCROLL_SPEED = 20;
+    private final List<T> entries = new ArrayList<>();
+    private float scrollX = 0;
+    private float scrollGoal = 0;
+    protected int itemWidth = 200;
+    protected int itemHeight = 300;
+    private int xOffset = 0;
+    private T selected;
     private boolean selectable;
-    protected Entry<T> hoveredWidget;
-    protected @Nullable Entry<T> pressingWidget;
+    protected T hoveredWidget;
+    protected @Nullable T pressingWidget;
     int innerXOffset;
     int innerYOffset;
 
     private ItemRenderer<T> itemRenderer = null;
     private Callback<T> onSelected = value -> {
     };
-    private final int gap = 0;
+    private int gap = SCROLL_SPEED;
+    private int count;
 
-    public SelectionList(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public HorizontalList(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
 
     }
 
-    public SelectionList(Position position, Size size) {
-        this(position.x, position.y, size.width, size.height);
+    public HorizontalList(Size size) {
+        this(size.width, size.height);
     }
 
-    public SelectionList() {
+    public HorizontalList() {
         super(400, 500);
     }
 
-    public SelectionList(int itemHeight) {
+    public HorizontalList(int itemHeight) {
         this();
         this.itemHeight(itemHeight);
     }
@@ -60,6 +66,22 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
 
+        float v = this.scrollGoal - this.scrollX;
+        boolean left = this.scrollGoal < this.scrollX;
+        float scrollX = this.scrollX + v * (deltaTime * 10);
+        if (left && scrollX < scrollGoal) this.scrollX = this.scrollGoal;
+        else if (!left && scrollX > scrollGoal) this.scrollX = this.scrollGoal;
+        else this.scrollX = scrollX;
+
+        if (this.scrollX < 0) {
+            this.scrollX = 0;
+            this.scrollGoal = 0;
+        }
+        if (this.scrollX > this.getContentHeight()) {
+            this.scrollX = this.getContentHeight();
+            this.scrollGoal = this.getContentHeight();
+        }
+
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
             this.renderChildren(renderer, mouseX, mouseY, deltaTime);
@@ -68,11 +90,12 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         renderer.popMatrix();
     }
 
+    @SuppressWarnings("GDXJavaFlushInsideLoop")
     @Override
     public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        for (Entry<T> entry : this.entries) {
+        for (T entry : this.entries) {
             if (entry.visible) {
-                entry.render(renderer, 0, mouseX, mouseY - (int) this.scrollY, this.selectable && this.selected == entry, deltaTime);
+                entry.render(renderer, mouseX, mouseY, this.selectable && this.selected == entry, deltaTime);
             }
         }
     }
@@ -83,11 +106,11 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     }
 
     @Nullable
-    public Entry<T> getEntryAt(int x, int y) {
+    public T getEntryAt(int x, int y) {
         if (!this.isWithinBounds(x, y)) return null;
-        List<Entry<T>> entries = this.entries;
+        List<T> entries = this.entries;
         for (int i = entries.size() - 1; i >= 0; i--) {
-            Entry<T> entry = entries.get(i);
+            T entry = entries.get(i);
             if (!entry.enabled || !entry.visible) continue;
             if (entry.isWithinBounds(x, y)) return entry;
         }
@@ -97,34 +120,34 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     @Override
     public boolean mouseClick(int x, int y, int button, int count) {
         if (this.selectable) {
-            Entry<T> entryAt = this.getEntryAt(x, y);
+            T entryAt = this.getEntryAt(x, y);
 
             if (entryAt != null) {
                 this.selected = entryAt;
-                this.onSelected.call(this.selected.value);
+                this.onSelected.call(this.selected);
                 return true;
             }
         }
-        @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
+        @Nullable T widgetAt = this.getEntryAt(x, y);
         return widgetAt != null && widgetAt.mouseClick(x - widgetAt.getX(), y - widgetAt.getY(), button, count);
     }
 
     @Override
     public boolean mousePress(int x, int y, int button) {
-        @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
+        @Nullable T widgetAt = this.getEntryAt(x, y);
         this.pressingWidget = widgetAt;
         return widgetAt != null && widgetAt.mousePress(x - widgetAt.getX(), y - widgetAt.getY(), button);
     }
 
     @Override
     public boolean mouseRelease(int x, int y, int button) {
-        @Nullable Entry<T> widgetAt = this.pressingWidget;
+        @Nullable T widgetAt = this.pressingWidget;
         return widgetAt != null && widgetAt.mouseRelease(x - widgetAt.getX(), y - widgetAt.getY(), button);
     }
 
     @Override
     public void mouseMove(int x, int y) {
-        @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
+        @Nullable T widgetAt = this.getEntryAt(x, y);
         boolean widgetChanged = false;
         if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
             this.hoveredWidget.mouseExit();
@@ -145,7 +168,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public void mouseEnter(int x, int y) {
-        @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
+        @Nullable T widgetAt = this.getEntryAt(x, y);
         boolean widgetChanged = false;
         if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
             this.hoveredWidget.mouseExit();
@@ -166,7 +189,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public boolean mouseDrag(int x, int y, int drawX, int dragY, int pointer) {
-        @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
+        @Nullable T widgetAt = this.getEntryAt(x, y);
         x -= this.pos.x + this.innerXOffset;
         y -= this.pos.y + this.innerYOffset;
         drawX -= this.pos.x + this.innerXOffset;
@@ -186,12 +209,16 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public boolean mouseWheel(int x, int y, double rotation) {
-        this.scrollY = this.getContentHeight() > this.size.height ? Mth.clamp((float) (this.scrollY + rotation * 10), 0, this.getContentHeight() - this.size.height) : 0;
+        this.scrollGoal = this.getContentHeight() > this.size.height ? Mth.clamp((float) (this.scrollGoal + rotation * SCROLL_SPEED), 0, this.getContentHeight() - this.size.height) : 0;
         return true;
     }
 
     public int getContentHeight() {
-        return this.itemHeight * this.entries.size();
+        return this.itemWidth * this.entries.size() + (this.entries.size() - 1) * this.gap;
+    }
+
+    public int getItemWidth() {
+        return itemWidth;
     }
 
     public int getItemHeight() {
@@ -200,17 +227,23 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     public T getSelected() {
         if (this.selected == null) return null;
-        return this.selected.value;
+        return this.selected;
     }
 
     public int getGap() {
         return this.gap;
     }
 
-    @CanIgnoreReturnValue
-    public Entry<T> removeEntry(Entry<T> entry) {
-        this.entries.remove(entry);
-        return entry;
+    public void setGap(int gap) {
+        this.gap = gap;
+    }
+
+    public int getXOffset() {
+        return this.xOffset;
+    }
+
+    public void setXOffset(int xOffset) {
+        this.xOffset = xOffset;
     }
 
     public void removeEntry(T value) {
@@ -222,8 +255,8 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
         int found = -1;
         int idx = 0;
-        for (Entry<T> entry : this.entries) {
-            if (predicate.test(entry.value)) {
+        for (T entry : this.entries) {
+            if (predicate.test(entry)) {
                 found = idx;
                 break;
             }
@@ -235,92 +268,120 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     }
 
     @Override
-    public List<Entry<T>> children() {
+    public List<T> children() {
         return this.entries;
     }
 
     @CanIgnoreReturnValue
-    public SelectionList<T> itemRenderer(ItemRenderer<T> itemRenderer) {
+    public HorizontalList<T> itemRenderer(ItemRenderer<T> itemRenderer) {
         this.itemRenderer = itemRenderer;
         return this;
     }
 
     @CanIgnoreReturnValue
-    public SelectionList<T> selectable(boolean selectable) {
+    public HorizontalList<T> selectable(boolean selectable) {
         this.selectable = selectable;
         return this;
     }
 
     @CanIgnoreReturnValue
-    public Entry<T> entry(T value) {
-        Entry<T> entry = new Entry<>(value, this);
+    public T entry(T entry) {
         this.entries.add(entry);
         return entry;
     }
 
-    public SelectionList<T> entries(Collection<? extends T> values) {
+    public HorizontalList<T> entries(Collection<? extends T> values) {
         values.forEach(this::entry);
         return this;
     }
 
-    public SelectionList<T> callback(Callback<T> onSelected) {
+    public HorizontalList<T> callback(Callback<T> onSelected) {
         this.onSelected = onSelected;
         return this;
     }
 
-    public SelectionList<T> itemHeight(int itemHeight) {
+    public HorizontalList<T> itemWidth(int itemWidth) {
+        this.itemWidth = itemWidth;
+        return this;
+    }
+
+    public HorizontalList<T> itemHeight(int itemHeight) {
         this.itemHeight = itemHeight;
         return this;
     }
 
     @Override
-    public SelectionList<T> position(Supplier<Position> position) {
+    public HorizontalList<T> position(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public SelectionList<T> bounds(Supplier<Bounds> position) {
+    public HorizontalList<T> bounds(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }
 
-    public static class Entry<T> extends Widget {
-        private final T value;
-        private final SelectionList<T> list;
+    @SuppressWarnings("unchecked")
+    public HorizontalList<T> count(IntSupplier o) {
+        this.onRevalidate(widget -> ((HorizontalList<T>) widget).setCount(o.getAsInt()));
+        return this;
+    }
 
-        public Entry(T value, SelectionList<T> list) {
-            super(list.size.width, list.itemHeight);
-            this.value = value;
+    public HorizontalList<T> gap(int gap) {
+        this.gap = gap;
+        return this;
+    }
+
+    public HorizontalList<T> xOffset(int xOffset) {
+        this.xOffset = xOffset;
+        return this;
+    }
+
+    protected HorizontalList<T> setCount(int count) {
+        this.count = count;
+        return this;
+    }
+
+    public void scrollDelta(int i) {
+        this.scrollGoal = ((int)(this.scrollGoal / (this.itemWidth + this.gap))) + i * (this.itemWidth + this.gap);
+    }
+
+    public void scroll(int i) {
+        this.scrollGoal = ((int)(this.scrollGoal)) + i * SCROLL_SPEED;
+    }
+
+    public abstract static class Entry extends Widget {
+        protected final HorizontalList<?> list;
+
+        public Entry(HorizontalList<?> list) {
+            super(list.itemWidth, list.itemHeight);
             this.list = list;
         }
 
-        public void render(Renderer renderer, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
-            this.pos.x = this.list.pos.x;
-            this.pos.y = (int) (this.list.pos.y - this.list.scrollY + (this.list.itemHeight + this.list.gap) * this.list.entries.indexOf(this));
-            this.size.width = this.list.size.width - SelectionList.SCROLLBAR_WIDTH;
+        public void render(Renderer renderer, int mouseX, int mouseY, boolean selected, float deltaTime) {
+            float scrlX = this.list.pos.x - this.list.scrollX;
+            int startX = (int) (scrlX + (((this.list.size.width) - (this.list.itemWidth + this.list.gap) * (this.list.count)) - this.list.gap)) / 2;
+            this.pos.x = this.list.xOffset + ((int) (scrlX + (this.list.itemWidth + this.list.gap) * this.list.entries.indexOf(this)));
+            this.pos.y = this.list.pos.y + this.list.size.height / 2 - this.list.itemHeight / 2;
+            this.size.width = this.list.itemWidth;
             this.size.height = this.list.itemHeight;
-            ItemRenderer<T> itemRenderer = this.list.itemRenderer;
-            if (itemRenderer != null && renderer.pushScissors(this.pos.x, this.pos.y, this.size.width, this.size.height)) {
-                if (selected)
-                    renderer.box(this.pos.x, this.pos.y, this.size.width - 2, this.size.height - 2, RgbColor.rgb(0xffffff));
-
-                itemRenderer.render(renderer, this.value, this.pos.y, mouseX, mouseY, selected, deltaTime);
-                renderer.popScissors();
-            }
+            ItemRenderer<?> itemRenderer = this.list.itemRenderer;
+//            if (itemRenderer != null && renderer.pushScissors(this.pos.x, this.pos.y, this.size.width, this.size.height)) {
+                renderEntry(renderer, this.pos.x, this.pos.y, mouseX, mouseY, selected, deltaTime);
+//                renderer.popScissors();
+//            }
         }
 
-        public T getValue() {
-            return this.value;
-        }
+        public abstract void renderEntry(Renderer renderer, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime);
 
         @Override
-        public Entry<T> position(Supplier<Position> position) {
+        public Entry position(Supplier<Position> position) {
             return this;
         }
 
         @Override
-        public Entry<T> bounds(Supplier<Bounds> position) {
+        public Entry bounds(Supplier<Bounds> position) {
             return this;
         }
 
@@ -333,17 +394,18 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
             select(false);
         }
 
+        @SuppressWarnings({"RedundantCast", "rawtypes", "unchecked"})
         public void select(boolean emitEvent) {
-            this.list.selected = this;
+            ((HorizontalList) this.list).selected = this;
 
             if (this.list.onSelected != null && emitEvent) {
-                this.list.onSelected.call(this.value);
+                ((HorizontalList) this.list).onSelected.call(this);
             }
         }
     }
 
     @FunctionalInterface
     public interface ItemRenderer<T> {
-        void render(Renderer renderer, T value, int y, int mouseX, int mouseY, boolean selected, float deltaTime);
+        void render(Renderer renderer, T value, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime);
     }
 }

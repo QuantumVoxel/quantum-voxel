@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.gui.screens.Screen;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 public class CraftyConfigGui extends Screen {
     protected CraftyConfigGui() {
@@ -22,6 +22,6 @@ public class CraftyConfigGui extends Screen {
 
     private void renderItem(Renderer renderer, CraftyConfig value, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
         String fileName = value.getFileName();
-        renderer.textLeft(fileName, 20, y + 20, Color.rgb(selected ? 0xFF0000 : 0xFFFFFF));
+        renderer.textLeft(fileName, 20, y + 20, RgbColor.rgb(selected ? 0xFF0000 : 0xFFFFFF));
     }
 }

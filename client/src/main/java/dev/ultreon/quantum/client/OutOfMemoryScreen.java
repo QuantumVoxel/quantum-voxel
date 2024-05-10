@@ -6,7 +6,7 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.screens.Screen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 /**
  * An out of memory screen.
@@ -32,7 +32,7 @@ public class OutOfMemoryScreen extends Screen {
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.getWidth() / 4 , this.getHeight() / 4 - 25))
                 .scale(2)
-                .textColor(Color.RED.brighter());
+                .textColor(RgbColor.RED.brighter());
 
         // Add a label for the message
         builder.add(Label.of(TextObject.translation("quantum.screen.out_of_memory.message")))

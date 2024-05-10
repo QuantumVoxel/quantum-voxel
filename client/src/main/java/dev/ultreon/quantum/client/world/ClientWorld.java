@@ -27,7 +27,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakingPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SPlaceBlockPacket;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
@@ -45,18 +45,18 @@ import static dev.ultreon.quantum.client.util.ExtKt.deg;
 
 public final class ClientWorld extends World implements Disposable {
     public static final int DAY_CYCLE = 24000;
-    public static final AtomicReference<Color> FOG_COLOR = new AtomicReference<>(Color.rgb(0x7fb0fe));
+    public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
     public static final AtomicDouble FOG_DENSITY = new AtomicDouble(0.001);
     public static final AtomicDouble FOG_START = new AtomicDouble(0.0);
     public static final AtomicDouble FOG_END = new AtomicDouble(1.0);
     public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(512, 512));
     public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(0.99908f, 1.03125f));
     public static Rot SKYBOX_ROTATION = deg(-60);
-    public static Color DAY_TOP_COLOR = Color.rgb(0x7fb0fe);
-    public static Color DAY_BOTTOM_COLOR = Color.rgb(0xc1d3f1);
-    public static Color NIGHT_TOP_COLOR = Color.rgb(0x01010b);
-    public static Color NIGHT_BOTTOM_COLOR = Color.rgb(0x0a0c16);
-    public static Color SUN_RISE_COLOR = Color.rgb(0xff3000);
+    public static RgbColor DAY_TOP_COLOR = RgbColor.rgb(0x7fb0fe);
+    public static RgbColor DAY_BOTTOM_COLOR = RgbColor.rgb(0xc1d3f1);
+    public static RgbColor NIGHT_TOP_COLOR = RgbColor.rgb(0x01010b);
+    public static RgbColor NIGHT_BOTTOM_COLOR = RgbColor.rgb(0x0a0c16);
+    public static RgbColor SUN_RISE_COLOR = RgbColor.rgb(0xff3000);
     @NotNull
     private final QuantumClient client;
     private final Map<ChunkPos, ClientChunk> chunks = new HashMap<>();
@@ -314,24 +314,24 @@ public final class ClientWorld extends World implements Disposable {
     }
 
     @Deprecated
-    public Color getSkyColor() {
+    public RgbColor getSkyColor() {
         WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
-        if (worldRenderer == null) return Color.BLACK;
-        return Color.gdx(worldRenderer.getSkybox().topColor);
+        if (worldRenderer == null) return RgbColor.BLACK;
+        return RgbColor.gdx(worldRenderer.getSkybox().topColor);
     }
 
     public int getDaytime() {
         return this.time % DAY_CYCLE;
     }
 
-    static Color mixColors(Color color1, Color color2, double percent) {
+    static RgbColor mixColors(RgbColor color1, RgbColor color2, double percent) {
         percent = Mth.clamp(percent, 0.0, 1.0);
         double inversePercent = 1.0 - percent;
         int redPart = (int) (color1.getRed() * percent + color2.getRed() * inversePercent);
         int greenPart = (int) (color1.getGreen() * percent + color2.getGreen() * inversePercent);
         int bluePart = (int) (color1.getBlue() * percent + color2.getBlue() * inversePercent);
         int alphaPart = (int) (color1.getAlpha() * percent + color2.getAlpha() * inversePercent);
-        return Color.rgba(redPart, greenPart, bluePart, alphaPart);
+        return RgbColor.rgba(redPart, greenPart, bluePart, alphaPart);
     }
     
     @Override

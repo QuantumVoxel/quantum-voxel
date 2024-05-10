@@ -17,10 +17,8 @@ public class Font implements Disposable {
     @SuppressWarnings("GDXJavaStaticResource")
     static final BitmapFont UNIFONT = QuantumClient.get().unifont;
     final BitmapFont bitmapFont;
-    private final QuantumClient client = QuantumClient.get();
     public final int lineHeight;
     private final boolean special;
-    private final GlyphLayout layout = new GlyphLayout();
 
     public Font(BitmapFont bitmapFont) {
         this(bitmapFont, false);
@@ -34,7 +32,7 @@ public class Font implements Disposable {
     }
 
     public void drawText(Renderer renderer, String text, float x, float y, Color color, boolean shadow) {
-        this.drawText(renderer, Formatter.format("&#" + color.toString().substring(1, 7) + text), x, y, color, shadow);
+        this.drawText(renderer, Formatter.format("&#" + color.toHex().substring(1, 7) + text), x, y, color, shadow);
     }
 
     public void drawText(Renderer renderer, TextObject text, float x, float y, Color color, boolean shadow) {

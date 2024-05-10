@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -21,8 +21,8 @@ public class InspectorDebugPage implements DebugPage {
 
         Comparator<InspectionNode<?>> comparator = Comparator.comparing(InspectionNode::getName);
 
-        context.entryLine(TextObject.literal(this.inspectIdxInput).setColor(Color.WHITE))
-                .entryLine(TextObject.literal(path).setColor(Color.AZURE).setBold(true).setUnderlined(true))
+        context.entryLine(TextObject.literal(this.inspectIdxInput).setColor(RgbColor.WHITE))
+                .entryLine(TextObject.literal(path).setColor(RgbColor.AZURE).setBold(true).setUnderlined(true))
                 .entryLine();
 
         if (this.renderNodes(context, path, comparator)) return;

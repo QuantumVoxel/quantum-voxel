@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -85,7 +85,7 @@ public class GlStateStack {
         public int blendSrc;
         public int blendDst;
         public int blendEquation;
-        public Color blendColor;
+        public RgbColor blendColor;
         public int blendSrcAlpha;
         public int blendDstAlpha;
         public int blendEquationAlpha;
@@ -116,7 +116,7 @@ public class GlStateStack {
             this.blendSrc = GL20.GL_SRC_ALPHA;
             this.blendDst = GL20.GL_ONE_MINUS_SRC_ALPHA;
             this.blendEquation = GL20.GL_FUNC_ADD;
-            this.blendColor = Color.WHITE;
+            this.blendColor = RgbColor.WHITE;
             this.blendSrcAlpha = GL20.GL_SRC_ALPHA;
             this.blendDstAlpha = GL20.GL_ONE_MINUS_SRC_ALPHA;
             this.blendEquationAlpha = GL20.GL_FUNC_ADD;

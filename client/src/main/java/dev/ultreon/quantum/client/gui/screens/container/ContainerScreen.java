@@ -13,7 +13,7 @@ import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.c2s.C2SMenuTakeItemPacket;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -88,12 +88,12 @@ public abstract class ContainerScreen extends Screen {
         this.client.itemRenderer.render(slotItem.getItem(), renderer, x, y);
 
         if (slot.isWithinBounds(mouseX - this.left(), mouseY - this.top())) {
-            renderer.fill(x, y, 16, 16, Color.WHITE.withAlpha(0x60));
+            renderer.fill(x, y, 16, 16, RgbColor.WHITE.withAlpha(0x60));
         }
 
         if (!slotItem.isEmpty() && slotItem.getCount() > 1) {
             String text = Integer.toString(slotItem.getCount());
-            renderer.textLeft(text, x + 18 - this.font.width(text), y + 17 - this.font.lineHeight, Color.WHITE, false);
+            renderer.textLeft(text, x + 18 - this.font.width(text), y + 17 - this.font.lineHeight, RgbColor.WHITE, false);
         }
     }
 
@@ -136,20 +136,20 @@ public abstract class ContainerScreen extends Screen {
             textHeight += 1 + this.font.lineHeight;
         }
 
-        renderer.fill(x + 1, y, textWidth + 4, textHeight + 6, Color.rgb(0x202020));
-        renderer.fill(x, y + 1, textWidth + 6, textHeight + 4, Color.rgb(0x202020));
-        renderer.box(x + 1, y + 1, textWidth + 4, textHeight + 4, Color.rgb(0x303030));
+        renderer.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));
+        renderer.fill(x, y + 1, textWidth + 6, textHeight + 4, RgbColor.rgb(0x202020));
+        renderer.box(x + 1, y + 1, textWidth + 4, textHeight + 4, RgbColor.rgb(0x303030));
 
-        renderer.textLeft(title, x + 3, y + 3, Color.WHITE);
+        renderer.textLeft(title, x + 3, y + 3, RgbColor.WHITE);
 
         int lineNr = 0;
         for (TextObject line : description) {
-            renderer.textLeft(line, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, Color.rgb(0xa0a0a0));
+            renderer.textLeft(line, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0xa0a0a0));
             lineNr++;
         }
 
         if (subTitle != null)
-            renderer.textLeft(subTitle, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, Color.rgb(0x606060));
+            renderer.textLeft(subTitle, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0x606060));
     }
 
     protected @Nullable ItemSlot getSlotAt(int mouseX, int mouseY) {

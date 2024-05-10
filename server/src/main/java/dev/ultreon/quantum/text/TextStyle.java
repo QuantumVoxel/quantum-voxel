@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.text;
 
 import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,12 +14,12 @@ public class TextStyle {
     private boolean strikethrough = false;
     private @Nullable HoverEvent<?> hoverEvent = null;
     private @Nullable ClickEvent clickEvent = null;
-    private Color color = Color.WHITE;
+    private RgbColor color = RgbColor.WHITE;
     private Identifier font;
 
     public static TextStyle deserialize(MapType data) {
         TextStyle textStyle = new TextStyle();
-        textStyle.color = Color.rgb(data.getInt("color"));
+        textStyle.color = RgbColor.rgb(data.getInt("color"));
         textStyle.bold = data.getBoolean("bold");
         textStyle.italic = data.getBoolean("italic");
         textStyle.underline = data.getBoolean("underline");
@@ -100,11 +100,11 @@ public class TextStyle {
         return this;
     }
 
-    public Color getColor() {
+    public RgbColor getColor() {
         return this.color;
     }
 
-    public TextStyle color(@NotNull Color color) {
+    public TextStyle color(@NotNull RgbColor color) {
         this.color = color;
         return this;
     }
@@ -123,12 +123,12 @@ public class TextStyle {
     }
 
     public static TextStyle defaultStyle() {
-        return new TextStyle().color(Color.WHITE).bold(false).italic(false).underline(false).strikethrough(false);
+        return new TextStyle().color(RgbColor.WHITE).bold(false).italic(false).underline(false).strikethrough(false);
     }
 
-    public void color(ChatColor color) {
+    public void color(ColorCode color) {
         Integer c = color.getColor();
         if (!color.isColor()) return;
-        this.color = Color.rgb(c);
+        this.color = RgbColor.rgb(c);
     }
 }

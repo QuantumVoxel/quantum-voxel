@@ -10,7 +10,7 @@ import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,13 +22,13 @@ public class WorldDeleteConfirmScreen extends Screen {
     private final WorldStorage storage;
 
     public WorldDeleteConfirmScreen(@NotNull WorldStorage storage) {
-        super(TextObject.translation("quantum.screen.world_delete_confirm.title").setColor(Color.rgb(0xff4040)));
+        super(TextObject.translation("quantum.screen.world_delete_confirm.title").setColor(RgbColor.rgb(0xff4040)));
         this.storage = storage;
     }
 
     @Override
     public void build(GuiBuilder builder) {
-        builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(Color.RED).position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
+        builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(RgbColor.RED).position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
                 .scale(2));
 
         builder.add(Label.of(TextObject.translation("quantum.screen.world_delete_confirm.message1", this.storage.getDirectory().getFileName().toString()))

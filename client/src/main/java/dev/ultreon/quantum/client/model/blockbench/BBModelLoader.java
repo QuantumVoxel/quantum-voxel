@@ -17,7 +17,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.ModelImporter;
 import dev.ultreon.quantum.client.model.blockbench.anim.*;
 import dev.ultreon.quantum.resources.Resource;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.CubicDirection;
 import org.jetbrains.annotations.NotNull;
@@ -230,7 +230,7 @@ public class BBModelLoader implements ModelImporter {
             JsonObject elemObj = elem.getAsJsonObject();
             String name = elemObj.getAsJsonPrimitive("name").getAsString();
             Vec3f origin = loadVec3(elemObj.getAsJsonArray("origin"));
-            Color color = loadColor(elemObj.getAsJsonPrimitive("color").getAsInt());
+            RgbColor color = loadColor(elemObj.getAsJsonPrimitive("color").getAsInt());
             UUID uuid = UUID.fromString(elemObj.getAsJsonPrimitive("uuid").getAsString());
             boolean export = elemObj.getAsJsonPrimitive("export").getAsBoolean();
             boolean mirrorUV = elemObj.getAsJsonPrimitive("mirror_uv").getAsBoolean();
@@ -271,7 +271,7 @@ public class BBModelLoader implements ModelImporter {
 
     private BBMeshModelElement loadMeshElement(JsonObject meshJson) {
         String name = meshJson.getAsJsonPrimitive("name").getAsString();
-        Color color = loadColor(meshJson.getAsJsonPrimitive("color").getAsInt());
+        RgbColor color = loadColor(meshJson.getAsJsonPrimitive("color").getAsInt());
         Vec3f origin = loadVec3(meshJson.getAsJsonArray("origin"));
         Vec3f rotation = loadVec3(meshJson.getAsJsonArray("rotation"));
         boolean export = meshJson.getAsJsonPrimitive("export").getAsBoolean();
@@ -354,7 +354,7 @@ public class BBModelLoader implements ModelImporter {
         Vec3f from = loadVec3(elem.getAsJsonObject().getAsJsonArray("from"));
         Vec3f to = loadVec3(elem.getAsJsonObject().getAsJsonArray("to"));
         float autouv = elem.getAsJsonObject().getAsJsonPrimitive("autouv").getAsFloat();
-        Color color = loadColor(elem.getAsJsonObject().getAsJsonPrimitive("color").getAsInt());
+        RgbColor color = loadColor(elem.getAsJsonObject().getAsJsonPrimitive("color").getAsInt());
         Vec3f origin = loadVec3(elem.getAsJsonObject().getAsJsonArray("origin"));
 
         List<BBModelFace> faces = loadFaces(elem.getAsJsonObject().getAsJsonObject("faces"));
@@ -389,8 +389,8 @@ public class BBModelLoader implements ModelImporter {
         return new BBModelFace(blockFace, uv, texture);
     }
 
-    private Color loadColor(int color) {
-        return Color.BLACK;
+    private RgbColor loadColor(int color) {
+        return RgbColor.BLACK;
     }
 
     private Vec2f loadVec2(JsonArray array) {

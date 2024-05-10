@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +17,7 @@ public abstract sealed class BBModelElement implements BBModelNode permits BBCub
 
     public abstract String name();
 
-    public abstract Color color();
+    public abstract RgbColor color();
 
     @Override
     public abstract Vec3f origin();

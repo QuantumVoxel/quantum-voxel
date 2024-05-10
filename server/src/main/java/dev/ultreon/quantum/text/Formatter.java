@@ -4,7 +4,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.registry.CustomKeyRegistry;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharList;
@@ -42,11 +42,11 @@ public class Formatter {
     private int offset = 0;
 
     // Colors
-    private final Color messageColor;
+    private final RgbColor messageColor;
 
     // Formatting
     private StringBuilder currentBuilder = new StringBuilder();
-    private Color currentColor;
+    private RgbColor currentColor;
     private @Nullable ClickEvent currentClickEvent = null;
     private @Nullable HoverEvent<?> currentHoverEvent = null;
     private final @Nullable Identifier currentFont = null;
@@ -64,7 +64,7 @@ public class Formatter {
     // Locks
     private final Object lock = new Object();
 
-    public Formatter(boolean allowFormatting, boolean doPing, String message, TextObject prefix, TextObject textPrefix, @Nullable Player sender, Color defaultMessageColor) {
+    public Formatter(boolean allowFormatting, boolean doPing, String message, TextObject prefix, TextObject textPrefix, @Nullable Player sender, RgbColor defaultMessageColor) {
         this.allowFormatting = allowFormatting;
         this.doPing = doPing;
         this.message = message;
@@ -195,7 +195,7 @@ public class Formatter {
     }
 
     public static TextObject format(String message, boolean doPing) {
-        var formatter = new Formatter(true, doPing, message, TextObject.empty(), TextObject.empty(), null, Color.WHITE);
+        var formatter = new Formatter(true, doPing, message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE);
         var parse = formatter.parse();
         return parse.getResult();
     }
@@ -233,7 +233,7 @@ public class Formatter {
         if (EmoteMap.get(arg) != null) {
             var texture = TextObject.literal(String.valueOf(EmoteMap.get(arg).getChar())).style(style ->
                     style.font(EmoteMap.get(arg).getFont())
-                            .color(Color.rgb(0xffffff)));
+                            .color(RgbColor.rgb(0xffffff)));
             this.builder.append(texture);
         }
     }
@@ -257,7 +257,7 @@ public class Formatter {
         if (IconMap.get(arg) != null) {
             var texture = TextObject.literal(String.valueOf(IconMap.get(arg).getChar()))
                     .style(style -> style.font(IconMap.get(arg).getFont())
-                            .color(Color.rgb(0xffffff)));
+                            .color(RgbColor.rgb(0xffffff)));
             this.builder.append(texture);
         }
     }
@@ -277,12 +277,12 @@ public class Formatter {
                     return;
                 }
                 this.pushBuilder();
-                this.currentColor = Color.rgb(Integer.parseInt(this.message.substring(this.offset + 1, this.offset + 7), 16));
+                this.currentColor = RgbColor.rgb(Integer.parseInt(this.message.substring(this.offset + 1, this.offset + 7), 16));
                 this.offset += 7;
             }
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F' -> {
                 this.pushBuilder();
-                this.currentColor = Color.of(ChatColor.getByChar(Character.toLowerCase(this.c())));
+                this.currentColor = RgbColor.of(ColorCode.getByChar(Character.toLowerCase(this.c())));
                 this.offset++;
             }
             case 'l' -> {
@@ -355,7 +355,7 @@ public class Formatter {
                             .italic(this.italic)
                             .underline(this.underlined)
                             .strikethrough(this.strikethrough)
-                            .hoverEvent(HoverEvent.text(new Formatter(true, false, hoverText, TextObject.empty(), TextObject.empty(), null, Color.WHITE).parse().getResult()))
+                            .hoverEvent(HoverEvent.text(new Formatter(true, false, hoverText, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult()))
                             .clickEvent(this.currentClickEvent));
                     this.builder.append(textObj2);
                     this.currentBuilder.append(this.sender.getName());
@@ -530,18 +530,18 @@ public class Formatter {
 
             var hoverText = String.format(
                     "<blue>%s\n<gray>Name <i>%s</i>\n<dark-gray>%s".trim(),
-                    ChatColor.stripColor(player.getPublicName()),
+                    ColorCode.stripColor(player.getPublicName()),
                     player.getName(),
                     player.getUuid()
             );
 
             TextObject textComponent1 = TextObject.literal(
-                    "@" + player.getName()).style(style -> style.color(Color.of(ChatColor.BLUE))
+                    "@" + player.getName()).style(style -> style.color(RgbColor.of(ColorCode.BLUE))
                     .bold(false)
                     .italic(false)
                     .underline(true)
                     .strikethrough(false)
-                    .hoverEvent(HoverEvent.text(new Formatter(true, false, hoverText, TextObject.empty(), TextObject.empty(), null, Color.WHITE).parse().getResult()))
+                    .hoverEvent(HoverEvent.text(new Formatter(true, false, hoverText, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult()))
                     .clickEvent(ClickEvent.suggestMessage("@" + player.getName())));
 
             this.builder.append(textComponent1);
@@ -588,53 +588,53 @@ public class Formatter {
                 this.currentHoverEvent = null;
             }
 
-            case "red" -> this.currentColor = Color.of(ChatColor.RED);
-            case "yellow" -> this.currentColor = Color.of(ChatColor.YELLOW);
-            case "lime", "green" -> this.currentColor = Color.of(ChatColor.GREEN);
-            case "cyan", "aqua" -> this.currentColor = Color.of(ChatColor.AQUA);
-            case "blue" -> this.currentColor = Color.of(ChatColor.BLUE);
-            case "magenta", "light-purple" -> this.currentColor = Color.of(ChatColor.LIGHT_PURPLE);
-            case "dark-red" -> this.currentColor = Color.of(ChatColor.DARK_RED);
-            case "gold" -> this.currentColor = Color.of(ChatColor.GOLD);
-            case "dark-green" -> this.currentColor = Color.of(ChatColor.DARK_GREEN);
-            case "turquoise", "dark-aqua" -> this.currentColor = Color.of(ChatColor.DARK_AQUA);
-            case "dark-blue" -> this.currentColor = Color.of(ChatColor.DARK_BLUE);
-            case "purple", "dark-purple" -> this.currentColor = Color.of(ChatColor.DARK_PURPLE);
-            case "gray-16", "white" -> this.currentColor = Color.of(ChatColor.WHITE);
-            case "gray-15" -> this.currentColor = Color.rgb(0xf0f0f0);
-            case "gray-14" -> this.currentColor = Color.rgb(0xe0e0e0);
-            case "gray-13" -> this.currentColor = Color.rgb(0xd0d0d0);
-            case "gray-12", "light-gray" -> this.currentColor = Color.rgb(0xc0c0c0);
-            case "gray-11" -> this.currentColor = Color.rgb(0xb0b0b0);
-            case "gray-10" -> this.currentColor = Color.rgb(0xa0a0a0);
-            case "gray", "silver" -> this.currentColor = Color.of(ChatColor.GRAY);
-            case "gray-9" -> this.currentColor = Color.rgb(0x909090);
-            case "gray-8" -> this.currentColor = Color.rgb(0x808080);
-            case "mid-gray", "gray-7" -> this.currentColor = Color.rgb(0x707070);
-            case "gray-6" -> this.currentColor = Color.rgb(0x606060);
-            case "dark-gray" -> this.currentColor = Color.of(ChatColor.DARK_GRAY);
-            case "gray-5" -> this.currentColor = Color.rgb(0x505050);
-            case "gray-4" -> this.currentColor = Color.rgb(0x404040);
-            case "darker-gray", "gray-3" -> this.currentColor = Color.rgb(0x303030);
-            case "gray-2" -> this.currentColor = Color.rgb(0x202020);
-            case "gray-1" -> this.currentColor = Color.rgb(0x101010);
-            case "gray-0" -> this.currentColor = Color.rgb(0x000000);
-            case "black" -> this.currentColor = Color.of(ChatColor.BLACK);
-            case "brown" -> this.currentColor = Color.rgb(0x614E36);
-            case "azure" -> this.currentColor = Color.rgb(0x007FFF);
-            case "mint" -> this.currentColor = Color.rgb(0x00FF7F);
-            case "orange" -> this.currentColor = Color.rgb(0xFF7F00);
-            case "pure-yellow" -> this.currentColor = Color.rgb(0xFFFF00);
-            case "yellow-gold" -> this.currentColor = Color.rgb(0xFFD500);
-            case "pure-gold" -> this.currentColor = Color.rgb(0xFFC500);
-            case "dark-yellow" -> this.currentColor = Color.rgb(0x7F7F00);
-            case "method" -> this.currentColor = Color.rgb(0x61AFEF);
-            case "string-escape" -> this.currentColor = Color.rgb(0x2BBAC5);
-            case "string" -> this.currentColor = Color.rgb(0x89CA78);
-            case "class" -> this.currentColor = Color.rgb(0xE5C07B);
-            case "number" -> this.currentColor = Color.rgb(0xD19A66);
-            case "enum-value" -> this.currentColor = Color.rgb(0xEF596F);
-            case "keyword" -> this.currentColor = Color.rgb(0xD55FDE);
+            case "red" -> this.currentColor = RgbColor.of(ColorCode.RED);
+            case "yellow" -> this.currentColor = RgbColor.of(ColorCode.YELLOW);
+            case "lime", "green" -> this.currentColor = RgbColor.of(ColorCode.GREEN);
+            case "cyan", "aqua" -> this.currentColor = RgbColor.of(ColorCode.AQUA);
+            case "blue" -> this.currentColor = RgbColor.of(ColorCode.BLUE);
+            case "magenta", "light-purple" -> this.currentColor = RgbColor.of(ColorCode.LIGHT_PURPLE);
+            case "dark-red" -> this.currentColor = RgbColor.of(ColorCode.DARK_RED);
+            case "gold" -> this.currentColor = RgbColor.of(ColorCode.GOLD);
+            case "dark-green" -> this.currentColor = RgbColor.of(ColorCode.DARK_GREEN);
+            case "turquoise", "dark-aqua" -> this.currentColor = RgbColor.of(ColorCode.DARK_AQUA);
+            case "dark-blue" -> this.currentColor = RgbColor.of(ColorCode.DARK_BLUE);
+            case "purple", "dark-purple" -> this.currentColor = RgbColor.of(ColorCode.DARK_PURPLE);
+            case "gray-16", "white" -> this.currentColor = RgbColor.of(ColorCode.WHITE);
+            case "gray-15" -> this.currentColor = RgbColor.rgb(0xf0f0f0);
+            case "gray-14" -> this.currentColor = RgbColor.rgb(0xe0e0e0);
+            case "gray-13" -> this.currentColor = RgbColor.rgb(0xd0d0d0);
+            case "gray-12", "light-gray" -> this.currentColor = RgbColor.rgb(0xc0c0c0);
+            case "gray-11" -> this.currentColor = RgbColor.rgb(0xb0b0b0);
+            case "gray-10" -> this.currentColor = RgbColor.rgb(0xa0a0a0);
+            case "gray", "silver" -> this.currentColor = RgbColor.of(ColorCode.GRAY);
+            case "gray-9" -> this.currentColor = RgbColor.rgb(0x909090);
+            case "gray-8" -> this.currentColor = RgbColor.rgb(0x808080);
+            case "mid-gray", "gray-7" -> this.currentColor = RgbColor.rgb(0x707070);
+            case "gray-6" -> this.currentColor = RgbColor.rgb(0x606060);
+            case "dark-gray" -> this.currentColor = RgbColor.of(ColorCode.DARK_GRAY);
+            case "gray-5" -> this.currentColor = RgbColor.rgb(0x505050);
+            case "gray-4" -> this.currentColor = RgbColor.rgb(0x404040);
+            case "darker-gray", "gray-3" -> this.currentColor = RgbColor.rgb(0x303030);
+            case "gray-2" -> this.currentColor = RgbColor.rgb(0x202020);
+            case "gray-1" -> this.currentColor = RgbColor.rgb(0x101010);
+            case "gray-0" -> this.currentColor = RgbColor.rgb(0x000000);
+            case "black" -> this.currentColor = RgbColor.of(ColorCode.BLACK);
+            case "brown" -> this.currentColor = RgbColor.rgb(0x614E36);
+            case "azure" -> this.currentColor = RgbColor.rgb(0x007FFF);
+            case "mint" -> this.currentColor = RgbColor.rgb(0x00FF7F);
+            case "orange" -> this.currentColor = RgbColor.rgb(0xFF7F00);
+            case "pure-yellow" -> this.currentColor = RgbColor.rgb(0xFFFF00);
+            case "yellow-gold" -> this.currentColor = RgbColor.rgb(0xFFD500);
+            case "pure-gold" -> this.currentColor = RgbColor.rgb(0xFFC500);
+            case "dark-yellow" -> this.currentColor = RgbColor.rgb(0x7F7F00);
+            case "method" -> this.currentColor = RgbColor.rgb(0x61AFEF);
+            case "string-escape" -> this.currentColor = RgbColor.rgb(0x2BBAC5);
+            case "string" -> this.currentColor = RgbColor.rgb(0x89CA78);
+            case "class" -> this.currentColor = RgbColor.rgb(0xE5C07B);
+            case "number" -> this.currentColor = RgbColor.rgb(0xD19A66);
+            case "enum-value" -> this.currentColor = RgbColor.rgb(0xEF596F);
+            case "keyword" -> this.currentColor = RgbColor.rgb(0xD55FDE);
             default -> {
                 this.currentBuilder.append('<');
                 this.currentBuilder.append(arg);
@@ -690,7 +690,7 @@ public class Formatter {
         final var hoverText = this.getPlayerHoverText(player);
         final var textComponent1 = TextObject.literal(
                 "@" + player.getName()).style(style -> style
-                .color(Color.of(ChatColor.BLUE))
+                .color(RgbColor.of(ColorCode.BLUE))
                 .bold(false)
                 .italic(false)
                 .underline(true)
@@ -716,7 +716,7 @@ public class Formatter {
                 <blue>%s
                 <gray>Name <i>%s</i>
                 <dark-gray>%s
-                """.formatted(ChatColor.stripColor(player.getPublicName()), player.getName(), player.getUuid());
+                """.formatted(ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
     }
 
     public Identifier getCurrentFont() {

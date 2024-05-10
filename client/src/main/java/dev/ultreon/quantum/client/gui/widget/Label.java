@@ -9,7 +9,7 @@ import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.client.gui.widget.components.ScaleComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
@@ -24,18 +24,18 @@ public class Label extends Widget {
     private final ScaleComponent scale;
 
     public Label() {
-        this(Alignment.LEFT, Color.WHITE);
+        this(Alignment.LEFT, RgbColor.WHITE);
     }
 
-    public Label(Color textColor) {
+    public Label(RgbColor textColor) {
         this(Alignment.LEFT, textColor);
     }
 
     public Label(Alignment alignment) {
-        this(alignment, Color.WHITE);
+        this(alignment, RgbColor.WHITE);
     }
 
-    public Label(Alignment alignment, Color textColor) {
+    public Label(Alignment alignment, RgbColor textColor) {
         super(0, 0);
         this.alignment = this.register(id("alignment"), new AlignmentComponent(alignment));
         this.textColor = this.register(id("text_color"), new ColorComponent(textColor));
@@ -78,7 +78,7 @@ public class Label extends Widget {
         return this;
     }
 
-    public Label textColor(Color textColor) {
+    public Label textColor(RgbColor textColor) {
         this.textColor.set(textColor);
         return this;
     }

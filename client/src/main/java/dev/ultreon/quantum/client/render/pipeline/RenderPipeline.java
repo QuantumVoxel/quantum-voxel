@@ -16,7 +16,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -77,7 +77,7 @@ public class RenderPipeline implements Disposable {
     private Array<Renderable> modelRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures) {
         FrameBuffer frameBuffer = node.getFrameBuffer();
         frameBuffer.begin();
-        ScreenUtils.clear(Color.TRANSPARENT.toGdx(), true);
+        ScreenUtils.clear(RgbColor.TRANSPARENT.toGdx(), true);
 
         modelBatch.begin(this.camera);
         node.textureBinder.begin();
@@ -99,7 +99,7 @@ public class RenderPipeline implements Disposable {
     private Array<Renderable> plainRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures) {
         FrameBuffer frameBuffer = node.getFrameBuffer();
         frameBuffer.begin();
-        ScreenUtils.clear(Color.TRANSPARENT.toGdx(), true);
+        ScreenUtils.clear(RgbColor.TRANSPARENT.toGdx(), true);
 
         node.textureBinder.begin();
         node.time += Gdx.graphics.getDeltaTime();

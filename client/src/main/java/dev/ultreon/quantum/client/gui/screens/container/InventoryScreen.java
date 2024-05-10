@@ -13,7 +13,7 @@ import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.PagedList;
 import org.jetbrains.annotations.Nullable;
@@ -144,18 +144,18 @@ public class InventoryScreen extends ContainerScreen {
         var ingredients = recipe.ingredients();
         if (!ingredients.isEmpty()) {
             result.add(TextObject.empty());
-            result.add(TextObject.translation("quantum.recipe.ingredients").style(textStyle -> textStyle.color(Color.WHITE).bold(true)));
+            result.add(TextObject.translation("quantum.recipe.ingredients").style(textStyle -> textStyle.color(RgbColor.WHITE).bold(true)));
             for (ItemStack stack : ingredients) {
                 result.add(TextObject.literal(stack.getCount() + "x ").append(stack.getItem().getTranslation()));
             }
 
             if (!this.showOnlyCraftable()) {
-                result.add(recipe.canCraft(this.inventory) ? TextObject.translation("quantum.recipe.craftable").style(textStyle -> textStyle.color(Color.GREEN)) : TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(Color.RED)));
+                result.add(recipe.canCraft(this.inventory) ? TextObject.translation("quantum.recipe.craftable").style(textStyle -> textStyle.color(RgbColor.GREEN)) : TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(RgbColor.RED)));
             }
 
             result.add(TextObject.empty());
         } else {
-            result.add(TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(Color.RED)));
+            result.add(TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(RgbColor.RED)));
             result.add(TextObject.empty());
         }
 

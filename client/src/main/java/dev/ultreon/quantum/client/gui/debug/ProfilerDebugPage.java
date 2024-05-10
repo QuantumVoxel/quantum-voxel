@@ -6,7 +6,7 @@ import dev.ultreon.quantum.debug.profiler.ProfileData;
 import dev.ultreon.quantum.debug.profiler.Section;
 import dev.ultreon.quantum.debug.profiler.ThreadSection;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +28,7 @@ public class ProfilerDebugPage implements DebugPage {
 
         Comparator<Section.FinishedSection> comparator = new FinishedSectionComparator();
 
-        context.entryLine(TextObject.literal(this.idxInput).setColor(Color.WHITE));
+        context.entryLine(TextObject.literal(this.idxInput).setColor(RgbColor.WHITE));
 
         if (this.renderView(context, thread, path, comparator)) return;
         this.inputHandling(thread, path, comparator);
@@ -126,7 +126,7 @@ public class ProfilerDebugPage implements DebugPage {
         ThreadSection.FinishedThreadSection threadSection = this.profile.getThreadSection(thread);
         List<Section.FinishedSection> data;
 
-        context.entryLine(TextObject.literal(path).setColor(Color.AZURE).setBold(true).setUnderlined(true))
+        context.entryLine(TextObject.literal(path).setColor(RgbColor.AZURE).setBold(true).setUnderlined(true))
                 .entryLine();
 
         if (path.equals("/")) {
@@ -149,7 +149,7 @@ public class ProfilerDebugPage implements DebugPage {
     }
 
     private boolean renderThreadView(DebugPageContext context) {
-        context.entryLine(TextObject.literal("Thread View").setColor(Color.GREEN).setBold(true).setUnderlined(true))
+        context.entryLine(TextObject.literal("Thread View").setColor(RgbColor.GREEN).setBold(true).setUnderlined(true))
                 .entryLine();
 
         List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).toList();

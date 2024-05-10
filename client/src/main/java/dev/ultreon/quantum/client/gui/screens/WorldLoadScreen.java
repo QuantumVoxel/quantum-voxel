@@ -13,7 +13,7 @@ import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.*;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +26,8 @@ import java.util.ArrayList;
 
 public class WorldLoadScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldLoadScreen.class);
-    public static final @NotNull Color PROGRESS_BG = Color.hex("#ffffff80");
-    public static final @NotNull Color PROGRESS_FG = Color.rgb(0xff0040);
+    public static final @NotNull RgbColor PROGRESS_BG = RgbColor.hex("#ffffff80");
+    public static final @NotNull RgbColor PROGRESS_FG = RgbColor.rgb(0xff0040);
     private Label titleLabel;
     private Label descriptionLabel;
     private Label subTitleLabel;

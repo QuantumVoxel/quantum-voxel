@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.TerrainNoise;
 
 import java.util.Random;
 
-public class WorldGenTestPanel extends Panel {
+public class WorldGenTestPanel extends Rectangle {
     private TerrainNoise terrainNoise;
     private int terrainX = 0;
 
@@ -29,7 +29,7 @@ public class WorldGenTestPanel extends Panel {
 
         for (int i = 0; i < size.width; i++) {
             int height = (int) noise.evaluateNoise(i + terrainX);
-            renderer.line(pos.x + i, size.height, pos.x + i, size.height - height, Color.rgb(height <= 64 ? 0x0055aa : 0x55aa55));
+            renderer.line(pos.x + i, size.height, pos.x + i, size.height - height, RgbColor.rgb(height <= 64 ? 0x0055aa : 0x55aa55));
         }
     }
 

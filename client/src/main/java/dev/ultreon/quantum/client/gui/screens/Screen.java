@@ -9,7 +9,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -100,7 +100,7 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderSolidBackground(Renderer renderer) {
-        renderer.fill(0, 0, this.size.width, this.size.height, Color.BLACK);
+        renderer.fill(0, 0, this.size.width, this.size.height, RgbColor.BLACK);
         renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, 0, this.size.width, this.size.height, 0, 0, 256, 256, 256, 256));
     }
 
@@ -110,7 +110,7 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderTransparentBackground(Renderer renderer) {
-        renderer.fill(0, 0, this.size.width, this.size.height, Color.argb(0x40000000));
+        renderer.fill(0, 0, this.size.width, this.size.height, RgbColor.argb(0x40000000));
     }
 
     /**

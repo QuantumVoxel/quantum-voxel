@@ -7,13 +7,13 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.*;
 
 public final class BBMeshModelElement extends BBModelElement {
     private final String name;
-    private final Color color;
+    private final RgbColor color;
     private final Vec3f origin;
     private final Vec3f rotation;
     private final boolean export;
@@ -24,7 +24,7 @@ public final class BBMeshModelElement extends BBModelElement {
     private final List<BBModelMeshFace> faces;
     private final UUID uuid;
 
-    public BBMeshModelElement(String name, Color color, Vec3f origin, Vec3f rotation, boolean export,
+    public BBMeshModelElement(String name, RgbColor color, Vec3f origin, Vec3f rotation, boolean export,
                               boolean visibility, boolean locked, String renderOrder, boolean allowMirrorModeling,
                               List<BBModelMeshFace> faces, UUID uuid) {
         this.name = name;
@@ -46,7 +46,7 @@ public final class BBMeshModelElement extends BBModelElement {
     }
 
     @Override
-    public Color color() {
+    public RgbColor color() {
         return color;
     }
 

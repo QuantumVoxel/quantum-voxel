@@ -12,7 +12,7 @@ import dev.ultreon.quantum.client.gui.widget.ChatTextEntry;
 import dev.ultreon.quantum.network.packets.c2s.C2SChatPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SCommandPacket;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongLists;
@@ -111,15 +111,15 @@ public class ChatScreen extends Screen {
         }
     }
 
-    private static class QuantumColorTypeAdapter extends TypeAdapter<Color> {
+    private static class QuantumColorTypeAdapter extends TypeAdapter<RgbColor> {
         @Override
-        public void write(JsonWriter out, Color value) throws IOException {
+        public void write(JsonWriter out, RgbColor value) throws IOException {
             out.value(value.toString());
         }
 
         @Override
-        public Color read(JsonReader in) throws IOException {
-            return Color.hex(in.nextString());
+        public RgbColor read(JsonReader in) throws IOException {
+            return RgbColor.hex(in.nextString());
         }
     }
 }

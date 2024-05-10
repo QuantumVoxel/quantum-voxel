@@ -5,8 +5,8 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.util.Renderable;
-import dev.ultreon.quantum.text.ChatColor;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.text.ColorCode;
+import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.Arrays;
 
@@ -63,7 +63,7 @@ public class TabCompletePopup implements Renderable {
 
         var textX = this.x + 2;
         var textY = this.y - this.height + 3;
-        renderer.fill(this.x, this.y - this.height, this.width, this.height, Color.BLACK.withAlpha(0x90));
+        renderer.fill(this.x, this.y - this.height, this.width, this.height, RgbColor.BLACK.withAlpha(0x90));
         String[] strings = this.values;
 
         int min;
@@ -100,13 +100,13 @@ public class TabCompletePopup implements Renderable {
             down = false;
         }
 
-        if (down) renderer.line(textX, this.y - 3, textX + this.width - 4, this.y - 3, Color.rgb(255, 64, 64));
-        if (up) renderer.line(textX, this.y - this.height + 3, textX + this.width - 4, this.y - this.height + 3, Color.rgb(255, 64, 64));
+        if (down) renderer.line(textX, this.y - 3, textX + this.width - 4, this.y - 3, RgbColor.rgb(255, 64, 64));
+        if (up) renderer.line(textX, this.y - this.height + 3, textX + this.width - 4, this.y - this.height + 3, RgbColor.rgb(255, 64, 64));
 
         for (int i = 0, stringsLength = strings.length; i < stringsLength; i++) {
             if (i < min || i >= max) continue;
             String value = strings[i];
-            renderer.textLeft(value, textX, textY + 2, i == this.index ? ChatColor.YELLOW : ChatColor.WHITE);
+            renderer.textLeft(value, textX, textY + 2, i == this.index ? ColorCode.YELLOW : ColorCode.WHITE);
             textY += this.font.lineHeight + 4;
         }
     }

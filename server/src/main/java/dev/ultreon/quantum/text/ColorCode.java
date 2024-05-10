@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.text;
 
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.util.Color;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -8,8 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 
 import java.util.regex.Pattern;
 
-public enum ChatColor {
-
+public enum ColorCode implements Color {
     BLACK('0', 0, false, 0x000000),
     DARK_BLUE('1', 1, false, 0x0000aa),
     DARK_GREEN('2', 2, false, 0x00aa00),
@@ -43,7 +43,7 @@ public enum ChatColor {
     private final String toString;
     private final Integer color;
 
-    ChatColor(char code, int intCode, boolean isFormat, Integer color) {
+    ColorCode(char code, int intCode, boolean isFormat, Integer color) {
         this.code = code;
         this.intCode = intCode;
         this.isFormat = isFormat;
@@ -51,11 +51,11 @@ public enum ChatColor {
         this.toString = new String(new char[]{'§', code});
     }
 
-    ChatColor(char code, int intCode) {
+    ColorCode(char code, int intCode) {
         this(code, intCode, false);
     }
 
-    ChatColor(char code, int intCode, boolean isFormat) {
+    ColorCode(char code, int intCode, boolean isFormat) {
         this(code, intCode, isFormat, null);
     }
 
@@ -76,7 +76,7 @@ public enum ChatColor {
     }
 
     public boolean isColor() {
-        return !this.isFormat && this != ChatColor.RESET;
+        return !this.isFormat && this != ColorCode.RESET;
     }
 
     @Override
@@ -88,58 +88,58 @@ public enum ChatColor {
         return this.toString + str;
     }
 
-    public String concat(ChatColor color) {
+    public String concat(ColorCode color) {
         return this.toString + color.toString;
     }
 
-    public ChatColor asBungee() {
-        return ChatColor.getByChar(this.code);
+    public ColorCode asBungee() {
+        return ColorCode.getByChar(this.code);
     }
 
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + '§' + "[0-9A-FK-OR]");
 
-    private static final Int2ReferenceMap<ChatColor> BY_ID = new Int2ReferenceArrayMap<>();
-    private static final Char2ReferenceMap<ChatColor> BY_CHAR = new Char2ReferenceArrayMap<>();
+    private static final Int2ReferenceMap<ColorCode> BY_ID = new Int2ReferenceArrayMap<>();
+    private static final Char2ReferenceMap<ColorCode> BY_CHAR = new Char2ReferenceArrayMap<>();
 
     static {
-        for (ChatColor color : ChatColor.values()) {
-            ChatColor.BY_ID.put(color.intCode, color);
-            ChatColor.BY_CHAR.put(color.code, color);
+        for (ColorCode color : ColorCode.values()) {
+            ColorCode.BY_ID.put(color.intCode, color);
+            ColorCode.BY_CHAR.put(color.code, color);
         }
     }
 
-    public static ChatColor getByChar(char code) {
-        return ChatColor.BY_CHAR.get(code);
+    public static ColorCode getByChar(char code) {
+        return ColorCode.BY_CHAR.get(code);
     }
 
-    public static ChatColor getById(int id) {
-        return ChatColor.BY_ID.get(id);
+    public static ColorCode getById(int id) {
+        return ColorCode.BY_ID.get(id);
     }
 
-    public static ChatColor getByChar(String code) {
+    public static ColorCode getByChar(String code) {
         Preconditions.checkNotNull(code, "Code cannot be null");
         Preconditions.checkArgument(!code.isEmpty(), "Code must have at least one char");
-        return ChatColor.BY_CHAR.get(code.charAt(0));
+        return ColorCode.BY_CHAR.get(code.charAt(0));
     }
 
     public static String stripColor(final String input) {
-        return input == null ? null : ChatColor.STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
+        return input == null ? null : ColorCode.STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
     }
 
-    public static ChatColor getLastColors(String input) {
-        ChatColor result = ChatColor.WHITE;
+    public static ColorCode getLastColors(String input) {
+        ColorCode result = ColorCode.WHITE;
         int length = input.length();
 
         for (int index = length - 1; index > -1; index--) {
             char section = input.charAt(index);
             if (section == '§' && index < length - 1) {
                 char c = input.charAt(index + 1);
-                ChatColor color = ChatColor.getByChar(c);
+                ColorCode color = ColorCode.getByChar(c);
 
                 if (color != null) {
                     result = color;
 
-                    if (color.isColor() || color == ChatColor.RESET) {
+                    if (color.isColor() || color == ColorCode.RESET) {
                         break;
                     }
                 }
@@ -147,5 +147,25 @@ public enum ChatColor {
         }
 
         return result;
+    }
+
+    @Override
+    public int getRed() {
+        return color >> 16 & 0xFF;
+    }
+
+    @Override
+    public int getGreen() {
+        return color >> 8 & 0xFF;
+    }
+
+    @Override
+    public int getBlue() {
+        return color & 0xFF;
+    }
+
+    @Override
+    public int getAlpha() {
+        return 255;
     }
 }

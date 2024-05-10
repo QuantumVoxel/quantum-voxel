@@ -9,7 +9,7 @@ import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
         super(width, 21);
 
         this.text = this.register(id("text"), new TextComponent(TextObject.empty()));
-        this.textColor = this.register(id("text_color"), new ColorComponent(Color.WHITE));
+        this.textColor = this.register(id("text_color"), new ColorComponent(RgbColor.WHITE));
 
         this.label = name;
         this.text.set(name);
@@ -41,7 +41,7 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
         super(width, height);
 
         this.text = this.register(id("text"), new TextComponent(null));
-        this.textColor = this.register(id("text_color"), new ColorComponent(Color.WHITE));
+        this.textColor = this.register(id("text_color"), new ColorComponent(RgbColor.WHITE));
 
         this.label = name;
         this.text.set(name);
@@ -51,7 +51,7 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
         super(200, 21);
 
         this.text = this.register(id("text"), new TextComponent(TextObject.empty()));
-        this.textColor = this.register(id("text_color"), new ColorComponent(Color.WHITE));
+        this.textColor = this.register(id("text_color"), new ColorComponent(RgbColor.WHITE));
     }
 
     @Override

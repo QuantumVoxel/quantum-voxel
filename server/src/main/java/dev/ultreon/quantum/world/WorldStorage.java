@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.ubo.types.MapType;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,10 @@ import java.util.Comparator;
  */
 public final class WorldStorage {
     private final Path directory;
+    private final Path infoFile;
+    private MapType infoData;
+    private boolean infoLoaded;
+    private WorldSaveInfo info;
 
     /**
      * Creates a new world storage instance from the given directory.
@@ -27,6 +32,7 @@ public final class WorldStorage {
      */
     public WorldStorage(Path path) {
         this.directory = path;
+        this.infoFile = this.directory.resolve("info.ubo");
     }
 
     /**
@@ -196,7 +202,18 @@ public final class WorldStorage {
         this.createDir("data");
     }
 
-    public void loadInfo() {
+    public WorldSaveInfo loadInfo() {
+        if (!this.infoLoaded) {
+            this.infoLoaded = true;
+            try {
+                this.infoData = DataIo.readCompressed(this.infoFile.toFile());
+            } catch (IOException e) {
+                this.infoData = new MapType();
+            }
 
+            this.info = WorldSaveInfo.fromMap(this.infoData);
+        }
+
+        return this.info;
     }
 }

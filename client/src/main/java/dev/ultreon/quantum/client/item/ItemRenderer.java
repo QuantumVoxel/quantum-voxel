@@ -31,7 +31,7 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -91,11 +91,11 @@ public class ItemRenderer implements Disposable {
 
         Identifier curKey = Registries.ITEM.getId(item);
         if (curKey == null) {
-            renderer.blitColor(Color.WHITE);
+            renderer.blitColor(RgbColor.WHITE);
             renderer.blit((TextureRegion) null, x, y, 16, 16);
         } else {
             TextureRegion texture = this.client.itemTextureAtlas.get(curKey.mapPath(path -> "textures/items/" + path + ".png"));
-            renderer.blitColor(Color.WHITE);
+            renderer.blitColor(RgbColor.WHITE);
             renderer.blit(texture, x, y, 16, 16);
         }
     }

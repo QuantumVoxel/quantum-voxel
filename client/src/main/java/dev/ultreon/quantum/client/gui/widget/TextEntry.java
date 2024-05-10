@@ -10,7 +10,7 @@ import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import it.unimi.dsi.fastutil.chars.CharPredicate;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
@@ -82,7 +82,7 @@ public class TextEntry extends Widget {
         final int th = this.size.height + 3;
 
         Texture texture = this.client.getTextureManager().getTexture(id("textures/gui/text_entry.png"));
-        renderer.blitColor(Color.WHITE)
+        renderer.blitColor(RgbColor.WHITE)
                 .blit(texture, tx, ty, 4, 4, u, v, 4, 4, 36, 12)
                 .blit(texture, tx + 4, ty, tw - 8, 4, 4 + u, v, 4, 4, 36, 12)
                 .blit(texture, tx + tw - 4, ty, 4, 4, 8 + u, v, 4, 4, 36, 12)
@@ -97,11 +97,11 @@ public class TextEntry extends Widget {
             renderer.textLeft(this.value, this.pos.x + 5, this.pos.y + 6, false);
             TextObject textObject = this.hint.get();
             if (this.value.isEmpty() && textObject != null) {
-                renderer.textLeft(textObject, this.pos.x + 5, this.pos.y + 6, Color.WHITE.withAlpha(0x80), false);
+                renderer.textLeft(textObject, this.pos.x + 5, this.pos.y + 6, RgbColor.WHITE.withAlpha(0x80), false);
             }
 
             if (this.focused) {
-                renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
+                renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, RgbColor.WHITE);
             }
 
             renderer.popScissors();

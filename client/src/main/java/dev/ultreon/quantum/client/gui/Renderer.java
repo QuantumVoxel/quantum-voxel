@@ -21,16 +21,17 @@ import com.crashinvaders.vfx.effects.GaussianBlurEffect;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.libs.commons.v0.vector.Vec4i;
+import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.util.InvalidValueException;
 import dev.ultreon.quantum.client.world.RenderablePool;
-import dev.ultreon.quantum.text.ChatColor;
+import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.FormattedText;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.ApiStatus;
@@ -71,7 +72,7 @@ public class Renderer implements Disposable {
     private float strokeWidth = 1;
     private Font font;
     private final Matrices matrices;
-    private Color blitColor = Color.rgb(0xffffff);
+    private Color blitColor = RgbColor.rgb(0xffffff);
     private final Vector2 tmp2A = new Vector2();
     private final Vector3 tmp3A = new Vector3();
     private final GlStateStack glState = new GlStateStack();
@@ -163,31 +164,31 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer setColor(int r, int g, int b) {
-        this.setColor(Color.rgb(r, g, b));
+        this.setColor(RgbColor.rgb(r, g, b));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(float r, float g, float b) {
-        this.setColor(Color.rgb(r, g, b));
+        this.setColor(RgbColor.rgb(r, g, b));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(int r, int g, int b, int a) {
-        this.setColor(Color.rgba(r, g, b, a));
+        this.setColor(RgbColor.rgba(r, g, b, a));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(float r, float g, float b, float a) {
-        this.setColor(Color.rgba(r, g, b, a));
+        this.setColor(RgbColor.rgba(r, g, b, a));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(int argb) {
-        this.setColor(Color.argb(argb));
+        this.setColor(RgbColor.argb(argb));
         return this;
     }
 
@@ -205,7 +206,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer setColor(String hex) {
-        this.setColor(Color.hex(hex));
+        this.setColor(RgbColor.hex(hex));
         return this;
     }
 
@@ -217,37 +218,37 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer clearColor(int red, int green, int blue) {
-        this.clearColor(Color.rgb(red, green, blue));
+        this.clearColor(RgbColor.rgb(red, green, blue));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer clearColor(float red, float green, float blue) {
-        this.clearColor(Color.rgb(red, green, blue));
+        this.clearColor(RgbColor.rgb(red, green, blue));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer clearColor(int red, int green, int blue, int alpha) {
-        this.clearColor(Color.rgba(red, green, blue, alpha));
+        this.clearColor(RgbColor.rgba(red, green, blue, alpha));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer clearColor(float red, float green, float blue, float alpha) {
-        this.clearColor(Color.rgba(red, green, blue, alpha));
+        this.clearColor(RgbColor.rgba(red, green, blue, alpha));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer clearColor(int argb) {
-        this.clearColor(Color.argb(argb));
+        this.clearColor(RgbColor.argb(argb));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer clearColor(String hex) {
-        this.clearColor(Color.hex(hex));
+        this.clearColor(RgbColor.hex(hex));
         return this;
     }
 
@@ -577,7 +578,7 @@ public class Renderer implements Disposable {
     //////////////////
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, int x, int y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -588,14 +589,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, int x, int y, ChatColor color) {
-        this.textLeft(text, x, y, Color.of(color), true);
+    public Renderer textLeft(@NotNull String text, int x, int y, ColorCode color) {
+        this.textLeft(text, x, y, RgbColor.of(color), true);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, int x, int y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -606,14 +607,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, int x, int y, ChatColor color, boolean shadow) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull String text, int x, int y, ColorCode color, boolean shadow) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -624,14 +625,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, float x, float y, ChatColor color) {
-        this.textLeft(text, x, y, Color.of(color), true);
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color) {
+        this.textLeft(text, x, y, RgbColor.of(color), true);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -642,14 +643,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, float x, float y, ChatColor color, boolean shadow) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, float maxWidth, String truncate) {
-        this.textLeft(text, x, y, Color.WHITE, maxWidth, truncate);
+        this.textLeft(text, x, y, RgbColor.WHITE, maxWidth, truncate);
         return this;
     }
 
@@ -660,14 +661,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, float x, float y, ChatColor color, float maxWidth, String truncate) {
-        this.textLeft(text, x, y, Color.of(color), true, maxWidth, truncate);
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, float maxWidth, String truncate) {
+        this.textLeft(text, x, y, RgbColor.of(color), true, maxWidth, truncate);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, boolean shadow, float maxWidth, String truncate) {
-        this.textLeft(text, x, y, Color.WHITE, shadow, maxWidth, truncate);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow, maxWidth, truncate);
         return this;
     }
 
@@ -678,14 +679,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, float x, float y, ChatColor color, boolean shadow, float maxWidth, String truncate) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth, String truncate) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, float maxWidth, boolean wrap, String truncate) {
-        this.textLeft(text, x, y, Color.WHITE, maxWidth, wrap, truncate);
+        this.textLeft(text, x, y, RgbColor.WHITE, maxWidth, wrap, truncate);
         return this;
     }
 
@@ -696,14 +697,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, float x, float y, ChatColor color, float maxWidth, boolean wrap, String truncate) {
-        this.textLeft(text, x, y, Color.of(color), true, maxWidth, wrap, truncate);
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, float maxWidth, boolean wrap, String truncate) {
+        this.textLeft(text, x, y, RgbColor.of(color), true, maxWidth, wrap, truncate);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, boolean shadow, float maxWidth, boolean wrap, String truncate) {
-        this.textLeft(text, x, y, Color.WHITE, shadow, maxWidth, wrap, truncate);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow, maxWidth, wrap, truncate);
         return this;
     }
 
@@ -714,14 +715,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull String text, float x, float y, ChatColor color, boolean shadow, float maxWidth, boolean wrap, String truncate) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth, boolean wrap, String truncate) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, int x, int y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -732,14 +733,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull TextObject text, int x, int y, ChatColor color) {
+    public Renderer textLeft(@NotNull TextObject text, int x, int y, ColorCode color) {
         this.textLeft(String.valueOf(text), x, y, color, true);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, int x, int y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -750,14 +751,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull TextObject text, int x, int y, ChatColor color, boolean shadow) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull TextObject text, int x, int y, ColorCode color, boolean shadow) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, float x, float y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -769,7 +770,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, float x, float y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -781,7 +782,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -792,14 +793,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull FormattedText text, int x, int y, ChatColor color) {
+    public Renderer textLeft(@NotNull FormattedText text, int x, int y, ColorCode color) {
         this.textLeft(String.valueOf(text), x, y, color, true);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -810,14 +811,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull FormattedText text, int x, int y, ChatColor color, boolean shadow) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull FormattedText text, int x, int y, ColorCode color, boolean shadow) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -829,7 +830,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -841,7 +842,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -852,14 +853,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ChatColor color) {
+    public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ColorCode color) {
         this.textLeft(String.valueOf(text), x, y, color, true);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -870,14 +871,14 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ChatColor color, boolean shadow) {
-        this.font.drawText(this, text, x, y, Color.of(color), shadow);
+    public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ColorCode color, boolean shadow) {
+        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y) {
-        this.textLeft(text, x, y, Color.WHITE);
+        this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -889,7 +890,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y, boolean shadow) {
-        this.textLeft(text, x, y, Color.WHITE, shadow);
+        this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -1645,7 +1646,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textMultiline(@NotNull String text, int x, int y) {
-        this.textMultiline(text, x, y, Color.WHITE);
+        this.textMultiline(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -1657,7 +1658,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textMultiline(@NotNull String text, int x, int y, boolean shadow) {
-        this.textMultiline(text, x, y, Color.WHITE, shadow);
+        this.textMultiline(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -1675,7 +1676,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textTabbed(@NotNull String text, int x, int y) {
-        this.textTabbed(text, x, y, Color.WHITE);
+        this.textTabbed(text, x, y, RgbColor.WHITE);
         return this;
     }
 
@@ -1687,7 +1688,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textTabbed(@NotNull String text, int x, int y, boolean shadow) {
-        this.textTabbed(text, x, y, Color.WHITE, shadow);
+        this.textTabbed(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
@@ -1780,7 +1781,7 @@ public class Renderer implements Disposable {
     public Color getColor() {
         com.badlogic.gdx.graphics.Color color = new com.badlogic.gdx.graphics.Color();
         com.badlogic.gdx.graphics.Color.abgr8888ToColor(color, this.shapes.getPackedColor());
-        return Color.gdx(color);
+        return Color.fromGdx(color);
     }
 
     public Font getFont() {
@@ -2066,7 +2067,7 @@ public class Renderer implements Disposable {
     }
 
     public void renderFrame(@NotNull Identifier texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
-        renderFrame(texture, x, y, w, h, u, v, uvW, uvH, texWidth, texHeight, Color.WHITE);
+        renderFrame(texture, x, y, w, h, u, v, uvW, uvH, texWidth, texHeight, RgbColor.WHITE);
     }
 
     public void renderFrame(@NotNull Identifier texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight, @NotNull Color color) {
@@ -2079,7 +2080,7 @@ public class Renderer implements Disposable {
         int endV = uvH * 2 + v;
         int midU = uvW + u;
         int endU = uvW * 2 + u;
-        this.blitColor(Color.WHITE)
+        this.blitColor(RgbColor.WHITE)
                 .blit(handle, x, y, uvW, uvH, u, v, uvW, uvH, texWidth, texHeight)
                 .blit(handle, x + uvW, y, w - uvW, uvH, midU, v, uvW, uvH, texWidth, texHeight)
                 .blit(handle, x + w - uvW, y, uvW, uvH, endU, v, uvW, uvH, texWidth, texHeight)
@@ -2092,6 +2093,42 @@ public class Renderer implements Disposable {
                 .blit(handle, x + uvW, y + h - uvH, w - uvW * 2, uvH, midU, endV, uvW, uvH, texWidth, texHeight)
                 .blit(handle, x + w - uvW, y + h - uvH, uvW, uvH, endU, endV, uvW, uvH, texWidth, texHeight);
 
+    }
+
+    public void draw9Slice(Texture texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int inset, int texWidth, int texHeight) {
+        this
+                // top
+                .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y, width - inset * 2, inset, inset + u, v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y, inset, inset, uWidth - inset + u, v, inset, inset, texWidth, texHeight) // right
+
+                // center
+                .blit(texture, x, y + inset, inset, height - inset * 2, u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + inset, width - inset * 2, height - inset * 2, inset + u, inset + v, uWidth - inset * 2, vHeight - inset * 2, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + inset, inset, height - inset * 2, uWidth - inset + u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // right
+
+                // bottom
+                .blit(texture, x, y + height - inset, inset, inset, u, vHeight - inset + v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + height - inset, width - inset * 2, inset, inset + u, vHeight - inset + v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
+    }
+
+    public void draw9Slice(Identifier texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int inset, int texWidth, int texHeight) {
+        this
+                // top
+                .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y, width - inset * 2, inset, inset + u, v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y, inset, inset, uWidth - inset + u, v, inset, inset, texWidth, texHeight) // right
+
+                // center
+                .blit(texture, x, y + inset, inset, height - inset * 2, u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + inset, width - inset * 2, height - inset * 2, inset + u, inset + v, uWidth - inset * 2, vHeight - inset * 2, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + inset, inset, height - inset * 2, uWidth - inset + u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // right
+
+                // bottom
+                .blit(texture, x, y + height - inset, inset, inset, u, vHeight - inset + v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + height - inset, width - inset * 2, inset, inset + u, vHeight - inset + v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
     public void begin() {
@@ -2126,10 +2163,10 @@ public class Renderer implements Disposable {
                     attribute vec4 a_color;
                     attribute vec2 a_texCoord0;
                     uniform mat4 u_projTrans;
-                                        
+                    
                     varying vec4 vColor;
                     varying vec2 vTexCoord;
-                                        
+                    
                     void main() {
                     	vColor = a_color;
                     	vTexCoord = a_texCoord0;
@@ -2242,26 +2279,26 @@ public class Renderer implements Disposable {
                     void main() {\s
                       vec2 uv = gl_FragCoord.xy;
                       uv /= 24.0;
-                      
+                    
                       vec4 color = texture2D(u_texture, vTexCoord);
                       const float A = 0.0;
                       const float B = 0.15;
-                      
+                    
                       float x = uv.x;
                       float y = (uv.y) * (1.5 / 3.0);
-                      
+                    
                       float val = (0.5 + 0.5 * x + 0.5 * y);
-                      
+                    
                       float noise = perlin(val);
                       if (noise > 0.1) {
                           noise = -1.0;
                       }
-                      
+                    
                       noise = 1.0 - (noise + 1.0) / 2.0;
-                      
+                    
                       color.rgb = vec3(1.0);
                       color.a = color.a * (noise * (B - A)) + A;
-                      
+                    
                       gl_FragColor = color;
                     }
                     """;
@@ -2441,9 +2478,9 @@ public class Renderer implements Disposable {
             if (hexagonColorHex.length() < 7 && hexagonColorHex.length() > 4)
                 hexagonColorHex = hexagonColorHex.substring(0, 4);
             if (hexagonColorHex.length() < 4) hexagonColorHex = "#ffffff";
-            hexagonColor = Color.hex(hexagonColorHex);
+            hexagonColor = RgbColor.hex(hexagonColorHex);
         } catch (InvalidValueException e) {
-            hexagonColor = Color.WHITE;
+            hexagonColor = RgbColor.WHITE;
         }
 
         float hexagonTransparency = ClientConfig.hexagonTransparency;
@@ -2454,7 +2491,7 @@ public class Renderer implements Disposable {
         this.gridShader.setUniformf("iResolution", width, height);
 //        this.gridShader.setUniformf("iColor", hexagonColor.getRed() / 255f, hexagonColor.getGreen() / 255f, hexagonColor.getBlue() / 255f, hexagonTransparency);
 
-        this.shapes.filledRectangle(0, 0, width, height, Color.WHITE.toGdx());
+        this.shapes.filledRectangle(0, 0, width, height, RgbColor.WHITE.toGdx());
 
         this.batch.setShader(null);
         this.batch.end();

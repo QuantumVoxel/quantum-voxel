@@ -11,7 +11,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.resources.StaticResource;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
@@ -53,9 +53,9 @@ public class TextureManager implements Disposable {
 
     private static Pixmap createMissingNo() {
         Pixmap pixmap = new Pixmap(16, 16, Pixmap.Format.RGB888);
-        pixmap.setColor(Color.rgb(0x000000).toGdx());
+        pixmap.setColor(RgbColor.rgb(0x000000).toGdx());
         pixmap.fillRectangle(0, 0, 16, 16);
-        pixmap.setColor(Color.rgb(0xff00ff).toGdx());
+        pixmap.setColor(RgbColor.rgb(0xff00ff).toGdx());
         pixmap.fillRectangle(0, 0, 8, 8);
         pixmap.fillRectangle(8, 8, 16, 16);
         return pixmap;
@@ -64,9 +64,9 @@ public class TextureManager implements Disposable {
     private static InputStream createDefaultTex() throws IOException {
         var image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
         var graphics = image.getGraphics();
-        graphics.setColor(Color.rgb(0xffbb00).toAwt());
+        graphics.setColor(RgbColor.rgb(0xffbb00).toAwt());
         graphics.fillRect(0, 0, 16, 16);
-        graphics.setColor(Color.rgb(0x333333).toAwt());
+        graphics.setColor(RgbColor.rgb(0x333333).toAwt());
         graphics.fillRect(0, 8, 8, 8);
         graphics.fillRect(8, 0, 8, 8);
         var out = new ByteArrayOutputStream();

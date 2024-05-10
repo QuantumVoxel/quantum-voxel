@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.text;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.util.ArrayList;
@@ -32,11 +32,11 @@ public abstract class MutableText extends TextObject {
         return this;
     }
 
-    public Color getColor() {
+    public RgbColor getColor() {
         return this.style.getColor();
     }
 
-    public MutableText setColor(Color color) {
+    public MutableText setColor(RgbColor color) {
         this.style.color(color);
         return this;
     }

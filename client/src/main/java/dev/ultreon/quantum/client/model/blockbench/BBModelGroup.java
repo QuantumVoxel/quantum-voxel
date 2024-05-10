@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.model.blockbench;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +13,7 @@ public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
     private final BBModelLoader model;
     private final String name;
     private final Vec3f origin;
-    private final Color color;
+    private final RgbColor color;
     private final UUID uuid;
     private final boolean export;
     private final boolean mirrorUV;
@@ -24,7 +24,7 @@ public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
     private final Vec3f rotation;
     BBModelGroup parent;
 
-    public BBModelGroup(BBModelLoader model, String name, Vec3f origin, Color color, UUID uuid, boolean export, boolean mirrorUV,
+    public BBModelGroup(BBModelLoader model, String name, Vec3f origin, RgbColor color, UUID uuid, boolean export, boolean mirrorUV,
                         boolean isOpen, boolean visibility, int autouv, List<BBModelOutlineInfo> children, Vec3f rotation) {
         this.model = model;
         this.name = name;
@@ -70,7 +70,7 @@ public final class BBModelGroup implements BBModelOutlineInfo, BBModelNode {
         return origin;
     }
 
-    public Color color() {
+    public RgbColor color() {
         return color;
     }
 

@@ -5,7 +5,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.icon.Icon;
 import dev.ultreon.quantum.client.util.Renderable;
 import dev.ultreon.quantum.text.MutableText;
-import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.*;
@@ -57,9 +57,9 @@ public class NotifyManager implements Renderable {
             float motionRatio = notification.getMotion();
             int motion = (int) ((width + NotifyManager.OFFSET) * motionRatio);
 
-            renderer.fill(x + motion + 1, y, width - 2, NotifyManager.HEIGHT, Color.rgb(0x101010))
-                    .fill(x + motion, y + 1, width, NotifyManager.HEIGHT - 2, Color.rgb(0x101010))
-                    .box(x + motion + 1, y + 1, width - 2, NotifyManager.HEIGHT - 2, Color.rgb(0x505050));
+            renderer.fill(x + motion + 1, y, width - 2, NotifyManager.HEIGHT, RgbColor.rgb(0x101010))
+                    .fill(x + motion, y + 1, width, NotifyManager.HEIGHT - 2, RgbColor.rgb(0x101010))
+                    .box(x + motion + 1, y + 1, width - 2, NotifyManager.HEIGHT - 2, RgbColor.rgb(0x505050));
 
             if (icon != null) {
                 icon.render(renderer, x + motion + 4, y + 4, 32, 32, deltaTime);
@@ -67,9 +67,9 @@ public class NotifyManager implements Renderable {
 
             int textX = icon == null ? 0 : 37;
 
-            renderer.textLeft(title, x + motion + 5 + textX, y + 5, Color.rgb(0xd0d0d0))
-                    .textLeft(summary, x + motion + 5 + textX, y + 17, Color.rgb(0xb0b0b0))
-                    .textLeft(subText, x + motion + 5 + textX, y + 29, Color.rgb(0x707070));
+            renderer.textLeft(title, x + motion + 5 + textX, y + 5, RgbColor.rgb(0xd0d0d0))
+                    .textLeft(summary, x + motion + 5 + textX, y + 17, RgbColor.rgb(0xb0b0b0))
+                    .textLeft(subText, x + motion + 5 + textX, y + 29, RgbColor.rgb(0x707070));
 
             y += NotifyManager.HEIGHT + NotifyManager.GAP;
         }

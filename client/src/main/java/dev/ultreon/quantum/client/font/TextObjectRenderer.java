@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
 public class TextObjectRenderer {
     private final GlyphLayout layout = new GlyphLayout();
@@ -39,7 +40,7 @@ public class TextObjectRenderer {
 
         for (TextObject cur : this.text) {
             String rawText = cur.createString();
-            Color color = Color.WHITE;
+            Color color = RgbColor.WHITE;
             boolean bold = false;
             boolean italic = false;
             boolean underlined = false;

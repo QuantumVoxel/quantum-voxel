@@ -1,8 +1,9 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.Color;
+import dev.ultreon.quantum.util.RgbColor;
 
-import static dev.ultreon.quantum.util.Color.rgba;
+import static dev.ultreon.quantum.util.RgbColor.rgba;
 
 public class Skybox {
     private final static int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
@@ -23,7 +24,7 @@ public class Skybox {
         negZColor.set(sunRiseSetMix(daytime, null, ClientWorld.SUN_RISE_COLOR));
     }
 
-    private static Color timeMix(int daytime, dev.ultreon.quantum.util.Color dayTopColor, dev.ultreon.quantum.util.Color nightTopColor) {
+    private static Color timeMix(int daytime, RgbColor dayTopColor, RgbColor nightTopColor) {
         if (daytime < Skybox.riseSetDuration / 2) {
             return ClientWorld.mixColors(
                     dayTopColor, nightTopColor,
@@ -43,7 +44,7 @@ public class Skybox {
         }
     }
 
-    private static Color sunRiseSetMix(int daytime, dev.ultreon.quantum.util.Color sunRiseColor, dev.ultreon.quantum.util.Color sunSetColor) {
+    private static Color sunRiseSetMix(int daytime, RgbColor sunRiseColor, RgbColor sunSetColor) {
         final var nullColor = rgba(0x00000000);
 
         if (sunRiseColor == null) {

@@ -359,7 +359,7 @@ public class DesktopInput extends GameInput {
 
         // Scale the coordinates and pass to the current screen
         currentScreen.mouseMove((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()));
-        return true;
+        return false;
     }
 
     /**
@@ -385,7 +385,7 @@ public class DesktopInput extends GameInput {
                     (int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()),
                     (int) (Gdx.input.getDeltaX(pointer) / this.client.getGuiScale()), (int) (Gdx.input.getDeltaY(pointer) / this.client.getGuiScale()), pointer);
         }
-        return true;
+        return false;
     }
 
     /**
@@ -521,7 +521,7 @@ public class DesktopInput extends GameInput {
         if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1).isCanceled())
             eventHandled |= currentScreen.mouseClick((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1);
 
-        return eventHandled;
+        return false;
     }
 
     @Override

@@ -472,7 +472,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Initialize the render pipeline
         this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
-//                .node(new SkyboxNode())
+                .node(new CollectNode())
+                .node(new WorldDepthNode())
+                .node(new SSAONode())
                 .node(new CollectNode())
                 .node(new WorldDiffuseNode())
                 .node(new BackgroundNode())

@@ -77,6 +77,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
         return this.widgets;
     }
 
+    @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         for (var widget : this.widgets) {
             if (!widget.visible) {
@@ -173,7 +174,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
-        for (var widget : this.widgets) {
+        for (var widget : this.widgets.reversed()) {
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseClick(mouseX, mouseY, button, clicks)) return true;
                 continue;
@@ -185,7 +186,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        for (var widget : this.widgets) {
+        for (var widget : this.widgets.reversed()) {
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mousePress(mouseX, mouseY, button)) return true;
                 continue;
@@ -197,7 +198,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
-        for (var widget : this.widgets) {
+        for (var widget : this.widgets.reversed()) {
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseRelease(mouseX, mouseY, button)) return true;
                 continue;
@@ -209,7 +210,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
-        for (var widget : this.widgets) {
+        for (var widget : this.widgets.reversed()) {
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseWheel(mouseX, mouseY, rotation)) return true;
                 continue;
@@ -221,7 +222,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public void mouseMove(int mouseX, int mouseY) {
-        for (var widget : this.widgets) {
+        for (var widget : this.widgets.reversed()) {
             if (!widget.visible) {
                 if (widget.ignoreBounds) {
                     widget.mouseMove(mouseX, mouseY);
@@ -237,7 +238,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
-        for (var widget : this.widgets) {
+        for (var widget : this.widgets.reversed()) {
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer)) return true;
                 continue;
