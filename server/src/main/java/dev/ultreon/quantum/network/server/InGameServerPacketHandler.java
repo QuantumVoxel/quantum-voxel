@@ -141,6 +141,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
                 case START -> world.startBreaking(pos, this.player);
                 case CONTINUE -> world.continueBreaking(pos, 1.0F / (Math.max(block.getHardness() * QuantumServer.TPS / efficiency, 0) + 1), this.player);
                 case STOP -> world.stopBreaking(pos, this.player);
+                case BROKEN -> world.destroyBlock(pos, this.player);
             }
         });
     }

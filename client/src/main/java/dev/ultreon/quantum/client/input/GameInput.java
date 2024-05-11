@@ -19,7 +19,7 @@ import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.Constants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.input.util.*;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.entity.player.Player;

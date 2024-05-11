@@ -2,9 +2,10 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.Screenshot;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Position;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Panel;
@@ -18,6 +19,7 @@ public class PauseScreen extends Screen {
     private TextButton optionsButton;
     private TextButton exitWorldButton;
     private Panel panel;
+    private Screenshot screenshot;
 
     public PauseScreen() {
         super("Game Paused");
@@ -80,5 +82,13 @@ public class PauseScreen extends Screen {
 
     public Label getGamePausedLabel() {
         return gamePausedLabel;
+    }
+
+    public void setScreenshot(Screenshot screenshot) {
+        this.screenshot = screenshot;
+    }
+
+    public Screenshot getScreenshot() {
+        return this.screenshot;
     }
 }

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 
 /**
  * Represents a screenshot grabbed from the game.
@@ -139,6 +140,10 @@ public class Screenshot {
 
         // Return the captured screenshot as a Screenshot object
         return new Screenshot(pixmap);
+    }
+
+    public void save(Path resolve) {
+        this.save(resolve.toString());
     }
 
     static class ImageSelection implements Transferable {

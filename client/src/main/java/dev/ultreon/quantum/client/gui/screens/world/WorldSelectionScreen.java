@@ -1,24 +1,19 @@
 package dev.ultreon.quantum.client.gui.screens.world;
 
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Position;
-import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.screens.Screen;
-import dev.ultreon.quantum.client.gui.screens.WorldCreationScreen;
-import dev.ultreon.quantum.client.gui.screens.WorldDeleteConfirmScreen;
-import dev.ultreon.quantum.client.gui.widget.Rectangle;
-import dev.ultreon.quantum.client.gui.widget.TextButton;
-import dev.ultreon.quantum.client.gui.widget.WorldCardList;
+import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.*;
+import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -28,7 +23,6 @@ import java.util.stream.Stream;
 public class WorldSelectionScreen extends Screen {
     public static final Path WORLDS_DIR = Paths.get("worlds");
     private static final int ENTRY_WIDTH = 200;
-    private static final int ENTRY_HEIGHT = 300;
     private WorldCardList worldList;
     private WorldStorage selected;
     private TextButton createButton;
@@ -55,24 +49,30 @@ public class WorldSelectionScreen extends Screen {
         builder.add(Rectangle.create().bounds(() -> new Bounds(this.getWidth() - 60, 0, 60, this.getHeight() - 41)).backgroundColor(RgbColor.rgba(0, 0, 0, .2f)));
 
         this.prevButton = builder.add(TextButton.of(TextObject.literal("<"), 150)
-                .bounds(() -> new Bounds(20, this.getHeight() / 2 - 15, 20, 30))
+                .bounds(() -> new Bounds(20, this.getHeight() / 2 - (this.getHeight() / 2 - 40) - 20, 20, this.getHeight() - 80))
                 .callback(caller -> scrollLeft()));
 
         this.nextButton = builder.add(TextButton.of(TextObject.literal(">"), 150)
-                .bounds(() -> new Bounds(this.getWidth() - 40, this.getHeight() / 2 - 15, 20, 30))
+                .bounds(() -> new Bounds(this.getWidth() - 40, this.getHeight() / 2 - (this.getHeight() / 2 - 40) - 20, 20, this.getHeight() - 80))
                 .callback(caller -> scrollRight()));
+
+        builder.add(Panel.create()
+                .bounds(() -> new Bounds(-5, this.getHeight() - 41, this.getWidth() + 10, 46)));
 
         this.createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
                 .position(() -> new Position(this.getWidth() / 2 - 227, this.getHeight() - 31))
-                .callback(this::createWorld));
+                .callback(this::createWorld)
+                .type(Button.Type.DARK_EMBED));
 
         this.playButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.play"), 150)
                 .position(() -> new Position(this.getWidth() / 2 - 75, this.getHeight() - 31))
-                .callback(this::playWorld));
+                .callback(this::playWorld)
+                .type(Button.Type.DARK_EMBED));
 
         this.deleteWorld = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
                 .position(() -> new Position(this.getWidth() / 2 + 77, this.getHeight() - 31))
-                .callback(this::deleteWorld));
+                .callback(this::deleteWorld)
+                .type(Button.Type.DARK_EMBED));
     }
 
     private void selectWorld(WorldCardList.Entry entry) {
@@ -94,7 +94,21 @@ public class WorldSelectionScreen extends Screen {
     private void deleteWorld(TextButton caller) {
         if (this.selected == null) return;
 
-        this.client.showScreen(new WorldDeleteConfirmScreen(this.selected));
+        this.showDialog(new DialogBuilder(this)
+                .title(TextObject.translation("quantum.dialog.delete_world.title"))
+                .message(TextObject.translation("quantum.dialog.delete_world.message"))
+                .button(TextObject.translation("quantum.ui.yes"), () -> {
+                    try {
+                        selected.delete();
+                    } catch (IOException e) {
+                        CommonConstants.LOGGER.error("Failed to delete world", e);
+                    } finally {
+                        this.getDialog().close();
+                    }
+                })
+                .button(TextObject.translation("quantum.ui.no"), () -> {
+                    this.getDialog().close();
+                }));
     }
 
     private void playWorld(TextButton t) {
@@ -102,7 +116,6 @@ public class WorldSelectionScreen extends Screen {
 
         WorldStorage selected = this.selected;
         this.client.startWorld(selected);
-
     }
 
     private void createWorld(TextButton caller) {
@@ -113,22 +126,27 @@ public class WorldSelectionScreen extends Screen {
         this.selected = storage;
     }
 
-    private void renderItem(Renderer renderer, WorldStorage storage, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
-        renderer.renderFrame(x, y, ENTRY_WIDTH, ENTRY_HEIGHT);
-
-        WorldSaveInfo worldSaveInfo = storage.loadInfo();
-
-        if (renderer.pushScissors(x + 2, y + 2, ENTRY_WIDTH - 4, ENTRY_HEIGHT - 4)) {
-            renderer.textCenter("<bold>" + worldSaveInfo.name(), x + ENTRY_WIDTH / 2, y + 5, 0xffffff);
-            renderer.textCenter("<gray><bold>" + worldSaveInfo.lastPlayedInMode(), x + ENTRY_WIDTH / 2, y + 15, 0xa0a0a0);
-            renderer.popScissors();
-        }
-    }
-
     public List<WorldStorage> locateWorlds() {
         var worlds = new ArrayList<WorldStorage>();
         try (Stream<Path> worldPaths = Files.list(WorldSelectionScreen.WORLDS_DIR)) {
             worlds = worldPaths.map(WorldStorage::new).sorted(Comparator.comparing(o -> o.getDirectory().getFileName().toString())).collect(Collectors.toCollection(ArrayList::new));
+            worlds.sort((o1, o2) -> {
+                try {
+                    if (!o1.exists("info.ubo") && !o2.exists("info.ubo")) {
+                        long millis1 = Files.readAttributes(o1.getDirectory(), BasicFileAttributes.class).lastAccessTime().toMillis();
+                        long millis2 = Files.readAttributes(o2.getDirectory(), BasicFileAttributes.class).lastAccessTime().toMillis();
+                        return Long.compare(millis2, millis1);
+                    };
+                    if (!o1.exists("info.ubo")) return 1;
+                    if (!o2.exists("info.ubo")) return -1;
+
+                    long millis1 = o1.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+                    long millis2 = o2.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+                    return Long.compare(millis2, millis1);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (IOException ignored) {
             // ignored
         }

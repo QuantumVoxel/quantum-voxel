@@ -4,10 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Position;
-import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.widget.Button;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
@@ -42,6 +40,7 @@ public class ModListScreen extends Screen {
     public void build(GuiBuilder builder) {
         this.list = builder.add(new SelectionList<ModContainer>()
                 .itemHeight(48)
+                .drawBackground(false)
                 .bounds(() -> new Bounds(0, 0, 200, this.size.height - 52))
                 .itemRenderer(this::renderItem)
                 .selectable(true)
@@ -53,11 +52,13 @@ public class ModListScreen extends Screen {
                         .toList()));
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
-                .position(() -> new Position(5, this.size.height - 51)));
+                .position(() -> new Position(5, this.size.height - 51))
+                .type(Button.Type.DARK_EMBED));
         this.configButton.disable();
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190).position(() -> new Position(5, this.size.height - 26)))
-                .callback(this::onBack);
+                .callback(this::onBack)
+                .type(Button.Type.DARK_EMBED);
     }
 
     public void onBack(TextButton button) {
@@ -104,20 +105,29 @@ public class ModListScreen extends Screen {
         renderer.blit(iconId, x, y, size, size, 0, 0, texW, texH, texW, texH);
     }
 
+    @Override
+    protected void renderBackground(Renderer renderer) {
+        super.renderBackground(renderer);
+
+        renderer.renderFrame(-2, -2, this.list.getWidth() + 4, this.size.height + 4);
+    }
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+        int x = 220;
+        int y = 20;
+        int xIcon = x + 84;
+
+        renderer.renderFrame(x - 8, y - 8, size.width - x - 4, size.height - y - 4);
+
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
         ModContainer selected = this.list.getSelected();
         if (selected != null) {
             ModMetadata metadata = selected.getMetadata();
-            int x = 220;
-            int y = 20;
 
             this.drawIcon(renderer, metadata, x, y, 64);
 
-            int xIcon = x + 84;
             renderer.textLeft(TextObject.literal(metadata.getName()).setBold(true), 2, xIcon, y);
             renderer.textLeft("<aqua>ID: <light-gray>" + metadata.getId(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
             renderer.textLeft("<aqua>Version: <light-gray>" + metadata.getVersion().getFriendlyString(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));

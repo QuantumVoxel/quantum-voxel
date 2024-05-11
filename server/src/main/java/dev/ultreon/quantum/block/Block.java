@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.block;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
@@ -216,6 +217,15 @@ public class Block implements DataWriter<MapType> {
 
     public @Nullable ToolLevel getToolRequirement() {
         return toolLevel;
+    }
+
+    public void onDestroy(World world, BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+
+    }
+
+    public Iterable<ItemStack> getDrops(BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+        if (breaker == null) return this.lootGen.generate(new JavaRNG());
+        return this.lootGen.generate(breaker.getRng());
     }
 
     public static class Properties {

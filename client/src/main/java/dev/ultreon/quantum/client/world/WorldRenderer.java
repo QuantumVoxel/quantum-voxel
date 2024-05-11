@@ -601,9 +601,10 @@ public final class WorldRenderer implements DisposableContainer {
             }
         }
 
-        for (var entry : this.breakingInstances.entrySet()) {
+        for (var entry : new HashMap<>(this.breakingInstances).entrySet()) {
             if (!breaking.containsKey(entry.getKey())) {
                 scene3D.destroy(entry.getValue());
+                this.breakingInstances.remove(entry.getKey());
             }
         }
     }

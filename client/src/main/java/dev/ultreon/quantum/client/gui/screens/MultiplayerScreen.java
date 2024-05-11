@@ -1,12 +1,15 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Position;
+import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.widget.Button;
+import dev.ultreon.quantum.client.gui.widget.Panel;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.TextEntry;
 import dev.ultreon.quantum.client.text.Language;
-import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,16 +27,17 @@ public class MultiplayerScreen extends Screen {
 
     @Override
     public void build(GuiBuilder builder) {
+        builder.add(Panel.create().bounds(() -> new Bounds(this.size.width / 2 - 105, this.size.height / 2 - 15, 210, 57)));
+
         this.entry = builder.add(TextEntry.of().position(() -> new Position(this.size.width / 2 - 100, this.size.height / 2 - 10)))
                 .callback(this::validateServerIp)
                 .hint(TextObject.translation("quantum.screen.multiplayer.server_ip"));
 
+
         this.joinButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98)
-                        .position(() -> new Position(this.size.width / 2 + 2, this.size.height / 2 + 15)))
-                .callback(this::joinServer);
-        builder.add(TextButton.of(UITranslations.BACK, 98)
-                        .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 2 + 15)))
-                .callback(caller -> this.back());
+                .position(() -> new Position(this.size.width / 2 + 2, this.size.height / 2 + 15))
+                .type(Button.Type.DARK_EMBED)
+                .callback(this::joinServer));
         this.joinButton.disable();
     }
 

@@ -8,27 +8,26 @@ import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Rectangle;
-import dev.ultreon.quantum.client.gui.widget.TextButton;
+import dev.ultreon.quantum.client.gui.widget.TitleButton;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
-import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
 public class TitleScreen extends Screen {
     private Label titleLabel;
-    private TextButton singleplayerButton;
-    private TextButton multiplayerButton;
-    private TextButton modListButton;
-    private TextButton optionsButton;
-    private TextButton quitButton;
+    private TitleButton singleplayerButton;
+    private TitleButton multiplayerButton;
+    private TitleButton modListButton;
+    private TitleButton optionsButton;
+    private TitleButton quitButton;
     private final Resizer resizer;
-    private TextButton worldGenTestButton;
+    private TitleButton worldGenTestButton;
 
     public TitleScreen() {
-        super(TextObject.translation("quantum.screen.title"));
+        super((TextObject) null, null);
 
         this.resizer = new Resizer(7680, 4320);
     }
@@ -37,62 +36,65 @@ public class TitleScreen extends Screen {
     public void build(GuiBuilder builder) {
         this.client.setActivity(GameActivity.MAIN_MENU);
 
-        builder.add(Rectangle.create()
-                .bounds(() -> new Bounds(0, 0, 250, this.size.height))
-                .backgroundColor(RgbColor.BLACK.withAlpha(0x80)));
+        builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
 
-        this.titleLabel = builder.add(Label.of(Formatter.format("<bold>Quantum<gray><bold>Voxel")).position(() -> new Position(125, 40))
+        this.titleLabel = builder.add(Label.of(Formatter.format("<bold>Quantum<gray><bold>Voxel")).position(() -> new Position(this.size.width / 2, 40))
                 .alignment(Alignment.CENTER)
                 .scale(2));
 
-        this.singleplayerButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.title.singleplayer"), 150)
-                .position(() -> new Position(50, this.size.height / 2 - 35))
+        this.singleplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.singleplayer"), 100)
+                        .icon(QuantumClient.id("textures/gui/title/singleplayer.png"))
+                .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, this.size.height / 2 - 100, 100, 150))
                 .callback(this::openSingleplayer));
 
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 150)
-                    .position(() -> new Position(50, this.size.height / 2 - 60))
-                    .callback(this::openTest));
-        }
+//        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+//            this.worldGenTestButton = builder.add(TitleButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
+//                    .position(() -> new Position(50, this.size.height / 2 - 60))
+//                    .callback(this::openTest));
+//        }
 
-        this.multiplayerButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.multiplayer"), 150)
-                        .position(() -> new Position(50, this.size.height / 2 - 10)))
-                .callback(this::openMultiplayer);
+        this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
+                        .icon(QuantumClient.id("textures/gui/title/multiplayer.png"))
+                        .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100, this.size.height / 2 - 100, 100, 150))
+                .callback(this::openMultiplayer));
 
-        this.modListButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list"), 150)
-                .position(() -> new Position(50, this.size.height / 2 + 15))
+        this.modListButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.mod_list"), 100)
+                        .icon(QuantumClient.id("textures/gui/title/mods.png"))
+                        .bounds(() -> new Bounds(this.size.width / 2 - 50, this.size.height / 2 - 100, 100, 150))
                 .callback(this::showModList));
 
-        this.optionsButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.options"), 150)
-                .position(() -> new Position(50, this.size.height / 2 + 40))
+        this.optionsButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.options"), 100)
+                        .icon(QuantumClient.id("textures/gui/title/options.png"))
+                .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50, this.size.height / 2 - 100, 100, 150))
                 .callback(this::showOptions));
 
-        this.quitButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.title.quit"), 150)
-                .position(() -> new Position(50, this.size.height / 2 + 78))
+        this.quitButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.quit"), 100)
+                        .icon(QuantumClient.id("textures/gui/title/quit.png"))
+                .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50 + 10 + 100, this.size.height / 2 - 100, 100, 150))
                 .callback(this::quitGame));
     }
 
-    private void openTest(TextButton textButton) {
+    private void openTest(TitleButton textButton) {
         this.client.showScreen(new WorldGenTestScreen());
     }
 
-    private void quitGame(TextButton caller) {
+    private void quitGame(TitleButton caller) {
         Gdx.app.exit();
     }
 
-    private void openSingleplayer(TextButton caller) {
+    private void openSingleplayer(TitleButton caller) {
         this.client.showScreen(new WorldSelectionScreen());
     }
 
-    private void openMultiplayer(TextButton caller) {
+    private void openMultiplayer(TitleButton caller) {
         this.client.showScreen(new MultiplayerScreen());
     }
 
-    private void showOptions(TextButton caller) {
+    private void showOptions(TitleButton caller) {
         this.client.showScreen(new SettingsScreen());
     }
 
-    private void showModList(TextButton caller) {
+    private void showModList(TitleButton caller) {
         this.client.showScreen(new ModListScreen(this));
     }
 
@@ -108,32 +110,30 @@ public class TitleScreen extends Screen {
         float drawX = (this.size.width - drawWidth) / 2;
         float drawY = (this.size.height - drawHeight) / 2;
         renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
-
-        client.newFont.drawText(renderer, "!\"#", 20, 20, RgbColor.WHITE, true);
     }
 
-    public TextButton getSingleplayerButton() {
+    public TitleButton getSingleplayerButton() {
         return this.singleplayerButton;
     }
 
     @Nullable
-    public TextButton getWorldGenTestButton() {
+    public TitleButton getWorldGenTestButton() {
         return worldGenTestButton;
     }
 
-    public TextButton getMultiplayerButton() {
+    public TitleButton getMultiplayerButton() {
         return this.multiplayerButton;
     }
 
-    public TextButton getModListButton() {
+    public TitleButton getModListButton() {
         return this.modListButton;
     }
 
-    public TextButton getOptionsButton() {
+    public TitleButton getOptionsButton() {
         return this.optionsButton;
     }
 
-    public TextButton getQuitButton() {
+    public TitleButton getQuitButton() {
         return this.quitButton;
     }
 

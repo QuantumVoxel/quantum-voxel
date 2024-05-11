@@ -1,5 +1,8 @@
 package dev.ultreon.quantum.block.state;
 
+import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.UnsafeApi;
 import dev.ultreon.quantum.block.Block;
@@ -69,7 +72,6 @@ public class BlockProperties {
     public static BlockProperties load(MapType data) {
         Block block = Registries.BLOCK.get(Identifier.parse(data.getString("block")));
         BlockProperties meta = block.createMeta();
-        meta.entries.clear();
         meta.entries.putAll(meta.loadEntries(data.getMap("entries", new MapType())));
 
         return meta;
@@ -239,5 +241,15 @@ public class BlockProperties {
 
     public boolean is(Block block) {
         return this.block == block;
+    }
+
+    public void onDestroy(World world, BlockPos breaking, Player breaker) {
+        this.block.onDestroy(world, breaking, this, breaker);
+
+        if (!breaker.getWorld().isClientSide()) {
+            for (ItemStack stack : this.block.getDrops(breaking, this, breaker)) {
+                world.drop(stack, new Vec3d(breaking.x() + 0.5, breaking.y() + 0.5, breaking.z() + 0.5));
+            }
+        }
     }
 }

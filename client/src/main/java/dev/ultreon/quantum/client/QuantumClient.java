@@ -54,10 +54,7 @@ import dev.ultreon.quantum.client.audio.ClientSound;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.config.GameSettings;
 import dev.ultreon.quantum.client.font.Font;
-import dev.ultreon.quantum.client.gui.Callback;
-import dev.ultreon.quantum.client.gui.Hud;
-import dev.ultreon.quantum.client.gui.NotifyManager;
-import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.debug.DebugOverlay;
 import dev.ultreon.quantum.client.gui.overlay.LoadingOverlay;
 import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
@@ -186,6 +183,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     });
     private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
     public VideoPlayer backgroundVideo = VideoPlayerCreator.createVideoPlayer();
+    private boolean screenshotWorldOnly;
+    public WorldStorage openedWorld;
 
     private IClipboard getClipboard() {
         if (Platform.get() != Platform.MACOSX) {
@@ -238,6 +237,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public GameInput input;
     @Nullable
     public ClientWorld world;
+    private boolean skipScreenshot = false;
     @Nullable
     public WorldRenderer worldRenderer;
     @UnknownNullability
@@ -473,12 +473,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Initialize the render pipeline
         this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
                 .node(new CollectNode())
-                .node(new WorldDepthNode())
-                .node(new SSAONode())
-                .node(new CollectNode())
                 .node(new WorldDiffuseNode())
-                .node(new BackgroundNode())
-                .node(new MainRenderNode()));
+                .node(new BackgroundNode()));
 
         // Create a white pixel for the shape drawer
         Pixmap pixmap = deferDispose(new Pixmap(1, 1, Pixmap.Format.RGBA8888));
@@ -638,6 +634,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * Makes a screenshot of the game.
      */
     public CompletableFuture<Screenshot> screenshot() {
+        this.triggerScreenshot = true;
+        this.screenshotFuture = new CompletableFuture<>();
+        return this.screenshotFuture;
+    }
+
+    /**
+     * Makes a screenshot of the game.
+     */
+    public CompletableFuture<Screenshot> screenshot(boolean worldOnly) {
+        this.screenshotWorldOnly = worldOnly;
         this.triggerScreenshot = true;
         this.screenshotFuture = new CompletableFuture<>();
         return this.screenshotFuture;
@@ -1013,6 +1019,22 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return invokeAndWait(() -> this.showScreen(finalNext));
         }
 
+        if (!skipScreenshot && next instanceof PauseScreen pause && world != null) {
+            this.screenshot(true).thenAccept(screenshot -> {
+                if (screenshot != null) {
+                    screenshot.save(openedWorld.getDirectory().resolve("picture.png"));
+                }
+
+                this.skipScreenshot = true;
+                invoke(() -> {
+                    boolean b = this.showScreen(pause);
+                    this.skipScreenshot = false;
+                    return b;
+                });
+            });
+        }
+
+
         var cur = this.screen;
         if (next == null && this.world == null)
             next = new TitleScreen();
@@ -1126,13 +1148,26 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.height = Gdx.graphics.getHeight();
 
         if (this.width == 0 || this.height == 0) return;
+
+        if (this.screenshotWorldOnly) {
+            ScreenUtils.clear(0, 0, 0, 0, true);
+            this.gameRenderer.renderWorld(0f);
+            this.captureScreenshot = false;
+            this.triggerScreenshot = false;
+
+            Screenshot grabbed = Screenshot.grab(this.width, this.height);
+            screenshotFuture.complete(grabbed);
+            ScreenUtils.clear(0, 0, 0, 0, true);
+            this.screenshotWorldOnly = false;
+        }
+
         if (this.triggerScreenshot) this.prepareScreenshot();
 
         QuantumClient.PROFILER.section("renderGame", () -> this.renderGame(renderer, deltaTime));
 
-        if (this.captureScreenshot) this.handleScreenshot();
+        if (this.captureScreenshot && !this.screenshotWorldOnly) this.handleScreenshot();
 
-        if (this.screenshotFlashTime > System.currentTimeMillis() - 200) {
+        if (!this.screenshotWorldOnly && this.screenshotFlashTime > System.currentTimeMillis() - 200) {
             this.renderer.begin();
             this.shapes.filledRectangle(0, 0, this.width, this.height, this.tmpColor.set(1, 1, 1, 1 - (System.currentTimeMillis() - this.screenshotFlashTime) / 200f));
             this.renderer.end();
@@ -1603,7 +1638,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
 
             if (world.continueBreaking(breaking, 1.0F / (Math.max(this.breakingBlock.getHardness() * QuantumServer.TPS / efficiency, 0) + 1), this.player) != BreakResult.CONTINUE) {
-                this.stopBreaking();
+                Vec3i pos = hitResult.getPos();
+                world.set(pos.x, pos.y, pos.z, BlockProperties.AIR, BlockFlags.UPDATE | BlockFlags.SYNC);
+                this.resetBreaking();
             } else {
                 if (this.oldSelected != this.player.selected) {
                     this.resetBreaking();

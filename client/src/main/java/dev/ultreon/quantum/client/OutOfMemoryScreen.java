@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client;
 import dev.ultreon.quantum.client.gui.Alignment;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Position;
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;

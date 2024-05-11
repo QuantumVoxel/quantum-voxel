@@ -16,6 +16,7 @@ public class BlockEvents {
     public static final Event<BlockPlaced> BLOCK_PLACED = Event.create();
     public static final Event<AttemptBlockRemoval> ATTEMPT_BLOCK_REMOVAL = Event.withResult();
     public static final Event<BlockRemoved> BLOCK_REMOVED = Event.create();
+    public static final Event<BreakBlock> BREAK_BLOCK = Event.withResult();
 
     @FunctionalInterface
     public interface SetBlock {
@@ -40,5 +41,10 @@ public class BlockEvents {
     @FunctionalInterface
     public interface BlockRemoved {
         void onBlockRemoved(ServerPlayer player, BlockProperties removed, BlockPos pos, ItemStack stack);
+    }
+
+    @FunctionalInterface
+    public interface BreakBlock {
+        EventResult onBreakBlock(World player, BlockPos removed, BlockProperties pos, Player stack);
     }
 }

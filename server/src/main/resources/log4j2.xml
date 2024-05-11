@@ -10,6 +10,11 @@
                     disableAnsi="false"/>
         </Console>
 
+        <JTextAreaAppender name="jtextarea-log" maxLines="100">
+            <PatternLayout>
+                <pattern>[%d{HH:mm:ss}] [%t/%level] (%logger) %msg%n</pattern>
+            </PatternLayout>
+        </JTextAreaAppender>
         <!--=======================-->
         <!--    Normal log file    -->
         <!--=======================-->
@@ -42,6 +47,7 @@
         <!--======================-->
         <!--    Logging levels    -->
         <!--======================-->
+        <Logger name="io.netty" level="WARN"/>
         <Root level="all">
             <AppenderRef ref="SysOut" level="TRACE"/>
             <AppenderRef ref="LatestFile" level="INFO"/>

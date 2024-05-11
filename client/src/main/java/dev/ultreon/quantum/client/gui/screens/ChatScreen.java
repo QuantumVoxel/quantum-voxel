@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.overlay.ChatOverlay;
 import dev.ultreon.quantum.client.gui.widget.ChatTextEntry;
 import dev.ultreon.quantum.network.packets.c2s.C2SChatPacket;

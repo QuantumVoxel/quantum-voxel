@@ -1,9 +1,10 @@
 package dev.ultreon.quantum.client.gui.screens.tabs;
 
 import dev.ultreon.quantum.client.gui.Bounds;
+import dev.ultreon.quantum.client.gui.TitleWidget;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.Tab;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
@@ -202,26 +203,44 @@ public abstract class TabbedUI extends Screen {
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
+        TitleWidget title = this.titleWidget;
+        int oldMouseY = mouseY;
+        if (title != null) {
+            mouseY -= title.getHeight();
+        }
+
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseClick(mouseX, mouseY, button, clicks)) return true;
             if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseClick(mouseX, mouseY, button, clicks)) return true;
         }
 
-        return super.mouseClick(mouseX, mouseY, button, clicks);
+        return super.mouseClick(mouseX, oldMouseY, button, clicks);
     }
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
+        TitleWidget title = this.titleWidget;
+        int oldMouseY = mouseY;
+        if (title != null) {
+            mouseY -= title.getHeight();
+        }
+
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mousePress(mouseX, mouseY, button)) return true;
             if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mousePress(mouseX, mouseY, button)) return true;
         }
 
-        return super.mousePress(mouseX, mouseY, button);
+        return super.mousePress(mouseX, oldMouseY, button);
     }
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        TitleWidget title = this.titleWidget;
+        int oldMouseY = mouseY;
+        if (title != null) {
+            mouseY -= title.getHeight();
+        }
+
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseRelease(mouseX, mouseY, button)) {
                 this.selected = this.tabs.indexOf(tab);
@@ -232,7 +251,7 @@ public abstract class TabbedUI extends Screen {
             if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseRelease(mouseX, mouseY, button)) return true;
         }
 
-        return super.mouseRelease(mouseX, mouseY, button);
+        return super.mouseRelease(mouseX, oldMouseY, button);
     }
 
     @Override
@@ -272,7 +291,7 @@ public abstract class TabbedUI extends Screen {
     public static class TabbedUIBuilder extends GuiBuilder {
         private final GuiBuilder guiBuilder;
         private final List<Tab> tabs = new ArrayList<>();
-        private Supplier<Bounds> contentBounds = () -> new Bounds(0, 0, screen().getWidth(), screen().getHeight());
+        private Supplier<Bounds> contentBounds = () -> new Bounds(0, 0, screen().size.width, screen().size.height);
         private final TabbedUI parent;
 
         public TabbedUIBuilder(GuiBuilder guiBuilder, TabbedUI parent) {

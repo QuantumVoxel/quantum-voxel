@@ -78,6 +78,8 @@ public class Renderer implements Disposable {
     private final GlStateStack glState = new GlStateStack();
     private int width;
     private int height;
+    private int scissorOffsetX;
+    private int scissorOffsetY;
     private boolean blurred;
 
     public static final int FBO_SIZE = 1024;
@@ -1812,7 +1814,7 @@ public class Renderer implements Disposable {
     @CheckReturnValue
     private boolean pushScissorsInternal(Rectangle rect) {
         rect.getPosition(this.tmp2A);
-        this.tmp3A.set(this.globalTranslation.peek());
+        this.tmp3A.set(this.globalTranslation.peek()).add(this.scissorOffsetX, this.scissorOffsetY, 0);
         rect.setPosition(this.tmp2A.add(this.tmp3A.x, this.tmp3A.y));
 
         if (rect.x < 0) {
@@ -2066,6 +2068,10 @@ public class Renderer implements Disposable {
         renderFrame(id("textures/gui/frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
     }
 
+    public void renderPopoutFrame(int x, int y, int w, int h) {
+        renderFrame(id("textures/gui/popout_frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
+    }
+
     public void renderFrame(@NotNull Identifier texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
         renderFrame(texture, x, y, w, h, u, v, uvW, uvH, texWidth, texHeight, RgbColor.WHITE);
     }
@@ -2136,6 +2142,10 @@ public class Renderer implements Disposable {
             QuantumClient.LOGGER.warn("Batch still drawing", new Exception());
             this.batch.end();
         }
+
+        this.scissorOffsetX = 0;
+        this.scissorOffsetY = 0;
+
         this.batch.begin();
 
         this.iTime = System.currentTimeMillis() / 1000f;
@@ -2545,5 +2555,10 @@ public class Renderer implements Disposable {
 
     public Renderable obtainRenderable() {
         return this.renderablePool.obtain();
+    }
+
+    public void scissorOffset(int x, int y) {
+        this.scissorOffsetX += x;
+        this.scissorOffsetY += y;
     }
 }

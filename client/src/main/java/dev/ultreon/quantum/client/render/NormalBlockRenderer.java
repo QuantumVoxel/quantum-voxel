@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher.LightLevelData;
 import dev.ultreon.quantum.client.render.meshing.PerCornerLightData;
+import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
 
 public class NormalBlockRenderer implements BlockRenderer {
@@ -30,7 +31,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y1, z).setNor(0, 0, 1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y2, z).setNor(0, 0, 1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        RgbColor c = this.getColor((int) x1, (int) y1, (int) z - 1);
+        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
         if (lightData == null) {
             this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
             this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
@@ -60,7 +61,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y1, z).setNor(0, 0, -1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y2, z).setNor(0, 0, -1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        RgbColor c = getColor((int) x1, (int) y1, (int) z);
+        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
         if (lightData == null) {
             this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
             this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
@@ -90,7 +91,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x, y2, z1).setNor(-1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x, y2, z2).setNor(-1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        RgbColor c = getColor((int) x, (int) y1, (int) z1);
+        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
         if (lightData == null) {
             this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
             this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
@@ -120,7 +121,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x, y2, z1).setNor(1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x, y2, z2).setNor(1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        RgbColor c = this.getColor((int) x - 1, (int) y1, (int) z1);
+        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
         if (lightData == null) {
             this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
             this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
@@ -150,7 +151,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y, z1).setNor(0, 1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y, z2).setNor(0, 1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        RgbColor c = this.getColor((int) x1, (int) y - 1, (int) z1);
+        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
         if (lightData == null) {
             this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
             this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
@@ -180,7 +181,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y, z1).setNor(0, -1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y, z2).setNor(0, -1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        RgbColor c = this.getColor((int) x1, (int) y, (int) z1);
+        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
         if (lightData == null) {
             this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
             this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
@@ -196,7 +197,7 @@ public class NormalBlockRenderer implements BlockRenderer {
         builder.rect(this.c00, this.c10, this.c11, this.c01);
     }
 
-    protected RgbColor getColor(int x, int y, int z) {
+    protected Color getColor(int x, int y, int z) {
         return RgbColor.WHITE;
     }
 

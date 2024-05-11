@@ -40,12 +40,6 @@ public class MainRenderNode extends RenderNode {
         modelBatch.end();
         this.client.renderer.begin();
 
-        var blurScale = this.blurScale;
-        blurScale += client.screen != null ? Gdx.graphics.getDeltaTime() * 3f : -Gdx.graphics.getDeltaTime() * 3f;
-
-        blurScale = Mth.clamp(blurScale, 0f, 1f);
-        this.blurScale = blurScale;
-
         if (blurScale > 0f) {
             this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
                 this.drawDiffuse(skyboxTexture);
@@ -125,5 +119,9 @@ public class MainRenderNode extends RenderNode {
 
         mesh.setVertices(vertices);
         return mesh;
+    }
+
+    public void blur(float blurScale) {
+        this.blurScale = blurScale;
     }
 }

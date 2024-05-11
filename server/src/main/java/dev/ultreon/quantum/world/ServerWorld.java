@@ -104,12 +104,11 @@ public class ServerWorld extends World {
     }
 
     private MapType save(MapType worldData) {
-        BlockPos spawnPoint = QuantumServer.invokeAndWait(this::getSpawnPoint);
         worldData.putInt("playTime", this.playTime);
         worldData.putUUID("uid", this.uid);
-        worldData.putInt("spawnX", spawnPoint.x());
-        worldData.putInt("spawnY", spawnPoint.y());
-        worldData.putInt("spawnZ", spawnPoint.z());
+        worldData.putInt("spawnX", spawnPoint.x);
+        worldData.putInt("spawnY", spawnPoint.y);
+        worldData.putInt("spawnZ", spawnPoint.z);
         worldData.putLong("seed", this.seed);
 
         ListType<MapType> recordedChanges = new ListType<>();

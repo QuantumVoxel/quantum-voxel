@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.client;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 public class IntegratedServer extends QuantumServer {
@@ -163,13 +166,20 @@ public class IntegratedServer extends QuantumServer {
 
     @Override
     public void save(boolean silent) throws IOException {
-        super.save(silent);
+        try {
+            super.save(silent);
+        } catch (IOException e) {
+            QuantumServer.LOGGER.error("Failed to save world", e);
+        }
 
         try {
             this.savePlayer();
         } catch (Exception e) {
             QuantumServer.LOGGER.error("Failed to save local player data.", e);
         }
+    }
+
+    private void saveScreenshot() {
     }
 
     @Override

@@ -35,5 +35,6 @@ public class C2SBlockBreakingPacket extends Packet<InGameServerPacketHandler> {
         START,
         CONTINUE,
         STOP,
+        BROKEN
     }
 }

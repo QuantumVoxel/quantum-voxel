@@ -20,6 +20,7 @@
   "quantum.ui.exitWorld": "Exit World",
   "quantum.ui.backToGame": "Go back to the game",
   "quantum.ui.back": "Back",
+  "quantum.ui.back.arrow": "< Back",
   "quantum.ui.cancel": "Cancel",
   "quantum.ui.confirm": "Confirm",
   "quantum.ui.proceed": "Proceed",

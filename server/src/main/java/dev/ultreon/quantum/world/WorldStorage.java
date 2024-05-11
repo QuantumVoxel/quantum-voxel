@@ -2,16 +2,21 @@ package dev.ultreon.quantum.world;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.util.Hashing;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 
 /**
@@ -24,6 +29,8 @@ public final class WorldStorage {
     private MapType infoData;
     private boolean infoLoaded;
     private WorldSaveInfo info;
+    private String sha256Name;
+    private String name;
 
     /**
      * Creates a new world storage instance from the given directory.
@@ -105,7 +112,7 @@ public final class WorldStorage {
     public void createDir(String path) throws IOException {
         // Validate path
         var worldPath = this.validatePath(path);
-        
+
         // Create the directory if it doesn't exist
         if (Files.notExists(worldPath.getParent(), LinkOption.NOFOLLOW_LINKS)) {
             Files.createDirectories(worldPath.getParent());
@@ -130,7 +137,7 @@ public final class WorldStorage {
         if (Files.notExists(worldPath.getParent(), LinkOption.NOFOLLOW_LINKS)) {
             Files.createDirectories(worldPath.getParent());
         }
-        
+
         return worldPath;
     }
 
@@ -176,8 +183,8 @@ public final class WorldStorage {
         if (Files.notExists(this.directory)) return false;
         try (var stream = Files.walk(this.directory)) {
             stream.sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+                    .map(Path::toFile)
+                    .forEach(File::delete);
             return true;
         }
     }
@@ -215,5 +222,72 @@ public final class WorldStorage {
         }
 
         return this.info;
+    }
+
+    public boolean hasInfo() {
+        return Files.exists(this.getDirectory().resolve("info.ubo"));
+    }
+
+    public <V, K> String getSHA256Name() {
+        if (sha256Name == null) {
+            String string = getDirectory().getFileName().toString();
+            Hashing.hashMD5(string.getBytes(StandardCharsets.UTF_8));
+
+            sha256Name = bytes2hex(hashSHA256(string.getBytes(StandardCharsets.UTF_8)));
+        }
+
+        return sha256Name;
+    }
+
+    public static <V, K> String createFolderName() {
+        long l = System.currentTimeMillis();
+        byte[] bytes = Hashing.hashMD5(new byte[]{
+                (byte) ((l >> 56) & 0xff),
+                (byte) ((l >> 48) & 0xff),
+                (byte) ((l >> 40) & 0xff),
+                (byte) ((l >> 32) & 0xff),
+                (byte) ((l >> 24) & 0xff),
+                (byte) ((l >> 16) & 0xff),
+                (byte) ((l >> 8) & 0xff),
+                (byte) (l & 0xff)
+        });
+
+        return bytes2hex(bytes);
+    }
+
+    private static String bytes2hex(byte[] bytes) {
+        char[] hexArray = "0123456789abcdef".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
+    public static byte @NotNull [] hashSHA256(byte @NotNull [] input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            return md.digest(input);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getName() {
+        if (name != null) return name;
+        if (this.hasInfo()) {
+            this.info = loadInfo();
+            name = this.info.name();
+        } else {
+            name = getDirectory().getFileName().toString();
+        }
+        return name;
+    }
+
+    public void saveInfo(WorldSaveInfo worldSaveInfo) throws IOException {
+        this.info = worldSaveInfo;
+        worldSaveInfo.save(this);
     }
 }

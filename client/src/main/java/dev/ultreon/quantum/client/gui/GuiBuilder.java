@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui;
 
-import dev.ultreon.quantum.client.gui.screens.Screen;
 import dev.ultreon.quantum.client.gui.widget.Widget;
+import dev.ultreon.quantum.text.TextObject;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
@@ -41,4 +41,14 @@ public class GuiBuilder {
                 "screen=" + screen + ']';
     }
 
+    TitleWidget title(TextObject title) {
+        TitleWidget widget = new TitleWidget(this.screen, title);
+        screen.titleWidget = widget;
+        screen.defineRoot(widget);
+        return widget;
+    }
+
+    TitleWidget title(String title) {
+        return this.title(TextObject.literal(title));
+    }
 }

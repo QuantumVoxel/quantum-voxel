@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui.widget;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabContent;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabbedUI;

@@ -1,10 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Alignment;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Notification;
-import dev.ultreon.quantum.client.gui.Position;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.TextButton;

@@ -44,7 +44,7 @@ public class RenderPipeline implements Disposable {
     }
 
     @SuppressWarnings("GDXJavaFlushInsideLoop") // We need to flush before the next node.
-    public void render(ModelBatch modelBatch) {
+    public void render(ModelBatch modelBatch, float blurScale) {
         @Nullable WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
         if (worldRenderer != null) ScreenUtils.clear(worldRenderer.getSkybox().bottomColor, true);
         else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
@@ -64,6 +64,7 @@ public class RenderPipeline implements Disposable {
             modelBatch.flush();
         }
 
+        ((MainRenderNode)this.main).blur(blurScale);
         this.main.render(textures, modelBatch, this.camera, input);
         modelBatch.flush();
 

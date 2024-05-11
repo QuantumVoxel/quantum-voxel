@@ -145,7 +145,10 @@ public class TextureManager implements Disposable {
 
         Preconditions.checkNotNull(id, "id");
         Texture oldTexture = this.textures.get(id);
-        if (oldTexture != null) return oldTexture;
+        if (oldTexture != null) {
+            QuantumClient.LOGGER.warn("Texture already registered {}, possibly leaking textures", id, new Exception("Stacktrace"));
+            return oldTexture;
+        }
 
         FileHandle handle = QuantumClient.resource(id);
         if (!handle.exists()) {

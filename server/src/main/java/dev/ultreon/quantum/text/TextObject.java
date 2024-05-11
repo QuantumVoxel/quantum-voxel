@@ -22,6 +22,10 @@ public abstract class TextObject implements Iterable<TextObject> {
         };
     }
 
+    public static TextObject nullToEmpty(TextObject title) {
+        return title == null ? TextObject.empty() : title;
+    }
+
     public abstract @NotNull String createString();
 
     public String getText() {

@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Size;
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
 import dev.ultreon.quantum.component.GameComponent;
 import dev.ultreon.quantum.component.GameComponentHolder;
@@ -81,9 +81,9 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     @Override
-    public final void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    @ApiStatus.Internal
+    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
         if (!this.visible) return;
-
 
         if (this.isWithinBounds(mouseX, mouseY)) {
             this.root.directHovered = this;

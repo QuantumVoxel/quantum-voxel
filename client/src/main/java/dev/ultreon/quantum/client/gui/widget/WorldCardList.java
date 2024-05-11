@@ -1,13 +1,14 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.Callback;
-import dev.ultreon.quantum.client.gui.Position;
-import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
+import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.WorldEditScreen;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.ColorCode;
+import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -108,9 +110,33 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
         private boolean pressed;
         private boolean wasPressed;
 
+        private TextButton button;
+        private long lastClick;
+
         public Entry(WorldStorage world) {
             super(WorldCardList.this);
             this.world = world;
+
+            this.button = TextButton.of(TextObject.translation("quantum.screen.worlds.edit"))
+                    .bounds(() -> new Bounds(this.pos.x + 5, this.pos.y + this.size.height - 25, this.size.width - 10, 21))
+                    .type(Button.Type.DARK_EMBED)
+                    .callback(this::openWorldEditScreen);
+
+            this.list.defineRoot(this.button);
+        }
+
+        private void openWorldEditScreen(TextButton textButton) {
+            if (world.hasInfo()) {
+                this.client.showScreen(new WorldEditScreen(world));
+            } else {
+                Screen screen = this.client.screen;
+                if (screen != null) {
+                    screen.showDialog(new DialogBuilder(screen)
+                            .title(TextObject.translation("quantum.ui.error"))
+                            .message(TextObject.translation("quantum.screen.worlds.edit.too_old"))
+                            .button(TextObject.translation("quantum.ui.ok"), (dialog) -> screen.closeDialog(screen.getDialog())));
+                }
+            }
         }
 
         @Override
@@ -131,27 +157,57 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
                 int y1 = isPressed() || selected ? this.pos.y + 2 : this.pos.y;
 
+                var ref = new Object() {
+                    int y = y1;
+                };
+
                 WorldSaveInfo worldSaveInfo = world.loadInfo();
-                worldSaveInfo.picture().ifPresentOrElse(picture -> {
-                    int width = picture.getWidth();
-                    int height = picture.getHeight();
+                Texture picture = null;
+                if (world.exists("picture.png")) {
+                    String replace = world.getSHA256Name();
+                    Identifier id = id("generated/worlds/" + replace + "/picture.png");
+                    if (client.getTextureManager().isTextureLoaded(id)) {
+                        picture = client.getTextureManager().getTexture(id);
+                    } else {
+                        picture = new Texture(new FileHandle(world.getDirectory().resolve("picture.png").toFile()));
+                        picture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                        client.getTextureManager().registerTexture(id, picture);
+                    }
+                }
+                Optional.ofNullable(picture).ifPresentOrElse(pict -> {
+                    int width = pict.getWidth();
+                    int height = pict.getHeight();
                     float ratio = (float) width / height;
-                    renderer.blit(id("textures/gui/world/default_picture.png"), this.pos.x + 2, y1 + 2, list.itemWidth - 4, (list.itemWidth - 4) / ratio, 0, 0, 384, 213, 384, 213);
+                    renderer.blit(pict, this.pos.x + 2, y1 + 2, list.itemWidth - 4, (list.itemWidth - 4) / ratio, 0, 0, 384, 213, 384, 213);
+                    ref.y = (int) (y1 + 2 + (list.itemWidth - 4) / ratio);
                 }, () -> {
                     int width = 384;
                     int height = 213;
                     float ratio = (float) width / height;
                     renderer.blit(id("textures/gui/world/default_picture.png"), this.pos.x + 2, y1 + 2, list.itemWidth - 4, (list.itemWidth - 4) / ratio, 0, 0, 384, 213, 384, 213);
+                    ref.y = (int) (y1 + 2 + (list.itemWidth - 4) / ratio);
                 });
 
+                if (renderer.pushScissors(this.pos.x + 2, ref.y, list.itemWidth - 4, list.itemHeight - 4)) {
+                    renderer.textCenter(world.getName(), this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 71, ColorCode.WHITE);
 
-                renderer.textCenter(world.getDirectory().getFileName().toString().replace("<", "&<").replace("(", "&(").replace("{", "&{").replace("&", "&&"),
-                        this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 47, ColorCode.WHITE);
+                    renderer.line(this.pos.x + 30, y1 + this.size.height - 59, this.pos.x + this.list.itemWidth - 30, y1 + this.size.height - 59, RgbColor.argb(0x80ffffff));
+                    renderer.textCenter(worldSaveInfo.lastPlayedInMode().name().toLowerCase().replace("_", " "), this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 59, false);
 
-                renderer.line(this.pos.x + 30, y1 + this.size.height - 35, this.pos.x + this.list.itemWidth - 30, y1 + this.size.height - 35, RgbColor.argb(0x80ffffff));
-                renderer.textCenter(worldSaveInfo.lastPlayedInMode(), this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 35, false);
+                    this.button.setPos(this.pos.x + 5, y1 + this.size.height - 29);
+                    this.button.render(renderer, mouseX, mouseY, deltaTime);
+                    renderer.popScissors();
+                }
+
                 renderer.popScissors();
             }
+        }
+
+        @Override
+        public void revalidate() {
+            this.button.revalidate();
+
+            super.revalidate();
         }
 
         @ApiStatus.OverrideOnly
@@ -160,18 +216,35 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
             if (!wasPressed) return false;
 
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
-            this.client.startWorld(world);
+
+            if (this.isSelected() && lastClick + 500 > System.currentTimeMillis()) {
+                this.client.startWorld(world);
+            }
+
+            lastClick = System.currentTimeMillis();
             return false;
         }
 
         @Override
         public boolean mouseClick(int x, int y, int button, int count) {
+            if (!this.enabled) return false;
+
+            if (this.button.isHovered() && isSelected()) {
+                this.button.mouseClick(x, y, button, count);
+                return true;
+            }
+
             return !this.click();
         }
 
         @Override
         public boolean mousePress(int x, int y, int button) {
             if (!this.enabled) return false;
+
+            if (this.button.isHovered() && isSelected()) {
+                this.button.mousePress(x, y, button);
+                return true;
+            }
 
             this.pressed = true;
             this.wasPressed = true;
@@ -181,10 +254,85 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
             return super.mousePress(x, y, button);
         }
 
+        private boolean isSelected() {
+            return this.list.getSelected() == this;
+        }
+
         @Override
         public boolean mouseRelease(int mouseX, int mouseY, int button) {
             this.pressed = false;
+
+            if (!this.enabled) return false;
+
+            if (this.button.isHovered() && isSelected()) {
+                this.button.mouseRelease(mouseX, mouseY, button);
+                return true;
+            }
+
             return super.mouseRelease(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
+            if (!this.enabled) return false;
+
+            if (this.button.isHovered() && isSelected()) {
+                this.button.mouseWheel(mouseX, mouseY, rotation);
+                return true;
+            }
+
+            return super.mouseWheel(mouseX, mouseY, rotation);
+        }
+
+        @Override
+        public void mouseMove(int mouseX, int mouseY) {
+            if (!this.enabled) return;
+            if (!this.isWithinBounds(mouseX, mouseY)) return;
+
+            if (this.button.isHovered() && isSelected()) {
+                this.button.mouseMove(mouseX, mouseY);
+                return;
+            }
+
+            super.mouseMove(mouseX, mouseY);
+        }
+
+        @Override
+        public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
+            if (!this.enabled) return false;
+
+            if (this.button.isHovered() && isSelected()) {
+                this.button.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
+                return true;
+            }
+
+            return super.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
+        }
+
+        @Override
+        public boolean keyPress(int keyCode) {
+            if (!this.enabled) return false;
+            if (this.list.getSelected() != this) return false;
+
+            if (keyCode == Input.Keys.E) {
+                this.client.playSound(SoundEvents.BUTTON_PRESS, 1.0f);
+                return true;
+            }
+
+            return super.keyPress(keyCode);
+        }
+
+        @Override
+        public boolean keyRelease(int keyCode) {
+            if (!this.enabled) return false;
+            if (this.list.getSelected() != this) return false;
+
+            if (keyCode == Input.Keys.E) {
+                this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
+                this.client.showScreen(new WorldEditScreen(this.world));
+                return true;
+            }
+            return super.keyRelease(keyCode);
         }
 
         public WorldStorage getWorld() {

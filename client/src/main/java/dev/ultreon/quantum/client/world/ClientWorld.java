@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2d;
@@ -34,10 +35,7 @@ import dev.ultreon.quantum.world.particles.ParticleType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
@@ -64,6 +62,7 @@ public final class ClientWorld extends World implements Disposable {
     private ChunkPos oldChunkPos = new ChunkPos(0, 0);
     private int time = 0;
     private int totalChunks;
+    private final Vec3i tmp = new Vec3i();
 
     public ClientWorld(@NotNull QuantumClient client) {
         super();
@@ -156,9 +155,10 @@ public final class ClientWorld extends World implements Disposable {
         }
         BreakResult breakResult = super.continueBreaking(breaking, amount, breaker);
         if (breakResult == BreakResult.BROKEN) {
-            this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.STOP));
-            this.client.connection.send(new C2SBlockBreakPacket(breaking));
-            this.set(breaking, Blocks.AIR.createMeta(), BlockFlags.UPDATE);
+            if (this.destroyBlock(breaking, breaker)) {
+                this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.BROKEN));
+                this.client.connection.send(new C2SBlockBreakPacket(breaking));
+            }
         }
         return breakResult;
     }
@@ -201,10 +201,16 @@ public final class ClientWorld extends World implements Disposable {
         BlockPos blockPos = new BlockPos(x, y, z);
         if ((flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if ((flags & BlockFlags.UPDATE) != 0) {
-            for (CubicDirection direction : CubicDirection.values()) {
-                BlockPos offset = blockPos.offset(direction);
-                BlockProperties blockProperties = this.get(offset);
-                blockProperties.update(this, offset);
+            ClientChunk chunk = getChunkAt(blockPos);
+            if (chunk != null && isBlockSet) {
+                chunk.set(World.toLocalBlockPos(x, y, z, this.tmp), block);
+                updateChunkAndNeighbours(chunk);
+
+                for (CubicDirection direction : CubicDirection.values()) {
+                    BlockPos offset = blockPos.offset(direction);
+                    BlockProperties blockProperties = this.get(offset);
+                    blockProperties.update(this, offset);
+                }
             }
         }
 

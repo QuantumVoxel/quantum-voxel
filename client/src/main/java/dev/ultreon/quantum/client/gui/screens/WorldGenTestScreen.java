@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.Input;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.WorldGenTestPanel;
 
 public class WorldGenTestScreen extends Screen {

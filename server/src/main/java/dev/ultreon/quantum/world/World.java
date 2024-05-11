@@ -975,4 +975,16 @@ public abstract class World implements ServerDisposable {
     public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
 
     }
+
+    public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
+        BlockProperties blockProperties = get(breaking);
+
+        if (breaker != null && BlockEvents.BREAK_BLOCK.factory().onBreakBlock(this, breaking, blockProperties, breaker).isCanceled()) {
+            stopBreaking(breaking, breaker);
+        }
+
+        set(breaking, blockProperties, BlockFlags.UPDATE);
+        blockProperties.onDestroy(this, breaking, breaker);
+        return true;
+    }
 }

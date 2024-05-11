@@ -12,12 +12,13 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.Scene3D;
@@ -38,6 +39,7 @@ public class GameRenderer implements Disposable {
     private FrameBuffer fbo;
     private final RenderContext context;
     private float cameraBop = 0.0f;
+    private float blurScale = 0.0f;
 
     public GameRenderer(QuantumClient client, ModelBatch modelBatch, RenderPipeline pipeline) {
         this.client = client;
@@ -102,7 +104,14 @@ public class GameRenderer implements Disposable {
 
             QuantumClient.PROFILER.section("world", () -> {
                 RenderEvents.PRE_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
-                this.renderWorld();
+
+                var blurScale = this.blurScale;
+                blurScale += client.screen != null ? Gdx.graphics.getDeltaTime() * 3f : -Gdx.graphics.getDeltaTime() * 3f;
+
+                blurScale = Mth.clamp(blurScale, 0f, 1f);
+                this.blurScale = blurScale;
+
+                this.renderWorld(Math.max(blurScale, 0f));
                 RenderEvents.POST_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
             });
         }
@@ -155,8 +164,8 @@ public class GameRenderer implements Disposable {
         return this.cameraBop = bop;
     }
 
-    private void renderWorld() {
-        this.pipeline.render(this.modelBatch);
+    void renderWorld(float blurScale) {
+        this.pipeline.render(this.modelBatch, blurScale);
     }
 
     private void renderOverlays(Renderer renderer, @Nullable Screen screen, @Nullable World world, float deltaTime) {

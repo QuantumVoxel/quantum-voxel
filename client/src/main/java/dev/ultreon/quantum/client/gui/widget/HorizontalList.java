@@ -63,6 +63,15 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     @Override
+    public void revalidate() {
+        for (T entry : this.entries) {
+            entry.revalidate();
+        }
+
+        super.revalidate();
+    }
+
+    @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
 
@@ -125,6 +134,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
             if (entryAt != null) {
                 this.selected = entryAt;
                 this.onSelected.call(this.selected);
+                entryAt.mouseClick(x - entryAt.getX(), y - entryAt.getY(), button, count);
                 return true;
             }
         }

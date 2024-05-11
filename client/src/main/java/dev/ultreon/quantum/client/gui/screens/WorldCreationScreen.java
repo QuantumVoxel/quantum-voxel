@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import dev.ultreon.quantum.client.gui.Alignment;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Notification;
-import dev.ultreon.quantum.client.gui.Position;
+import dev.ultreon.libs.datetime.v0.DateTime;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.GenericIcon;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
 import dev.ultreon.quantum.client.gui.widget.IconButton;
@@ -13,6 +11,9 @@ import dev.ultreon.quantum.client.gui.widget.TextEntry;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.text.WordGenerator;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.GameMode;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -28,6 +29,8 @@ public class WorldCreationScreen extends Screen {
     @MonotonicNonNull
     private TextButton createButton;
     private String worldName = "";
+    private long seed;
+    private GameMode gameMode = GameMode.SURVIVAL;
 
     public WorldCreationScreen() {
         super(TextObject.translation("quantum.screen.world_creation.title"));
@@ -70,9 +73,30 @@ public class WorldCreationScreen extends Screen {
     }
 
     private void createWorld(TextButton caller) {
-        WorldStorage storage = new WorldStorage(Paths.get("worlds", this.worldName));
+        String folderName = WorldStorage.createFolderName();
+        WorldStorage storage = new WorldStorage(Paths.get("worlds", folderName));
+
         try {
-            storage.delete();
+            if (storage.exists(".")) {
+                this.client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal("World already exists")).icon(MessageIcon.ERROR).build());
+                return;
+            }
+
+            try {
+                storage.saveInfo(new WorldSaveInfo(
+                        seed,
+                        World.REGION_DATA_VERSION,
+                        this.gameMode,
+                        this.gameMode,
+                        this.worldName,
+                        DateTime.current()
+                ));
+            } catch (IOException e) {
+                String localizedMessage = e.getLocalizedMessage();
+                this.client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal(localizedMessage.substring(0, Math.min(localizedMessage.length() - 1, 50)))).icon(MessageIcon.ERROR).build());
+                return;
+            }
+
             storage.createWorld();
             this.client.startWorld(storage);
         } catch (IOException e) {

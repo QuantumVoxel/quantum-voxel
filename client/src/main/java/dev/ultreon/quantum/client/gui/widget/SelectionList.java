@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
@@ -15,6 +16,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static dev.ultreon.quantum.client.QuantumClient.id;
 
 @ApiStatus.NonExtendable
 public class SelectionList<T> extends UIContainer<SelectionList<T>> {
@@ -33,6 +36,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private Callback<T> onSelected = value -> {
     };
     private final int gap = 0;
+    private boolean drawBackground;
 
     public SelectionList(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
@@ -58,7 +62,9 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
+        if (this.drawBackground) {
+            renderer.renderFrame(pos.x - 2, pos.y - 2, size.width + 4, size.height + 4);
+        }
 
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
@@ -207,6 +213,10 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this.gap;
     }
 
+    public boolean isDrawBackground() {
+        return this.drawBackground;
+    }
+
     @CanIgnoreReturnValue
     public Entry<T> removeEntry(Entry<T> entry) {
         this.entries.remove(entry);
@@ -273,6 +283,11 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this;
     }
 
+    public SelectionList<T> drawBackground(boolean drawBackground) {
+        this.drawBackground = drawBackground;
+        return this;
+    }
+
     @Override
     public SelectionList<T> position(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
@@ -298,12 +313,18 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         public void render(Renderer renderer, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
             this.pos.x = this.list.pos.x;
             this.pos.y = (int) (this.list.pos.y - this.list.scrollY + (this.list.itemHeight + this.list.gap) * this.list.entries.indexOf(this));
-            this.size.width = this.list.size.width - SelectionList.SCROLLBAR_WIDTH;
+            this.size.width = this.list.size.width;
             this.size.height = this.list.itemHeight;
             ItemRenderer<T> itemRenderer = this.list.itemRenderer;
             if (itemRenderer != null && renderer.pushScissors(this.pos.x, this.pos.y, this.size.width, this.size.height)) {
-                if (selected)
-                    renderer.box(this.pos.x, this.pos.y, this.size.width - 2, this.size.height - 2, RgbColor.rgb(0xffffff));
+
+                Identifier texture = id("textures/gui/list.png");
+                renderer.draw9Slice(texture, this.pos.x, this.pos.y, this.size.width, this.size.height, 0, 0, 15, 15, 5, 256, 256);
+                if (selected) {
+                    renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.WHITE.withAlpha(0x20));
+                } else {
+                    renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.BLACK.withAlpha(0x20));
+                }
 
                 itemRenderer.render(renderer, this.value, this.pos.y, mouseX, mouseY, selected, deltaTime);
                 renderer.popScissors();

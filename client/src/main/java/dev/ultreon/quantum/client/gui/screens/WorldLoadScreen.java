@@ -5,10 +5,7 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Alignment;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Position;
-import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
@@ -47,6 +44,7 @@ public class WorldLoadScreen extends Screen {
         IntegratedServer server = new IntegratedServer(this.storage);
         this.client.integratedServer = server;
         this.world = server.getWorld();
+        this.client.openedWorld = this.storage;
 
         this.titleLabel = builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)

@@ -44,7 +44,10 @@ public abstract class Button<T extends Button<T>> extends Widget {
         else u = 42;
         int v = this.isPressed() ? 21 : 0;
 
-        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 4, 256, 256);
+        u += 63 * type.xOffset;
+        v += 42 * type.yOffset;
+
+        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 5, 256, 256);
         if (!isPressed() && wasPressed) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
@@ -122,15 +125,18 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     public enum Type {
-        DARK(),
-        LIGHT(),
-        DANGER(),
-        WARNING(),
-        SUCCESS(),
-        PRIMARY();
+        DARK(0, 0),
+        LIGHT(1, 0),
+        DARK_EMBED(2, 0),
+        LIGHT_EMBED(3, 0);
 
-        Type() {
+        private final int xOffset;
+        private final int yOffset;
 
+        Type(int xOffset, int yOffset) {
+
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
         }
     }
 }

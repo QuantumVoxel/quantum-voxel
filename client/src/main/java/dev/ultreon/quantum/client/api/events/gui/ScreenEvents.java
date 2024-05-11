@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.api.events.gui;
 
-import dev.ultreon.quantum.client.gui.screens.Screen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.events.api.ValueEventResult;
