@@ -616,12 +616,49 @@ public class GreedyMesher implements Mesher {
         return sameBlock && sameLight;
     }
 
-    public record LightLevelData(float sunBrightness, float blockBrightness) {
+    public static final class LightLevelData {
+        private final float sunBrightness;
+        private final float blockBrightness;
 
-        public float lightLevel() {
-            return Mth.clamp(this.sunBrightness + this.blockBrightness, 0, 1);
+        public LightLevelData(float sunBrightness, float blockBrightness) {
+            this.sunBrightness = sunBrightness;
+            this.blockBrightness = blockBrightness;
         }
-    }
+
+            public float lightLevel() {
+                return Mth.clamp(this.sunBrightness + this.blockBrightness, 0, 1);
+            }
+
+        public float sunBrightness() {
+            return sunBrightness;
+        }
+
+        public float blockBrightness() {
+            return blockBrightness;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (LightLevelData) obj;
+            return Float.floatToIntBits(this.sunBrightness) == Float.floatToIntBits(that.sunBrightness) &&
+                   Float.floatToIntBits(this.blockBrightness) == Float.floatToIntBits(that.blockBrightness);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(sunBrightness, blockBrightness);
+        }
+
+        @Override
+        public String toString() {
+            return "LightLevelData[" +
+                   "sunBrightness=" + sunBrightness + ", " +
+                   "blockBrightness=" + blockBrightness + ']';
+        }
+
+        }
 
     public static class Face {
 

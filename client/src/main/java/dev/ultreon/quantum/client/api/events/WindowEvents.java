@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.api.events;
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 
@@ -14,31 +14,31 @@ public class WindowEvents {
 
     @FunctionalInterface
     public interface WindowCreated {
-        void onWindowCreated(Lwjgl3Window window);
+        void onWindowCreated(GameWindow window);
     }
 
     @FunctionalInterface
     public interface WindowResized {
-        void onWindowResized(Lwjgl3Window window, int width, int height);
+        void onWindowResized(GameWindow window, int width, int height);
     }
 
     @FunctionalInterface
     public interface WindowMoved {
-        void onWindowMoved(Lwjgl3Window window, int x, int y);
+        void onWindowMoved(GameWindow window, int x, int y);
     }
 
     @FunctionalInterface
     public interface WindowFocusChanged {
-        void onWindowFocusChanged(Lwjgl3Window window, boolean focused);
+        void onWindowFocusChanged(GameWindow window, boolean focused);
     }
 
     @FunctionalInterface
     public interface WindowCloseRequested {
-        EventResult onWindowCloseRequested(Lwjgl3Window window);
+        EventResult onWindowCloseRequested(GameWindow window);
     }
 
     @FunctionalInterface
     public interface WindowFilesDropped {
-        void onWindowFilesDropped(Lwjgl3Window window, String[] files);
+        void onWindowFilesDropped(GameWindow window, String[] files);
     }
 }

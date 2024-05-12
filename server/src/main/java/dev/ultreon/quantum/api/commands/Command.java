@@ -70,13 +70,13 @@ public abstract class Command {
             Command.commands.add(this);
             if (!this.isCreatedYet) {
                 Command.incompleteCommands.add(this);
-                QuantumServer.LOGGER.warn("Incomplete command: {}", this.getClass().getSimpleName());
+                QuantumServer.LOGGER.warn("Incomplete command: %s", this.getClass().getSimpleName());
             }
 
             if (this.category == null)
-                QuantumServer.LOGGER.warn("Missing category in command: {}", this.getClass().getSimpleName());
+                QuantumServer.LOGGER.warn("Missing category in command: %s", this.getClass().getSimpleName());
             if (this.getRequiredPermission() == null)
-                QuantumServer.LOGGER.warn("Broken permissions in command: {}", this.getClass().getSimpleName());
+                QuantumServer.LOGGER.warn("Broken permissions in command: %s", this.getClass().getSimpleName());
 
             this.detectBrokenCommand();
         });
@@ -102,7 +102,7 @@ public abstract class Command {
             // Check if return type is CommandResult or subtype
             if (!CommandResult.class.isAssignableFrom(method.getReturnType())) {
                 // Throw error if return type is invalid
-                throw new InvalidCommandMethodError("Invalid return type: %s (%s - %s)".formatted(
+                throw new InvalidCommandMethodError(String.format("Invalid return type: %s (%s - %s)", 
                         method.getReturnType().getName(),
                         method.getName(),
                         method.getDeclaringClass().getName()
@@ -115,7 +115,7 @@ public abstract class Command {
 
         // Throw error if no overload specifications found
         if (this.data.getOverloadSpecs().isEmpty()) {
-            throw new InvalidCommandMethodError("No overloads found! (%s)".formatted(
+            throw new InvalidCommandMethodError(String.format("No overloads found! (%s)", 
                     this.getClass().getName()
             ));
         }

@@ -16,8 +16,19 @@ import dev.ultreon.quantum.client.texture.TextureManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-public record BBModelMeshFace(Map<String, Vec2f> uvs, List<BBModelVertex> vertices, int texture) {
+public final class BBModelMeshFace {
+    private final Map<String, Vec2f> uvs;
+    private final List<BBModelVertex> vertices;
+    private final int texture;
+
+    public BBModelMeshFace(Map<String, Vec2f> uvs, List<BBModelVertex> vertices, int texture) {
+        this.uvs = uvs;
+        this.vertices = vertices;
+        this.texture = texture;
+    }
+
     public void write(ModelBuilder model, Map<Integer, BBTexture> texture2builder, Map<BBTexture, MeshPartBuilder> meshes, Vec2f resolution) {
         MeshPartBuilder builder = meshes.computeIfAbsent(texture2builder.get(texture), integer -> {
             Material attributes = new Material();
@@ -59,4 +70,40 @@ public record BBModelMeshFace(Map<String, Vec2f> uvs, List<BBModelVertex> vertic
         Vec3f vertex = vertices.get(index).vertex();
         return new Vector3(vertex.x / 16f, vertex.y / 16f, vertex.z / 16f);
     }
+
+    public Map<String, Vec2f> uvs() {
+        return uvs;
+    }
+
+    public List<BBModelVertex> vertices() {
+        return vertices;
+    }
+
+    public int texture() {
+        return texture;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (BBModelMeshFace) obj;
+        return Objects.equals(this.uvs, that.uvs) &&
+               Objects.equals(this.vertices, that.vertices) &&
+               this.texture == that.texture;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uvs, vertices, texture);
+    }
+
+    @Override
+    public String toString() {
+        return "BBModelMeshFace[" +
+               "uvs=" + uvs + ", " +
+               "vertices=" + vertices + ", " +
+               "texture=" + texture + ']';
+    }
+
 }

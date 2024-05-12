@@ -4,7 +4,6 @@ import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.g3d.Model;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
-import dev.ultreon.quantum.client.model.block.GLTFModel;
 import dev.ultreon.quantum.client.model.blockbench.BBModelLoader;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
@@ -96,16 +95,6 @@ public class EntityModelRegistry implements ContextAwareReloadable {
                 return "textures/entity/" + path;
             }))));
             this.finishedRegistry.put(e.getKey(), model);
-        }
-
-        for (Map.Entry<EntityType<?>, Identifier> e : this.gltfRegistry.entrySet()) {
-            Identifier id = e.getValue();
-            GLTFModel gltfModel = QuantumClient.invokeAndWait(() -> {
-                GLTFModel toLoad = new GLTFModel(id.mapPath(path -> "entity/" + path + ".gltf"));
-                toLoad.load(client);
-                return toLoad;
-            });
-            this.finishedRegistry.put(e.getKey(), gltfModel.getModel());
         }
 
         for (Map.Entry<EntityType<?>, Identifier> e : this.bbModelRegistry.entrySet()) {

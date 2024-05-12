@@ -42,11 +42,11 @@ public class ResourceFileHandle extends FileHandle {
 
     @Override
     public InputStream read() {
-        if (this.resource == null) throw new GdxRuntimeException("Resource %s not found".formatted(this.id));
+        if (this.resource == null) throw new GdxRuntimeException(String.format("Resource %s not found", this.id));
         try {
             return this.resource.openStream();
         } catch (IOException e) {
-            throw new GdxRuntimeException("An IO error occurred while reading resource %s".formatted(this.id), e);
+            throw new GdxRuntimeException(String.format("An IO error occurred while reading resource %s", this.id), e);
         }
     }
 

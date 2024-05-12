@@ -25,7 +25,7 @@ public class SettingsScreen extends TabbedUI {
         builder.add(PersonalSettingsUI.TITLE, false, 1, personalSettingsUI::build).icon(QuantumClient.id("gui/settings/personal"));
         builder.add(AccessibilitySettingsUI.TITLE, false, 0, accessibilitySettingsUI::build).icon(QuantumClient.id("gui/settings/accessibility"));
 
-        builder.contentBounds(() -> new Bounds(50, 50, size.width - 100, size.height - 100));
+        builder.contentBounds(() -> new Bounds(20, 20, size.width - 40, size.height - 40));
         setTabX(50);
 
         builder.add(TextButton.of(UITranslations.BACK, 50))

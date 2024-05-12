@@ -9,9 +9,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
@@ -54,7 +53,7 @@ public class MainRenderNode extends RenderNode {
 
         gl.glActiveTexture(GL_TEXTURE0);
 
-        if (ImGuiOverlay.SHOW_RENDER_PIPELINE.get()) {
+        if (GamePlatform.get().showRenderPipeline()) {
             this.client.renderer.begin();
             this.client.spriteBatch.draw(diffuseTexture, (float) (2 * Gdx.graphics.getWidth()) / 4, 0, (float) Gdx.graphics.getWidth() / 4, (float) Gdx.graphics.getHeight() / 4);
             this.client.spriteBatch.flush();

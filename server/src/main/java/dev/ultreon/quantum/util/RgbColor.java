@@ -2,13 +2,14 @@ package dev.ultreon.quantum.util;
 
 import dev.ultreon.libs.commons.v0.exceptions.InvalidValueException;
 import dev.ultreon.quantum.text.ColorCode;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class RgbColor implements Color {
+    private static final double FACTOR = 0.7;
+
     public static final RgbColor BLACK = RgbColor.rgb(0x000000);
     public static final RgbColor DARK_GRAY = RgbColor.rgb(0x404040);
     public static final RgbColor GRAY = RgbColor.rgb(0x808080);
@@ -28,26 +29,73 @@ public class RgbColor implements Color {
     public static final RgbColor MAGENTA = RgbColor.rgb(0xff00ff);
     public static final RgbColor ROSE = RgbColor.rgb(0xff0080);
     public static final RgbColor TRANSPARENT = RgbColor.rgba(0x00000000);
-    private final java.awt.Color awtColor;
+
+    private final int red;
+    private final int green;
+    private final int blue;
+    private final int alpha;
 
     private RgbColor(long red, long green, long blue, long alpha) {
-        this.awtColor = new java.awt.Color((int) red, (int) green, (int) blue, (int) alpha);
+        this.red = (int) red;
+        this.green = (int) green;
+        this.blue = (int) blue;
+        this.alpha = (int) alpha;
     }
 
     private RgbColor(int red, int green, int blue, int alpha) {
-        this.awtColor = new java.awt.Color(red, green, blue, alpha);
-    }
-
-    private RgbColor(@NotNull java.awt.Color color) {
-        this.awtColor = color;
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+        this.alpha = alpha;
     }
 
     public RgbColor(float red, float green, float blue, float alpha) {
-        this.awtColor = new java.awt.Color(red, green, blue, alpha);
+        this((int) (red * 255), (int) (green * 255), (int) (blue * 255), (int) (alpha * 255));
     }
 
     public static @NotNull RgbColor hsb(float h, float s, float b) {
-        return new RgbColor(java.awt.Color.getHSBColor(h, s, b));
+        float[] rgb = hsb2rgb(h, s, b);
+        return new RgbColor((int) (rgb[0] * 255), (int) (rgb[1] * 255), (int) (rgb[2] * 255), 255);
+    }
+
+    private static float[] hsb2rgb(float h, float s, float b) {
+        float[] rgb = new float[3];
+        float c = b * s;
+        float x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        float m = b - c;
+        if (h < 60) {
+            rgb[0] = c + m;
+            rgb[1] = x + m;
+            rgb[2] = 0 + m;
+        } else if (h < 120) {
+            rgb[0] = x + m;
+            rgb[1] = c + m;
+            rgb[2] = 0 + m;
+        } else if (h < 180) {
+            rgb[0] = 0 + m;
+            rgb[1] = c + m;
+            rgb[2] = x + m;
+        }
+
+        if (h < 240) {
+            rgb[0] = 0 + m;
+            rgb[1] = x + m;
+            rgb[2] = c + m;
+        } else if (h < 300) {
+            rgb[0] = x + m;
+            rgb[1] = 0 + m;
+            rgb[2] = c + m;
+        } else if (h < 360) {
+            rgb[0] = c + m;
+            rgb[1] = 0 + m;
+            rgb[2] = x + m;
+        } else {
+            rgb[0] = c + m;
+            rgb[1] = x + m;
+            rgb[2] = 0 + m;
+        }
+
+        return rgb;
     }
 
     public static @NotNull RgbColor rgb(int red, int green, int blue) {
@@ -131,11 +179,6 @@ public class RgbColor implements Color {
         }
     }
 
-    @ApiStatus.Internal
-    public static @NotNull RgbColor awt(java.awt.Color awt) {
-        return new RgbColor(awt);
-    }
-
     public static @NotNull RgbColor gdx(com.badlogic.gdx.graphics.Color color) {
         return new RgbColor((int) (color.r * 255), (int) (color.g * 255), (int) (color.b * 255), (int) (color.a * 255));
     }
@@ -144,44 +187,59 @@ public class RgbColor implements Color {
         return RgbColor.rgb(colorCode.getColor());
     }
 
-    public @NotNull java.awt.Color toAwt() {
-        return this.awtColor;
-    }
-
     public @NotNull RgbColor brighter() {
-        return new RgbColor(this.awtColor.brighter());
+        int r = getRed();
+        int g = getGreen();
+        int b = getBlue();
+        int alpha = getAlpha();
+
+        int i = (int) (1.0 / (1.0 - FACTOR));
+        if (r == 0 && g == 0 && b == 0) {
+            return new RgbColor(i, i, i, alpha);
+        }
+        if (r > 0 && r < i) r = i;
+        if (g > 0 && g < i) g = i;
+        if (b > 0 && b < i) b = i;
+
+        return new RgbColor(Math.min((int) (r / FACTOR), 255),
+                Math.min((int) (g / FACTOR), 255),
+                Math.min((int) (b / FACTOR), 255),
+                alpha);
     }
 
     public @NotNull RgbColor darker() {
-        return new RgbColor(this.awtColor.darker());
+        return new RgbColor(Math.max((int) (getRed() * FACTOR), 0),
+                Math.max((int) (getGreen() * FACTOR), 0),
+                Math.max((int) (getBlue() * FACTOR), 0),
+                getAlpha());
     }
 
     @Override
     public int getRed() {
-        return this.awtColor.getRed();
+        return this.red;
     }
 
     @Override
     public int getGreen() {
-        return this.awtColor.getGreen();
+        return this.green;
     }
 
     @Override
     public int getBlue() {
-        return this.awtColor.getBlue();
+        return this.blue;
     }
 
     @Override
     public int getAlpha() {
-        return this.awtColor.getAlpha();
+        return this.alpha;
     }
 
     public int getTransparency() {
-        return this.awtColor.getTransparency();
+        return this.alpha;
     }
 
     public int getRgb() {
-        return this.awtColor.getRGB();
+        return this.alpha << 24 | this.red << 16 | this.green << 8 | this.blue;
     }
 
     public @NotNull RgbColor withRed(int red) {

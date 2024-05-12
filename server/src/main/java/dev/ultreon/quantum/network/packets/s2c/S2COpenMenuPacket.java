@@ -10,6 +10,7 @@ import dev.ultreon.quantum.util.Identifier;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class S2COpenMenuPacket extends Packet<InGameClientPacketHandler> {
     private final Identifier menuType;
@@ -21,7 +22,7 @@ public class S2COpenMenuPacket extends Packet<InGameClientPacketHandler> {
             if (itemSlot == null) return ItemStack.empty();
             if (itemSlot.isEmpty()) return ItemStack.empty();
             return itemSlot.getItem();
-        }).toList();
+        }).collect(Collectors.toList());
     }
 
     public S2COpenMenuPacket(PacketIO buffer) {

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class InventoryScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
@@ -208,7 +209,44 @@ public class InventoryScreen extends ContainerScreen {
         this.rebuildSlots();
     }
 
-    private record RecipeSlot(Recipe recipe, ItemSlot slot) {
+    private static final class RecipeSlot {
+        private final Recipe recipe;
+        private final ItemSlot slot;
 
-    }
+        private RecipeSlot(Recipe recipe, ItemSlot slot) {
+            this.recipe = recipe;
+            this.slot = slot;
+        }
+
+        public Recipe recipe() {
+            return recipe;
+        }
+
+        public ItemSlot slot() {
+            return slot;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (RecipeSlot) obj;
+            return Objects.equals(this.recipe, that.recipe) &&
+                   Objects.equals(this.slot, that.slot);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(recipe, slot);
+        }
+
+        @Override
+        public String toString() {
+            return "RecipeSlot[" +
+                   "recipe=" + recipe + ", " +
+                   "slot=" + slot + ']';
+        }
+
+
+        }
 }

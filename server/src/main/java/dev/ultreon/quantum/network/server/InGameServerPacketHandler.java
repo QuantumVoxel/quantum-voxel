@@ -32,7 +32,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.*;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.server = server;
         this.player = player;
         this.connection = connection;
-        this.context = new PacketContext(player, connection, EnvType.SERVER);
+        this.context = new PacketContext(player, connection, Env.SERVER);
     }
 
     public static NetworkChannel registerChannel(Identifier id) {
@@ -65,7 +65,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     @Override
     public void onDisconnect(String message) {
-        IConnection.LOGGER.info("Player {} disconnected: {}", this.player.getName(), message);
+        IConnection.LOGGER.info("Player %s disconnected: %s", this.player.getName(), message);
         PlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(this.player);
 
         this.disconnected = true;
@@ -94,7 +94,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onModPacket(NetworkChannel channel, ModPacket<?> packet) {
-        packet.handlePacket(() -> new ModPacketContext(channel, this.player, this.connection, EnvType.SERVER));
+        packet.handlePacket(() -> new ModPacketContext(channel, this.player, this.connection, Env.SERVER));
     }
 
     public NetworkChannel getChannel(Identifier channelId) {
@@ -102,7 +102,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onRespawn() {
-        QuantumServer.LOGGER.debug("Respawning player: {}", this.player.getName());
+        QuantumServer.LOGGER.debug("Respawning player: %s", this.player.getName());
         this.server.submit(this.player::respawn);
     }
 
@@ -133,7 +133,8 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
-            if (item instanceof ToolItem toolItem && block.getEffectiveTool() == ((ToolItem) item).getToolType()) {
+            if (item instanceof ToolItem && block.getEffectiveTool() == ((ToolItem) item).getToolType()) {
+                ToolItem toolItem = (ToolItem) item;
                 efficiency = toolItem.getEfficiency();
             }
 
@@ -152,7 +153,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             if (openMenu != null) {
                 openMenu.onTakeItem(this.player, index, rightClick);
             } else {
-                QuantumServer.LOGGER.warn("Player {} attempted to take item without a menu open.", this.player.getName());
+                QuantumServer.LOGGER.warn("Player %s attempted to take item without a menu open.", this.player.getName());
             }
         });
     }
@@ -162,7 +163,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         var chunkPos = World.toChunkPos(pos);
 
         if (!this.player.isChunkActive(chunkPos)) {
-            QuantumServer.LOGGER.warn("Player {} attempted to break block that is not loaded.", this.player.getName());
+            QuantumServer.LOGGER.warn("Player %s attempted to break block that is not loaded.", this.player.getName());
             return;
         }
 
@@ -185,7 +186,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
             BlockEvents.BLOCK_REMOVED.factory().onBlockRemoved(this.player, original, pos, stack);
 
-            if (block.isToolRequired() && (!(stack.getItem() instanceof ToolItem toolItem) || toolItem.getToolType() != block.getEffectiveTool())) {
+            if (block.isToolRequired() && (!(stack.getItem() instanceof ToolItem) || ((ToolItem) stack.getItem()).getToolType() != block.getEffectiveTool())) {
                 return;
             }
 

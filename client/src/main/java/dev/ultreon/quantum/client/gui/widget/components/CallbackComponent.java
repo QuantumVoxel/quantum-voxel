@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.gui.widget.components;
 import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.util.ImGuiEx;
 import org.jetbrains.annotations.ApiStatus;
 
 public class CallbackComponent<T extends Widget> extends UIComponent {
@@ -31,6 +30,6 @@ public class CallbackComponent<T extends Widget> extends UIComponent {
     @Override
     @SuppressWarnings("unchecked")
     public void handleImGui(String path, Identifier key, Widget widget) {
-        ImGuiEx.button("Callback (" + key + "): ", path, () -> this.call((T) widget));
+//        ImGuiEx.button("Callback (" + key + "): ", path, () -> this.call((T) widget));
     }
 }

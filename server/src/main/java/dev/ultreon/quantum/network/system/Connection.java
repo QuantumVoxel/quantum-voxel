@@ -9,7 +9,7 @@ import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.Nullable;
 import org.tukaani.xz.LZMA2Options;
 import org.tukaani.xz.LZMAOutputStream;
@@ -118,7 +118,7 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
     protected abstract ServerPlayer getPlayer();
 
     private void iLuvGenerics(Packet<OurHandler> decode, ServerPlayer player) {
-        ourPacketData.handle(decode, new PacketContext(player, this, EnvType.SERVER), this.handler);
+        ourPacketData.handle(decode, new PacketContext(player, this, Env.SERVER), this.handler);
     }
 
     @CanIgnoreReturnValue

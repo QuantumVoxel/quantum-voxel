@@ -8,6 +8,8 @@ import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
+import dev.ultreon.quantum.world.rng.JavaRNG;
+import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
@@ -19,7 +21,7 @@ public class TreeFeature extends WorldGenFeature {
     private final Block trunk;
     private final Block leaves;
     private final float threshold;
-    private final Random random = new Random();
+    private final RNG random = new JavaRNG();
     private final int minTrunkHeight;
     private final int maxTrunkHeight;
 
@@ -50,13 +52,13 @@ public class TreeFeature extends WorldGenFeature {
 
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
+                System.out.println("[Start " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height);
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
             if (trunkHeight + height + 1 > CHUNK_HEIGHT) {
                 if (WorldGenDebugContext.isActive()) {
-                    System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
+                    System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height);
                 }
                 return false;
             }
@@ -67,7 +69,7 @@ public class TreeFeature extends WorldGenFeature {
                     for (int zOffset = -1; zOffset <= 1; zOffset++) {
                         if (!chunk.get(x + xOffset, y, z + zOffset).isAir()){
                             if (WorldGenDebugContext.isActive()) {
-                                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
+                                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
                             }
                             return false;
                         }
@@ -87,14 +89,14 @@ public class TreeFeature extends WorldGenFeature {
                         chunk.set(x + xOffset, y, z + zOffset, this.leaves.createMeta());
 
                         if (WorldGenDebugContext.isActive()) {
-                            System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Setting leaf at " + (x + xOffset) + ", " + y + ", " + (z + zOffset));
+                            System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Setting leaf at " + (x + xOffset) + ", " + y + ", " + (z + zOffset));
                         }
                     }
                 }
             }
 
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Success");
+                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Success");
             }
             return true;
         }

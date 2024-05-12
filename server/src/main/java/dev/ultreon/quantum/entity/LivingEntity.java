@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.entity;
 
+import com.google.common.collect.Lists;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
@@ -17,7 +18,6 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.include.com.google.common.collect.Lists;
 
 import java.util.List;
 
@@ -261,7 +261,8 @@ public class LivingEntity extends Entity {
     }
 
     protected void removeDead() {
-        if (this.world instanceof ServerWorld serverWorld) {
+        if (this.world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) this.world;
             serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CRemoveEntityPacket(this.getId()));
         }
 

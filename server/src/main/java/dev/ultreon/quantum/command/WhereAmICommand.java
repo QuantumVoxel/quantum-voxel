@@ -14,8 +14,9 @@ public class WhereAmICommand extends Command {
 
     @DefineCommand
     public @Nullable CommandResult executeCoordsInWorld(CommandSender sender, CommandContext commandContext, String alias) {
-        if (!(sender instanceof Entity entity)) return this.needEntity();
+        if (!(sender instanceof Entity)) return this.needEntity();
+        Entity entity = (Entity) sender;
 
-        return this.infoMessage("You are at %s".formatted(entity.getBlockPos()));
+        return this.infoMessage(String.format("You are at %s", entity.getBlockPos()));
     }
 }

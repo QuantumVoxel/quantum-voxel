@@ -5,6 +5,8 @@ import dev.ultreon.quantum.api.commands.error.InvalidSelectorError;
 import dev.ultreon.quantum.api.commands.error.SelectorTooSmallError;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public abstract class BaseSelector<T> {
     protected SelectorKey key;
     protected String stringValue;
@@ -43,24 +45,98 @@ public abstract class BaseSelector<T> {
         return this.result == null ? null : this.result.error();
     }
 
-    public record Result<T>(@Nullable T value, @Nullable CommandError error) {
+    public static final class Result<T> {
+        private final @Nullable T value;
+        private final @Nullable CommandError error;
 
-        public boolean hasError() {
-                return this.error != null;
-            }
+        public Result(@Nullable T value, @Nullable CommandError error) {
+            this.value = value;
+            this.error = error;
         }
 
-    public record Parsed(SelectorKey key, String value, CommandError error) {
-
-        public boolean hasError() {
+            public boolean hasError() {
                 return this.error != null;
             }
 
-            @Override
-            public String toString() {
-                return this.key.toString() + this.value;
-            }
+        public @Nullable T value() {
+            return value;
         }
+
+        public @Nullable CommandError error() {
+            return error;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (Result) obj;
+            return Objects.equals(this.value, that.value) &&
+                   Objects.equals(this.error, that.error);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value, error);
+        }
+
+        @Override
+        public String toString() {
+            return "Result[" +
+                   "value=" + value + ", " +
+                   "error=" + error + ']';
+        }
+
+    }
+
+    public static final class Parsed {
+        private final SelectorKey key;
+        private final String value;
+        private final CommandError error;
+
+        public Parsed(SelectorKey key, String value, CommandError error) {
+            this.key = key;
+            this.value = value;
+            this.error = error;
+        }
+
+            public boolean hasError() {
+                return this.error != null;
+            }
+
+        @Override
+        public String toString() {
+            return this.key.toString() + this.value;
+        }
+
+        public SelectorKey key() {
+            return key;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        public CommandError error() {
+            return error;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (Parsed) obj;
+            return Objects.equals(this.key, that.key) &&
+                   Objects.equals(this.value, that.value) &&
+                   Objects.equals(this.error, that.error);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key, value, error);
+        }
+
+    }
 
     @Override
     public String toString() {

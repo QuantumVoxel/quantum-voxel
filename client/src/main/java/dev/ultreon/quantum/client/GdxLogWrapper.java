@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.ApplicationLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import org.slf4j.MarkerFactory;
 
 /**
@@ -19,7 +19,7 @@ class GdxLogWrapper implements ApplicationLogger {
      */
     @Override
     public void log(String tag, String message) {
-        this.LOGGER.info(MarkerFactory.getMarker(tag), message);
+        this.LOGGER.info(/* MarkerFactory.getMarker(tag), */ message);
     }
 
     /**
@@ -31,7 +31,7 @@ class GdxLogWrapper implements ApplicationLogger {
      */
     @Override
     public void log(String tag, String message, Throwable exception) {
-        this.LOGGER.info(MarkerFactory.getMarker(tag), message, exception);
+        this.LOGGER.info(/* MarkerFactory.getMarker(tag), */ message, exception);
     }
 
     /**
@@ -42,7 +42,7 @@ class GdxLogWrapper implements ApplicationLogger {
      */
     @Override
     public void error(String tag, String message) {
-        this.LOGGER.error(MarkerFactory.getMarker(tag), message);
+        this.LOGGER.error(/* MarkerFactory.getMarker(tag), */ message);
     }
 
     /**
@@ -54,7 +54,7 @@ class GdxLogWrapper implements ApplicationLogger {
      */
     @Override
     public void error(String tag, String message, Throwable exception) {
-        this.LOGGER.error(MarkerFactory.getMarker(tag), message, exception);
+        this.LOGGER.error(/* MarkerFactory.getMarker(tag), */ message, exception);
     }
 
     /**
@@ -65,7 +65,7 @@ class GdxLogWrapper implements ApplicationLogger {
      */
     @Override
     public void debug(String tag, String message) {
-        this.LOGGER.debug(MarkerFactory.getMarker(tag), message);
+        this.LOGGER.debug(/* MarkerFactory.getMarker(tag), */ message);
     }
 
     /**
@@ -77,6 +77,6 @@ class GdxLogWrapper implements ApplicationLogger {
      */
     @Override
     public void debug(String tag, String message, Throwable exception) {
-        this.LOGGER.debug(MarkerFactory.getMarker(tag), message, exception);
+        this.LOGGER.debug(/* MarkerFactory.getMarker(tag), */ message, exception);
     }
 }

@@ -29,23 +29,31 @@ public interface Color {
         return RgbColor.gdx(color);
     }
 
-    default java.awt.Color toAwt() {
-        return new java.awt.Color(getRed(), getGreen(), getBlue(), getAlpha());
-    }
-
-    static Color fromAwt(java.awt.Color color) {
-        return RgbColor.awt(color);
-    }
-
     default Color darker() {
-        return fromAwt(toAwt().darker());
+        return RgbColor.gdx(toGdx()).darker();
     }
 
     default Color lighter() {
-        return fromAwt(toAwt().brighter());
+        return RgbColor.gdx(toGdx()).lighter();
     }
 
     default String toHex() {
         return String.format("#%02x%02x%02x%02x", getRed(), getGreen(), getBlue(), getAlpha());
+    }
+
+    default Color withRed(int i) {
+        return new RgbColor(i / 255f, getGreen(), getBlue(), getAlpha());
+    }
+
+    default Color withGreen(int i) {
+        return new RgbColor(getRed(), i / 255f, getBlue(), getAlpha());
+    }
+
+    default Color withBlue(int i) {
+        return new RgbColor(getRed(), getGreen(), i / 255f, getAlpha());
+    }
+
+    default Color withAlpha(int i) {
+        return new RgbColor(getRed(), getGreen(), getBlue(), i / 255f);
     }
 }

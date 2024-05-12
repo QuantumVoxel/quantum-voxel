@@ -1,12 +1,11 @@
 package dev.ultreon.quantum.client.config;
 
-import dev.ultreon.gameprovider.quantum.OS;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.config.crafty.ConfigEntry;
 import dev.ultreon.quantum.config.crafty.ConfigInfo;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.config.crafty.Ranged;
 import dev.ultreon.quantum.util.Identifier;
-import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * This is the client configuration.
@@ -55,7 +54,7 @@ public class ClientConfig extends CraftyConfig {
     public static boolean enable4xScreenshot = false;
 
     @ConfigEntry(path = "generic.enableDebugUtils", comment = "Whether debug utils are enabled.")
-    public static boolean enableDebugUtils = FabricLoader.getInstance().isDevelopmentEnvironment();
+    public static boolean enableDebugUtils = GamePlatform.get().isDevEnvironment();
 
     @ConfigEntry(path = "generic.enableDebugOverlay", comment = "Whether debug overlays are enabled.")
     public static boolean enableDebugOverlay = false;
@@ -141,7 +140,7 @@ public class ClientConfig extends CraftyConfig {
     public static boolean showSunAndMoon = true;
 
     @ConfigEntry(path = "personalisation.showMemoryUsage", comment = "Whether the memory usage is shown in the game's GUI / HUD.")
-    public static boolean showMemoryUsage = FabricLoader.getInstance().isDevelopmentEnvironment() && OS.isWindows();
+    public static boolean showMemoryUsage = GamePlatform.get().isDevEnvironment() && GamePlatform.get().isWindows();
 
     @ConfigEntry(path = "accessibility.doublePressDelay", comment = "The delay between double presses or clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
     public static int doublePressDelay = 30;

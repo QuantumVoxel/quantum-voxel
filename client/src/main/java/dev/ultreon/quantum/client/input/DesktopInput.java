@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
@@ -13,7 +14,6 @@ import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
-import dev.ultreon.quantum.client.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -443,7 +443,8 @@ public class DesktopInput extends GameInput {
     private void doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
         // Get the position and metadata of the current and next blocks
         Vec3i pos = hitResult.getPos();
-        if (hitResult instanceof BlockHitResult blockHitResult){
+        if (hitResult instanceof BlockHitResult){
+            BlockHitResult blockHitResult = (BlockHitResult) hitResult;
             BlockProperties block = world.get(new BlockPos(pos));
             Vec3i posNext = blockHitResult.getNext();
             BlockProperties blockNext = world.get(new BlockPos(posNext));
@@ -473,7 +474,8 @@ public class DesktopInput extends GameInput {
             if (button == Input.Buttons.RIGHT && blockNext != null && blockNext.isAir()) {
                 this.useItem(player, world, blockHitResult);
             }
-        } else if (hitResult instanceof EntityHitResult entityHitResult) {
+        } else if (hitResult instanceof EntityHitResult) {
+            EntityHitResult entityHitResult = (EntityHitResult) hitResult;
             if (!entityHitResult.isCollide()) {
                 return;
             }
@@ -542,7 +544,7 @@ public class DesktopInput extends GameInput {
         Screen currentScreen = this.client.screen;
 
         // Check if the ImGui overlay is shown and return false if it is
-        if (ImGuiOverlay.isShown()) return false;
+        if (GamePlatform.get().isShowingImGui()) return false;
 
         // Handle hotbar scrolling with the mouse wheel
         Player player = this.client.player;

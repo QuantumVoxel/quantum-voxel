@@ -7,8 +7,8 @@ import dev.ultreon.quantum.network.system.*;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -166,6 +166,6 @@ public class ServerConnections {
 
     @Override
     public String toString() {
-        return "ServerConnections{}";
+        return "ServerConnections%s";
     }
 }

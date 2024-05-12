@@ -11,7 +11,7 @@ import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler, ClientPacketHandler> {
@@ -45,7 +45,7 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
 
     @Override
     protected PacketContext createPacketContext() {
-        return new PacketContext(player, this, EnvType.CLIENT);
+        return new PacketContext(player, this, Env.CLIENT);
     }
 
     @Override

@@ -1,10 +1,12 @@
 package dev.ultreon.quantum.client.gui;
 
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.util.GameRenderable;
+import dev.ultreon.quantum.client.gui.widget.StaticWidget;
 import dev.ultreon.quantum.entity.player.Player;
 
-public class Hud implements GameRenderable {
+import java.util.UUID;
+
+public class Hud implements StaticWidget {
     private final QuantumClient client;
 
     public int leftY;
@@ -18,7 +20,7 @@ public class Hud implements GameRenderable {
     }
 
     @Override
-    public void render(Renderer renderer, float deltaTime) {
+    public void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
     }
 
     private void renderCrosshair(Renderer renderer) {
@@ -32,4 +34,16 @@ public class Hud implements GameRenderable {
     private void renderHealth(Renderer renderer, Player player) {
     }
 
+    public boolean isMouseOver(int mouseX, int mouseY) {
+        QuantumClient.get().notifications.addOnce(UUID.fromString("d04e6cc8-df0c-4520-935a-8262cac97c2c"), Notification.builder("HUD", "MouseOver check not implemented for HUD").build());
+        return false;
+    }
+
+    public boolean touchDown(int mouseX, int mouseY, int pointer, int button) {
+        return false;
+    }
+
+    public boolean touchUp(int mouseX, int mouseY, int pointer, int button) {
+        return false;
+    }
 }

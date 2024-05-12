@@ -33,15 +33,14 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -59,7 +58,6 @@ public abstract class World implements ServerDisposable {
     public static final int CHUNK_HEIGHT = 256;
     public static final int WORLD_HEIGHT = 256;
     public static final int WORLD_DEPTH = 0;
-    public static final Marker MARKER = MarkerFactory.getMarker("World");
     public static final int REGION_SIZE = 32;
     public static final Identifier OVERWORLD = new Identifier("overworld");
     public static final int SEA_LEVEL = 64;
@@ -202,10 +200,15 @@ public abstract class World implements ServerDisposable {
     }
 
     private static void fail(Throwable throwable, String msg) {
-        if (throwable instanceof CompletionException e && e.getCause() instanceof Error error)
+        if (throwable instanceof CompletionException && ((CompletionException) throwable).getCause() instanceof Error) {
+            CompletionException e = (CompletionException) throwable;
+            Error error = (Error) e.getCause();
             QuantumServer.get().crash(throwable);
-        if (throwable instanceof Error error)
+        }
+        if (throwable instanceof Error) {
+            Error error = (Error) throwable;
             QuantumServer.get().crash(throwable);
+        }
 
         World.LOGGER.error(msg, throwable);
     }
@@ -916,7 +919,7 @@ public abstract class World implements ServerDisposable {
     }
 
     public <T extends Entity> Collection<Entity> getEntitiesByClass(Class<T> clazz) {
-        return this.entitiesById.values().stream().filter(clazz::isInstance).toList();
+        return this.entitiesById.values().stream().filter(clazz::isInstance).collect(Collectors.toList());
     }
 
     public UUID getUID() {
@@ -965,11 +968,11 @@ public abstract class World implements ServerDisposable {
     }
 
     public List<Entity> entitiesWithinDst(Entity entity, int distance) {
-        return entitiesById.values().stream().filter(entity1 -> entity1.distanceTo(entity) <= distance).toList();
+        return entitiesById.values().stream().filter(entity1 -> entity1.distanceTo(entity) <= distance).collect(Collectors.toList());
     }
 
     public List<Entity> collideEntities(Entity droppedItem, BoundingBox ext) {
-        return entitiesById.values().stream().filter(entity -> entity.getBoundingBox().intersects(ext)).toList();
+        return entitiesById.values().stream().filter(entity -> entity.getBoundingBox().intersects(ext)).collect(Collectors.toList());
     }
 
     public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {

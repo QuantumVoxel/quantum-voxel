@@ -4,11 +4,11 @@ import java.lang.reflect.Method;
 
 public class InvalidCommandMethodError extends Error {
     public InvalidCommandMethodError(Method method) {
-        super("Invalid command method: %s in class: %s".formatted(method.getName(), method.getDeclaringClass().getName()));
+        super(String.format("Invalid command method: %s in class: %s", method.getName(), method.getDeclaringClass().getName()));
     }
 
     public InvalidCommandMethodError(Method method, Throwable cause) {
-        super("Invalid command method: %s in class: %s".formatted(method.getName(), method.getDeclaringClass().getName()), cause);
+        super(String.format("Invalid command method: %s in class: %s", method.getName(), method.getDeclaringClass().getName()), cause);
     }
 
     public InvalidCommandMethodError(String message) {

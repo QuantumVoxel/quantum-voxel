@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.debug.inspect;
 
-import com.google.common.base.Suppliers;
+import dev.ultreon.quantum.util.Suppliers;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

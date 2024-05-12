@@ -103,7 +103,8 @@ public abstract class ContainerMenu {
      */
     protected void onItemChanged(ItemSlot slot) {
         for (Player player : this.watching) {
-            if (player instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer) player;
                 Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
                 if (packet != null) {
                     serverPlayer.connection.send(packet);
@@ -147,7 +148,7 @@ public abstract class ContainerMenu {
      */
     public void removeWatcher(Player player) {
         if (!this.watching.contains(player)) {
-            QuantumServer.LOGGER.warn("Player {} is not a watcher of {}", player, this);
+            QuantumServer.LOGGER.warn("Player %s is not a watcher of %s", player, this);
             return;
         }
         this.watching.remove(player);
@@ -263,7 +264,8 @@ public abstract class ContainerMenu {
 
     @CanIgnoreReturnValue
     protected int inventoryMenu(int idx, int offX, int offY) {
-        if (getEntity() instanceof Player player) {
+        if (getEntity() instanceof Player) {
+            Player player = (Player) getEntity();
             for (int x = 0; x < 9; x++) {
                 this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 83));
             }

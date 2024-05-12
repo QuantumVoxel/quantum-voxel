@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -155,7 +156,7 @@ public class ServerWorld extends World {
         if (!chunk.getPos().equals(pos)) {
             throw new ValidationError("Chunk position (" + chunk.getPos() + ") and provided position (" + pos + ") don't match.");
         }
-        if (!this.unloadChunk(pos, true)) World.LOGGER.warn(World.MARKER, "Failed to unload chunk at {}", pos);
+        if (!this.unloadChunk(pos, true)) World.LOGGER.warn("Failed to unload chunk at %s", pos);
 
         WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getPos(), chunk);
         return true;
@@ -330,7 +331,7 @@ public class ServerWorld extends World {
             return chunk;
         } catch (Exception e) {
             // Log and rethrow any exception that occurred during chunk loading
-            World.LOGGER.error(World.MARKER, "Failed to load chunk " + globalPos + ":", e);
+            World.LOGGER.error("Failed to load chunk " + globalPos + ":", e);
             throw e;
         }
     }
@@ -402,7 +403,7 @@ public class ServerWorld extends World {
             if (chunk == null) {
                 // Handle failure to load chunk
                 this.server.handleChunkLoadFailure(globalPos, "Chunk not loaded on server.");
-                World.LOGGER.warn("Failed to load chunk {}!", globalPos);
+                World.LOGGER.warn("Failed to load chunk %s!", globalPos);
                 return null;
             }
             if (chunk.active) {
@@ -416,7 +417,7 @@ public class ServerWorld extends World {
             return chunk;
         } catch (Exception e) {
             // Log and rethrow any exceptions that occur during chunk loading
-            World.LOGGER.error(World.MARKER, "Failed to load chunk " + globalPos + ":", e);
+            World.LOGGER.error("Failed to load chunk " + globalPos + ":", e);
             throw e;
         }
     }
@@ -583,7 +584,7 @@ public class ServerWorld extends World {
         var localChunkPos = World.toLocalChunkPos(chunkPos);
 
         if (region.getActiveChunk(localChunkPos) == null)
-            throw new IllegalChunkStateException("Tried to unload chunk %s but it isn't active".formatted(chunkPos));
+            throw new IllegalChunkStateException(String.format("Tried to unload chunk %s but it isn't active", chunkPos));
 
         var chunk = region.deactivate(localChunkPos);
         if (chunk == null) {
@@ -594,7 +595,7 @@ public class ServerWorld extends World {
             try {
                 this.saveRegion(region);
             } catch (Exception e) {
-                World.LOGGER.warn("Failed to save region %s:".formatted(region.getPos()), e);
+                World.LOGGER.warn(String.format("Failed to save region %s:", region.getPos()), e);
                 return false;
             }
         }
@@ -643,7 +644,7 @@ public class ServerWorld extends World {
 
             // If the positions don't match, throw a validation error
             if (!foundAt.equals(localPos)) {
-                throw new ValidationError("Chunk expected to be found at %s was found at %s instead.".formatted(pos, foundAt));
+                throw new ValidationError(String.format("Chunk expected to be found at %s was found at %s instead.", pos, foundAt));
             }
         }
 
@@ -659,7 +660,7 @@ public class ServerWorld extends World {
     @Override
     public Collection<ServerChunk> getLoadedChunks() {
         var regions = this.regionStorage.regions.values();
-        return regions.stream().flatMap(value -> value.getChunks().stream()).toList();
+        return regions.stream().flatMap(value -> value.getChunks().stream()).collect(Collectors.toList());
     }
 
     /**
@@ -779,7 +780,7 @@ public class ServerWorld extends World {
         this.storage.createDir("players/");
         this.storage.createDir("regions/");
 
-        World.LOGGER.info(World.MARKER, "Loading world: " + this.storage.getDirectory().getFileName());
+        World.LOGGER.info("Loading world: " + this.storage.getDirectory().getFileName());
 
         //<editor-fold defaultstate="collapsed" desc="<<Loading: entities.ubo>>">
         if (this.storage.exists("entities.ubo")) {
@@ -805,7 +806,7 @@ public class ServerWorld extends World {
                 try {
                     ServerWorld.this.save(true);
                 } catch (Exception e) {
-                    World.LOGGER.error(World.MARKER, "Failed to save world:", e);
+                    World.LOGGER.error("Failed to save world:", e);
                 }
                 ServerWorld.this.saveSchedule = ServerWorld.this.server.schedule(this, QuantumServerConfig.autoSaveInterval, TimeUnit.SECONDS);
             }
@@ -814,7 +815,7 @@ public class ServerWorld extends World {
 
         WorldEvents.LOAD_WORLD.factory().onLoadWorld(this, this.storage);
 
-        World.LOGGER.info(World.MARKER, "Loaded world: " + this.storage.getDirectory().getFileName());
+        World.LOGGER.info("Loaded world: " + this.storage.getDirectory().getFileName());
     }
 
     /**
@@ -830,7 +831,7 @@ public class ServerWorld extends World {
         this.saving = true;
 
         // Log saving world message if not silent
-        if (!silent) World.LOGGER.info(World.MARKER, "Saving world: " + this.storage.getDirectory().getFileName());
+        if (!silent) World.LOGGER.info("Saving world: " + this.storage.getDirectory().getFileName());
 
         // Save entities data
         var entitiesData = new ListType<MapType>();
@@ -852,7 +853,7 @@ public class ServerWorld extends World {
                 if (region.isDirty())
                     this.saveRegion(region, false);
             } catch (Exception e) {
-                World.LOGGER.warn("Failed to save region %s:".formatted(region.getPos()), e);
+                World.LOGGER.warn(String.format("Failed to save region %s:", region.getPos()), e);
                 var remove = this.regionStorage.regions.remove(region.getPos());
                 if (remove != region)
                     this.server.crash(new ValidationError("Removed region is not the region that got saved."));
@@ -864,7 +865,7 @@ public class ServerWorld extends World {
         WorldEvents.SAVE_WORLD.factory().onSaveWorld(this, this.storage);
 
         // Log saved world message if not silent
-        if (!silent) World.LOGGER.info(World.MARKER, "Saved world: " + this.storage.getDirectory().getFileName());
+        if (!silent) World.LOGGER.info("Saved world: " + this.storage.getDirectory().getFileName());
         this.saving = false;
     }
 
@@ -896,7 +897,7 @@ public class ServerWorld extends World {
             if (!region.dirtyWhileSaving) region.dirty = false;
             else region.dirtyWhileSaving = false;
         } catch (IOException e) {
-            World.LOGGER.error("Failed to save region %s".formatted(region.getPos()), e);
+            World.LOGGER.error(String.format("Failed to save region %s", region.getPos()), e);
         }
     }
 
@@ -931,13 +932,13 @@ public class ServerWorld extends World {
                 } catch (Exception e) {
                     // Handle save error
                     this.server.handleWorldSaveError(e);
-                    World.LOGGER.error(World.MARKER, "Failed to save world", e);
+                    World.LOGGER.error("Failed to save world", e);
                     return false;
                 }
             }, this.saveExecutor);
         } catch (Exception e) {
             // Log error if save operation fails
-            World.LOGGER.error(World.MARKER, "Failed to save world", e);
+            World.LOGGER.error("Failed to save world", e);
             return CompletableFuture.completedFuture(false);
         }
     }
@@ -976,7 +977,7 @@ public class ServerWorld extends World {
             }
         } catch (IOException e) {
             // Log error if the region failed to load
-            World.LOGGER.error("Region at %s,%s failed to load:".formatted(rx, rz), e);
+            World.LOGGER.error(String.format("Region at %s,%s failed to load:", rx, rz), e);
         }
 
         // Create a new region if it doesn't exist and add it to the regions map
@@ -1018,9 +1019,10 @@ public class ServerWorld extends World {
 
         T spawn = super.spawn(entity);
 
-        if (entity instanceof ServerPlayer player)
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer player = (ServerPlayer) entity;
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));
-        else
+        } else
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));
 
         return spawn;
@@ -1033,9 +1035,10 @@ public class ServerWorld extends World {
 
         T spawn = super.spawn(entity, spawnData);
 
-        if (entity instanceof ServerPlayer player)
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer player = (ServerPlayer) entity;
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));
-        else
+        } else
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));
 
         return spawn;
@@ -1418,7 +1421,7 @@ public class ServerWorld extends World {
                 return null;
             } catch (Throwable t) {
                 this.generatingChunks.remove(globalPos);
-                World.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), t);
+                World.LOGGER.error(String.format("Failed to build chunk at %s:", globalPos), t);
                 throw new Error(t);
             }
 
@@ -1463,7 +1466,7 @@ public class ServerWorld extends World {
                 } catch (CancellationException | RejectedExecutionException e) {
                     throw e;
                 } catch (Throwable e) {
-                    QuantumServer.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), e);
+                    QuantumServer.LOGGER.error(String.format("Failed to build chunk at %s:", globalPos), e);
                     throw new Error(e);
                 }
             }, this.world.executor).thenAccept(builtChunk -> QuantumServer.invoke(() -> {
@@ -1481,7 +1484,7 @@ public class ServerWorld extends World {
                 });
             }).exceptionallyAsync(e -> {
                 if (!(e instanceof CancellationException))
-                    QuantumServer.LOGGER.error("Failed to build chunk at %s:".formatted(globalPos), e);
+                    QuantumServer.LOGGER.error(String.format("Failed to build chunk at %s:", globalPos), e);
 
                 return null;
             }));
@@ -1542,7 +1545,7 @@ public class ServerWorld extends World {
 
             var loadedAt = loadedChunk.getPos();
             if (!loadedAt.equals(pos)) {
-                throw new IllegalChunkStateException("Chunk requested to load at %s got loaded at %s instead".formatted(pos, loadedAt));
+                throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", pos, loadedAt));
             }
 
             return loadedChunk;
@@ -1565,7 +1568,7 @@ public class ServerWorld extends World {
 
             var loadedAt = loadedChunk.getPos();
             if (!loadedAt.equals(pos)) {
-                throw new IllegalChunkStateException("Chunk requested to load at %s got loaded at %s instead".formatted(pos, loadedAt));
+                throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", pos, loadedAt));
             }
 
             return loadedChunk;
@@ -1639,7 +1642,7 @@ public class ServerWorld extends World {
             mapType.putInt("size", World.REGION_SIZE);
 
             // Write chunks to the region file.
-            var chunks = region.getChunks().stream().filter(serverChunk -> !serverChunk.isOriginal()).toList();
+            var chunks = region.getChunks().stream().filter(serverChunk -> !serverChunk.isOriginal()).collect(Collectors.toList());
             var idx = 0;
             CommonConstants.LOGGER.info("Saving " + chunks.size() + " chunks in region " + pos);
             for (var chunk : chunks) {
@@ -1725,7 +1728,7 @@ public class ServerWorld extends World {
             // Chceck if region already exists, if so, then throw an error.
             var oldRegion = this.regions.get(regionPos);
             if (oldRegion != null) {
-                throw new OverwriteError("Tried to overwrite region %s".formatted(regionPos));
+                throw new OverwriteError(String.format("Tried to overwrite region %s", regionPos));
             }
 
             // Create region instance.
@@ -1781,37 +1784,66 @@ public class ServerWorld extends World {
         }
     }
 
-    public record RecordedChange(int x, int y, int z, BlockProperties block) {
+    public static final class RecordedChange {
+        private final int x;
+        private final int y;
+        private final int z;
+        private final BlockProperties block;
+
+        public RecordedChange(int x, int y, int z, BlockProperties block) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.block = block;
+        }
+
         public MapType save() {
-            MapType mapType = new MapType();
-            mapType.putInt("x", this.x);
-            mapType.putInt("y", this.y);
-            mapType.putInt("z", this.z);
-            mapType.put("block", this.block.save());
-            return mapType;
+                MapType mapType = new MapType();
+                mapType.putInt("x", this.x);
+                mapType.putInt("y", this.y);
+                mapType.putInt("z", this.z);
+                mapType.put("block", this.block.save());
+                return mapType;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                RecordedChange that = (RecordedChange) o;
+                return x == that.x && y == that.y && z == that.z;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(x, y, z);
+            }
+
+            @Override
+            public String toString() {
+                return "RecordedChange{" +
+                       "x=" + x +
+                       ", y=" + y +
+                       ", z=" + z +
+                       ", block=" + block +
+                       '}';
+            }
+
+        public int x() {
+            return x;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            RecordedChange that = (RecordedChange) o;
-            return x == that.x && y == that.y && z == that.z;
+        public int y() {
+            return y;
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y, z);
+        public int z() {
+            return z;
         }
 
-        @Override
-        public String toString() {
-            return "RecordedChange{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    ", z=" + z +
-                    ", block=" + block +
-                    '}';
+        public BlockProperties block() {
+            return block;
         }
-    }
+
+        }
 }

@@ -4,7 +4,7 @@ import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ public class ModPacketContext extends PacketContext {
     @NotNull
     private final NetworkChannel channel;
 
-    public ModPacketContext(@NotNull NetworkChannel channel, @Nullable ServerPlayer player, @NotNull IConnection connection, @NotNull EnvType environment) {
+    public ModPacketContext(@NotNull NetworkChannel channel, @Nullable ServerPlayer player, @NotNull IConnection connection, @NotNull Env environment) {
         super(player, connection, environment);
         this.channel = channel;
     }

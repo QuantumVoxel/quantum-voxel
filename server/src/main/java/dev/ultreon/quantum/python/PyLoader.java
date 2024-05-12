@@ -1,19 +1,21 @@
 package dev.ultreon.quantum.python;
 
 import com.google.gson.Gson;
-import net.fabricmc.loader.api.FabricLoader;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.api.FileIO;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.SandboxPolicy;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 public class PyLoader {
@@ -38,15 +40,15 @@ public class PyLoader {
                 try {
                     extractPyz(p);
 
-                    Path modRoot = FabricLoader.getInstance().getGameDir().resolve("mods/python/" + p.getFileName());
+                    Path modRoot = GamePlatform.get().getGameDir().resolve("mods/python/" + p.getFileName());
                     pythonPath.add(modRoot.toAbsolutePath().toString());
-                    PyMod pyMod = new Gson().fromJson(Files.readString(modRoot.resolve("python.mod.json")), PyMod.class);
+                    PyMod pyMod = new Gson().fromJson(FileIO.readString(modRoot.resolve("python.mod.json")), PyMod.class);
                     mods.put(pyMod.id(), pyMod);
                     pyMod.path = modRoot;
 
                     execute(modRoot);
                 } catch (Exception e) {
-                    PyLang.LOGGER.error("Failed to load python file: {}", p, e);
+                    PyLang.LOGGER.error("Failed to load python file: %s", p, e);
                 }
             });
         }
@@ -110,7 +112,7 @@ public class PyLoader {
         }));
 
         try {
-            List<Path> list = Files.list(modRoot).toList();
+            List<Path> list = Files.list(modRoot).collect(Collectors.toList());
             for (Path p : list) {
                 if (p.toString().endsWith(".py")) {
                     Source source = Source.newBuilder("python", p.toFile())
@@ -128,17 +130,17 @@ public class PyLoader {
             Value python = context.parse(Source.newBuilder("python", preLaunchScript.toFile()).mimeType("text/x-python").build());
             python.execute();
         } catch (Exception e) {
-            PyLang.LOGGER.error("Failed to load python file: {}", modRoot, e);
+            PyLang.LOGGER.error("Failed to load python file: %s", modRoot, e);
         }
     }
 
     private void extractPyz(Path p) throws IOException {
-        Path resolve = FabricLoader.getInstance().getGameDir().resolve("mods/python/" + p.getFileName());
+        Path resolve = GamePlatform.get().getGameDir().resolve("mods/python/" + p.getFileName());
         if (Files.exists(resolve)) {
             try {
                 Files.walk(resolve).sorted().map(Path::toFile).forEach(File::delete);
             } catch (IOException e) {
-                PyLang.LOGGER.error("Failed to delete python file: {}", p, e);
+                PyLang.LOGGER.error("Failed to delete python file: %s", p, e);
             }
         }
         Files.createDirectories(resolve);
@@ -156,18 +158,18 @@ public class PyLoader {
                     try {
                         Files.createDirectories(resolve.resolve(entry.getName()));
                     } catch (IOException e) {
-                        PyLang.LOGGER.error("Failed to load python file: {}", p, e);
+                        PyLang.LOGGER.error("Failed to load python file: %s", p, e);
                     }
                 } else {
                     try {
-                        Files.copy(zipFile.getInputStream(entry), FabricLoader.getInstance().getGameDir().resolve("mods/python/" + p.getFileName() + "/" + entry.getName()));
+                        Files.copy(zipFile.getInputStream(entry), GamePlatform.get().getGameDir().resolve("mods/python/" + p.getFileName() + "/" + entry.getName()));
                     } catch (IOException e) {
-                        PyLang.LOGGER.error("Failed to load python file: {}", p, e);
+                        PyLang.LOGGER.error("Failed to load python file: %s", p, e);
                     }
                 }
             });
         } catch (Exception e) {
-            PyLang.LOGGER.error("Failed to load python file: {}", p, e);
+            PyLang.LOGGER.error("Failed to load python file: %s", p, e);
         }
     }
 

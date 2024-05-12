@@ -9,9 +9,17 @@ import dev.ultreon.quantum.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public record CraftingRecipe(List<ItemStack> ingredients, ItemStack result) implements Recipe {
+public final class CraftingRecipe implements Recipe {
+    private final List<ItemStack> ingredients;
+    private final ItemStack result;
+
+    public CraftingRecipe(List<ItemStack> ingredients, ItemStack result) {
+        this.ingredients = ingredients;
+        this.result = result;
+    }
 
     @Override
     public ItemStack craft(Inventory inventory) {
@@ -90,4 +98,36 @@ public record CraftingRecipe(List<ItemStack> ingredients, ItemStack result) impl
 
         return new CraftingRecipe(ingredients, result);
     }
+
+    @Override
+    public List<ItemStack> ingredients() {
+        return ingredients;
+    }
+
+    @Override
+    public ItemStack result() {
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (CraftingRecipe) obj;
+        return Objects.equals(this.ingredients, that.ingredients) &&
+               Objects.equals(this.result, that.result);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ingredients, result);
+    }
+
+    @Override
+    public String toString() {
+        return "CraftingRecipe[" +
+               "ingredients=" + ingredients + ", " +
+               "result=" + result + ']';
+    }
+
 }

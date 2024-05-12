@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.gui.widget.components;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.util.ImGuiEx;
 import org.jetbrains.annotations.Nullable;
 
 public class TextComponent extends UIComponent {
@@ -48,6 +47,6 @@ public class TextComponent extends UIComponent {
 
     @Override
     public void handleImGui(String path, Identifier key, Widget widget) {
-        ImGuiEx.editString("Text (" + key + "): ", path, this::getRaw, this::setRaw);
+//        ImGuiEx.editString("Text (" + key + "): ", path, this::getRaw, this::setRaw);
     }
 }

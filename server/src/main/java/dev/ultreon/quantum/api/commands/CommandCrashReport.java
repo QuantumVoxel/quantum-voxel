@@ -11,6 +11,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -122,10 +123,48 @@ public class CommandCrashReport {
 
     /**
      * Represents the details of a command error.
-     *
-     * @param report The details of the command error
-     * @param id     The unique ID of the error
      */
-    public record Details(String report, String id) {
-    }
+        public static final class Details {
+        private final String report;
+        private final String id;
+
+        /**
+         * @param report The details of the command error
+         * @param id     The unique ID of the error
+         */
+        public Details(String report, String id) {
+            this.report = report;
+            this.id = id;
+        }
+
+        public String report() {
+            return report;
+        }
+
+        public String id() {
+            return id;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (Details) obj;
+            return Objects.equals(this.report, that.report) &&
+                   Objects.equals(this.id, that.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(report, id);
+        }
+
+        @Override
+        public String toString() {
+            return "Details[" +
+                   "report=" + report + ", " +
+                   "id=" + id + ']';
+        }
+
+        }
 }

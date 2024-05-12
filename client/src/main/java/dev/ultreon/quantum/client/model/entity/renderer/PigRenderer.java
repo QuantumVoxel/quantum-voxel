@@ -27,7 +27,7 @@ public class PigRenderer extends LivingEntityRenderer<@NotNull Pig> {
             case WALKING -> {
                 // TODO: Add walking animation
             }
-            default -> QuantumClient.LOGGER.warn("Unknown pose {} for entity {}", pose, entity.getId());
+            default -> QuantumClient.LOGGER.warn("Unknown pose %s for entity %s", pose, entity.getId());
         }
     }
 

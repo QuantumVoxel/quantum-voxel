@@ -23,7 +23,8 @@ public class OverloadContent {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof OverloadContent that)) return false;
+        if (!(o instanceof OverloadContent)) return false;
+        OverloadContent that = (OverloadContent) o;
         return this.size == that.size &&
                Objects.equal(this.name, that.name) &&
                Objects.equal(this.indexedValues, that.indexedValues);

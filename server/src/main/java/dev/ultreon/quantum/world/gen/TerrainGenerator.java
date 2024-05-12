@@ -91,7 +91,7 @@ public class TerrainGenerator implements Disposable {
             }
 
             if (DebugFlags.LOG_OUT_OF_BOUNDS.enabled() && (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE)) {
-                QuantumServer.LOGGER.warn("Recorded change out of bounds: {}", change);
+                QuantumServer.LOGGER.warn("Recorded change out of bounds: %s", change);
             }
 
             chunk.set(change.x(), change.y(), change.z(), change.block());

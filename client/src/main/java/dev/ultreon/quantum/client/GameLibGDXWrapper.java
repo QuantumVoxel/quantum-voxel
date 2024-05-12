@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * LibGDX wrapper for Quantum Voxel to handle uncaught exceptions.
@@ -68,7 +70,8 @@ public final class GameLibGDXWrapper implements ApplicationListener {
      * @param throwable The uncaught exception
      */
     private void uncaughtException(Thread thread, Throwable throwable) {
-        if (throwable instanceof ApplicationCrash e) {
+        if (throwable instanceof ApplicationCrash) {
+            ApplicationCrash e = (ApplicationCrash) throwable;
             try {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.get().delayCrash(crashLog);
@@ -181,7 +184,7 @@ public final class GameLibGDXWrapper implements ApplicationListener {
         this.batch.begin();
         this.batch.setColor(Color.WHITE);
 
-        List<String> string = crashLog.toString().replace("\t", "    ").lines().toList();
+        List<String> string = StringUtils.splitIntoLines(crashLog.toString().replace("\t", "    "));
 
         for (int i = 0; i < string.size(); i++) {
             String line = string.get(i);

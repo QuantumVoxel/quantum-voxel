@@ -68,7 +68,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     public void revalidate() {
         super.revalidate();
 
-        for (var widget : this.widgets) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1, widgetListSize = widgetList.size(); i >= 0; i--) {
+            var widget = widgetList.get(i);
             widget.revalidate();
         }
     }
@@ -113,7 +115,10 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
             var widget = this.widgets.get(i);
             if (!widget.visible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?> uiContainer) return uiContainer.getExactWidgetAt(x, y);
+                if (widget instanceof UIContainer<?>) {
+                    UIContainer<?> uiContainer = (UIContainer<?>) widget;
+                    return uiContainer.getExactWidgetAt(x, y);
+                }
                 return widget;
             }
         }
@@ -127,8 +132,10 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
             if (!widget.visible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?> container)
+                if (widget instanceof UIContainer<?>) {
+                    UIContainer<?> container = (UIContainer<?>) widget;
                     output.addAll(container.getWidgetsAt(x, y));
+                }
                 output.add(widget);
             }
         }
@@ -174,7 +181,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
-        for (var widget : this.widgets.reversed()) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
+            var widget = widgetList.get(i);
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseClick(mouseX, mouseY, button, clicks)) return true;
                 continue;
@@ -186,7 +195,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        for (var widget : this.widgets.reversed()) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
+            var widget = widgetList.get(i);
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mousePress(mouseX, mouseY, button)) return true;
                 continue;
@@ -198,7 +209,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
-        for (var widget : this.widgets.reversed()) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
+            var widget = widgetList.get(i);
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseRelease(mouseX, mouseY, button)) return true;
                 continue;
@@ -210,7 +223,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
-        for (var widget : this.widgets.reversed()) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
+            var widget = widgetList.get(i);
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseWheel(mouseX, mouseY, rotation)) return true;
                 continue;
@@ -222,7 +237,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public void mouseMove(int mouseX, int mouseY) {
-        for (var widget : this.widgets.reversed()) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
+            var widget = widgetList.get(i);
             if (!widget.visible) {
                 if (widget.ignoreBounds) {
                     widget.mouseMove(mouseX, mouseY);
@@ -238,7 +255,9 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
-        for (var widget : this.widgets.reversed()) {
+        List<Widget> widgetList = List.copyOf(this.widgets);
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
+            var widget = widgetList.get(i);
             if (!widget.visible) {
                 if (widget.ignoreBounds && widget.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer)) return true;
                 continue;

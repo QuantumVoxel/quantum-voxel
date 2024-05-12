@@ -198,7 +198,7 @@ public class DebugOverlay {
             rText = TextObject.literal("< 0.01").setColor(RgbColor.LIGHT_GRAY)
                     .append(TextObject.literal(" ms").setColor(RgbColor.rgb(0xa0a0a0)));
         else
-            rText = TextObject.literal("%.2f".formatted(nanos / 1000000.0)).setColor(RgbColor.LIGHT_GRAY)
+            rText = TextObject.literal(String.format("%.2f", nanos / 1000000.0)).setColor(RgbColor.LIGHT_GRAY)
                     .append(TextObject.literal(" ms").setColor(RgbColor.rgb(0xa0a0a0)));
         int lWidth = renderer.getFont().width(lText);
         int rWidth = renderer.getFont().width(rText);
@@ -249,7 +249,8 @@ public class DebugOverlay {
     }
 
     public void updateProfiler() {
-        if (this.getPage() instanceof ProfilerDebugPage profilerPage) {
+        if (this.getPage() instanceof ProfilerDebugPage) {
+            ProfilerDebugPage profilerPage = (ProfilerDebugPage) this.getPage();
             var profiler = this.client.profiler;
             profilerPage.profile = profiler.collect();
         }

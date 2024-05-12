@@ -42,16 +42,12 @@ import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.PollingExecutorService;
 import dev.ultreon.quantum.util.Shutdownable;
 import dev.ultreon.quantum.world.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import org.apache.logging.log4j.core.config.ConfigurationScheduler;
-import org.apache.logging.log4j.core.util.WatchManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -79,7 +75,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumServer");
     @Deprecated(since = "0.1.0", forRemoval = true)
     public static final String NAMESPACE = "quantum";
-    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
+//    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
     private final List<ServerDisposable> disposables = new ArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -165,9 +161,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         Recipes.init();
     }
 
-    public static WatchManager getWatchManager() {
-        return QuantumServer.WATCH_MANAGER;
-    }
+//    public static WatchManager getWatchManager() {
+//        return QuantumServer.WATCH_MANAGER;
+//    }
 
     public void load() throws IOException {
         this.world.load();
@@ -260,7 +256,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static boolean isOnServerThread() {
         QuantumServer instance = QuantumServer.instance;
         if (instance == null) throw new IllegalStateException("Server closed!");
-        return instance.thread.threadId() == Thread.currentThread().threadId();
+        return instance.thread.getId() == Thread.currentThread().getId();
     }
 
     @ApiStatus.Internal
@@ -592,9 +588,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @return the game's version.
      */
     public String getGameVersion() {
-        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE);
-        if (container.isEmpty()) throw new InternalError("Can't find mod container for the base game.");
-        return container.get().getMetadata().getVersion().getFriendlyString();
+//        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE);
+//        if (container.isEmpty()) throw new InternalError("Can't find mod container for the base game.");
+//        return container.get().getMetadata().getVersion().getFriendlyString();
+        return "0.1.0";
     }
 
     /**
@@ -665,7 +662,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         // Send player to all other players within the render distance.
         var players = this.getPlayers()
                 .stream()
-                .toList();
+                .collect(Collectors.toList());
 
         for (ServerPlayer other : players) {
             if (other == player) continue;
@@ -737,7 +734,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     @ApiStatus.Internal
     public void onDisconnected(ServerPlayer player, String message) {
-        QuantumServer.LOGGER.info("Player '{}' disconnected with message: {}", player.getName(), message);
+        QuantumServer.LOGGER.info("Player '%s' disconnected with message: %s", player.getName(), message);
         this.players.remove(player.getUuid());
         for (ServerPlayer other : this.players.values()) {
             other.connection.send(new S2CRemovePlayerPacket(other.getUuid()));
@@ -788,9 +785,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public ServerPlayer loadPlayer(String name, UUID uuid, IConnection connection) {
         ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.world, uuid, name, connection);
         try {
-            if (this.storage.exists("players/%s.ubo".formatted(name))) {
-                QuantumServer.LOGGER.info("Loading player '{}'...", name);
-                MapType read = this.storage.read("players/%s.ubo".formatted(name));
+            if (this.storage.exists(String.format("players/%s.ubo", name))) {
+                QuantumServer.LOGGER.info("Loading player '%s'...", name);
+                MapType read = this.storage.read(String.format("players/%s.ubo", name));
                 player.load(read);
                 player.markSpawned();
                 player.markPlayedBefore();

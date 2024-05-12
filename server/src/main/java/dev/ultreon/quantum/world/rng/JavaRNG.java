@@ -19,7 +19,7 @@ public class JavaRNG implements RNG {
 
     @Override
     public int randint(int min, int max) {
-        return this.random.nextInt(min, max + 1);
+        return this.random.nextInt(max - min + 1) + min;
     }
 
     @Override
@@ -34,11 +34,36 @@ public class JavaRNG implements RNG {
 
     @Override
     public float randrange(float min, float max) {
-        return this.random.nextFloat(min, max);
+        return this.random.nextFloat(max - min) + min;
     }
 
     @Override
     public double randrange(double min, double max) {
-        return this.random.nextDouble(min, max);
+        return this.random.nextDouble(max - min) + min;
+    }
+
+    @Override
+    public void setSeed(long seed) {
+        this.random.setSeed(seed);
+    }
+
+    @Override
+    public long nextLong() {
+        return this.random.nextLong();
+    }
+
+    @Override
+    public int nextInt(int bound) {
+        return this.random.nextInt(bound);
+    }
+
+    @Override
+    public float nextFloat() {
+        return this.random.nextFloat();
+    }
+
+    @Override
+    public int nextInt(int min, int max) {
+        return this.random.nextInt(max - min) + min;
     }
 }

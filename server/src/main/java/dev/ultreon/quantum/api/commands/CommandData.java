@@ -46,6 +46,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class CommandData {
@@ -176,7 +177,7 @@ public class CommandData {
     }
 
     final List<Method> getMethods() {
-        return this.methodMap.values().stream().toList();
+        return this.methodMap.values().stream().collect(Collectors.toList());
     }
 
     public @Nullable String mapToPerm(@Nullable CommandSpec spec) {
@@ -255,9 +256,10 @@ public class CommandData {
 
     public static Object readObject(CommandReader ctx) throws CommandParseException {
         CommandSender sender = ctx.getSender();
-        if (!(sender instanceof ServerPlayer serverPlayer)) {
+        if (!(sender instanceof ServerPlayer)) {
             throw new CommandParseException("Not ran from a server player.", ctx.getOffset());
         }
+        ServerPlayer serverPlayer = (ServerPlayer) sender;
         String first = ctx.readUntil('.');
         Object object;
         if (first.startsWith(":")) {
@@ -308,9 +310,10 @@ public class CommandData {
     }
 
     public static List<String> completeObject(CommandSender commandSender, CommandContext commandCtx, CommandReader ctx, String[] strings) throws CommandParseException {
-        if (!(commandSender instanceof ServerPlayer serverPlayer)) {
+        if (!(commandSender instanceof ServerPlayer)) {
             throw new CommandParseException("Not ran from a server player.", ctx.getOffset());
         }
+        ServerPlayer serverPlayer = (ServerPlayer) commandSender;
 
         if (ctx.isAtEndOfCmd()) {
             return List.of(":", "$");
@@ -476,7 +479,8 @@ public class CommandData {
 
     private static PlayerVariable readVariableAssignment(CommandReader commandReader) throws CommandParseException {
         CommandSender sender = commandReader.getSender();
-        if (!(sender instanceof ServerPlayer serverPlayer)) throw new CommandParseException.NotFound("player", commandReader.getOffset());
+        if (!(sender instanceof ServerPlayer)) throw new CommandParseException.NotFound("player", commandReader.getOffset());
+        ServerPlayer serverPlayer = (ServerPlayer) sender;
         Selector selector = commandReader.readSelector();
         SelectorKey key = selector.getKey();
         if (key != SelectorKey.VARIABLE) throw new CommandParseException.Invalid("variable assignment", commandReader.getOffset());
@@ -646,7 +650,7 @@ public class CommandData {
         try {
             return ctx.readString();
         } catch (Exception e) {
-            CommonConstants.LOGGER.error("Failed to read string in command {}", ctx.getCommand(), e);
+            CommonConstants.LOGGER.error("Failed to read string in command %s", ctx.getCommand(), e);
             throw new CommandParseException(e.getMessage(), ctx.getOffset());
         }
     }
@@ -800,12 +804,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.getLast().length() > 2) {
+            if (parts.get(parts.size() - 1).length() > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add(":");
             }
-        } else if (!parts.getLast().isEmpty()) {
+        } else if (!parts.get(parts.size() - 1).isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -822,9 +826,9 @@ public class CommandData {
         if (parts.size() > 3) {
             return List.of();
         }
-        if (parts.getLast().length() > 2) {
+        if (parts.get(parts.size() - 1).length() > 2) {
             return List.of("$currentArgument:");
-        } else if (!parts.getLast().isEmpty()) {
+        } else if (!parts.get(parts.size() - 1).isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -842,12 +846,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.getLast().length()     > 2) {
+            if (parts.get(parts.size() - 1).length()     > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add("-");
             }
-        } else if (!parts.getLast().isEmpty()) {
+        } else if (!parts.get(parts.size() - 1).isEmpty()) {
             list.add("-");
         }
         for (var i : new Range(0, 9)) {
@@ -866,12 +870,12 @@ public class CommandData {
                 return List.of(" ");
             }
             if (parts.size() > 1) {
-                if (parts.getLast().length() > 2) {
+                if (parts.get(parts.size() - 1).length() > 2) {
                     return List.of("$date:");
-                } else if (!parts.getLast().isEmpty()) {
+                } else if (!parts.get(parts.size() - 1).isEmpty()) {
                     list.add("-");
                 }
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add("-");
             }
             for (var i : new Range(0, 9)) {
@@ -885,9 +889,9 @@ public class CommandData {
             if (parts.size() > 3) {
                 return List.of();
             }
-            if (parts.getLast().length()     > 2) {
+            if (parts.get(parts.size() - 1).length()     > 2) {
                 return List.of("$time:");
-            } else if (!parts.getLast().isEmpty()) {
+            } else if (!parts.get(parts.size() - 1).isEmpty()) {
                 list.add(":");
             }
             for (var i : new Range(0, 9)) {
@@ -938,7 +942,7 @@ public class CommandData {
     }
 
     private static List<String> completeCommand(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
-        List<Command> list = CommandRegistry.getCommands().toList();
+        List<Command> list = CommandRegistry.getCommands().collect(Collectors.toList());
         String s = ctx.readString();
         if (!ctx.isAtEndOfCmd()) {
             Command command = CommandRegistry.get(s);
@@ -959,7 +963,8 @@ public class CommandData {
     }
 
     private static List<String> completeVariables(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
-        if (sender instanceof ServerPlayer serverPlayer) {
+        if (sender instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer) sender;
             return TabCompleting.variables(new ArrayList<>(), ctx.readString(), serverPlayer, Object.class);
         }
 

@@ -19,8 +19,6 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongLists;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChatScreen extends Screen {
-    private static final Marker MARKER = MarkerFactory.getMarker("ChatScreen");
     private final String input;
     private ChatTextEntry entry;
     private static final List<TextObject> MESSAGES = new CopyOnWriteArrayList<>();
@@ -47,7 +44,7 @@ public class ChatScreen extends Screen {
         ChatScreen.MESSAGES.add(0, message);
         ChatScreen.MESSAGE_TIMESTAMPS.add(0, System.currentTimeMillis());
 
-        QuantumClient.LOGGER.info(ChatScreen.MARKER, "Received message: " + message.getText());
+        QuantumClient.LOGGER.info("Received message: " + message.getText());
 
         if (ChatScreen.MESSAGES.size() > 100) {
             ChatScreen.MESSAGES.remove(ChatScreen.getMessages().size() - 1);

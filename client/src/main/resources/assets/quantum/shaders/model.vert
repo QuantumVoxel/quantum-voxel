@@ -1,15 +1,21 @@
 #ifdef GL_ES
+#define LOWP lowp
+#define MED mediump
+#define HIGH highp
 precision mediump float;
-precision mediump vec4;
-precision mediump vec2;
+#else
+#define MED
+#define LOWP
+#define HIGH
 #endif
-attribute vec4 a_position;
-attribute vec4 a_diffuseColor;
-attribute vec2 a_texCoord0;
-attribute vec2 a_texCoord1;
+
+attribute MED vec4 a_position;
+attribute MED vec4 a_diffuseColor;
+attribute MED vec2 a_texCoord0;
+attribute MED vec2 a_texCoord1;
 uniform mat4 u_projTrans;
-varying vec4 v_color;
-varying vec2 v_texCoords;
+varying MED vec4 v_color;
+varying MED vec2 v_texCoords;
 
 void main()
 {

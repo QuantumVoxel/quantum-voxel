@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.Input;
+import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.client.gui.widget.Button;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
@@ -10,6 +11,7 @@ import dev.ultreon.quantum.util.RgbColor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Dialog extends UIContainer<Dialog> {
     private final Screen parent;
@@ -79,7 +81,7 @@ public class Dialog extends UIContainer<Dialog> {
         }
         if (renderer.pushScissors(pos.x, pos.y, size.width, size.height)) {
             String message1 = message.getText();
-            List<String> lines = message1.lines().toList();
+            List<String> lines = StringUtils.splitIntoLines(message1);
             for (int i = 0; i < lines.size(); i++) {
                 renderer.textCenter(lines.get(i), pos.x + size.width / 2, pos.y + 30 + i * font.lineHeight, RgbColor.WHITE.withAlpha(0xa0), true);
             }

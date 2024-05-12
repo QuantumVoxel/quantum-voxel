@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
@@ -42,7 +43,10 @@ public class TranslationText extends MutableText {
         Object @NotNull [] objects = this.args;
         for (int i = 0, objectsLength = objects.length; i < objectsLength; i++) {
             Object arg = objects[i];
-            if (arg instanceof TextObject textObject) objects[i] = textObject.createString();
+            if (arg instanceof TextObject) {
+                TextObject textObject = (TextObject) arg;
+                objects[i] = textObject.createString();
+            }
         }
         return LanguageBootstrap.translate(this.path, this.args);
     }
@@ -57,9 +61,13 @@ public class TranslationText extends MutableText {
 
         ListType<MapType> argsData = new ListType<>();
         for (Object arg : this.args) {
-            if (arg instanceof TextObject textObject) argsData.add(textObject.serialize());
-            else if (arg instanceof String s) argsData.add(TextObject.literal(s).serialize());
-            else argsData.add(TextObject.literal(String.valueOf(arg)).serialize());
+            if (arg instanceof TextObject) {
+                TextObject textObject = (TextObject) arg;
+                argsData.add(textObject.serialize());
+            } else if (arg instanceof String) {
+                String s = (String) arg;
+                argsData.add(TextObject.literal(s).serialize());
+            } else argsData.add(TextObject.literal(String.valueOf(arg)).serialize());
         }
         data.put("Args", argsData);
 
@@ -79,7 +87,7 @@ public class TranslationText extends MutableText {
 
     @Override
     public MutableText copy() {
-        var copy = this.extras.stream().map(TextObject::copy).toList();
+        var copy = this.extras.stream().map(TextObject::copy).collect(Collectors.toList());
         var translationText = new TranslationText(this.path, this.args);
         translationText.extras.addAll(copy);
         return translationText;

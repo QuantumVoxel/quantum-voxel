@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.debug;
 
-import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 public class Debugger {
     private static final Logger LOGGER = LoggerFactory.getLogger(Debugger.class);
@@ -11,10 +11,10 @@ public class Debugger {
      * Only logs debug messages when Fabric is in development environment.
      *
      * @param message the debug message.
-     * @see FabricLoader#isDevelopmentEnvironment()
+     * @see GamePlatform#isDevEnvironment()
      */
     public static void log(String message) {
-        if (FabricLoader.getInstance().isDevelopmentEnvironment() || DebugFlags.IS_RUNNING_IN_DEBUG) {
+        if (GamePlatform.get().isDevEnvironment() || DebugFlags.IS_RUNNING_IN_DEBUG) {
             Debugger.LOGGER.debug(message);
         }
     }
@@ -24,10 +24,10 @@ public class Debugger {
      *
      * @param message the debug message.
      * @param t       the exception.
-     * @see FabricLoader#isDevelopmentEnvironment()
+     * @see GamePlatform#isDevEnvironment()
      */
     public static void log(String message, Throwable t) {
-        if (FabricLoader.getInstance().isDevelopmentEnvironment() || DebugFlags.IS_RUNNING_IN_DEBUG) {
+        if (GamePlatform.get().isDevEnvironment() || DebugFlags.IS_RUNNING_IN_DEBUG) {
             Debugger.LOGGER.debug(message, t);
         }
     }

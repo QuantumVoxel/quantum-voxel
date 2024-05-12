@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class PacketIO {
@@ -74,7 +75,7 @@ public class PacketIO {
     public final List<ByteBuf> validate(List<PartialPacket> parts) throws PacketIntegrityException {
         List<ByteBuf> bufs = new ArrayList<>();
         int dataOffsetCheck = 0;
-        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).toList()) {
+        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).collect(Collectors.toList())) {
             if (dataOffsetCheck != partialPacket.dataOffset()) throw new PacketIntegrityException("Packet data offset mismatch. Expected " + dataOffsetCheck + " but got " + partialPacket.dataOffset());
             bufs.add(partialPacket.data());
             dataOffsetCheck += partialPacket.data().readableBytes();
@@ -1048,7 +1049,7 @@ public class PacketIO {
     public <T> List<T> readList(Function<PacketIO, T> decoder, int max) {
         int size = this.readInt();
         if (size > max) {
-            throw new PacketException("List too large, max = %d, actual = %d".formatted(max, size));
+            throw new PacketException(String.format("List too large, max = %d, actual = %d", max, size));
         }
 
         var list = new ArrayList<T>();
@@ -1084,7 +1085,7 @@ public class PacketIO {
     public <K, V> Map<K, V> readMap(Function<PacketIO, K> keyDecoder, Function<PacketIO, V> valueDecoder, int max) {
         int size = this.readInt();
         if (size > max) {
-            throw new PacketException("Map too large, max = %d, actual = %d".formatted(max, size));
+            throw new PacketException(String.format("Map too large, max = %d, actual = %d", max, size));
         }
 
         var map = new HashMap<K, V>();

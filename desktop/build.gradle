@@ -2,6 +2,7 @@
 
 
 //import dev.ultreon.gameutils.ProjectType
+import org.jetbrains.gradle.ext.Application
 
 
 import java.nio.file.Files
@@ -20,6 +21,8 @@ buildscript {
             url = "https://maven.atlassian.com/3rdparty/"
         }
 
+        gradlePluginPortal()
+
         google()
     }
 
@@ -27,6 +30,7 @@ buildscript {
         classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
         classpath "com.google.code.gson:gson:2.10.1"
         classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
+        classpath("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.8")
     }
 }
 
@@ -36,10 +40,12 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'groovy'
+apply plugin: 'idea'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
+apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
 
 //****************************//
 // Setting up main properties //
@@ -73,7 +79,6 @@ dependencies {
     implementation api("com.badlogicgames.ashley:ashley:$ashley_version")
     implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
     implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
-    implementation api("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
     implementation api("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
 
     implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
@@ -104,7 +109,7 @@ dependencies {
     implementation api("com.google.guava:guava:$guava_version")
 
     // Misc
-    implementation api("it.unimi.dsi:fastutil:8.5.12")
+    implementation api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
     implementation api("com.raylabz:opensimplex:1.0.3")
 
     implementation api("space.earlygrey:shapedrawer:$shapedrawer_version")
@@ -198,6 +203,112 @@ tasks.withType(Jar).configureEach {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
+
+//idea {
+//    project {
+//        settings {
+//            fun setupIdea(dependency: Project, name: String) {
+//                dependency.afterEvaluate {
+//                    mkdir("${projectDir}/build/gameutils")
+//                    mkdir("${projectDir}/run")
+//                    mkdir("${projectDir}/run/client")
+//                    mkdir("${projectDir}/run/client/alt")
+//                    mkdir("${projectDir}/run/client/main")
+//                    mkdir("${projectDir}/run/server")
+//
+//                    val ps = File.pathSeparator!!
+//                            val files = dependency.configurations["runtimeClasspath"]!!.files
+//
+//                    val classPath = files.asSequence()
+//                            .filter { it != null }
+//                            .map { it.path }
+//                            .joinToString(ps)
+//
+////language=TEXT
+//                    val conf = """
+//commonProperties
+//	fabric.development=true
+//	log4j2.formatMsgNoLookups=true
+//	fabric.log.disableAnsi=false
+//	log4j.configurationFile=${project.projectDir}/log4j.xml
+//    """.trimIndent()
+//                    val launchFile = file("${project.projectDir}/build/gameutils/launch.cfg")
+//                    Files.writeString(
+//                            launchFile.toPath(),
+//                            conf,
+//                            StandardOpenOption.CREATE,
+//                            StandardOpenOption.TRUNCATE_EXISTING,
+//                            StandardOpenOption.WRITE
+//                    )
+//
+//                    val cpFile = file("${project.projectDir}/build/gameutils/classpath.txt")
+//                    Files.writeString(
+//                            cpFile.toPath(),
+//                            classPath,
+//                            StandardOpenOption.CREATE,
+//                            StandardOpenOption.TRUNCATE_EXISTING,
+//                            StandardOpenOption.WRITE
+//                    )
+//
+//                    withIDEADir {
+//                        println("Callback 1 executed with: $absolutePath")
+//                    }
+//
+//                    runConfigurations {
+//                        create(
+//                                "Quantum Voxel Client $name",
+//                                Application::class.java
+//                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+//                            jvmArgs =
+//                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+//                            mainClass = "net.fabricmc.devlaunchinjector.Main"
+//                            moduleName = idea.module.name + ".${dependency.name}.main"
+//                            workingDirectory = "$projectDir/run/client/main/"
+//                            programParameters = "--gameDir=."
+//                        }
+//                        create(
+//                                "Quantum Voxel Data $name",
+//                                Application::class.java
+//                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+//                            jvmArgs =
+//                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+//                            mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
+//                            moduleName = idea.module.name + ".desktop.main"
+//                            workingDirectory = "$projectDir/run/data/main/"
+//                            programParameters = "--gameDir=."
+//                        }
+//                        create(
+//                                "Quantum Voxel Client $name Alt",
+//                                Application::class.java
+//                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+//                            jvmArgs =
+//                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+//                            mainClass = "net.fabricmc.devlaunchinjector.Main"
+//                            moduleName = idea.module.name + ".${dependency.name}.main"
+//                            workingDirectory = "$projectDir/run/client/alt/"
+//                            programParameters = "--gameDir=."
+//                        }
+//                        create(
+//                                "Quantum Voxel Server $name",
+//                                Application::class.java
+//                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+//                            jvmArgs =
+//                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+//                            mainClass = "net.fabricmc.devlaunchinjector.Main"
+//                            moduleName = idea.module.name + ".${dependency.name}.main"
+//                            workingDirectory = "$projectDir/run/server/"
+//                            programParameters = "--gameDir=."
+//                        }
+//                    }
+//                }
+//
+//            }
+//
+//            setupIdea(rootProject.project(":desktop"), "Desktop")
+//            setupIdea(rootProject.project(":testmod"), "Test Mod")
+//        }
+//    }
+//}

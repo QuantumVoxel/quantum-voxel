@@ -71,7 +71,7 @@ public class Models3D {
 
     public Model generateModel(Identifier id, Consumer<ModelBuilder> builder) {
         if (this.models.containsKey(id)) {
-            QuantumClient.LOGGER.error("Model {} already exists, the model will be unloaded and regenerated.", id);
+            QuantumClient.LOGGER.error("Model %s already exists, the model will be unloaded and regenerated.", id);
 //            this.unloadModel(id);
             return this.models.get(id);
         }
@@ -108,7 +108,7 @@ public class Models3D {
             try {
                 removed.dispose();
             } catch (Exception e) {
-                QuantumClient.LOGGER.debug("Error unloading model {}:", id, e);
+                QuantumClient.LOGGER.debug("Error unloading model %s:", id, e);
                 return false;
             }
             return true;

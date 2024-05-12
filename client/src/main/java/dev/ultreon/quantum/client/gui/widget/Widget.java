@@ -255,7 +255,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
      * @return path to the widget.
      */
     public Path path() {
-        return this.parent.path().resolve("%s[%d]".formatted(this.getName(), this.createTime));
+        return this.parent.path().resolve(String.format("%s[%d]", this.getName(), this.createTime));
     }
 
     public Bounds getBounds() {

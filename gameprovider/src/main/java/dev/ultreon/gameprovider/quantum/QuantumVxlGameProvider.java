@@ -40,7 +40,7 @@ public class QuantumVxlGameProvider implements GameProvider {
     private static final String[] ALLOWED_EARLY_CLASS_PREFIXES = { "org.apache.logging.log4j.", "dev.ultreon.gameprovider.quantum.", "dev.ultreon.premain." };
 
     private final GameTransformer transformer = new GameTransformer();
-    private EnvType envType;
+    private EnvType Env;
     private Arguments arguments;
     private final List<Path> gameJars = new ArrayList<>();
     private final List<Path> logJars = new ArrayList<>();
@@ -202,13 +202,13 @@ public class QuantumVxlGameProvider implements GameProvider {
     @Override
     public boolean locateGame(FabricLauncher launcher, String[] args) {
         // Set the environment type and parse the arguments
-        this.envType = launcher.getEnvironmentType();
+        this.Env = launcher.getEnvironmentType();
         this.arguments = new Arguments();
         this.arguments.parse(args);
 
         try {
             // Create a new LibClassifier object with the specified class and environment type
-            var classifier = new LibClassifier<>(GameLibrary.class, this.envType, this);
+            var classifier = new LibClassifier<>(GameLibrary.class, this.Env, this);
 
             // Get the client and server libraries
             var clientLib = GameLibrary.QUANTUM_VXL_CLIENT;
@@ -451,7 +451,7 @@ public class QuantumVxlGameProvider implements GameProvider {
      */
     @Override
     public boolean canOpenErrorGui() {
-        if (this.arguments == null || this.envType == EnvType.CLIENT)
+        if (this.arguments == null || this.Env == Env.CLIENT)
             return !OS.isMobile();
 
         return false;

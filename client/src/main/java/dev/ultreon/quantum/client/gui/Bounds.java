@@ -4,7 +4,17 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.util.Copyable;
 
-public record Bounds(Position pos, Size size) implements Copyable<Bounds> {
+import java.util.Objects;
+
+public final class Bounds implements Copyable<Bounds> {
+    private final Position pos;
+    private final Size size;
+
+    public Bounds(Position pos, Size size) {
+        this.pos = pos;
+        this.size = size;
+    }
+
     public Bounds() {
         this(new Position(), new Size());
     }
@@ -136,15 +146,15 @@ public record Bounds(Position pos, Size size) implements Copyable<Bounds> {
     @CheckReturnValue
     public String toString() {
         return "Bounds{" +
-                "pos=" + this.pos +
-                ", size=" + this.size +
-                '}';
+               "pos=" + this.pos +
+               ", size=" + this.size +
+               '}';
     }
 
     @CanIgnoreReturnValue
     public boolean contains(int x, int y) {
         return x >= this.pos.x && x <= this.pos.x + this.size.width &&
-                y >= this.pos.y && y <= this.pos.y + this.size.height;
+               y >= this.pos.y && y <= this.pos.y + this.size.height;
     }
 
     public Bounds shrink(int left, int right, int top, int bottom) {
@@ -170,4 +180,27 @@ public record Bounds(Position pos, Size size) implements Copyable<Bounds> {
     public Bounds grow(int amount) {
         return new Bounds(this.pos.x - amount, this.pos.y - amount, this.size.width + amount * 2, this.size.height + amount * 2);
     }
+
+    public Position pos() {
+        return pos;
+    }
+
+    public Size size() {
+        return size;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Bounds) obj;
+        return Objects.equals(this.pos, that.pos) &&
+               Objects.equals(this.size, that.size);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, size);
+    }
+
 }

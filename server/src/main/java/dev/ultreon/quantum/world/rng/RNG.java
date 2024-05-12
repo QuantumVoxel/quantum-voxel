@@ -6,4 +6,12 @@ public interface RNG {
     boolean chance(float chance);
     float randrange(float min, float max);
     double randrange(double min, double max);
+    void setSeed(long seed);
+    long nextLong();
+
+    int nextInt(int bound);
+
+    float nextFloat();
+
+    int nextInt(int min, int max);
 }

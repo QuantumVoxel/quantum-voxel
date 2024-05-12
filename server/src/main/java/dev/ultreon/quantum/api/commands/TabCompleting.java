@@ -2,6 +2,8 @@ package dev.ultreon.quantum.api.commands;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.api.commands.selector.SelectorKey;
 import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
 import dev.ultreon.quantum.entity.Entity;
@@ -16,11 +18,10 @@ import dev.ultreon.quantum.util.Difficulty;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TabCompleting {
@@ -239,9 +240,9 @@ public class TabCompleting {
     }
 
     public static List<String> mods(List<String> list, String currentArgument) {
-        FabricLoader manager = FabricLoader.getInstance();
-        for (ModContainer plugin : manager.getAllMods()) {
-            TabCompleting.addIfStartsWith(list, plugin.getMetadata().getId(), currentArgument);
+        GamePlatform manager = GamePlatform.get();
+        for (Mod plugin : manager.getMods()) {
+            TabCompleting.addIfStartsWith(list, plugin.getId(), currentArgument);
         }
         return list;
     }
@@ -326,7 +327,7 @@ public class TabCompleting {
     }
 
     public static List<String> variables(ArrayList<Object> objects, String s, ServerPlayer player, Class<?> clazz) {
-        List<String> list = PlayerVariables.get(player).getVariablesByType(clazz).toList();
+        List<String> list = PlayerVariables.get(player).getVariablesByType(clazz).collect(Collectors.toList());
         for (var variable : list) {
             if (variable.startsWith(s)) {
                 objects.add(variable);
@@ -386,7 +387,7 @@ public class TabCompleting {
     }
 
     public static List<String> entityIds(List<String> list, ServerWorld world, String currentArgument) {
-        for (var id : world.getEntities().stream().map(Entity::getId).toList()) {
+        for (var id : world.getEntities().stream().map(Entity::getId).collect(Collectors.toList())) {
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
 

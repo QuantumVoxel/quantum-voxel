@@ -82,11 +82,11 @@ public final class BuilderChunk extends Chunk {
     }
 
     public boolean isOnInvalidThread() {
-        return this.thread.threadId() != Thread.currentThread().threadId();
+        return this.thread.getId() != Thread.currentThread().getId();
     }
 
     public boolean isOnBuilderThread() {
-        return this.thread.threadId() == Thread.currentThread().threadId();
+        return this.thread.getId() == Thread.currentThread().getId();
     }
 
     public ServerChunk build() {

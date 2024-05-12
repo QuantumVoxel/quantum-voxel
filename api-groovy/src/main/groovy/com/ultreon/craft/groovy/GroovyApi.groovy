@@ -3,7 +3,7 @@ package dev.ultreon.quantum.groovy
 import dev.ultreon.quantum.client.QuantumClient
 import dev.ultreon.quantum.server.QuantumServer
 import net.fabricmc.loader.api.FabricLoader
-import org.slf4j.LoggerFactory
+import dev.ultreon.quantum.log.LoggerFactory
 
 class GroovyApi {
     def fabricLoader = FabricLoader.instance

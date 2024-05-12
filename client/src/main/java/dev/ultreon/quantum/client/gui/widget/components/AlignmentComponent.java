@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.gui.widget.components;
 import dev.ultreon.quantum.client.gui.Alignment;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.util.ImGuiEx;
 
 public class AlignmentComponent extends UIComponent {
     private Alignment alignment;
@@ -23,6 +22,6 @@ public class AlignmentComponent extends UIComponent {
 
     @Override
     public void handleImGui(String path, Identifier key, Widget widget) {
-        ImGuiEx.editEnum("Alignment (" + key + "): ", path, this::get, this::set);
+//        ImGuiEx.editEnum("Alignment (" + key + "): ", path, this::get, this::set);
     }
 }

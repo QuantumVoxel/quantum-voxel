@@ -4,8 +4,15 @@ import dev.ultreon.quantum.util.Identifier;
 
 import java.util.Objects;
 
-public record RegistryKey<T>(RegistryKey<Registry<T>> parent, Identifier element) {
+public final class RegistryKey<T> {
     public static final RegistryKey<Registry<Registry<?>>> ROOT = new RegistryKey<>(null, new Identifier("root"));
+    private final RegistryKey<Registry<T>> parent;
+    private final Identifier element;
+
+    public RegistryKey(RegistryKey<Registry<T>> parent, Identifier element) {
+        this.parent = parent;
+        this.element = element;
+    }
 
     public static <T> RegistryKey<T> of(RegistryKey<Registry<T>> parent, Identifier element) {
         if (element == null) throw new IllegalArgumentException("Element ID cannot be null");
@@ -41,4 +48,13 @@ public record RegistryKey<T>(RegistryKey<Registry<T>> parent, Identifier element
         if (parent == null) return element.toString();
         return parent.element + " @ " + element;
     }
+
+    public RegistryKey<Registry<T>> parent() {
+        return parent;
+    }
+
+    public Identifier element() {
+        return element;
+    }
+
 }

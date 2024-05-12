@@ -47,7 +47,7 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     public InGameClientPacketHandlerImpl(IConnection<ClientPacketHandler, ServerPacketHandler> connection) {
         this.connection = connection;
-        this.context = new PacketContext(null, connection, EnvType.CLIENT);
+        this.context = new PacketContext(null, connection, Env.CLIENT);
     }
 
     public NetworkChannel registerChannel(Identifier id) {
@@ -79,7 +79,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onModPacket(NetworkChannel channel, ModPacket<?> packet) {
-        packet.handlePacket(() -> new ModPacketContext(channel, null, this.connection, EnvType.CLIENT));
+        packet.handlePacket(() -> new ModPacketContext(channel, null, this.connection, Env.CLIENT));
     }
 
     @Override
@@ -106,7 +106,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             client.showScreen(null);
         }
 
-        QuantumClient.LOGGER.debug("Player respawned at %s".formatted(pos)); //! DEBUG
+        QuantumClient.LOGGER.debug(String.format("Player respawned at %s", pos)); //! DEBUG
     }
 
     @Override
@@ -281,7 +281,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 openMenu.setItem(index, stack);
             }
 
-            if (this.client.screen instanceof ContainerScreen screen) {
+            if (this.client.screen instanceof ContainerScreen) {
+                ContainerScreen screen = (ContainerScreen) this.client.screen;
                 screen.emitUpdate();
             }
         }
@@ -295,7 +296,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             Inventory inventory = player.inventory;
             inventory.setItem(index, stack);
 
-            if (this.client.screen instanceof InventoryScreen screen) {
+            if (this.client.screen instanceof InventoryScreen) {
+                InventoryScreen screen = (InventoryScreen) this.client.screen;
                 screen.emitUpdate();
             }
         }
@@ -354,7 +356,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onTabCompleteResult(String[] options) {
         Screen screen = this.client.screen;
-        if (screen instanceof ChatScreen chatScreen) {
+        if (screen instanceof ChatScreen) {
+            ChatScreen chatScreen = (ChatScreen) screen;
             QuantumClient.invoke(() -> chatScreen.onTabComplete(options));
         }
     }

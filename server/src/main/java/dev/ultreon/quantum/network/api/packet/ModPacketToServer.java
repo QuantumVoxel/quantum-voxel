@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network.api.packet;
 
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -12,7 +12,7 @@ public abstract non-sealed class ModPacketToServer<T extends ModPacketToServer<T
     @Override
     public final boolean handle(Supplier<ModPacketContext> context) {
         PacketContext ctx = context.get();
-        if (ctx.getDestination() == EnvType.SERVER)
+        if (ctx.getDestination() == Env.SERVER)
             ctx.queue(() -> this.handle(Objects.requireNonNull(ctx.getPlayer(), "Server player was not found while on server side")));
         return true;
     }

@@ -47,14 +47,23 @@ public class WorldShaderProvider extends DefaultShaderProvider implements OpenSh
     }
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
-        return switch (userData) {
-            case QVModel qvModel -> qvModel.getShaderProvider().createShader(renderable);
-            case OpenShaderProvider provider -> provider.createShader(renderable);
-            case ItemModel ignoredItemModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case BlockModel ignoredBlockModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case Shader shader -> shader;
-            case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
-            case null, default -> new DefaultShader(renderable, new DefaultShader.Config());
-        };
+        if (userData instanceof QVModel) {
+            QVModel qvModel = (QVModel) userData;
+            return qvModel.getShaderProvider().createShader(renderable);
+        } else if (userData instanceof OpenShaderProvider) {
+            OpenShaderProvider provider = (OpenShaderProvider) userData;
+            return provider.createShader(renderable);
+        } else if (userData instanceof ItemModel) {
+            return Shaders.MODEL_VIEW.get().createShader(renderable);
+        } else if (userData instanceof BlockModel) {
+            return Shaders.MODEL_VIEW.get().createShader(renderable);
+        } else if (userData instanceof Shader) {
+            Shader shader = (Shader) userData;
+            return shader;
+        } else if (userData instanceof ModelObject) {
+            ModelObject modelObject = (ModelObject) userData;
+            return modelObject.shaderProvider().createShader(renderable);
+        }
+        return new DefaultShader(renderable, new DefaultShader.Config());
     }
 }

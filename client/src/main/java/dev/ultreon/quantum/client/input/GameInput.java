@@ -30,6 +30,7 @@ import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.network.packets.c2s.C2SItemUsePacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.BlockHitResult;
+import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.UseResult;
@@ -42,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class GameInput implements InputProcessor, ControllerListener, Disposable {
     protected static final float DEG_PER_PIXEL = 0.6384300433839F;
@@ -68,7 +70,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     private boolean using;
     private final Vec3d vel = new Vec3d();
     @Nullable
-    protected BlockHitResult hitResult;
+    protected HitResult hitResult;
     private static final Set<ControllerButton> BUTTONS_DOWN = new HashSet<>();
     private static final Set<ControllerButton> BUTTONS_JUST_PRESSED = new HashSet<>();
     private long itemUseCooldown;
@@ -78,7 +80,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         this.camera = camera;
 
         Controllers.addListener(this);
-        this.controllers.addAll(Arrays.stream((Object[]) Controllers.getControllers().items).map(o -> (Controller) o).toList());
+        this.controllers.addAll(Arrays.stream((Object[]) Controllers.getControllers().items).map(o -> (Controller) o).collect(Collectors.toList()));
     }
 
     public static boolean isControllerButtonJustPressed(ControllerButton button) {
@@ -288,7 +290,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     }
 
     @CanIgnoreReturnValue
-    public UseResult useItem(Player player, World world, BlockHitResult hitResult) {
+    public UseResult useItem(Player player, World world, HitResult hitResult) {
         if (this.itemUseCooldown > System.currentTimeMillis())
             return UseResult.DENY;
 
@@ -298,24 +300,29 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         return useResult;
     }
 
-    private UseResult useItem0(Player player, World world, BlockHitResult hitResult) {
+    private UseResult useItem0(Player player, World world, HitResult hitResult) {
+        if (!(hitResult instanceof BlockHitResult)) return UseResult.DENY;
+
         ItemStack stack = player.getSelectedItem();
         UseItemContext context = new UseItemContext(world, player, hitResult, stack);
         Item item = stack.getItem();
         ItemEvents.USE.factory().onUseItem(item, context);
-        this.client.connection.send(new C2SItemUsePacket(hitResult));
+        this.client.connection.send(new C2SItemUsePacket((BlockHitResult) hitResult));
 
         UseItemContext ctx = new UseItemContext(world, player, hitResult, stack);
-        BlockHitResult result = ctx.result();
+        HitResult result = ctx.result();
         if (result == null)
             return UseResult.SKIP;
 
-        Block block = result.getBlock();
-        if (block != null && !block.isAir()) {
-            UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockPos(result.getPos()));
+        if (hitResult instanceof BlockHitResult) {
+            BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+            Block block = blockHitResult.getBlock();
+            if (block != null && !block.isAir()) {
+                UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockPos(result.getPos()));
 
-            if (blockResult == UseResult.DENY || blockResult == UseResult.ALLOW)
-                return blockResult;
+                if (blockResult == UseResult.DENY || blockResult == UseResult.ALLOW)
+                    return blockResult;
+            }
         }
 
         return stack.getItem().use(ctx);

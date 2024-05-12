@@ -232,7 +232,7 @@ public final class ClientWorld extends World implements Disposable {
             ParticleEffect obtained = particleController.obtain();
             worldRenderer.addParticles(obtained, position, motion, count);
         } else if (clientParticle == null) {
-            World.LOGGER.warn("Unknown particle type: {}", particleType.getId());
+            World.LOGGER.warn("Unknown particle type: %s", particleType.getId());
         }
     }
 
@@ -245,7 +245,7 @@ public final class ClientWorld extends World implements Disposable {
         if (chunk == null) {
             chunk = data;
         } else {
-            World.LOGGER.warn("Duplicate chunk packet detected! Chunk {}", pos);
+            World.LOGGER.warn("Duplicate chunk packet detected! Chunk %s", pos);
             return;
         }
         LocalPlayer player = this.client.player;
@@ -362,7 +362,7 @@ public final class ClientWorld extends World implements Disposable {
     }
 
     public void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
-        QuantumClient.LOGGER.debug("Adding entity with id {} of type {} at {}", new Object[]{id, type.getId(), position});
+        QuantumClient.LOGGER.debug("Adding entity with id %s of type %s at %s", new Object[]{id, type.getId(), position});
 
         Entity entity = type.create(this);
         entity.setId(id);
@@ -385,13 +385,14 @@ public final class ClientWorld extends World implements Disposable {
         Entity player = this.entitiesById.get(playerId);
         Entity entity = this.entitiesById.get(entityId);
 
-        if (entity != null && player instanceof RemotePlayer remotePlayer) {
+        if (entity != null && player instanceof RemotePlayer) {
+            RemotePlayer remotePlayer = (RemotePlayer) player;
             remotePlayer.onAttack(entity);
         }
 
         if (player instanceof LocalPlayer) {
             //??? This should not happen...
-            LOGGER.warn("SANITY CHECK: local player tried to attack entity {}!", entityId);
+            LOGGER.warn("SANITY CHECK: local player tried to attack entity %s!", entityId);
         }
     }
 }

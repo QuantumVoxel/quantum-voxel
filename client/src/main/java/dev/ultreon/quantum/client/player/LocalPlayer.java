@@ -228,9 +228,9 @@ public class LocalPlayer extends ClientPlayer {
     public void onOpenMenu(MenuType<?> menuType, List<ItemStack> items) {
         ContainerMenu openedBefore = openMenu;
         if (openedBefore != null && menuType != openedBefore.getType()) {
-            CommonConstants.LOGGER.warn("Opened menu {} instead of {}", menuType, openMenu);
+            CommonConstants.LOGGER.warn("Opened menu %s instead of %s", menuType, openMenu);
         } else if (openedBefore == null) {
-            CommonConstants.LOGGER.warn("Opened server menu {} before opening any on client side", menuType);
+            CommonConstants.LOGGER.warn("Opened server menu %s before opening any on client side", menuType);
             openedBefore = menuType.create(this.world, this, this.getBlockPos());
         }
         ContainerScreen screen = MenuRegistry.getScreen(openedBefore);

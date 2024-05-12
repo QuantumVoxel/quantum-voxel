@@ -436,7 +436,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
             Vec2d cPos2 = new Vec2d(o2.x(), o2.z());
 
             return Double.compare(cPos1.dst(playerPos), cPos2.dst(playerPos));
-        }).toList();
+        }).collect(Collectors.toList());
 
         // Load each chunk in the sorted order.
         for (ChunkPos loadingChunk : load) {
@@ -536,7 +536,7 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     public void openMenu(@NotNull ContainerMenu menu) {
         if (getOpenMenu() != null) {
-            QuantumServer.LOGGER.warn("Player {} tried to open menu {} but it was already open!", this.name, menu.getType().getId());
+            QuantumServer.LOGGER.warn("Player %s tried to open menu %s but it was already open!", this.name, menu.getType().getId());
             return;
         }
 
@@ -616,11 +616,11 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     public void handlePlayerMove(double x, double y, double z) {
         ChunkPos chunkPos = World.toChunkPos((int) x, (int) y, (int) z);
         if (this.world.getChunk(chunkPos) == null) {
-            QuantumServer.LOGGER.warn("Player moved into a null chunk: %s".formatted(this.getName()));
+            QuantumServer.LOGGER.warn(String.format("Player moved into a null chunk: %s", this.getName()));
             return;
         }
         if (!this.isChunkActive(chunkPos)) {
-            QuantumServer.LOGGER.warn("Player moved into an inactive chunk: %s".formatted(this.getName()));
+            QuantumServer.LOGGER.warn(String.format("Player moved into an inactive chunk: %s", this.getName()));
             return;
         }
 
@@ -705,12 +705,12 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     private void resendCommands() {
-        this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().toList()));
+        this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().collect(Collectors.toList())));
     }
 
     public UseResult useItem(BlockHitResult hitResult, ItemStack stack, ItemSlot slot) {
         UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack);
-        BlockHitResult result = ctx.result();
+        BlockHitResult result = (BlockHitResult) ctx.result();
         if (result == null)
             return UseResult.SKIP;
 
@@ -746,14 +746,15 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void onDisconnect(String message) {
-        QuantumServer.LOGGER.info("Player %s disconnected: %s".formatted(this.getName(), message));
+        QuantumServer.LOGGER.info(String.format("Player %s disconnected: %s", this.getName(), message));
     }
 
     public void onAttack(int id) {
         Entity entity = this.world.getEntity(id);
         if (entity == null) return;
         this.world.sendAllTrackingExcept((int) entity.getX(), (int) entity.getY(), (int) entity.getZ(), new S2CPlayerAttackPacket(this.getId(), id), this);
-        if (entity instanceof LivingEntity livingEntity) {
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
             livingEntity.hurt(this.getAttackDamage(), DamageSource.PLAYER);
         }
     }

@@ -74,7 +74,7 @@ public class Navigator {
             points.add(position);
         }
 
-        this.setPath(new Path(points, currentPoint(), points.getLast()));
+        this.setPath(new Path(points, currentPoint(), points.get(points.size() - 1)));
     }
 
     private Vec3d randomPos(RNG rng, Vec3d pos) {

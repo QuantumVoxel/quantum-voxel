@@ -15,10 +15,7 @@ import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static dev.ultreon.quantum.client.QuantumClient.isOnMainThread;
 
@@ -95,7 +92,7 @@ public class TextureStitcher implements Disposable {
 
             if (DebugFlags.DUMP_TEXTURE_ATLAS.enabled()) {
                 Pixmap frameBufferPixmap = Pixmap.createFromFrameBuffer(0, 0, width, height);
-                PixmapIO.writePNG(Gdx.files.local("%s.%s-%d.atlas-png".formatted(this.atlasId.toString().replace(':', '.').replace('/', '_'), type.name().toLowerCase(Locale.ROOT), x)), frameBufferPixmap);
+                PixmapIO.writePNG(Gdx.files.local(String.format("%s.%s-%d.atlas-png", this.atlasId.toString().replace(':', '.').replace('/', '_'), type.name().toLowerCase(Locale.ROOT), x)), frameBufferPixmap);
             }
 
             texHeight = Math.max(texture.getHeight(), texHeight);
@@ -110,7 +107,7 @@ public class TextureStitcher implements Disposable {
 
         if (DebugFlags.DUMP_TEXTURE_ATLAS.enabled()) {
             Pixmap frameBufferPixmap = Pixmap.createFromFrameBuffer(0, 0, width, height);
-            PixmapIO.writePNG(Gdx.files.local("%s.%s.atlas-png".formatted(this.atlasId.toString().replace(':', '.').replace('/', '_'), type.name().toLowerCase(Locale.ROOT))), frameBufferPixmap);
+            PixmapIO.writePNG(Gdx.files.local(String.format("%s.%s.atlas-png", this.atlasId.toString().replace(':', '.').replace('/', '_'), type.name().toLowerCase(Locale.ROOT))), frameBufferPixmap);
         }
 
         this.fbo.end();
@@ -126,8 +123,53 @@ public class TextureStitcher implements Disposable {
         return new Result(spriteBatch, uvMap, textureAtlas);
     }
 
-    private record Result(SpriteBatch spriteBatch, ImmutableMap.Builder<Identifier, TextureOffset> uvMap, Texture textureAtlas) {
-    }
+    private static final class Result {
+        private final SpriteBatch spriteBatch;
+        private final ImmutableMap.Builder<Identifier, TextureOffset> uvMap;
+        private final Texture textureAtlas;
+
+        private Result(SpriteBatch spriteBatch, ImmutableMap.Builder<Identifier, TextureOffset> uvMap, Texture textureAtlas) {
+            this.spriteBatch = spriteBatch;
+            this.uvMap = uvMap;
+            this.textureAtlas = textureAtlas;
+        }
+
+        public SpriteBatch spriteBatch() {
+            return spriteBatch;
+        }
+
+        public ImmutableMap.Builder<Identifier, TextureOffset> uvMap() {
+            return uvMap;
+        }
+
+        public Texture textureAtlas() {
+            return textureAtlas;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (Result) obj;
+            return Objects.equals(this.spriteBatch, that.spriteBatch) &&
+                   Objects.equals(this.uvMap, that.uvMap) &&
+                   Objects.equals(this.textureAtlas, that.textureAtlas);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(spriteBatch, uvMap, textureAtlas);
+        }
+
+        @Override
+        public String toString() {
+            return "Result[" +
+                   "spriteBatch=" + spriteBatch + ", " +
+                   "uvMap=" + uvMap + ", " +
+                   "textureAtlas=" + textureAtlas + ']';
+        }
+
+        }
 
     private int calcHeight(int width) {
         int height = 1024; // calculate the height of the atlas

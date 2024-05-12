@@ -135,7 +135,8 @@ public class Font implements Disposable {
 
         for (TextObject child : text) {
             boolean isBold = false;
-            if (child instanceof MutableText mutableText) {
+            if (child instanceof MutableText) {
+                MutableText mutableText = (MutableText) child;
                 isBold = mutableText.isBold();
             }
             width += (int) (this.width0(child.createString()) + (isBold ? (isForcingUnicode() ? 0.5F : 1) : 0));

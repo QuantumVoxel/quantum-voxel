@@ -23,7 +23,8 @@ public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
     @Override
     public void animate(EntityModelInstance<@NotNull Player> instance, WorldRenderContext<@NotNull Player> context) {
         Player player = instance.getEntity();
-        if (!(player instanceof ClientPlayer clientPlayer)) return;
+        if (!(player instanceof ClientPlayer)) return;
+        ClientPlayer clientPlayer = (ClientPlayer) player;
 
         LocalPlayer localPlayer = this.client.player;
         if (localPlayer == null) return;

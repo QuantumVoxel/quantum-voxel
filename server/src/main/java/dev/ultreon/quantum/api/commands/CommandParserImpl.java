@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands;
 
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.commands.error.InternalError;
 import dev.ultreon.quantum.api.commands.error.NoPermissionError;
 import dev.ultreon.quantum.api.commands.error.OverloadError;
@@ -9,13 +10,13 @@ import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
-import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class CommandParserImpl {
     private static final List<CommandParserImpl> parsers = new ArrayList<>();
@@ -64,7 +65,8 @@ public class CommandParserImpl {
             // Loop all arguments.
             final var i = new AtomicInteger();
             for (var param : overload.args()) {
-                if (param instanceof CommandParameter.Text text) {
+                if (param instanceof CommandParameter.Text) {
+                    CommandParameter.Text text = (CommandParameter.Text) param;
                     String[] strings = text.getText();
                     final var values = new CommandSpecValues();
                     final var duplicateValues = new CommandSpecValues();
@@ -103,7 +105,7 @@ public class CommandParserImpl {
             for (var duplicateSpecValue : duplicateSpecValues) {
                 QuantumServer.LOGGER.warn("  Overload: " + duplicateSpecValue.getFirst().spec().toString());
                 for (var duplicate : duplicateSpecValue.getSecond()) {
-                    QuantumServer.LOGGER.warn("    Duplicate: %s".formatted(duplicate));
+                    QuantumServer.LOGGER.warn(String.format("    Duplicate: %s", duplicate));
                 }
             }
         }
@@ -152,7 +154,7 @@ public class CommandParserImpl {
         // If there's multiple overloads available for this set of command arguments.
         if (foundOverloads.size() > 1) {
             if (sender instanceof Player) {
-                if (sender.hasPermission("quantum.developer") && FabricLoader.getInstance().isDevelopmentEnvironment()) {
+                if (sender.hasPermission("quantum.developer") && GamePlatform.get().isDevEnvironment()) {
                     Chat.sendError(sender, "Multiple overloads have been found.");
                 }
                 Chat.sendError(sender, "Error occurred when parsing the command. Code: CP-0001");
@@ -191,13 +193,13 @@ public class CommandParserImpl {
         } catch (IllegalArgumentException e) {
             QuantumServer.LOGGER.error("Got illegal argument, possible argument mismatch.");
             QuantumServer.LOGGER.error("Dumping method argument types:");
-            for (var type : method.getParameterTypes()) QuantumServer.LOGGER.error("  {}", type.getName());
+            for (var type : method.getParameterTypes()) QuantumServer.LOGGER.error("  %s", type.getName());
 
             QuantumServer.LOGGER.error("Dumping called argument types:");
-            for (var obj : callArgs) QuantumServer.LOGGER.error("  {}", obj == null ? null : obj.getClass().getName());
+            for (var obj : callArgs) QuantumServer.LOGGER.error("  %s", obj == null ? null : obj.getClass().getName());
 
             QuantumServer.LOGGER.error("Dumping stack trace:");
-            for (var line : ExceptionUtils.getStackTrace(e).lines().toList()) QuantumServer.LOGGER.error("  %s".formatted(line));
+            for (var line : dev.ultreon.libs.commons.v0.util.StringUtils.splitIntoLines(ExceptionUtils.getStackTrace(e))) QuantumServer.LOGGER.error(String.format("  %s", line));
             throw new CommandArgumentMismatch(method.getParameterTypes(), callArgs, e);
         }
     }

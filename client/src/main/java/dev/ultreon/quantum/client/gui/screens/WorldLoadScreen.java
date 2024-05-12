@@ -14,8 +14,8 @@ import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.*;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -128,11 +128,11 @@ public class WorldLoadScreen extends Screen {
                 float ratio = (float) world.getChunksLoaded() / chunksToLoad;
                 String percent = (int) (100 * ratio) + "%";
                 ratio = Mth.clamp(ratio, 0, 1);
-                this.subTitleLabel.text().setRaw("Loaded %d of %d chunks (%s complete)".formatted(world.getChunksLoaded(), chunksToLoad, percent));
+                this.subTitleLabel.text().setRaw(String.format("Loaded %d of %d chunks (%s complete)", world.getChunksLoaded(), chunksToLoad, percent));
 
                 if (this.nextLog <= System.currentTimeMillis()) {
                     this.nextLog = System.currentTimeMillis() + 2000;
-                    QuantumClient.LOGGER.info(World.MARKER, "Loading world: {}", percent);
+                    QuantumClient.LOGGER.info("Loading world: %s", percent);
                 }
 
                 // Draw progressbar

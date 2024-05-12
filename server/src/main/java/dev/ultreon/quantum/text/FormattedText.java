@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.chars.CharList;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class FormattedText {
     private final Map<Integer, TextFormatElement> indexedElements = Maps.newHashMap();
@@ -224,38 +225,75 @@ public class FormattedText {
     }
 
     public FormattedText copy() {
-        return new FormattedText(this.elements.stream().map(TextFormatElement::copy).toList());
+        return new FormattedText(this.elements.stream().map(TextFormatElement::copy).collect(Collectors.toList()));
     }
 
     public int indexOf(TextFormatElement element) {
         return element.index;
     }
 
-    public record TextFormatElement(TextStyle style, String text, int index) {
+    public static final class TextFormatElement {
+        private final TextStyle style;
+        private final String text;
+        private final int index;
 
-        public int length() {
-            return this.text.length();
+        public TextFormatElement(TextStyle style, String text, int index) {
+            this.style = style;
+            this.text = text;
+            this.index = index;
         }
 
-        public TextFormatElement[] split(int index) {
-            return new TextFormatElement[]{
-                    new TextFormatElement(this.style, this.text.substring(0, index), this.index),
-                    new TextFormatElement(this.style, this.text.substring(index), this.index + index)
-            };
+            public int length() {
+                return this.text.length();
+            }
+
+            public TextFormatElement[] split(int index) {
+                return new TextFormatElement[]{
+                        new TextFormatElement(this.style, this.text.substring(0, index), this.index),
+                        new TextFormatElement(this.style, this.text.substring(index), this.index + index)
+                };
+            }
+
+            public int indexOf(String text) {
+                return this.text.indexOf(text);
+            }
+
+            public String toString() {
+                return this.text;
+            }
+
+            public TextFormatElement copy() {
+                return new TextFormatElement(this.style.copy(), this.text, this.index);
+            }
+
+        public TextStyle style() {
+            return style;
         }
 
-        public int indexOf(String text) {
-            return this.text.indexOf(text);
+        public String text() {
+            return text;
         }
 
-        public String toString() {
-            return this.text;
+        public int index() {
+            return index;
         }
 
-        public TextFormatElement copy() {
-            return new TextFormatElement(this.style.copy(), this.text, this.index);
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (TextFormatElement) obj;
+            return Objects.equals(this.style, that.style) &&
+                   Objects.equals(this.text, that.text) &&
+                   this.index == that.index;
         }
-    }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(style, text, index);
+        }
+
+        }
 
     private class ElementRangeView implements Iterator<TextFormatElement> {
         TextFormatElement next;

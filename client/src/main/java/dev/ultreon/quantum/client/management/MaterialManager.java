@@ -73,7 +73,7 @@ public class MaterialManager implements Manager<Material> {
             this.register(id, material);
             return material;
         } catch (IOException e) {
-            QuantumClient.LOGGER.error("Failed to load material {}", id, e);
+            QuantumClient.LOGGER.error("Failed to load material %s", id, e);
             return new Material();
         }
     }
@@ -95,7 +95,7 @@ public class MaterialManager implements Manager<Material> {
                 case "texture" -> loadTexture(attrObj, textureManager);
                 case "cubemap" -> loadCubemap(attrObj, cubemapManager);
                 default -> {
-                    QuantumClient.LOGGER.warn("Unknown material attribute type {}", type);
+                    QuantumClient.LOGGER.warn("Unknown material attribute type %s", type);
                     yield null;
                 }
             };
@@ -164,7 +164,7 @@ public class MaterialManager implements Manager<Material> {
             case "fog" -> ColorAttribute.createFog(color);
             case "reflection" -> ColorAttribute.createReflection(color);
             default -> {
-                QuantumClient.LOGGER.warn("Unknown material color type {}", type);
+                QuantumClient.LOGGER.warn("Unknown material color type %s", type);
                 yield null;
             }
         };
@@ -189,7 +189,7 @@ public class MaterialManager implements Manager<Material> {
             case "bump" -> TextureAttribute.createBump(texture);
             case "reflection" -> TextureAttribute.createReflection(texture);
             default -> {
-                QuantumClient.LOGGER.warn("Unknown material texture type {}", textureType);
+                QuantumClient.LOGGER.warn("Unknown material texture type %s", textureType);
                 yield null;
             }
         };

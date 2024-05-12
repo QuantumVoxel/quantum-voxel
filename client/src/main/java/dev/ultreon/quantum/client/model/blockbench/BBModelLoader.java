@@ -210,7 +210,7 @@ public class BBModelLoader implements ModelImporter {
             BBModelOutlineInfo node;
             node = loadNode(elem);
             if (node == null) {
-                QuantumClient.LOGGER.warn("Failed to load BlockBench model node: {}", elem);
+                QuantumClient.LOGGER.warn("Failed to load BlockBench model node: %s", elem);
             }
             values.add(node);
         }
@@ -263,7 +263,7 @@ public class BBModelLoader implements ModelImporter {
         }
 
         if (processed.isEmpty()) {
-            QuantumClient.LOGGER.warn("BlockBench model {} has no elements", this.id);
+            QuantumClient.LOGGER.warn("BlockBench model %s has no elements", this.id);
         }
 
         return processed;
@@ -504,7 +504,8 @@ public class BBModelLoader implements ModelImporter {
 
     private void extracted(List<BBModelOutlineInfo> data, BBModelGroup parent, ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes0, Map<UUID, Node> nodes, Map<Integer, BBTexture> texture2texture) {
         for (BBModelOutlineInfo node : data) {
-            if (node instanceof BBModelGroup group) {
+            if (node instanceof BBModelGroup) {
+                BBModelGroup group = (BBModelGroup) node;
                 group.parent = parent;
                 ModelBuilder wrapperBuilder = new ModelBuilder();
                 wrapperBuilder.begin();
@@ -521,7 +522,8 @@ public class BBModelLoader implements ModelImporter {
                 wrapper.calculateLocalTransform();
 
                 nodes.put(group.uuid(), wrapper);
-            } else if (node instanceof BBModelElementReference ref) {
+            } else if (node instanceof BBModelElementReference) {
+                BBModelElementReference ref = (BBModelElementReference) node;
                 writeElement(groupBuilder, parent, subNodes0, nodes, texture2texture, ref);
             }
         }

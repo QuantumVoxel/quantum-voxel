@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network.api.packet;
 
 import dev.ultreon.quantum.network.PacketContext;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 
 import java.util.function.Supplier;
 
@@ -13,7 +13,7 @@ public abstract non-sealed class ModPacketToClient<T extends ModPacketToClient<T
     @Override
     public final boolean handle(Supplier<ModPacketContext> context) {
         PacketContext ctx = context.get();
-        if (ctx.getDestination() == EnvType.CLIENT)
+        if (ctx.getDestination() == Env.CLIENT)
             ctx.queue(this::handle);
         return true;
     }

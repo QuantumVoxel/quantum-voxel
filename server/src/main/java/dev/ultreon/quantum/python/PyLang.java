@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.python;
 
-import net.fabricmc.loader.api.FabricLoader;
+import dev.ultreon.quantum.GamePlatform;
 import org.graalvm.polyglot.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.IOException;
 
@@ -19,12 +19,13 @@ public class PyLang {
         context = Context.newBuilder()
                 .option("python.EmulateJython", "true")
                 .option("log.file", "logs/latest-python.log")
-                .option("python.SysPrefix", FabricLoader.getInstance().getGameDir().toString())
-                .option("python.CoreHome", FabricLoader.getInstance().getGameDir().toString())
+                .option("python.SysPrefix", GamePlatform.get().getGameDir().toString())
+                .option("python.CoreHome", GamePlatform.get().getGameDir().toString())
                 .allowAllAccess(true).build();
 
         try {
-            PyLoader.getInstance().init(FabricLoader.getInstance().getGameDir().resolve("mods"), context);
+            if (GamePlatform.get().isDesktop())
+                PyLoader.getInstance().init(GamePlatform.get().getGameDir().resolve("mods"), context);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

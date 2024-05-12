@@ -20,9 +20,10 @@ public class SummonCommand extends Command {
 
     @DefineCommand("<entity-type>")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, EntityType<?> entityType) {
-        if (!(sender instanceof Entity senderEntity)) {
+        if (!(sender instanceof Entity)) {
             return needEntity();
         }
+        Entity senderEntity = (Entity) sender;
 
         Vec3d position = senderEntity.getPosition();
         World world = senderEntity.getWorld();

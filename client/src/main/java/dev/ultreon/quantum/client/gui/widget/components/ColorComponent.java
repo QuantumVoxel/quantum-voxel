@@ -1,23 +1,23 @@
 package dev.ultreon.quantum.client.gui.widget.components;
 
 import dev.ultreon.quantum.client.gui.widget.Widget;
+import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.util.ImGuiEx;
 
 public class ColorComponent extends UIComponent {
-    private RgbColor color;
+    private Color color;
 
     public ColorComponent(RgbColor color) {
         super();
         this.color = color;
     }
 
-    public RgbColor get() {
+    public Color get() {
         return this.color;
     }
 
-    public void set(RgbColor color) {
+    public void set(Color color) {
         this.color = color;
     }
 
@@ -51,6 +51,6 @@ public class ColorComponent extends UIComponent {
 
     @Override
     public void handleImGui(String path, Identifier key, Widget widget) {
-        ImGuiEx.editColor3("Color (" + key + "): ", path, this::get, this::set);
+
     }
 }

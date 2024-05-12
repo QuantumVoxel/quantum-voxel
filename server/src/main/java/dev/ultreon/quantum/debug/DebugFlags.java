@@ -1,16 +1,15 @@
 package dev.ultreon.quantum.debug;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
 public class DebugFlags {
     private static boolean detectDebug() {
-        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        boolean debugFlagPresent = args.contains("-Xdebug");
-        boolean jdwpPresent = args.toString().contains("jdwp");
-        return debugFlagPresent || jdwpPresent;
+        GamePlatform gamePlatform = GamePlatform.get();
+        return gamePlatform.detectDebug();
     }
 
 

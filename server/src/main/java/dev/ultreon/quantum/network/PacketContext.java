@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network;
 
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,9 +11,9 @@ import java.util.Objects;
 public class PacketContext {
     private final @Nullable ServerPlayer player;
     private final IConnection<?, ?> connection;
-    private final @NotNull EnvType destination;
+    private final @NotNull Env destination;
 
-    public PacketContext(@Nullable ServerPlayer player, @NotNull IConnection<?, ?> connection, @NotNull EnvType destination) {
+    public PacketContext(@Nullable ServerPlayer player, @NotNull IConnection<?, ?> connection, @NotNull Env destination) {
         this.player = player;
         this.connection = connection;
         this.destination = destination;
@@ -31,7 +31,7 @@ public class PacketContext {
         return this.connection;
     }
 
-    public @NotNull EnvType getDestination() {
+    public @NotNull Env getDestination() {
         return this.destination;
     }
 

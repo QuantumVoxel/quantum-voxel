@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Suppliers;
+import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.CommonConstants;

@@ -6,7 +6,19 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
 import dev.ultreon.quantum.client.util.RenderableArray;
 
-public record ModelObject(OpenShaderProvider shaderProvider, ModelInstance model, RenderableArray renderables) implements Disposable {
+import java.util.Objects;
+
+public final class ModelObject implements Disposable {
+    private final OpenShaderProvider shaderProvider;
+    private final ModelInstance model;
+    private final RenderableArray renderables;
+
+    public ModelObject(OpenShaderProvider shaderProvider, ModelInstance model, RenderableArray renderables) {
+        this.shaderProvider = shaderProvider;
+        this.model = model;
+        this.renderables = renderables;
+    }
+
     public void dispose() {
         for (Renderable renderable : renderables) {
             renderable.meshPart.mesh = null;
@@ -18,8 +30,36 @@ public record ModelObject(OpenShaderProvider shaderProvider, ModelInstance model
     @Override
     public String toString() {
         return "ModelObject[" +
-                "shaderProvider=" + shaderProvider + ", " +
-                "renderables=" + renderables + ']';
+               "shaderProvider=" + shaderProvider + ", " +
+               "renderables=" + renderables + ']';
     }
+
+    public OpenShaderProvider shaderProvider() {
+        return shaderProvider;
+    }
+
+    public ModelInstance model() {
+        return model;
+    }
+
+    public RenderableArray renderables() {
+        return renderables;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (ModelObject) obj;
+        return Objects.equals(this.shaderProvider, that.shaderProvider) &&
+               Objects.equals(this.model, that.model) &&
+               Objects.equals(this.renderables, that.renderables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shaderProvider, model, renderables);
+    }
+
 
 }

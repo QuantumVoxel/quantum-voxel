@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.screens;
 
+import com.badlogic.gdx.Gdx;
 import dev.ultreon.libs.datetime.v0.DateTime;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.GenericIcon;
@@ -74,7 +75,7 @@ public class WorldCreationScreen extends Screen {
 
     private void createWorld(TextButton caller) {
         String folderName = WorldStorage.createFolderName();
-        WorldStorage storage = new WorldStorage(Paths.get("worlds", folderName));
+        WorldStorage storage = new WorldStorage(Gdx.files.external("worlds").child(folderName).file());
 
         try {
             if (storage.exists(".")) {

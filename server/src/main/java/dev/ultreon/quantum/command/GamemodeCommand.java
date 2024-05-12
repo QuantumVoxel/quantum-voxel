@@ -19,11 +19,12 @@ public class GamemodeCommand extends Command {
     @DefineCommand("<game-mode>")
     @Perm("quantum.commands.gamemode.self")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, GameMode gamemode) {
-        if (!(sender instanceof Player target)) return this.needPlayer();
+        if (!(sender instanceof Player)) return this.needPlayer();
+        Player target = (Player) sender;
 
         target.setGameMode(gamemode);
 
-        return this.successMessage("Gamemode set to %s".formatted(gamemode.name().toLowerCase(Locale.ROOT)));
+        return this.successMessage(String.format("Gamemode set to %s", gamemode.name().toLowerCase(Locale.ROOT)));
     }
 
     @DefineCommand("<player> <game-mode>")
@@ -32,8 +33,8 @@ public class GamemodeCommand extends Command {
 
         target.setGameMode(gamemode);
 
-        if (sender == target) return this.successMessage("Gamemode set to %s".formatted(gamemode.name().toLowerCase(Locale.ROOT)));
-        Chat.sendInfo(target, "%s set your gamemode to %s".formatted(target.getName(), gamemode.name().toLowerCase(Locale.ROOT)));
-        return this.successMessage("Gamemode set to %s for %s".formatted(gamemode.name().toLowerCase(Locale.ROOT), target.getName()));
+        if (sender == target) return this.successMessage(String.format("Gamemode set to %s", gamemode.name().toLowerCase(Locale.ROOT)));
+        Chat.sendInfo(target, String.format("%s set your gamemode to %s", target.getName(), gamemode.name().toLowerCase(Locale.ROOT)));
+        return this.successMessage(String.format("Gamemode set to %s for %s", gamemode.name().toLowerCase(Locale.ROOT), target.getName()));
     }
 }

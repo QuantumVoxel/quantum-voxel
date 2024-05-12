@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.screens.world;
 
+import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.*;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WorldSelectionScreen extends Screen {
-    public static final Path WORLDS_DIR = Paths.get("worlds");
+    public static final Path WORLDS_DIR = Gdx.files.external("worlds").file().toPath();
     private static final int ENTRY_WIDTH = 200;
     private WorldCardList worldList;
     private WorldStorage selected;
@@ -106,9 +107,7 @@ public class WorldSelectionScreen extends Screen {
                         this.getDialog().close();
                     }
                 })
-                .button(TextObject.translation("quantum.ui.no"), () -> {
-                    this.getDialog().close();
-                }));
+                .button(TextObject.translation("quantum.ui.no"), () -> this.getDialog().close()));
     }
 
     private void playWorld(TextButton t) {
@@ -136,7 +135,7 @@ public class WorldSelectionScreen extends Screen {
                         long millis1 = Files.readAttributes(o1.getDirectory(), BasicFileAttributes.class).lastAccessTime().toMillis();
                         long millis2 = Files.readAttributes(o2.getDirectory(), BasicFileAttributes.class).lastAccessTime().toMillis();
                         return Long.compare(millis2, millis1);
-                    };
+                    }
                     if (!o1.exists("info.ubo")) return 1;
                     if (!o2.exists("info.ubo")) return -1;
 

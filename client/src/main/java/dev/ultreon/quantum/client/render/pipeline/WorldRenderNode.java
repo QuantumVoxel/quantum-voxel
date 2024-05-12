@@ -37,8 +37,9 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
 
     protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
         for (Renderable renderable : input) {
-            if (!(shaderProvider instanceof OpenShaderProvider openShaderProvider))
+            if (!(shaderProvider instanceof OpenShaderProvider))
                 throw new IllegalStateException("Shader provider is not open");
+            OpenShaderProvider openShaderProvider = (OpenShaderProvider) shaderProvider;
             ShaderContext.set(openShaderProvider);
             renderable.environment = this.client.getEnvironment();
             renderable.shader = null;

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.crash;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.DataSizes;
 import dev.ultreon.quantum.util.Result;
@@ -40,7 +41,8 @@ public final class CrashLog extends CrashCategory {
     public CrashLog(String details, Throwable t) {
         super(details, t);
 
-        if (t instanceof ApplicationCrash crash) {
+        if (t instanceof ApplicationCrash) {
+            ApplicationCrash crash = (ApplicationCrash) t;
             this.addCrash(crash);
         }
     }
@@ -168,7 +170,7 @@ public final class CrashLog extends CrashCategory {
     }
 
     public void writeToLog() {
-        this.toString().lines().forEach(CommonConstants.LOGGER::error);
+        StringUtils.splitIntoLines(this.toString()).forEach(CommonConstants.LOGGER::error);
     }
 
     @ApiStatus.Internal

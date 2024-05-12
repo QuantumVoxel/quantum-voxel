@@ -14,7 +14,7 @@ import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
     public LoginServerPacketHandler(QuantumServer server, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         this.server = server;
         this.connection = connection;
-        this.context = new PacketContext(null, connection, EnvType.SERVER);
+        this.context = new PacketContext(null, connection, Env.SERVER);
     }
 
     public static NetworkChannel registerChannel(Identifier id) {
@@ -67,7 +67,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onModPacket(NetworkChannel channel, ModPacket<?> packet) {
-        packet.handlePacket(() -> new ModPacketContext(channel, null, this.connection, EnvType.SERVER));
+        packet.handlePacket(() -> new ModPacketContext(channel, null, this.connection, Env.SERVER));
     }
 
     public NetworkChannel getChannel(Identifier channelId) {
@@ -98,7 +98,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         final var player = this.server.loadPlayer(name, uuid, this.connection);
         this.connection.setPlayer(player);
 
-        IConnection.LOGGER.info("{} joined the server.", name);
+        IConnection.LOGGER.info("%s joined the server.", name);
 
 
         this.connection.send(new S2CLoginAcceptedPacket(uuid), PacketListener.onEither(() -> {

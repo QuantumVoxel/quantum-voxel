@@ -42,8 +42,6 @@ apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'groovy'
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'java'
-apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 //****************************//
@@ -89,89 +87,89 @@ configurations {
 evaluationDependsOn(":client")
 
 dependencies {
-    addToJar implementation(project(":gameprovider"))
-    pack implementation(project(":client"))
-    pack implementation(project(":desktop"))
+    addToJar api(project(":gameprovider"))
+    pack api(project(":client"))
+    pack api(project(":desktop"))
 
-    pack implementation("com.formdev:flatlaf:3.2.1")
+    pack api("com.formdev:flatlaf:3.2.1")
 
-    pack implementation("com.badlogicgames.gdx:gdx:$gdx_version")
-    pack implementation("com.badlogicgames.gdx:gdx-box2d:$gdx_version")
-    pack implementation("com.badlogicgames.ashley:ashley:$ashley_version")
-    pack implementation("com.badlogicgames.gdx:gdx-ai:$ai_version")
-    pack implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
-    pack implementation("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
-    pack implementation("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
+    pack api("com.badlogicgames.gdx:gdx:$gdx_version")
+    pack api("com.badlogicgames.gdx:gdx-box2d:$gdx_version")
+    pack api("com.badlogicgames.ashley:ashley:$ashley_version")
+    pack api("com.badlogicgames.gdx:gdx-ai:$ai_version")
+    pack api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
+    pack api("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
+    pack api("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
 
-    pack implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
-    pack implementation("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
-    pack implementation("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
-    pack implementation("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
-    pack implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
-    pack implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
-    pack implementation("org.tukaani:xz:$tukaani_xz_version")
-    pack implementation("org.bidib.org.oxbow:swingbits:$swingbits_version")
+    pack api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
+    pack api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
+    pack api("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
+    pack api("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
+    pack api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
+    pack api("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
+    pack api("org.tukaani:xz:$tukaani_xz_version")
+    pack api("org.bidib.org.oxbow:swingbits:$swingbits_version")
 
     // Apache Log4J
-    pack implementation("org.apache.logging.log4j:log4j:$log4j_version")
-    pack implementation("org.apache.logging.log4j:log4j-core:$log4j_version")
-    pack implementation("org.apache.logging.log4j:log4j-api:$log4j_version")
-    pack implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
+    pack api("org.apache.logging.log4j:log4j:$log4j_version")
+    pack api("org.apache.logging.log4j:log4j-core:$log4j_version")
+    pack api("org.apache.logging.log4j:log4j-api:$log4j_version")
+    pack api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
 
     // JNA
-    pack implementation("net.java.dev.jna:jna:$jna_version")
-    pack implementation("net.java.dev.jna:jna-platform:$jna_version")
+    pack api("net.java.dev.jna:jna:$jna_version")
+    pack api("net.java.dev.jna:jna-platform:$jna_version")
 
     // SLF4J
     pack api("org.slf4j:slf4j-api:$slf4j_version")
 
     // Google
-    pack implementation("com.google.code.gson:gson:2.10.1")
-    pack implementation("com.google.guava:guava:$guava_version")
+    pack api("com.google.code.gson:gson:2.10.1")
+    pack api("com.google.guava:guava:$guava_version")
 
     // Misc
-    pack implementation('it.unimi.dsi:fastutil:8.5.12')
-    pack implementation('com.raylabz:opensimplex:1.0.3')
+    pack api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    pack api('com.raylabz:opensimplex:1.0.3')
 
-    pack implementation("space.earlygrey:shapedrawer:$shapedrawer_version")
+    pack api("space.earlygrey:shapedrawer:$shapedrawer_version")
 
     // ImGui
-    pack implementation("io.github.spair:imgui-java-binding:$imgui_version")
-    pack implementation("io.github.spair:imgui-java-lwjgl3:$imgui_version")
-    pack implementation("io.github.spair:imgui-java-natives-linux:$imgui_version")
-    pack implementation("io.github.spair:imgui-java-natives-macos:$imgui_version")
-    pack implementation("io.github.spair:imgui-java-natives-windows:$imgui_version")
+    pack api("io.github.spair:imgui-java-binding:$imgui_version")
+    pack api("io.github.spair:imgui-java-lwjgl3:$imgui_version")
+    pack api("io.github.spair:imgui-java-natives-linux:$imgui_version")
+    pack api("io.github.spair:imgui-java-natives-macos:$imgui_version")
+    pack api("io.github.spair:imgui-java-natives-windows:$imgui_version")
 
-    pack implementation("it.unimi.dsi:fastutil-core:8.5.9")
-    pack implementation("com.google.code.findbugs:jsr305:$jsr_version")
+    pack api("it.unimi.dsi:fastutil-core:8.5.9")
+    pack api("com.google.code.findbugs:jsr305:$jsr_version")
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
 
-    pack implementation("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    pack implementation("org.apache.logging.log4j:log4j:$log4j_version")
-    pack implementation("org.apache.logging.log4j:log4j-core:$log4j_version")
-    pack implementation("org.apache.logging.log4j:log4j-api:$log4j_version")
+    pack api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
+    pack api("org.apache.logging.log4j:log4j:$log4j_version")
+    pack api("org.apache.logging.log4j:log4j-core:$log4j_version")
+    pack api("org.apache.logging.log4j:log4j-api:$log4j_version")
 
     // fabric-loader dependencies
-    pack implementation("org.ow2.asm:asm:${project.asm_version}")
-    pack implementation("org.ow2.asm:asm-analysis:${project.asm_version}")
-    pack implementation("org.ow2.asm:asm-commons:${project.asm_version}")
-    pack implementation("org.ow2.asm:asm-tree:${project.asm_version}")
-    pack implementation("org.ow2.asm:asm-util:${project.asm_version}")
+    pack api("org.ow2.asm:asm:${project.asm_version}")
+    pack api("org.ow2.asm:asm-analysis:${project.asm_version}")
+    pack api("org.ow2.asm:asm-commons:${project.asm_version}")
+    pack api("org.ow2.asm:asm-tree:${project.asm_version}")
+    pack api("org.ow2.asm:asm-util:${project.asm_version}")
 
-    pack implementation("net.fabricmc:sponge-mixin:${project.mixin_version}") {
+    pack api("net.fabricmc:sponge-mixin:${project.mixin_version}") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
 
     //noinspection GradleDynamicVersion
-    pack implementation('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    pack implementation('net.fabricmc:tiny-remapper:0.8.7')
+    pack api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    pack api('net.fabricmc:tiny-remapper:0.8.7')
     //noinspection GradleDynamicVersion
-    pack implementation('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    pack implementation('net.fabricmc:access-widener:2.1.0')
+    pack api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    pack api('net.fabricmc:access-widener:2.1.0')
 
-    pack implementation("dev.ultreon:quantum-fabric-loader:$fabric_version")
+    pack api("dev.ultreon:quantum-fabric-loader:$fabric_version")
 }
 
 processResources {
@@ -235,8 +233,8 @@ tasks.withType(Jar).configureEach {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 delete "$projectDir/build/jars"

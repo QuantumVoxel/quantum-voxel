@@ -10,18 +10,12 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.resources.StaticResource;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +23,6 @@ public class TextureManager implements Disposable {
     private final Map<Identifier, Texture> textures = new HashMap<>();
 
     private final ResourceManager resourceManager;
-
-    @Deprecated
-    public static final StaticResource DEFAULT_TEX_RESOURCE = new StaticResource(new Identifier("missing_no"), TextureManager::createDefaultTex);
 
     public static final Texture DEFAULT_TEX = new Texture(TextureManager.createMissingNo());
     public static final TextureRegion DEFAULT_TEX_REG = new TextureRegion(TextureManager.DEFAULT_TEX, 0.0F, 0.0F, 1.0F, 1.0F);
@@ -61,21 +52,15 @@ public class TextureManager implements Disposable {
         return pixmap;
     }
 
-    private static InputStream createDefaultTex() throws IOException {
-        var image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        var graphics = image.getGraphics();
-        graphics.setColor(RgbColor.rgb(0xffbb00).toAwt());
-        graphics.fillRect(0, 0, 16, 16);
-        graphics.setColor(RgbColor.rgb(0x333333).toAwt());
-        graphics.fillRect(0, 8, 8, 8);
-        graphics.fillRect(8, 0, 8, 8);
-        var out = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", out);
-        graphics.dispose();
-        out.flush();
-        var byteArrayInputStream = new ByteArrayInputStream(out.toByteArray());
-        out.close();
-        return byteArrayInputStream;
+    private static Pixmap createDefaultTex() throws IOException {
+        var image = new Pixmap(16, 16, Pixmap.Format.RGB888);
+        image.setColor(RgbColor.rgb(0x000000).toGdx());
+        image.fillRectangle(0, 0, 16, 16);
+        image.setColor(RgbColor.rgb(0xff00ff).toGdx());
+        image.fillRectangle(0, 8, 8, 8);
+        image.fillRectangle(8, 0, 8, 8);
+
+        return image;
     }
 
     public Texture getTexture(Identifier id, Texture fallback) {
@@ -146,13 +131,13 @@ public class TextureManager implements Disposable {
         Preconditions.checkNotNull(id, "id");
         Texture oldTexture = this.textures.get(id);
         if (oldTexture != null) {
-            QuantumClient.LOGGER.warn("Texture already registered {}, possibly leaking textures", id, new Exception("Stacktrace"));
+            QuantumClient.LOGGER.warn("Texture already registered %s, possibly leaking textures", id, new Exception("Stacktrace"));
             return oldTexture;
         }
 
         FileHandle handle = QuantumClient.resource(id);
         if (!handle.exists()) {
-            if (fallback != null) QuantumClient.LOGGER.warn("Texture not found: {}", id);
+            if (fallback != null) QuantumClient.LOGGER.warn("Texture not found: %s", id);
             this.textures.put(id, fallback);
             return fallback;
         }
@@ -161,7 +146,7 @@ public class TextureManager implements Disposable {
 
         Texture texture = new Texture(pixmap);
         if (texture.getTextureData() == null) {
-            if (fallback != null) QuantumClient.LOGGER.warn("Couldn't read texture data: {}", id);
+            if (fallback != null) QuantumClient.LOGGER.warn("Couldn't read texture data: %s", id);
             this.textures.put(id, fallback);
             return fallback;
         }

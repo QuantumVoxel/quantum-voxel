@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.network.system;
 
+import com.google.common.collect.Lists;
 import dev.ultreon.quantum.network.Networker;
 import dev.ultreon.quantum.server.QuantumServer;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.include.com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.net.InetAddress;

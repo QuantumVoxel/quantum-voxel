@@ -1410,7 +1410,7 @@
   ],
   "textures": [
     {
-      "path": "/home/xypercode/IdeaProjects/ultracraft/client/src/main/resources/assets/quantum/textures/entity/player.png",
+      "path": "/home/xypercode/IdeaProjects/Quantum/client/src/main/resources/assets/quantum/textures/entity/player.png",
       "name": "player.png",
       "folder": "textures/entity",
       "namespace": "quantum",

@@ -57,7 +57,7 @@ public class DedicatedServer extends QuantumServer {
     @NotNull
     private ServerLanguage createServerLanguage() {
         // Specify the locale
-        Locale locale = Locale.of("en", "us");
+        Locale locale = new Locale("en", "us");
 
         // Load the language resource from the file system
         InputStream resourceAsStream = getClass().getResourceAsStream("/assets/quantum/languages/main.json");
@@ -93,7 +93,7 @@ public class DedicatedServer extends QuantumServer {
         // Call the other constructor with hostname, port, and inspection
         this(ServerConfig.hostname, ServerConfig.port, inspection);
 
-        LOGGER.info("Server started on {}:{}", ServerConfig.hostname, ServerConfig.port);
+        LOGGER.info("Server started on %s:%s", ServerConfig.hostname, ServerConfig.port);
 
         try {
             // Create the world storage

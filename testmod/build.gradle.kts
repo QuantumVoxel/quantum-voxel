@@ -28,9 +28,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 
 //    api(project(":api"))
-    api(project(":client"))
-    api(project(":desktop"))
-    api(project(":server"))
+    implementation(project(":client"))
+    implementation(project(":desktop"))
+    implementation(project(":server"))
 }
 
 tasks.test {

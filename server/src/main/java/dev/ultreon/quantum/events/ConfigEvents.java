@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.events;
 
 import dev.ultreon.quantum.events.api.Event;
-import net.fabricmc.api.EnvType;
+import dev.ultreon.quantum.util.Env;
 
 public class ConfigEvents {
     public static final Event<Load> LOAD = Event.create();
 
     @FunctionalInterface
     public interface Load {
-        void onConfigLoad(EnvType envType);
+        void onConfigLoad(Env Env);
     }
 }

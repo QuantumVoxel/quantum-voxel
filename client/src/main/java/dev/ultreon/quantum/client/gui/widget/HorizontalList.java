@@ -1,9 +1,13 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
@@ -39,6 +43,9 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     };
     private int gap = SCROLL_SPEED;
     private int count;
+    private boolean dragging;
+    private Notification dragNotification;
+    private boolean startedDragging;
 
     public HorizontalList(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
@@ -75,20 +82,29 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
 
-        float v = this.scrollGoal - this.scrollX;
-        boolean left = this.scrollGoal < this.scrollX;
-        float scrollX = this.scrollX + v * (deltaTime * 10);
-        if (left && scrollX < scrollGoal) this.scrollX = this.scrollGoal;
-        else if (!left && scrollX > scrollGoal) this.scrollX = this.scrollGoal;
-        else this.scrollX = scrollX;
+        Vector2 vector2 = this.client.touchPosStartScl[0];
+        if (vector2 != null && vector2.dst(mouseX, mouseY) > 10 && this.startedDragging) {
+            this.dragging = true;
+            float deltaX = Gdx.input.getDeltaX(0) * this.client.getGuiScale();
+            this.scrollX -= deltaX;
+            this.scrollX = Mth.clamp(this.scrollX, 0, this.getContentHeight());
+            this.dragNotification.setSummary(TextObject.literal("Scrolling | " + this.scrollX + " | " + deltaX).setColor(RgbColor.WHITE));
+        } else if (!GamePlatform.get().isMobile()) {
+            float v = this.scrollGoal - this.scrollX;
+            boolean left = this.scrollGoal < this.scrollX;
+            float scrollX = this.scrollX + v * (deltaTime * 10);
+            if (left && scrollX < scrollGoal) this.scrollX = this.scrollGoal;
+            else if (!left && scrollX > scrollGoal) this.scrollX = this.scrollGoal;
+            else this.scrollX = scrollX;
 
-        if (this.scrollX < 0) {
-            this.scrollX = 0;
-            this.scrollGoal = 0;
-        }
-        if (this.scrollX > this.getContentHeight()) {
-            this.scrollX = this.getContentHeight();
-            this.scrollGoal = this.getContentHeight();
+            if (this.scrollX < 0) {
+                this.scrollX = 0;
+                this.scrollGoal = 0;
+            }
+            if (this.scrollX > this.getContentHeight()) {
+                this.scrollX = this.getContentHeight();
+                this.scrollGoal = this.getContentHeight();
+            }
         }
 
         renderer.pushMatrix();
@@ -128,6 +144,13 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @Override
     public boolean mouseClick(int x, int y, int button, int count) {
+        if (GamePlatform.get().isMobile() && this.dragging && client.scrollPointer.dst(x, y) > 10) {
+            this.dragging = false;
+            this.dragNotification.close();
+            this.dragNotification = null;
+            return false;
+        }
+
         if (this.selectable) {
             T entryAt = this.getEntryAt(x, y);
 
@@ -144,6 +167,15 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @Override
     public boolean mousePress(int x, int y, int button) {
+        if (GamePlatform.get().isMobile()) {
+            this.startedDragging = true;
+
+            if (this.dragNotification != null)
+                this.dragNotification.close();
+            this.dragNotification = Notification.builder("Debug", "Dragging").sticky().build();
+            this.client.notifications.add(this.dragNotification);
+        }
+
         @Nullable T widgetAt = this.getEntryAt(x, y);
         this.pressingWidget = widgetAt;
         return widgetAt != null && widgetAt.mousePress(x - widgetAt.getX(), y - widgetAt.getY(), button);
@@ -151,6 +183,14 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @Override
     public boolean mouseRelease(int x, int y, int button) {
+        if (GamePlatform.get().isMobile()) {
+            this.startedDragging = false;
+            this.dragging = false;
+            if (this.dragNotification != null)
+                this.dragNotification.close();
+            this.dragNotification = null;
+        }
+
         @Nullable T widgetAt = this.pressingWidget;
         return widgetAt != null && widgetAt.mouseRelease(x - widgetAt.getX(), y - widgetAt.getY(), button);
     }
@@ -219,7 +259,9 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @Override
     public boolean mouseWheel(int x, int y, double rotation) {
-        this.scrollGoal = this.getContentHeight() > this.size.height ? Mth.clamp((float) (this.scrollGoal + rotation * SCROLL_SPEED), 0, this.getContentHeight() - this.size.height) : 0;
+        if (GamePlatform.get().isDesktop()) {
+            this.scrollGoal = this.getContentHeight() > this.size.height ? Mth.clamp((float) (this.scrollGoal + rotation * SCROLL_SPEED), 0, this.getContentHeight() - this.size.height) : 0;
+        }
         return true;
     }
 

@@ -21,7 +21,11 @@ public class ShaderPrograms {
         return QuantumClient.get().getShaderProgramManager().register(QuantumClient.id(name), () -> {
             Identifier id = QuantumClient.id(name);
 
-            return ShaderPrograms.createShader(id);
+            try {
+                return ShaderPrograms.createShader(id);
+            } catch (GdxRuntimeException e) {
+                throw new RuntimeException("Failed to create shader program: " + id, e);
+            }
         });
     }
 
@@ -33,7 +37,7 @@ public class ShaderPrograms {
         String shaderLog = program.getLog();
         if (program.isCompiled()) {
             if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation success");
-            else QuantumClient.LOGGER.warn("Shader compilation warnings:\n{}", shaderLog);
+            else QuantumClient.LOGGER.warn("Shader compilation warnings:\n%s", shaderLog);
         } else throw new GdxRuntimeException("Shader compilation failed:\n" + shaderLog);
         return program;
     }

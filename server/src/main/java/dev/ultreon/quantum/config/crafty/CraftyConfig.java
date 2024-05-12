@@ -4,11 +4,12 @@ import de.marhali.json5.*;
 import de.marhali.json5.exception.Json5Exception;
 import de.marhali.json5.stream.Json5Writer;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.Mod;
+import dev.ultreon.quantum.api.FileIO;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.ModLoadingContext;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The base class for all configuration files.
- * Files are stored in the path provided in {@link FabricLoader#getConfigDir()}.
+ * Files are stored in the path provided in {@link GamePlatform#getConfigDir()}.
  * Those files are also automatically reloaded when they are modified.
  * Configs are saved in JSON5 format. See {@link Json5} for more information.
  *
@@ -85,7 +86,7 @@ public abstract class CraftyConfig {
     public final Event<LoadConfig> event = Event.create();
 
     private static WatchKey watchKey;
-    private final ModContainer mod;
+    private final Mod mod;
 
     /**
      * Constructor for CraftyConfig class.
@@ -103,7 +104,7 @@ public abstract class CraftyConfig {
             throw new IllegalStateException("Class " + configClass + " is not annotated with @ConfigInfo");
 
         // Set the file name for the configuration
-        this.configPath = FabricLoader.getInstance().getConfigDir().resolve(annotation.fileName() + ".json5");
+        this.configPath = GamePlatform.get().getConfigDir().resolve(annotation.fileName() + ".json5");
 
         // Get all declared fields of the class
         Field[] declaredFields = configClass.getDeclaredFields();
@@ -181,7 +182,7 @@ public abstract class CraftyConfig {
      */
     protected boolean loadUnsafe() throws IOException {
         // Parse the JSON5 file into a Json5Element
-        Json5Element root = CommonConstants.JSON5.parse(Files.readString(this.configPath, StandardCharsets.UTF_8));
+        Json5Element root = CommonConstants.JSON5.parse(FileIO.readString(this.configPath, StandardCharsets.UTF_8));
 
         // Check if the root element is an object
         if (!(root instanceof Json5Object)) {
@@ -271,7 +272,7 @@ public abstract class CraftyConfig {
         }
 
         // Write the serialized configurations to a file
-        Files.writeString(this.configPath, serialize(root), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+        FileIO.writeString(this.configPath, serialize(root), StandardCharsets.UTF_8);
     }
 
     /**
@@ -305,7 +306,7 @@ public abstract class CraftyConfig {
     private static void enableWatcher() {
         try {
             // Register the watch service for entry modify, delete, and create events
-            watchKey = FabricLoader.getInstance().getConfigDir().register(WATCH_SERVICE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_CREATE);
+            watchKey = GamePlatform.get().getConfigDir().register(WATCH_SERVICE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_CREATE);
         } catch (IOException e) {
             // Log error if failed to create watch service
             CommonConstants.LOGGER.error("Failed to create watch service", e);
@@ -321,7 +322,7 @@ public abstract class CraftyConfig {
             Files.deleteIfExists(this.configPath);
         } catch (IOException e) {
             // Log an error if the deletion fails
-            CommonConstants.LOGGER.error("Failed to reset config file " + this.configPath, e);
+            CommonConstants.LOGGER.error("Failed to reset config file %s", this.configPath, e);
         }
 
         // Disable the watcher to prevent unnecessary notifications
@@ -426,7 +427,7 @@ public abstract class CraftyConfig {
         // Traverse the path and create any missing objects
         for (int i = 0; i < parts.length - 1; i++) {
             Json5Element tempCurrent = current.get(parts[i]);
-            if (tempCurrent == null || !(tempCurrent instanceof Json5Object object)) {
+            if (tempCurrent == null || !(tempCurrent instanceof Json5Object)) {
                 // Create a new JSON object if the current element is missing
                 Json5Object newValue = new Json5Object();
                 tempCurrent = newValue;
@@ -435,6 +436,7 @@ public abstract class CraftyConfig {
                 current = newValue;
                 continue;
             }
+            Json5Object object = (Json5Object) tempCurrent;
 
             current = object;
         }
@@ -996,7 +998,7 @@ public abstract class CraftyConfig {
         return configPath.getFileName().toString();
     }
 
-    public ModContainer getMod() {
+    public Mod getMod() {
         return mod;
     }
 

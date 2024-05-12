@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.render;
 
-import org.lwjgl.opengl.GL30;
+import com.badlogic.gdx.graphics.GL30;
 
 public enum SourceBlending {
     ONE(GL30.GL_ONE),

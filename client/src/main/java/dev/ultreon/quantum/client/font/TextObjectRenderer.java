@@ -46,7 +46,8 @@ public class TextObjectRenderer {
             boolean underlined = false;
             boolean strikethrough = false;
 
-            if (cur instanceof MutableText mutableText) {
+            if (cur instanceof MutableText) {
+                MutableText mutableText = (MutableText) cur;
                 color = mutableText.getColor();
                 bold = mutableText.isBold();
                 italic = mutableText.isItalic();

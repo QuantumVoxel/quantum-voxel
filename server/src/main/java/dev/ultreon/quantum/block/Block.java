@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.block;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class Block implements DataWriter<MapType> {
     private final boolean transparent;
@@ -200,7 +202,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockPos at, UseItemContext context) {
-        return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), context.result().getDirection());
+        return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), ((BlockHitResult) context.result()).getDirection());
     }
 
     public void update(World serverWorld, BlockPos offset, BlockProperties meta) {
@@ -280,7 +282,7 @@ public class Block implements DataWriter<MapType> {
         }
 
         public @This Properties dropsItems(Item...  drops) {
-            this.loot = new ConstantLoot(Arrays.stream(drops).map(Item::defaultStack).toList());
+            this.loot = new ConstantLoot(Arrays.stream(drops).map(Item::defaultStack).collect(Collectors.toList()));
             return this;
         }
 

@@ -8,6 +8,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CommonRegistries;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.LoadingContext;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -19,9 +20,9 @@ import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
-import dev.ultreon.quantum.client.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.client.input.GameInput;
+import dev.ultreon.quantum.client.input.TouchscreenInput;
 import dev.ultreon.quantum.client.item.ItemRenderer;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
@@ -46,7 +47,6 @@ import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.Task;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
-import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.*;
 
@@ -69,9 +69,9 @@ class QuantumClientLoader implements Runnable {
     @SuppressWarnings("UnstableApiUsage")
     void load(QuantumClient client) {
         var argList = Arrays.asList(client.argv);
-        client.isDevMode = argList.contains("--dev") && FabricLoader.getInstance().isDevelopmentEnvironment();
+        client.isDevMode = argList.contains("--dev") && GamePlatform.get().isDevEnvironment();
 
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) client.gameEnv = GameEnvironment.DEVELOPMENT;
+        if (GamePlatform.get().isDevEnvironment()) client.gameEnv = GameEnvironment.DEVELOPMENT;
         else if (Objects.equals(System.getProperty("quantum.environment", "normal"), "packaged"))
             client.gameEnv = GameEnvironment.PACKAGED;
         else client.gameEnv = GameEnvironment.NORMAL;
@@ -167,8 +167,8 @@ class QuantumClientLoader implements Runnable {
             QuantumClientLoader.registerDebugPages();
         });
 
-        for (var mod : FabricLoader.getInstance().getAllMods()) {
-            final String id = mod.getMetadata().getId();
+        for (var mod : GamePlatform.get().getMods()) {
+            final String id = mod.getId();
             LoadingContext.withinContext(new LoadingContext(id), () -> {
                 for (Registry<?> registry : Registry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
@@ -245,7 +245,7 @@ class QuantumClientLoader implements Runnable {
         QuantumClient.LOGGER.info("Opening title screen");
 
         if (client.imGui) {
-            ImGuiOverlay.setupImGui();
+            GamePlatform.get().setupImGui();
         }
 
         client.booted = true;
@@ -253,7 +253,7 @@ class QuantumClientLoader implements Runnable {
         client.loadingOverlay.setProgress(1.0F);
 
         client.bootTime = Duration.ofMilliseconds(System.currentTimeMillis() - QuantumClient.BOOT_TIMESTAMP);
-        QuantumClient.LOGGER.info("Game booted in {}.", client.bootTime.toSimpleString());
+        QuantumClient.LOGGER.info("Game booted in %s.", client.bootTime.toSimpleString());
 
         QuantumClient.invokeAndWait(new Task<>(QuantumClient.id("main/show_title_screen"), () -> {
             if (client.devWorld) {
@@ -266,6 +266,9 @@ class QuantumClientLoader implements Runnable {
     }
 
     private GameInput createInput(QuantumClient quantumClient) {
+        if (GamePlatform.get().isMobile()) {
+            return new TouchscreenInput(quantumClient, quantumClient.camera);
+        }
         return new DesktopInput(quantumClient, quantumClient.camera);
     }
 
@@ -300,7 +303,7 @@ class QuantumClientLoader implements Runnable {
 
     private void registerLanguage(Identifier id, QuantumClient quantumClient) {
         var s = id.path().split("_", 2);
-        var locale = s.length == 1 ? Locale.of(s[0]) : Locale.of(s[0], s[1]);
+        var locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
         LanguageManager.INSTANCE.register(locale, id);
         LanguageManager.INSTANCE.load(locale, id, quantumClient.getResourceManager());
     }

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.crash;
 
+import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,6 +12,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="https://github.com/XyperCodee">XyperCode</a>
@@ -25,7 +27,8 @@ public class CrashCategory {
     }
 
     public CrashCategory(String details, Throwable throwable) {
-        if (throwable instanceof ApplicationCrash crash) {
+        if (throwable instanceof ApplicationCrash) {
+            ApplicationCrash crash = (ApplicationCrash) throwable;
             CrashLog crashLog = crash.getCrashLog();
             this.details = this.detectThrowable(crashLog.details, crashLog.throwable);
             this.entries.addAll(crashLog.entries);
@@ -39,7 +42,8 @@ public class CrashCategory {
         var current = throwable;
         if (current != null) {
             do {
-                if (current instanceof ApplicationCrash crash) {
+                if (current instanceof ApplicationCrash) {
+                    ApplicationCrash crash = (ApplicationCrash) current;
                     CrashLog crashLog = crash.getCrashLog();
                     this.entries.addAll(crashLog.entries);
                     return this.detectThrowable(crashLog.details, crashLog.throwable);
@@ -53,7 +57,8 @@ public class CrashCategory {
             } while (current.getCause() != null);
         }
 
-        if (current instanceof ApplicationCrash crash) {
+        if (current instanceof ApplicationCrash) {
+            ApplicationCrash crash = (ApplicationCrash) current;
             return this.detectThrowable(crash.getCrashLog().details, crash.getCrashLog().throwable);
         } else {
             this.throwable = current;
@@ -119,7 +124,7 @@ public class CrashCategory {
             }
 
             String output = outputBuf.toString();
-            List<String> lines = output.lines().toList();
+            List<String> lines = StringUtils.splitIntoLines(output);
             String finalResult = "   " + String.join(System.lineSeparator() + "   ", lines);
 
             sb.append(finalResult);

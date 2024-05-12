@@ -4,13 +4,21 @@ import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Identifier;
 
+import java.util.Objects;
+
 /**
  * Represents a type of recipe.
- *
- * @param <T> The type of recipe
  */
-public record RecipeType<T extends Recipe>(RecipeType.RecipeDeserializer<T> deserializer) {
+public final class RecipeType<T extends Recipe> {
     public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<>(CraftingRecipe::deserialize));
+    private final RecipeDeserializer<T> deserializer;
+
+    /**
+     * @param <T> The type of recipe
+     */
+    public RecipeType(RecipeDeserializer<T> deserializer) {
+        this.deserializer = deserializer;
+    }
 
     /**
      * Registers a recipe type.
@@ -53,6 +61,30 @@ public record RecipeType<T extends Recipe>(RecipeType.RecipeDeserializer<T> dese
     public T deserialize(Identifier id, Json5Object root) {
         return this.deserializer.deserialize(id, root);
     }
+
+    public RecipeDeserializer<T> deserializer() {
+        return deserializer;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (RecipeType) obj;
+        return Objects.equals(this.deserializer, that.deserializer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deserializer);
+    }
+
+    @Override
+    public String toString() {
+        return "RecipeType[" +
+               "deserializer=" + deserializer + ']';
+    }
+
 
     /**
      * Functional interface for deserializing a recipe.

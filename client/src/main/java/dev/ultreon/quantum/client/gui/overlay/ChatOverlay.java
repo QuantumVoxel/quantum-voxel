@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -30,7 +31,7 @@ public class ChatOverlay extends Overlay {
             for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                 TextObject text = messages.get(i);
                 if (text == null) continue;
-                long lineCount = text.getText().lines().count();
+                long lineCount = StringUtils.splitIntoLines(text.getText()).size();
                 if (lineCount == 0) continue;
                 if (lineCount > 1) y -= (int) ((font.lineHeight + 2) * (lineCount - 1));
                 long messageTimestamp = messageTimestamps.getLong(i);

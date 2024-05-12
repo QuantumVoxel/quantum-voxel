@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.model.entity.renderer;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -17,7 +18,6 @@ import dev.ultreon.quantum.client.render.EntityTextures;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.entity.Entity;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL20;
 
 public abstract class EntityRenderer<E extends Entity> implements Disposable {
     protected static Vec3d tmp0 = new Vec3d();

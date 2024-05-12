@@ -6,8 +6,10 @@ import dev.ultreon.quantum.util.Identifier;
 
 public class MenuTypes {
     public static final MenuType<Inventory> INVENTORY = MenuTypes.register("inventory", (type, world, entity, pos) -> {
-        if (entity instanceof Player player) return player.inventory;
-        else return null;
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
+            return player.inventory;
+        } else return null;
     });
     public static final MenuType<CrateMenu> CRATE = MenuTypes.register("crate", CrateMenu::new);
 

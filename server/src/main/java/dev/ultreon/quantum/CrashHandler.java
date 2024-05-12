@@ -3,8 +3,8 @@ package dev.ultreon.quantum;
 import dev.ultreon.quantum.crash.CrashLog;
 import org.oxbow.swingbits.dialog.task.TaskDialog;
 import org.oxbow.swingbits.util.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;

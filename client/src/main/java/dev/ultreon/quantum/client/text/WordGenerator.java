@@ -1,5 +1,8 @@
 package dev.ultreon.quantum.client.text;
 
+import dev.ultreon.quantum.world.rng.JavaRNG;
+import dev.ultreon.quantum.world.rng.RNG;
+
 import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Random;
@@ -76,14 +79,14 @@ public class WordGenerator {
     private static final String[] ZE = {
             "ium"
     };
-    private final Random random;
+    private final JavaRNG random;
 
     public WordGenerator(Config config) {
         this.minSize = config.minSize;
         this.maxSize = config.maxSize;
         this.isNamed = config.isNamed;
         long seed = config.seed;
-        this.random = new Random(seed);
+        this.random = new JavaRNG(seed);
     }
 
     enum State {
@@ -92,7 +95,7 @@ public class WordGenerator {
 
     public String generate() {
         final var random = this.random();
-        final var len = random.nextInt(max(this.minSize, 2), this.maxSize + 1);
+        final var len = random.randint(max(this.minSize, 2), this.maxSize + 1);
 
         final var named = new AtomicBoolean(this.isNamed);
         var ref = new StateHolder(random);
@@ -103,7 +106,7 @@ public class WordGenerator {
         return sb.toString();
     }
 
-    private void switchState(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchState(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, RNG random) {
         switch (ref.state) {
             case A -> this.switchToA(ref, i, len, sb, named, random);
             case B -> this.switchToB(ref, i, len, sb, named, random);
@@ -115,19 +118,19 @@ public class WordGenerator {
         }
     }
 
-    private void switchToE2(StateHolder ref, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchToE2(StateHolder ref, StringBuilder sb, AtomicBoolean named, RNG random) {
         ref.state = State.B;
         this.appendRandom(sb, named, random, WordGenerator.E);
     }
 
-    private void switchToE1(StateHolder ref, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchToE1(StateHolder ref, StringBuilder sb, AtomicBoolean named, RNG random) {
         ref.state = State.E2;
         this.appendRandom(sb, named, random, WordGenerator.E);
     }
 
-    private void switchToD(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchToD(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, RNG random) {
         if (i < len - 3) {
-            if (random.nextBoolean()) ref.state = State.A;
+            if (random.chance(1)) ref.state = State.A;
             else ref.state = State.E1;
         } else {
             ref.state = State.A;
@@ -135,14 +138,14 @@ public class WordGenerator {
         this.appendRandom(sb, named, random, WordGenerator.D, WordGenerator.DA, WordGenerator.DB);
     }
 
-    private void switchToC(StateHolder ref, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchToC(StateHolder ref, StringBuilder sb, AtomicBoolean named, RNG random) {
         ref.state = State.B;
         this.appendRandom(sb, named, random, WordGenerator.C, WordGenerator.CA, WordGenerator.CB);
     }
 
-    private void switchToB(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchToB(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, RNG random) {
         if (i < len - 3) {
-            if (random.nextBoolean()) {
+            if (random.chance(1)) {
                 ref.state = State.A;
             } else {
                 ref.state = State.E1;
@@ -157,7 +160,7 @@ public class WordGenerator {
         this.appendRandom(sb, named, random, WordGenerator.B);
     }
 
-    private void switchToA(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, Random random) {
+    private void switchToA(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, RNG random) {
         ref.state = State.B;
         if (i == len - 1) {
             this.appendRandom(sb, named, random, WordGenerator.Y, WordGenerator.YA, WordGenerator.YB, WordGenerator.YC, WordGenerator.YD);
@@ -166,14 +169,14 @@ public class WordGenerator {
         this.appendRandom(sb, named, random, WordGenerator.A);
     }
 
-    private Random random() {
+    private RNG random() {
         return this.random;
     }
 
-    private void appendRandom(StringBuilder sb, AtomicBoolean named, Random random, String[]... lists) {
+    private void appendRandom(StringBuilder sb, AtomicBoolean named, RNG random, String[]... lists) {
         @Nullable String[] list = null;
         for (var l : lists) {
-            if (random.nextBoolean()) {
+            if (random.chance(1)) {
                 list = l;
                 break;
             }
@@ -192,8 +195,8 @@ public class WordGenerator {
     }
 
 
-    protected <T> T choose(Random rand, T[] list) {
-        return list[rand.nextInt(list.length)];
+    protected <T> T choose(RNG rand, T[] list) {
+        return list[rand.randint(0, list.length - 1)];
     }
 
     public static class Config {
@@ -227,8 +230,8 @@ public class WordGenerator {
     private static class StateHolder {
         State state;
 
-        public StateHolder(Random random) {
-            this.state = random.nextBoolean() ? State.C : State.D;
+        public StateHolder(RNG random) {
+            this.state = random.chance(1) ? State.C : State.D;
         }
     }
 }

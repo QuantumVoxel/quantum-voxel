@@ -3,15 +3,29 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
+import java.util.Objects;
+
 /**
  * Represents a block position in the world.
  *
- * @param x
- * @param y
- * @param z
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  */
-public record BlockPos(int x, int y, int z) {
+public final class BlockPos {
+    private final int x;
+    private final int y;
+    private final int z;
+
+    /**
+     * @param x
+     * @param y
+     * @param z
+     */
+    public BlockPos(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
     /**
      * Creates a new block position at the given coordinates.
      *
@@ -63,7 +77,7 @@ public record BlockPos(int x, int y, int z) {
 
     @Override
     public String toString() {
-        return "%d,%d,%d".formatted(this.x, this.y, this.z);
+        return String.format("%d,%d,%d", this.x, this.y, this.z);
     }
 
     /**
@@ -95,6 +109,34 @@ public record BlockPos(int x, int y, int z) {
     }
 
     private BlockPos offset(BlockPos offset) {
-        return this.offset(x + offset.x, y + offset.y, z +  offset.z);
+        return this.offset(x + offset.x, y + offset.y, z + offset.z);
     }
+
+    public int x() {
+        return x;
+    }
+
+    public int y() {
+        return y;
+    }
+
+    public int z() {
+        return z;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (BlockPos) obj;
+        return this.x == that.x &&
+               this.y == that.y &&
+               this.z == that.z;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z);
+    }
+
 }

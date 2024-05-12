@@ -15,7 +15,8 @@ public class KillCommand extends Command {
 
     @DefineCommand
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias) {
-        if (!(sender instanceof LivingEntity player)) return this.needLivingEntity();
+        if (!(sender instanceof LivingEntity)) return this.needLivingEntity();
+        LivingEntity player = (LivingEntity) sender;
 
         player.kill();
 
@@ -25,7 +26,8 @@ public class KillCommand extends Command {
     @DefineCommand("<entity>")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Entity entity) {
         if (sender != entity && !sender.hasPermission("quantum.commands.kill.others")) return this.noPermission();
-        if (!(entity instanceof LivingEntity livingEntity)) return errorMessage("Cannot kill " + entity.getName() + " because it is not a living entity");
+        if (!(entity instanceof LivingEntity)) return errorMessage("Cannot kill " + entity.getName() + " because it is not a living entity");
+        LivingEntity livingEntity = (LivingEntity) entity;
 
         livingEntity.kill();
 

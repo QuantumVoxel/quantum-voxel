@@ -25,7 +25,8 @@ public class SetVarCommand extends Command {
     public @Nullable CommandResult executeRun(CommandSender sender, CommandContext commandContext, String alias, PlayerVariable variable, CommandResult result) {
         var player = (ServerPlayer) sender;
 
-        if (result instanceof ObjectCommandResult commandResult) {
+        if (result instanceof ObjectCommandResult) {
+            ObjectCommandResult commandResult = (ObjectCommandResult) result;
             switch (commandResult.getType()) {
                 case Object -> variable.setValue(commandResult.getObject());
                 case Void -> variable.setValue(null);

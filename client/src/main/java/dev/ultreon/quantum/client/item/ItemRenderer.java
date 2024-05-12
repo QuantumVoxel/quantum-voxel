@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.base.Suppliers;
+import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import dev.ultreon.quantum.block.state.BlockProperties;
@@ -78,7 +78,8 @@ public class ItemRenderer implements Disposable {
             return;
         }
 
-        if (item instanceof BlockItem blockItem) {
+        if (item instanceof BlockItem) {
+            BlockItem blockItem = (BlockItem) item;
             ModelInstance modelInstance = modelsInstances.get(item);
             if (modelInstance != null) {
                 this.renderModel(modelInstance, models.get(item), renderer, x + 8, this.client.getScaledHeight() - y - 16);
@@ -129,7 +130,8 @@ public class ItemRenderer implements Disposable {
                 renderCustomBlock(item, block, renderer, x, y);
                 return;
             }
-            if (blockModel instanceof BakedCubeModel bakedModel) {
+            if (blockModel instanceof BakedCubeModel) {
+                BakedCubeModel bakedModel = (BakedCubeModel) blockModel;
                 this.batch.begin(this.itemCam);
                 Mesh mesh = bakedModel.getMesh();
                 Renderable renderable = renderer.obtainRenderable();
@@ -221,7 +223,8 @@ public class ItemRenderer implements Disposable {
     public void registerModels(Json5ModelLoader loader) {
         Registries.ITEM.values().forEach((e) -> {
             try {
-                if (e instanceof BlockItem blockItem) {
+                if (e instanceof BlockItem) {
+                    BlockItem blockItem = (BlockItem) e;
                     this.registerBlockModel(blockItem, () -> this.client.getBlockModel(blockItem.createBlockMeta()));
                     return;
                 }
@@ -233,14 +236,15 @@ public class ItemRenderer implements Disposable {
 
                 this.registerModel(e, Objects.requireNonNullElseGet(load, () -> new FlatItemModel(e)));
             } catch (IOException ex) {
-                QuantumClient.LOGGER.error("Failed to load item model for {}", e, ex);
+                QuantumClient.LOGGER.error("Failed to load item model for %s", e, ex);
                 fallbackModel(e);
             }
         });
     }
 
     private void fallbackModel(Item e) {
-        if (e instanceof BlockItem blockItem) {
+        if (e instanceof BlockItem) {
+            BlockItem blockItem = (BlockItem) e;
 //            this.registerBlockModel(blockItem, () -> this.client.getBakedBlockModel(blockItem.createBlockMeta()));
         }
     }

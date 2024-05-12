@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FlatStorage<D> implements Storage<D> {
     private final D defaultValue;
@@ -145,7 +146,7 @@ public class FlatStorage<D> implements Storage<D> {
 
     @Override
     public <R> Storage<R> map(R defaultValue, Function<D, R> o) {
-        var data = Arrays.stream(this.data).map(o).toList();
+        var data = Arrays.stream(this.data).map(o).collect(Collectors.toList());
         return new FlatStorage<>(defaultValue, data);
     }
 }

@@ -3,8 +3,13 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.Mod;
+import dev.ultreon.quantum.ModOrigin;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.config.ConfigScreenFactory;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.icon.MessageIcon;
 import dev.ultreon.quantum.client.gui.widget.Button;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
@@ -15,22 +20,20 @@ import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.fabricmc.loader.api.metadata.ModOrigin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ModListScreen extends Screen {
     private static final Identifier DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
-    private SelectionList<ModContainer> list;
+    private SelectionList<Mod> list;
     private TextButton configButton;
     private TextButton backButton;
     private static final Map<String, Texture> TEXTURES = new HashMap<>();
+    private TextButton importXeox;
 
     public ModListScreen(Screen back) {
         super(TextObject.translation("quantum.screen.mod_list"), back);
@@ -38,44 +41,58 @@ public class ModListScreen extends Screen {
 
     @Override
     public void build(GuiBuilder builder) {
-        this.list = builder.add(new SelectionList<ModContainer>()
+        this.list = builder.add(new SelectionList<Mod>()
                 .itemHeight(48)
                 .drawBackground(false)
                 .bounds(() -> new Bounds(0, 0, 200, this.size.height - 52))
                 .itemRenderer(this::renderItem)
                 .selectable(true)
-                .entries(FabricLoader.getInstance()
-                        .getAllMods()
+                .callback(caller -> {
+                    ConfigScreenFactory modConfigScreen = QuantumClient.get().getModConfigScreen(caller);
+                    try {
+                        if (modConfigScreen != null) {
+                            this.client.showScreen(modConfigScreen.create(this.client.screen));
+                        }
+                    } catch (Exception e) {
+                        QuantumClient.LOGGER.error("Can't show mod config", e);
+                        this.client.notifications.add(Notification.builder(TextObject.literal("Failed to show mod config"), TextObject.literal(e.getMessage()))
+                                .icon(MessageIcon.ERROR).build());
+                    }
+                })
+                .entries(GamePlatform.get().getMods()
                         .stream()
-                        .sorted((a, b) -> a.getMetadata().getName().compareToIgnoreCase(b.getMetadata().getName()))
-                        .filter(modContainer -> modContainer.getOrigin().getKind() != ModOrigin.Kind.NESTED)
-                        .toList()));
+                        .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
+                        .collect(Collectors.toList())));
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
                 .position(() -> new Position(5, this.size.height - 51))
                 .type(Button.Type.DARK_EMBED));
         this.configButton.disable();
 
-        this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190).position(() -> new Position(5, this.size.height - 26)))
-                .callback(this::onBack)
+        this.importXeox = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.import_xeox"), 190).position(() -> new Position(5, this.size.height - 26)))
+                .callback(this::onImportXeox)
                 .type(Button.Type.DARK_EMBED);
+    }
+
+    private void onImportXeox(TextButton textButton) {
+        GamePlatform.get().openImportDialog();
     }
 
     public void onBack(TextButton button) {
         this.back();
     }
 
-    private void renderItem(Renderer renderer, ModContainer modContainer, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
-        ModMetadata metadata = modContainer.getMetadata();
+    private void renderItem(Renderer renderer, Mod mod, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+        Mod metadata = mod;
         var x = this.list.getX();
 
         renderer.textLeft(Formatter.format("<bold>" + metadata.getName()), x + 50, y + this.list.getItemHeight() - 34);
-        renderer.textLeft("Version: " + metadata.getVersion().getFriendlyString(), x + 50, y + this.list.getItemHeight() - 34 + 12, RgbColor.rgb(0xa0a0a0));
+        renderer.textLeft("Version: " + metadata.getVersion(), x + 50, y + this.list.getItemHeight() - 34 + 12, RgbColor.rgb(0xa0a0a0));
 
         this.drawIcon(renderer, metadata, x + 7, y + 7, 32);
     }
 
-    private void drawIcon(Renderer renderer, ModMetadata metadata, int x, int y, int size) {
+    private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size) {
         Identifier iconId;
         @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
         Identifier overrideId = ModIconOverrideRegistry.get(metadata.getId());
@@ -122,23 +139,21 @@ public class ModListScreen extends Screen {
 
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        ModContainer selected = this.list.getSelected();
+        Mod selected = this.list.getSelected();
         if (selected != null) {
-            ModMetadata metadata = selected.getMetadata();
+            this.drawIcon(renderer, selected, x, y, 64);
 
-            this.drawIcon(renderer, metadata, x, y, 64);
-
-            renderer.textLeft(TextObject.literal(metadata.getName()).setBold(true), 2, xIcon, y);
-            renderer.textLeft("<aqua>ID: <light-gray>" + metadata.getId(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft("<aqua>Version: <light-gray>" + metadata.getVersion().getFriendlyString(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft(metadata.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor.getName())).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
+            renderer.textLeft(TextObject.literal(selected.getName()).setBold(true), 2, xIcon, y);
+            renderer.textLeft("<aqua>ID: <light-gray>" + selected.getId(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft("<aqua>Version: <light-gray>" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor)).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 
             y += 84;
-            renderer.textMultiline("<gray>" + metadata.getDescription(), x, y, RgbColor.rgb(0x808080));
+            renderer.textMultiline("<gray>" + selected.getDescription(), x, y, RgbColor.rgb(0x808080));
         }
     }
 
-    public SelectionList<ModContainer> getList() {
+    public SelectionList<Mod> getList() {
         return this.list;
     }
 

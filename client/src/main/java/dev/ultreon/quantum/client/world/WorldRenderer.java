@@ -29,13 +29,13 @@ import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.DisposableContainer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
-import dev.ultreon.quantum.client.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.QVModel;
@@ -68,6 +68,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.crash;
@@ -406,7 +407,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         for (var chunk : chunks) {
             if (positions.contains(chunk.getPos(), false)) {
-                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getPos());
+                QuantumClient.LOGGER.warn("Duplicate chunk: %s", chunk.getPos());
                 continue;
             }
 
@@ -490,7 +491,7 @@ public final class WorldRenderer implements DisposableContainer {
 
             chunk.renderModels(scene3D);
 
-            if (ImGuiOverlay.isChunkSectionBordersShown()) {
+            if (GamePlatform.get().areChunkBordersVisible()) {
 //                this.tmp.set(chunk.renderOffset);
 //                Mesh mesh = this.sectionBorder;
 //
@@ -528,9 +529,9 @@ public final class WorldRenderer implements DisposableContainer {
 
         ModelInstance modelInstance = chunk.modelInstance;
         if (modelInstance == null)
-            QuantumClient.LOGGER.warn("Model instance is null for chunk {}, not disposing it.", chunk.getPos());
+            QuantumClient.LOGGER.warn("Model instance is null for chunk %s, not disposing it.", chunk.getPos());
         else if (!Scene3D.WORLD.destroy(modelInstance))
-            QuantumClient.LOGGER.warn("Model instance didn't exist in scene! Chunk at {}", chunk.getPos());
+            QuantumClient.LOGGER.warn("Model instance didn't exist in scene! Chunk at %s", chunk.getPos());
 
         chunk.modelInstance = null;
         chunk.model = null;
@@ -539,7 +540,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         Identifier id = createId(chunk.getPos());
         if (!Models3D.INSTANCE.unloadModel(id)) {
-            QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
+            QuantumClient.LOGGER.warn("Didn't find chunk model %s to dispose, possibly it didn't exist, or got moved out.", id);
         }
 
 
@@ -618,8 +619,8 @@ public final class WorldRenderer implements DisposableContainer {
             @Nullable QVModel model = this.qvModels.get(entity.getId());
             LocalPlayer player = QuantumClient.get().player;
             if (player == null
-                    || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64
-                    || entity instanceof Player playerEntity && playerEntity.isSpectator()) {
+                || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64
+                || entity instanceof Player && ((Player) entity).isSpectator()) {
                 if (model != null)
                     scene3D.deactivate(model.getInstance());
                 return;
@@ -634,7 +635,7 @@ public final class WorldRenderer implements DisposableContainer {
                 }
                 model = renderer.createModel(entity);
                 if (model == null) {
-                    QuantumClient.LOGGER.warn("Failed to render entity {} because it's model instance is still null", entity.getId());
+                    QuantumClient.LOGGER.warn("Failed to render entity %s because it's model instance is still null", entity.getId());
                     return;
                 }
                 this.modelInstances.put(entity.getId(), model.getInstance());
@@ -649,7 +650,7 @@ public final class WorldRenderer implements DisposableContainer {
             renderer.animate(instance, context);
             renderer.render(instance, context);
         } catch (Exception e) {
-            QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);
+            QuantumClient.LOGGER.error("Failed to render entity %s", entity.getId(), e);
             CrashLog crashLog = new CrashLog("Error rendering entity " + entity.getId(), new Exception());
             CrashCategory category = new CrashCategory("Entity", e);
             category.add("Entity ID", entity.getId());
@@ -701,7 +702,7 @@ public final class WorldRenderer implements DisposableContainer {
             Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CHUNK_SIZE, o1.getOffset().y + (float) CHUNK_HEIGHT, o1.getOffset().z + (float) CHUNK_SIZE);
             Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CHUNK_SIZE, o2.getOffset().y + (float) CHUNK_HEIGHT, o2.getOffset().z + (float) CHUNK_SIZE);
             return Double.compare(mid1.dst(player.getPosition()), mid2.dst(player.getPosition()));
-        }).toList();
+        }).collect(Collectors.toList());
         return list;
     }
 
@@ -768,7 +769,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         if (this.disposables.contains(disposable)) return disposable;
         if (this.disposed) {
-            QuantumClient.LOGGER.warn("World renderer already disposed, immediately disposing {}", disposable.getClass().getName());
+            QuantumClient.LOGGER.warn("World renderer already disposed, immediately disposing %s", disposable.getClass().getName());
             disposable.dispose();
             return disposable;
         }
@@ -854,9 +855,46 @@ public final class WorldRenderer implements DisposableContainer {
         return particleSystem;
     }
 
-    private record MeshMaterial(Mesh mesh, Material material) {
+    private static final class MeshMaterial {
+        private final Mesh mesh;
+        private final Material material;
 
-    }
+        private MeshMaterial(Mesh mesh, Material material) {
+            this.mesh = mesh;
+            this.material = material;
+        }
+
+        public Mesh mesh() {
+            return mesh;
+        }
+
+        public Material material() {
+            return material;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (MeshMaterial) obj;
+            return Objects.equals(this.mesh, that.mesh) &&
+                   Objects.equals(this.material, that.material);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mesh, material);
+        }
+
+        @Override
+        public String toString() {
+            return "MeshMaterial[" +
+                   "mesh=" + mesh + ", " +
+                   "material=" + material + ']';
+        }
+
+
+        }
 
     private static class ChunkRenderRef {
         boolean chunkRendered = false;

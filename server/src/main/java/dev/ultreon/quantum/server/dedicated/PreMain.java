@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.server.dedicated;
 
-import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -19,8 +18,6 @@ public final class PreMain {
      */
     @ApiStatus.Internal
     public static void main(String[] args) {
-        System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL", "true");
-        System.setProperty("fabric.skipMcProvider", "true");
-        KnotClient.main(args);
+
     }
 }

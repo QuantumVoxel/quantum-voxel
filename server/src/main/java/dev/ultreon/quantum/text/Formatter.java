@@ -432,12 +432,12 @@ public class Formatter {
 
         switch (type) {
             case "click":
-                var actionName = arguments.removeFirst();
+                var actionName = arguments.remove(0);
                 ClickEvent event = null;
                 switch (actionName) {
                     case "@", "web", "url", "open-url" -> {
                         if (arguments.isEmpty()) return;
-                        var url = arguments.removeFirst();
+                        var url = arguments.remove(0);
                         try {
                             event = ClickEvent.openUri(new URI(url));
                         } catch (URISyntaxException ignored) {
@@ -446,17 +446,17 @@ public class Formatter {
                     }
                     case "#", "clip", "clipboard", "copy", "cp", "copy-to-clipboard" -> {
                         if (arguments.isEmpty()) return;
-                        var text = arguments.removeFirst();
+                        var text = arguments.remove(0);
                         event = ClickEvent.copyToClipboard(text);
                     }
                     case "/", "cmd", "command" -> {
                         if (arguments.isEmpty()) return;
-                        var cmd = arguments.removeFirst();
+                        var cmd = arguments.remove(0);
                         event = ClickEvent.runCommand(cmd);
                     }
                     case ">", "suggest", "suggest-msg", "put-msg", "put", "example", "example-msg" -> {
                         if (arguments.isEmpty()) return;
-                        var cmd = arguments.removeFirst();
+                        var cmd = arguments.remove(0);
                         event = ClickEvent.suggestMessage(cmd);
                     }
                     default -> {
@@ -490,7 +490,7 @@ public class Formatter {
                         new Formatter(
                                 true,
                                 false,
-                                arguments.removeFirst(),
+                                arguments.remove(0),
                                 TextObject.empty(),
                                 this.textPrefix,
                                 null,
@@ -712,11 +712,11 @@ public class Formatter {
                     """;
         }
         // Set hover text.
-        return """
+        return String.format("""
                 <blue>%s
                 <gray>Name <i>%s</i>
                 <dark-gray>%s
-                """.formatted(ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
+                """, ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
     }
 
     public Identifier getCurrentFont() {

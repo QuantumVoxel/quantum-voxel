@@ -9,6 +9,7 @@ import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.client.gui.widget.components.ScaleComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -78,7 +79,7 @@ public class Label extends Widget {
         return this;
     }
 
-    public Label textColor(RgbColor textColor) {
+    public Label textColor(Color textColor) {
         this.textColor.set(textColor);
         return this;
     }

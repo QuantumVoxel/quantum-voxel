@@ -1,17 +1,15 @@
 package dev.ultreon.quantum.resources;
 
+import com.badlogic.gdx.Gdx;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
 import dev.ultreon.libs.commons.v0.util.IOUtils;
 import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.events.ResourceEvent;
 import dev.ultreon.quantum.resources.android.DeferredResourcePackage;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Identifier;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.ModOrigin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,8 +19,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -123,7 +121,7 @@ public class ResourceManager implements Closeable {
 
                     // Walk assets package.
                     try (Stream<Path> walk = Files.walk(resPackage.toPath())) {
-                        for (Path assetPath : walk.toList()) {
+                        for (Path assetPath : walk.collect(Collectors.toList())) {
                             // Convert to a file object.
                             File asset = assetPath.toFile();
 
@@ -294,7 +292,7 @@ public class ResourceManager implements Closeable {
             }
 
             return resourcePackage.getCategory(category);
-        }).filter(Objects::nonNull).toList();
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public List<ResourcePackage> getResourcePackages() {
@@ -302,7 +300,7 @@ public class ResourceManager implements Closeable {
     }
 
     public List<ResourceCategory> getResourceCategories() {
-        return this.resourcePackages.stream().flatMap(resourcePackage -> resourcePackage.getCategories().stream()).toList();
+        return this.resourcePackages.stream().flatMap(resourcePackage -> resourcePackage.getCategories().stream()).collect(Collectors.toList());
     }
 
     public void close() {
@@ -333,7 +331,7 @@ public class ResourceManager implements Closeable {
     }
 
     private void importResourcePackages() throws IOException {
-        Path dir = Paths.get("resource-mods");
+        Path dir = Gdx.files.external("resource-packages").file().toPath();
         if (!Files.exists(dir)) {
             Files.createDirectories(dir);
             return;
@@ -344,7 +342,7 @@ public class ResourceManager implements Closeable {
     }
 
     private void importFrom(Stream<Path> list) {
-        for (Path path : list.toList()) {
+        for (Path path : list.collect(Collectors.toList())) {
             try {
                 this.importPackage(path);
             } catch (IOException e) {
@@ -354,47 +352,10 @@ public class ResourceManager implements Closeable {
     }
 
     private void importGameResources() {
-        // Locate resources by finding the ".ucraft-resources" file using Class.getResource() and using the parent file.
-        try {
-            URL resource = ResourceManager.class.getResource("/.ucraft-resources");
-            if (resource == null) throw new IOError(new FileNotFoundException("Could not locate resource directory"));
-
-            String string = resource.toString();
-
-            if (string.startsWith("jar:")) {
-                string = string.substring("jar:".length());
-            }
-
-            string = string.substring(0, string.lastIndexOf('/'));
-
-            if (string.endsWith("!")) {
-                string = string.substring(0, string.length() - 1);
-            }
-
-            this.importPackage(new File(new URI(string)).toPath());
-        } catch (Exception e) {
-            for (Path rootPath : FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getRootPaths()) {
-                try {
-                    this.importPackage(rootPath);
-                } catch (IOException ex) {
-                    QuantumServer.get().fatalCrash(ex);
-                }
-            }
-        }
+        GamePlatform.get().locateResources();
     }
 
     public void importModResources() {
-        for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-            if (mod.getOrigin().getKind() != ModOrigin.Kind.PATH) continue;
-
-            for (Path rootPath : mod.getRootPaths()) {
-                // Try to import a resource package for the given mod path.
-                try {
-                    importPackage(rootPath);
-                } catch (IOException e) {
-                    CommonConstants.LOGGER.warn("Importing resources failed for path: " + rootPath.toFile(), e);
-                }
-            }
-        }
+        GamePlatform.get().locateModResources();
     }
 }

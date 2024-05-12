@@ -66,19 +66,19 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
         }
 
         for (var e : EntityRendererRegistry.REGISTRY.entrySet()) {
-            QuantumClient.LOGGER.debug("Registering renderer for entity {}", e.getKey().getId());
+            QuantumClient.LOGGER.debug("Registering renderer for entity %s", e.getKey().getId());
             if (this.finishedRegistry.containsKey(e.getKey())) {
-                QuantumClient.LOGGER.warn("Renderer for entity {} is already registered", e.getKey().getId());
+                QuantumClient.LOGGER.warn("Renderer for entity %s is already registered", e.getKey().getId());
                 continue;
             }
 
             if (this.modelManager.get(e.getKey()) == null) {
-                QuantumClient.LOGGER.warn("Model for entity {} is null", e.getKey().getId());
+                QuantumClient.LOGGER.warn("Model for entity %s is null", e.getKey().getId());
                 continue;
             }
 
             if (this.modelManager.getFinished(e.getKey()) == null) {
-                QuantumClient.LOGGER.warn("Finished model for entity {} is null", e.getKey().getId());
+                QuantumClient.LOGGER.warn("Finished model for entity %s is null", e.getKey().getId());
                 continue;
             }
 
@@ -111,12 +111,12 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
             } else {
                 // If the model does not exist, use the entity model and renderer
                 if (entityModel == null) {
-                    QuantumClient.LOGGER.warn("Model not found for entity {}", type.getId());
+                    QuantumClient.LOGGER.warn("Model not found for entity %s", type.getId());
                     continue;
                 }
 
                 if (renderer == null) {
-                    QuantumClient.LOGGER.warn("Renderer not found for entity {}", type.getId());
+                    QuantumClient.LOGGER.warn("Renderer not found for entity %s", type.getId());
                     continue;
                 }
 

@@ -13,18 +13,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.imgui.ImGuiOverlay;
+import dev.ultreon.quantum.client.input.TouchscreenInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.Scene3D;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +55,7 @@ public class GameRenderer implements Disposable {
 
         ShaderProgram worldShaderProgram = ShaderPrograms.MODEL.get();
         if (!worldShaderProgram.isCompiled()) {
-            LOGGER.error("Failed to compile model shader:\n{}", worldShaderProgram.getLog());
+            LOGGER.error("Failed to compile model shader:\n%s", worldShaderProgram.getLog());
         }
     }
 
@@ -74,7 +76,7 @@ public class GameRenderer implements Disposable {
 
         if (player != null) {
             QuantumClient.PROFILER.section("camera", () -> {
-                if (this.client.screen == null && !ImGuiOverlay.isShown()) {
+                if (this.client.screen == null && !GamePlatform.get().isShowingImGui()) {
                     player.rotateHead(-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity, -Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
                 }
 
@@ -181,6 +183,20 @@ public class GameRenderer implements Disposable {
             QuantumClient.PROFILER.section("screen", () -> {
                 float x = (Gdx.input.getX() - this.client.getDrawOffset().x) / this.client.getGuiScale();
                 float y = (Gdx.input.getY() + this.client.getDrawOffset().y) / this.client.getGuiScale();
+
+                if (GamePlatform.get().isMobile()) {
+                    MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();
+                    if (mouseDevice != null) {
+                        x = mouseDevice.getX() / this.client.getGuiScale();
+                        y = mouseDevice.getY() / this.client.getGuiScale();
+                    } else if (TouchscreenInput.isPressingAnyButton()) {
+                        x = Gdx.input.getX() / this.client.getGuiScale();
+                        y = Gdx.input.getY() / this.client.getGuiScale();
+                    } else {
+                        x = Integer.MIN_VALUE;
+                        y = Integer.MIN_VALUE;
+                    }
+                }
                 RenderEvents.PRE_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
                 screen.render(renderer, (int) x, (int) y, deltaTime);
 

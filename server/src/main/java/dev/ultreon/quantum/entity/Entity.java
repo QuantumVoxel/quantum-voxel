@@ -688,7 +688,7 @@ public class Entity implements CommandSender {
         if (typeId == null) return "NULL";
 
         // Generate a display name based on the entity's type ID
-        return LanguageBootstrap.translate("%s.entity.%s.name".formatted(
+        return LanguageBootstrap.translate(String.format("%s.entity.%s.name", 
                 typeId.namespace(),
                 typeId.path().replace('/', '.')
         ));
@@ -724,7 +724,7 @@ public class Entity implements CommandSender {
         if (typeId == null) return Translations.NULL_OBJECT;
 
         // Generate a display name based on the entity's type ID
-        return TextObject.translation("%s.entity.%s.name".formatted(
+        return TextObject.translation(String.format("%s.entity.%s.name", 
                 typeId.namespace(),
                 typeId.path().replace('/', '.')
         ));
@@ -783,7 +783,8 @@ public class Entity implements CommandSender {
      * Sends the pipeline data for this entity to the client.
      */
     public void sendPipeline() {
-        if (this.world instanceof ServerWorld serverWorld) {
+        if (this.world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) this.world;
             // Send the entity to all tracking players
             MapType pipeline1 = this.getPipeline();
             if (pipeline1.entries().isEmpty()) return;

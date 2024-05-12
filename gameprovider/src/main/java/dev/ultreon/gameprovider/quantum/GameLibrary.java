@@ -20,7 +20,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.impl.game.LibClassifier.LibraryType;
 
 enum GameLibrary implements LibraryType {
-    QUANTUM_VXL_CLIENT("dev/ultreon/quantum/client/QuantumClient.class"),
+    QUANTUM_VXL_CLIENT("dev/ultreon/quantum/desktop/DesktopLauncher.class"),
     QUANTUM_VXL_SERVER("dev/ultreon/quantum/server/dedicated/Main.class"),
 	LIBGDX("com/badlogic/gdx/Gdx.class"),
 	LOG4J_API("org/apache/logging/log4j/LogManager.class"),

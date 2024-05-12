@@ -125,7 +125,8 @@ public interface CommandSender {
 
         CommandResult commandResult = baseCommand.onCommand(this, new CommandContext(command), command, argv);
         if (sendToChat) {
-            if (commandResult instanceof CommandError error) {
+            if (commandResult instanceof CommandError) {
+                CommandError error = (CommandError) commandResult;
                 // Command has an error
                 error.send(this, baseCommand.data());
             } else {

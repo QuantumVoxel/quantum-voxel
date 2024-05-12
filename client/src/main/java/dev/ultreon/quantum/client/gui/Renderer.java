@@ -1887,7 +1887,7 @@ public class Renderer implements Disposable {
 
     @Override
     public String toString() {
-        return "Renderer{}";
+        return "Renderer%s";
     }
 
     @CanIgnoreReturnValue
@@ -2239,6 +2239,10 @@ public class Renderer implements Disposable {
 //    @Language("GLSL")
     final String GRID_FRAG =
                     """
+                    #ifdef GL_ES
+                    precision mediump float;
+                    #endif
+                    
                     varying vec2 vTexCoord;
                     varying vec4 vColor;
                     uniform sampler2D u_texture;

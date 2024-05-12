@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.item;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Suppliers;
+import dev.ultreon.quantum.util.Suppliers;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
@@ -9,6 +9,8 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.BlockEvents;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.BlockHitResult;
+import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
@@ -35,9 +37,10 @@ public class BlockItem extends Item {
 
         var world = useItemContext.world();
         var stack = useItemContext.stack();
-        var pos = useItemContext.result().getPos();
-        var next = useItemContext.result().getNext();
-        var direction = useItemContext.result().getDirection();
+        BlockHitResult result = (BlockHitResult) useItemContext.result();
+        var pos = result.getPos();
+        var next = result.getNext();
+        var direction = result.getDirection();
         var player = useItemContext.player();
 
         BlockPos blockPos = new BlockPos(next);

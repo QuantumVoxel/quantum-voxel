@@ -37,7 +37,7 @@ public class MultiplayerData {
 
     @CanIgnoreReturnValue
     public RemotePlayer addPlayer(UUID uuid, String name, Vec3d position) {
-        QuantumClient.LOGGER.info("{} joined the server.", name);
+        QuantumClient.LOGGER.info("%s joined the server.", name);
         RemotePlayer player = new RemotePlayer(this.client.world);
         player.setUuid(uuid);
         player.setName(name);
@@ -50,7 +50,7 @@ public class MultiplayerData {
         RemotePlayer remotePlayer = this.remotePlayers.get(uuid);
         if (remotePlayer == null) return;
 
-        QuantumClient.LOGGER.info("{} left the server.", remotePlayer.getName());
+        QuantumClient.LOGGER.info("%s left the server.", remotePlayer.getName());
         this.remotePlayers.remove(uuid);
     }
 

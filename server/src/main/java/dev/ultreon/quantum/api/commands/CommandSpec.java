@@ -3,8 +3,17 @@ package dev.ultreon.quantum.api.commands;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 
-public record CommandSpec(String commandName, List<CommandParameter> arguments) {
+public final class CommandSpec {
+    private final String commandName;
+    private final List<CommandParameter> arguments;
+
+    public CommandSpec(String commandName, List<CommandParameter> arguments) {
+        this.commandName = commandName;
+        this.arguments = arguments;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -48,5 +57,19 @@ public record CommandSpec(String commandName, List<CommandParameter> arguments) 
         CommandSpec that = (CommandSpec) other;
         return this.commandName.equals(that.commandName) && this.arguments.equals(that.arguments);
     }
+
+    public String commandName() {
+        return commandName;
+    }
+
+    public List<CommandParameter> arguments() {
+        return arguments;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commandName, arguments);
+    }
+
 
 }
