@@ -22,7 +22,7 @@ public class ChatTextEntry extends TextEntry {
     @Override
     public boolean keyPress(int keyCode) {
         switch (keyCode) {
-            case ENTER -> {
+            case ENTER:
                 if (Gdx.input.isKeyPressed(CONTROL_LEFT) && this.popup.visible && this.popup.values.length > 0) {
                     this.complete("");
                     this.popup.visible = false;
@@ -30,31 +30,29 @@ public class ChatTextEntry extends TextEntry {
                     this.screen.send();
                 }
                 return true;
-            }
-            case TAB -> {
+            case TAB:
                 if (this.popup.visible && this.popup.values.length > 0) {
                     this.complete("");
                 } else {
                     this.client.connection.send(new C2SRequestTabComplete(this.getValue()));
                 }
                 return true;
-            }
-            case UP -> {
+            case UP:
                 if (this.popup.visible && this.popup.values.length > 0) {
                     this.popup.up();
                 }
-            }
-            case DOWN -> {
+                break;
+            case DOWN:
                 if (this.popup.visible && this.popup.values.length > 0) {
                     this.popup.down();
                 }
-            }
-            case ESCAPE -> {
+                break;
+            case ESCAPE:
                 if (this.popup.visible) {
                     this.popup.visible = false;
                     return true;
                 }
-            }
+                break;
         }
 
         boolean b = super.keyPress(keyCode);

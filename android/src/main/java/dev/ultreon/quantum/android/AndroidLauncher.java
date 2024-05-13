@@ -18,7 +18,6 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
-import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -69,7 +68,7 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
         inputManager = (InputManager) getSystemService(INPUT_SERVICE);
         inputManager.registerInputDeviceListener(this, Handler.createAsync(Looper.getMainLooper()));
 
-        initialize(new GameLibGDXWrapper(new String[]{"--android"}), config);
+        initialize(GameLibGDXWrapper.createInstance(new String[]{"--android"}), config);
     }
 
     @Override

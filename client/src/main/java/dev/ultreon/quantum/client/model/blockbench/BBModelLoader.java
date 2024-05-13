@@ -257,8 +257,12 @@ public class BBModelLoader implements ModelImporter {
             JsonObject elemObj = elem.getAsJsonObject();
             String type = elemObj.getAsJsonPrimitive("type").getAsString();
             switch (type) {
-                case "cube" -> processed.add(loadCubeElement(elemObj.getAsJsonObject()));
-                case "mesh" -> processed.add(loadMeshElement(elemObj.getAsJsonObject()));
+                case "cube":
+                    processed.add(loadCubeElement(elemObj.getAsJsonObject()));
+                    break;
+                case "mesh":
+                    processed.add(loadMeshElement(elemObj.getAsJsonObject()));
+                    break;
             }
         }
 

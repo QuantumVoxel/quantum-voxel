@@ -506,42 +506,36 @@ public class GreedyMesher implements Mesher {
         // coordinate offsets for getting the blocks to average
         int posX = 0, negX = 0, posY = 0, negY = 0, posZ = 0, negZ = 0;
         switch (side) {
-            case UP -> {
-                // Use the light values from the blocks above the face
+            case UP:// Use the light values from the blocks above the face
                 negY = posY = 1;
                 // Get blocks around the point
                 negZ = negX = -1;
-            }
-            case DOWN -> {
-                // Use the light values from the blocks below the face
+                break;
+            case DOWN:// Use the light values from the blocks below the face
                 negY = posY = -1;
                 // Get blocks around the point
                 negZ = negX = -1;
-            }
-            case WEST -> {
-                // Use the light values from the blocks to the west of the face
+                break;
+            case WEST:// Use the light values from the blocks to the west of the face
                 negX = posX = -1;
                 // Get blocks around the point
                 negY = negZ = -1;
-            }
-            case EAST -> {
-                // Use the light values from the blocks to the east of the face
+                break;
+            case EAST:// Use the light values from the blocks to the east of the face
                 negX = posX = 1;
                 // Get blocks around the point
                 negY = negZ = -1;
-            }
-            case NORTH -> {
-                // Use the light values from the blocks to the north of the face
+                break;
+            case NORTH:// Use the light values from the blocks to the north of the face
                 negZ = posZ = 1;
                 // Get blocks around the point
                 negY = negX = -1;
-            }
-            case SOUTH -> {
-                // Use the light values from the blocks to the south of the face
+                break;
+            case SOUTH:// Use the light values from the blocks to the south of the face
                 negZ = posZ = -1;
                 // Get blocks around the point
                 negY = negX = -1;
-            }
+                break;
         }
         // sx,sy,sz are the x, y, and z positions of the side block
         int count = 0;
@@ -694,18 +688,24 @@ public class GreedyMesher implements Mesher {
             LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);
             if (this.bakedBlockModel == null) return;
             switch (this.side) {
-                case UP ->
-                        this.renderer.renderTop(this.bakedBlockModel.top(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
-                case DOWN ->
-                        this.renderer.renderBottom(this.bakedBlockModel.bottom(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
-                case NORTH ->
-                        this.renderer.renderNorth(this.bakedBlockModel.north(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
-                case SOUTH ->
-                        this.renderer.renderSouth(this.bakedBlockModel.south(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
-                case EAST ->
-                        this.renderer.renderEast(this.bakedBlockModel.east(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
-                case WEST ->
-                        this.renderer.renderWest(this.bakedBlockModel.west(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                case UP:
+                    this.renderer.renderTop(this.bakedBlockModel.top(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
+                    break;
+                case DOWN:
+                    this.renderer.renderBottom(this.bakedBlockModel.bottom(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                    break;
+                case NORTH:
+                    this.renderer.renderNorth(this.bakedBlockModel.north(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
+                    break;
+                case SOUTH:
+                    this.renderer.renderSouth(this.bakedBlockModel.south(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                    break;
+                case EAST:
+                    this.renderer.renderEast(this.bakedBlockModel.east(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
+                    break;
+                case WEST:
+                    this.renderer.renderWest(this.bakedBlockModel.west(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                    break;
             }
         }
 
@@ -713,27 +713,51 @@ public class GreedyMesher implements Mesher {
 
     // Find "real" x based on relative position in the greedy method
     private int realX(CubicDirection side, int x, int y, int z) {
-        return switch (side) {
-            case UP, DOWN, NORTH, SOUTH -> x;
-            case EAST, WEST -> z;
-        };
+        switch (side) {
+            case UP:
+            case DOWN:
+            case NORTH:
+            case SOUTH:
+                return x;
+            case EAST:
+            case WEST:
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     // Find "real" y based on relative position in the greedy method
     private int realY(CubicDirection side, int x, int y, int z) {
-        return switch (side) {
-            case EAST, WEST, NORTH, SOUTH -> y;
-            case UP, DOWN -> z;
-        };
+        switch (side) {
+            case EAST:
+            case WEST:
+            case NORTH:
+            case SOUTH:
+                return y;
+            case UP:
+            case DOWN:
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     // Find "real" z based on relative position in the greedy method
     private int realZ(CubicDirection side, int x, int y, int z) {
-        return switch (side) {
-            case UP, DOWN -> y;
-            case WEST, EAST -> x;
-            case NORTH, SOUTH -> z;
-        };
+        switch (side) {
+            case UP:
+            case DOWN:
+                return y;
+            case WEST:
+            case EAST:
+                return x;
+            case NORTH:
+            case SOUTH:
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public interface OccludeCondition {

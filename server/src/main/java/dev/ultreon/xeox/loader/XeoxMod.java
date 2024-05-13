@@ -208,17 +208,17 @@ public class XeoxMod implements Mod {
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return metadata.id();
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return metadata.name();
     }
 
     @Override
-    public String getVersion() {
+    public @NotNull String getVersion() {
         return metadata.version();
     }
 
@@ -233,7 +233,7 @@ public class XeoxMod implements Mod {
     }
 
     @Override
-    public ModOrigin getOrigin() {
+    public @NotNull ModOrigin getOrigin() {
         return ModOrigin.ACTUAL_PATH;
     }
 
@@ -243,7 +243,7 @@ public class XeoxMod implements Mod {
     }
 
     @Override
-    public Optional<String> getIconPath(int size) {
+    public @NotNull Optional<String> getIconPath(int size) {
         FileHandle child = modPath.child("icon.png");
         if (child.exists()) {
             return Optional.of(child.path());

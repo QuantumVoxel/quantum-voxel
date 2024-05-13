@@ -2168,154 +2168,148 @@ public class Renderer implements Disposable {
 
     @Language("GLSL")
     final String VERT =
-            """
-                    attribute vec4 a_position;
-                    attribute vec4 a_color;
-                    attribute vec2 a_texCoord0;
-                    uniform mat4 u_projTrans;
-                    
-                    varying vec4 vColor;
-                    varying vec2 vTexCoord;
-                    
-                    void main() {
-                    	vColor = a_color;
-                    	vTexCoord = a_texCoord0;
-                    	gl_Position =  u_projTrans * a_position;
-                    }
-                    """;
+            "attribute vec4 a_position;\n" +
+            "attribute vec4 a_color;\n" +
+            "attribute vec2 a_texCoord0;\n" +
+            "uniform mat4 u_projTrans;\n" +
+            "\n" +
+            "varying vec4 vColor;\n" +
+            "varying vec2 vTexCoord;\n" +
+            "\n" +
+            "void main() {\n" +
+            "\tvColor = a_color;\n" +
+            "\tvTexCoord = a_texCoord0;\n" +
+            "\tgl_Position =  u_projTrans * a_position;\n" +
+            "}\n";
 
     @Language("GLSL")
     final String FRAG =
-            """
-                    // Fragment shader
-                    #ifdef GL_ES
-                    precision mediump float;
-                    #endif
-                               \s
-                    varying vec4 vColor;
-                    varying vec2 vTexCoord;
-                               \s
-                    uniform sampler2D u_texture;
-                    uniform vec2 iResolution;
-                    uniform float iBlurRadius; // Radius of the blur
-                    uniform vec2 iBlurDirection; // Direction of the blur
-                               \s
-                    void main() {
-                      float Pi = 6.28318530718; // Pi*2
-                               \s
-                      // GAUSSIAN BLUR SETTINGS {{{
-                      float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
-                      float Quality = 4.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
-                      float Size = iBlurRadius; // BLUR SIZE (Radius)
-                      // GAUSSIAN BLUR SETTINGS }}}
-                               \s
-                      vec2 Radius = Size/iResolution.xy;
-                               \s
-                      // Normalized pixel coordinates (from 0 to 1)
-                      vec2 uv = gl_FragCoord.xy/iResolution.xy;
-                      // Pixel colour
-                      vec4 color = texture2D(u_texture, uv);
-                               \s
-                      // Blur calculations
-                      for( float d=0.0; d<Pi; d+=Pi/Directions)
-                      {
-                        for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)
-                        {
-                          color += texture2D(u_texture, uv+vec2(cos(d),sin(d))*Radius*i);
-                        }
-                      }
-                     \s
-                      // Gamma correction
-                      float Gamma = 1.05;
-                      color.rgba = pow(color.rgba, vec4(1.0/Gamma));
-                               \s
-                      // Output to screen
-                      color /= Quality * Directions;
-                      gl_FragColor = color;
-                    }
-                    """;
+            "// Fragment shader\n" +
+            "#ifdef GL_ES\n" +
+            "precision mediump float;\n" +
+            "#endif\n" +
+            "            \n" +
+            "varying vec4 vColor;\n" +
+            "varying vec2 vTexCoord;\n" +
+            "            \n" +
+            "uniform sampler2D u_texture;\n" +
+            "uniform vec2 iResolution;\n" +
+            "uniform float iBlurRadius; // Radius of the blur\n" +
+            "uniform vec2 iBlurDirection; // Direction of the blur\n" +
+            "            \n" +
+            "void main() {\n" +
+            "  float Pi = 6.28318530718; // Pi*2\n" +
+            "            \n" +
+            "  // GAUSSIAN BLUR SETTINGS {{{\n" +
+            "  float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)\n" +
+            "  float Quality = 4.0; // BLUR QUALITY (Default 4.0 - More is better but slower)\n" +
+            "  float Size = iBlurRadius; // BLUR SIZE (Radius)\n" +
+            "  // GAUSSIAN BLUR SETTINGS }}}\n" +
+            "            \n" +
+            "  vec2 Radius = Size/iResolution.xy;\n" +
+            "            \n" +
+            "  // Normalized pixel coordinates (from 0 to 1)\n" +
+            "  vec2 uv = gl_FragCoord.xy/iResolution.xy;\n" +
+            "  // Pixel colour\n" +
+            "  vec4 color = texture2D(u_texture, uv);\n" +
+            "            \n" +
+            "  // Blur calculations\n" +
+            "  for( float d=0.0; d<Pi; d+=Pi/Directions)\n" +
+            "  {\n" +
+            "    for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)\n" +
+            "    {\n" +
+            "      color += texture2D(u_texture, uv+vec2(cos(d),sin(d))*Radius*i);\n" +
+            "    }\n" +
+            "  }\n" +
+            "  \n" +
+            "  // Gamma correction\n" +
+            "  float Gamma = 1.05;\n" +
+            "  color.rgba = pow(color.rgba, vec4(1.0/Gamma));\n" +
+            "            \n" +
+            "  // Output to screen\n" +
+            "  color /= Quality * Directions;\n" +
+            "  gl_FragColor = color;\n" +
+            "}\n";
 
 
 //    @Language("GLSL")
     final String GRID_FRAG =
-                    """
-                    #ifdef GL_ES
-                    precision mediump float;
-                    #endif
-                    
-                    varying vec2 vTexCoord;
-                    varying vec4 vColor;
-                    uniform sampler2D u_texture;
-                    uniform vec2 iResolution;
-                    uniform vec3 hexagonColor;
-                    uniform float hexagonTransparency;
-                    
-                    float rng( in vec2 pos )
-                    {
-                        return fract(sin( pos.y + pos.x*78.233 )*43758.5453)*2.0 - 1.0;
-                    }
-                    
-                    float simplexValue1DPart(vec2 uv, float ix) {
-                        float x = uv.x - ix;
-                        float f = 1.0 - x * x;
-                        float f2 = f * f;
-                        float f3 = f * f2;
-                        return f3;
-                    }
-                    
-                    float simplexValue1D(vec2 uv) {
-                        vec2 iuv = floor(uv);   \s
-                        float n = simplexValue1DPart(uv, iuv.x);
-                        n += simplexValue1DPart(uv, iuv.x + 1.0);
-                        return rng(vec2(n * 2.0 - 1.0, 0.0));
-                    }
-                    
-                    float perlin( in float pos )
-                    {
-                        // Get node values
-                       \s
-                        float a = rng( vec2(floor(pos), 1.0) );
-                        float b = rng( vec2(ceil( pos), 1.0) );
-                       \s
-                        float a_x = rng( vec2(floor(pos), 2.0) );
-                        float b_x = rng( vec2(ceil( pos), 2.0) );
-                       \s
-                        a += a_x*fract(pos);
-                        b += b_x*(fract(pos)-1.0);
-                       \s
-                       \s
-                       \s
-                        // Interpolate values
-                       \s
-                        return a + (b-a)*smoothstep(0.0,1.0,fract(pos));
-                    }
-                    
-                    void main() {\s
-                      vec2 uv = gl_FragCoord.xy;
-                      uv /= 24.0;
-                    
-                      vec4 color = texture2D(u_texture, vTexCoord);
-                      const float A = 0.0;
-                      const float B = 0.15;
-                    
-                      float x = uv.x;
-                      float y = (uv.y) * (1.5 / 3.0);
-                    
-                      float val = (0.5 + 0.5 * x + 0.5 * y);
-                    
-                      float noise = perlin(val);
-                      if (noise > 0.1) {
-                          noise = -1.0;
-                      }
-                    
-                      noise = 1.0 - (noise + 1.0) / 2.0;
-                    
-                      color.rgb = vec3(1.0);
-                      color.a = color.a * (noise * (B - A)) + A;
-                    
-                      gl_FragColor = color;
-                    }
-                    """;
+                    "#ifdef GL_ES\n" +
+                    "precision mediump float;\n" +
+                    "#endif\n" +
+                    "\n" +
+                    "varying vec2 vTexCoord;\n" +
+                    "varying vec4 vColor;\n" +
+                    "uniform sampler2D u_texture;\n" +
+                    "uniform vec2 iResolution;\n" +
+                    "uniform vec3 hexagonColor;\n" +
+                    "uniform float hexagonTransparency;\n" +
+                    "\n" +
+                    "float rng( in vec2 pos )\n" +
+                    "{\n" +
+                    "    return fract(sin( pos.y + pos.x*78.233 )*43758.5453)*2.0 - 1.0;\n" +
+                    "}\n" +
+                    "\n" +
+                    "float simplexValue1DPart(vec2 uv, float ix) {\n" +
+                    "    float x = uv.x - ix;\n" +
+                    "    float f = 1.0 - x * x;\n" +
+                    "    float f2 = f * f;\n" +
+                    "    float f3 = f * f2;\n" +
+                    "    return f3;\n" +
+                    "}\n" +
+                    "\n" +
+                    "float simplexValue1D(vec2 uv) {\n" +
+                    "    vec2 iuv = floor(uv);    \n" +
+                    "    float n = simplexValue1DPart(uv, iuv.x);\n" +
+                    "    n += simplexValue1DPart(uv, iuv.x + 1.0);\n" +
+                    "    return rng(vec2(n * 2.0 - 1.0, 0.0));\n" +
+                    "}\n" +
+                    "\n" +
+                    "float perlin( in float pos )\n" +
+                    "{\n" +
+                    "    // Get node values\n" +
+                    "    \n" +
+                    "    float a = rng( vec2(floor(pos), 1.0) );\n" +
+                    "    float b = rng( vec2(ceil( pos), 1.0) );\n" +
+                    "    \n" +
+                    "    float a_x = rng( vec2(floor(pos), 2.0) );\n" +
+                    "    float b_x = rng( vec2(ceil( pos), 2.0) );\n" +
+                    "    \n" +
+                    "    a += a_x*fract(pos);\n" +
+                    "    b += b_x*(fract(pos)-1.0);\n" +
+                    "    \n" +
+                    "    \n" +
+                    "    \n" +
+                    "    // Interpolate values\n" +
+                    "    \n" +
+                    "    return a + (b-a)*smoothstep(0.0,1.0,fract(pos));\n" +
+                    "}\n" +
+                    "\n" +
+                    "void main() { \n" +
+                    "  vec2 uv = gl_FragCoord.xy;\n" +
+                    "  uv /= 24.0;\n" +
+                    "\n" +
+                    "  vec4 color = texture2D(u_texture, vTexCoord);\n" +
+                    "  const float A = 0.0;\n" +
+                    "  const float B = 0.15;\n" +
+                    "\n" +
+                    "  float x = uv.x;\n" +
+                    "  float y = (uv.y) * (1.5 / 3.0);\n" +
+                    "\n" +
+                    "  float val = (0.5 + 0.5 * x + 0.5 * y);\n" +
+                    "\n" +
+                    "  float noise = perlin(val);\n" +
+                    "  if (noise > 0.1) {\n" +
+                    "      noise = -1.0;\n" +
+                    "  }\n" +
+                    "\n" +
+                    "  noise = 1.0 - (noise + 1.0) / 2.0;\n" +
+                    "\n" +
+                    "  color.rgb = vec3(1.0);\n" +
+                    "  color.a = color.a * (noise * (B - A)) + A;\n" +
+                    "\n" +
+                    "  gl_FragColor = color;\n" +
+                    "}\n";
 
     @ApiStatus.Experimental
     public void blurred(Runnable block) {

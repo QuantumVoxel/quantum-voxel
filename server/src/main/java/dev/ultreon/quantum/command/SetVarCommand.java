@@ -28,8 +28,12 @@ public class SetVarCommand extends Command {
         if (result instanceof ObjectCommandResult) {
             ObjectCommandResult commandResult = (ObjectCommandResult) result;
             switch (commandResult.getType()) {
-                case Object -> variable.setValue(commandResult.getObject());
-                case Void -> variable.setValue(null);
+                case Object:
+                    variable.setValue(commandResult.getObject());
+                    break;
+                case Void:
+                    variable.setValue(null);
+                    break;
             }
             return new ObjectCommandResult(variable.getValue(), variable.getValue() == null ? ObjectCommandResult.Type.Void : ObjectCommandResult.Type.Object);
         }

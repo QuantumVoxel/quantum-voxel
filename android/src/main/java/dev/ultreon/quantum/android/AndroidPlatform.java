@@ -15,6 +15,7 @@ import dev.ultreon.quantum.client.gui.screens.RestartConfirmScreen;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.loader.XeoxModFile;
 import de.mxapplications.openfiledialog.OpenFileDialog;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -94,7 +95,7 @@ public class AndroidPlatform extends GamePlatform {
     }
 
     @Override
-    public boolean openImportDialog() {
+    public Result<Boolean> openImportDialog() {
         launcher.runOnUiThread(() -> {
             Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
             chooseFile.addCategory(Intent.CATEGORY_OPENABLE);

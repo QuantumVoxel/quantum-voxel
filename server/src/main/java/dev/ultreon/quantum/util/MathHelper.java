@@ -52,19 +52,31 @@ public final class MathHelper {
     public static float[] rotate(float[] vertices, Vector3 origin, Axis axis) {
         // Rotate the vertices.
         FaceRotation rotation = FaceRotation.values()[MathUtils.random(0, FaceRotation.values().length - 1)];
-        return switch (rotation) {
-            case UNCHANGED -> vertices;
-            case DEGREES_90 -> MathHelper.rotate(vertices, 90 * MathUtils.degRad, origin, axis);
-            case DEGREES_180 -> MathHelper.rotate(vertices, 180 * MathUtils.degRad, origin, axis);
-            case DEGREES_270 -> MathHelper.rotate(vertices, 270 * MathUtils.degRad, origin, axis);
-        };
+        switch (rotation) {
+            case UNCHANGED:
+                return vertices;
+            case DEGREES_90:
+                return MathHelper.rotate(vertices, 90 * MathUtils.degRad, origin, axis);
+            case DEGREES_180:
+                return MathHelper.rotate(vertices, 180 * MathUtils.degRad, origin, axis);
+            case DEGREES_270:
+                return MathHelper.rotate(vertices, 270 * MathUtils.degRad, origin, axis);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     private static float[] rotate(float[] vertices, float angle, Vector3 origin, Axis axis) {
         switch (axis) {
-            case X -> MathHelper.rotateX(vertices, angle, origin);
-            case Y -> MathHelper.rotateY(vertices, angle, origin);
-            case Z -> MathHelper.rotateZ(vertices, angle, origin);
+            case X:
+                MathHelper.rotateX(vertices, angle, origin);
+                break;
+            case Y:
+                MathHelper.rotateY(vertices, angle, origin);
+                break;
+            case Z:
+                MathHelper.rotateZ(vertices, angle, origin);
+                break;
         }
         return vertices;
     }

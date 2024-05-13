@@ -123,9 +123,14 @@ public class GameRules {
         @Override
         public void setStringValue(String value) throws CommandExecuteException {
             switch (value) {
-                case "true" -> this.value = true;
-                case "false" -> this.value = false;
-                default -> throw new CommandExecuteException("Invalid boolean value: " + value);
+                case "true":
+                    this.value = true;
+                    break;
+                case "false":
+                    this.value = false;
+                    break;
+                default:
+                    throw new CommandExecuteException("Invalid boolean value: " + value);
             }
         }
     }

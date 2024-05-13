@@ -10,7 +10,7 @@ import java.util.UUID;
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  * @since 0.1.0
  */
-public sealed interface CacheablePlayer permits CachedPlayer, ServerPlayer {
+public interface CacheablePlayer {
     String getName();
 
     @Nullable UUID getUuid();

@@ -154,7 +154,7 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
-    public void setPosition(Vec3d position) {
+    public void setPosition(@NotNull Vec3d position) {
         position.x = Mth.clamp(position.x, -30000000, 30000000);
         position.z = Mth.clamp(position.z, -30000000, 30000000);
         super.setPosition(position);
@@ -397,37 +397,38 @@ public abstract class Player extends LivingEntity {
     public void setGameMode(GameMode gamemode) {
         this.gamemode = gamemode;
         switch (gamemode) {
-            case SURVIVAL -> {
+            case SURVIVAL:
                 this.abilities.allowFlight = false;
                 this.abilities.instaMine = false;
                 this.abilities.invincible = false;
                 this.abilities.blockBreak = true;
                 this.abilities.flying = false;
                 this.noClip = false;
-            }
-            case BUILDER, BUILDER_PLUS -> {
+                break;
+            case BUILDER:
+            case BUILDER_PLUS:
                 this.abilities.allowFlight = true;
                 this.abilities.instaMine = true;
                 this.abilities.invincible = true;
                 this.abilities.blockBreak = true;
                 this.noClip = false;
-            }
-            case ADVENTUROUS -> {
+                break;
+            case ADVENTUROUS:
                 this.abilities.allowFlight = false;
                 this.abilities.instaMine = false;
                 this.abilities.invincible = false;
                 this.abilities.blockBreak = false;
                 this.abilities.flying = false;
                 this.noClip = false;
-            }
-            case SPECTATOR -> {
+                break;
+            case SPECTATOR:
                 this.abilities.allowFlight = true;
                 this.abilities.instaMine = false;
                 this.abilities.invincible = true;
                 this.abilities.blockBreak = false;
                 this.abilities.flying = true;
                 this.noClip = true;
-            }
+                break;
         }
 
         this.sendAbilities();

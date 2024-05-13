@@ -94,10 +94,17 @@ public class CommandData {
         this.sendUsage0(name, sender, usage);
         if (this.getStatus() != null) {
             switch (this.getStatus()) {
-                case WIP -> this.executor.wip().send(sender);
-                case OUTDATED -> this.executor.outdated().send(sender);
-                case DEPRECATED -> this.executor.deprecated().send(sender);
-                default -> {}
+                case WIP:
+                    this.executor.wip().send(sender);
+                    break;
+                case OUTDATED:
+                    this.executor.outdated().send(sender);
+                    break;
+                case DEPRECATED:
+                    this.executor.deprecated().send(sender);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -264,20 +271,26 @@ public class CommandData {
         Object object;
         if (first.startsWith(":")) {
             var code = first.substring(1);
-            object = switch (code) {
-                case "true" -> true;
-                case "false" -> false;
-                case "null" -> null;
-                case "root" -> {
+            switch (code) {
+                case "true":
+                    object = true;
+                    break;
+                case "false":
+                    object = false;
+                    break;
+                case "null":
+                    object = null;
+                    break;
+                case "root":
                     RootVariableSource<?> source = RootVariables.get(ctx.readUntil('.'));
                     if (source == null) {
                         throw new CommandParseException("Unknown root variable: " + code, ctx.getOffset());
                     }
 
-                    yield source.get(sender, ctx);
-                }
-                default -> throw new CommandParseException("Unknown value: " + code, ctx.getOffset());
-            };
+                    return source.get(sender, ctx);
+                default:
+                    throw new CommandParseException("Unknown value: " + code, ctx.getOffset());
+            }
         } else if (first.startsWith("$")) {
             String name = first.substring(1);
             object = PlayerVariables.get(serverPlayer).getVariable(name);
@@ -322,7 +335,7 @@ public class CommandData {
         Object object;
         StringBuilder code;
         switch (c) {
-            case '$' -> {
+            case '$':
                 String name = ctx.readUntil('.');
                 if (ctx.getLastChar() != '.') {
                     return TabCompleting.prefixed("$", ctx.getArgument(), TabCompleting.variables(new ArrayList<>(), name, serverPlayer, Object.class));
@@ -334,16 +347,20 @@ public class CommandData {
                 if (object == null) {
                     return List.of();
                 }
-            }
-            case ':' -> {
-                String name = ctx.readUntil('.');
+                break;
+            case ':':
+                name = ctx.readUntil('.');
 
                 if (ctx.getLastChar() != '.') {
-                    return switch (name) {
-                        case "true", "false", "null", "root" -> List.of(":" + name + ".");
-                        default ->
-                                TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
-                    };
+                    switch (name) {
+                        case "true":
+                        case "false":
+                        case "null":
+                        case "root":
+                            return List.of(":" + name + ".");
+                        default:
+                            return TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
+                    }
                 }
 
                 if (!Objects.equals(name, "root")) {
@@ -358,10 +375,9 @@ public class CommandData {
 
                 object = rootVariableSource.get(serverPlayer, ctx);
                 code = new StringBuilder(":root." + name);
-            }
-            default -> {
+                break;
+            default:
                 return List.of(":", "$");
-            }
         }
 
         String name;
@@ -444,12 +460,19 @@ public class CommandData {
     }
 
     private static Weather readWeather(CommandReader ctx) throws CommandParseException {
-        return switch (ctx.readString()) {
-            case "clear", "sunny" -> Weather.SUNNY;
-            case "rain", "downfall" -> Weather.RAIN;
-            case "storm", "thunder" -> Weather.THUNDER;
-            default -> throw new CommandParseException.NotFound("weather", ctx.getOffset());
-        };
+        switch (ctx.readString()) {
+            case "clear":
+            case "sunny":
+                return Weather.SUNNY;
+            case "rain":
+            case "downfall":
+                return Weather.RAIN;
+            case "storm":
+            case "thunder":
+                return Weather.THUNDER;
+            default:
+                throw new CommandParseException.NotFound("weather", ctx.getOffset());
+        }
     }
 
     private static World readDimension(CommandReader ctx) throws CommandParseException {
@@ -602,14 +625,20 @@ public class CommandData {
     }
 
     private static GameMode readGamemode(CommandReader ctx) throws CommandParseException {
-        return switch (ctx.readString()) {
-            case "survival" -> GameMode.SURVIVAL;
-            case "adventurous" -> GameMode.ADVENTUROUS;
-            case "builder" -> GameMode.BUILDER;
-            case "builder_plus" -> GameMode.BUILDER_PLUS;
-            case "spectator" -> GameMode.SPECTATOR;
-            default -> throw new CommandParseException.NotFound("game mode", ctx.getOffset());
-        };
+        switch (ctx.readString()) {
+            case "survival":
+                return GameMode.SURVIVAL;
+            case "adventurous":
+                return GameMode.ADVENTUROUS;
+            case "builder":
+                return GameMode.BUILDER;
+            case "builder_plus":
+                return GameMode.BUILDER_PLUS;
+            case "spectator":
+                return GameMode.SPECTATOR;
+            default:
+                throw new CommandParseException.NotFound("game mode", ctx.getOffset());
+        }
     }
 
     private static Block readBlock(CommandReader ctx) throws CommandParseException {

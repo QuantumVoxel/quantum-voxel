@@ -40,24 +40,18 @@ public class PlayerBaseSelector extends BaseSelector<Player> {
             return new Result<>(null, this.error);
         }
         switch (this.key) {
-            case TAG -> {
+            case TAG:
                 return switchTag(player);
-            }
-            case NAME -> {
+            case NAME:
                 return name();
-            }
-            case UUID -> {
+            case UUID:
                 return uuid();
-            }
-            case ID -> {
+            case ID:
                 return id();
-            }
-            case VARIABLE -> {
+            case VARIABLE:
                 return variable(player);
-            }
-            default -> {
+            default:
                 return new Result<>(null, new OverloadError());
-            }
         }
     }
 
@@ -111,7 +105,7 @@ public class PlayerBaseSelector extends BaseSelector<Player> {
     private @NotNull Result<Player> switchTag(Player player) {
         Object target0;
         switch (this.stringValue) {
-            case "target" -> {
+            case "target":
                 if (player == null) {
                     return new Result<>(null, new NeedPlayerError());
                 }
@@ -122,13 +116,11 @@ public class PlayerBaseSelector extends BaseSelector<Player> {
                 return (target0 instanceof Player)
                         ? new Result<>((Player) target0, null)
                         : new Result<>(null, new TargetPlayerNotFoundError());
-            }
-            case "me" -> {
+            case "me":
                 return (this.sender instanceof Player)
                         ? new Result<>((Player) this.sender, null)
                         : new Result<>(null, new NeedPlayerError());
-            }
-            case "nearest" -> {
+            case "nearest":
                 if (player == null) {
                     return new Result<>(null, new NeedPlayerError());
                 }
@@ -136,17 +128,14 @@ public class PlayerBaseSelector extends BaseSelector<Player> {
                 return (target0 == null)
                         ? new Result<>(null, new NotFoundInWorldError("player"))
                         : new Result<>((Player) target0, null);
-            }
-            case "selected" -> {
+            case "selected":
                 target0 = Selections.get(this.sender).getPlayer();
                 if (target0 == null) {
                     return new Result<>(null, new NoSelectedError("player"));
                 }
                 return new Result<>((Player) target0, null);
-            }
-            default -> {
+            default:
                 return new Result<>(null, new OverloadError());
-            }
         }
     }
 

@@ -46,10 +46,17 @@ public final class BBModelMeshFace {
         builder.setUVRange(0, 0, resolution.x, resolution.y); // FIXME is this right?
 
         switch (vertices.size()) {
-            case 2 -> line(builder);
-            case 3 -> triangle(builder);
-            case 4 -> rect(builder);
-            default -> throw new IllegalStateException("Unsupported number of vertices for face: " + vertices.size());
+            case 2:
+                line(builder);
+                break;
+            case 3:
+                triangle(builder);
+                break;
+            case 4:
+                rect(builder);
+                break;
+            default:
+                throw new IllegalStateException("Unsupported number of vertices for face: " + vertices.size());
         }
     }
 

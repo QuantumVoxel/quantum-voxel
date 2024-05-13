@@ -23,9 +23,11 @@ import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipException;
 
 public class ModListScreen extends Screen {
     private static final Identifier DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
@@ -75,7 +77,31 @@ public class ModListScreen extends Screen {
     }
 
     private void onImportXeox(TextButton textButton) {
-        GamePlatform.get().openImportDialog();
+        GamePlatform.get().openImportDialog().ifFailure(throwable -> {
+            QuantumClient.invoke(() -> {
+                if (throwable instanceof ZipException) {
+                    this.showDialog(new DialogBuilder(this)
+                            .title(TextObject.literal("Import Failed"))
+                            .message(TextObject.literal("Invalid Xeox mod file.\nXeox only supports .zip files!"))
+                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
+                } else if (throwable instanceof IOException) {
+                    this.showDialog(new DialogBuilder(this)
+                            .title(TextObject.literal("Import Failed"))
+                            .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
+                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
+                } else if (throwable instanceof RuntimeException) {
+                    this.showDialog(new DialogBuilder(this)
+                            .title(TextObject.literal("Import Failed"))
+                            .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
+                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
+                } else {
+                    this.showDialog(new DialogBuilder(this)
+                            .title(TextObject.literal("Import Failed"))
+                            .message(TextObject.literal("Failed to import Xeox mod file!\nInternal error!"))
+                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
+                }
+            });
+        });
     }
 
     public void onBack(TextButton button) {

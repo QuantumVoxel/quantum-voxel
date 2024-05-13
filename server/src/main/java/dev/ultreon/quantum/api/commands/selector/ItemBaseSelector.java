@@ -38,13 +38,11 @@ public class ItemBaseSelector extends BaseSelector<ItemStack> {
         }
         switch (this.key) {
             case TAG:
-                return switch (this.stringValue) {
-                    case "selected" -> {
-                        ItemStack targetMain = ((Player) player).getSelectedItem();
-                        yield new Result<>(targetMain, null);
-                    }
-                    default -> new Result<>(null, new OverloadError());
-                };
+                if (this.stringValue.equals("selected")) {
+                    ItemStack targetMain = ((Player) player).getSelectedItem();
+                    return new Result<>(targetMain, null);
+                }
+                return new Result<>(null, new OverloadError());
 
             case ID:
                 Integer anInt = Numbers.toIntOrNull(this.stringValue);

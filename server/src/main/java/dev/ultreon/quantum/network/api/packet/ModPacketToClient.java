@@ -5,7 +5,7 @@ import dev.ultreon.quantum.util.Env;
 
 import java.util.function.Supplier;
 
-public abstract non-sealed class ModPacketToClient<T extends ModPacketToClient<T>> extends ModPacket<T> implements ClientEndpoint {
+public abstract class ModPacketToClient<T extends ModPacketToClient<T>> extends ModPacket<T> implements ClientEndpoint {
     public ModPacketToClient() {
         super();
     }

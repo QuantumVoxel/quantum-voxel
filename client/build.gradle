@@ -47,13 +47,12 @@ group project_group // https://maven.apache.org/guides/mini/guide-naming-convent
 java {
     withSourcesJar()
     
-    sourceCompatibility("17")
-    targetCompatibility("17")
+    sourceCompatibility("11")
+    targetCompatibility("11")
 }
 
 repositories {
     mavenCentral()
-    maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
 }
 
 configurations {
@@ -186,4 +185,8 @@ test {
 
 compileJava {
     options.encoding = "UTF-8"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "11"
 }

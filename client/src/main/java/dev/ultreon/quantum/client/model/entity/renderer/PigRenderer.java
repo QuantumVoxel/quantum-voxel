@@ -23,11 +23,14 @@ public class PigRenderer extends LivingEntityRenderer<@NotNull Pig> {
         Entity.Pose pose = entity.getPose();
 
         switch (pose) {
-            case IDLE -> instance.getModel().queue("animation.model.idle", -1, 1f, null, 0f);
-            case WALKING -> {
-                // TODO: Add walking animation
-            }
-            default -> QuantumClient.LOGGER.warn("Unknown pose %s for entity %s", pose, entity.getId());
+            case IDLE:
+                instance.getModel().queue("animation.model.idle", -1, 1f, null, 0f);
+                break;
+            case WALKING:// TODO: Add walking animation
+                break;
+            default:
+                QuantumClient.LOGGER.warn("Unknown pose %s for entity %s", pose, entity.getId());
+                break;
         }
     }
 

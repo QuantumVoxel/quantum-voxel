@@ -120,7 +120,7 @@ public abstract class TabbedUI extends Screen {
         super.renderChildren(renderer, mouseX, mouseY, deltaTime);
     }
 
-    public final Tab getTab() {
+    public final @Nullable Tab getTab() {
         return this.tab;
     }
 

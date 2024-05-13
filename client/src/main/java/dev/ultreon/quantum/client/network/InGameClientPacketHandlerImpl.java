@@ -411,9 +411,15 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (this.client.world != null) {
             int daytime = this.client.world.getDaytime();
             switch (operation) {
-                case SET -> this.client.world.setDaytime(time);
-                case ADD -> this.client.world.setDaytime(daytime + time);
-                case SUB -> this.client.world.setDaytime(daytime - time);
+                case SET:
+                    this.client.world.setDaytime(time);
+                    break;
+                case ADD:
+                    this.client.world.setDaytime(daytime + time);
+                    break;
+                case SUB:
+                    this.client.world.setDaytime(daytime - time);
+                    break;
             }
         }
     }

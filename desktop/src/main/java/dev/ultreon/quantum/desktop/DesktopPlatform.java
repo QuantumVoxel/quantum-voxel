@@ -14,6 +14,7 @@ import dev.ultreon.quantum.desktop.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.loader.XeoxLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -31,7 +32,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.client.QuantumClient.crash;
 
@@ -121,10 +121,14 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public Env getEnv() {
-        return switch (FabricLoader.getInstance().getEnvironmentType()) {
-            case CLIENT -> Env.CLIENT;
-            case SERVER -> Env.SERVER;
-        };
+        switch (FabricLoader.getInstance().getEnvironmentType()) {
+            case CLIENT:
+                return Env.CLIENT;
+            case SERVER:
+                return Env.SERVER;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -138,7 +142,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
-    public boolean openImportDialog() {
+    public Result<Boolean> openImportDialog() {
         JFileChooser jFileChooser = new JFileChooser();
         jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         jFileChooser.setMultiSelectionEnabled(true);
@@ -146,11 +150,11 @@ public abstract class DesktopPlatform extends GamePlatform {
         if (result == JFileChooser.APPROVE_OPTION) {
             File[] selectedFiles = jFileChooser.getSelectedFiles();
             for (File file : selectedFiles) {
-                XeoxLoader.get().importMod(file);
+                return XeoxLoader.get().importMod(file).map(v -> true, v -> v);
             }
-            return true;
+            return Result.ok(false);
         }
-        return false;
+        return Result.ok(false);
     }
 
     @Override

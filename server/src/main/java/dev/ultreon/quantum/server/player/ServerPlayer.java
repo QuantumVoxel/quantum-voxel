@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
  *
  * @see QuantumServer#getCachedPlayer(String)
  */
-public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
+public class ServerPlayer extends Player implements CacheablePlayer {
     public IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private final ServerWorld world;
     public int hotbarIdx;
@@ -341,15 +341,21 @@ public non-sealed class ServerPlayer extends Player implements CacheablePlayer {
     public void onChunkStatus(@NotNull ChunkPos pos, Chunk.Status status) {
         // Handle the chunk status accordingly
         switch (status) {
-            case FAILED -> this.handleFailedChunk(pos);
-            case SKIP -> this.skippedChunks.add(pos);
-            case SUCCESS -> this.handleClientLoadChunk(pos);
-            case UNLOADED -> {
+            case FAILED:
+                this.handleFailedChunk(pos);
+                break;
+            case SKIP:
+                this.skippedChunks.add(pos);
+                break;
+            case SUCCESS:
+                this.handleClientLoadChunk(pos);
+                break;
+            case UNLOADED:
                 this.activeChunks.remove(pos);
                 this.skippedChunks.remove(pos);
                 this.pendingChunks.invalidate(pos);
                 this.failedChunks.invalidate(pos);
-            }
+                break;
         }
 
         // Handle chunk load failure if the status is failed

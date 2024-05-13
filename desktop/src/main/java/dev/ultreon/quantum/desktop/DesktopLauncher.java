@@ -12,10 +12,16 @@ import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.platform.Device;
+import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.python.PyLang;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.Collection;
+import java.util.List;
 
 public class DesktopLauncher {
     private static DesktopPlatform platform;
@@ -52,6 +58,16 @@ public class DesktopLauncher {
             public GameWindow createWindow() {
                 return gameWindow;
             }
+
+            @Override
+            public @Nullable MouseDevice getMouseDevice() {
+                return null;
+            }
+
+            @Override
+            public Collection<Device> getGameDevices() {
+                return List.of();
+            }
         };
 
         CrashHandler.addHandler(crashLog -> {
@@ -75,7 +91,7 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description))) {
             try {
-                new Lwjgl3Application(new GameLibGDXWrapper(argv), DesktopLauncher.createConfig());
+                new Lwjgl3Application(GameLibGDXWrapper.createInstance(argv), DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);

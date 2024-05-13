@@ -66,7 +66,7 @@ extensions.configure<GameUtilsExt> {
     packageProject = project(":desktop-merge")
 
     mainClass = "dev.ultreon.quantum.premain.PreMain"
-    javaVersion = 17
+    javaVersion = 11
 }
 
 //**********************//

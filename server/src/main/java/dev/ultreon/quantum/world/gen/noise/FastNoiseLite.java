@@ -328,12 +328,16 @@ public class FastNoiseLite
                 break;
         }
 
-        return switch (mFractalType) {
-            default -> GenNoiseSingle(mSeed, x, y);
-            case FBm -> GenFractalFBm(x, y);
-            case Ridged -> GenFractalRidged(x, y);
-            case PingPong -> GenFractalPingPong(x, y);
-        };
+        switch (mFractalType) {
+            default:
+                return GenNoiseSingle(mSeed, x, y);
+            case FBm:
+                return GenFractalFBm(x, y);
+            case Ridged:
+                return GenFractalRidged(x, y);
+            case PingPong:
+                return GenFractalPingPong(x, y);
+        }
     }
 
     /// <summary>
@@ -388,12 +392,16 @@ public class FastNoiseLite
                 break;
         }
 
-        return switch (mFractalType) {
-            default -> GenNoiseSingle(mSeed, x, y, z);
-            case FBm -> GenFractalFBm(x, y, z);
-            case Ridged -> GenFractalRidged(x, y, z);
-            case PingPong -> GenFractalPingPong(x, y, z);
-        };
+        switch (mFractalType) {
+            default:
+                return GenNoiseSingle(mSeed, x, y, z);
+            case FBm:
+                return GenFractalFBm(x, y, z);
+            case Ridged:
+                return GenFractalRidged(x, y, z);
+            case PingPong:
+                return GenFractalPingPong(x, y, z);
+        }
     }
 
 
@@ -683,28 +691,42 @@ public class FastNoiseLite
 
     private double GenNoiseSingle(long seed, /*FNLdouble*/ double x, /*FNLdouble*/ double y)
     {
-        return switch (mNoiseType) {
-            case OpenSimplex2 -> SingleSimplex(seed, x, y);
-            case OpenSimplex2S -> SingleOpenSimplex2S(seed, x, y);
-            case Cellular -> SingleCellular(seed, x, y);
-            case Perlin -> SinglePerlin(seed, x, y);
-            case ValueCubic -> SingleValueCubic(seed, x, y);
-            case Value -> SingleValue(seed, x, y);
-            default -> 0;
-        };
+        switch (mNoiseType) {
+            case OpenSimplex2:
+                return SingleSimplex(seed, x, y);
+            case OpenSimplex2S:
+                return SingleOpenSimplex2S(seed, x, y);
+            case Cellular:
+                return SingleCellular(seed, x, y);
+            case Perlin:
+                return SinglePerlin(seed, x, y);
+            case ValueCubic:
+                return SingleValueCubic(seed, x, y);
+            case Value:
+                return SingleValue(seed, x, y);
+            default:
+                return 0;
+        }
     }
 
     private double GenNoiseSingle(long seed, /*FNLdouble*/ double x, /*FNLdouble*/ double y, /*FNLdouble*/ double z)
     {
-        return switch (mNoiseType) {
-            case OpenSimplex2 -> SingleOpenSimplex2(seed, x, y, z);
-            case OpenSimplex2S -> SingleOpenSimplex2S(seed, x, y, z);
-            case Cellular -> SingleCellular(seed, x, y, z);
-            case Perlin -> SinglePerlin(seed, x, y, z);
-            case ValueCubic -> SingleValueCubic(seed, x, y, z);
-            case Value -> SingleValue(seed, x, y, z);
-            default -> 0;
-        };
+        switch (mNoiseType) {
+            case OpenSimplex2:
+                return SingleOpenSimplex2(seed, x, y, z);
+            case OpenSimplex2S:
+                return SingleOpenSimplex2S(seed, x, y, z);
+            case Cellular:
+                return SingleCellular(seed, x, y, z);
+            case Perlin:
+                return SinglePerlin(seed, x, y, z);
+            case ValueCubic:
+                return SingleValueCubic(seed, x, y, z);
+            case Value:
+                return SingleValue(seed, x, y, z);
+            default:
+                return 0;
+        }
     }
 
 
@@ -1496,16 +1518,24 @@ public class FastNoiseLite
             }
         }
 
-        return switch (mCellularReturnType) {
-            case CellValue -> closestHash * (1 / 2147483648.0f);
-            case Distance -> distance0 - 1;
-            case Distance2 -> distance1 - 1;
-            case Distance2Add -> (distance1 + distance0) * 0.5f - 1;
-            case Distance2Sub -> distance1 - distance0 - 1;
-            case Distance2Mul -> distance1 * distance0 * 0.5f - 1;
-            case Distance2Div -> distance0 / distance1 - 1;
-            default -> 0;
-        };
+        switch (mCellularReturnType) {
+            case CellValue:
+                return closestHash * (1 / 2147483648.0f);
+            case Distance:
+                return distance0 - 1;
+            case Distance2:
+                return distance1 - 1;
+            case Distance2Add:
+                return (distance1 + distance0) * 0.5f - 1;
+            case Distance2Sub:
+                return distance1 - distance0 - 1;
+            case Distance2Mul:
+                return distance1 * distance0 * 0.5f - 1;
+            case Distance2Div:
+                return distance0 / distance1 - 1;
+            default:
+                return 0;
+        }
     }
 
     private double SingleCellular(long seed, /*FNLdouble*/ double x, /*FNLdouble*/ double y, /*FNLdouble*/ double z)
@@ -1640,16 +1670,24 @@ public class FastNoiseLite
             }
         }
 
-        return switch (mCellularReturnType) {
-            case CellValue -> closestHash * (1 / 2147483648.0f);
-            case Distance -> distance0 - 1;
-            case Distance2 -> distance1 - 1;
-            case Distance2Add -> (distance1 + distance0) * 0.5f - 1;
-            case Distance2Sub -> distance1 - distance0 - 1;
-            case Distance2Mul -> distance1 * distance0 * 0.5f - 1;
-            case Distance2Div -> distance0 / distance1 - 1;
-            default -> 0;
-        };
+        switch (mCellularReturnType) {
+            case CellValue:
+                return closestHash * (1 / 2147483648.0f);
+            case Distance:
+                return distance0 - 1;
+            case Distance2:
+                return distance1 - 1;
+            case Distance2Add:
+                return (distance1 + distance0) * 0.5f - 1;
+            case Distance2Sub:
+                return distance1 - distance0 - 1;
+            case Distance2Mul:
+                return distance1 * distance0 * 0.5f - 1;
+            case Distance2Div:
+                return distance0 / distance1 - 1;
+            default:
+                return 0;
+        }
     }
 
 

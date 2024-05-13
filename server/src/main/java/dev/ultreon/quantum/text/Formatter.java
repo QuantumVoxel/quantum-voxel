@@ -87,37 +87,28 @@ public class Formatter {
         if (this.allowFormatting) {
             while (this.offset < this.message.length()) {
                 switch (this.c()) {
-                    case '&' -> {
+                    case '&':
                         this.parseId();
                         continue;
-                    }
-
-                    case '@' -> {
+                    case '@':
                         this.parseMention();
                         continue;
-                    }
-
-                    case '<' -> {
+                    case '<':
                         this.parseColor();
                         continue;
-                    }
-
-                    case '{' -> {
+                    case '{':
                         this.parseFunction();
                         continue;
-                    }
-
-                    case '%' -> {
+                    case '%':
                         this.parseKey();
                         continue;
-                    }
 
 //                    case ':' -> {
 //                        this.parseEmote();
 //                        continue;
 //                    }
 
-                    case '!' -> {
+                    case '!':
                         if (this.sender == null) {
                             this.currentBuilder.append(this.c());
                             if (this.redirect) {
@@ -137,9 +128,9 @@ public class Formatter {
                             this.parseIcon();
                         }
                         continue;
-                    }
-
-                    default -> this.currentBuilder.append(this.c());
+                    default:
+                        this.currentBuilder.append(this.c());
+                        break;
                 }
                 if (this.redirect) {
                     this.redirect = false;
@@ -269,7 +260,7 @@ public class Formatter {
             return;
         }
         switch (this.c()) {
-            case '#' -> {
+            case '#':
                 if (this.offset + 6 > this.message.length()) {
                     this.currentBuilder.append('&');
                     this.currentBuilder.append(this.c());
@@ -279,29 +270,50 @@ public class Formatter {
                 this.pushBuilder();
                 this.currentColor = RgbColor.rgb(Integer.parseInt(this.message.substring(this.offset + 1, this.offset + 7), 16));
                 this.offset += 7;
-            }
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F' -> {
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
                 this.pushBuilder();
                 this.currentColor = RgbColor.of(ColorCode.getByChar(Character.toLowerCase(this.c())));
                 this.offset++;
-            }
-            case 'l' -> {
+                break;
+            case 'l':
                 this.bold = true;
                 this.offset++;
-            }
-            case 'm' -> {
+                break;
+            case 'm':
                 this.strikethrough = true;
                 this.offset++;
-            }
-            case 'n' -> {
+                break;
+            case 'n':
                 this.underlined = true;
                 this.offset++;
-            }
-            case 'o' -> {
+                break;
+            case 'o':
                 this.italic = true;
                 this.offset++;
-            }
-            case 'r' -> {
+                break;
+            case 'r':
                 this.pushBuilder();
                 this.currentColor = this.messageColor;
                 this.bold = false;
@@ -311,12 +323,12 @@ public class Formatter {
                 this.currentClickEvent = null;
                 this.currentHoverEvent = null;
                 this.offset++;
-            }
-            default -> {
+                break;
+            default:
                 this.currentBuilder.append('&');
                 this.currentBuilder.append(this.c());
                 this.offset++;
-            }
+                break;
         }
     }
 
@@ -339,12 +351,13 @@ public class Formatter {
         this.pushBuilder();
 
         switch (key) {
-            case "message-type", "username" -> {
+            case "message-type":
+            case "username":
                 if (this.sender != null) {
                     this.currentBuilder.append(this.sender.getName());
                 }
-            }
-            case "player" -> {
+                break;
+            case "player":
                 if (this.sender != null) {
                     this.pushBuilder();
 
@@ -360,11 +373,17 @@ public class Formatter {
                     this.builder.append(textObj2);
                     this.currentBuilder.append(this.sender.getName());
                 }
-            }
-            case "console-sender" -> this.currentBuilder.append("Console");
-            case "time" -> this.currentBuilder.append(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME));
-            case "date" -> this.currentBuilder.append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-            default -> {
+                break;
+            case "console-sender":
+                this.currentBuilder.append("Console");
+                break;
+            case "time":
+                this.currentBuilder.append(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME));
+                break;
+            case "date":
+                this.currentBuilder.append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+                break;
+            default:
                 var identifier = Identifier.tryParse(key);
                 if (identifier == null) {
                     this.currentBuilder.append('%');
@@ -380,7 +399,7 @@ public class Formatter {
                     break;
                 }
                 this.currentBuilder.append(textKey.get(this.sender));
-            }
+                break;
         }
     }
 
@@ -435,7 +454,10 @@ public class Formatter {
                 var actionName = arguments.remove(0);
                 ClickEvent event = null;
                 switch (actionName) {
-                    case "@", "web", "url", "open-url" -> {
+                    case "@":
+                    case "web":
+                    case "url":
+                    case "open-url":
                         if (arguments.isEmpty()) return;
                         var url = arguments.remove(0);
                         try {
@@ -443,25 +465,38 @@ public class Formatter {
                         } catch (URISyntaxException ignored) {
 
                         }
-                    }
-                    case "#", "clip", "clipboard", "copy", "cp", "copy-to-clipboard" -> {
+                        break;
+                    case "#":
+                    case "clip":
+                    case "clipboard":
+                    case "copy":
+                    case "cp":
+                    case "copy-to-clipboard":
                         if (arguments.isEmpty()) return;
                         var text = arguments.remove(0);
                         event = ClickEvent.copyToClipboard(text);
-                    }
-                    case "/", "cmd", "command" -> {
+                        break;
+                    case "/":
+                    case "cmd":
+                    case "command":
                         if (arguments.isEmpty()) return;
                         var cmd = arguments.remove(0);
                         event = ClickEvent.runCommand(cmd);
-                    }
-                    case ">", "suggest", "suggest-msg", "put-msg", "put", "example", "example-msg" -> {
+                        break;
+                    case ">":
+                    case "suggest":
+                    case "suggest-msg":
+                    case "put-msg":
+                    case "put":
+                    case "example":
+                    case "example-msg":
                         if (arguments.isEmpty()) return;
-                        var cmd = arguments.remove(0);
+                        cmd = arguments.remove(0);
                         event = ClickEvent.suggestMessage(cmd);
-                    }
-                    default -> {
+                        break;
+                    default:
                         if (actionName.startsWith("@")) {
-                            var url = actionName.substring(1);
+                            url = actionName.substring(1);
                             try {
                                 event = ClickEvent.openUri(new URI(url));
                             } catch (URISyntaxException ignored) {
@@ -469,18 +504,18 @@ public class Formatter {
                             }
                         }
                         if (actionName.startsWith("#")) {
-                            var text = actionName.substring(1);
+                            text = actionName.substring(1);
                             event = ClickEvent.copyToClipboard(text);
                         }
                         if (actionName.startsWith("/")) {
-                            var cmd = actionName.substring(1);
+                            cmd = actionName.substring(1);
                             event = ClickEvent.runCommand(cmd);
                         }
                         if (actionName.startsWith(">")) {
-                            var cmd = actionName.substring(1);
+                            cmd = actionName.substring(1);
                             event = ClickEvent.suggestMessage(cmd);
                         }
-                    }
+                        break;
                 }
                 this.currentClickEvent = event;
                 break;
@@ -569,16 +604,62 @@ public class Formatter {
         this.pushBuilder();
 
         switch (arg) {
-            case "/mc/", "/message/", "/message-color/" -> this.currentColor = this.messageColor;
-            case "b", "bold", "fat", "%" -> this.bold = true;
-            case "/b", "/bold", "/fat", "/%" -> this.bold = false;
-            case "i", "italic", "+" -> this.italic = true;
-            case "/i", "/italic", "/+" -> this.italic = false;
-            case "u", "underlined", "underline", "_" -> this.underlined = true;
-            case "/u", "/underlined", "/underline", "/_" -> this.underlined = false;
-            case "s", "strikethrough", "st", "-" -> this.strikethrough = true;
-            case "/s", "/strikethrough", "/st", "/-" -> this.strikethrough = false;
-            case "/", "/*", "r", "reset", "clear" -> {
+            case "/mc/":
+            case "/message/":
+            case "/message-color/":
+                this.currentColor = this.messageColor;
+                break;
+            case "b":
+            case "bold":
+            case "fat":
+            case "%":
+                this.bold = true;
+                break;
+            case "/b":
+            case "/bold":
+            case "/fat":
+            case "/%":
+                this.bold = false;
+                break;
+            case "i":
+            case "italic":
+            case "+":
+                this.italic = true;
+                break;
+            case "/i":
+            case "/italic":
+            case "/+":
+                this.italic = false;
+                break;
+            case "u":
+            case "underlined":
+            case "underline":
+            case "_":
+                this.underlined = true;
+                break;
+            case "/u":
+            case "/underlined":
+            case "/underline":
+            case "/_":
+                this.underlined = false;
+                break;
+            case "s":
+            case "strikethrough":
+            case "st":
+            case "-":
+                this.strikethrough = true;
+                break;
+            case "/s":
+            case "/strikethrough":
+            case "/st":
+            case "/-":
+                this.strikethrough = false;
+                break;
+            case "/":
+            case "/*":
+            case "r":
+            case "reset":
+            case "clear":
                 this.bold = false;
                 this.italic = false;
                 this.underlined = false;
@@ -586,60 +667,163 @@ public class Formatter {
                 this.currentColor = this.messageColor;
                 this.currentClickEvent = null;
                 this.currentHoverEvent = null;
-            }
-
-            case "red" -> this.currentColor = RgbColor.of(ColorCode.RED);
-            case "yellow" -> this.currentColor = RgbColor.of(ColorCode.YELLOW);
-            case "lime", "green" -> this.currentColor = RgbColor.of(ColorCode.GREEN);
-            case "cyan", "aqua" -> this.currentColor = RgbColor.of(ColorCode.AQUA);
-            case "blue" -> this.currentColor = RgbColor.of(ColorCode.BLUE);
-            case "magenta", "light-purple" -> this.currentColor = RgbColor.of(ColorCode.LIGHT_PURPLE);
-            case "dark-red" -> this.currentColor = RgbColor.of(ColorCode.DARK_RED);
-            case "gold" -> this.currentColor = RgbColor.of(ColorCode.GOLD);
-            case "dark-green" -> this.currentColor = RgbColor.of(ColorCode.DARK_GREEN);
-            case "turquoise", "dark-aqua" -> this.currentColor = RgbColor.of(ColorCode.DARK_AQUA);
-            case "dark-blue" -> this.currentColor = RgbColor.of(ColorCode.DARK_BLUE);
-            case "purple", "dark-purple" -> this.currentColor = RgbColor.of(ColorCode.DARK_PURPLE);
-            case "gray-16", "white" -> this.currentColor = RgbColor.of(ColorCode.WHITE);
-            case "gray-15" -> this.currentColor = RgbColor.rgb(0xf0f0f0);
-            case "gray-14" -> this.currentColor = RgbColor.rgb(0xe0e0e0);
-            case "gray-13" -> this.currentColor = RgbColor.rgb(0xd0d0d0);
-            case "gray-12", "light-gray" -> this.currentColor = RgbColor.rgb(0xc0c0c0);
-            case "gray-11" -> this.currentColor = RgbColor.rgb(0xb0b0b0);
-            case "gray-10" -> this.currentColor = RgbColor.rgb(0xa0a0a0);
-            case "gray", "silver" -> this.currentColor = RgbColor.of(ColorCode.GRAY);
-            case "gray-9" -> this.currentColor = RgbColor.rgb(0x909090);
-            case "gray-8" -> this.currentColor = RgbColor.rgb(0x808080);
-            case "mid-gray", "gray-7" -> this.currentColor = RgbColor.rgb(0x707070);
-            case "gray-6" -> this.currentColor = RgbColor.rgb(0x606060);
-            case "dark-gray" -> this.currentColor = RgbColor.of(ColorCode.DARK_GRAY);
-            case "gray-5" -> this.currentColor = RgbColor.rgb(0x505050);
-            case "gray-4" -> this.currentColor = RgbColor.rgb(0x404040);
-            case "darker-gray", "gray-3" -> this.currentColor = RgbColor.rgb(0x303030);
-            case "gray-2" -> this.currentColor = RgbColor.rgb(0x202020);
-            case "gray-1" -> this.currentColor = RgbColor.rgb(0x101010);
-            case "gray-0" -> this.currentColor = RgbColor.rgb(0x000000);
-            case "black" -> this.currentColor = RgbColor.of(ColorCode.BLACK);
-            case "brown" -> this.currentColor = RgbColor.rgb(0x614E36);
-            case "azure" -> this.currentColor = RgbColor.rgb(0x007FFF);
-            case "mint" -> this.currentColor = RgbColor.rgb(0x00FF7F);
-            case "orange" -> this.currentColor = RgbColor.rgb(0xFF7F00);
-            case "pure-yellow" -> this.currentColor = RgbColor.rgb(0xFFFF00);
-            case "yellow-gold" -> this.currentColor = RgbColor.rgb(0xFFD500);
-            case "pure-gold" -> this.currentColor = RgbColor.rgb(0xFFC500);
-            case "dark-yellow" -> this.currentColor = RgbColor.rgb(0x7F7F00);
-            case "method" -> this.currentColor = RgbColor.rgb(0x61AFEF);
-            case "string-escape" -> this.currentColor = RgbColor.rgb(0x2BBAC5);
-            case "string" -> this.currentColor = RgbColor.rgb(0x89CA78);
-            case "class" -> this.currentColor = RgbColor.rgb(0xE5C07B);
-            case "number" -> this.currentColor = RgbColor.rgb(0xD19A66);
-            case "enum-value" -> this.currentColor = RgbColor.rgb(0xEF596F);
-            case "keyword" -> this.currentColor = RgbColor.rgb(0xD55FDE);
-            default -> {
+                break;
+            case "red":
+                this.currentColor = RgbColor.of(ColorCode.RED);
+                break;
+            case "yellow":
+                this.currentColor = RgbColor.of(ColorCode.YELLOW);
+                break;
+            case "lime":
+            case "green":
+                this.currentColor = RgbColor.of(ColorCode.GREEN);
+                break;
+            case "cyan":
+            case "aqua":
+                this.currentColor = RgbColor.of(ColorCode.AQUA);
+                break;
+            case "blue":
+                this.currentColor = RgbColor.of(ColorCode.BLUE);
+                break;
+            case "magenta":
+            case "light-purple":
+                this.currentColor = RgbColor.of(ColorCode.LIGHT_PURPLE);
+                break;
+            case "dark-red":
+                this.currentColor = RgbColor.of(ColorCode.DARK_RED);
+                break;
+            case "gold":
+                this.currentColor = RgbColor.of(ColorCode.GOLD);
+                break;
+            case "dark-green":
+                this.currentColor = RgbColor.of(ColorCode.DARK_GREEN);
+                break;
+            case "turquoise":
+            case "dark-aqua":
+                this.currentColor = RgbColor.of(ColorCode.DARK_AQUA);
+                break;
+            case "dark-blue":
+                this.currentColor = RgbColor.of(ColorCode.DARK_BLUE);
+                break;
+            case "purple":
+            case "dark-purple":
+                this.currentColor = RgbColor.of(ColorCode.DARK_PURPLE);
+                break;
+            case "gray-16":
+            case "white":
+                this.currentColor = RgbColor.of(ColorCode.WHITE);
+                break;
+            case "gray-15":
+                this.currentColor = RgbColor.rgb(0xf0f0f0);
+                break;
+            case "gray-14":
+                this.currentColor = RgbColor.rgb(0xe0e0e0);
+                break;
+            case "gray-13":
+                this.currentColor = RgbColor.rgb(0xd0d0d0);
+                break;
+            case "gray-12":
+            case "light-gray":
+                this.currentColor = RgbColor.rgb(0xc0c0c0);
+                break;
+            case "gray-11":
+                this.currentColor = RgbColor.rgb(0xb0b0b0);
+                break;
+            case "gray-10":
+                this.currentColor = RgbColor.rgb(0xa0a0a0);
+                break;
+            case "gray":
+            case "silver":
+                this.currentColor = RgbColor.of(ColorCode.GRAY);
+                break;
+            case "gray-9":
+                this.currentColor = RgbColor.rgb(0x909090);
+                break;
+            case "gray-8":
+                this.currentColor = RgbColor.rgb(0x808080);
+                break;
+            case "mid-gray":
+            case "gray-7":
+                this.currentColor = RgbColor.rgb(0x707070);
+                break;
+            case "gray-6":
+                this.currentColor = RgbColor.rgb(0x606060);
+                break;
+            case "dark-gray":
+                this.currentColor = RgbColor.of(ColorCode.DARK_GRAY);
+                break;
+            case "gray-5":
+                this.currentColor = RgbColor.rgb(0x505050);
+                break;
+            case "gray-4":
+                this.currentColor = RgbColor.rgb(0x404040);
+                break;
+            case "darker-gray":
+            case "gray-3":
+                this.currentColor = RgbColor.rgb(0x303030);
+                break;
+            case "gray-2":
+                this.currentColor = RgbColor.rgb(0x202020);
+                break;
+            case "gray-1":
+                this.currentColor = RgbColor.rgb(0x101010);
+                break;
+            case "gray-0":
+                this.currentColor = RgbColor.rgb(0x000000);
+                break;
+            case "black":
+                this.currentColor = RgbColor.of(ColorCode.BLACK);
+                break;
+            case "brown":
+                this.currentColor = RgbColor.rgb(0x614E36);
+                break;
+            case "azure":
+                this.currentColor = RgbColor.rgb(0x007FFF);
+                break;
+            case "mint":
+                this.currentColor = RgbColor.rgb(0x00FF7F);
+                break;
+            case "orange":
+                this.currentColor = RgbColor.rgb(0xFF7F00);
+                break;
+            case "pure-yellow":
+                this.currentColor = RgbColor.rgb(0xFFFF00);
+                break;
+            case "yellow-gold":
+                this.currentColor = RgbColor.rgb(0xFFD500);
+                break;
+            case "pure-gold":
+                this.currentColor = RgbColor.rgb(0xFFC500);
+                break;
+            case "dark-yellow":
+                this.currentColor = RgbColor.rgb(0x7F7F00);
+                break;
+            case "method":
+                this.currentColor = RgbColor.rgb(0x61AFEF);
+                break;
+            case "string-escape":
+                this.currentColor = RgbColor.rgb(0x2BBAC5);
+                break;
+            case "string":
+                this.currentColor = RgbColor.rgb(0x89CA78);
+                break;
+            case "class":
+                this.currentColor = RgbColor.rgb(0xE5C07B);
+                break;
+            case "number":
+                this.currentColor = RgbColor.rgb(0xD19A66);
+                break;
+            case "enum-value":
+                this.currentColor = RgbColor.rgb(0xEF596F);
+                break;
+            case "keyword":
+                this.currentColor = RgbColor.rgb(0xD55FDE);
+                break;
+            default:
                 this.currentBuilder.append('<');
                 this.currentBuilder.append(arg);
                 this.currentBuilder.append('>');
-            }
+                break;
         }
 
         this.offset++;
@@ -706,20 +890,13 @@ public class Formatter {
 
     private String getPlayerHoverText(@Nullable Player player) {
         if (player == null) {
-            return """
-                    <red>NULL
-                    <dark-gray>&<unknown-entity>
-                    """;
+            return "<red>NULL\n<dark-gray>&<unknown-entity>";
         }
         // Set hover text.
-        return String.format("""
-                <blue>%s
-                <gray>Name <i>%s</i>
-                <dark-gray>%s
-                """, ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
+        return String.format("<blue>%s\n<gray>Name <i>%s</i>\n<dark-gray>%s\n", ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
     }
 
-    public Identifier getCurrentFont() {
+    public @Nullable Identifier getCurrentFont() {
         return currentFont;
     }
 

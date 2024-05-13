@@ -35,22 +35,28 @@ public final class BBAnimator {
             nodeAnimation.node = node;
 
             switch (keyFrame.channel()) {
-                case POSITION -> keyFrame.dataPoints().stream().map(vector3 -> new NodeKeyframe<>(keyFrame.time(), vector3)).collect(Collectors.toList()).forEach(nodeFrame -> {
-                    if (nodeAnimation.translation == null) nodeAnimation.translation = new Array<>();
-                    nodeAnimation.translation.add(nodeFrame);
-                });
-                case SCALE -> keyFrame.dataPoints().stream().map(vector3 -> new NodeKeyframe<>(keyFrame.time(), vector3)).collect(Collectors.toList()).forEach(nodeFrame -> {
-                    if (nodeAnimation.scaling == null) nodeAnimation.scaling = new Array<>();
-                    nodeAnimation.scaling.add(nodeFrame);
-                });
-                case ROTATION -> keyFrame.dataPoints().stream().map(vector3 -> {
-                    Quaternion q = new Quaternion();
-                    q.setEulerAngles(vector3.y, vector3.x, vector3.z);
-                    return new NodeKeyframe<>(keyFrame.time(), q);
-                }).collect(Collectors.toList()).forEach(nodeFrame -> {
-                    if (nodeAnimation.rotation == null) nodeAnimation.rotation = new Array<>();
-                    nodeAnimation.rotation.add(nodeFrame);
-                });
+                case POSITION:
+                    keyFrame.dataPoints().stream().map(vector3 -> new NodeKeyframe<>(keyFrame.time(), vector3)).collect(Collectors.toList()).forEach(nodeFrame -> {
+                        if (nodeAnimation.translation == null) nodeAnimation.translation = new Array<>();
+                        nodeAnimation.translation.add(nodeFrame);
+                    });
+                    break;
+                case SCALE:
+                    keyFrame.dataPoints().stream().map(vector3 -> new NodeKeyframe<>(keyFrame.time(), vector3)).collect(Collectors.toList()).forEach(nodeFrame -> {
+                        if (nodeAnimation.scaling == null) nodeAnimation.scaling = new Array<>();
+                        nodeAnimation.scaling.add(nodeFrame);
+                    });
+                    break;
+                case ROTATION:
+                    keyFrame.dataPoints().stream().map(vector3 -> {
+                        Quaternion q = new Quaternion();
+                        q.setEulerAngles(vector3.y, vector3.x, vector3.z);
+                        return new NodeKeyframe<>(keyFrame.time(), q);
+                    }).collect(Collectors.toList()).forEach(nodeFrame -> {
+                        if (nodeAnimation.rotation == null) nodeAnimation.rotation = new Array<>();
+                        nodeAnimation.rotation.add(nodeFrame);
+                    });
+                    break;
             }
         }
 

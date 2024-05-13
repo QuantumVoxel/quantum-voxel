@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.Gdx;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
@@ -72,6 +73,10 @@ public class TitleScreen extends Screen {
                         .icon(QuantumClient.id("textures/gui/title/quit.png"))
                 .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50 + 10 + 100, this.size.height / 2 - 100, 100, 150))
                 .callback(this::quitGame));
+
+        if (GamePlatform.get().isMobile()) {
+            this.quitButton.enabled = false;
+        }
     }
 
     private void openTest(TitleButton textButton) {

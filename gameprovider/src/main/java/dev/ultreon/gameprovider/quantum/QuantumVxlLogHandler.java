@@ -58,13 +58,20 @@ public class QuantumVxlLogHandler implements LogHandler {
      * @return The corresponding Level object
      */
     private static Level getLevel(LogLevel level) {
-        return switch (level) {
-            case INFO -> Level.INFO;
-            case WARN -> Level.WARN;
-            case DEBUG -> Level.DEBUG;
-            case ERROR -> Level.ERROR;
-            case TRACE -> Level.TRACE;
-        };
+        switch (level) {
+            case INFO:
+                return Level.INFO;
+            case WARN:
+                return Level.WARN;
+            case DEBUG:
+                return Level.DEBUG;
+            case ERROR:
+                return Level.ERROR;
+            case TRACE:
+                return Level.TRACE;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     /**

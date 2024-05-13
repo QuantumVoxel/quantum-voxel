@@ -194,7 +194,7 @@ public abstract class Screen extends UIContainer<Screen> {
         return screen.path().resolve("OldScreen[" + this.createTime + "]");
     }
 
-    public TextObject getTitle() {
+    public @Nullable TextObject getTitle() {
         return this.title;
     }
 

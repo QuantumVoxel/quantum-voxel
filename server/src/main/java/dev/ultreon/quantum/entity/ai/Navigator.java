@@ -78,25 +78,6 @@ public class Navigator {
     }
 
     private Vec3d randomPos(RNG rng, Vec3d pos) {
-        enum Direction {
-            NORTH(0, -1),
-            EAST(1, 0),
-            SOUTH(0, 1),
-            WEST(-1, 0);
-
-            private final int x;
-            private final int y;
-
-            Direction(int x, int y) {
-                this.x = x;
-                this.y = y;
-            }
-
-            public Vec3d vector() {
-                return new Vec3d(x, 0, y);
-            }
-        }
-
         Direction[] directions = Direction.values();
         Vec3d dir = directions[rng.randint(0, 3)].vector();
 
@@ -109,5 +90,24 @@ public class Navigator {
 
     private PathPoint currentPoint() {
         return new PathPoint(this.entity.getPosition(), this.entity.getVelocity(), this.entity.getLookVector());
+    }
+
+    private enum Direction {
+        NORTH(0, -1),
+        EAST(1, 0),
+        SOUTH(0, 1),
+        WEST(-1, 0);
+
+        private final int x;
+        private final int y;
+
+        Direction(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Vec3d vector() {
+            return new Vec3d(x, 0, y);
+        }
     }
 }

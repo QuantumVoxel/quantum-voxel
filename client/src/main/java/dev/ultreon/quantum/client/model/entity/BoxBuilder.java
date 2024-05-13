@@ -58,23 +58,53 @@ public class BoxBuilder {
     }
 
     private void face(Vec3i pos, CubicDirection face, TextureRegion region, FloatArray output) {
-        float[] vertices = switch (face) {
-            case UP -> BoxBuilder.topVertices;
-            case DOWN -> BoxBuilder.bottomVertices;
-            case WEST -> BoxBuilder.leftVertices;
-            case EAST -> BoxBuilder.rightVertices;
-            case NORTH -> BoxBuilder.frontVertices;
-            case SOUTH -> BoxBuilder.backVertices;
-        };
+        float[] vertices;
+        switch (face) {
+            case UP:
+                vertices = BoxBuilder.topVertices;
+                break;
+            case DOWN:
+                vertices = BoxBuilder.bottomVertices;
+                break;
+            case WEST:
+                vertices = BoxBuilder.leftVertices;
+                break;
+            case EAST:
+                vertices = BoxBuilder.rightVertices;
+                break;
+            case NORTH:
+                vertices = BoxBuilder.frontVertices;
+                break;
+            case SOUTH:
+                vertices = BoxBuilder.backVertices;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
 
-        float[] uvs = switch (face) {
-            case UP -> BoxBuilder.topUv;
-            case DOWN -> BoxBuilder.bottomUv;
-            case WEST -> BoxBuilder.leftUv;
-            case EAST -> BoxBuilder.rightUv;
-            case NORTH -> BoxBuilder.frontUv;
-            case SOUTH -> BoxBuilder.backUv;
-        };
+        float[] uvs;
+        switch (face) {
+            case UP:
+                uvs = BoxBuilder.topUv;
+                break;
+            case DOWN:
+                uvs = BoxBuilder.bottomUv;
+                break;
+            case WEST:
+                uvs = BoxBuilder.leftUv;
+                break;
+            case EAST:
+                uvs = BoxBuilder.rightUv;
+                break;
+            case NORTH:
+                uvs = BoxBuilder.frontUv;
+                break;
+            case SOUTH:
+                uvs = BoxBuilder.backUv;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
 
         Vector3 normal = face.getNormal();
 

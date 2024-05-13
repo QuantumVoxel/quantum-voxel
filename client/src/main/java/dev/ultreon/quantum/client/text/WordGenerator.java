@@ -108,13 +108,26 @@ public class WordGenerator {
 
     private void switchState(StateHolder ref, int i, int len, StringBuilder sb, AtomicBoolean named, RNG random) {
         switch (ref.state) {
-            case A -> this.switchToA(ref, i, len, sb, named, random);
-            case B -> this.switchToB(ref, i, len, sb, named, random);
-            case C -> this.switchToC(ref, sb, named, random);
-            case D -> this.switchToD(ref, i, len, sb, named, random);
-            case E1 -> this.switchToE1(ref, sb, named, random);
-            case E2 -> this.switchToE2(ref, sb, named, random);
-            default -> throw new IllegalStateException("Unexpected state: " + ref.state);
+            case A:
+                this.switchToA(ref, i, len, sb, named, random);
+                break;
+            case B:
+                this.switchToB(ref, i, len, sb, named, random);
+                break;
+            case C:
+                this.switchToC(ref, sb, named, random);
+                break;
+            case D:
+                this.switchToD(ref, i, len, sb, named, random);
+                break;
+            case E1:
+                this.switchToE1(ref, sb, named, random);
+                break;
+            case E2:
+                this.switchToE2(ref, sb, named, random);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected state: " + ref.state);
         }
     }
 

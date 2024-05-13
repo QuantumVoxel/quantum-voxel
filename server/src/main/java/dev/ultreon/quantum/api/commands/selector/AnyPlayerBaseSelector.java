@@ -36,9 +36,9 @@ public class AnyPlayerBaseSelector extends BaseSelector<CacheablePlayer> {
         Object target0;
         CacheablePlayer target;
         switch (this.key) {
-            case TAG -> {
+            case TAG:
                 switch (this.stringValue) {
-                    case "target" -> {
+                    case "target":
                         if (player == null) {
                             return new Result<>(null, new NeedPlayerError());
                         }
@@ -51,16 +51,14 @@ public class AnyPlayerBaseSelector extends BaseSelector<CacheablePlayer> {
                         } else {
                             return new Result<>((ServerPlayer) target0, null);
                         }
-                    }
-                    case "me" -> {
+                    case "me":
                         if (this.sender instanceof ServerPlayer) {
                             ServerPlayer serverPlayer = (ServerPlayer) this.sender;
                             return new Result<>(serverPlayer, null);
                         } else {
                             return new Result<>(null, new NeedPlayerError());
                         }
-                    }
-                    case "nearest" -> {
+                    case "nearest":
                         if (player == null) {
                             return new Result<>(null, new NeedPlayerError());
                         }
@@ -70,25 +68,20 @@ public class AnyPlayerBaseSelector extends BaseSelector<CacheablePlayer> {
                         } else {
                             return new Result<>((ServerPlayer) target0, null);
                         }
-                    }
-                    case "selected" -> {
+                    case "selected":
                         target0 = Selections.get(this.sender).getPlayer();
                         if (target0 == null) {
                             return new Result<>(null, new NoSelectedError("player"));
                         } else {
                             return new Result<>((ServerPlayer) target0, null);
                         }
-                    }
-                    default -> {
+                    default:
                         return new Result<>(null, new OverloadError());
-                    }
                 }
-            }
-            case NAME -> {
+            case NAME:
                 target = QuantumServer.get().getCacheablePlayer(this.stringValue);
                 return new Result<>(target, null);
-            }
-            case UUID -> {
+            case UUID:
                 UUID uuid;
                 try {
                     uuid = UUID.fromString(this.stringValue);
@@ -97,10 +90,8 @@ public class AnyPlayerBaseSelector extends BaseSelector<CacheablePlayer> {
                 } catch (IllegalArgumentException e) {
                     return new Result<>(null, new InvalidUUIDError());
                 }
-            }
-            default -> {
+            default:
                 return new Result<>(null, new OverloadError());
-            }
         }
     }
 

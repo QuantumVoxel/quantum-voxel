@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.api.commands.error;
 
+import org.jetbrains.annotations.NotNull;
+
 public class InvalidCoordinateXError extends InvalidCoordinateError {
     private String name = "Invalid";
 
@@ -20,7 +22,7 @@ public class InvalidCoordinateXError extends InvalidCoordinateError {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return this.name;
     }
 }

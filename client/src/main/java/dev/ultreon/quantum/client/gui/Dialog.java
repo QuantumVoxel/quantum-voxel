@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class Dialog extends UIContainer<Dialog> {
         revalidate();
     }
 
-    public void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         renderer.renderFrame(parent.getWidth() / 2 - size.width / 2 - 2, parent.getHeight() / 2 - size.height / 2 - 2, size.width + 4, size.height + 4);
         renderer.renderPopoutFrame(pos.x - 1, pos.y - 2, size.width + 2, 27);
 

@@ -50,7 +50,7 @@ public class FoliageFeature extends WorldGenFeature {
     }
 
     @Override
-    public void create(ServerWorld world) {
+    public void create(@NotNull ServerWorld world) {
 
     }
 }

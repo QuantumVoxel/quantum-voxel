@@ -447,11 +447,20 @@ public class CommandReader {
 
     public boolean readBoolean() throws CommandParseException {
         String text = this.readString();
-        return switch (text) {
-            case "true", "on", "enabled", "yes" -> true;
-            case "false", "off", "disabled", "no" -> false;
-            default -> throw new CommandParseException("Invalid boolean: " + text);
-        };
+        switch (text) {
+            case "true":
+            case "on":
+            case "enabled":
+            case "yes":
+                return true;
+            case "false":
+            case "off":
+            case "disabled":
+            case "no":
+                return false;
+            default:
+                throw new CommandParseException("Invalid boolean: " + text);
+        }
     }
 
     public int getOffset() {

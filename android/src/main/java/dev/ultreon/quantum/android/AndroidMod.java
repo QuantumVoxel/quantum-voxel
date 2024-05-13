@@ -26,17 +26,17 @@ public class AndroidMod implements Mod {
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getVersion() {
+    public @NotNull String getVersion() {
         return version;
     }
 
@@ -51,7 +51,7 @@ public class AndroidMod implements Mod {
     }
 
     @Override
-    public ModOrigin getOrigin() {
+    public @NotNull ModOrigin getOrigin() {
         return ModOrigin.ACTUAL_PATH;
     }
 
@@ -62,7 +62,7 @@ public class AndroidMod implements Mod {
     }
 
     @Override
-    public Optional<String> getIconPath(int size) {
+    public @NotNull Optional<String> getIconPath(int size) {
         return Optional.empty();
     }
 }

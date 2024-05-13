@@ -99,9 +99,15 @@ public class Label extends Widget {
         if (text == null) return;
 
         switch (this.alignment.get()) {
-            case LEFT -> renderer.textLeft(text, scale, this.pos.x, this.pos.y, textColor);
-            case CENTER -> renderer.textCenter(text, scale, this.pos.x, this.pos.y, textColor);
-            case RIGHT -> renderer.textRight(text, scale, this.pos.x, this.pos.y, textColor);
+            case LEFT:
+                renderer.textLeft(text, scale, this.pos.x, this.pos.y, textColor);
+                break;
+            case CENTER:
+                renderer.textCenter(text, scale, this.pos.x, this.pos.y, textColor);
+                break;
+            case RIGHT:
+                renderer.textRight(text, scale, this.pos.x, this.pos.y, textColor);
+                break;
         }
     }
 

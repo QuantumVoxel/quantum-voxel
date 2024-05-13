@@ -15,13 +15,27 @@ public class BasicCommandResult implements CommandResult {
     @Override
     public void send(CommandSender sender) {
         switch (this.type) {
-            case SERVER -> Chat.sendServerMessage(sender, this.message);
-            case SUCCESS -> Chat.sendSuccess(sender, this.message);
-            case INFO -> Chat.sendInfo(sender, this.message);
-            case WARNING -> Chat.sendWarning(sender, this.message);
-            case DENIED -> Chat.sendDenied(sender, this.message);
-            case ERROR -> Chat.sendError(sender, this.message);
-            case FATAL -> Chat.sendFatal(sender, this.message);
+            case SERVER:
+                Chat.sendServerMessage(sender, this.message);
+                break;
+            case SUCCESS:
+                Chat.sendSuccess(sender, this.message);
+                break;
+            case INFO:
+                Chat.sendInfo(sender, this.message);
+                break;
+            case WARNING:
+                Chat.sendWarning(sender, this.message);
+                break;
+            case DENIED:
+                Chat.sendDenied(sender, this.message);
+                break;
+            case ERROR:
+                Chat.sendError(sender, this.message);
+                break;
+            case FATAL:
+                Chat.sendFatal(sender, this.message);
+                break;
         }
     }
 

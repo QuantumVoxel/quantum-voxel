@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public abstract non-sealed class ModPacketToServer<T extends ModPacketToServer<T>> extends ModPacket<T> implements ServerEndpoint {
+public abstract class ModPacketToServer<T extends ModPacketToServer<T>> extends ModPacket<T> implements ServerEndpoint {
     @Override
     public final boolean handle(Supplier<ModPacketContext> context) {
         PacketContext ctx = context.get();

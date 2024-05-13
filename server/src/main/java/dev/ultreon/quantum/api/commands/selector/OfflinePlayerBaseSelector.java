@@ -28,17 +28,17 @@ public class OfflinePlayerBaseSelector extends BaseSelector<CachedPlayer> {
         }
         CachedPlayer target;
         switch (this.key) {
-            case NAME -> {
+            case NAME:
                 CachedPlayer cachedPlayer = QuantumServer.get().getCachedPlayer(this.stringValue);
                 if (cachedPlayer == null) return new Result<>(null, new NotFoundError("player " + this.stringValue));
                 if (cachedPlayer.isOnline()) return new Result<>(null, new PlayerIsOnlineError(this.stringValue));
                 target = cachedPlayer;
-            }
-            case UUID -> {
+                break;
+            case UUID:
                 UUID uuid = null;
                 try {
                     uuid = UUID.fromString(this.stringValue);
-                    CachedPlayer cachedPlayer = QuantumServer.get().getCachedPlayer(uuid);
+                    cachedPlayer = QuantumServer.get().getCachedPlayer(uuid);
                     if (cachedPlayer == null)
                         return new Result<>(null, new NotFoundError("player " + this.stringValue));
                     if (cachedPlayer.isOnline())
@@ -51,10 +51,9 @@ public class OfflinePlayerBaseSelector extends BaseSelector<CachedPlayer> {
                     e.printStackTrace();
                     return new Result<>(null, new ImpossibleError("Got error that couldn't be caught."));
                 }
-            }
-            default -> {
+                break;
+            default:
                 return new Result<>(null, new OverloadError());
-            }
         }
         return new Result<>(target, null);
     }

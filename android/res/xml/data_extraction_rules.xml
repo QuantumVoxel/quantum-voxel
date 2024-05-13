@@ -31,5 +31,6 @@
         <include domain="external" path="worlds"/>
         <include domain="external" path="screenshots"/>
         <include domain="external" path="resource-packages"/>
+        <include domain="external" path="mods"/>
     </device-transfer>
 </data-extraction-rules>

@@ -7,7 +7,7 @@ import dev.ultreon.quantum.network.system.IConnection;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
-public abstract sealed class ModPacket<T extends ModPacket<T>> permits BiDirectionalModPacket, ModPacketToClient, ModPacketToServer {
+public abstract class ModPacket<T extends ModPacket<T>> {
     protected abstract boolean handle(Supplier<ModPacketContext> context);
 
     @CanIgnoreReturnValue

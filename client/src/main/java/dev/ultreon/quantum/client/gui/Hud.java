@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.widget.StaticWidget;
 import dev.ultreon.quantum.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public class Hud implements StaticWidget {
     }
 
     @Override
-    public void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
     }
 
     private void renderCrosshair(Renderer renderer) {

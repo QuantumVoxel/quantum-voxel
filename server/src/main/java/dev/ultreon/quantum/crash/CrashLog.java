@@ -20,10 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class CrashLog extends CrashCategory {
-    private static final String HEADER = """
-            >>> FATAL ERROR: Crash Report <<<
-            
-            """;
+    private static final String HEADER = "\n>>> FATAL ERROR: Crash Report <<<\n\n";
     private final List<CrashCategory> categories = new ArrayList<>();
 
     public CrashLog(String details, CrashLog report) {

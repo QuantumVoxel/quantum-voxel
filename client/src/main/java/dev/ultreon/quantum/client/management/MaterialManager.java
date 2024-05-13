@@ -88,17 +88,27 @@ public class MaterialManager implements Manager<Material> {
         attributesArr.forEach(attributeElem -> {
             Json5Object attrObj = attributeElem.getAsJson5Object();
             String type = attrObj.getAsJson5Primitive("type").getAsString();
-            Attribute attribute = switch (type) {
-                case "blending" -> loadBlending(attrObj);
-                case "depth_test" -> loadDepthTest(attrObj);
-                case "color" -> loadColor(attrObj);
-                case "texture" -> loadTexture(attrObj, textureManager);
-                case "cubemap" -> loadCubemap(attrObj, cubemapManager);
-                default -> {
+            Attribute attribute;
+            switch (type) {
+                case "blending":
+                    attribute = loadBlending(attrObj);
+                    break;
+                case "depth_test":
+                    attribute = loadDepthTest(attrObj);
+                    break;
+                case "color":
+                    attribute = loadColor(attrObj);
+                    break;
+                case "texture":
+                    attribute = loadTexture(attrObj, textureManager);
+                    break;
+                case "cubemap":
+                    attribute = loadCubemap(attrObj, cubemapManager);
+                    break;
+                default:
                     QuantumClient.LOGGER.warn("Unknown material attribute type %s", type);
-                    yield null;
-                }
-            };
+                    attribute = null;
+            }
 
             if (attribute != null) {
                 material.set(attribute);
@@ -155,19 +165,25 @@ public class MaterialManager implements Manager<Material> {
 
         Color color = new Color(r.getAsFloat(), g.getAsFloat(), b.getAsFloat(), a.getAsFloat());
 
-        return switch (type) {
-            case "diffuse" -> ColorAttribute.createDiffuse(color);
-            case "ambient" -> ColorAttribute.createAmbient(color);
-            case "ambient_light" -> ColorAttribute.createAmbientLight(color);
-            case "emissive" -> ColorAttribute.createEmissive(color);
-            case "specular" -> ColorAttribute.createSpecular(color);
-            case "fog" -> ColorAttribute.createFog(color);
-            case "reflection" -> ColorAttribute.createReflection(color);
-            default -> {
+        switch (type) {
+            case "diffuse":
+                return ColorAttribute.createDiffuse(color);
+            case "ambient":
+                return ColorAttribute.createAmbient(color);
+            case "ambient_light":
+                return ColorAttribute.createAmbientLight(color);
+            case "emissive":
+                return ColorAttribute.createEmissive(color);
+            case "specular":
+                return ColorAttribute.createSpecular(color);
+            case "fog":
+                return ColorAttribute.createFog(color);
+            case "reflection":
+                return ColorAttribute.createReflection(color);
+            default:
                 QuantumClient.LOGGER.warn("Unknown material color type %s", type);
-                yield null;
-            }
-        };
+                return null;
+        }
     }
 
     private Attribute loadTexture(Json5Object attrObj, TextureManager textureManager) {
@@ -181,17 +197,22 @@ public class MaterialManager implements Manager<Material> {
 
     @Nullable
     private static Attribute createTexAttr(String textureType, Texture texture) {
-        return switch (textureType) {
-            case "diffuse" -> TextureAttribute.createDiffuse(texture);
-            case "normal" -> TextureAttribute.createNormal(texture);
-            case "specular" -> TextureAttribute.createSpecular(texture);
-            case "emissive" -> TextureAttribute.createEmissive(texture);
-            case "bump" -> TextureAttribute.createBump(texture);
-            case "reflection" -> TextureAttribute.createReflection(texture);
-            default -> {
+        switch (textureType) {
+            case "diffuse":
+                return TextureAttribute.createDiffuse(texture);
+            case "normal":
+                return TextureAttribute.createNormal(texture);
+            case "specular":
+                return TextureAttribute.createSpecular(texture);
+            case "emissive":
+                return TextureAttribute.createEmissive(texture);
+            case "bump":
+                return TextureAttribute.createBump(texture);
+            case "reflection":
+                return TextureAttribute.createReflection(texture);
+            default:
                 QuantumClient.LOGGER.warn("Unknown material texture type %s", textureType);
-                yield null;
-            }
-        };
+                return null;
+        }
     }
 }

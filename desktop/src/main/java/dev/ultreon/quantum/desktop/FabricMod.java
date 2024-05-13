@@ -34,21 +34,21 @@ public class FabricMod implements Mod {
         this.name = metadata.getName();
         this.version = metadata.getVersion().getFriendlyString();
         this.description = metadata.getDescription();
-        this.authors = metadata.getAuthors().stream().map(Person::getName).collect(Collectors.collect(Collectors.toList()));
+        this.authors = metadata.getAuthors().stream().map(Person::getName).collect(Collectors.toList());
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getVersion() {
+    public @NotNull String getVersion() {
         return version;
     }
 
@@ -58,7 +58,7 @@ public class FabricMod implements Mod {
     }
 
     @Override
-    public Optional<String> getIconPath(int size) {
+    public @NotNull Optional<String> getIconPath(int size) {
         return this.metadata.getIconPath(size);
     }
 
@@ -68,12 +68,17 @@ public class FabricMod implements Mod {
     }
 
     @Override
-    public ModOrigin getOrigin() {
-        return switch (container.getOrigin().getKind()) {
-            case PATH -> ModOrigin.ACTUAL_PATH;
-            case NESTED -> ModOrigin.BUNDLED;
-            case UNKNOWN -> ModOrigin.OTHER;
-        };
+    public @NotNull ModOrigin getOrigin() {
+        switch (container.getOrigin().getKind()) {
+            case PATH:
+                return ModOrigin.ACTUAL_PATH;
+            case NESTED:
+                return ModOrigin.BUNDLED;
+            case UNKNOWN:
+                return ModOrigin.OTHER;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     @Override

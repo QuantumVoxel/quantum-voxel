@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -65,7 +66,7 @@ public class IndexedCommandSpecValues implements Iterable<IndexedCommandSpecValu
     }
 
     @Override
-    public Iterator<Entry> iterator() {
+    public @NotNull Iterator<Entry> iterator() {
         return new Iterator<>() {
             private final Iterator<Int2ReferenceMap.Entry<CommandSpecValues>> entries =
                     IndexedCommandSpecValues.this.mapping.int2ReferenceEntrySet().iterator();

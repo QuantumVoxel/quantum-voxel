@@ -277,7 +277,7 @@ public class LocalPlayer extends ClientPlayer {
 
     @Override
     @Deprecated
-    public Vec3d getPosition() {
+    public @NotNull Vec3d getPosition() {
         return super.getPosition();
     }
 }

@@ -5,7 +5,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3f;
 
 import java.util.UUID;
 
-public sealed interface BBModelNode permits BBModelElement, BBModelGroup {
+public interface BBModelNode {
     Matrix4 rotationMatrix();
 
     Vec3f origin();

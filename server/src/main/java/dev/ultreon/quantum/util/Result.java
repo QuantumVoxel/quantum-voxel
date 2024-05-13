@@ -25,7 +25,7 @@ public class Result<T> {
         return new Result<>(new Ok<>(left), null);
     }
 
-    public static <T> Result<T> ok() {
+    public static Result<Void> ok() {
         return new Result<>(new Ok<>(null), null);
 
     }

@@ -82,7 +82,7 @@ public class TextStyle {
         return this;
     }
 
-    public HoverEvent<?> getHoverEvent() {
+    public @Nullable HoverEvent<?> getHoverEvent() {
         return this.hoverEvent;
     }
 
@@ -91,7 +91,7 @@ public class TextStyle {
         return this;
     }
 
-    public ClickEvent getClickEvent() {
+    public @Nullable ClickEvent getClickEvent() {
         return this.clickEvent;
     }
 

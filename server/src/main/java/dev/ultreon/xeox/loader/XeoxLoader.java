@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.Mod;
 
+import dev.ultreon.quantum.util.Result;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.mozilla.javascript.RhinoException;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -106,16 +106,18 @@ public class XeoxLoader {
 
     /**
      * Imports a mod into the mods directory.
-     * 
+     *
+     * @return
      * @author <a href="https://github.com/XyperCode">XyperCode</a>
      * @since 0.1.0
      */
-    public void importMod(File file) {
+    public Result<Void> importMod(File file) {
         try {
             XeoxModFile.importFile(file);
-        } catch (IOException e) {
-            LOGGER.error("Failed to import mod %s.", file.getName(), e);
+        } catch (Exception e) {
+            return Result.failure(e);
         }
+        return Result.ok();
     }
 
     /**

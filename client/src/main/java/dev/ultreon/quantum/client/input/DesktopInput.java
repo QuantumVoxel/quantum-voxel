@@ -155,20 +155,40 @@ public class DesktopInput extends GameInput {
         if (player != null && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                 switch (player.getGamemode()) {
-                    case SURVIVAL -> player.execute("gm spectator");
-                    case BUILDER -> player.execute("gm survival");
-                    case BUILDER_PLUS -> player.execute("gm builder");
-                    case ADVENTUROUS -> player.execute("gm builder_plus");
-                    case SPECTATOR -> player.execute("gm adventurous");
+                    case SURVIVAL:
+                        player.execute("gm spectator");
+                        break;
+                    case BUILDER:
+                        player.execute("gm survival");
+                        break;
+                    case BUILDER_PLUS:
+                        player.execute("gm builder");
+                        break;
+                    case ADVENTUROUS:
+                        player.execute("gm builder_plus");
+                        break;
+                    case SPECTATOR:
+                        player.execute("gm adventurous");
+                        break;
                 }
                 return;
             }
             switch (player.getGamemode()) {
-                case SURVIVAL -> player.execute("gm builder");
-                case BUILDER -> player.execute("gm builder_plus");
-                case BUILDER_PLUS -> player.execute("gm adventurous");
-                case ADVENTUROUS -> player.execute("gm spectator");
-                case SPECTATOR -> player.execute("gm survival");
+                case SURVIVAL:
+                    player.execute("gm builder");
+                    break;
+                case BUILDER:
+                    player.execute("gm builder_plus");
+                    break;
+                case BUILDER_PLUS:
+                    player.execute("gm adventurous");
+                    break;
+                case ADVENTUROUS:
+                    player.execute("gm spectator");
+                    break;
+                case SPECTATOR:
+                    player.execute("gm survival");
+                    break;
             }
 
             return;

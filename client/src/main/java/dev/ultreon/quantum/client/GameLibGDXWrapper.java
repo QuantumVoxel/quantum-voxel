@@ -21,7 +21,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * LibGDX wrapper for Quantum Voxel to handle uncaught exceptions.
@@ -47,7 +46,7 @@ public final class GameLibGDXWrapper implements ApplicationListener {
      *
      * @param argv The command line arguments.
      */
-    public GameLibGDXWrapper(String[] argv) {
+    private GameLibGDXWrapper(String[] argv) {
         this.argv = argv;
 
         if (instance == null) {
@@ -59,6 +58,13 @@ public final class GameLibGDXWrapper implements ApplicationListener {
         crashOverride = crash.getCrashLog();
 
         CommonConstants.LOGGER.error("\n" + crash);
+    }
+
+    public static GameLibGDXWrapper createInstance(String[] argv) {
+        if (instance == null) {
+            instance = new GameLibGDXWrapper(argv);
+        }
+        return instance;
     }
 
     /**
@@ -88,6 +94,8 @@ public final class GameLibGDXWrapper implements ApplicationListener {
      */
     @Override
     public void create() {
+        if (client != null) return;
+
         try {
             batch = new SpriteBatch();
             shapeRenderer = new ShapeRenderer();

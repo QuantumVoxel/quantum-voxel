@@ -88,11 +88,9 @@ public final class CubeModel {
             TextureRegion backTex = texture.get(this.back);
 
             switch (this.properties.rotation) {
-                case NORTH -> {
-
-                }
-
-                case EAST -> {
+                case NORTH:
+                    break;
+                case EAST:
                     frontTex = texture.get(this.left);
                     backTex = texture.get(this.right);
                     leftTex = texture.get(this.back);
@@ -101,9 +99,8 @@ public final class CubeModel {
                     // Rotate top and bottom tex
                     topTex = rotate(topTex, 1);
                     bottomTex = rotate(bottomTex, 1);
-                }
-
-                case SOUTH -> {
+                    break;
+                case SOUTH:
                     frontTex = texture.get(this.back);
                     backTex = texture.get(this.front);
                     leftTex = texture.get(this.right);
@@ -112,9 +109,8 @@ public final class CubeModel {
                     // Rotate top and bottom tex
                     topTex = rotate(topTex, 2);
                     bottomTex = rotate(bottomTex, 2);
-                }
-
-                case WEST -> {
+                    break;
+                case WEST:
                     frontTex = texture.get(this.right);
                     backTex = texture.get(this.left);
                     leftTex = texture.get(this.front);
@@ -123,9 +119,8 @@ public final class CubeModel {
                     // Rotate top and bottom tex
                     topTex = rotate(topTex, 3);
                     bottomTex = rotate(bottomTex, 3);
-                }
-
-                case UP -> {
+                    break;
+                case UP:
                     frontTex = texture.get(this.top);
                     backTex = texture.get(this.bottom);
                     leftTex = texture.get(this.left);
@@ -133,9 +128,8 @@ public final class CubeModel {
 
                     leftTex = rotate(leftTex, 1);
                     rightTex = rotate(rightTex, 1);
-                }
-
-                case DOWN -> {
+                    break;
+                case DOWN:
                     frontTex = texture.get(this.bottom);
                     backTex = texture.get(this.top);
                     leftTex = texture.get(this.left);
@@ -143,7 +137,7 @@ public final class CubeModel {
 
                     leftTex = rotate(leftTex, 3);
                     rightTex = rotate(rightTex, 3);
-                }
+                    break;
             }
 
             BakedCubeModel baked = BakedCubeModel.of(
@@ -165,9 +159,7 @@ public final class CubeModel {
 
     private TextureRegion rotate(TextureRegion region, int ticks) {
         Texture texture = region.getTexture();
-        return switch (ticks) {
-            default -> new TextureRegion(texture, region.getU(), region.getV(), region.getU2(), region.getV2());
-        };
+        return new TextureRegion(texture, region.getU(), region.getV(), region.getU2(), region.getV2());
     }
 
     @NotNull

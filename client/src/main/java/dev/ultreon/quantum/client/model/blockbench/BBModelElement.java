@@ -11,7 +11,7 @@ import dev.ultreon.quantum.util.RgbColor;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract sealed class BBModelElement implements BBModelNode permits BBCubeModelElement, BBMeshModelElement {
+public abstract class BBModelElement implements BBModelNode {
     BBModelNode parent;
     private Matrix4 rotationMatrix;
 

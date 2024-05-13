@@ -226,42 +226,42 @@ public final class BBCubeModelElement extends BBModelElement {
             v11.setUV(entry.uv().z / resolution.x, entry.uv().y / resolution.y);
 
             switch (blockFace) {
-                case UP -> {
+                case UP:
                     v00.setPos(to.x, to.y, from.z);
                     v01.setPos(to.x, to.y, to.z);
                     v10.setPos(from.x, to.y, from.z);
                     v11.setPos(from.x, to.y, to.z);
-                }
-                case DOWN -> {
+                    break;
+                case DOWN:
                     v00.setPos(from.x, from.y, from.z);
                     v01.setPos(from.x, from.y, to.z);
                     v10.setPos(to.x, from.y, from.z);
                     v11.setPos(to.x, from.y, to.z);
-                }
-                case WEST -> {
+                    break;
+                case WEST:
                     v00.setPos(from.x, from.y, from.z);
                     v01.setPos(from.x, to.y, from.z);
                     v10.setPos(from.x, from.y, to.z);
                     v11.setPos(from.x, to.y, to.z);
-                }
-                case EAST -> {
+                    break;
+                case EAST:
                     v00.setPos(to.x, from.y, to.z);
                     v01.setPos(to.x, to.y, to.z);
                     v10.setPos(to.x, from.y, from.z);
                     v11.setPos(to.x, to.y, from.z);
-                }
-                case NORTH -> {
+                    break;
+                case NORTH:
                     v00.setPos(to.x, from.y, from.z);
                     v01.setPos(to.x, to.y, from.z);
                     v10.setPos(from.x, from.y, from.z);
                     v11.setPos(from.x, to.y, from.z);
-                }
-                case SOUTH -> {
+                    break;
+                case SOUTH:
                     v00.setPos(from.x, from.y, to.z);
                     v01.setPos(from.x, to.y, to.z);
                     v10.setPos(to.x, from.y, to.z);
                     v11.setPos(to.x, to.y, to.z);
-                }
+                    break;
             }
 
             parent.rect(v00, v10, v11, v01);

@@ -49,8 +49,8 @@ java {
     withSourcesJar()
     withJavadocJar()
     
-    sourceCompatibility("17")
-    targetCompatibility("17")
+    sourceCompatibility("11")
+    targetCompatibility("11")
 }
 
 dependencies {
@@ -101,7 +101,7 @@ dependencies {
     // Misc
     implementation api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
     implementation api("com.raylabz:opensimplex:1.0.3")
-    implementation api("de.articdive:jnoise-pipeline:4.1.0")
+    implementation api("dev.ultreon.JNoiseJDK11:jnoise-pipeline:f45d87516b")
 
     implementation api('dev.ultreon:libnoiseforjava:f77e0827da')
     implementation api('com.flowpowered:flow-noise:1.0.0')
@@ -198,4 +198,8 @@ tasks.register('copyJar', Copy) {
 
 compileJava {
     options.encoding = "UTF-8"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "11"
 }

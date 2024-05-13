@@ -50,14 +50,28 @@ public class EntityBaseSelector<T extends Entity> extends BaseSelector<T> {
             return new Result<>(null, this.getError());
         }
         Object target;
-        return result =  switch (this.getKey()) {
-            case TAG -> tag(player);
-            case UUID -> uuid();
-            case NAME -> name();
-            case ID -> id();
-            case VARIABLE -> variable(player);
-            default -> new Result<>(null, new OverloadError());
-        };
+        switch (this.getKey()) {
+            case TAG:
+                result = tag(player);
+                break;
+            case UUID:
+                result = uuid();
+                break;
+            case NAME:
+                result = name();
+                break;
+            case ID:
+                result = id();
+                break;
+            case VARIABLE:
+                result = variable(player);
+                break;
+            default:
+                result = new Result<>(null, new OverloadError());
+                break;
+        }
+
+        return result;
     }
 
     private @NotNull Result<T> variable(Player player) {
@@ -112,7 +126,7 @@ public class EntityBaseSelector<T extends Entity> extends BaseSelector<T> {
         if (stringValue == null) return new Result<>(null, new OverloadError());
 
         switch (stringValue) {
-            case "target" -> {
+            case "target":
                 if (player == null) return new Result<>(null, new NeedPlayerError());
 
                 target = player.rayCast(player.getWorld().getEntitiesByClass(this.clazz));
@@ -121,29 +135,24 @@ public class EntityBaseSelector<T extends Entity> extends BaseSelector<T> {
                 } catch (ClassCastException e) {
                     return new Result<>(null, new TargetEntityNotFoundError(this.clazz.getSimpleName()));
                 }
-            }
-            case "me" -> {
+            case "me":
                 return this.clazz.isAssignableFrom(this.sender.getClass())
                         ? new Result<>(clazz.cast(this.sender), null)
                         : new Result<T>(null, new NeedEntityError());
-            }
-            case "nearest" -> {
+            case "nearest":
                 if (player == null) return new Result<>(null, new NeedPlayerError());
 
                 target = player.nearestEntity(this.clazz);
                 return target == null
                         ? new Result<>(null, new NotFoundInWorldError("entity"))
                         : new Result<>(clazz.cast(target), null);
-            }
-            case "selected" -> {
+            case "selected":
                 var entity = Selections.get(this.sender).getEntity();
                 return this.clazz.isInstance(entity)
                         ? new Result<>(clazz.cast(entity), null)
                         : new Result<T>(null, new NoSelectedError("entity"));
-            }
-            default -> {
+            default:
                 return new Result<>(null, new OverloadError());
-            }
         }
     }
 

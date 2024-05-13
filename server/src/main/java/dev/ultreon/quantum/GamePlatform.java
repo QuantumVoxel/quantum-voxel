@@ -4,6 +4,7 @@ import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.loader.XeoxLoader;
 import org.jetbrains.annotations.Nullable;
 import org.mozilla.javascript.Context;
@@ -105,9 +106,9 @@ public abstract class GamePlatform {
         return false;
     }
 
-    public boolean openImportDialog() {
+    public Result<Boolean> openImportDialog() {
         // Implemented in subclasses
-        return false;
+        return Result.ok(false);
     }
 
     public void prepare() {
