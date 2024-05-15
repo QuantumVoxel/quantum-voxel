@@ -61,14 +61,14 @@ public class BlockModelRegistry {
     public static void registerDefault(Block block) {
         Identifier key = Registries.BLOCK.getId(block);
         Preconditions.checkNotNull(key, "Block is not registered");
-        BlockModelRegistry.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path)));
+        BlockModelRegistry.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
     }
 
     public static void registerDefault(Supplier<Block> block) {
         BlockModelRegistry.register(block, meta -> true, Suppliers.memoize(() -> {
             Identifier key = Registries.BLOCK.getId(block.get());
             Preconditions.checkNotNull(key, "Block is not registered");
-            return CubeModel.of(key.mapPath(path -> "blocks/" + path));
+            return CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path));
         }));
     }
 
@@ -104,7 +104,7 @@ public class BlockModelRegistry {
             for (var modelPair : models) {
                 var predicate = modelPair.getFirst();
                 var model = modelPair.getSecond();
-                BakedCubeModel baked = model.get().bake(block.getId(), atlas);
+                BakedCubeModel baked = model.get().bake(model.get().resourceId(), atlas);
 
                 modelList.add(new Pair<>(predicate, baked));
             }

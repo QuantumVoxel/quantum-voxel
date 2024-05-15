@@ -6,10 +6,12 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.BakedModel;
+import dev.ultreon.quantum.client.render.Models3D;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.LazyValue;
@@ -18,14 +20,12 @@ import java.util.Objects;
 
 public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final LazyValue<BakedCubeModel> DEFAULT = new LazyValue<>();
-    private final Identifier resourceId;
     private final TextureRegion top;
     private final TextureRegion bottom;
     private final TextureRegion left;
     private final TextureRegion right;
     private final TextureRegion front;
     private final TextureRegion back;
-    private final Mesh mesh;
     public final ModelProperties properties;
 
     private static final VertexInfo V_00 = new VertexInfo();
@@ -50,8 +50,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private BakedCubeModel(Identifier resourceId, TextureRegion top, TextureRegion bottom,
                            TextureRegion left, TextureRegion right,
                            TextureRegion front, TextureRegion back, ModelProperties properties, Model model) {
-        super(model);
-        this.resourceId = resourceId;
+        super(resourceId, model);
         this.top = top;
         this.bottom = bottom;
         this.left = left;
@@ -59,7 +58,6 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         this.front = front;
         this.back = back;
 
-        mesh = createMesh(top, bottom, left, right, front, back);
         this.properties = properties;
     }
 
@@ -75,40 +73,37 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
 
     public static BakedCubeModel of(Identifier resourceId, TextureRegion all) {
         return new BakedCubeModel(resourceId, all, all, all, all, all, all, ModelProperties.builder().build(),
-                createModel(all, all, all, all, all, all));
+                createModel(resourceId, all, all, all, all, all, all));
     }
 
     public static BakedCubeModel of(Identifier resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back) {
         return new BakedCubeModel(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(),
-                createModel(top, bottom, left, right, front, back));
+                createModel(resourceId, top, bottom, left, right, front, back));
     }
 
     public static BakedCubeModel of(Identifier resourceId, TextureRegion all, ModelProperties properties) {
-        return new BakedCubeModel(resourceId, all, properties, createModel(all, all, all, all, all, all));
+        return new BakedCubeModel(resourceId, all, properties, createModel(resourceId, all, all, all, all, all, all));
     }
 
     public static BakedCubeModel of(Identifier resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back, ModelProperties properties) {
         return new BakedCubeModel(resourceId, top, bottom, left, right, front, back, properties,
-                createModel(top, bottom, left, right, front, back));
+                createModel(resourceId, top, bottom, left, right, front, back));
     }
 
-    public static Model createModel(TextureRegion top, TextureRegion bottom,
+    public static Model createModel(Identifier resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back) {
-        ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.begin();
+        return Models3D.INSTANCE.generateModel(resourceId, modelBuilder -> {
+            Material material = new Material();
+            material.set(new TextureAttribute(TextureAttribute.Diffuse, QuantumClient.get().blocksTextureAtlas.getTexture()));
+            material.set(new TextureAttribute(TextureAttribute.Emissive, QuantumClient.get().blocksTextureAtlas.getEmissiveTexture()));
 
-        Material material = new Material();
-        material.set(new TextureAttribute(TextureAttribute.Diffuse, QuantumClient.get().blocksTextureAtlas.getTexture()));
-        material.set(new TextureAttribute(TextureAttribute.Emissive, QuantumClient.get().blocksTextureAtlas.getEmissiveTexture()));
-
-        modelBuilder.part("cube", createMesh(top, bottom, left, right, front, back), GL20.GL_TRIANGLES, material);
-
-        return modelBuilder.end();
+            modelBuilder.part("cube", createMesh(top, bottom, left, right, front, back), GL20.GL_TRIANGLES, material);
+        });
     }
 
     public TextureRegion top() {
@@ -150,7 +145,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         return builder.end();
     }
 
-    private static void createTop(TextureRegion region, MeshBuilder builder) {
+    private static void createTop(TextureRegion region, MeshPartBuilder builder) {
         if (region == null) return;
 
         V_00.setPos(-1, 1, 0);
@@ -162,7 +157,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         finishRect(region, builder);
     }
 
-    private static void createBottom(TextureRegion region, MeshBuilder builder) {
+    private static void createBottom(TextureRegion region, MeshPartBuilder builder) {
         if (region == null) return;
 
         V_00.setPos(-1, 0, 0);
@@ -174,7 +169,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         finishRect(region, builder);
     }
 
-    private static void createLeft(TextureRegion region, MeshBuilder builder) {
+    private static void createLeft(TextureRegion region, MeshPartBuilder builder) {
         if (region == null) return;
 
         V_00.setPos(-1, 0, 0);
@@ -186,7 +181,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         finishRect(region, builder);
     }
 
-    private static void createRight(TextureRegion region, MeshBuilder builder) {
+    private static void createRight(TextureRegion region, MeshPartBuilder builder) {
         if (region == null) return;
 
         V_00.setPos(-1 + 1, 0, 0);
@@ -198,7 +193,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         finishRect(region, builder);
     }
 
-    private static void createFront(TextureRegion region, MeshBuilder builder) {
+    private static void createFront(TextureRegion region, MeshPartBuilder builder) {
         if (region == null) return;
 
         V_00.setPos(-1, 0, 0);
@@ -210,7 +205,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         finishRect(region, builder);
     }
 
-    private static void createBack(TextureRegion region, MeshBuilder builder) {
+    private static void createBack(TextureRegion region, MeshPartBuilder builder) {
         if (region == null) return;
 
         V_00.setPos(-1, 0, 1);
@@ -229,7 +224,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         V_11.setNor(x, y, z);
     }
 
-    private static void finishRect(TextureRegion region, MeshBuilder builder) {
+    private static void finishRect(TextureRegion region, MeshPartBuilder builder) {
         V_00.setUV(region.getU2(), region.getV2());
         V_01.setUV(region.getU2(), region.getV());
         V_01.setUV(region.getU(), region.getV());
@@ -241,11 +236,6 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     @Override
     public void load(QuantumClient client) {
         // Do nothing
-    }
-
-    @Override
-    public Identifier resourceId() {
-        return resourceId;
     }
 
     public boolean isCustom() {
@@ -279,9 +269,5 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
                 "right=" + this.right + ", " +
                 "front=" + this.front + ", " +
                 "back=" + this.back + ']';
-    }
-
-    public Mesh getMesh() {
-        return this.mesh;
     }
 }

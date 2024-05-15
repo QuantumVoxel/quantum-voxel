@@ -193,4 +193,6 @@ public abstract class GamePlatform {
     public void setCursorPosition(int x, int y) {
 
     }
+
+    public abstract DeviceType getDeviceType();
 }

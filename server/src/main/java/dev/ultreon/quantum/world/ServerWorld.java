@@ -156,7 +156,7 @@ public class ServerWorld extends World {
         if (!chunk.getPos().equals(pos)) {
             throw new ValidationError("Chunk position (" + chunk.getPos() + ") and provided position (" + pos + ") don't match.");
         }
-        if (!this.unloadChunk(pos, true)) World.LOGGER.warn("Failed to unload chunk at %s", pos);
+        if (!this.unloadChunk(pos, true)) World.LOGGER.warn("Failed to unload chunk at {}", pos);
 
         WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getPos(), chunk);
         return true;

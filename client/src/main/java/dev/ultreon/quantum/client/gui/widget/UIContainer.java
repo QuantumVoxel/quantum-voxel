@@ -212,11 +212,12 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
         List<Widget> widgetList = List.copyOf(this.widgets);
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
-            if (!widget.visible) {
-                if (widget.ignoreBounds && widget.mouseRelease(mouseX, mouseY, button)) return true;
-                continue;
+            if (widget.visible) {
+                widget.mouseRelease(mouseX, mouseY, button);
+            } else if (widget.ignoreBounds) {
+                widget.mouseRelease(mouseX, mouseY, button);
             }
-            if (widget.isWithinBounds(mouseX, mouseY) && widget.mouseRelease(mouseX, mouseY, button)) return true;
+
         }
         return super.mouseRelease(mouseX, mouseY, button);
     }

@@ -23,6 +23,7 @@ public class Scene3D {
 
     private Scene3D() { }
 
+    @Deprecated(forRemoval = true)
     public MeshBuilder meshBuilder() {
         return new MeshBuilder();
     }

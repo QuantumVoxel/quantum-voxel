@@ -2,6 +2,8 @@ package dev.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FlushablePool;
 import com.google.common.collect.Queues;
 import dev.ultreon.quantum.client.util.Utils;
@@ -21,6 +23,7 @@ public class Matrices {
     public Consumer<Matrix4> onPush = matrix -> {};
     public Consumer<Matrix4> onPop = matrix -> {};
     public Consumer<Matrix4> onEdit = matrix -> {};
+    private Vector3 tmp;
 
     public Matrices() {
         this.stack = Utils.make(Queues.newArrayDeque(), matrixDeque -> matrixDeque.add(this.pool.obtain().idt()));
@@ -83,5 +86,36 @@ public class Matrices {
 
     public void reset() {
         pool.flush();
+    }
+
+    public Vector2 getScale(Vector2 scale) {
+        Matrix4 matrix = this.stack.getLast();
+        scale.set(matrix.getScaleX(), matrix.getScaleY());
+        return scale;
+    }
+
+    public Vector3 getScale(Vector3 scale) {
+        Matrix4 matrix = this.stack.getLast();
+        scale.set(matrix.getScaleX(), matrix.getScaleY(), matrix.getScaleZ());
+        return scale;
+    }
+
+    public Vector2 getTranslation(Vector2 translation) {
+        Matrix4 matrix = this.stack.getLast();
+        matrix.getTranslation(tmp);
+        translation.set(tmp.x, tmp.y);
+        return translation;
+    }
+
+    public Vector3 getTranslation(Vector3 translation) {
+        Matrix4 matrix = this.stack.getLast();
+        matrix.getTranslation(translation);
+        return translation;
+    }
+
+    public Quaternion getRotation(Quaternion rotation) {
+        Matrix4 matrix = this.stack.getLast();
+        matrix.getRotation(rotation);
+        return rotation;
     }
 }

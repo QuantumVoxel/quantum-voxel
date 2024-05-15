@@ -86,10 +86,10 @@ public class XeoxLoader {
             try {
                 mod.init();
             } catch (RhinoException e) {
-                LOGGER.error("Failed to initialize mod %s:", mod.getMetadata().id(), e);
+                LOGGER.error("Failed to initialize mod {}:", mod.getMetadata().id(), e);
                 recordError(e);
             } catch (Exception e) {
-                LOGGER.error("Failed to initialize mod %s", mod.getMetadata().id(), e);
+                LOGGER.error("Failed to initialize mod {}", mod.getMetadata().id(), e);
             }
         }
     }

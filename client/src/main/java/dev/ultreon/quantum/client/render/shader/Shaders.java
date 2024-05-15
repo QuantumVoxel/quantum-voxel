@@ -48,8 +48,8 @@ public class Shaders {
     public static void checkShaderCompilation(ShaderProgram program, String filename) {
         String shaderLog = program.getLog();
         if (program.isCompiled()) {
-            if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation for %s success", filename);
-            else QuantumClient.LOGGER.warn("Shader compilation warnings for %s:\n%s", filename, shaderLog);
+            if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation for {} success", filename);
+            else QuantumClient.LOGGER.warn("Shader compilation warnings for {}:\n{}", filename, shaderLog);
         } else throw new GdxRuntimeException("Shader compilation failed for " + filename + ":\n" + shaderLog);
     }
 

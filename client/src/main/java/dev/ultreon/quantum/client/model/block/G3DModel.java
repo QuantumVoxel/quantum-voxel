@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.render.Models3D;
 import dev.ultreon.quantum.client.resources.ResourceLoader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.Identifier;
@@ -27,7 +28,9 @@ public class G3DModel implements BlockModel {
 
     @Override
     public void load(QuantumClient client) {
-        this.model = client.deferDispose(ResourceLoader.loadG3D(this.resource));
+        Model loaded = ResourceLoader.loadG3D(this.resource);
+        Models3D.INSTANCE.add(this.resourceId(), loaded);
+        this.model = loaded;
     }
 
     @Override
@@ -51,11 +54,6 @@ public class G3DModel implements BlockModel {
     @Override
     public Model getModel() {
         return this.model;
-    }
-
-    @Override
-    public void dispose() {
-        this.model.dispose();
     }
 
     public static class ModelConfig {

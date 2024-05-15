@@ -37,7 +37,7 @@ public class ShaderPrograms {
         String shaderLog = program.getLog();
         if (program.isCompiled()) {
             if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation success");
-            else QuantumClient.LOGGER.warn("Shader compilation warnings:\n%s", shaderLog);
+            else QuantumClient.LOGGER.warn("Shader compilation warnings:\n{}", shaderLog);
         } else throw new GdxRuntimeException("Shader compilation failed:\n" + shaderLog);
         return program;
     }

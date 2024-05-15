@@ -46,6 +46,7 @@ import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.entity.renderer.EntityRenderer;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.render.Meshes3D;
 import dev.ultreon.quantum.client.render.Models3D;
 import dev.ultreon.quantum.client.render.Scene3D;
 import dev.ultreon.quantum.client.render.shader.Shaders;
@@ -146,11 +147,8 @@ public final class WorldRenderer implements DisposableContainer {
         boundingBox.max.add(v);
 
         for (int i = 0; i < 6; i++) {
-            BakedCubeModel bakedCubeModel = this.deferDispose(BakedCubeModel.of(new Identifier("break_stage/stub_" + i), breakingTexRegions.get(i)));
-            Mesh mesh = bakedCubeModel.getMesh();
-            Model model = Models3D.INSTANCE.generateModel(id("generated/breaking/stage_" + i), modelBuilder -> {
-                modelBuilder.part("breaking", mesh, GL_TRIANGLES, this.breakingMaterial);
-            });
+            BakedCubeModel bakedCubeModel = BakedCubeModel.of(new Identifier("break_stage/stub_" + i), breakingTexRegions.get(i));
+            Model model = bakedCubeModel.getModel();
 
             this.breakingModels.add(model);
         }
@@ -407,7 +405,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         for (var chunk : chunks) {
             if (positions.contains(chunk.getPos(), false)) {
-                QuantumClient.LOGGER.warn("Duplicate chunk: %s", chunk.getPos());
+                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getPos());
                 continue;
             }
 
@@ -529,9 +527,9 @@ public final class WorldRenderer implements DisposableContainer {
 
         ModelInstance modelInstance = chunk.modelInstance;
         if (modelInstance == null)
-            QuantumClient.LOGGER.warn("Model instance is null for chunk %s, not disposing it.", chunk.getPos());
+            QuantumClient.LOGGER.warn("Model instance is null for chunk {}, not disposing it.", chunk.getPos());
         else if (!Scene3D.WORLD.destroy(modelInstance))
-            QuantumClient.LOGGER.warn("Model instance didn't exist in scene! Chunk at %s", chunk.getPos());
+            QuantumClient.LOGGER.warn("Model instance didn't exist in scene! Chunk at {}", chunk.getPos());
 
         chunk.modelInstance = null;
         chunk.model = null;
@@ -540,7 +538,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         Identifier id = createId(chunk.getPos());
         if (!Models3D.INSTANCE.unloadModel(id)) {
-            QuantumClient.LOGGER.warn("Didn't find chunk model %s to dispose, possibly it didn't exist, or got moved out.", id);
+            QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
         }
 
 
@@ -635,7 +633,7 @@ public final class WorldRenderer implements DisposableContainer {
                 }
                 model = renderer.createModel(entity);
                 if (model == null) {
-                    QuantumClient.LOGGER.warn("Failed to render entity %s because it's model instance is still null", entity.getId());
+                    QuantumClient.LOGGER.warn("Failed to render entity {} because it's model instance is still null", entity.getId());
                     return;
                 }
                 this.modelInstances.put(entity.getId(), model.getInstance());
@@ -650,7 +648,7 @@ public final class WorldRenderer implements DisposableContainer {
             renderer.animate(instance, context);
             renderer.render(instance, context);
         } catch (Exception e) {
-            QuantumClient.LOGGER.error("Failed to render entity %s", entity.getId(), e);
+            QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);
             CrashLog crashLog = new CrashLog("Error rendering entity " + entity.getId(), new Exception());
             CrashCategory category = new CrashCategory("Entity", e);
             category.add("Entity ID", entity.getId());
@@ -769,7 +767,7 @@ public final class WorldRenderer implements DisposableContainer {
 
         if (this.disposables.contains(disposable)) return disposable;
         if (this.disposed) {
-            QuantumClient.LOGGER.warn("World renderer already disposed, immediately disposing %s", disposable.getClass().getName());
+            QuantumClient.LOGGER.warn("World renderer already disposed, immediately disposing {}", disposable.getClass().getName());
             disposable.dispose();
             return disposable;
         }

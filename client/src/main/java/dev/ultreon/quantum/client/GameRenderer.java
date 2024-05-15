@@ -55,7 +55,7 @@ public class GameRenderer implements Disposable {
 
         ShaderProgram worldShaderProgram = ShaderPrograms.MODEL.get();
         if (!worldShaderProgram.isCompiled()) {
-            LOGGER.error("Failed to compile model shader:\n%s", worldShaderProgram.getLog());
+            LOGGER.error("Failed to compile model shader:\n{}", worldShaderProgram.getLog());
         }
     }
 

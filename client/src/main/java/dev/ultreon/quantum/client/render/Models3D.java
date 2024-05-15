@@ -6,19 +6,21 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Models3D {
     public static final Models3D INSTANCE = new Models3D();
     private final ModelBuilder builder = new ModelBuilder();
-    private final Map<Identifier, Model> models = new HashMap<>();
+    private final Map<Identifier, Model> models = new ConcurrentHashMap<>();
 
     private Models3D() {
 
@@ -71,7 +73,7 @@ public class Models3D {
 
     public Model generateModel(Identifier id, Consumer<ModelBuilder> builder) {
         if (this.models.containsKey(id)) {
-            QuantumClient.LOGGER.error("Model %s already exists, the model will be unloaded and regenerated.", id);
+            QuantumClient.LOGGER.error("Model {} already exists, the model will be unloaded and regenerated.", id);
 //            this.unloadModel(id);
             return this.models.get(id);
         }
@@ -108,7 +110,7 @@ public class Models3D {
             try {
                 removed.dispose();
             } catch (Exception e) {
-                QuantumClient.LOGGER.debug("Error unloading model %s:", id, e);
+                QuantumClient.LOGGER.debug("Error unloading model {}:", id, e);
                 return false;
             }
             return true;
@@ -123,5 +125,15 @@ public class Models3D {
         for (Identifier id : identifiers) {
             this.loadModel(id);
         }
+    }
+
+    public void dispose() {
+        for (Identifier id : this.models.keySet()) {
+            unloadModel(id);
+        }
+    }
+
+    public void add(Identifier resourceId, Model model) {
+        this.models.put(resourceId, model);
     }
 }

@@ -148,7 +148,7 @@ public abstract class ContainerMenu {
      */
     public void removeWatcher(Player player) {
         if (!this.watching.contains(player)) {
-            QuantumServer.LOGGER.warn("Player %s is not a watcher of %s", player, this);
+            QuantumServer.LOGGER.warn("Player {} is not a watcher of {}", player, this);
             return;
         }
         this.watching.remove(player);

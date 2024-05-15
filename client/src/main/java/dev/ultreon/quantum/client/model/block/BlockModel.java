@@ -3,13 +3,15 @@ package dev.ultreon.quantum.client.model.block;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.client.render.Models3D;
 import dev.ultreon.quantum.client.render.Scene3D;
 import dev.ultreon.quantum.client.resources.LoadableResource;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;
 
 @SuppressWarnings("unused")
-public interface BlockModel extends Disposable, LoadableResource {
+public interface BlockModel extends LoadableResource {
 
     Vector3 DEFAULT_ITEM_SCALE = new Vector3(1, 1, 1);
 
@@ -24,6 +26,12 @@ public interface BlockModel extends Disposable, LoadableResource {
     }
 
     Model getModel();
+
+    default void dispose() {
+        Models3D.INSTANCE.unloadModel(resourceId());
+    }
+
+    Identifier resourceId();
 
     default Vector3 getItemScale() {
         return DEFAULT_ITEM_SCALE;

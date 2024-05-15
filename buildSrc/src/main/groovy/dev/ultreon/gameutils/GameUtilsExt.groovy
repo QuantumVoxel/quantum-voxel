@@ -11,6 +11,7 @@ class GameUtilsExt {
     Project coreProject
     Project desktopProject
     Project packageProject
+    Project androidProject
     int javaVersion = -1
     boolean production = false
     final buildDate = Instant.now()

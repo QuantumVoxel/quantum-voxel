@@ -107,7 +107,7 @@ public class AndroidPlatform extends GamePlatform {
                     null
             );
         });
-        return false;
+        return Result.ok(false);
     }
 
     public void performImport() {
@@ -247,5 +247,10 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public void setCursorPosition(int x, int y) {
         launcher.setCursorPosition(x, y);
+    }
+
+    @Override
+    public DeviceType getDeviceType() {
+        return launcher.getDeviceType();
     }
 }

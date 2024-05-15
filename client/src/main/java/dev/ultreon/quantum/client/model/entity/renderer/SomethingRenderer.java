@@ -22,7 +22,7 @@ public class SomethingRenderer extends LivingEntityRenderer<@NotNull Something> 
         if (bone != null) {
 //            bone.rotation.add(new Quaternion().setFromAxis(Vector3.Y, Gdx.graphics.getDeltaTime()));
         } else {
-            QuantumClient.LOGGER.warn("Bone not found in model for entity %s", instance.getEntity().getId());
+            QuantumClient.LOGGER.warn("Bone not found in model for entity {}", instance.getEntity().getId());
         }
     }
 

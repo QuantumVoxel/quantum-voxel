@@ -12,8 +12,6 @@ public class DebugFlags {
         return gamePlatform.detectDebug();
     }
 
-
-
     public static final boolean IS_RUNNING_IN_DEBUG = detectDebug();
 
     public static final DebugFlag CHUNK_PACKET_DUMP = new DebugFlag(false);

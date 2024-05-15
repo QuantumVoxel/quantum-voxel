@@ -70,7 +70,7 @@ public class XeoxMod implements Mod {
             func.call(cx, scope, scope, new Object[0]);
         } else {
             System.out.println("init = " + init.getClass().getSuperclass().getName());
-            XeoxLoader.LOGGER.error("Mod %s does not have an init function.", metadata.id());
+            XeoxLoader.LOGGER.error("Mod {} does not have an init function.", metadata.id());
             disable();
         }
     }

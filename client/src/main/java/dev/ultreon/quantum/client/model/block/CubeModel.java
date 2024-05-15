@@ -24,10 +24,12 @@ public final class CubeModel {
     private final Identifier front;
     private final Identifier back;
     private final ModelProperties properties;
+    private Identifier resourceId;
 
-    private CubeModel(Identifier top, Identifier bottom,
+    private CubeModel(Identifier resourceId, Identifier top, Identifier bottom,
                       Identifier left, Identifier right,
                       Identifier front, Identifier back, ModelProperties properties) {
+        this.resourceId = resourceId;
         this.top = top;
         this.bottom = bottom;
         this.left = left;
@@ -37,44 +39,44 @@ public final class CubeModel {
         this.properties = properties;
     }
 
-    public static CubeModel of(Identifier all) {
-        return CubeModel.of(all, all, all);
+    public static CubeModel of(Identifier resourceId, Identifier all) {
+        return CubeModel.of(resourceId, all, all, all);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier side) {
-        return CubeModel.of(top, bottom, side, side, side, side);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side) {
+        return CubeModel.of(resourceId, top, bottom, side, side, side, side);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier side, Identifier front) {
-        return CubeModel.of(top, bottom, side, side, front, side);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front) {
+        return CubeModel.of(resourceId, top, bottom, side, side, front, side);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier side, Identifier front, Identifier back) {
-        return CubeModel.of(top, bottom, side, side, front, back);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front, Identifier back) {
+        return CubeModel.of(resourceId, top, bottom, side, side, front, back);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier left, Identifier right, Identifier front, Identifier back) {
-        return new CubeModel(top, bottom, left, right, front, back, ModelProperties.builder().build());
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier left, Identifier right, Identifier front, Identifier back) {
+        return new CubeModel(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build());
     }
 
-    public static CubeModel of(Identifier all, ModelProperties properties) {
-        return CubeModel.of(all, all, all, properties);
+    public static CubeModel of(Identifier resourceId, Identifier all, ModelProperties properties) {
+        return CubeModel.of(resourceId, all, all, all, properties);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier side, ModelProperties properties) {
-        return CubeModel.of(top, bottom, side, side, side, side, properties);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, ModelProperties properties) {
+        return CubeModel.of(resourceId, top, bottom, side, side, side, side, properties);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier side, Identifier front, ModelProperties properties) {
-        return CubeModel.of(top, bottom, side, side, front, side, properties);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front, ModelProperties properties) {
+        return CubeModel.of(resourceId, top, bottom, side, side, front, side, properties);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier side, Identifier front, Identifier back, ModelProperties properties) {
-        return CubeModel.of(top, bottom, side, side, front, back, properties);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front, Identifier back, ModelProperties properties) {
+        return CubeModel.of(resourceId, top, bottom, side, side, front, back, properties);
     }
 
-    public static CubeModel of(Identifier top, Identifier bottom, Identifier left, Identifier right, Identifier front, Identifier back, ModelProperties properties) {
-        return new CubeModel(top, bottom, left, right, front, back, properties);
+    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier left, Identifier right, Identifier front, Identifier back, ModelProperties properties) {
+        return new CubeModel(resourceId, top, bottom, left, right, front, back, properties);
     }
 
     public BakedCubeModel bake(Identifier resourceId, TextureAtlas texture) {
@@ -140,16 +142,13 @@ public final class CubeModel {
                     break;
             }
 
-            BakedCubeModel baked = BakedCubeModel.of(
+            return BakedCubeModel.of(
                     resourceId,
                     topTex, bottomTex,
                     leftTex, rightTex,
                     frontTex, backTex,
                     this.properties
             );
-
-            QuantumClient.get().deferDispose(baked);
-            return baked;
         } catch (RuntimeException e) {
             CrashLog crashLog = createCrash(resourceId, e);
 
@@ -235,5 +234,9 @@ public final class CubeModel {
 
     public Set<Identifier> all() {
         return new ReferenceArraySet<>(new Object[]{top, bottom, left, right, front, back});
+    }
+
+    public Identifier resourceId() {
+        return resourceId;
     }
 }

@@ -29,10 +29,8 @@ public class Slider extends Widget {
         this(200, value, min, max);
     }
 
-    public Slider(@IntRange(from = 21) int width, int value, int min, int max) {
+    public Slider(@IntRange(from = 10) int width, int value, int min, int max) {
         super(width, 21);
-
-        this.ignoreBounds = true;
 
         Preconditions.checkArgument(max > min, "Max should be higher than min");
 
@@ -66,7 +64,13 @@ public class Slider extends Widget {
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        int thumbX = this.pos.x + (this.size.width - 21) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 1;
+        int newValue = this.originalValue + (this.value.max() - this.value.min()) * (mouseX - this.holdStart) / (this.size.width - 14);
+        if (this.isHolding && newValue >= this.value.min() && newValue <= this.value.max() && newValue != this.value.get()) {
+            this.value.set(newValue);
+            this.callback.call(this);
+        }
+
+        int thumbX = this.pos.x + (this.size.width - 14) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 2;
 
         // Track
         renderer.blit(Slider.TEXTURE, this.pos.x, this.pos.y, 7, 21, 0, 0, 7, 21);
@@ -74,22 +78,28 @@ public class Slider extends Widget {
         renderer.blit(Slider.TEXTURE, this.pos.x + this.size.width - 7, this.pos.y, 7, 21, 14, 0, 7, 21);
 
         // Thumb
-        renderer.blit(Slider.TEXTURE, thumbX, this.pos.y, 18, 15, 21, 0, 18, 15);
+        if (this.isWithinBounds(mouseX, mouseY) || this.isHolding) {
+            renderer.blit(Slider.TEXTURE, thumbX, this.pos.y, 10, 19, 33, 0, 10, 19);
+        } else {
+            renderer.blit(Slider.TEXTURE, thumbX, this.pos.y, 10, 19, 22, 0, 10, 19);
+        }
 
         // Text
         TextObject textObject = this.text.get();
         if (textObject != null) {
-            renderer.textCenter(textObject.copy().append(": ").append(this.value.get()), this.pos.x + this.size.width / 2, this.pos.y + 5, true);
+            renderer.textLeft(textObject.copy().append(": ").append(this.value.get()), this.pos.x + this.size.width + 5, this.pos.y + 5, true);
         } else {
-            renderer.textCenter(String.valueOf(this.value.get()), this.pos.x + this.size.width / 2, this.pos.y + 5, true);
+            renderer.textLeft(String.valueOf(this.value.get()), this.pos.x + this.size.width + 5, this.pos.y + 5, true);
         }
+
+        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
     }
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        int thumbX = this.pos.x + (this.size.width - 21) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 1;
+        int thumbX = this.pos.x + (this.size.width - 14) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 2;
 
-        if (Widget.isPosWithin(mouseX, mouseY, thumbX + 1, this.pos.y, 18, 15)) {
+        if (Widget.isPosWithin(mouseX, mouseY, thumbX + 1, this.pos.y, 10, 19)) {
             this.originalValue = this.value.get();
             this.holdStart = mouseX;
             this.isHolding = true;
@@ -103,17 +113,6 @@ public class Slider extends Widget {
         this.isHolding = false;
 
         return super.mouseRelease(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
-        if (this.isHolding) {
-            this.value.set(this.originalValue + (this.value.max() - this.value.min()) * (mouseX - this.holdStart) / (this.size.width - 21));
-            this.callback.call(this);
-            return true;
-        }
-
-        return super.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
     }
 
     public Slider callback(Callback<Slider> callback) {

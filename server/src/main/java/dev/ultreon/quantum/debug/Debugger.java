@@ -31,4 +31,21 @@ public class Debugger {
             Debugger.LOGGER.debug(message, t);
         }
     }
+
+    public static void log(Type type, String message) {
+        if (type.enabled && (GamePlatform.get().isDevEnvironment() || DebugFlags.IS_RUNNING_IN_DEBUG)) {
+            Debugger.LOGGER.debug(type.name() + " :: " + message);
+        }
+    }
+
+    public enum Type {
+        CLEAN_UP(true);
+
+        private final boolean enabled;
+
+        Type(boolean enabled) {
+
+            this.enabled = enabled;
+        }
+    }
 }

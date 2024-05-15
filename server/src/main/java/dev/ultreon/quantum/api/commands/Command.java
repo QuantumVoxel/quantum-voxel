@@ -70,13 +70,13 @@ public abstract class Command {
             Command.commands.add(this);
             if (!this.isCreatedYet) {
                 Command.incompleteCommands.add(this);
-                QuantumServer.LOGGER.warn("Incomplete command: %s", this.getClass().getSimpleName());
+                QuantumServer.LOGGER.warn("Incomplete command: {}", this.getClass().getSimpleName());
             }
 
             if (this.category == null)
-                QuantumServer.LOGGER.warn("Missing category in command: %s", this.getClass().getSimpleName());
+                QuantumServer.LOGGER.warn("Missing category in command: {}", this.getClass().getSimpleName());
             if (this.getRequiredPermission() == null)
-                QuantumServer.LOGGER.warn("Broken permissions in command: %s", this.getClass().getSimpleName());
+                QuantumServer.LOGGER.warn("Broken permissions in command: {}", this.getClass().getSimpleName());
 
             this.detectBrokenCommand();
         });

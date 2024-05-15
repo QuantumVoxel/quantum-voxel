@@ -38,6 +38,7 @@ public class DesktopLauncher {
         try {
             DesktopLauncher.launch(argv);
         } catch (Exception | OutOfMemoryError e) {
+            e.printStackTrace();
             CrashHandler.handleCrash(new CrashLog("Launch failed", e).createCrash().getCrashLog());
         }
     }

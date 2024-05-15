@@ -64,6 +64,7 @@ extensions.configure<GameUtilsExt> {
     coreProject = project(":client")
     desktopProject = project(":desktop")
     packageProject = project(":desktop-merge")
+    androidProject = project(":android")
 
     mainClass = "dev.ultreon.quantum.premain.PreMain"
     javaVersion = 11

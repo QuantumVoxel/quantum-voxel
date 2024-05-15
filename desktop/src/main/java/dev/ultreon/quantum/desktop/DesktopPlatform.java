@@ -5,10 +5,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.Mod;
-import dev.ultreon.quantum.GameWindow;
+import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.desktop.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
@@ -278,5 +275,10 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void setCursorPosition(int x, int y) {
         Gdx.input.setCursorPosition(x, y);
+    }
+
+    @Override
+    public DeviceType getDeviceType() {
+        return DeviceType.DESKTOP;
     }
 }

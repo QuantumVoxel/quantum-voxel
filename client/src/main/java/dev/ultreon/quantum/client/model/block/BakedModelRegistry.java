@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.model.block;
 
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.collect.ImmutableMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.block.Block;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public final class BakedModelRegistry {
+public final class BakedModelRegistry implements Disposable {
     private final TextureAtlas atlas;
     private final ImmutableMap<Block, List<Pair<Predicate<BlockProperties>, BakedCubeModel>>> bakedModels;
 
@@ -44,5 +45,10 @@ public final class BakedModelRegistry {
     public String toString() {
         return "BakedModelRegistry[" +
                 "atlas=" + this.atlas + ']';
+    }
+
+    @Override
+    public void dispose() {
+        this.atlas.dispose();
     }
 }

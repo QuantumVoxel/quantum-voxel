@@ -63,6 +63,7 @@ public class Renderer implements Disposable {
     ////////////////////
     private final QuantumClient client = QuantumClient.get();
     private final Deque<Vector3> globalTranslation = new ArrayDeque<>();
+    private final Deque<Vector3> globalScale = new ArrayDeque<>();
     private final Batch batch;
     private final ShapeDrawer shapes;
     private final TextureManager textureManager;
@@ -1715,21 +1716,17 @@ public class Renderer implements Disposable {
     ////////////////////////////
     @CanIgnoreReturnValue
     public Renderer translate(float x, float y) {
-        var translation = this.globalTranslation.peek();
-        if (translation != null) {
-            translation.add(x, y, 0);
-        }
         this.matrices.translate(x, y);
         this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
 
+    private Vector2 getScale(Vector2 scale) {
+        return new Vector2(this.matrices.getScale(scale));
+    }
+
     @CanIgnoreReturnValue
     public Renderer translate(int x, int y) {
-        var translation = this.globalTranslation.peek();
-        if (translation != null) {
-            translation.add(x, y, 0);
-        }
         this.matrices.translate(x, y);
         this.batch.setTransformMatrix(this.matrices.last());
         return this;
@@ -1737,10 +1734,6 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer translate(float x, float y, float z) {
-        var translation = this.globalTranslation.peek();
-        if (translation != null) {
-            translation.add(x, y, z);
-        }
         this.matrices.translate(x, y, z);
         this.batch.setTransformMatrix(this.matrices.last());
         return this;
@@ -1748,10 +1741,6 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer translate(int x, int y, int z) {
-        var translation = this.globalTranslation.peek();
-        if (translation != null) {
-            translation.add(x, y, z);
-        }
         this.matrices.translate(x, y, z);
         this.batch.setTransformMatrix(this.matrices.last());
         return this;
@@ -1813,9 +1802,10 @@ public class Renderer implements Disposable {
 
     @CheckReturnValue
     private boolean pushScissorsInternal(Rectangle rect) {
-        rect.getPosition(this.tmp2A);
-        this.tmp3A.set(this.globalTranslation.peek()).add(this.scissorOffsetX, this.scissorOffsetY, 0);
-        rect.setPosition(this.tmp2A.add(this.tmp3A.x, this.tmp3A.y));
+        Vector3 translation = this.matrices.getTranslation(this.tmp3A);
+        if (translation != null) {
+            rect.setPosition(rect.getPosition(this.tmp2A).add(translation.x, translation.y));
+        }
 
         if (rect.x < 0) {
             rect.width = Math.max(rect.width + rect.x, 0);

@@ -61,7 +61,7 @@ public class Json5ModelLoader {
         Resource resource = this.resourceManager.getResource(identifier);
         if (resource == null)
             return null;
-        QuantumClient.LOGGER.debug("Loading block model: %s", identifier);
+        QuantumClient.LOGGER.debug("Loading block model: {}", identifier);
         return this.load(Registries.BLOCK.getKey(block), JSON5.parse(resource.openReader()));
     }
 
@@ -70,7 +70,7 @@ public class Json5ModelLoader {
         Resource resource = this.resourceManager.getResource(identifier);
         if (resource == null)
             return null;
-        QuantumClient.LOGGER.debug("Loading item model: %s", identifier);
+        QuantumClient.LOGGER.debug("Loading item model: {}", identifier);
         return this.load(Registries.ITEM.getKey(item), JSON5.parse(resource.openReader()));
     }
 

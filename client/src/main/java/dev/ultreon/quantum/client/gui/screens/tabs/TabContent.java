@@ -10,7 +10,7 @@ public class TabContent extends ScrollableContainer {
     private TextObject title;
 
     public TabContent(TabbedUI parent, int x, int y, int width, int height, TextObject title) {
-        super(x, y, width, height);
+        super(width, height);
         this.backgroundColor(RgbColor.TRANSPARENT);
         this.parent = parent;
         this.title = title;
@@ -22,7 +22,7 @@ public class TabContent extends ScrollableContainer {
 
         int curHeight = 0;
         for (Widget widget : this.getWidgets()) {
-            curHeight = widget.getX() + widget.getHeight();
+            curHeight = widget.getY() + widget.getHeight();
         }
 
         this.contentHeight = curHeight;

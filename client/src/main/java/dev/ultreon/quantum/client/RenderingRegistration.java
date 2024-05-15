@@ -21,6 +21,8 @@ import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.CubicDirection;
 
+import java.util.Locale;
+
 /**
  * Register rendering for entities, blocks, etc.
  *
@@ -80,18 +82,18 @@ public class RenderingRegistration {
      */
     private static void registerBlockModels() {
         // Register block models for grass block, log, and crafting bench
-        BlockModelRegistry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        BlockModelRegistry.register(Blocks.LOG, meta -> true , CubeModel.of(QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        BlockModelRegistry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(QuantumClient.id("blocks/crafting_bench_top"), QuantumClient.id("blocks/crafting_bench_bottom"), QuantumClient.id("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        BlockModelRegistry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        BlockModelRegistry.register(Blocks.LOG, meta -> true , CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        BlockModelRegistry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/crafting_bench_top"), QuantumClient.id("blocks/crafting_bench_bottom"), QuantumClient.id("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
 
         // Register block models for switch test block based on metadata
-        BlockModelRegistry.register(Blocks.META_SWITCH_TEST, meta -> meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_on")));
-        BlockModelRegistry.register(Blocks.META_SWITCH_TEST, meta -> !meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_off")));
+        BlockModelRegistry.register(Blocks.META_SWITCH_TEST, meta -> meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_on"), QuantumClient.id("blocks/switch_on")));
+        BlockModelRegistry.register(Blocks.META_SWITCH_TEST, meta -> !meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_off"), QuantumClient.id("blocks/switch_off")));
 
         // Register block models for blast furnace with different rotations based on metadata
         for (CubicDirection direction : CubicDirection.HORIZONTAL) {
-            BlockModelRegistry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
-            BlockModelRegistry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            BlockModelRegistry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            BlockModelRegistry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
         }
 
         BlockModelRegistry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.TOP, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_top")));

@@ -105,7 +105,7 @@ public class CommandParserImpl {
             for (var duplicateSpecValue : duplicateSpecValues) {
                 QuantumServer.LOGGER.warn("  Overload: " + duplicateSpecValue.getFirst().spec().toString());
                 for (var duplicate : duplicateSpecValue.getSecond()) {
-                    QuantumServer.LOGGER.warn(String.format("    Duplicate: %s", duplicate));
+                    QuantumServer.LOGGER.warn(String.format("    Duplicate: {}", duplicate));
                 }
             }
         }
@@ -193,10 +193,10 @@ public class CommandParserImpl {
         } catch (IllegalArgumentException e) {
             QuantumServer.LOGGER.error("Got illegal argument, possible argument mismatch.");
             QuantumServer.LOGGER.error("Dumping method argument types:");
-            for (var type : method.getParameterTypes()) QuantumServer.LOGGER.error("  %s", type.getName());
+            for (var type : method.getParameterTypes()) QuantumServer.LOGGER.error("  {}", type.getName());
 
             QuantumServer.LOGGER.error("Dumping called argument types:");
-            for (var obj : callArgs) QuantumServer.LOGGER.error("  %s", obj == null ? null : obj.getClass().getName());
+            for (var obj : callArgs) QuantumServer.LOGGER.error("  {}", obj == null ? null : obj.getClass().getName());
 
             QuantumServer.LOGGER.error("Dumping stack trace:");
             for (var line : dev.ultreon.libs.commons.v0.util.StringUtils.splitIntoLines(ExceptionUtils.getStackTrace(e))) QuantumServer.LOGGER.error(String.format("  %s", line));

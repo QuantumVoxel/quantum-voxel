@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
@@ -56,6 +57,8 @@ public final class GameLibGDXWrapper implements ApplicationListener {
 
     static void displayCrash(ApplicationCrash crash) {
         crashOverride = crash.getCrashLog();
+
+        while (ScissorStack.peekScissors() != null) ScissorStack.popScissors();
 
         CommonConstants.LOGGER.error("\n" + crash);
     }
@@ -167,6 +170,8 @@ public final class GameLibGDXWrapper implements ApplicationListener {
     }
 
     private void renderCrash(CrashLog crashLog) {
+        while (ScissorStack.peekScissors() != null) ScissorStack.popScissors();
+
         if (Gdx.graphics.isFullscreen()) {
             Gdx.graphics.setWindowedMode(1280, 720);
             Gdx.graphics.setResizable(false);

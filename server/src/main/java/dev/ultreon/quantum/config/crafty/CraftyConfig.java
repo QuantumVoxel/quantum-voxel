@@ -322,7 +322,7 @@ public abstract class CraftyConfig {
             Files.deleteIfExists(this.configPath);
         } catch (IOException e) {
             // Log an error if the deletion fails
-            CommonConstants.LOGGER.error("Failed to reset config file %s", this.configPath, e);
+            CommonConstants.LOGGER.error("Failed to reset config file {}", this.configPath, e);
         }
 
         // Disable the watcher to prevent unnecessary notifications

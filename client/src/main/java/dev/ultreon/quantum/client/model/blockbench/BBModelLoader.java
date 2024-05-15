@@ -210,7 +210,7 @@ public class BBModelLoader implements ModelImporter {
             BBModelOutlineInfo node;
             node = loadNode(elem);
             if (node == null) {
-                QuantumClient.LOGGER.warn("Failed to load BlockBench model node: %s", elem);
+                QuantumClient.LOGGER.warn("Failed to load BlockBench model node: {}", elem);
             }
             values.add(node);
         }
@@ -267,7 +267,7 @@ public class BBModelLoader implements ModelImporter {
         }
 
         if (processed.isEmpty()) {
-            QuantumClient.LOGGER.warn("BlockBench model %s has no elements", this.id);
+            QuantumClient.LOGGER.warn("BlockBench model {} has no elements", this.id);
         }
 
         return processed;

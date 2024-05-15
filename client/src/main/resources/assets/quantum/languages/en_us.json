@@ -60,6 +60,7 @@
   "quantum.screen.message.saving_world": "Saving World...",
   "quantum.screen.message.joining_server": "Joining Server...",
   "quantum.screen.mod_list": "Mod List",
+  "quantum.screen.mod_list.import_xeox": "Import Xeox Mod",
   "quantum.screen.mod_list.config": "Config",
   "quantum.screen.death.respawn": "Respawn",
   "quantum.screen.death.title": "You Died",

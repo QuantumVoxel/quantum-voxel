@@ -253,7 +253,7 @@ class QuantumClientLoader implements Runnable {
         client.loadingOverlay.setProgress(1.0F);
 
         client.bootTime = Duration.ofMilliseconds(System.currentTimeMillis() - QuantumClient.BOOT_TIMESTAMP);
-        QuantumClient.LOGGER.info("Game booted in %s.", client.bootTime.toSimpleString());
+        QuantumClient.LOGGER.info("Game booted in {}.", client.bootTime.toSimpleString());
 
         QuantumClient.invokeAndWait(new Task<>(QuantumClient.id("main/show_title_screen"), () -> {
             if (client.devWorld) {

@@ -64,7 +64,7 @@ public class CubemapManager implements Manager<Cubemap>, Disposable {
 
             this.register(id, cubemap);
         } catch (IOException e) {
-            CommonConstants.LOGGER.error("Failed to load cubemap %s", id, e);
+            CommonConstants.LOGGER.error("Failed to load cubemap {}", id, e);
         }
     }
 

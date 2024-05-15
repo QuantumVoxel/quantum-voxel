@@ -130,31 +130,31 @@ public class ItemRenderer implements Disposable {
                 renderCustomBlock(item, block, renderer, x, y);
                 return;
             }
-            if (blockModel instanceof BakedCubeModel) {
-                BakedCubeModel bakedModel = (BakedCubeModel) blockModel;
-                this.batch.begin(this.itemCam);
-                Mesh mesh = bakedModel.getMesh();
-                Renderable renderable = renderer.obtainRenderable();
-                renderable.meshPart.mesh = mesh;
-                renderable.meshPart.center.set(0F, 0F, 0F);
-                renderable.meshPart.offset = 0;
-                renderable.meshPart.size = mesh.getMaxVertices();
-                renderable.meshPart.primitiveType = GL20.GL_TRIANGLES;
-                renderable.material = this.material;
-                renderable.environment = this.environment;
-                renderable.worldTransform.set(this.position.cpy().add((x - (int) (this.client.getScaledWidth() / 2.0F)) * guiScale, -(-y + (int) (this.client.getScaledHeight() / 2.0F)) * guiScale, 100), this.quaternion, this.scale);
-                renderable.worldTransform.rotate(Vector3.X, this.rotation.x);
-                renderable.worldTransform.rotate(Vector3.Y, this.rotation.y);
-                this.batch.render(renderable);
-                this.batch.end();
-            } else {
+//            if (blockModel instanceof BakedCubeModel) {
+//                BakedCubeModel bakedModel = (BakedCubeModel) blockModel;
+//                this.batch.begin(this.itemCam);
+//                Mesh mesh = bakedModel.getMesh();
+//                Renderable renderable = renderer.obtainRenderable();
+//                renderable.meshPart.mesh = mesh;
+//                renderable.meshPart.center.set(0F, 0F, 0F);
+//                renderable.meshPart.offset = 0;
+//                renderable.meshPart.size = mesh.getMaxVertices();
+//                renderable.meshPart.primitiveType = GL20.GL_TRIANGLES;
+//                renderable.material = this.material;
+//                renderable.environment = this.environment;
+//                renderable.worldTransform.set(this.position.cpy().add((x - (int) (this.client.getScaledWidth() / 2.0F)) * guiScale, -(-y + (int) (this.client.getScaledHeight() / 2.0F)) * guiScale, 100), this.quaternion, this.scale);
+//                renderable.worldTransform.rotate(Vector3.X, this.rotation.x);
+//                renderable.worldTransform.rotate(Vector3.Y, this.rotation.y);
+//                this.batch.render(renderable);
+//                this.batch.end();
+//            } else {
                 try {
                     ModelInstance modelInstance = this.blockModelCache.get(block, () -> new ModelInstance(blockModel.getModel()));
                     this.batch.render(modelInstance, this.environment);
                 } catch (ExecutionException e) {
                     QuantumClient.LOGGER.warn("Error occurred while caching block model:", e);
                 }
-            }
+//            }
         });
     }
 
@@ -236,7 +236,7 @@ public class ItemRenderer implements Disposable {
 
                 this.registerModel(e, Objects.requireNonNullElseGet(load, () -> new FlatItemModel(e)));
             } catch (IOException ex) {
-                QuantumClient.LOGGER.error("Failed to load item model for %s", e, ex);
+                QuantumClient.LOGGER.error("Failed to load item model for {}", e, ex);
                 fallbackModel(e);
             }
         });

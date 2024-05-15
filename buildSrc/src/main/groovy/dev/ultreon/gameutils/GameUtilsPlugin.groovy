@@ -81,6 +81,8 @@ class GameUtilsPlugin implements Plugin<Project> {
     }
 
     private static void evaluateAfter(Project project) {
+        if (project == extension.androidProject) return
+
         if (!extension.production) {
             println("WARNING: App $extension.projectName is in developer mode.")
         }
@@ -142,12 +144,16 @@ class GameUtilsPlugin implements Plugin<Project> {
 
             zip.from(metadataTask.get().metadataFile)
             zip.from("$packProject.projectDir/build/config.json")
-            zip.from(project.tasks.jar.outputs, new Action<CopySpec>() {
-                @Override
-                void execute(CopySpec copySpec) {
-                    copySpec.rename { extension.projectVersion + ".jar" }
-                }
-            })
+
+            def jarTask = project.tasks.findByName("jar")
+            if (jarTask != null) {
+                zip.from(jarTask.outputs, new Action<CopySpec>() {
+                    @Override
+                    void execute(CopySpec copySpec) {
+                        copySpec.rename { extension.projectVersion + ".jar" }
+                    }
+                })
+            }
 
             println metadataTask.get().metadataFile
 

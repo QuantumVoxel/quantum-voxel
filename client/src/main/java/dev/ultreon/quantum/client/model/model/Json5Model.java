@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.client.model.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.google.common.collect.Table;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
+import dev.ultreon.quantum.client.render.Models3D;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.Identifier;
 
@@ -20,6 +20,7 @@ public class Json5Model implements BlockModel, ItemModel {
     public final boolean ambientOcclusion;
     public final Json5ModelLoader.Display display;
     private final RegistryKey<?> key;
+    private final Identifier id;
     private Model model;
     private final Table<String, BlockDataEntry<?>, Json5Model> overrides;
     private static final Vector3 SCALE = new Vector3(-0.0625f, -0.0625f, 0.0625f);
@@ -31,16 +32,16 @@ public class Json5Model implements BlockModel, ItemModel {
         this.ambientOcclusion = ambientOcclusion;
         this.display = display;
         this.overrides = overrides;
+        id = key.parent().element().mapPath(s -> s + "/" + key.element().namespace() + "." + key.element().path());
     }
 
     public Model bake() {
-        ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.begin();
-        for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
-            Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
-            modelElement.bake(i, modelBuilder, textureElements);
-        }
-        return modelBuilder.end();
+        return Models3D.INSTANCE.generateModel(id, modelBuilder -> {
+            for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
+                Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
+                modelElement.bake(i, modelBuilder, textureElements);
+            }
+        });
     }
 
     @Override
@@ -69,9 +70,7 @@ public class Json5Model implements BlockModel, ItemModel {
 
     @Override
     public void dispose() {
-        if (model != null) {
-            model.dispose();
-        }
+        Models3D.INSTANCE.unloadModel(id);
     }
 
     @Override

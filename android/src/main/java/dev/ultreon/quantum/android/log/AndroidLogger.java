@@ -3,6 +3,8 @@ package dev.ultreon.quantum.android.log;
 import android.util.Log;
 import dev.ultreon.quantum.log.Logger;
 
+import java.text.MessageFormat;
+
 public class AndroidLogger implements Logger {
     private final String name;
 
@@ -22,7 +24,7 @@ public class AndroidLogger implements Logger {
             Log.d(this.name, s, throwable);
             return;
         }
-        Log.d(this.name, String.format(s, o));
+        Log.d(this.name, MessageFormat.format(s, o));
     }
 
     @Override
@@ -34,15 +36,15 @@ public class AndroidLogger implements Logger {
     public void debug(String s, Object p, Object o) {
         if (o instanceof Throwable) {
             Throwable throwable = (Throwable) o;
-            Log.d(this.name, String.format(s, p), throwable);
+            Log.d(this.name, MessageFormat.format(s, p), throwable);
             return;
         }
-        Log.d(this.name, String.format(s, p, o));
+        Log.d(this.name, MessageFormat.format(s, p, o));
     }
 
     @Override
     public void debug(String s, Object p, Throwable t) {
-        Log.d(this.name, String.format(s, p), t);
+        Log.d(this.name, MessageFormat.format(s, p), t);
     }
 
     @Override
@@ -57,22 +59,22 @@ public class AndroidLogger implements Logger {
             Log.i(this.name, s, throwable);
             return;
         }
-        Log.i(this.name, String.format(s, o));
+        Log.i(this.name, MessageFormat.format(s, o));
     }
 
     @Override
     public void info(String s, Object p, Object o) {
         if (o instanceof Throwable) {
             Throwable throwable = (Throwable) o;
-            Log.i(this.name, String.format(s, p), throwable);
+            Log.i(this.name, MessageFormat.format(s, p), throwable);
             return;
         }
-        Log.i(this.name, String.format(s, p, o));
+        Log.i(this.name, MessageFormat.format(s, p, o));
     }
 
     @Override
     public void info(String s, Object p, Throwable t) {
-        Log.i(this.name, String.format(s, p), t);
+        Log.i(this.name, MessageFormat.format(s, p), t);
     }
 
     @Override
@@ -92,22 +94,22 @@ public class AndroidLogger implements Logger {
             Log.w(this.name, s, throwable);
             return;
         }
-        Log.w(this.name, String.format(s, o));
+        Log.w(this.name, MessageFormat.format(s, o));
     }
 
     @Override
     public void warn(String s, Object p, Object o) {
         if (o instanceof Throwable) {
             Throwable throwable = (Throwable) o;
-            Log.w(this.name, String.format(s, p), throwable);
+            Log.w(this.name, MessageFormat.format(s, p), throwable);
             return;
         }
-        Log.w(this.name, String.format(s, p, o));
+        Log.w(this.name, MessageFormat.format(s, p, o));
     }
 
     @Override
     public void warn(String s, Object p, Throwable t) {
-        Log.w(this.name, String.format(s, p), t);
+        Log.w(this.name, MessageFormat.format(s, p), t);
     }
 
     @Override
@@ -127,7 +129,7 @@ public class AndroidLogger implements Logger {
             Log.e(this.name, s, throwable);
             return;
         }
-        Log.e(this.name, String.format(s, o));
+        Log.e(this.name, MessageFormat.format(s, o));
     }
 
     @Override
@@ -139,14 +141,14 @@ public class AndroidLogger implements Logger {
     public void error(String s, Object p, Object o) {
         if (o instanceof Throwable) {
             Throwable throwable = (Throwable) o;
-            Log.e(this.name, String.format(s, p), throwable);
+            Log.e(this.name, MessageFormat.format(s, p), throwable);
             return;
         }
-        Log.e(this.name, String.format(s, p, o));
+        Log.e(this.name, MessageFormat.format(s, p, o));
     }
 
     @Override
     public void error(String s, Object p, Throwable t) {
-        Log.e(this.name, String.format(s, p), t);
+        Log.e(this.name, MessageFormat.format(s, p), t);
     }
 }

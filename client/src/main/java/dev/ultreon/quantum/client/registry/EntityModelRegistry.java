@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.registry;
 
 import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import dev.ultreon.quantum.client.model.blockbench.BBModelLoader;
@@ -21,7 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EntityModelRegistry implements ContextAwareReloadable {
+public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
     private final Map<EntityType<?>, EntityModel<?>> registry = new HashMap<>();
     private final Map<EntityType<?>, Identifier> g3dRegistry = new HashMap<>();
     private final Map<EntityType<?>, Identifier> gltfRegistry = new HashMap<>();
@@ -109,5 +110,12 @@ public class EntityModelRegistry implements ContextAwareReloadable {
 
     private Model blockBenchModel(Identifier id) {
         return new BBModelLoader(id.mapPath(path -> "models/" + path + ".bbmodel")).createModel();
+    }
+
+    @Override
+    public void dispose() {
+        for (Model model : this.finishedRegistry.values()) {
+            model.dispose();
+        }
     }
 }

@@ -19,9 +19,7 @@ import java.util.function.Supplier;
 
 @ApiStatus.NonExtendable
 public class ScrollableContainer extends UIContainer<ScrollableContainer> {
-    private static final int SCROLLBAR_WIDTH = 5;
     private float scrollY = 0;
-    private Widget selected;
     private boolean selectable;
     protected Widget hoveredWidget;
     int innerXOffset;
@@ -31,12 +29,12 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     protected int contentWidth;
     private RgbColor backgroundColor = RgbColor.argb(0x40000000);
 
-    public ScrollableContainer(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public ScrollableContainer(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
     }
 
-    public ScrollableContainer(Position position, Size size) {
-        this(position.x, position.y, size.width, size.height);
+    public ScrollableContainer(Size size) {
+        this(size.width, size.height);
     }
 
     public ScrollableContainer() {
@@ -51,9 +49,13 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, backgroundColor);
 
+        this.innerYOffset = (int) Mth.clamp(this.scrollY, 0, this.contentHeight - this.size.height);
+
+
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
-            this.renderChildren(renderer, mouseX, mouseY, deltaTime);
+            renderer.translate(0, -this.scrollY);
+            this.renderChildren(renderer, mouseX, mouseY + innerYOffset, deltaTime);
             renderer.popScissors();
         }
         renderer.popMatrix();
@@ -66,6 +68,8 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     @Nullable
     public Widget getWidgetAt(int x, int y) {
+        y -= this.pos.y + this.innerYOffset;
+
         if (!this.isWithinBounds(x, y)) return null;
         List<? extends Widget> entries = this.children();
         for (int i = entries.size() - 1; i >= 0; i--) {
@@ -88,10 +92,10 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY());
+            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY() + innerYOffset);
 
             if (widgetChanged) {
-                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
+                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY() + innerYOffset);
             }
         }
         super.mouseMove(x, y);
@@ -112,7 +116,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
             x -= this.pos.x + this.innerXOffset;
             y -= this.pos.y + this.innerYOffset;
             if (widgetChanged) {
-                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
+                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY() + innerYOffset);
             }
         }
         super.mouseMove(x, y);
@@ -124,7 +128,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         dragX -= this.pos.x + this.innerXOffset;
         dragY -= this.pos.y + this.innerYOffset;
         if (widgetAt != null)
-            return widgetAt.mouseDrag(x, y, dragX, dragY, pointer);
+            return widgetAt.mouseDrag(x, y - widgetAt.getY(), dragX, dragY, pointer);
         return super.mouseDrag(x, y, dragX, dragY, pointer);
     }
 
@@ -138,8 +142,35 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     @Override
     public boolean mouseWheel(int x, int y, double rotation) {
-        this.scrollY = this.getContentHeight() > this.size.height ? Mth.clamp((float) (this.scrollY + rotation * 10), 0, this.getContentHeight() - this.size.height) : 0;
+        Widget widgetAt = this.getWidgetAt(x, y);
+        if (widgetAt != null && widgetAt.mouseWheel(x, y + innerYOffset, rotation)) {
+            return true;
+        }
+
+        if (this.getContentHeight() > this.size.height) {
+            double scrollAmount = rotation * 10;
+            double newValue = this.scrollY + scrollAmount;
+            int max = this.getContentHeight() - this.size.height;
+            this.scrollY = Mth.clamp((float) newValue, 0, max);
+        } else {
+            this.scrollY = 0;
+        }
         return true;
+    }
+
+    @Override
+    public boolean mousePress(int mouseX, int mouseY, int button) {
+        return super.mousePress(mouseX, mouseY + innerYOffset, button);
+    }
+
+    @Override
+    public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        return super.mouseRelease(mouseX, mouseY + innerYOffset, button);
+    }
+
+    @Override
+    public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
+        return super.mouseClick(mouseX, mouseY + innerYOffset, button, clicks);
     }
 
     public int getContentHeight() {

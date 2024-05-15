@@ -679,7 +679,7 @@ public class CommandData {
         try {
             return ctx.readString();
         } catch (Exception e) {
-            CommonConstants.LOGGER.error("Failed to read string in command %s", ctx.getCommand(), e);
+            CommonConstants.LOGGER.error("Failed to read string in command {}", ctx.getCommand(), e);
             throw new CommandParseException(e.getMessage(), ctx.getOffset());
         }
     }

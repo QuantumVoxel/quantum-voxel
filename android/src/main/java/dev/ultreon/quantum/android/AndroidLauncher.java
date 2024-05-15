@@ -1,9 +1,6 @@
 package dev.ultreon.quantum.android;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -26,6 +23,7 @@ import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.DeviceType;
 import dev.ultreon.quantum.client.GameLibGDXWrapper;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.ModImportFailedScreen;
@@ -47,6 +45,7 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
     private InputManager inputManager;
     private GLSurfaceView view;
     private boolean isMouseCaptured;
+    private UiModeManager uiModeManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +67,8 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
         inputManager = (InputManager) getSystemService(INPUT_SERVICE);
         inputManager.registerInputDeviceListener(this, Handler.createAsync(Looper.getMainLooper()));
 
+        this.uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+
         initialize(GameLibGDXWrapper.createInstance(new String[]{"--android"}), config);
     }
 
@@ -78,7 +79,7 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
             try {
                 Uri contentDescriber = data.getData();
                 File source = new File(contentDescriber.getPath());
-                CommonConstants.LOGGER.debug("src is %s", source);
+                CommonConstants.LOGGER.debug("src is {}", source);
 
                 FileHandle external = Gdx.files.external("temp");
                 File tempFile = external.child(source.getName() + "_" + UUID.randomUUID() + ".tmp").file();
@@ -231,5 +232,26 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
                 // TODO: mouseDevice.setCursorPosition(x, y);
             }
         });
+    }
+
+    public DeviceType getDeviceType() {
+        switch (uiModeManager.getCurrentModeType()) {
+            case Configuration.UI_MODE_TYPE_TELEVISION:
+                return DeviceType.TV;
+            case Configuration.UI_MODE_TYPE_CAR:
+                return DeviceType.AUTOMOBILE;
+            case Configuration.UI_MODE_TYPE_DESK:
+                return DeviceType.DESKTOP;
+            case Configuration.UI_MODE_TYPE_WATCH:
+                return DeviceType.WATCH;
+            case Configuration.UI_MODE_TYPE_NORMAL:
+                return DeviceType.MOBILE;
+            case Configuration.UI_MODE_TYPE_APPLIANCE:
+                return DeviceType.APPLIANCE;
+            case Configuration.UI_MODE_TYPE_VR_HEADSET:
+                return DeviceType.VR_HEADSET;
+            default:
+                return DeviceType.OTHER;
+        }
     }
 }

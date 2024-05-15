@@ -236,36 +236,58 @@ public abstract class TabbedUI extends Screen {
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
         TitleWidget title = this.titleWidget;
+        if (title != null) {
+            if (isPosWithin(mouseX, mouseY, 0, 0, this.titleWidget.getWidth(), this.titleWidget.getHeight())) {
+                title.mouseRelease(mouseX, mouseY, button);
+            }
+        }
+
+        int oldMouseY = mouseY;
+        if (title != null) {
+            mouseY -= title.getHeight();
+        }
+
+        boolean flag = false;
+        for (Tab tab : this.tabs) {
+            if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseRelease(mouseX, mouseY, button)) {
+                this.selected = this.tabs.indexOf(tab);
+                this.bottomSelected = tab.bottom();
+                this.tab = tab;
+            }
+            if (tab == this.tab && tab.content().mouseRelease(mouseX, mouseY, button)) flag = true;
+        }
+
+        if (!flag) {
+            return super.mouseRelease(mouseX, oldMouseY, button);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
+        TitleWidget title = this.titleWidget;
         int oldMouseY = mouseY;
         if (title != null) {
             mouseY -= title.getHeight();
         }
 
         for (Tab tab : this.tabs) {
-            if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseRelease(mouseX, mouseY, button)) {
-                this.selected = this.tabs.indexOf(tab);
-                this.bottomSelected = tab.bottom();
-                this.tab = tab;
-                return true;
-            }
-            if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseRelease(mouseX, mouseY, button)) return true;
-        }
-
-        return super.mouseRelease(mouseX, oldMouseY, button);
-    }
-
-    @Override
-    public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
-        for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseWheel(mouseX, mouseY, rotation)) return true;
             if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseWheel(mouseX, mouseY, rotation)) return true;
         }
 
-        return super.mouseWheel(mouseX, mouseY, rotation);
+        return super.mouseWheel(mouseX, oldMouseY, rotation);
     }
 
     @Override
     public void mouseMove(int mouseX, int mouseY) {
+        TitleWidget title = this.titleWidget;
+        int oldMouseY = mouseY;
+        if (title != null) {
+            mouseY -= title.getHeight();
+        }
+
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY))
                 tab.mouseMove(mouseX, mouseY);
@@ -273,18 +295,25 @@ public abstract class TabbedUI extends Screen {
                 tab.content().mouseMove(mouseX, mouseY);
         }
 
-        super.mouseMove(mouseX, mouseY);
+        super.mouseMove(mouseX, oldMouseY);
     }
 
     @Override
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
+        TitleWidget title = this.titleWidget;
+        int oldMouseY = mouseY;
+        if (title != null) {
+            mouseY -= title.getHeight();
+        }
+
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer))
                 return true;
-            if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer)) return true;
+            if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer))
+                return true;
         }
 
-        return super.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
+        return super.mouseDrag(mouseX, oldMouseY, deltaX, deltaY, pointer);
     }
 
     @SuppressWarnings("UnusedReturnValue")

@@ -1,21 +1,25 @@
 package dev.ultreon.quantum.client.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.client.render.Models3D;
+import dev.ultreon.quantum.util.Identifier;
 
-public class BakedModel implements Disposable {
+public abstract class BakedModel {
     private final Model model;
+    private final Identifier resourceId;
 
-    public BakedModel(Model model) {
+    public BakedModel(Identifier resourceId, Model model) {
+        this.resourceId = resourceId;
         this.model = model;
+
+        Models3D.INSTANCE.add(resourceId, model);
     }
 
     public Model getModel() {
         return model;
     }
 
-    @Override
-    public void dispose() {
-        this.model.dispose();
+    public final Identifier resourceId() {
+        return resourceId;
     }
 }

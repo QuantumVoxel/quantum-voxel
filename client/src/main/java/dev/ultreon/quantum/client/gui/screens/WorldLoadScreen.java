@@ -132,7 +132,7 @@ public class WorldLoadScreen extends Screen {
 
                 if (this.nextLog <= System.currentTimeMillis()) {
                     this.nextLog = System.currentTimeMillis() + 2000;
-                    QuantumClient.LOGGER.info("Loading world: %s", percent);
+                    QuantumClient.LOGGER.info("Loading world: {}", percent);
                 }
 
                 // Draw progressbar

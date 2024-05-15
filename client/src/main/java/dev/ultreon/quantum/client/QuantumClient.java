@@ -73,6 +73,9 @@ import dev.ultreon.quantum.client.player.SkinManager;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
+import dev.ultreon.quantum.client.render.Meshes3D;
+import dev.ultreon.quantum.client.render.Models3D;
+import dev.ultreon.quantum.client.render.Scene3D;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.render.shader.GameShaderProvider;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
@@ -153,8 +156,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public static final float FROM_ZOOM = 2.0f;
     public static final float TO_ZOOM = 1.3f;
     private static final float DURATION = 6000f;
-    private static final int MINIMUM_WIDTH = 800;
-    private static final int MINIMUM_HEIGHT = 600;
+    private static final int MINIMUM_WIDTH = 480;
+    private static final int MINIMUM_HEIGHT = 300;
     @SuppressWarnings("GDXJavaStaticResource")
     public static final Profiler PROFILER = new Profiler();
     private static ArgParser arguments = new ArgParser();
@@ -550,7 +553,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (split.length == 2) {
             LanguageManager.setCurrentLanguage(new Locale(split[0], split[1]));
         } else {
-            QuantumClient.LOGGER.error("Invalid language: %s", ClientConfig.language);
+            QuantumClient.LOGGER.error("Invalid language: {}", ClientConfig.language);
             LanguageManager.setCurrentLanguage(new Locale("en", "us"));
             ClientConfig.language = QuantumClient.id("en_us");
             this.newConfig.save();
@@ -657,9 +660,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public static void logDebug() {
         if (QuantumClient.isPackaged()) QuantumClient.LOGGER.warn("Running in the JPackage environment.");
-        QuantumClient.LOGGER.debug("Java Version: %s", System.getProperty("java.version"));
-        QuantumClient.LOGGER.debug("Java Vendor: %s", System.getProperty("java.vendor"));
-        QuantumClient.LOGGER.debug("Operating System: %s %s (%s)", new Object[]{System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")});
+        QuantumClient.LOGGER.debug("Java Version: {}", System.getProperty("java.version"));
+        QuantumClient.LOGGER.debug("Java Vendor: {}", System.getProperty("java.vendor"));
+        QuantumClient.LOGGER.debug("Operating System: {} {} ({})", new Object[]{System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")});
     }
 
     public static String[] getIcons() {
@@ -838,7 +841,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (QuantumClient.instance.disposables.contains(disposable)) return disposable;
 
         if (QuantumClient.instance.disposed) {
-            QuantumClient.LOGGER.warn("QuantumClient already disposed, immediately disposing %s", disposable.getClass().getName());
+            QuantumClient.LOGGER.warn("QuantumClient already disposed, immediately disposing {}", disposable.getClass().getName());
             disposable.dispose();
             return disposable;
         }
@@ -1476,6 +1479,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private static void cleanUp(@Nullable Disposable disposable) {
         if (disposable == null) return;
 
+        Debugger.log(Debugger.Type.CLEAN_UP, "Cleaning up " + disposable.getClass().getName());
+
         try {
             disposable.dispose();
         } catch (Exception throwable) {
@@ -1498,6 +1503,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private static void cleanUp(@Nullable ExecutorService disposable) {
         if (disposable == null) return;
 
+        Debugger.log(Debugger.Type.CLEAN_UP, "Cleaning up " + disposable.getClass().getName());
+
         try {
             disposable.shutdownNow();
         } catch (Exception throwable) {
@@ -1507,6 +1514,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     private static void cleanUp(@Nullable AutoCloseable disposable) {
         if (disposable == null) return;
+
+        Debugger.log(Debugger.Type.CLEAN_UP, "Cleaning up " + disposable.getClass().getName());
 
         try {
             disposable.close();
@@ -1662,7 +1671,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Resize the current screen
         var cur = this.screen;
         if (cur != null) {
-            cur.resize(ceil(width / this.getGuiScale()), ceil(height / this.getGuiScale()));
+            float w = width / this.getGuiScale();
+            float h = height / this.getGuiScale();
+            cur.resize(ceil(w), ceil(h));
         }
 
         OverlayManager.resize(ceil(width / this.getGuiScale()), ceil(height / this.getGuiScale()));
@@ -1716,6 +1727,18 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.worldRenderer);
                 QuantumClient.cleanUp(this.fbo);
 
+                // Clear scenes
+                Scene3D.BACKGROUND.clear();
+                Scene3D.WORLD.clear();
+
+                // Dispose Models
+                Models3D.INSTANCE.dispose();
+                QuantumClient.cleanUp(this.bakedBlockModels.atlas());
+                QuantumClient.cleanUp(this.bakedBlockModels);
+                QuantumClient.cleanUp(this.entityModelManager);
+
+                Meshes3D.INSTANCE.dispose();
+
                 // Dispose textures
                 QuantumClient.cleanUp(this.ultreonBgTex);
                 QuantumClient.cleanUp(this.ultreonLogoTex);
@@ -1734,6 +1757,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.connection);
 
                 ClientLifecycleEvents.CLIENT_STOPPED.factory().onGameDisposed();
+                System.gc();
             } catch (Exception t) {
                 QuantumClient.crash(t);
             }
@@ -1837,7 +1861,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             try {
                 task.run();
             } catch (Exception e) {
-                QuantumClient.LOGGER.warn("Error occurred in task %s:", task.id(), e);
+                QuantumClient.LOGGER.warn("Error occurred in task {}:", task.id(), e);
             }
             return null;
         }, timeMillis, TimeUnit.MILLISECONDS);
@@ -1848,7 +1872,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             try {
                 task.run();
             } catch (Exception e) {
-                QuantumClient.LOGGER.warn("Error occurred in task %s:", task.id(), e);
+                QuantumClient.LOGGER.warn("Error occurred in task {}:", task.id(), e);
             }
             return null;
         }, time, unit);
@@ -2008,14 +2032,15 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         var windowHeight = Gdx.graphics.getHeight();
 
         if (windowWidth / QuantumClient.MINIMUM_WIDTH < windowHeight / QuantumClient.MINIMUM_HEIGHT) {
-            return windowWidth / QuantumClient.MINIMUM_WIDTH;
+            return Math.max(windowWidth / QuantumClient.MINIMUM_WIDTH, 1);
         }
 
         if (windowHeight / QuantumClient.MINIMUM_HEIGHT < windowWidth / QuantumClient.MINIMUM_WIDTH) {
-            return windowHeight / QuantumClient.MINIMUM_HEIGHT;
+            return Math.max(windowHeight / QuantumClient.MINIMUM_HEIGHT, 1);
         }
 
-        return Math.min(windowWidth / QuantumClient.MINIMUM_WIDTH, windowHeight / QuantumClient.MINIMUM_HEIGHT);
+        int min = Math.min(windowWidth / QuantumClient.MINIMUM_WIDTH, windowHeight / QuantumClient.MINIMUM_HEIGHT);
+        return Math.max(min, 1);
     }
 
     public boolean isPlaying() {

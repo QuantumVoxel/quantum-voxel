@@ -102,7 +102,7 @@ public class JSEvents {
                 instance.emit(event, args);
             } catch (RhinoException e) {
                 XeoxEvents.EVENT_ERROR.factory().onError(e);
-                XeoxLoader.LOGGER.error("Failed to emit event %s:", event, e);
+                XeoxLoader.LOGGER.error("Failed to emit event {}:", event, e);
             }
         }
     }

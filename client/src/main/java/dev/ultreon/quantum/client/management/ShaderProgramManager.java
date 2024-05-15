@@ -53,7 +53,7 @@ public class ShaderProgramManager implements Manager<ShaderProgram> {
             throw new RuntimeException("Failed to compile shader program: " + shaderProgram.getLog());
 
         if (!shaderProgram.getLog().isEmpty())
-            QuantumClient.LOGGER.warn("Warning while compiling shader program: %s", shaderProgram.getLog());
+            QuantumClient.LOGGER.warn("Warning while compiling shader program: {}", shaderProgram.getLog());
 
         this.register(id, shaderProgram);
         program = shaderProgram;

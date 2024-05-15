@@ -41,7 +41,7 @@ public class ClientConfig extends CraftyConfig {
     public static int fov = 70;
 
     @ConfigEntry(path = "video.guiScale", comment = "The scale of the GUI.")
-    @Ranged(min = 1, max = 4)
+    @Ranged(min = 0, max = 4)
     public static int guiScale = 2;
 
     @ConfigEntry(path = "video.fullscreen", comment = "Whether the game is fullscreen at startup.")
