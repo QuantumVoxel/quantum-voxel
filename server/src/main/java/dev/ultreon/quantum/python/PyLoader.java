@@ -2,7 +2,6 @@ package dev.ultreon.quantum.python;
 
 import com.google.gson.Gson;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.api.FileIO;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.SandboxPolicy;
 import org.graalvm.polyglot.Source;
@@ -42,13 +41,13 @@ public class PyLoader {
 
                     Path modRoot = GamePlatform.get().getGameDir().resolve("mods/python/" + p.getFileName());
                     pythonPath.add(modRoot.toAbsolutePath().toString());
-                    PyMod pyMod = new Gson().fromJson(FileIO.readString(modRoot.resolve("python.mod.json")), PyMod.class);
+                    PyMod pyMod = new Gson().fromJson(Files.readString(modRoot.resolve("python.mod.json")), PyMod.class);
                     mods.put(pyMod.id(), pyMod);
                     pyMod.path = modRoot;
 
                     execute(modRoot);
                 } catch (Exception e) {
-                    PyLang.LOGGER.error("Failed to load python file: %s", p, e);
+                    PyLang.LOGGER.error("Failed to load python file: {}", p, e);
                 }
             });
         }
@@ -130,7 +129,7 @@ public class PyLoader {
             Value python = context.parse(Source.newBuilder("python", preLaunchScript.toFile()).mimeType("text/x-python").build());
             python.execute();
         } catch (Exception e) {
-            PyLang.LOGGER.error("Failed to load python file: %s", modRoot, e);
+            PyLang.LOGGER.error("Failed to load python file: {}", modRoot, e);
         }
     }
 
@@ -140,7 +139,7 @@ public class PyLoader {
             try {
                 Files.walk(resolve).sorted().map(Path::toFile).forEach(File::delete);
             } catch (IOException e) {
-                PyLang.LOGGER.error("Failed to delete python file: %s", p, e);
+                PyLang.LOGGER.error("Failed to delete python file: {}", p, e);
             }
         }
         Files.createDirectories(resolve);
@@ -158,18 +157,18 @@ public class PyLoader {
                     try {
                         Files.createDirectories(resolve.resolve(entry.getName()));
                     } catch (IOException e) {
-                        PyLang.LOGGER.error("Failed to load python file: %s", p, e);
+                        PyLang.LOGGER.error("Failed to load python file: {}", p, e);
                     }
                 } else {
                     try {
                         Files.copy(zipFile.getInputStream(entry), GamePlatform.get().getGameDir().resolve("mods/python/" + p.getFileName() + "/" + entry.getName()));
                     } catch (IOException e) {
-                        PyLang.LOGGER.error("Failed to load python file: %s", p, e);
+                        PyLang.LOGGER.error("Failed to load python file: {}", p, e);
                     }
                 }
             });
         } catch (Exception e) {
-            PyLang.LOGGER.error("Failed to load python file: %s", p, e);
+            PyLang.LOGGER.error("Failed to load python file: {}", p, e);
         }
     }
 

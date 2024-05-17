@@ -71,9 +71,10 @@ public class ModListScreen extends Screen {
                 .type(Button.Type.DARK_EMBED));
         this.configButton.disable();
 
-        this.importXeox = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.import_xeox"), 190).position(() -> new Position(5, this.size.height - 26)))
+        this.importXeox = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.import_xeox"), 190)
+                .position(() -> new Position(5, this.size.height - 26))
                 .callback(this::onImportXeox)
-                .type(Button.Type.DARK_EMBED);
+                .type(Button.Type.DARK_EMBED));
     }
 
     private void onImportXeox(TextButton textButton) {
