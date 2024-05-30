@@ -180,10 +180,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     private IClipboard getClipboard() {
         if (GamePlatform.get().isMacOSX()) {
-            return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
+            return new NullClipboard();
         }
 
-        return new NullClipboard();
+        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
     }
 
     public final G3dModelLoader modelLoader;

@@ -4,12 +4,12 @@ import java.awt.image.BufferedImage;
 
 public class NullClipboard implements IClipboard {
     @Override
-    public void copy(BufferedImage image) {
-
+    public boolean copy(BufferedImage image) {
+        return false;
     }
 
     @Override
-    public void copy(String text) {
-
+    public boolean copy(String text) {
+        return false;
     }
 }

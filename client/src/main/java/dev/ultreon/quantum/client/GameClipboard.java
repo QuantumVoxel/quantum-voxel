@@ -19,13 +19,18 @@ public class GameClipboard implements IClipboard {
     }
 
     @Override
-    public void copy(BufferedImage image) {
+    public boolean copy(BufferedImage image) {
+        if (image == null) return false;
         toolkitClipboard.setContents(new ImageSelection(image), null);
+        return true;
     }
 
     @Override
-    public void copy(String text) {
+    public boolean copy(String text) {
+        if (text == null) return false;
         gdxClipboard.setContents(text);
+
+        return true;
     }
 
     @Override

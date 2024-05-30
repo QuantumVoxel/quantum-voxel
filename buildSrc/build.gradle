@@ -20,10 +20,6 @@ java {
     targetCompatibility = "11"
 }
 
-kotlin {
-    jvmToolchain 11
-}
-
 repositories {
     mavenCentral()
     gradlePluginPortal()
