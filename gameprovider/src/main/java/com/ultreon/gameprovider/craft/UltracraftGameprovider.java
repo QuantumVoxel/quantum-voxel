@@ -90,7 +90,7 @@ public class UltracraftGameprovider implements GameProvider {
                         .addIcon(200, "assets/gdx/icon.png")
                         .build()),
                 new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("ultracraft", this.versions.getProperty("ultreoncraft"))
-                        .addLicense("Ultreon-Api-1.1")
+                        .addLicense("Ultreon-PSL-1.0")
                         .addAuthor("Ultreon Team", Map.of("github", "https://github.com/badlogic", "email", "badlogicgames@gmail.com"))
                         .addContributor("XyperCode", Map.of("github", "https://github.com/XyperCode"))
                         .addContributor("Creatomat Gaming", Map.of("github", "https://github.com/Creatomat"))
