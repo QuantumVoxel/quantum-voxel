@@ -40,7 +40,7 @@ events.on("postRegister", () => {
         let key = entry.key;
         let value = entry.value;
 
-        if (key.namespace == "Quantum") {
+        if (key.namespace == "quantum") {
             Registries[key.path.toUpperCase()] = value
         }
     })

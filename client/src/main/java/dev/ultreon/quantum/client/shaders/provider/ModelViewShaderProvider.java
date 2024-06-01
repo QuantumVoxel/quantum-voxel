@@ -5,11 +5,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.ModelViewShader;
 
-public class ModelViewShaderProvider extends DefaultShaderProvider implements OpenShaderProvider {
+public class ModelViewShaderProvider extends DefaultShaderProvider implements GameShaders {
     public ModelViewShaderProvider(final DefaultShader.Config config) {
         super(config);
     }

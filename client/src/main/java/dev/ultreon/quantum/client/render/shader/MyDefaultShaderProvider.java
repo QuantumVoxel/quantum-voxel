@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 
-class MyDefaultShaderProvider extends DefaultShaderProvider implements OpenShaderProvider {
+class MyDefaultShaderProvider extends DefaultShaderProvider implements GameShaders {
     public MyDefaultShaderProvider(DefaultShader.Config config) {
         super(config);
     }

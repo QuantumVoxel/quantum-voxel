@@ -2245,6 +2245,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public void reloadResourcesAsync() {
+        if (!isOnMainThread()) {
+            this.invokeAndWait(() -> this.reloadResourcesAsync());
+            return;
+        }
+
         this.loadingOverlay = new LoadingOverlay();
         loading = true;
         CompletableFuture.runAsync(() -> {

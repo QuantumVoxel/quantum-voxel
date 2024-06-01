@@ -1,15 +1,15 @@
 package dev.ultreon.quantum.client.render;
 
-import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import dev.ultreon.quantum.client.render.shader.GameShaders;
 
 public class ShaderContext {
-    private static OpenShaderProvider mode;
+    private static GameShaders mode;
 
-    public static void set(OpenShaderProvider mode) {
+    public static void set(GameShaders mode) {
         ShaderContext.mode = mode;
     }
 
-    public static OpenShaderProvider get() {
+    public static GameShaders get() {
         return ShaderContext.mode;
     }
 

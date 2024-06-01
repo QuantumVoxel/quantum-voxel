@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 
-class MyDepthShaderProvider extends DepthShaderProvider implements OpenShaderProvider {
+class MyDepthShaderProvider extends DepthShaderProvider implements GameShaders {
     public MyDepthShaderProvider(DepthShader.Config config) {
         super(config);
     }

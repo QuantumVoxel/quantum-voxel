@@ -3,17 +3,17 @@ package dev.ultreon.quantum.client.render;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.util.RenderableArray;
 
 import java.util.Objects;
 
 public final class ModelObject implements Disposable {
-    private final OpenShaderProvider shaderProvider;
+    private final GameShaders shaderProvider;
     private final ModelInstance model;
     private final RenderableArray renderables;
 
-    public ModelObject(OpenShaderProvider shaderProvider, ModelInstance model, RenderableArray renderables) {
+    public ModelObject(GameShaders shaderProvider, ModelInstance model, RenderableArray renderables) {
         this.shaderProvider = shaderProvider;
         this.model = model;
         this.renderables = renderables;
@@ -34,7 +34,7 @@ public final class ModelObject implements Disposable {
                "renderables=" + renderables + ']';
     }
 
-    public OpenShaderProvider shaderProvider() {
+    public GameShaders shaderProvider() {
         return shaderProvider;
     }
 

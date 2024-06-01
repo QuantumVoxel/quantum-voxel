@@ -153,44 +153,7 @@ public class DesktopInput extends GameInput {
         Screen currentScreen = this.client.screen;
 
         if (player != null && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                switch (player.getGamemode()) {
-                    case SURVIVAL:
-                        player.execute("gm spectator");
-                        break;
-                    case BUILDER:
-                        player.execute("gm survival");
-                        break;
-                    case BUILDER_PLUS:
-                        player.execute("gm builder");
-                        break;
-                    case ADVENTUROUS:
-                        player.execute("gm builder_plus");
-                        break;
-                    case SPECTATOR:
-                        player.execute("gm adventurous");
-                        break;
-                }
-                return;
-            }
-            switch (player.getGamemode()) {
-                case SURVIVAL:
-                    player.execute("gm builder");
-                    break;
-                case BUILDER:
-                    player.execute("gm builder_plus");
-                    break;
-                case BUILDER_PLUS:
-                    player.execute("gm adventurous");
-                    break;
-                case ADVENTUROUS:
-                    player.execute("gm spectator");
-                    break;
-                case SPECTATOR:
-                    player.execute("gm survival");
-                    break;
-            }
-
+            cycleGamemode(player);
             return;
         }
 
@@ -201,6 +164,46 @@ public class DesktopInput extends GameInput {
         handlePlayerInteraction(player, currentScreen);
     }
 
+    private static void cycleGamemode(Player player) {
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            switch (player.getGamemode()) {
+                case SURVIVAL:
+                    player.execute("gm spectator");
+                    break;
+                case BUILDER:
+                    player.execute("gm survival");
+                    break;
+                case BUILDER_PLUS:
+                    player.execute("gm builder");
+                    break;
+                case ADVENTUROUS:
+                    player.execute("gm builder_plus");
+                    break;
+                case SPECTATOR:
+                    player.execute("gm adventurous");
+                    break;
+            }
+            return;
+        }
+        switch (player.getGamemode()) {
+            case SURVIVAL:
+                player.execute("gm builder");
+                break;
+            case BUILDER:
+                player.execute("gm builder_plus");
+                break;
+            case BUILDER_PLUS:
+                player.execute("gm adventurous");
+                break;
+            case ADVENTUROUS:
+                player.execute("gm spectator");
+                break;
+            case SPECTATOR:
+                player.execute("gm survival");
+                break;
+        }
+    }
+
     /**
      * Handles different input events like opening inventory, chat, debug keys, etc.
      *
@@ -208,6 +211,13 @@ public class DesktopInput extends GameInput {
      * @param currentScreen The current screen
      */
     private void handleInputEvents(Player player, Screen currentScreen) {
+        if (Gdx.input.isKeyPressed(Input.Keys.F12)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
+                QuantumClient.get().reloadResourcesAsync();
+            }
+            return;
+        }
+
         if (DesktopInput.IM_GUI_KEY.isJustPressed()) {
             this.handleImGuiKey();
         } else if (DesktopInput.IM_GUI_FOCUS_KEY.isJustPressed()) {

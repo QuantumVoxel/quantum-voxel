@@ -132,3 +132,6 @@ Thumbs.db
 /.lsp/
 
 /client/test_data*.u[bs]o
+/local/
+/desktop/run/client/alt/
+/desktop/run/

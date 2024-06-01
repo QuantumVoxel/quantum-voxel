@@ -116,6 +116,8 @@ dependencies {
 
     implementation(api("org.graalvm.polyglot:polyglot:23.1.2"))
     implementation(api("org.graalvm.polyglot:python:23.1.2"))
+    implementation(api("org.graalvm.polyglot:js:23.1.2"))
+    implementation(api("org.graalvm.llvm:llvm-api:23.1.2"))
 
     api 'org.mozilla:rhino:1.7.15!!'
     api 'org.mozilla:rhino-engine:1.7.15!!'
@@ -123,6 +125,7 @@ dependencies {
 
 processResources {
     from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
+    from(project(":api-javascript").tasks.getByName("dist").outputs)
     exclude "*.pdn", "*.xcf", "*.ps"
 
     inputs.property "version", version
@@ -134,6 +137,8 @@ processResources {
 }
 
 jar {
+    dependsOn ":api-javascript:dist"
+
     //noinspection GroovyAssignabilityCheck
     manifest {
         //noinspection GroovyAssignabilityCheck

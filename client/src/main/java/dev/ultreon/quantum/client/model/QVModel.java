@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.model;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 
 import static com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
@@ -11,7 +11,7 @@ import static com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationL
 public class QVModel {
     private final ModelInstance instance;
     private final AnimationController animationController;
-    private final OpenShaderProvider shaderProvider = Shaders.MODEL_VIEW.get();
+    private final GameShaders shaderProvider = Shaders.MODEL_VIEW.get();
 
     public QVModel(ModelInstance instance) {
         this.instance = instance;
@@ -178,7 +178,7 @@ public class QVModel {
         animationController.allowSameAnimation = allowSameAnimation;
     }
 
-    public OpenShaderProvider getShaderProvider() {
+    public GameShaders getShaderProvider() {
         return shaderProvider;
     }
 }

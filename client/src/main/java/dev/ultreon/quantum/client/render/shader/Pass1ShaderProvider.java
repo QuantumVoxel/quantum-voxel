@@ -9,7 +9,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 
 import static com.badlogic.gdx.graphics.GL20.GL_BACK;
 
-public class Pass1ShaderProvider extends DepthShaderProvider implements OpenShaderProvider {
+public class Pass1ShaderProvider extends DepthShaderProvider implements GameShaders {
     public Pass1ShaderProvider() {
         super(Pass1ShaderProvider.configure());
     }

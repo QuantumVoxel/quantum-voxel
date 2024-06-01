@@ -22,5 +22,6 @@ include 'desktop'
 include 'client'
 include 'server'
 include 'testmod'
-include 'android'
+//include 'android'
+include 'api-javascript'
 

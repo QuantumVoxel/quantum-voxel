@@ -15,8 +15,8 @@ public class GameShaderProvider extends BaseShaderProvider {
 
     @Override
     protected Shader createShader(Renderable renderable) {
-        OpenShaderProvider openShaderProvider = ShaderContext.get();
-        Shader shader = openShaderProvider.createShader(renderable);
+        GameShaders gameShaders = ShaderContext.get();
+        Shader shader = gameShaders.createShader(renderable);
         if (shader == null) throw new IllegalStateException("Shader not found");
         if (!shader.canRender(renderable)) throw new IllegalStateException("Shader cannot render");
         return shader;

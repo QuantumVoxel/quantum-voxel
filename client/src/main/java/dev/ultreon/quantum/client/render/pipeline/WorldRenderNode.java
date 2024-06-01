@@ -11,7 +11,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.Scene3D;
 import dev.ultreon.quantum.client.render.ShaderContext;
-import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.entity.Entity;
@@ -37,10 +37,10 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
 
     protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
         for (Renderable renderable : input) {
-            if (!(shaderProvider instanceof OpenShaderProvider))
+            if (!(shaderProvider instanceof GameShaders))
                 throw new IllegalStateException("Shader provider is not open");
-            OpenShaderProvider openShaderProvider = (OpenShaderProvider) shaderProvider;
-            ShaderContext.set(openShaderProvider);
+            GameShaders gameShaders = (GameShaders) shaderProvider;
+            ShaderContext.set(gameShaders);
             renderable.environment = this.client.getEnvironment();
             renderable.shader = null;
             this.shader = shaderProvider.getShader(renderable);

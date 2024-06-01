@@ -29,7 +29,7 @@ dependencies {
     api(project(":server"))
 
     // requires a version of Clojure with prepl (1.10+)
-    implementation("org.clojure:clojure:1.11.1")
+    implementation("org.clojure:clojure:1.21.1")
     // and any other dependencies you want on the compile classpath
     // implementation 'group:artifact:version'
 

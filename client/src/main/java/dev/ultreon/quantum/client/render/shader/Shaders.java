@@ -36,7 +36,7 @@ public class Shaders {
             new ResourceFileHandle(id("shaders/model_view.vert")),
             new ResourceFileHandle(id("shaders/model_view.frag"))
     ));
-    public static final Supplier<ModelViewShaderProvider> OUTLINE = Shaders.register("outline", () -> new ModelViewShaderProvider(
+    public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
             new ResourceFileHandle(id("shaders/outline.vert")),
             new ResourceFileHandle(id("shaders/outline.frag"))
     ));

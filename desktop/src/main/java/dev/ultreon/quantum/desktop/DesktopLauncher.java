@@ -12,6 +12,7 @@ import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.js.JsLang;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.python.PyLang;
@@ -88,6 +89,7 @@ public class DesktopLauncher {
         }
 
         new PyLang().init();
+        new JsLang().init();
 
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description))) {

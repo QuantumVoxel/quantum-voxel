@@ -29,7 +29,7 @@ buildscript {
 
     dependencies {
         classpath("gradle.plugin.org.danilopianini:javadoc.io-linker:0.1.4-700fdb6")
-        classpath("com.android.tools.build:gradle:8.2.0")
+//        classpath("com.android.tools.build:gradle:8.2.0")
     }
 }
 
@@ -64,7 +64,7 @@ extensions.configure<GameUtilsExt> {
     coreProject = project(":client")
     desktopProject = project(":desktop")
     packageProject = project(":desktop-merge")
-    androidProject = project(":android")
+//    androidProject = project(":android")
 
     mainClass = "dev.ultreon.quantum.premain.PreMain"
     javaVersion = 11

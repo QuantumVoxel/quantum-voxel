@@ -2,6 +2,7 @@ package dev.ultreon.quantum.python;
 
 import com.google.gson.Gson;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.LangLoader;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.SandboxPolicy;
 import org.graalvm.polyglot.Source;
@@ -17,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
-public class PyLoader {
+public class PyLoader implements LangLoader {
     private static final PyLoader INSTANCE = new PyLoader();
     private static final Logger LOGGER = LoggerFactory.getLogger(PyLoader.class);
     private final Map<String, PyMod> mods = new HashMap<>();
@@ -33,6 +34,7 @@ public class PyLoader {
         pyDecos.put(id, runnable);
     }
 
+    @Override
     public void init(Path path, Context context) throws IOException {
         try (var list = Files.list(path)) {
             list.filter(p -> p.toString().endsWith(".pyz")).forEach(p -> {

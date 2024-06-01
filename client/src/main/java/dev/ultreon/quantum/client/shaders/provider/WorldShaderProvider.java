@@ -10,11 +10,11 @@ import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelObject;
-import dev.ultreon.quantum.client.render.shader.OpenShaderProvider;
+import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 
-public class WorldShaderProvider extends DefaultShaderProvider implements OpenShaderProvider {
+public class WorldShaderProvider extends DefaultShaderProvider implements GameShaders {
     public WorldShaderProvider(final DefaultShader.Config config) {
         super(config);
     }
@@ -50,8 +50,8 @@ public class WorldShaderProvider extends DefaultShaderProvider implements OpenSh
         if (userData instanceof QVModel) {
             QVModel qvModel = (QVModel) userData;
             return qvModel.getShaderProvider().createShader(renderable);
-        } else if (userData instanceof OpenShaderProvider) {
-            OpenShaderProvider provider = (OpenShaderProvider) userData;
+        } else if (userData instanceof GameShaders) {
+            GameShaders provider = (GameShaders) userData;
             return provider.createShader(renderable);
         } else if (userData instanceof ItemModel) {
             return Shaders.MODEL_VIEW.get().createShader(renderable);

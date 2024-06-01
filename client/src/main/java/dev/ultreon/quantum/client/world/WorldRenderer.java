@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -362,11 +363,11 @@ public final class WorldRenderer implements DisposableContainer {
                         var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                         var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-
                         WorldRenderer.buildOutlineBox(0.02f, sizeX, sizeY, sizeZ, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
                     });
 
                     this.cursor = Scene3D.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+                    this.cursor.userData = Shaders.OUTLINE.get();
                 }
             });
         } else if (this.cursor != null) {
@@ -661,7 +662,7 @@ public final class WorldRenderer implements DisposableContainer {
 
     public static Mesh buildOutlineBox(float thickness, float width, float height, float depth) {
         MeshBuilder meshBuilder = new MeshBuilder();
-        meshBuilder.begin(new VertexAttributes(VertexAttribute.Position()), GL_TRIANGLES);
+        meshBuilder.begin(new VertexAttributes(VertexAttribute.Position()), GL_LINES);
 
         WorldRenderer.buildOutlineBox(thickness, width, height, depth, meshBuilder);
 
@@ -670,23 +671,8 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     public static void buildOutlineBox(float thickness, float width, float height, float depth, MeshPartBuilder meshBuilder) {
-        // Top face
-        buildLine(thickness, 0, height, 0, width, height, 0, meshBuilder);
-        buildLine(thickness, 0, height, depth, width, height, depth, meshBuilder);
-        buildLine(thickness, width, height, 0, width, height, depth, meshBuilder);
-        buildLine(thickness, 0, height, 0, 0, height, depth, meshBuilder);
-
-        // Bottom face
-        buildLine(thickness, 0, 0, 0, width, 0, 0, meshBuilder);
-        buildLine(thickness, 0, 0, depth, width, 0, depth, meshBuilder);
-        buildLine(thickness, width, 0, 0, width, 0, depth, meshBuilder);
-        buildLine(thickness, 0, 0, 0, 0, 0, depth, meshBuilder);
-
-        // Sides
-        buildLine(thickness, 0, 0, 0, 0, height, 0, meshBuilder);
-        buildLine(thickness, width, 0, 0, width, height, 0, meshBuilder);
-        buildLine(thickness, 0, 0, depth, 0, height, depth, meshBuilder);
-        buildLine(thickness, width, 0, depth, width, height, depth, meshBuilder);
+        Gdx.gl20.glLineWidth(thickness);
+        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-width / 2, -height / 2, -depth / 2), new Vector3(width / 2, height / 2, depth / 2)));
     }
 
     public static void buildLine(float thickness, float x1, float y1, float z1, float x2, float y2, float z2, MeshPartBuilder meshBuilder) {
