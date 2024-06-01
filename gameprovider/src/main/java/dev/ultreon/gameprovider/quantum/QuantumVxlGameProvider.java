@@ -130,7 +130,7 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .build()),
                 // Creating a BuiltinMod for Quantum Voxel
                 new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("quantum", this.versions.getProperty("quantum"))
-                        .addLicense("AGPL-3.0")
+                        .addLicense("Ultreon-PSL-1.0")
                         .addAuthor("Ultreon Team", Map.of("github", "https://github.com/badlogic", "email", "badlogicgames@gmail.com"))
                         .addContributor("XyperCode", Map.of("github", "https://github.com/XyperCode"))
                         .addContributor("Creatomat Gaming", Map.of("github", "https://github.com/Creatomat"))
