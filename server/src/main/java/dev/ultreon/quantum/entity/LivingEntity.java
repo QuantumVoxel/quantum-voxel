@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity;
 
 import com.google.common.collect.Lists;
+import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;

@@ -44,7 +44,7 @@ public class RenderPipeline implements Disposable {
     }
 
     @SuppressWarnings("GDXJavaFlushInsideLoop") // We need to flush before the next node.
-    public void render(ModelBatch modelBatch, float blurScale) {
+    public void render(ModelBatch modelBatch, float blurScale, float deltaTime) {
         @Nullable WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
         if (worldRenderer != null) ScreenUtils.clear(worldRenderer.getSkybox().bottomColor, true);
         else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
@@ -57,15 +57,15 @@ public class RenderPipeline implements Disposable {
         var textures = new ObjectMap<String, Texture>();
         for (var node : this.nodes) {
             if (node.requiresModel()) {
-                input = this.modelRender(modelBatch, node, input, textures);
+                input = this.modelRender(modelBatch, node, input, textures, deltaTime);
             } else {
-                input = this.plainRender(modelBatch, node, input, textures);
+                input = this.plainRender(modelBatch, node, input, textures, deltaTime);
             }
             modelBatch.flush();
         }
 
         ((MainRenderNode)this.main).blur(blurScale);
-        this.main.render(textures, modelBatch, this.camera, input);
+        this.main.render(textures, modelBatch, this.camera, input, deltaTime);
         modelBatch.flush();
 
         for (var node : this.nodes) {
@@ -75,7 +75,7 @@ public class RenderPipeline implements Disposable {
         textures.clear();
     }
 
-    private Array<Renderable> modelRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures) {
+    private Array<Renderable> modelRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures, float deltaTime) {
         FrameBuffer frameBuffer = node.getFrameBuffer();
         frameBuffer.begin();
         ScreenUtils.clear(RgbColor.TRANSPARENT.toGdx(), true);
@@ -83,7 +83,7 @@ public class RenderPipeline implements Disposable {
         modelBatch.begin(this.camera);
         node.textureBinder.begin();
         node.time += Gdx.graphics.getDeltaTime();
-        input = node.render(textures, modelBatch, this.camera, input);
+        input = node.render(textures, modelBatch, this.camera, input, deltaTime);
         try {
             modelBatch.end();
         } catch (Exception e) {
@@ -97,14 +97,14 @@ public class RenderPipeline implements Disposable {
         return input;
     }
 
-    private Array<Renderable> plainRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures) {
+    private Array<Renderable> plainRender(ModelBatch modelBatch, RenderNode node, Array<Renderable> input, ObjectMap<String, Texture> textures, float deltaTime) {
         FrameBuffer frameBuffer = node.getFrameBuffer();
         frameBuffer.begin();
         ScreenUtils.clear(RgbColor.TRANSPARENT.toGdx(), true);
 
         node.textureBinder.begin();
         node.time += Gdx.graphics.getDeltaTime();
-        input = node.render(textures, modelBatch, this.camera, input);
+        input = node.render(textures, modelBatch, this.camera, input, deltaTime);
         node.textureBinder.end();
 
         RenderPipeline.capture(node);
@@ -154,7 +154,7 @@ public class RenderPipeline implements Disposable {
             return Pixmap.Format.RGBA8888;
         }
 
-        public abstract @NewInstance Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input);
+        public abstract @NewInstance Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime);
 
         public void resize(int width, int height) {
             this.fbo.dispose();

@@ -68,7 +68,7 @@ public class CrateMenu extends BlockContainerMenu {
         }
 
 
-        this.inventoryMenu(idx, 0, 76);
+        this.inventoryMenu(idx, 0, 89);
     }
 
     @Override

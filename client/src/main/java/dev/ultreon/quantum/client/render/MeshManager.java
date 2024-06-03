@@ -17,12 +17,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Meshes3D {
-    public static final Meshes3D INSTANCE = new Meshes3D();
+public class MeshManager {
+    public static final MeshManager INSTANCE = new MeshManager();
     private final MeshBuilder builder = new MeshBuilder();
     private final List<Mesh> meshes = new CopyOnWriteArrayList<>();
 
-    private Meshes3D() {
+    private MeshManager() {
 
     }
 

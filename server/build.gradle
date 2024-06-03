@@ -49,8 +49,8 @@ java {
     withSourcesJar()
     withJavadocJar()
     
-    sourceCompatibility("11")
-    targetCompatibility("11")
+    sourceCompatibility("21")
+    targetCompatibility("21")
 }
 
 dependencies {
@@ -206,5 +206,5 @@ compileJava {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "21"
 }

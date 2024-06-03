@@ -6,23 +6,21 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.util.Identifier;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Models3D {
-    public static final Models3D INSTANCE = new Models3D();
+public class ModelManager {
+    public static final ModelManager INSTANCE = new ModelManager();
     private final ModelBuilder builder = new ModelBuilder();
     private final Map<Identifier, Model> models = new ConcurrentHashMap<>();
 
-    private Models3D() {
+    private ModelManager() {
 
     }
 

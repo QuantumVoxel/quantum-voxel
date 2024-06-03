@@ -16,7 +16,7 @@ public class WorldDiffuseNode extends WorldRenderNode {
 
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
+    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         this.render(modelBatch, this.shaderProvider.get(), input);
         textures.put("diffuse", this.getFrameBuffer().getColorBufferTexture());
         return input;

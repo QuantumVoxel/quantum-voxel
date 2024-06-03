@@ -11,7 +11,7 @@ import com.google.common.base.Supplier;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
@@ -43,7 +43,7 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
     }
 
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
+    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         WorldShaderProvider shaderProvider = this.shaderProvider.get();
         ShaderContext.set(shaderProvider);
         this.renderWorld(modelBatch);
@@ -58,6 +58,6 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
 
     private void renderWorldOnce(WorldRenderer worldRenderer, ClientWorld world, Vec3d position, ModelBatch batch) {
         worldRenderer.updateBackground();
-        batch.render(Scene3D.BACKGROUND::finish);
+        batch.render(RenderLayer.BACKGROUND::finish);
     }
 }

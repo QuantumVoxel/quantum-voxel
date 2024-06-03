@@ -986,8 +986,8 @@ public abstract class World implements ServerDisposable {
             stopBreaking(breaking, breaker);
         }
 
-        set(breaking, blockProperties, BlockFlags.UPDATE);
         blockProperties.onDestroy(this, breaking, breaker);
+        set(breaking, Blocks.AIR.createMeta(), BlockFlags.UPDATE);
         return true;
     }
 }

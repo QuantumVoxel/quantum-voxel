@@ -7,7 +7,7 @@ import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
-import dev.ultreon.quantum.client.render.Models3D;
+import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.Identifier;
 
@@ -36,7 +36,7 @@ public class Json5Model implements BlockModel, ItemModel {
     }
 
     public Model bake() {
-        return Models3D.INSTANCE.generateModel(id, modelBuilder -> {
+        return ModelManager.INSTANCE.generateModel(id, modelBuilder -> {
             for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
                 Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
                 modelElement.bake(i, modelBuilder, textureElements);
@@ -70,7 +70,7 @@ public class Json5Model implements BlockModel, ItemModel {
 
     @Override
     public void dispose() {
-        Models3D.INSTANCE.unloadModel(id);
+        ModelManager.INSTANCE.unloadModel(id);
     }
 
     @Override

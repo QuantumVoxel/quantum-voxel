@@ -15,12 +15,12 @@ import org.jetbrains.annotations.NotNull;
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  * @since 0.1.0
  */
-public class DevScreen extends Screen {
+public class DevPreviewScreen extends Screen {
     /**
      * Constructor for DevScreen class.
      * Initializes with a translation text for the screen title.
      */
-    protected DevScreen() {
+    protected DevPreviewScreen() {
         super(TextObject.translation("quantum.screen.dev"));
     }
 

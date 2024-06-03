@@ -15,7 +15,7 @@ import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.registry.BlockRenderTypeRegistry;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.RenderEffect;
 import dev.ultreon.quantum.client.world.FaceProperties;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.registry.Registries;
@@ -63,7 +63,7 @@ public class RenderingRegistration {
      */
     private static void registerBlockRenderTypes() {
         // Register the RenderType.WATER render type for the Blocks.WATER block.
-        BlockRenderTypeRegistry.register(Blocks.WATER, RenderLayer.WATER);
+        BlockRenderTypeRegistry.register(Blocks.WATER, RenderEffect.WATER);
 
         // Call the onRegister() method of the BLOCK_RENDER_TYPES factory.
         ClientRegistrationEvents.BLOCK_RENDER_TYPES.factory().onRegister();

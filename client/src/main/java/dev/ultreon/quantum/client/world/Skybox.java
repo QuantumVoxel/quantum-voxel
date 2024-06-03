@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.Color;
+import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.util.RgbColor;
 
 import static dev.ultreon.quantum.util.RgbColor.rgba;
@@ -15,13 +17,28 @@ public class Skybox {
     public Color posZColor = new Color();
     public Color negZColor = new Color();
 
-    public void update(int daytime) {
+    public void update(int daytime, float deltaTime) {
         topColor.set(timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR));
         midColor.set(timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR));
-        bottomColor.set(timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR));
+        bottomColor.set(posYMix(QuantumClient.get().player, deltaTime, timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR), ClientWorld.VOID_COLOR));
 
         posZColor.set(sunRiseSetMix(daytime, ClientWorld.SUN_RISE_COLOR, null));
         negZColor.set(sunRiseSetMix(daytime, null, ClientWorld.SUN_RISE_COLOR));
+    }
+
+    private Color posYMix(LocalPlayer player, float deltaTime, Color color, RgbColor voidColor) {
+        int start = ClientWorld.VOID_Y_START;
+        int end = ClientWorld.VOID_Y_END;
+
+        if (player.getPosition(deltaTime).y < start) {
+            return voidColor.toGdx();
+        } else if (player.getPosition(deltaTime).y >= end) {
+            return ClientWorld.mixColors(
+                    voidColor, RgbColor.gdx(color),
+                    (player.getPosition(deltaTime).y - start) / (float) (end - start)).toGdx();
+        } else {
+            return color;
+        }
     }
 
     private static Color timeMix(int daytime, RgbColor dayTopColor, RgbColor nightTopColor) {

@@ -47,19 +47,6 @@ public class GenericDebugPage implements DebugPage {
                     .left();
         }
 
-        context.left("Meshes")
-                .left("Meshes Disposed", ChunkMesh.getMeshesDisposed())
-                .left("Vertex Count", WorldRenderer.getVertexCount())
-                .left();
-
-        context.left("Renderables")
-                .left("Global Size", RenderableArray.getGlobalSize())
-                .left("Obtained Renderables", ValueTracker.getObtainedRenderables())
-                .left("Obtain Requests", ValueTracker.getObtainRequests())
-                .left("Free Requests", ValueTracker.getFreeRequests())
-                .left("Flush Requests", ValueTracker.getFlushRequests())
-                .left();
-
         if (world != null) {
             // Player
             Player player = client.player;

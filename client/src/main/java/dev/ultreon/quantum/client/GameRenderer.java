@@ -22,7 +22,7 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.input.TouchscreenInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -99,8 +99,8 @@ public class GameRenderer implements Disposable {
             });
         }
 
-        Scene3D.BACKGROUND.update(deltaTime);
-        Scene3D.WORLD.update(deltaTime);
+        RenderLayer.BACKGROUND.update(deltaTime);
+        RenderLayer.WORLD.update(deltaTime);
 
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
 
@@ -113,7 +113,7 @@ public class GameRenderer implements Disposable {
                 blurScale = Mth.clamp(blurScale, 0f, 1f);
                 this.blurScale = blurScale;
 
-                this.renderWorld(Math.max(blurScale, 0f));
+                this.renderWorld(Math.max(blurScale, 0f), deltaTime);
                 RenderEvents.POST_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
             });
         }
@@ -166,8 +166,8 @@ public class GameRenderer implements Disposable {
         return this.cameraBop = bop;
     }
 
-    void renderWorld(float blurScale) {
-        this.pipeline.render(this.modelBatch, blurScale);
+    void renderWorld(float blurScale, float deltaTime) {
+        this.pipeline.render(this.modelBatch, blurScale, deltaTime);
     }
 
     private void renderOverlays(Renderer renderer, @Nullable Screen screen, @Nullable World world, float deltaTime) {

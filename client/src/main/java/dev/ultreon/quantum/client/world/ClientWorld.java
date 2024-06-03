@@ -55,6 +55,9 @@ public final class ClientWorld extends World implements Disposable {
     public static RgbColor NIGHT_TOP_COLOR = RgbColor.rgb(0x01010b);
     public static RgbColor NIGHT_BOTTOM_COLOR = RgbColor.rgb(0x0a0c16);
     public static RgbColor SUN_RISE_COLOR = RgbColor.rgb(0xff3000);
+    public static RgbColor VOID_COLOR = RgbColor.rgb(0x0a0a0a);
+    public static int VOID_Y_START = 20;
+    public static int VOID_Y_END = 0;
     @NotNull
     private final QuantumClient client;
     private final Map<ChunkPos, ClientChunk> chunks = new HashMap<>();

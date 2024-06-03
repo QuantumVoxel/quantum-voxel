@@ -1,18 +1,18 @@
 package dev.ultreon.quantum.client.model;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.world.World;
 
 public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
-    final Scene3D scene3D;
+    final RenderLayer renderLayer;
     final T holder;
     private final World world;
     private final float worldScale;
     private final Vec3d cameraPos;
 
-    public WorldRenderContextImpl(Scene3D scene3D, T holder, World world, float worldScale, Vec3d cameraPos) {
-        this.scene3D = scene3D;
+    public WorldRenderContextImpl(RenderLayer renderLayer, T holder, World world, float worldScale, Vec3d cameraPos) {
+        this.renderLayer = renderLayer;
         this.holder = holder;
         this.world = world;
         this.worldScale = worldScale;

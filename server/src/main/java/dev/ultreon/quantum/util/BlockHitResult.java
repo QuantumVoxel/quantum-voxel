@@ -7,6 +7,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.CubicDirection;
 
 import java.util.Objects;
@@ -53,6 +54,20 @@ public class BlockHitResult implements HitResult {
         this.block = Registries.BLOCK.byId(buffer.readVarInt());
         this.collide = buffer.readBoolean();
         this.distance = buffer.readDouble();
+    }
+
+    public BlockHitResult(Ray ray, BlockPos blockPos, BlockProperties block) {
+        this.ray = ray;
+        this.blockMeta = block;
+        this.block = block.getBlock();
+        this.position.set(blockPos.vec().d());
+        this.setDirection(ray.getDirection());
+        this.distanceMax = 5.0F;
+        this.pos.set(blockPos.vec());
+        this.next.set(blockPos.vec());
+        this.normal.set(0, 0, 0);
+        this.collide = true;
+        this.distance = 0.0D;
     }
 
     public void write(PacketIO buffer) {

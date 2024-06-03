@@ -16,8 +16,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
+    sourceCompatibility = "21"
+    targetCompatibility = "21"
 }
 
 repositories {

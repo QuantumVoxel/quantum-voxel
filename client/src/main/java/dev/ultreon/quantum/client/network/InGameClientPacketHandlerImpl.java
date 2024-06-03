@@ -265,10 +265,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onBlockSet(BlockPos pos, BlockProperties block) {
-        ClientWorld world = this.client.world;
-        if (this.client.world != null) {
-            this.client.submit(() -> world.set(pos, block, BlockFlags.UPDATE));
-        }
+
     }
 
     @Override

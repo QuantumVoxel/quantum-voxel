@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -73,9 +74,9 @@ import dev.ultreon.quantum.client.player.SkinManager;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
-import dev.ultreon.quantum.client.render.Meshes3D;
-import dev.ultreon.quantum.client.render.Models3D;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.MeshManager;
+import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.render.shader.GameShaderProvider;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
@@ -176,7 +177,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Vector2 scrollPointer = new Vector2();
     private boolean screenshotWorldOnly;
     public WorldStorage openedWorld;
-    private Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
+    private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
 
     private IClipboard getClipboard() {
         if (GamePlatform.get().isMacOSX()) {
@@ -1099,7 +1100,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (this.screenshotWorldOnly) {
             ScreenUtils.clear(0, 0, 0, 0, true);
-            this.gameRenderer.renderWorld(0f);
+            this.gameRenderer.renderWorld(0f, deltaTime);
             this.captureScreenshot = false;
             this.triggerScreenshot = false;
 
@@ -1196,9 +1197,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         final LoadingOverlay loading = this.loadingOverlay;
         if (loading != null) {
             this.renderLoadingOverlay(renderer, deltaTime, loading);
-        }
-
-        if (loading != null) {
             return true;
         }
 
@@ -1272,7 +1270,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             QuantumClient.crashHook = null;
 
             QuantumClient.invoke(() -> {
-                this.screen = this.crashes.isEmpty() ? new DevScreen() : new CrashScreen(this.crashes);
+                this.screen = this.crashes.isEmpty() ? new DevPreviewScreen() : new CrashScreen(this.crashes);
                 this.screen.init(this.getScaledWidth(), this.getScaledHeight());
                 this.loadingOverlay = null;
             }).exceptionally(throwable -> {
@@ -1592,9 +1590,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 efficiency = toolItem.getEfficiency();
             }
 
-            if (world.continueBreaking(breaking, 1.0F / (Math.max(this.breakingBlock.getHardness() * QuantumServer.TPS / efficiency, 0) + 1), this.player) != BreakResult.CONTINUE) {
-                Vec3i pos = hitResult.getPos();
-                world.set(pos.x, pos.y, pos.z, BlockProperties.AIR, BlockFlags.UPDATE | BlockFlags.SYNC);
+            if (world.continueBreaking(breaking, 1.0F / (Math.max((this.breakingBlock.getHardness() / efficiency) * QuantumServer.TPS, 1) + 1), this.player) != BreakResult.CONTINUE) {
                 this.resetBreaking();
             } else {
                 if (this.oldSelected != this.player.selected) {
@@ -1728,16 +1724,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.fbo);
 
                 // Clear scenes
-                Scene3D.BACKGROUND.clear();
-                Scene3D.WORLD.clear();
+                RenderLayer.BACKGROUND.clear();
+                RenderLayer.WORLD.clear();
 
                 // Dispose Models
-                Models3D.INSTANCE.dispose();
+                ModelManager.INSTANCE.dispose();
                 QuantumClient.cleanUp(this.bakedBlockModels.atlas());
                 QuantumClient.cleanUp(this.bakedBlockModels);
                 QuantumClient.cleanUp(this.entityModelManager);
 
-                Meshes3D.INSTANCE.dispose();
+                MeshManager.INSTANCE.dispose();
 
                 // Dispose textures
                 QuantumClient.cleanUp(this.ultreonBgTex);
@@ -1992,7 +1988,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         if (this.breaking != null) {
-            this.world.continueBreaking(new BlockPos(this.breaking), 1.0F, player);
+            this.world.stopBreaking(new BlockPos(this.breaking), player);
             return;
         }
 
@@ -2246,7 +2242,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public void reloadResourcesAsync() {
         if (!isOnMainThread()) {
-            this.invokeAndWait(() -> this.reloadResourcesAsync());
+            invokeAndWait(this::reloadResourcesAsync);
             return;
         }
 
@@ -2333,5 +2329,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public void setModConfigScreen(Mod caller, ConfigScreenFactory factory) {
         cfgScreenFactories.put(caller.getId(), factory);
+    }
+
+    public CubemapManager getCubemapManager() {
+        return cubemapManager;
     }
 }

@@ -28,6 +28,7 @@ import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.server.TickTask;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.Identifier;
@@ -139,18 +140,9 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             }
 
             switch (status) {
-                case START:
-                    world.startBreaking(pos, this.player);
-                    break;
-                case CONTINUE:
-                    world.continueBreaking(pos, 1.0F / (Math.max(block.getHardness() * QuantumServer.TPS / efficiency, 0) + 1), this.player);
-                    break;
-                case STOP:
-                    world.stopBreaking(pos, this.player);
-                    break;
-                case BROKEN:
-                    world.destroyBlock(pos, this.player);
-                    break;
+                case START-> world.startBreaking(pos, this.player);
+                case CONTINUE -> world.continueBreaking(pos, 1.0F / (Math.max(block.getHardness() * QuantumServer.TPS / efficiency, 0) + 1), this.player);
+                case STOP, BROKEN -> world.stopBreaking(pos, this.player);
             }
         });
     }
@@ -178,7 +170,10 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         QuantumServer.invoke(() -> {
             if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick) {
-                world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockPos(pos.x(), pos.y(), pos.z()), world.get(pos)));
+
+                QuantumServer.invoke(new TickTask(2, () -> {
+                    world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockPos(pos.x(), pos.y(), pos.z()), world.get(pos)));
+                }));
                 return;
             }
 

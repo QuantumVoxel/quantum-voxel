@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.api.events;
 
+import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.events.api.Event;
 
@@ -23,6 +24,7 @@ public class ClientLifecycleEvents {
     public static final Event<Registration> REGISTER_BLOCK_ENTITY_MODELS = Event.create();
     @Deprecated(forRemoval = true, since = "0.1.0")
     public static final Event<Registration> REGISTER_BLOCK_MODELS = Event.create();
+    public static final Event<GuiAtlasInit> GUI_ATLAS_INIT = Event.create();
 
     @FunctionalInterface
     public interface ClientStarted {
@@ -45,4 +47,8 @@ public class ClientLifecycleEvents {
         void onRegister();
     }
 
+    @FunctionalInterface
+    public interface GuiAtlasInit {
+        void onGuiAtlasInit(PixmapPacker packer);
+    }
 }

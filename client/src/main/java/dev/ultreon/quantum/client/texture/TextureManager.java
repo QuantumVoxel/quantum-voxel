@@ -2,12 +2,17 @@ package dev.ultreon.quantum.client.texture;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.PixmapPacker;
+import com.badlogic.gdx.graphics.g2d.PixmapPackerIO;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.RgbColor;
@@ -15,8 +20,8 @@ import dev.ultreon.quantum.util.Identifier;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TextureManager implements Disposable {
@@ -24,10 +29,13 @@ public class TextureManager implements Disposable {
 
     private final ResourceManager resourceManager;
 
+    @SuppressWarnings("GDXJavaStaticResource")
     public static final Texture DEFAULT_TEX = new Texture(TextureManager.createMissingNo());
     public static final TextureRegion DEFAULT_TEX_REG = new TextureRegion(TextureManager.DEFAULT_TEX, 0.0F, 0.0F, 1.0F, 1.0F);
     @Deprecated
     public static final TextureRegion DEFAULT_TEXTURE_REG = TextureManager.DEFAULT_TEX_REG;
+
+    private TextureAtlas guiAtlas;
 
     static {
         TextureManager.DEFAULT_TEX.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
@@ -40,6 +48,31 @@ public class TextureManager implements Disposable {
         Preconditions.checkNotNull(resourceManager, "resourceManager");
 
         this.resourceManager = resourceManager;
+
+        this.setupGuiAtlas();
+    }
+
+    private void setupGuiAtlas() {
+        if (this.guiAtlas == null) {
+            PixmapPacker packer = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
+
+            GuiAtlasLoader.load(packer);
+            ClientLifecycleEvents.GUI_ATLAS_INIT.factory().onGuiAtlasInit(packer);
+            this.guiAtlas = packer.generateTextureAtlas(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, false);
+
+            this.dumpAtlas();
+        }
+    }
+
+    private void dumpAtlas() {
+        int i = 0;
+        for (Texture page : this.guiAtlas.getTextures()) {
+            Pixmap pixmap = page.getTextureData().consumePixmap();
+            FileHandle file = QuantumClient.data("textures/gui/" + i + ".png");
+            file.parent().mkdirs();
+            PixmapIO.writePNG(file, pixmap);
+            ++i;
+        }
     }
 
     private static Pixmap createMissingNo() {
@@ -50,17 +83,6 @@ public class TextureManager implements Disposable {
         pixmap.fillRectangle(0, 0, 8, 8);
         pixmap.fillRectangle(8, 8, 16, 16);
         return pixmap;
-    }
-
-    private static Pixmap createDefaultTex() throws IOException {
-        var image = new Pixmap(16, 16, Pixmap.Format.RGB888);
-        image.setColor(RgbColor.rgb(0x000000).toGdx());
-        image.fillRectangle(0, 0, 16, 16);
-        image.setColor(RgbColor.rgb(0xff00ff).toGdx());
-        image.fillRectangle(0, 8, 8, 8);
-        image.fillRectangle(8, 0, 8, 8);
-
-        return image;
     }
 
     public Texture getTexture(Identifier id, Texture fallback) {
@@ -184,12 +206,17 @@ public class TextureManager implements Disposable {
     public void reload(ReloadContext context) {
         this.frozen = true;
         context.submit(() -> {
-            for (Texture texture : this.textures.values()) {
+            Iterable<Texture> textures = List.copyOf(this.textures.values());
+            this.textures.clear();
+            for (Texture texture : textures) {
                 if (texture == null) continue;
                 texture.dispose();
             }
-            this.textures.clear();
             this.frozen = false;
         });
+    }
+
+    public String getManagedStatus() {
+        return "<white>Size: <gray>" + this.textures.size() + " <gold><b>|</b> <white>Frozen: <gray>" + this.frozen;
     }
 }

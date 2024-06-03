@@ -6,6 +6,8 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.LongType;
@@ -222,6 +224,22 @@ public class ServerWorld extends World {
         super.spawnParticles(particleType, position, motion, count);
 
         this.sendAllTracking((int) position.x, (int) position.y, (int) position.z, new S2CSpawnParticlesPacket(particleType, position, motion, count));
+    }
+
+    @Override
+    public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
+        BlockProperties blockProperties = get(breaking);
+        if (blockProperties.isAir()) {
+            QuantumServer.LOGGER.warn("Tried to break air block at {}!", breaking);
+            return false;
+        }
+
+        boolean broken = super.destroyBlock(breaking, breaker);
+        if (broken)
+            for (ItemStack item : blockProperties.getLootGen().generate(breaker != null ? breaker.getRng() : new JavaRNG())) {
+                drop(item, breaking.vec().d().add(0.5));
+            }
+        return broken;
     }
 
     private void sync(int x, int y, int z, BlockProperties block) {
@@ -1422,6 +1440,7 @@ public class ServerWorld extends World {
             } catch (Throwable t) {
                 this.generatingChunks.remove(globalPos);
                 World.LOGGER.error(String.format("Failed to build chunk at %s:", globalPos), t);
+                world.server.crash(t);
                 throw new Error(t);
             }
 
@@ -1467,6 +1486,7 @@ public class ServerWorld extends World {
                     throw e;
                 } catch (Throwable e) {
                     QuantumServer.LOGGER.error(String.format("Failed to build chunk at %s:", globalPos), e);
+                    world.server.crash(e);
                     throw new Error(e);
                 }
             }, this.world.executor).thenAccept(builtChunk -> QuantumServer.invoke(() -> {

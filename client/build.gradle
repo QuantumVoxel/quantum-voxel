@@ -47,8 +47,8 @@ group project_group // https://maven.apache.org/guides/mini/guide-naming-convent
 java {
     withSourcesJar()
     
-    sourceCompatibility("11")
-    targetCompatibility("11")
+    sourceCompatibility("21")
+    targetCompatibility("21")
 }
 
 repositories {
@@ -188,5 +188,5 @@ compileJava {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "21"
 }

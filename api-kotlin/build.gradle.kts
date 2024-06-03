@@ -29,7 +29,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(21)
 }
 
 fun setupIdea() {

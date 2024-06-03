@@ -35,6 +35,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     private final D defaultValue;
     private short[] palette;
     private List<D> data = new LinkedList<>();
+    private final Object lock = new Object();
 
     public PaletteStorage(D defaultValue, int size) {
         this.defaultValue = defaultValue;
@@ -56,123 +57,141 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
 
     @Override
     public MapType save(MapType outputData, Function<D, MapType> encoder) {
-        ListType<MapType> data = new ListType<>();
-        for (@Nullable D entry : this.data) if (entry != null) data.add(encoder.apply(entry));
-        outputData.put("Data", data);
+        synchronized (lock) {
+            ListType<MapType> data = new ListType<>();
+            for (@Nullable D entry : this.data) if (entry != null) data.add(encoder.apply(entry));
+            outputData.put("Data", data);
 
-        outputData.putShortArray("Palette", this.palette);
+            outputData.putShortArray("Palette", this.palette);
 
-        return outputData;
+            return outputData;
+        }
     }
 
     @Override
     public void load(MapType inputData, Function<MapType, D> decoder) {
-        this.data.clear();
-        var data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
-        for (MapType entryData : data.getValue()) {
-            D entry = decoder.apply(entryData);
-            if (entry == null) {
-                this.data.add(this.defaultValue);
-                continue;
+        synchronized (lock) {
+            this.data.clear();
+            var data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
+            for (MapType entryData : data.getValue()) {
+                D entry = decoder.apply(entryData);
+                if (entry == null) {
+                    this.data.add(this.defaultValue);
+                    continue;
+                }
+                this.data.add(entry);
             }
-            this.data.add(entry);
-        }
 
-        this.palette = inputData.getShortArray(DataKeys.PALETTE, new short[this.palette.length]);
+            this.palette = inputData.getShortArray(DataKeys.PALETTE, new short[this.palette.length]);
+        }
     }
 
     @Override
     public void write(PacketIO buffer, BiConsumer<PacketIO, D> encoder) {
-        buffer.writeMedium(this.data.size());
-        for (D entry : this.data) if (entry != null) encoder.accept(buffer, entry);
-        buffer.writeMedium(this.palette.length);
-        for (short v : this.palette) buffer.writeShort(v);
+        synchronized (lock) {
+            buffer.writeMedium(this.data.size());
+            for (D entry : this.data) if (entry != null) encoder.accept(buffer, entry);
+            buffer.writeMedium(this.palette.length);
+            for (short v : this.palette) buffer.writeShort(v);
+        }
     }
 
     @Override
     public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
-        var data = new ArrayList<D>();
-        var dataSize = buffer.readMedium();
-        for (int i = 0; i < dataSize; i++) {
-            data.add(decoder.apply(buffer));
-        }
-        this.data = data;
+        synchronized (lock) {
+            var data = new ArrayList<D>();
+            var dataSize = buffer.readMedium();
+            for (int i = 0; i < dataSize; i++) {
+                data.add(decoder.apply(buffer));
+            }
+            this.data = data;
 
-        short[] palette = new short[buffer.readMedium()];
-        for (int i = 0; i < palette.length; i++) {
-            palette[i] = buffer.readShort();
-        }
+            short[] palette = new short[buffer.readMedium()];
+            for (int i = 0; i < palette.length; i++) {
+                palette[i] = buffer.readShort();
+            }
 
-        this.palette = palette;
+            this.palette = palette;
+        }
     }
 
     @Override
     public boolean set(int idx, D value) {
-        if (value == null) {
-            this.remove(idx);
+        synchronized (lock) {
+            if (value == null) {
+                this.remove(idx);
+                return false;
+            }
+
+            short old = this.palette[idx];
+
+            short setIdx = (short) this.data.indexOf(value);
+            if (setIdx == -1) {
+                setIdx = this.add(idx, value);
+            }
+            this.palette[idx] = setIdx;
+
+            if (old < 0 || ArrayUtils.contains(this.palette, old))
+                return false;
+
+            int i1 = ListUtils.indexOf(this.data, object -> Objects.equals(object, value));
+            if (i1 >= 0) {
+                this.data.set(old, value);
+                return false;
+            }
+
+            this.data.remove(old);
+
+            // Update paletteMap entries for indices after the removed one
+            for (int i = 0; i < this.palette.length; i++) {
+                int oldValue = this.palette[i];
+                this.palette[i] = (short) (oldValue - 1);
+            }
             return false;
         }
-
-        short old = this.palette[idx];
-
-        short setIdx = (short) this.data.indexOf(value);
-        if (setIdx == -1) {
-            setIdx = this.add(idx, value);
-        }
-        this.palette[idx] = setIdx;
-
-        if (old < 0 || ArrayUtils.contains(this.palette, old))
-            return false;
-
-        int i1 = ListUtils.indexOf(this.data, object -> Objects.equals(object, value));
-        if (i1 >= 0) {
-            this.data.set(old, value);
-            return false;
-        }
-
-        this.data.remove(old);
-
-        // Update paletteMap entries for indices after the removed one
-        for (int i = 0; i < this.palette.length; i++) {
-            int oldValue = this.palette[i];
-            this.palette[i] = (short) (oldValue - 1);
-        }
-        return false;
     }
 
     public short toDataIdx(int idx) {
-        return idx >= 0 && idx < this.palette.length ? this.palette[idx] : -1;
+        synchronized (lock) {
+            return idx >= 0 && idx < this.palette.length ? this.palette[idx] : -1;
+        }
     }
 
     public D direct(int dataIdx) {
-        if (dataIdx >= 0 && dataIdx < this.data.size()) {
-            D d = this.data.get(dataIdx);
-            return d != null ? d : this.defaultValue;
-        }
+        synchronized (lock) {
+            if (dataIdx >= 0 && dataIdx < this.data.size()) {
+                D d = this.data.get(dataIdx);
+                return d != null ? d : this.defaultValue;
+            }
 
-        return this.defaultValue;
+            return this.defaultValue;
+        }
     }
 
     public short add(int idx, D value) {
-        Preconditions.checkNotNull(value, "value");
+        synchronized (lock) {
+            Preconditions.checkNotNull(value, "value");
 
-        short dataIdx = (short) (this.data.size());
-        this.data.add(value);
-        this.palette[idx] = dataIdx;
-        return dataIdx;
+            short dataIdx = (short) (this.data.size());
+            this.data.add(value);
+            this.palette[idx] = dataIdx;
+            return dataIdx;
+        }
     }
 
     public void remove(int idx) {
-        if (idx >= 0 && idx < this.data.size()) {
-            int dataIdx = this.toDataIdx(idx);
-            if (dataIdx < 0) return;
-            this.data.remove(dataIdx);
-            this.palette[idx] = -1;
+        synchronized (lock) {
+            if (idx >= 0 && idx < this.data.size()) {
+                int dataIdx = this.toDataIdx(idx);
+                if (dataIdx < 0) return;
+                this.data.remove(dataIdx);
+                this.palette[idx] = -1;
 
-            // Update paletteMap entries for indices after the removed one
-            for (int i = idx; i < this.palette.length; i++) {
-                int oldValue = this.palette[i];
-                this.palette[i] = (short) (oldValue - 1);
+                // Update paletteMap entries for indices after the removed one
+                for (int i = idx; i < this.palette.length; i++) {
+                    int oldValue = this.palette[i];
+                    this.palette[i] = (short) (oldValue - 1);
+                }
             }
         }
     }
@@ -185,8 +204,10 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     @Nullable
     @Override
     public D get(int idx) {
-        short paletteIdx = this.toDataIdx(idx);
-        return paletteIdx < 0 ? this.defaultValue : this.direct(paletteIdx);
+        synchronized (lock) {
+            short paletteIdx = this.toDataIdx(idx);
+            return paletteIdx < 0 ? this.defaultValue : this.direct(paletteIdx);
+        }
     }
 
     @Override
@@ -194,8 +215,10 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
         Preconditions.checkNotNull(defaultValue, "defaultValue");
         Preconditions.checkNotNull(mapper, "mapper");
 
-        var data = this.data.stream().map(mapper).collect(Collectors.toList());
-        return new PaletteStorage<>(defaultValue, this.palette, data);
+        synchronized (lock) {
+            var data = this.data.stream().map(mapper).collect(Collectors.toList());
+            return new PaletteStorage<>(defaultValue, this.palette, data);
+        }
     }
 
     public short[] getPalette() {
@@ -207,14 +230,16 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     }
 
     public void set(short[] palette, List<D> data) {
-        if (this.palette.length != palette.length)
-            throw new IllegalArgumentException("Palette length must be equal.");
+        synchronized (lock) {
+            if (this.palette.length != palette.length)
+                throw new IllegalArgumentException("Palette length must be equal.");
 
-        if (this.data.contains(null))
-            throw new IllegalArgumentException("Data cannot contain null values.");
+            if (this.data.contains(null))
+                throw new IllegalArgumentException("Data cannot contain null values.");
 
-        this.palette = palette;
-        this.data = data;
+            this.palette = palette;
+            this.data = data;
+        }
     }
 
     @Override

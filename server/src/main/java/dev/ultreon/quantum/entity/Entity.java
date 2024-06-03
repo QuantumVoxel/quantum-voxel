@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.entity;
 
+import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
@@ -45,7 +46,7 @@ import java.util.UUID;
  * @see World#spawn(Entity)
  * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
  */
-public class Entity implements CommandSender {
+public class Entity extends ComponentSystem implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected final World world;
     protected double x;

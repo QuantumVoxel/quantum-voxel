@@ -144,6 +144,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             // Set player's position, health, and status
             this.setPosition(spawnAt);
             this.health = this.getMaxHealth();
+            this.getFoodStatus().reset();
             this.isDead = false;
             this.damageImmunity = 40;
 

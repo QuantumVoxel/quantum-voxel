@@ -3,12 +3,11 @@ package dev.ultreon.quantum.client;
 import com.badlogic.gdx.ApplicationLogger;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
-import org.slf4j.MarkerFactory;
 
 /**
  * Custom logger implementation for LibGDX.
  */
-class GdxLogWrapper implements ApplicationLogger {
+class GdxSlf4jLogger implements ApplicationLogger {
     private final Logger LOGGER = LoggerFactory.getLogger("LibGDX");
 
     /**

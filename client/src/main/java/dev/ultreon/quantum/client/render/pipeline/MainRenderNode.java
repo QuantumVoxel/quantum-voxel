@@ -29,7 +29,7 @@ public class MainRenderNode extends RenderNode {
 
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
+    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         Texture depthMap = textures.get("depth");
         Texture skyboxTexture = textures.get("skybox");
         Texture diffuseTexture = textures.get("diffuse");

@@ -17,7 +17,6 @@ import java.util.function.Function;
 
 public class SkyboxShader extends DefaultShader {
     private final static Attributes tmpAttributes = new Attributes();
-    private static String version = "140";
     public final int u_topColor;
     public final int u_midColor;
     public final int u_bottomColor;
@@ -182,6 +181,5 @@ public class SkyboxShader extends DefaultShader {
     }
 
     public static void setVersion(String version) {
-        SkyboxShader.version = version;
     }
 }

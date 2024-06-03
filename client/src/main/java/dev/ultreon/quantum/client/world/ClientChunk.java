@@ -15,7 +15,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.collection.Storage;
@@ -213,19 +213,19 @@ public final class ClientChunk extends Chunk {
     public ModelInstance addModel(BlockPos pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
             ModelInstance modelInstance1 = this.models.get(pos);
-            Scene3D.WORLD.destroy(modelInstance1);
+            RenderLayer.WORLD.destroy(modelInstance1);
             this.models.remove(pos);
         }
         return this.addedModels.put(pos, instance);
     }
 
-    public void renderModels(Scene3D scene3D) {
+    public void renderModels(RenderLayer renderLayer) {
         for (BlockPos pos : this.addedModels.keySet()) {
             ModelInstance model = this.addedModels.get(pos);
             model.userData = Shaders.MODEL_VIEW.get();
             this.addedModels.remove(pos);
             this.models.put(pos, model);
-            scene3D.add(model);
+            renderLayer.add(model);
         }
 
         for (BlockPos pos : this.models.keySet()) {
@@ -237,7 +237,7 @@ public final class ClientChunk extends Chunk {
             this.removedModels.removeValue(pos, false);
             ModelInstance model = this.models.remove(pos);
             if (model != null)
-                scene3D.destroy(model);
+                renderLayer.destroy(model);
         }
     }
 
@@ -267,7 +267,7 @@ public final class ClientChunk extends Chunk {
 
     public void destroyModels() {
         for (var model : this.models.values()) {
-            Scene3D.WORLD.destroy(model);
+            RenderLayer.WORLD.destroy(model);
         }
     }
 }

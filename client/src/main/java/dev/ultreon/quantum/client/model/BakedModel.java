@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import dev.ultreon.quantum.client.render.Models3D;
+import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.util.Identifier;
 
 public abstract class BakedModel {
@@ -12,7 +12,7 @@ public abstract class BakedModel {
         this.resourceId = resourceId;
         this.model = model;
 
-        Models3D.INSTANCE.add(resourceId, model);
+        ModelManager.INSTANCE.add(resourceId, model);
     }
 
     public Model getModel() {

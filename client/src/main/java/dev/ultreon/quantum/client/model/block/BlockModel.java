@@ -2,9 +2,8 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.client.render.Models3D;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.resources.LoadableResource;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.Identifier;
@@ -17,7 +16,7 @@ public interface BlockModel extends LoadableResource {
 
     boolean isCustom();
 
-    default void render(Vector3 pos, Scene3D scene3D) {
+    default void render(Vector3 pos, RenderLayer renderLayer) {
         // Do nothing
     }
 
@@ -28,7 +27,7 @@ public interface BlockModel extends LoadableResource {
     Model getModel();
 
     default void dispose() {
-        Models3D.INSTANCE.unloadModel(resourceId());
+        ModelManager.INSTANCE.unloadModel(resourceId());
     }
 
     Identifier resourceId();

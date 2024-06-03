@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 public class IntegratedServer extends QuantumServer {
@@ -121,7 +122,10 @@ public class IntegratedServer extends QuantumServer {
 
     @Override
     public void crash(CrashLog crashLog) {
-        QuantumClient.crash(crashLog);
+        this.shutdown();
+        crashLog.writeToLog();
+
+        this.client.showScreen(new CrashScreen(List.of(crashLog)));
     }
 
     @Override

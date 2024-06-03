@@ -8,10 +8,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.BakedModel;
-import dev.ultreon.quantum.client.render.Models3D;
+import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.LazyValue;
@@ -97,7 +96,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     public static Model createModel(Identifier resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back) {
-        return Models3D.INSTANCE.generateModel(resourceId, modelBuilder -> {
+        return ModelManager.INSTANCE.generateModel(resourceId, modelBuilder -> {
             Material material = new Material();
             material.set(new TextureAttribute(TextureAttribute.Diffuse, QuantumClient.get().blocksTextureAtlas.getTexture()));
             material.set(new TextureAttribute(TextureAttribute.Emissive, QuantumClient.get().blocksTextureAtlas.getEmissiveTexture()));

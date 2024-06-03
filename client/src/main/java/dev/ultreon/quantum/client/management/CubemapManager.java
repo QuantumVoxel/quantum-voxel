@@ -93,4 +93,8 @@ public class CubemapManager implements Manager<Cubemap>, Disposable {
 
         this.cubemaps.clear();
     }
+
+    public int getLoadedCount() {
+        return this.cubemaps.size();
+    }
 }

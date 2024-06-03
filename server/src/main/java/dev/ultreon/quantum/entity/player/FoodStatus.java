@@ -102,4 +102,11 @@ public class FoodStatus {
             player.hurt(1.0F, DamageSource.HUNGER);
         }
     }
+
+    public void reset() {
+        this.foodLevel = 20;
+        this.saturationLevel = 5;
+        this.exhaustion = 1.0F;
+        this.isStarving = false;
+    }
 }

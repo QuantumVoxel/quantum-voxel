@@ -11,7 +11,7 @@ import org.checkerframework.common.reflection.qual.NewInstance;
 public class PostEffectsNode extends RenderPipeline.RenderNode {
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
+    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         // Implement post-effects rendering logic here
         System.out.println("Post Effects Rendering");
         return input;

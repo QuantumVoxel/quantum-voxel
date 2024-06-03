@@ -48,7 +48,6 @@ public class ItemRenderer implements Disposable {
     private Environment environment;
     private final ModelBatch batch;
     private OrthographicCamera itemCam;
-    private Material material;
     private final Quaternion quaternion = new Quaternion();
     private final Vector3 rotation = new Vector3(-30, 45, 0);
     private final Vector3 position = new Vector3(0, 0, -1000);
@@ -68,9 +67,6 @@ public class ItemRenderer implements Disposable {
         this.environment.add(new DirectionalLight().set(0.17f, .17f, .17f, this.tmp.set(0, 1, 0).rotate(Vector3.Y, 45)));
         this.batch = new ModelBatch();
         this.itemCam = new OrthographicCamera(client.getScaledWidth(), client.getScaledHeight());
-        this.material = new Material(new TextureAttribute(TextureAttribute.Diffuse, this.client.blocksTextureAtlas.getTexture()));
-        this.material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
-        this.material.set(new DepthTestAttribute(GL20.GL_DEPTH_FUNC));
     }
 
     public void render(Item item, Renderer renderer, int x, int y) {
@@ -264,6 +260,5 @@ public class ItemRenderer implements Disposable {
 
         this.itemCam = null;
         this.environment = null;
-        this.material = null;
     }
 }

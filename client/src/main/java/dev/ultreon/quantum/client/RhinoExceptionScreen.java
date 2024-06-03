@@ -15,7 +15,7 @@ public class RhinoExceptionScreen extends Screen {
     private SelectionList<RhinoException> list;
 
     public RhinoExceptionScreen(List<RhinoException> rhinoExceptions) {
-        super(TextObject.translation("Quantum.screen.xeox_errors"));
+        super(TextObject.translation("quantum.screen.xeox_errors"));
 
         this.rhinoExceptions = rhinoExceptions;
     }

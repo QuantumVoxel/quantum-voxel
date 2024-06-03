@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.Scene3D;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import org.checkerframework.common.reflection.qual.NewInstance;
@@ -23,7 +23,7 @@ import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 public class CollectNode extends RenderPipeline.RenderNode {
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input) {
+    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         var localPlayer = this.client.player;
@@ -35,7 +35,7 @@ public class CollectNode extends RenderPipeline.RenderNode {
         }
         var position = localPlayer.getPosition(client.partialTick);
         List<Entity> toSort = new ArrayList<>(world.getAllEntities());
-        worldRenderer.render(Scene3D.WORLD);
+        worldRenderer.render(RenderLayer.WORLD, deltaTime);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);
@@ -43,7 +43,7 @@ public class CollectNode extends RenderPipeline.RenderNode {
         });
         for (Entity entity : toSort) {
             if (entity instanceof LocalPlayer) continue;
-            worldRenderer.collectEntity(entity, Scene3D.WORLD);
+            worldRenderer.collectEntity(entity, RenderLayer.WORLD);
         }
 
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();
@@ -53,7 +53,7 @@ public class CollectNode extends RenderPipeline.RenderNode {
 
         modelBatch.render(particleSystem);
 
-        Scene3D.WORLD.finish(input, this.pool());
+        RenderLayer.WORLD.finish(input, this.pool());
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
         return input;

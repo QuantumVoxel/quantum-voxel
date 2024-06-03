@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRenderer;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.debug.DebugPage;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.RenderEffect;
 import dev.ultreon.quantum.registry.Registry;
 
 /**
@@ -16,7 +16,7 @@ import dev.ultreon.quantum.registry.Registry;
  */
 public class ClientRegistries {
     // Registry for RenderType
-    public static final Registry<RenderLayer> RENDER_LAYER = ClientRegistries.<RenderLayer>builder("render_layer").build();
+    public static final Registry<RenderEffect> RENDER_EFFECT = ClientRegistries.<RenderEffect>builder("render_effect").build();
 
     // Registry for Font
     public static final Registry<Font> FONT = ClientRegistries.<Font>builder("fonts").build();

@@ -243,9 +243,13 @@ public abstract class Player extends LivingEntity {
 
     public HitResult rayCast() {
         Ray ray = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
+        if (this.world.get(getBlockPos()).getBlock().hasCollider()) {
+            return new BlockHitResult(ray, getBlockPos(), world.get(getBlockPos()));
+        }
         EntityHitResult entityHitResult = this.world.rayCastEntity(ray);
         if (entityHitResult.isCollide()) return entityHitResult;
-        return this.world.rayCast(ray);
+        Ray ray1 = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
+        return this.world.rayCast(ray1);
     }
 
     @Override
