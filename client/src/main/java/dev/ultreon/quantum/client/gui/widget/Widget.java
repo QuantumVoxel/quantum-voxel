@@ -26,9 +26,7 @@ import java.util.function.Supplier;
 public abstract class Widget implements StaticWidget, GameComponentHolder<UIComponent> {
     protected boolean ignoreBounds = false;
     private final Position preferredPos = new Position(0, 0);
-    protected final Position pos = new Position(0, 0);
     private final Size preferredSize = new Size(0, 0);
-    protected final Size size = new Size(0, 0);
     public boolean visible = true;
     public boolean enabled = true;
     public boolean hovered = false;
@@ -36,6 +34,9 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     @ApiStatus.Internal
     protected Screen root;
+    protected final Bounds bounds = new Bounds();
+    protected final Position pos = bounds.pos;
+    protected final Size size = bounds.size;
 
     UIContainer<?> parent = UIContainer.ROOT;
     protected final long createTime = System.nanoTime();
@@ -174,20 +175,17 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     @CanIgnoreReturnValue
     public void setPos(Position pos) {
-        this.pos.x = pos.x;
-        this.pos.y = pos.y;
+        this.pos.set(pos);
     }
 
     @CanIgnoreReturnValue
     public void setSize(int width, int height) {
-        this.size.width = width;
-        this.size.height = height;
+        this.size.set(width, height);
     }
 
     @CanIgnoreReturnValue
     public void setSize(Size size) {
-        this.size.width = size.width;
-        this.size.height = size.height;
+        this.size.set(size);
     }
 
     @CanIgnoreReturnValue
@@ -208,6 +206,10 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     @CanIgnoreReturnValue
     public void height(int height) {
         this.size.height = height;
+    }
+
+    public void bounds(int x, int y, int width, int height) {
+        this.bounds.set(x, y, width, height);
     }
 
     @CanIgnoreReturnValue
@@ -379,6 +381,10 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     public <T extends UIContainer<T>> void onDisconnect(UIContainer<T> from) {
 
+    }
+
+    public void bounds(Bounds bounds) {
+        this.bounds.set(bounds);
     }
 
     @FunctionalInterface

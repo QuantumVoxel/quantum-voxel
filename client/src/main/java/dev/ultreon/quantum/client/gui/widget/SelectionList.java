@@ -316,7 +316,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
             this.size.width = this.list.size.width;
             this.size.height = this.list.itemHeight;
             ItemRenderer<T> itemRenderer = this.list.itemRenderer;
-            if (itemRenderer != null && renderer.pushScissors(this.pos.x, this.pos.y, this.size.width, this.size.height)) {
+            if (itemRenderer != null && renderer.pushScissors(this.bounds)) {
 
                 Identifier texture = id("textures/gui/list.png");
                 renderer.draw9Slice(texture, this.pos.x, this.pos.y, this.size.width, this.size.height, 0, 0, 15, 15, 5, 256, 256);

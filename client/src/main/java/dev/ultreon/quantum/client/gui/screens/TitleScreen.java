@@ -8,9 +8,7 @@ import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
-import dev.ultreon.quantum.client.gui.widget.Label;
-import dev.ultreon.quantum.client.gui.widget.Rectangle;
-import dev.ultreon.quantum.client.gui.widget.TitleButton;
+import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.Formatter;
@@ -26,7 +24,7 @@ public class TitleScreen extends Screen {
     private TitleButton optionsButton;
     private TitleButton quitButton;
     private final Resizer resizer;
-    private TitleButton worldGenTestButton;
+    private TextButton worldGenTestButton;
 
     public TitleScreen() {
         super((TextObject) null, null);
@@ -50,8 +48,8 @@ public class TitleScreen extends Screen {
                 .callback(this::openSingleplayer));
 
         if (GamePlatform.get().isDevEnvironment()) {
-            this.worldGenTestButton = builder.add(TitleButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
-                    .position(() -> new Position(50, this.size.height / 2 - 60))
+            this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
+                    .position(() -> new Position(50, this.size.height / 2 - 125))
                     .callback(this::openTest));
         }
 
@@ -80,7 +78,7 @@ public class TitleScreen extends Screen {
         }
     }
 
-    private void openTest(TitleButton textButton) {
+    private void openTest(TextButton textButton) {
         this.client.showScreen(new WorldGenTestScreen());
     }
 
@@ -124,8 +122,7 @@ public class TitleScreen extends Screen {
         return this.singleplayerButton;
     }
 
-    @Nullable
-    public TitleButton getWorldGenTestButton() {
+    public @Nullable TextButton getWorldGenTestButton() {
         return worldGenTestButton;
     }
 

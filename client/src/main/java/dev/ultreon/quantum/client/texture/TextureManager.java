@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class TextureManager implements Disposable {
     private final Map<Identifier, Texture> textures = new HashMap<>();
@@ -206,7 +207,7 @@ public class TextureManager implements Disposable {
     public void reload(ReloadContext context) {
         this.frozen = true;
         context.submit(() -> {
-            Iterable<Texture> textures = List.copyOf(this.textures.values());
+            Iterable<Texture> textures = this.textures.values().stream().filter(Objects::nonNull).toList();
             this.textures.clear();
             for (Texture texture : textures) {
                 if (texture == null) continue;

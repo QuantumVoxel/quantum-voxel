@@ -54,11 +54,11 @@ public class LayoutBounds {
     }
 
     public void setCurrentBounds(int x, int y, int width, int height) {
-        this.current.setBounds(x, y, width, height);
+        this.current.set(x, y, width, height);
     }
 
     public void setCurrentBounds(Bounds bounds) {
-        this.current.setBounds(bounds);
+        this.current.set(bounds);
     }
 
     public void revalidate() {

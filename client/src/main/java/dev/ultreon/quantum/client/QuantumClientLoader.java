@@ -304,7 +304,7 @@ class QuantumClientLoader implements Runnable {
 
     private void registerLanguage(Identifier id, QuantumClient quantumClient) {
         var s = id.path().split("_", 2);
-        var locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
+        var locale = s.length == 1 ? Locale.of(s[0]) : Locale.of(s[0], s[1]);
         LanguageManager.INSTANCE.register(locale, id);
         LanguageManager.INSTANCE.load(locale, id, quantumClient.getResourceManager());
     }

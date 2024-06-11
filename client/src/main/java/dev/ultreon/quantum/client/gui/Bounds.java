@@ -7,20 +7,21 @@ import dev.ultreon.quantum.util.Copyable;
 import java.util.Objects;
 
 public final class Bounds implements Copyable<Bounds> {
-    private final Position pos;
-    private final Size size;
-
-    public Bounds(Position pos, Size size) {
-        this.pos = pos;
-        this.size = size;
-    }
+    public final Position pos = new Position();
+    public final Size size = new Size();
 
     public Bounds() {
-        this(new Position(), new Size());
+
+    }
+
+    public Bounds(Position pos, Size size) {
+        this.pos.set(pos);
+        this.size.set(size);
     }
 
     public Bounds(int x, int y, int width, int height) {
-        this(new Position(x, y), new Size(width, height));
+        this.pos.set(x, y);
+        this.size.set(width, height);
     }
 
     @CanIgnoreReturnValue
@@ -38,7 +39,7 @@ public final class Bounds implements Copyable<Bounds> {
     }
 
     @CanIgnoreReturnValue
-    public Bounds setBounds(int x, int y, int width, int height) {
+    public Bounds set(int x, int y, int width, int height) {
         this.pos.x = x;
         this.pos.y = y;
         this.size.width = width;
@@ -61,7 +62,7 @@ public final class Bounds implements Copyable<Bounds> {
     }
 
     @CanIgnoreReturnValue
-    public Bounds setBounds(Position pos, Size size) {
+    public Bounds set(Position pos, Size size) {
         this.pos.x = pos.x;
         this.pos.y = pos.y;
         this.size.width = size.width;
@@ -70,7 +71,7 @@ public final class Bounds implements Copyable<Bounds> {
     }
 
     @CanIgnoreReturnValue
-    public Bounds setBounds(Position pos, int width, int height) {
+    public Bounds set(Position pos, int width, int height) {
         this.pos.x = pos.x;
         this.pos.y = pos.y;
         this.size.width = width;
@@ -79,7 +80,7 @@ public final class Bounds implements Copyable<Bounds> {
     }
 
     @CanIgnoreReturnValue
-    public Bounds setBounds(int x, int y, Size size) {
+    public Bounds set(int x, int y, Size size) {
         this.pos.x = x;
         this.pos.y = y;
         this.size.width = size.width;
@@ -88,7 +89,7 @@ public final class Bounds implements Copyable<Bounds> {
     }
 
     @CanIgnoreReturnValue
-    public Bounds setBounds(Bounds bounds) {
+    public Bounds set(Bounds bounds) {
         this.pos.x = bounds.pos.x;
         this.pos.y = bounds.pos.y;
         this.size.width = bounds.size.width;
@@ -169,16 +170,31 @@ public final class Bounds implements Copyable<Bounds> {
         return new Bounds(this.pos.x + amount, this.pos.y + amount, this.size.width - amount * 2, this.size.height - amount * 2);
     }
 
+    @CanIgnoreReturnValue
     public Bounds grow(int left, int right, int top, int bottom) {
-        return new Bounds(this.pos.x - left, this.pos.y - top, this.size.width + left + right, this.size.height + top + bottom);
+        this.pos.x -= left;
+        this.pos.y -= top;
+        this.size.width += left + right;
+        this.size.height += top + bottom;
+        return this;
     }
 
+    @CanIgnoreReturnValue
     public Bounds grow(int horizontal, int vertical) {
-        return new Bounds(this.pos.x - horizontal, this.pos.y - vertical, this.size.width + horizontal * 2, this.size.height + vertical * 2);
+        this.pos.x -= horizontal;
+        this.pos.y -= vertical;
+        this.size.width += horizontal * 2;
+        this.size.height += vertical * 2;
+        return this;
     }
 
+    @CanIgnoreReturnValue
     public Bounds grow(int amount) {
-        return new Bounds(this.pos.x - amount, this.pos.y - amount, this.size.width + amount * 2, this.size.height + amount * 2);
+        this.pos.x -= amount;
+        this.pos.y -= amount;
+        this.size.width += amount * 2;
+        this.size.height += amount * 2;
+        return this;
     }
 
     public Position pos() {

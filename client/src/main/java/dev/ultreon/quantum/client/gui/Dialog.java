@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.math.Rectangle;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.client.gui.widget.Button;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
@@ -25,6 +27,8 @@ public class Dialog extends UIContainer<Dialog> {
             .position(() -> new Position(size.width - 21, 0))
             .callback(caller -> close())
             .type(Button.Type.DARK_EMBED);
+    private final Rectangle contentBounds = new Rectangle();
+    private final Rectangle titleBounds = new Rectangle();
 
     Dialog(Screen parent) {
         super(200, 100);
@@ -76,11 +80,12 @@ public class Dialog extends UIContainer<Dialog> {
         renderer.renderFrame(parent.getWidth() / 2 - size.width / 2 - 2, parent.getHeight() / 2 - size.height / 2 - 2, size.width + 4, size.height + 4);
         renderer.renderPopoutFrame(pos.x - 1, pos.y - 2, size.width + 2, 27);
 
-        if (renderer.pushScissors(pos.x, pos.y, size.width - 21, 21)) {
+        this.titleBounds.set(pos.x, pos.y, size.width - 21, 21);
+        if (renderer.pushScissors(titleBounds)) {
             renderer.textCenter("<bold>" + title.getText(), pos.x + (size.width) / 2, pos.y + 5, RgbColor.WHITE, true);
             renderer.popScissors();
         }
-        if (renderer.pushScissors(pos.x, pos.y, size.width, size.height)) {
+        if (renderer.pushScissors(this.bounds)) {
             String message1 = message.getText();
             List<String> lines = StringUtils.splitIntoLines(message1);
             for (int i = 0; i < lines.size(); i++) {
@@ -91,7 +96,8 @@ public class Dialog extends UIContainer<Dialog> {
 
         this.closeButton.render(renderer, mouseX, mouseY, deltaTime);
 
-        if (renderer.pushScissors(pos.x, pos.y + 21, size.width, size.height - 21)) {
+        this.contentBounds.set(pos.x, pos.y + 21, size.width, size.height - 21);
+        if (renderer.pushScissors(this.contentBounds)) {
             super.render(renderer, mouseX, mouseY, deltaTime);
             renderer.popScissors();
         }

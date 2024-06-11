@@ -26,11 +26,9 @@ public abstract class TabbedUI extends Screen {
     @Nullable
     private Tab tab;
     private int tabX;
-    private int contentX;
-    private int contentY;
-    private int contentWidth;
-    private int contentHeight;
-    private Supplier<Bounds> contentBounds;
+    private final Bounds contentBounds = new Bounds();
+    private Supplier<Bounds> contentBoundsRev;
+    private final Bounds frameBounds = new Bounds();
 
     protected TabbedUI(String title) {
         super(title);
@@ -56,9 +54,9 @@ public abstract class TabbedUI extends Screen {
         this.selected = 0;
         this.bottomSelected = false;
 
-        this.contentBounds = tabbedUIBuilder.contentBounds;
+        this.contentBoundsRev = tabbedUIBuilder.contentBounds;
         this.tabs = tabbedUIBuilder.tabs;
-        this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.get(0);
+        this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.getFirst();
 
         for (Tab tab : this.tabs) {
             this.defineRoot(tab);
@@ -69,19 +67,13 @@ public abstract class TabbedUI extends Screen {
     public void revalidate() {
         super.revalidate();
 
-        Bounds contentBounds = this.contentBounds.get();
-        this.contentX = contentBounds.getX();
-        this.contentY = contentBounds.getY();
-        this.contentWidth = contentBounds.getWidth();
-        this.contentHeight = contentBounds.getHeight();
+        Bounds contentBounds = this.contentBoundsRev.get();
+        this.contentBounds.set(contentBounds);
 
         for (Tab tab : this.tabs) {
             tab.revalidate();
             tab.content().revalidate();
-            tab.content().x(this.contentX);
-            tab.content().y(this.contentY);
-            tab.content().width(this.contentWidth);
-            tab.content().height(this.contentHeight);
+            tab.content().bounds(this.contentBounds);
         }
     }
 
@@ -96,14 +88,11 @@ public abstract class TabbedUI extends Screen {
 
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        renderer.renderFrame(contentX - 4, contentY - 4, contentWidth + 8, contentHeight + 8);
+        renderer.renderFrame(this.frameBounds.set(contentBounds).grow(4));
 
-        if (this.tab != null && renderer.pushScissors(contentX, contentY, contentWidth, contentHeight)) {
+        if (this.tab != null && renderer.pushScissors(contentBounds)) {
             TabContent content = this.tab.content();
-            content.x(this.contentX);
-            content.y(this.contentY);
-            content.width(this.contentWidth);
-            content.height(this.contentHeight);
+            content.bounds(contentBounds);
             content.render(renderer, mouseX, mouseY, deltaTime);
             renderer.popScissors();
         }
@@ -186,19 +175,19 @@ public abstract class TabbedUI extends Screen {
     }
 
     public int getContentX() {
-        return contentX;
+        return contentBounds.pos.x;
     }
 
     public int getContentY() {
-        return contentY;
+        return contentBounds.pos.y;
     }
 
     public int getContentWidth() {
-        return contentWidth;
+        return contentBounds.size.width;
     }
 
     public int getContentHeight() {
-        return contentHeight;
+        return contentBounds.size.height;
     }
 
     @Override

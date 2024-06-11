@@ -77,6 +77,8 @@ public class Renderer implements Disposable {
     private final Vector2 tmp2A = new Vector2();
     private final Vector3 tmp3A = new Vector3();
     private final GlStateStack glState = new GlStateStack();
+    private final TextureRegion tmpUv = new TextureRegion();
+    private final Quaternion tmpQ = new Quaternion();
     private int width;
     private int height;
     private int scissorOffsetX;
@@ -88,6 +90,7 @@ public class Renderer implements Disposable {
     private FrameBuffer grid;
     private float iTime;
     private final RenderablePool renderablePool = new RenderablePool();
+    private com.badlogic.gdx.graphics.Color tmpC = new com.badlogic.gdx.graphics.Color();
 
     /**
      * @param shapes shape drawer instance from {@link QuantumClient}
@@ -470,8 +473,9 @@ public class Renderer implements Disposable {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         this.batch.setColor(this.blitColor.toGdx());
-        TextureRegion textureRegion = new TextureRegion(tex, texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
-        this.batch.draw(textureRegion, x, y + height, width, -height);
+        tmpUv.setTexture(tex);
+        tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
+        this.batch.draw(tmpUv, x, y + height, width, -height);
         return this;
     }
 
@@ -500,8 +504,9 @@ public class Renderer implements Disposable {
     @CanIgnoreReturnValue
     public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
-        TextureRegion textureRegion = new TextureRegion(tex, 1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
-        this.batch.draw(textureRegion, x, y + height, width, -height);
+        this.tmpUv.setTexture(tex);
+        this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
+        this.batch.draw(tmpUv, x, y + height, width, -height);
         return this;
     }
 
@@ -547,8 +552,9 @@ public class Renderer implements Disposable {
     public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
         Texture tex = this.textureManager.getTexture(id);
-        TextureRegion textureRegion = new TextureRegion(tex, 1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
-        this.batch.draw(textureRegion, x, y + height, width, -height);
+        this.tmpUv.setTexture(tex);
+        this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
+        this.batch.draw(this.tmpUv, x, y + height, width, -height);
         return this;
     }
 
@@ -558,8 +564,9 @@ public class Renderer implements Disposable {
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
         this.batch.setColor(this.blitColor.toGdx());
-        TextureRegion textureRegion = new TextureRegion(tex, texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
-        this.batch.draw(textureRegion, x, y + height, width, -height);
+        this.tmpUv.setTexture(tex);
+        this.tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
+        this.batch.draw(tmpUv, x, y + height, width, -height);
         return this;
     }
 
@@ -1721,10 +1728,6 @@ public class Renderer implements Disposable {
         return this;
     }
 
-    private Vector2 getScale(Vector2 scale) {
-        return new Vector2(this.matrices.getScale(scale));
-    }
-
     @CanIgnoreReturnValue
     public Renderer translate(int x, int y) {
         this.matrices.translate(x, y);
@@ -1748,8 +1751,8 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer rotate(double x, double y) {
-        this.matrices.rotate(new Quaternion(1, 0, 0, (float) x));
-        this.matrices.rotate(new Quaternion(0, 1, 0, (float) y));
+        this.matrices.rotate(tmpQ.set(1, 0, 0, (float) x));
+        this.matrices.rotate(tmpQ.set(0, 1, 0, (float) y));
         this.batch.setTransformMatrix(this.matrices.last());
         return this;
     }
@@ -1770,9 +1773,8 @@ public class Renderer implements Disposable {
     }
 
     public Color getColor() {
-        com.badlogic.gdx.graphics.Color color = new com.badlogic.gdx.graphics.Color();
-        com.badlogic.gdx.graphics.Color.abgr8888ToColor(color, this.shapes.getPackedColor());
-        return Color.fromGdx(color);
+        com.badlogic.gdx.graphics.Color.abgr8888ToColor(tmpC, this.shapes.getPackedColor());
+        return Color.fromGdx(tmpC);
     }
 
     public Font getFont() {
@@ -1782,6 +1784,7 @@ public class Renderer implements Disposable {
     ///////////////////////////
     //     Miscellaneous     //
     ///////////////////////////
+    @Deprecated
     @ApiStatus.Experimental
     @CanIgnoreReturnValue
     public Renderer drawRegion(int x, int y, int width, int height, Consumer<Renderer> consumer) {
@@ -1795,6 +1798,7 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    @Deprecated
     @ApiStatus.Internal
     public boolean pushScissorsRaw(int x, int y, int width, int height) {
         return this.pushScissorsInternal(new Rectangle(x, y, width, height));
@@ -1826,6 +1830,7 @@ public class Renderer implements Disposable {
         return ScissorStack.pushScissors(rect);
     }
 
+    @Deprecated
     @CheckReturnValue
     public boolean pushScissors(int x, int y, int width, int height) {
         this.flush();
@@ -1835,22 +1840,26 @@ public class Renderer implements Disposable {
         );
     }
 
+    @Deprecated
     @CheckReturnValue
     public boolean pushScissors(float x, float y, float width, float height) {
         this.flush();
-        return this.pushScissorsInternal(new Rectangle(
-                x * this.client.getGuiScale(), y * this.client.getGuiScale(),
-                width * this.client.getGuiScale(), height * this.client.getGuiScale())
-        );
+        Rectangle rect = new Rectangle();
+        rect.x *= this.client.getGuiScale();
+        rect.y *= this.client.getGuiScale();
+        rect.width *= this.client.getGuiScale();
+        rect.height *= this.client.getGuiScale();
+        return this.pushScissorsInternal(rect);
     }
 
     @CheckReturnValue
     public boolean pushScissors(Rectangle rect) {
         this.flush();
-        return this.pushScissorsInternal(new Rectangle(
-                rect.x * this.client.getGuiScale(), rect.y * this.client.getGuiScale(),
-                rect.width * this.client.getGuiScale(), rect.height * this.client.getGuiScale())
-        );
+        rect.x *= this.client.getGuiScale();
+        rect.y *= this.client.getGuiScale();
+        rect.width *= this.client.getGuiScale();
+        rect.height *= this.client.getGuiScale();
+        return this.pushScissorsInternal(rect);
     }
 
     @CanIgnoreReturnValue
@@ -2548,5 +2557,9 @@ public class Renderer implements Disposable {
     public void scissorOffset(int x, int y) {
         this.scissorOffsetX += x;
         this.scissorOffsetY += y;
+    }
+
+    public void renderFrame(Bounds bounds) {
+        this.renderFrame(bounds.pos.x, bounds.pos.y, bounds.size.width, bounds.size.height);
     }
 }

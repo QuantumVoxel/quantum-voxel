@@ -21,11 +21,21 @@ public class MemoryUsageOverlay extends Overlay {
         renderer.fill(x + 1, y, width + 4, height + 6, RgbColor.rgb(0x202020));
         renderer.fill(x, y + 1, width + 6, height + 4, RgbColor.rgb(0x202020));
         renderer.box(x + 1, y + 1, width + 4, height + 4, RgbColor.rgb(0x303030));
+        Runtime runtime = Runtime.getRuntime();
+
+        long maxMemory = runtime.maxMemory(); // Maximum amount of memory the JVM will attempt to use
+        long allocatedMemory = runtime.totalMemory(); // Total amount of memory in use by the JVM
+        long freeMemory = runtime.freeMemory(); // Amount of free memory within the allocated memory
+
+//        System.out.println("Max memory: " + maxMemory);
+//        System.out.println("Allocated memory: " + allocatedMemory);
+//        System.out.println("Free memory: " + freeMemory);
+//        System.out.println("Percentage used: " + ((double) (allocatedMemory - freeMemory) / maxMemory) * 100);
 
         renderer.textLeft("<bold>Memory Usage", x + 5, y + 5, RgbColor.WHITE);
-//        renderer.textLeft("Used: " + ((memory.getTotal() - memory.getAvailable()) / 1000000) + " MB / " + (memory.getTotal() / 1000000) + " MB", x + 5, y + 15, RgbColor.WHITE);
-        renderer.textLeft("VM Free: " + (Runtime.getRuntime().freeMemory() / 1000000) + " MB", x + 5, y + 25, RgbColor.WHITE);
+        renderer.textLeft("Used: " + ((allocatedMemory) / 1000000) + " MB / " + (maxMemory / 1000000) + " MB", x + 5, y + 15, RgbColor.WHITE);
+        renderer.textLeft("VM Free: " + (freeMemory / 1000000) + " MB", x + 5, y + 25, RgbColor.WHITE);
 
-//        renderer.line(x + 1, y + height + 4, x + ((float) (memory.getTotal() - memory.getAvailable()) / memory.getTotal() * width + 4) - 1, y + height + 4, RgbColor.AZURE);
+        renderer.line(x + 1, y + height + 4, x + ((float) (allocatedMemory) / maxMemory * width + 4) - 1, y + height + 4, RgbColor.AZURE);
     }
 }

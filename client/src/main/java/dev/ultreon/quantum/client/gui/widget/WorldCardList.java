@@ -141,7 +141,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public void renderEntry(Renderer renderer, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
-            if (renderer.pushScissors(this.pos.x, this.pos.y, this.size.width, this.size.height)) {
+            if (renderer.pushScissors(this.bounds)) {
                 int u;
                 if (this.enabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
                 else u = 42;
