@@ -7,7 +7,7 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.rng.RNG;
 
 public class GroundTerrainLayer extends TerrainLayer {
-    private final Block block;
+    public final Block block;
     private final int offset;
     private final int height;
 

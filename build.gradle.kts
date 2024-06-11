@@ -1,4 +1,7 @@
 import dev.ultreon.gameutils.GameUtilsExt
+import org.jetbrains.gradle.ext.Application
+import org.jetbrains.gradle.ext.runConfigurations
+import org.jetbrains.gradle.ext.settings
 import java.lang.System.getenv
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -43,6 +46,7 @@ plugins {
 }
 
 apply(plugin = "gameutils")
+
 
 //val gameVersion = "0.1.0"
 val gameVersion = "0.1.0+snapshot." + DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm").format(LocalDateTime.now())
@@ -479,6 +483,113 @@ tasks.register<DefaultTask>("docker-push") {
             } else {
                 commandLine("docker", "push", "ghcr.io/ultreon/${project.name}:server-${gameVersion}")
             }
+        }
+    }
+}
+
+apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
+idea {
+    project {
+        settings {
+            fun setupIdea(dependency: Project, name: String) {
+                dependency.afterEvaluate {
+                    mkdir("${dependency.projectDir}/build/gameutils")
+                    mkdir("${dependency.projectDir}/run")
+                    mkdir("${dependency.projectDir}/run/client")
+                    mkdir("${dependency.projectDir}/run/client/alt")
+                    mkdir("${dependency.projectDir}/run/client/main")
+                    mkdir("${dependency.projectDir}/run/server")
+
+                    val ps = File.pathSeparator!!
+                            val files = dependency.configurations["runtimeClasspath"]!!.files
+
+                    val classPath = files.asSequence()
+                            .filter { it != null }
+                            .map { it.path }
+                            .joinToString(ps)
+
+//language=TEXT
+                    val conf = """
+commonProperties
+	fabric.development=true
+	log4j2.formatMsgNoLookups=true
+	fabric.log.disableAnsi=false
+	log4j.configurationFile=${rootProject.projectDir}/log4j.xml
+    """.trimIndent()
+                    val launchFile = file("${dependency.projectDir}/build/gameutils/launch.cfg")
+                    Files.writeString(
+                            launchFile.toPath(),
+                            conf,
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING,
+                            StandardOpenOption.WRITE
+                    )
+
+                    val cpFile = file("${dependency.projectDir}/build/gameutils/classpath.txt")
+                    Files.writeString(
+                            cpFile.toPath(),
+                            classPath,
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING,
+                            StandardOpenOption.WRITE
+                    )
+
+                    withIDEADir {
+                        println("Callback 1 executed with: $absolutePath")
+                    }
+
+                    runConfigurations {
+                        create(
+                                "Quantum Voxel Client $name",
+                                Application::class.java
+                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+                            jvmArgs =
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                            mainClass = "net.fabricmc.devlaunchinjector.Main"
+                            moduleName = rootProject.name + ".${dependency.name}.main"
+                            workingDirectory = "$projectDir/run/client/main/"
+                            programParameters = "--gameDir=."
+                        }
+                        create(
+                                "Quantum Voxel Data $name",
+                                Application::class.java
+                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+                            jvmArgs =
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                            mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
+                            moduleName = rootProject.name + ".desktop.main"
+                            workingDirectory = "$projectDir/run/data/main/"
+                            programParameters = "--gameDir=."
+                        }
+                        create(
+                                "Quantum Voxel Client $name Alt",
+                                Application::class.java
+                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+                            jvmArgs =
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                            mainClass = "net.fabricmc.devlaunchinjector.Main"
+                            moduleName = rootProject.name + ".${dependency.name}.main"
+                            workingDirectory = "$projectDir/run/client/alt/"
+                            programParameters = "--gameDir=."
+                        }
+                        create(
+                                "Quantum Voxel Server $name",
+                                Application::class.java
+                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
+                            jvmArgs =
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                            mainClass = "net.fabricmc.devlaunchinjector.Main"
+                            moduleName = rootProject.name + ".${dependency.name}.main"
+                            workingDirectory = "$projectDir/run/server/"
+                            programParameters = "--gameDir=."
+                        }
+                    }
+                }
+
+            }
+
+            setupIdea(rootProject.project(":desktop"), "Desktop")
+            setupIdea(rootProject.project(":testmod"), "Test Mod")
         }
     }
 }

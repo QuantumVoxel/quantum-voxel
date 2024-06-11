@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world.gen;
 
+import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.vector.Vec2i;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
@@ -10,6 +11,9 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4
 import de.articdive.jnoise.pipeline.JNoise;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
+import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -26,11 +30,13 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.Disposable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
+import static dev.ultreon.quantum.block.Blocks.SAND;
+import static dev.ultreon.quantum.block.Blocks.SANDSTONE;
+import static dev.ultreon.quantum.block.state.BlockProperties.AIR;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.gen.Carver.HAS_CAVES_FLAG;
 
 public class TerrainGenerator implements Disposable {
     private final DomainWarping biomeDomain;

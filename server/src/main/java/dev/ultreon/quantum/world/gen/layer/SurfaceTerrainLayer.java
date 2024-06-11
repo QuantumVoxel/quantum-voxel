@@ -6,7 +6,7 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.rng.RNG;
 
 public class SurfaceTerrainLayer extends TerrainLayer {
-    private final Block surfaceBlock;
+    public final Block surfaceBlock;
     private final int height;
 
     public SurfaceTerrainLayer(Block surfaceBlock, int height) {

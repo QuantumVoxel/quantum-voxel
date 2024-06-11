@@ -90,4 +90,8 @@ public abstract class GameWindow {
     public boolean isResizable() {
         return resizable;
     }
+
+    public long getPeer() {
+        return -1L;
+    }
 }

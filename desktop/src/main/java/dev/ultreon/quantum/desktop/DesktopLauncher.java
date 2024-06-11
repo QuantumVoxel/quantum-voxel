@@ -21,6 +21,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
@@ -82,6 +85,12 @@ public class DesktopLauncher {
             }
         });
 
+        try {
+            Files.createDirectories(Paths.get("logs"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         QuantumClient.logDebug();
 
         if (GamePlatform.get().isMacOSX()) {
@@ -117,6 +126,7 @@ public class DesktopLauncher {
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
+        config.setTransparentFramebuffer(true);
         return config;
     }
 

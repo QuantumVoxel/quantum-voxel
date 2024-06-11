@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -16,6 +17,7 @@ import dev.ultreon.xeox.loader.XeoxLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModOrigin;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Platform;
 import org.slf4j.LoggerFactory;
@@ -280,5 +282,10 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public DeviceType getDeviceType() {
         return DeviceType.DESKTOP;
+    }
+
+    @Override
+    public void setTransparentFBO(boolean enable) {
+//        GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, enable ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
     }
 }

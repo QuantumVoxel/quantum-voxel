@@ -2,8 +2,10 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.quantum.GameWindow;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWNativeWin32;
 
 import java.awt.*;
 
@@ -77,5 +79,14 @@ public class DesktopWindow extends GameWindow {
     @Override
     public void setResizable(boolean resizable) {
         GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_RESIZABLE, resizable ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+    }
+
+    @Override
+    public long getPeer() {
+        if (SharedLibraryLoader.isWindows) {
+            return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
+        } else {
+            return -1L;
+        }
     }
 }

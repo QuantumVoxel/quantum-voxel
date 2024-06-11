@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
@@ -152,9 +153,14 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderSolidBackground(Renderer renderer) {
-        int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-        renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, RgbColor.BLACK);
-        renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, 0, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
+        if (ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled()) {
+            renderer.clearColor(0, 0, 0, 0);
+            renderer.clear();
+        } else {
+            int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
+            renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, RgbColor.BLACK);
+            renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, 0, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
+        }
     }
 
     /**

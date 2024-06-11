@@ -1,6 +1,11 @@
 package dev.ultreon.quantum.world;
 
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.world.gen.layer.GroundTerrainLayer;
+import dev.ultreon.quantum.world.gen.layer.SurfaceTerrainLayer;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.events.WorldLifecycleEvents;
@@ -18,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Biome {
     private final List<TerrainLayer> layers = new ArrayList<>();
@@ -89,6 +95,19 @@ public abstract class Biome {
 
     public boolean isOcean() {
         return this.isOcean;
+    }
+
+    public boolean isTopBlock(BlockProperties currentBlock) {
+        if (currentBlock.getBlock() == Blocks.AIR) return true;
+        return layers.stream().anyMatch(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer && layer.surfaceBlock == currentBlock.getBlock());
+    }
+
+    public BlockProperties getTopMaterial() {
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer ? layer.surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
+    }
+
+    public BlockProperties getFillerMaterial() {
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
     }
 
     public static class Builder {

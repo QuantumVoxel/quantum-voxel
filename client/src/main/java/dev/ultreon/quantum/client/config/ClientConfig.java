@@ -83,6 +83,10 @@ public class ClientConfig extends CraftyConfig {
     @Ranged(min = 0, max = 1)
     public static float backgroundTransparency = 0.5F;
 
+    @ConfigEntry(path = "personalisation.useFullWindowVibrancy", comment = "Uses Acrylic on Windows 10, Mica on Windows 11 and Vibrancy on macOS but for the entire background of menus.")
+    @Ranged(min = 0, max = 1)
+    public static boolean useFullWindowVibrancy = false;
+
     @ConfigEntry(path = "crafting.showOnlyCraftable", comment = "Whether only craftable items are shown in the inventory.")
     @Ranged(min = 0, max = 1)
     public static boolean showOnlyCraftable = true;

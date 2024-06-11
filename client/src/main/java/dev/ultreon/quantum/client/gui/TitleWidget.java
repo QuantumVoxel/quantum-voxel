@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui;
 
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Identifier;
@@ -33,20 +34,43 @@ public class TitleWidget extends Widget {
 
         Identifier texture = new Identifier("textures/gui/title.png");
 
-        renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
+        if (ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled()) {
+//            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
+            renderer.fill(0, 0, size.width, size.height, RgbColor.WHITE.withAlpha(0x20));
 
-        if (parent != null) {
-            boolean isBackHovered = isPosWithin(mouseX, mouseY, 0, 0, 80, size.height);
-            int u = isBackHovered ? 21 : 0;
-            int v = isBackPressed() ? 21 : 0;
+            if (parent != null) {
+                boolean isBackHovered = isPosWithin(mouseX, mouseY, 0, 0, 80, size.height);
+                int u = isBackHovered ? 21 : 0;
+                int v = isBackPressed() ? 21 : 0;
 
-            renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
+//                renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
+                if (isBackHovered) {
+                    renderer.fill(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
+                } else {
+                    renderer.box(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
+                }
 
-            int yOffset = isBackPressed() ? 2 : 0;
-            renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.lineHeight / 2 + yOffset, RgbColor.WHITE);
+                int yOffset = isBackPressed() ? 2 : 0;
+                renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.lineHeight / 2 + yOffset, RgbColor.WHITE);
+            }
+
+            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.lineHeight / 2, RgbColor.WHITE);
+        } else {
+            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
+
+            if (parent != null) {
+                boolean isBackHovered = isPosWithin(mouseX, mouseY, 0, 0, 80, size.height);
+                int u = isBackHovered ? 21 : 0;
+                int v = isBackPressed() ? 21 : 0;
+
+                renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
+
+                int yOffset = isBackPressed() ? 2 : 0;
+                renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.lineHeight / 2 + yOffset, RgbColor.WHITE);
+            }
+
+            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.lineHeight / 2, RgbColor.WHITE);
         }
-
-        renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.lineHeight / 2, RgbColor.WHITE);
     }
 
     private boolean isBackPressed() {

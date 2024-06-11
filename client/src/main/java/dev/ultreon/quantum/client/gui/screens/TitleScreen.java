@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
@@ -48,11 +49,11 @@ public class TitleScreen extends Screen {
                 .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, this.size.height / 2 - 100, 100, 150))
                 .callback(this::openSingleplayer));
 
-//        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-//            this.worldGenTestButton = builder.add(TitleButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
-//                    .position(() -> new Position(50, this.size.height / 2 - 60))
-//                    .callback(this::openTest));
-//        }
+        if (GamePlatform.get().isDevEnvironment()) {
+            this.worldGenTestButton = builder.add(TitleButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
+                    .position(() -> new Position(50, this.size.height / 2 - 60))
+                    .callback(this::openTest));
+        }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
                         .icon(QuantumClient.id("textures/gui/title/multiplayer.png"))
@@ -107,14 +108,16 @@ public class TitleScreen extends Screen {
     protected void renderSolidBackground(Renderer renderer) {
         super.renderSolidBackground(renderer);
 
-        Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
+        if (!ClientConfig.useFullWindowVibrancy || !client.isWindowVibrancyEnabled()) {
+            Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
-        float drawWidth = thumbnail.x;
-        float drawHeight = thumbnail.y;
+            float drawWidth = thumbnail.x;
+            float drawHeight = thumbnail.y;
 
-        float drawX = (this.size.width - drawWidth) / 2;
-        float drawY = (this.size.height - drawHeight) / 2;
-        renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
+            float drawX = (this.size.width - drawWidth) / 2;
+            float drawY = (this.size.height - drawHeight) / 2;
+            renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
+        }
     }
 
     public TitleButton getSingleplayerButton() {

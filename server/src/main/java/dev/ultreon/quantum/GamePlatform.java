@@ -195,4 +195,8 @@ public abstract class GamePlatform {
     }
 
     public abstract DeviceType getDeviceType();
+
+    public void setTransparentFBO(boolean enable) {
+
+    }
 }

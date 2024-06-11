@@ -7,7 +7,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -132,7 +131,10 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 import javax.annotation.WillClose;
 import java.awt.*;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -178,6 +180,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private boolean screenshotWorldOnly;
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
+    private boolean windowVibrancyEnabled = false;
 
     private IClipboard getClipboard() {
         if (GamePlatform.get().isMacOSX()) {
@@ -392,7 +395,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Initialize the game window
         this.window = GamePlatform.get().createWindow();
-        
+
         // Initialize the inspection root
         this.inspection = deferDispose(new InspectionRoot<>(this));
 
@@ -582,6 +585,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (!ClientConfig.vibration) {
             GameInput.cancelVibration();
+        }
+
+        if (ClientConfig.useFullWindowVibrancy) {
+            GamePlatform.get().setTransparentFBO(true);
+        } else {
+            GamePlatform.get().setTransparentFBO(false);
         }
 
         QuantumClient.invoke(() -> {
@@ -1410,6 +1419,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     private void firstRender() {
+        if (SharedLibraryLoader.isWindows) {
+            InputStream resourceAsStream = QuantumClient.class.getResourceAsStream("/assets/quantum/native/acrylic.dll");
+            try {
+                if (!Files.exists(Paths.get(".", "acrylic.dll")))
+                    Files.copy(resourceAsStream, Paths.get(".", "acrylic.dll"));
+                if (System.getProperty("os.name").endsWith(" 11")) {
+                    Acrylic.applyMica(getWindow().getPeer());
+                    this.windowVibrancyEnabled = true;
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Acylic/mica effects not available", e);
+            }
+        }
+
         GamePlatform.get().setVisible(true);
     }
 
@@ -2333,5 +2356,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public CubemapManager getCubemapManager() {
         return cubemapManager;
+    }
+
+    public boolean isWindowVibrancyEnabled() {
+        return windowVibrancyEnabled;
     }
 }

@@ -148,6 +148,10 @@ public final class MathHelper {
         }
     }
 
+    public static float clampedLerp(float value, float min, float max) {
+        return MathUtils.clamp(lerp(value, min, max), min, max);
+    }
+
     public enum FaceRotation {
         UNCHANGED,
         DEGREES_90,
