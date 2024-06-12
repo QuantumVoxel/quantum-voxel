@@ -2183,52 +2183,55 @@ public class Renderer implements Disposable {
 
     @Language("GLSL")
     final String FRAG =
-            "// Fragment shader\n" +
-            "#ifdef GL_ES\n" +
-            "precision mediump float;\n" +
-            "#endif\n" +
-            "            \n" +
-            "varying vec4 vColor;\n" +
-            "varying vec2 vTexCoord;\n" +
-            "            \n" +
-            "uniform sampler2D u_texture;\n" +
-            "uniform vec2 iResolution;\n" +
-            "uniform float iBlurRadius; // Radius of the blur\n" +
-            "uniform vec2 iBlurDirection; // Direction of the blur\n" +
-            "            \n" +
-            "void main() {\n" +
-            "  float Pi = 6.28318530718; // Pi*2\n" +
-            "            \n" +
-            "  // GAUSSIAN BLUR SETTINGS {{{\n" +
-            "  float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)\n" +
-            "  float Quality = 4.0; // BLUR QUALITY (Default 4.0 - More is better but slower)\n" +
-            "  float Size = iBlurRadius; // BLUR SIZE (Radius)\n" +
-            "  // GAUSSIAN BLUR SETTINGS }}}\n" +
-            "            \n" +
-            "  vec2 Radius = Size/iResolution.xy;\n" +
-            "            \n" +
-            "  // Normalized pixel coordinates (from 0 to 1)\n" +
-            "  vec2 uv = gl_FragCoord.xy/iResolution.xy;\n" +
-            "  // Pixel colour\n" +
-            "  vec4 color = texture2D(u_texture, uv);\n" +
-            "            \n" +
-            "  // Blur calculations\n" +
-            "  for( float d=0.0; d<Pi; d+=Pi/Directions)\n" +
-            "  {\n" +
-            "    for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)\n" +
-            "    {\n" +
-            "      color += texture2D(u_texture, uv+vec2(cos(d),sin(d))*Radius*i);\n" +
-            "    }\n" +
-            "  }\n" +
-            "  \n" +
-            "  // Gamma correction\n" +
-            "  float Gamma = 1.05;\n" +
-            "  color.rgba = pow(color.rgba, vec4(1.0/Gamma));\n" +
-            "            \n" +
-            "  // Output to screen\n" +
-            "  color /= Quality * Directions;\n" +
-            "  gl_FragColor = color;\n" +
-            "}\n";
+            """
+                    // Fragment shader
+                    #ifdef GL_ES
+                    precision mediump float;
+                    #endif
+                               \s
+                    varying vec4 vColor;
+                    varying vec2 vTexCoord;
+                               \s
+                    uniform sampler2D u_texture;
+                    uniform vec2 iResolution;
+                    uniform float iBlurRadius; // Radius of the blur
+                    uniform vec2 iBlurDirection; // Direction of the blur
+                               \s
+                    void main() {
+                      float Pi = 6.28318530718; // Pi*2
+                               \s
+                      // GAUSSIAN BLUR SETTINGS {{{
+                      float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
+                      float Quality = 4.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
+                      float Size = iBlurRadius; // BLUR SIZE (Radius)
+                      // GAUSSIAN BLUR SETTINGS }}}
+                               \s
+                      vec2 Radius = Size/iResolution.xy;
+                               \s
+                      // Normalized pixel coordinates (from 0 to 1)
+                      vec2 uv = gl_FragCoord.xy/iResolution.xy;
+                      // Pixel colour
+                      vec4 color = texture2D(u_texture, uv);
+                               \s
+                      // Blur calculations
+                      for( float d=0.0; d<Pi; d+=Pi/Directions)
+                      {
+                        for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)
+                        {
+                          color += texture2D(u_texture, uv+vec2(cos(d),sin(d))*Radius*i);
+                        }
+                      }
+                     \s
+                      // Gamma correction
+                      float Gamma = 1.1;
+                      color.rgba = pow(color.rgba, vec4(1.0/Gamma));
+                               \s
+                      // Output to screen
+                      color /= Quality * Directions;
+                      color.a = 1.0;
+                      gl_FragColor = color;
+                    }
+                    """;
 
 
 //    @Language("GLSL")

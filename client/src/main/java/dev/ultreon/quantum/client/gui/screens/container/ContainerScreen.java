@@ -45,9 +45,7 @@ public abstract class ContainerScreen extends Screen {
 
     @Override
     public boolean onClose(Screen next) {
-        boolean b = super.onClose(next);
-        if (b) this.player.closeMenu();
-        return b;
+        return super.onClose(next);
     }
 
     public int left() {
@@ -85,7 +83,7 @@ public abstract class ContainerScreen extends Screen {
         var y = this.top() + slot.getSlotY();
 
         ItemStack slotItem = slot.getItem();
-        this.client.itemRenderer.render(slotItem.getItem(), renderer, x, y);
+        this.client.itemRenderer.render(slotItem.getItem(), renderer, x, y, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
 
         if (slot.isWithinBounds(mouseX - this.left(), mouseY - this.top())) {
             renderer.fill(x, y, 16, 16, RgbColor.WHITE.withAlpha(0x60));
@@ -117,7 +115,7 @@ public abstract class ContainerScreen extends Screen {
 
         ItemStack cursor = this.player.getCursor();
         if (!cursor.isEmpty()) {
-            this.client.itemRenderer.render(cursor.getItem(), renderer, mouseX - 8, mouseY - 8);
+            this.client.itemRenderer.render(cursor.getItem(), renderer, mouseX - 8, mouseY - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
         }
     }
 
@@ -164,7 +162,7 @@ public abstract class ContainerScreen extends Screen {
 
     @Override
     public boolean mouseClick(int x, int y, int button, int count) {
-        ItemSlot slot = this.getSlotAt(x, y);
+        ItemSlot slot = this.getSlotAt(x, y - (titleWidget == null ? 0 : titleWidget.getHeight()));
         if (slot == null) return super.mouseClick(x, y, button, count);
         if (button == Input.Buttons.LEFT) {
             this.client.connection.send(new C2SMenuTakeItemPacket(slot.getIndex(), false));

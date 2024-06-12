@@ -123,6 +123,9 @@
   "quantum.screen.crash.message": "Check if you are using any mods before reporting a bug.\nIf you are using mods, report the crash to the mod/modpack author instead.",
   "quantum.dimension.overworld": "Planet Earth",
 
+  "quantum.container.inventory.title": "Inventory",
+  "quantum.container.crate.title": "Crate",
+
   "quantum.recipe.craftable": "Craftable",
   "quantum.recipe.uncraftable": "Uncraftable",
   "quantum.recipe.ingredients": "Ingredients:",

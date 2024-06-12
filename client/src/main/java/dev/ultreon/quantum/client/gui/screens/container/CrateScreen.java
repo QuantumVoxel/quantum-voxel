@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens.container;
 
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.CrateMenu;
 import dev.ultreon.quantum.text.TextObject;
@@ -40,5 +41,12 @@ public class CrateScreen extends ContainerScreen {
 
     public CrateMenu getMenu() {
         return this.menu;
+    }
+
+    @Override
+    protected void renderBackground(Renderer renderer) {
+        super.renderBackground(renderer);
+
+        renderer.textLeft(TextObject.translation("quantum.container.inventory.title"), left() + 10, top() + 74);
     }
 }

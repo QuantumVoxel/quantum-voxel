@@ -88,8 +88,8 @@ public final class WorldRenderer implements DisposableContainer {
     public ParticleSystem particleSystem = new ParticleSystem();
     private Material material;
     private Material transparentMaterial;
-    private final Texture breakingTex;
-    private final Environment environment;
+    private Texture breakingTex;
+    private Environment environment;
     private int visibleChunks;
     private int loadedChunks;
     private static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE);
@@ -121,17 +121,37 @@ public final class WorldRenderer implements DisposableContainer {
     public WorldRenderer(ClientWorld world) {
         this.world = world;
 
+        this.setup();
+    }
+
+    private void setup() {
         Texture blockTex = this.client.blocksTextureAtlas.getTexture();
         Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
 
         this.setupMaterials(blockTex, emissiveBlockTex);
-
-        // Dynamic Skybox
-        this.skyboxInstance = this.setupDynamicSkybox();
-
-        // Sun and moon
+        this.setupDynamicSkybox();
         this.setupSunAndMoon();
+        this.setupBreaking();
+        this.setupEnvironment();
+        this.setupParticles();
+    }
 
+    private void setupParticles() {
+        BillboardParticleBatch billboardParticleBatch = new BillboardParticleBatch();
+        billboardParticleBatch.setCamera(this.client.camera);
+        this.particleSystem.add(billboardParticleBatch);
+    }
+
+    private void setupEnvironment() {
+        final Environment environment;
+        this.environment = new Environment();
+        this.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
+        this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
+        this.environment.set(new ColorAttribute(ColorAttribute.Specular, 1, 1, 1, 1f));
+    }
+
+    private void setupBreaking() {
+        final Texture breakingTex;
         // Breaking animation meshes.
         this.breakingTex = this.client.getTextureManager().getTexture(id("textures/break_stages.png"));
         this.breakingMaterial = this.client.getMaterialManager().get(id("block/breaking"));
@@ -154,20 +174,9 @@ public final class WorldRenderer implements DisposableContainer {
 
             this.breakingModels.add(model);
         }
-
-        QuantumClient.LOGGER.info("Setting up world environment");
-
-        this.environment = new Environment();
-        this.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
-        this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
-        this.environment.set(new ColorAttribute(ColorAttribute.Specular, 1, 1, 1, 1f));
-
-        BillboardParticleBatch billboardParticleBatch = new BillboardParticleBatch();
-        billboardParticleBatch.setCamera(this.client.camera);
-        this.particleSystem.add(billboardParticleBatch);
     }
 
-    private ModelInstance setupDynamicSkybox() {
+    private void setupDynamicSkybox() {
         ModelManager modelManager = ModelManager.INSTANCE;
         Model model = modelManager.generateModel(id("generated/skybox"), modelBuilder -> {
             Material material = new Material();
@@ -183,7 +192,7 @@ public final class WorldRenderer implements DisposableContainer {
         RenderLayer background = RenderLayer.BACKGROUND;
         ModelInstance modelInstance = background.create(model, 0, 0, 0);
         modelInstance.userData = Shaders.SKYBOX.get();
-        return modelInstance;
+        this.skyboxInstance = modelInstance;
     }
 
     private void setupMaterials(Texture blockTex, Texture emissiveBlockTex) {
@@ -545,7 +554,6 @@ public final class WorldRenderer implements DisposableContainer {
             QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
         }
 
-
         Map<BlockPos, BlockProperties> customRendered = chunk.getCustomRendered();
         for (var entry : blockInstances.entrySet()) {
             if (customRendered.containsKey(entry.getKey())) {
@@ -733,6 +741,10 @@ public final class WorldRenderer implements DisposableContainer {
         RenderLayer.WORLD.clear();
         RenderLayer.BACKGROUND.clear();
 
+        this.modelInstances.clear();
+        this.blockInstances.clear();
+        this.breakingInstances.clear();
+
         this.disposables.forEach(Disposable::dispose);
     }
 
@@ -774,18 +786,23 @@ public final class WorldRenderer implements DisposableContainer {
 
             this.setupMaterials(blockTex, emissiveBlockTex);
 
-            RenderLayer.BACKGROUND.destroy(this.sun);
-            RenderLayer.BACKGROUND.destroy(this.moon);
+            RenderLayer.WORLD.destroy(moon);
+            RenderLayer.WORLD.destroy(sun);
+            RenderLayer.BACKGROUND.clear();
 
             ModelManager.INSTANCE.unloadModel(MOON_ID);
             ModelManager.INSTANCE.unloadModel(SUN_ID);
 
-            this.setupSunAndMoon();
-
-            // TODO Implement reloading for chunks
-
-            this.unloadAllChunks();
             this.modelInstances.clear();
+            this.blockInstances.clear();
+
+            this.setupMaterials(this.client.blocksTextureAtlas.getTexture(), this.client.blocksTextureAtlas.getEmissiveTexture());
+
+            this.setupSunAndMoon();
+            this.setupDynamicSkybox();
+            this.setupBreaking();
+            this.setupEnvironment();
+            this.setupParticles();
         });
     }
 

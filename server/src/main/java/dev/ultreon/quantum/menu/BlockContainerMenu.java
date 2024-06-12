@@ -41,7 +41,7 @@ public abstract class BlockContainerMenu extends ContainerMenu {
 
             for (int x = 0; x < 9; x++) {
                 for (int y = 0; y < 3; y++) {
-                    this.addSlot(new RedirectItemSlot(idx++, player.inventory.inv[x][y], offX + x * 19 + 6,  offY + y * 19 + 6));
+                    this.addSlot(new RedirectItemSlot(idx++, player.inventory.inv[x][y], offX + x * 19 + 7,  offY + y * 19));
                 }
             }
         }

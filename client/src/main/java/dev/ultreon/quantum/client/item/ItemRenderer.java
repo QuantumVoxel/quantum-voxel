@@ -1,14 +1,9 @@
 package dev.ultreon.quantum.client.item;
 
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
@@ -70,19 +65,22 @@ public class ItemRenderer implements Disposable {
     }
 
     public void render(Item item, Renderer renderer, int x, int y) {
+        render(item, renderer, x, y, 0);
+    }
+
+    public void render(Item item, Renderer renderer, int x, int y, int offset) {
         if (item == null || item == Items.AIR) {
             return;
         }
 
-        if (item instanceof BlockItem) {
-            BlockItem blockItem = (BlockItem) item;
+        if (item instanceof BlockItem blockItem) {
             ModelInstance modelInstance = modelsInstances.get(item);
             if (modelInstance != null) {
-                this.renderModel(modelInstance, models.get(item), renderer, x + 8, this.client.getScaledHeight() - y - 16);
+                this.renderModel(modelInstance, models.get(item), renderer, x + 8, this.client.getScaledHeight() - y - 16 - offset);
                 return;
             }
 
-            this.renderBlockItem(blockItem,blockItem.createBlockMeta(), renderer, x + 8, this.client.getScaledHeight() - y - 16);
+            this.renderBlockItem(blockItem,blockItem.createBlockMeta(), renderer, x + 8, this.client.getScaledHeight() - y - 16 - offset);
             return;
         }
 

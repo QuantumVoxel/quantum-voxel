@@ -542,8 +542,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     @Override
     public void openMenu(@NotNull ContainerMenu menu) {
-        if (getOpenMenu() != null) {
-            QuantumServer.LOGGER.warn("Player %s tried to open menu %s but it was already open!", this.name, menu.getType().getId());
+        if (getOpenMenu() == menu) {
+            QuantumServer.LOGGER.warn("Player {} tried to open menu %s but it was already open!", this.name, menu.getType().getId());
             return;
         }
 
@@ -747,7 +747,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void placeBlock(int x, int y, int z, BlockProperties block) {
         BlockPos blockPos = new BlockPos(x, y, z);
-        if (block == null || !this.world.isLoaded(blockPos) || !this.world.get(blockPos).isReplaceable()) return;
+        if (block == null || !this.world.isLoaded(blockPos)) return;
 
         this.world.set(x, y, z, block, BlockFlags.SYNC | BlockFlags.UPDATE);
     }

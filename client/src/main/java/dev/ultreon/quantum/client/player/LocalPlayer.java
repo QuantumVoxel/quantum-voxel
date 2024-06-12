@@ -194,7 +194,9 @@ public class LocalPlayer extends ClientPlayer {
 
         super.openMenu(menu);
 
-        this.client.connection.send(new C2SOpenMenuPacket(menu.getType().getId(), menu.getPos()));
+        if (menu != inventory) {
+            this.client.connection.send(new C2SOpenMenuPacket(menu.getType().getId(), menu.getPos()));
+        }
     }
 
     @Override

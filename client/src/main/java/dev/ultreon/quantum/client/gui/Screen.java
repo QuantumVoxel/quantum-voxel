@@ -158,8 +158,8 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clear();
         } else {
             int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-            renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, RgbColor.BLACK);
-            renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, 0, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
+            renderer.fill(0, -extraHeight, this.size.width, this.size.height + extraHeight, RgbColor.BLACK);
+            renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, -extraHeight, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
         }
     }
 
