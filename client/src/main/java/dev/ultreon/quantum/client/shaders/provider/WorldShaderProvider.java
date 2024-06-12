@@ -12,23 +12,27 @@ import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelObject;
 import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.shaders.WorldShader;
+import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.world.ClientChunk;
 
 public class WorldShaderProvider extends DefaultShaderProvider implements GameShaders {
-    public WorldShaderProvider(final DefaultShader.Config config) {
+    private final GeomShaderConfig config;
+
+    public WorldShaderProvider(final GeomShaderConfig config) {
         super(config);
+        this.config = config;
     }
 
-    public WorldShaderProvider(final String vertexShader, final String fragmentShader) {
-        this(new DefaultShader.Config(vertexShader, fragmentShader));
+    public WorldShaderProvider(final String vertexShader, final String fragmentShader, String geometryShader) {
+        this(new GeomShaderConfig(vertexShader, fragmentShader, geometryShader));
     }
 
-    public WorldShaderProvider(final FileHandle vertexShader, final FileHandle fragmentShader) {
-        this(vertexShader.readString(), fragmentShader.readString());
+    public WorldShaderProvider(final FileHandle vertexShader, final FileHandle fragmentShader, FileHandle geometryShader) {
+        this(vertexShader.readString(), fragmentShader.readString(), geometryShader.readString());
     }
 
     public WorldShaderProvider() {
-        this(null);
+        this(new GeomShaderConfig());
     }
 
     @Override
@@ -47,23 +51,14 @@ public class WorldShaderProvider extends DefaultShaderProvider implements GameSh
     }
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
-        if (userData instanceof QVModel) {
-            QVModel qvModel = (QVModel) userData;
-            return qvModel.getShaderProvider().createShader(renderable);
-        } else if (userData instanceof GameShaders) {
-            GameShaders provider = (GameShaders) userData;
-            return provider.createShader(renderable);
-        } else if (userData instanceof ItemModel) {
-            return Shaders.MODEL_VIEW.get().createShader(renderable);
-        } else if (userData instanceof BlockModel) {
-            return Shaders.MODEL_VIEW.get().createShader(renderable);
-        } else if (userData instanceof Shader) {
-            Shader shader = (Shader) userData;
-            return shader;
-        } else if (userData instanceof ModelObject) {
-            ModelObject modelObject = (ModelObject) userData;
-            return modelObject.shaderProvider().createShader(renderable);
-        }
-        return new DefaultShader(renderable, new DefaultShader.Config());
+        return switch (userData) {
+            case QVModel qvModel -> qvModel.getShaderProvider().createShader(renderable);
+            case GameShaders provider -> provider.createShader(renderable);
+            case ItemModel itemModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
+            case BlockModel blockModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
+            case Shader shader -> shader;
+            case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
+            case null, default -> new DefaultShader(renderable, new DefaultShader.Config());
+        };
     }
 }

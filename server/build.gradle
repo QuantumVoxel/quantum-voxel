@@ -57,6 +57,8 @@ dependencies {
     implementation api("com.formdev:flatlaf:3.2.1")
     implementation api("org.jetbrains:annotations:24.0.0")
 
+    implementation api(project(":mixinprovider"))
+
     annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
 
     runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdx_version"

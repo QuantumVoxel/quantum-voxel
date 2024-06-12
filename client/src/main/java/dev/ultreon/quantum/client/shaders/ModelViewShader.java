@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorld;
 
@@ -17,27 +17,37 @@ public class ModelViewShader extends DefaultShader {
     public final int u_globalSunlight;
 
     public ModelViewShader(final Renderable renderable) {
-        this(renderable, new Config());
+        this(renderable, new GeomShaderConfig());
     }
 
-    public ModelViewShader(final Renderable renderable, final Config config) {
+    public ModelViewShader(final Renderable renderable, final GeomShaderConfig config) {
         this(renderable, config, createPrefix(renderable, config));
     }
 
-    public ModelViewShader(final Renderable renderable, final Config config, final String prefix) {
-        this(renderable, config, prefix, config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
-                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader());
+    public ModelViewShader(final Renderable renderable, final GeomShaderConfig config, final String prefix) {
+        this(renderable, config, prefix,
+                config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
+                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
+                config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+    }
+
+    public static String getDefaultGeometryShader() {
+        return """
+                void main() {
+                
+                }
+                """;
     }
 
     public ModelViewShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
-                           final String fragmentShader) {
-        this(renderable, config, new ShaderProgram(prefix + vertexShader, prefix + fragmentShader));
+                           final String fragmentShader, String geometryShader) {
+        this(renderable, config, new GeomShaderProgram(prefix + vertexShader, prefix + fragmentShader, prefix + geometryShader));
     }
 
-    public ModelViewShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
+    public ModelViewShader(Renderable renderable, Config config, GeomShaderProgram shaderProgram) {
         super(renderable, config, shaderProgram);
 
-        this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
+        this.u_globalSunlight = this.register(WorldShader.Inputs.globalSunlight, WorldShader.Setters.globalSunlight);
     }
 
     public static class Inputs extends DefaultShader.Inputs {
@@ -65,7 +75,7 @@ public class ModelViewShader extends DefaultShader {
     public static String createPrefix (final Renderable renderable, final Config config) {
         final Attributes attributes = ModelViewShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
-//        prefix.append("#version ").append(ModelViewShader.version).append("\n");
+        prefix.append("#version 330\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (ModelViewShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");

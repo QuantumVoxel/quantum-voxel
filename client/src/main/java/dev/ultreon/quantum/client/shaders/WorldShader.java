@@ -7,10 +7,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorld;
 
@@ -19,26 +19,37 @@ public class WorldShader extends DefaultShader {
     public final int u_globalSunlight;
     public final int u_atlasSize;
     public final int u_atlasOffset;
+    private String log;
 
     public WorldShader(final Renderable renderable) {
-        this(renderable, new Config());
+        this(renderable, new GeomShaderConfig());
     }
 
-    public WorldShader(final Renderable renderable, final Config config) {
+    public WorldShader(final Renderable renderable, final GeomShaderConfig config) {
         this(renderable, config, createPrefix(renderable, config));
     }
 
-    public WorldShader(final Renderable renderable, final Config config, final String prefix) {
-        this(renderable, config, prefix, config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
-                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader());
+    public WorldShader(final Renderable renderable, final GeomShaderConfig config, final String prefix) {
+        this(renderable, config, prefix,
+                config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
+                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
+                config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+    }
+
+    public static String getDefaultGeometryShader() {
+        return """
+                void main() {
+                
+                }
+                """;
     }
 
     public WorldShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
-                       final String fragmentShader) {
-        this(renderable, config, new ShaderProgram(prefix + vertexShader, prefix + fragmentShader));
+                       final String fragmentShader, String geometryShader) {
+        this(renderable, config, new GeomShaderProgram(prefix + vertexShader, prefix + fragmentShader, prefix + geometryShader));
     }
 
-    public WorldShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
+    public WorldShader(Renderable renderable, Config config, GeomShaderProgram shaderProgram) {
         super(renderable, config, shaderProgram);
 
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
@@ -55,7 +66,7 @@ public class WorldShader extends DefaultShader {
     public static class Setters extends DefaultShader.Setters {
         public final static Setter globalSunlight = new LocalSetter() {
             @Override
-            public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 ClientWorld world = QuantumClient.get().world;
                 if (world != null) {
                     shader.set(inputID, world.getGlobalSunlight());
@@ -67,7 +78,7 @@ public class WorldShader extends DefaultShader {
 
         public final static Setter atlasSize = new LocalSetter() {
             @Override
-            public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Vec2f f = ClientWorld.ATLAS_SIZE.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
             }
@@ -75,19 +86,22 @@ public class WorldShader extends DefaultShader {
 
         public final static Setter atlasOffset = new LocalSetter() {
             @Override
-            public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Vec2f f = ClientWorld.ATLAS_OFFSET.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
             }
         };
     }
-    public static String createPrefix (final Renderable renderable, final Config config) {
+
+    public static String createPrefix(final Renderable renderable, final GeomShaderConfig config) {
         final Attributes attributes = WorldShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
+        prefix.append("#version 330\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");
-        if (WorldShader.or(vertexMask, VertexAttributes.Usage.ColorUnpacked | VertexAttributes.Usage.ColorPacked)) prefix.append("#define colorFlag\n");
+        if (WorldShader.or(vertexMask, VertexAttributes.Usage.ColorUnpacked | VertexAttributes.Usage.ColorPacked))
+            prefix.append("#define colorFlag\n");
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.BiNormal)) prefix.append("#define binormalFlag\n");
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.Tangent)) prefix.append("#define tangentFlag\n");
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.Normal)) prefix.append("#define normalFlag\n");
@@ -108,7 +122,8 @@ public class WorldShader extends DefaultShader {
         final int n = renderable.meshPart.mesh.getVertexAttributes().size();
         for (int i = 0; i < n; i++) {
             final VertexAttribute attr = renderable.meshPart.mesh.getVertexAttributes().get(i);
-            if (attr.usage == VertexAttributes.Usage.TextureCoordinates) prefix.append("#define texCoord").append(attr.unit).append("Flag\n");
+            if (attr.usage == VertexAttributes.Usage.TextureCoordinates)
+                prefix.append("#define texCoord").append(attr.unit).append("Flag\n");
         }
         if (renderable.bones != null) {
             for (int i = 0; i < config.numBoneWeights; i++) {
@@ -153,7 +168,8 @@ public class WorldShader extends DefaultShader {
             prefix.append("#define " + FloatAttribute.ShininessAlias + "Flag\n");
         if ((attributesMask & FloatAttribute.AlphaTest) == FloatAttribute.AlphaTest)
             prefix.append("#define " + FloatAttribute.AlphaTestAlias + "Flag\n");
-        if (renderable.bones != null && config.numBones > 0) prefix.append("#define numBones ").append(config.numBones).append("\n");
+        if (renderable.bones != null && config.numBones > 0)
+            prefix.append("#define numBones ").append(config.numBones).append("\n");
         return prefix.toString();
     }
 

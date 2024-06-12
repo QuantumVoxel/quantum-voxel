@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+repositories {
+    // Add repositories to retrieve artifacts from in here.
+    // You should only use this when depending on other mods because
+    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+    // for more information about repositories.
+}
+
+dependencies {
+    implementation("com.badlogicgames.gdx:gdx:$gdx_version")
+    implementation("com.badlogicgames.gdx:gdx-box2d:$gdx_version")
+    implementation("com.badlogicgames.ashley:ashley:$ashley_version")
+    implementation("com.badlogicgames.gdx:gdx-ai:$ai_version")
+    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
+    implementation("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
+    implementation("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
+
+    implementation("net.fabricmc:sponge-mixin:${project.mixin_version}") {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+}
+
+processResources {
+
+}

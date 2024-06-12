@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.ultreon.mixinprovider.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ShaderProgramMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

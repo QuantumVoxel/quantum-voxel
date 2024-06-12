@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "mixinprovider",
+  "version": "${version}",
+  "name": "mixinprovider",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/mixinprovider/icon.png",
+  "environment": "*",
+  "entrypoints": {},
+  "mixins": [
+    "mixinprovider.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0"
+  }
+}

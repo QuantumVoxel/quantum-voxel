@@ -26,16 +26,16 @@ public class Shaders {
     
     public static final Supplier<WorldShaderProvider> WORLD = Shaders.register("world", () -> new WorldShaderProvider(
             new ResourceFileHandle(id("shaders/world.vert")),
-            new ResourceFileHandle(id("shaders/world.frag"))
-    ));
+            new ResourceFileHandle(id("shaders/world.frag")),
+            new ResourceFileHandle(id("shaders/world.geom"))));
     public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaderProvider(
             new ResourceFileHandle(id("shaders/skybox.vert")),
             new ResourceFileHandle(id("shaders/skybox.frag"))
     ));
     public static final Supplier<ModelViewShaderProvider> MODEL_VIEW = Shaders.register("model_view", () -> new ModelViewShaderProvider(
             new ResourceFileHandle(id("shaders/model_view.vert")),
-            new ResourceFileHandle(id("shaders/model_view.frag"))
-    ));
+            new ResourceFileHandle(id("shaders/model_view.frag")),
+            new ResourceFileHandle(id("shaders/model_view.geom"))));
     public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
             new ResourceFileHandle(id("shaders/outline.vert")),
             new ResourceFileHandle(id("shaders/outline.frag"))
