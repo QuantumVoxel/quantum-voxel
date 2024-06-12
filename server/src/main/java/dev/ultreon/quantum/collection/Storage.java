@@ -22,5 +22,5 @@ public interface Storage<D> {
     D get(int idx);
 
 
-    <R> Storage<R> map(R defaultValue, Function<D, R> o);
+    <R> Storage<R> map(R defaultValue, Class<R> type, Function<D, R> o);
 }

@@ -145,7 +145,7 @@ public class FlatStorage<D> implements Storage<D> {
     }
 
     @Override
-    public <R> Storage<R> map(R defaultValue, Function<D, R> o) {
+    public <R> Storage<R> map(R defaultValue, Class<R> type, Function<D, R> o) {
         var data = Arrays.stream(this.data).map(o).collect(Collectors.toList());
         return new FlatStorage<>(defaultValue, data);
     }

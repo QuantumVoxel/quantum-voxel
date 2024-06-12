@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world.gen.biome;
 
+import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.server.ServerDisposable;
@@ -30,6 +31,7 @@ public class BiomeGenerator implements ServerDisposable {
     private final Biome biome;
 
     public BiomeGenerator(World world, Biome biome, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features) {
+        Preconditions.checkNotNull(biome, "biome");
         this.world = world;
         this.biome = biome;
         this.layers = layers;

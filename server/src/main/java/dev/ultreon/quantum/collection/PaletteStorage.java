@@ -1,12 +1,13 @@
 package dev.ultreon.quantum.collection;
 
+import com.badlogic.gdx.utils.Array;
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.server.ServerDisposable;
 import dev.ultreon.quantum.ubo.DataKeys;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * <p>Palette storage is used for storing data in palettes.
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     private final D defaultValue;
     private short[] palette;
-    private List<D> data = new LinkedList<>();
+    private Array<D> data = new Array<>();
     private final Object lock = new Object();
 
     public PaletteStorage(D defaultValue, int size) {
@@ -44,7 +44,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
         Arrays.fill(this.palette, (short) -1);
     }
 
-    public PaletteStorage(D defaultValue, short[] palette, List<D> data) {
+    public PaletteStorage(D defaultValue, short[] palette, Array<D> data) {
         this.defaultValue = defaultValue;
         this.palette = palette;
         this.data = data;
@@ -89,9 +89,9 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     @Override
     public void write(PacketIO buffer, BiConsumer<PacketIO, D> encoder) {
         synchronized (lock) {
-            buffer.writeMedium(this.data.size());
+            buffer.writeVarInt(this.data.size);
             for (D entry : this.data) if (entry != null) encoder.accept(buffer, entry);
-            buffer.writeMedium(this.palette.length);
+            buffer.writeVarInt(this.palette.length);
             for (short v : this.palette) buffer.writeShort(v);
         }
     }
@@ -99,14 +99,14 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     @Override
     public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
         synchronized (lock) {
-            var data = new ArrayList<D>();
-            var dataSize = buffer.readMedium();
+            var data = new Array<D>(defaultValue.getClass());
+            var dataSize = buffer.readVarInt();
             for (int i = 0; i < dataSize; i++) {
                 data.add(decoder.apply(buffer));
             }
             this.data = data;
 
-            short[] palette = new short[buffer.readMedium()];
+            short[] palette = new short[buffer.readVarInt()];
             for (int i = 0; i < palette.length; i++) {
                 palette[i] = buffer.readShort();
             }
@@ -125,7 +125,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
 
             short old = this.palette[idx];
 
-            short setIdx = (short) this.data.indexOf(value);
+            short setIdx = (short) this.data.indexOf(value, false);
             if (setIdx == -1) {
                 setIdx = this.add(idx, value);
             }
@@ -134,13 +134,13 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
             if (old < 0 || ArrayUtils.contains(this.palette, old))
                 return false;
 
-            int i1 = ListUtils.indexOf(this.data, object -> Objects.equals(object, value));
+            int i1 = data.indexOf(value, false);
             if (i1 >= 0) {
                 this.data.set(old, value);
                 return false;
             }
 
-            this.data.remove(old);
+            this.data.removeIndex(old);
 
             // Update paletteMap entries for indices after the removed one
             for (int i = 0; i < this.palette.length; i++) {
@@ -159,7 +159,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
 
     public D direct(int dataIdx) {
         synchronized (lock) {
-            if (dataIdx >= 0 && dataIdx < this.data.size()) {
+            if (dataIdx >= 0 && dataIdx < this.data.size) {
                 D d = this.data.get(dataIdx);
                 return d != null ? d : this.defaultValue;
             }
@@ -172,7 +172,7 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
         synchronized (lock) {
             Preconditions.checkNotNull(value, "value");
 
-            short dataIdx = (short) (this.data.size());
+            short dataIdx = (short) (this.data.size);
             this.data.add(value);
             this.palette[idx] = dataIdx;
             return dataIdx;
@@ -181,10 +181,10 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
 
     public void remove(int idx) {
         synchronized (lock) {
-            if (idx >= 0 && idx < this.data.size()) {
+            if (idx >= 0 && idx < this.data.size) {
                 int dataIdx = this.toDataIdx(idx);
                 if (dataIdx < 0) return;
-                this.data.remove(dataIdx);
+                this.data.removeIndex(dataIdx);
                 this.palette[idx] = -1;
 
                 // Update paletteMap entries for indices after the removed one
@@ -211,13 +211,32 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     }
 
     @Override
-    public <R> Storage<R> map(@NotNull R defaultValue, @NotNull Function<@NotNull D, @NotNull R> mapper) {
+    public <R> Storage<R> map(@NotNull R defaultValue, Class<R> type, @NotNull Function<@NotNull D, @Nullable R> mapper) {
         Preconditions.checkNotNull(defaultValue, "defaultValue");
         Preconditions.checkNotNull(mapper, "mapper");
 
+        var ref = new Object() {
+            final transient Function<D, R> mapperRef = mapper;
+        };
+
         synchronized (lock) {
-            var data = this.data.stream().map(mapper).collect(Collectors.toList());
-            return new PaletteStorage<>(defaultValue, this.palette, data);
+            @SuppressWarnings("unchecked") var data = Arrays.stream(this.data.toArray()).map(d -> {
+                if (ref.mapperRef == null) {
+                    QuantumServer.LOGGER.warn("Mapper in PaletteStorage.mapper(...) just nullified out of thin air! What the f*** is going on?");
+                    return defaultValue;
+                }
+
+                R applied;
+                try {
+                    applied = ref.mapperRef.apply(d);
+                } catch (NullPointerException e) {
+                    QuantumServer.LOGGER.warn("Something sus going on, why is there a nullptr? Double check passed, third check failed :huh:", e);
+                    return defaultValue;
+                }
+                if (applied == null) return defaultValue;
+                return applied;
+            }).toArray(value -> (R[])java.lang.reflect.Array.newInstance(type, value));
+            return new PaletteStorage<>(defaultValue, this.palette, new Array<>(data));
         }
     }
 
@@ -226,15 +245,19 @@ public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
     }
 
     public List<D> getData() {
-        return Collections.unmodifiableList(this.data);
+        return List.of(data.items);
     }
 
-    public void set(short[] palette, List<D> data) {
+    public void set(short[] palette, D[] data) {
+        set(palette, new Array<>(data));
+    }
+
+    public void set(short[] palette, Array<D> data) {
         synchronized (lock) {
             if (this.palette.length != palette.length)
                 throw new IllegalArgumentException("Palette length must be equal.");
 
-            if (this.data.contains(null))
+            if (this.data.contains(null, true))
                 throw new IllegalArgumentException("Data cannot contain null values.");
 
             this.palette = palette;

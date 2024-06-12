@@ -82,15 +82,15 @@ public final class BuilderChunk extends Chunk {
     }
 
     public boolean isOnInvalidThread() {
-        return this.thread.getId() != Thread.currentThread().getId();
+        return this.thread.threadId() != Thread.currentThread().threadId();
     }
 
     public boolean isOnBuilderThread() {
-        return this.thread.getId() == Thread.currentThread().getId();
+        return this.thread.threadId() == Thread.currentThread().threadId();
     }
 
     public ServerChunk build() {
-        Storage<Biome> map = this.biomeData.map(Biomes.PLAINS, BiomeGenerator::getBiome);
+        Storage<Biome> map = this.biomeData.map(Biomes.PLAINS, Biome.class, BiomeGenerator::getBiome);
         return new ServerChunk(this.world, World.toLocalChunkPos(this.getPos()), this.storage, map, region);
     }
 
