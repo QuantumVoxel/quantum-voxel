@@ -21,11 +21,8 @@ uniform mat4 u_projViewTrans;
 attribute vec4 a_color;
 #endif // colorFlag
 
-#ifdef normalFlag
 attribute vec3 a_normal;
 uniform mat3 u_normalMatrix;
-varying vec3 v_normal;
-#endif // normalFlag
 
 #ifdef textureFlag
 attribute vec2 a_texCoord0;
@@ -187,16 +184,16 @@ varying vec3 v_ambientLight;
 
 #endif // lightingFlag
 
-varying vec2 v_rawUV;
-varying vec3 v_position;
-
 out VS_OUT {
+	vec3 normal;
 	vec2 diffuseUV;
 	vec2 emissiveUV;
 	vec2 specularUV;
 	vec4 color;
 	float opacity;
 	float alphaTest;
+	vec3 position;
+	vec2 rawUV;
 } gs_out;
 
 void main() {
@@ -206,6 +203,8 @@ void main() {
 	vec4 v_color;
 	float v_opacity;
 	float v_alphaTest;
+	vec3 v_position;
+	vec2 v_rawUV;
 
 	#ifdef diffuseTextureFlag
 		v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
@@ -245,6 +244,9 @@ void main() {
 	gs_out.color = v_color;
 	gs_out.opacity = v_opacity;
 	gs_out.alphaTest = v_alphaTest;
+	gs_out.position = v_position;
+	gs_out.rawUV = v_rawUV;
+	gs_out.normal = a_normal;
 
 	gl_Position = u_projViewTrans * pos;
 }

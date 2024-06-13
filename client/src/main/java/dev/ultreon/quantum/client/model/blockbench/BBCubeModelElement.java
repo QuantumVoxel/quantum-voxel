@@ -206,7 +206,7 @@ public final class BBCubeModelElement extends BBModelElement {
             if (texRef == -1) continue;
             MeshBuilder parent = texture2builder.computeIfAbsent(texRef, integer -> {
                 MeshBuilder meshBuilder = new MeshBuilder();
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
                 return meshBuilder;
             });
 
@@ -214,11 +214,6 @@ public final class BBCubeModelElement extends BBModelElement {
             v01.setCol(RgbColor.WHITE.toGdx());
             v10.setCol(RgbColor.WHITE.toGdx());
             v11.setCol(RgbColor.WHITE.toGdx());
-
-            v00.setNor(blockFace.getNormal());
-            v01.setNor(blockFace.getNormal());
-            v10.setNor(blockFace.getNormal());
-            v11.setNor(blockFace.getNormal());
 
             v00.setUV(entry.uv().x / resolution.x, entry.uv().w / resolution.y);
             v01.setUV(entry.uv().x / resolution.x, entry.uv().y / resolution.y);

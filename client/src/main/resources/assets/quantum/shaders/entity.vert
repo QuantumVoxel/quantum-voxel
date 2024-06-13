@@ -18,14 +18,13 @@ attribute vec3 a_position;
 uniform mat4 u_projViewTrans;
 
 #if defined(colorFlag)
-out vec4 v_color;
 attribute vec4 a_color;
 #endif // colorFlag
 
 #ifdef normalFlag
 attribute vec3 a_normal;
 uniform mat3 u_normalMatrix;
-out vec3 v_normal;
+#endif // normalFlag
 #endif // normalFlag
 
 #ifdef textureFlag
@@ -34,17 +33,14 @@ attribute vec2 a_texCoord0;
 
 #ifdef diffuseTextureFlag
 uniform vec4 u_diffuseUVTransform;
-out vec2 v_diffuseUV;
 #endif
 
 #ifdef emissiveTextureFlag
 uniform vec4 u_emissiveUVTransform;
-out vec2 v_emissiveUV;
 #endif
 
 #ifdef specularTextureFlag
 uniform vec4 u_specularUVTransform;
-out vec2 v_specularUV;
 #endif
 
 #ifdef boneWeight0Flag
@@ -123,16 +119,14 @@ const float u_shininess = 20.0;
 
 #ifdef blendedFlag
 uniform float u_opacity;
-out float v_opacity;
 
 #ifdef alphaTestFlag
 uniform float u_alphaTest;
-out float v_alphaTest;
 #endif //alphaTestFlag
 #endif // blendedFlag
 
 #ifdef lightingFlag
-out vec3 v_lightDiffuse;
+varying vec3 v_lightDiffuse;
 
 #ifdef ambientLightFlag
 uniform vec3 u_ambientLight;
@@ -147,16 +141,15 @@ uniform vec3 u_sphericalHarmonics[9];
 #endif //sphericalHarmonicsFlag
 
 #ifdef specularFlag
-out vec3 v_lightSpecular;
+varying vec3 v_lightSpecular;
 #endif // specularFlag
 
 #ifdef cameraPositionFlag
 uniform vec4 u_cameraPosition;
 #endif // cameraPositionFlag
-uniform vec3 u_cameraDirection;
 
 #ifdef fogFlag
-out float v_fog;
+varying float v_fog;
 #endif // fogFlag
 
 
@@ -184,36 +177,44 @@ uniform PointLight u_pointLights[numPointLights];
 
 #ifdef shadowMapFlag
 uniform mat4 u_shadowMapProjViewTrans;
-out vec3 v_shadowMapUv;
+varying vec3 v_shadowMapUv;
 #define separateAmbientFlag
 #endif //shadowMapFlag
 
 #if defined(ambientFlag) && defined(separateAmbientFlag)
-out vec3 v_ambientLight;
+varying vec3 v_ambientLight;
 #endif //separateAmbientFlag
 
 #endif // lightingFlag
 
-out vec2 v_rawUV;
-out vec3 v_position;
+varying vec2 v_rawUV;
+varying vec3 v_position;
 
 out VS_OUT {
 	vec2 diffuseUV;
 	vec2 emissiveUV;
-	vec3 direction;
+	vec2 specularUV;
+	vec4 color;
+	float opacity;
+	float alphaTest;
 } gs_out;
 
 void main() {
+	vec2 v_diffuseUV;
+	vec2 v_emissiveUV;
+	vec2 v_specularUV;
+	vec4 v_color;
+	float v_opacity;
+	float v_alphaTest;
+
 	#ifdef diffuseTextureFlag
-	gs_out.diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
+	v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
 	v_position = a_position.xyz;
 	#endif //diffuseTextureFlag
 
 	#ifdef emissiveTextureFlag
-	gs_out.emissiveUV = u_emissiveUVTransform.xy + a_texCoord0 * u_emissiveUVTransform.zw;
+	v_emissiveUV = u_emissiveUVTransform.xy + a_texCoord0 * u_emissiveUVTransform.zw;
 	#endif //emissiveTextureFlag
-
-	gs_out.direction = u_cameraDirection;
 
 	#if defined(colorFlag)
 	v_color = a_color;
@@ -238,9 +239,12 @@ void main() {
 	v_fog = min(fog, 1.0);
 	#endif
 
-	gl_Position = u_projViewTrans * pos;
+	gs_out.diffuseUV = v_diffuseUV;
+	gs_out.emissiveUV = v_emissiveUV;
+	gs_out.specularUV = v_specularUV;
+	gs_out.color = v_color;
+	gs_out.opacity = v_opacity;
+	gs_out.alphaTest = v_alphaTest;
 
-	#ifdef normalFlag
-	v_normal = a_normal;
-	#endif
+	gl_Position = u_projViewTrans * pos;
 }

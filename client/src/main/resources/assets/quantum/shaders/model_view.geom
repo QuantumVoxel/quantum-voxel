@@ -13,7 +13,7 @@ in VS_OUT {
     float alphaTest;
 } gs_in[];
 
-out vec3 v_normal;
+out vec3 normal;
 out vec2 v_diffuseUV;
 out vec2 v_emissiveUV;
 out vec2 v_specularUV;
@@ -34,7 +34,7 @@ void main( void )
     for( int i=0; i<gl_in.length( ); ++i )
     {
         gl_Position = gl_in[i].gl_Position;
-        v_normal = normalize(mat3(transpose(u_projViewWorldTrans)) * N);
+        normal = normalize(u_normalMatrix * mat3(transpose(u_projViewWorldTrans)) * N);
 
         v_diffuseUV = gs_in[i].diffuseUV;
         v_emissiveUV = gs_in[i].emissiveUV;

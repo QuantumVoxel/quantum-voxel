@@ -21,12 +21,6 @@ uniform mat4 u_projViewTrans;
 attribute vec4 a_color;
 #endif // colorFlag
 
-#ifdef normalFlag
-attribute vec3 a_normal;
-uniform mat3 u_normalMatrix;
-varying vec3 v_normal;
-#endif // normalFlag
-
 #ifdef textureFlag
 attribute vec2 a_texCoord0;
 #endif // textureFlag

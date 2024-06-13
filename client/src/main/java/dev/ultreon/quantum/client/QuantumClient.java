@@ -78,8 +78,10 @@ import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.render.shader.GameShaderProvider;
+import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
+import dev.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
 import dev.ultreon.quantum.client.sound.ClientSoundRegistry;
 import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.LanguageManager;
@@ -476,7 +478,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         shaderConfig.defaultDepthFunc = GL_DEPTH_FUNC;
 
         // Initialize ModelBatch with GameShaderProvider
-        this.modelBatch = deferDispose(new ModelBatch(new GameShaderProvider(shaderConfig)));
+        this.modelBatch = deferDispose(new ModelBatch(new WorldShaderProvider(
+                new ResourceFileHandle(id("shaders/world.vert")),
+                new ResourceFileHandle(id("shaders/world.frag")),
+                new ResourceFileHandle(id("shaders/world.geom")))));
 
         // Initialize GameRenderer
         this.gameRenderer = new GameRenderer(this, this.modelBatch, this.pipeline);

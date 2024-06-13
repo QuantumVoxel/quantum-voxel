@@ -15,6 +15,7 @@ public class QVModel {
 
     public QVModel(ModelInstance instance) {
         this.instance = instance;
+        this.instance.userData = this;
         this.animationController = new AnimationController(instance);
     }
 

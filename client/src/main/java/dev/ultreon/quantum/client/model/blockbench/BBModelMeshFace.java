@@ -40,7 +40,7 @@ public final class BBModelMeshFace {
             } catch (IOException e) {
                 attributes.set(TextureAttribute.createDiffuse(TextureManager.DEFAULT_TEX));
             }
-            return model.part(integer.uuid().toString(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, attributes);
+            return model.part(integer.uuid().toString(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates, attributes);
         });
 
         builder.setUVRange(0, 0, resolution.x, resolution.y); // FIXME is this right?
