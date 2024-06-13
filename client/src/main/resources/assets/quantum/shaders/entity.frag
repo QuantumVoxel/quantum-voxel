@@ -19,16 +19,16 @@ precision mediump float;
 #define specularFlag
 #endif
 
-in vec3 v_normal;
+in vec3 normal;
 
 #if defined(colorFlag)
-varying vec4 v_color;
+in vec4 v_color;
 #endif
 
 #ifdef blendedFlag
-varying float v_opacity;
+in float v_opacity;
 #ifdef alphaTestFlag
-varying float v_alphaTest;
+in float v_alphaTest;
 #endif //alphaTestFlag
 #endif //blendedFlag
 
@@ -37,15 +37,15 @@ varying float v_alphaTest;
 #endif
 
 #ifdef diffuseTextureFlag
-varying MED vec2 v_diffuseUV;
+in MED vec2 diffuseUV;
 #endif
 
 #ifdef specularTextureFlag
-varying MED vec2 v_specularUV;
+in MED vec2 v_specularUV;
 #endif
 
 #ifdef emissiveTextureFlag
-varying MED vec2 v_emissiveUV;
+in MED vec2 emissiveUV;
 #endif
 
 #ifdef diffuseColorFlag
@@ -77,20 +77,20 @@ uniform sampler2D u_emissiveTexture;
 #endif
 
 #ifdef lightingFlag
-varying vec3 v_lightDiffuse;
+in vec3 v_lightDiffuse;
 
 #if	defined(ambientLightFlag) || defined(ambientCubemapFlag) || defined(sphericalHarmonicsFlag)
 #define ambientFlag
 #endif //ambientFlag
 
 #ifdef specularFlag
-varying vec3 v_lightSpecular;
+in vec3 v_lightSpecular;
 #endif //specularFlag
 
 #ifdef shadowMapFlag
 uniform sampler2D u_shadowTexture;
 uniform float u_shadowPCFOffset;
-varying vec3 v_shadowMapUv;
+in vec3 v_shadowMapUv;
 #define separateAmbientFlag
 
 float getShadowness(vec2 offset)
@@ -110,18 +110,18 @@ float getShadow()
 #endif //shadowMapFlag
 
 #if defined(ambientFlag) && defined(separateAmbientFlag)
-varying vec3 v_ambientLight;
+in vec3 v_ambientLight;
 #endif //separateAmbientFlag
 
 #endif //lightingFlag
 
 #ifdef fogFlag
 uniform vec4 u_fogColor;
-varying float v_fog;
+in float v_fog;
 #endif // fogFlag
 
-varying vec2 v_rawUV;
-varying vec3 v_position;
+in vec2 v_rawUV;
+in vec3 v_position;
 
 uniform float u_globalSunlight;
 uniform vec2 u_atlasSize;
@@ -198,11 +198,11 @@ vec3 gamma(vec3 color){
 
 void main() {
     #if defined(diffuseTextureFlag)
-    vec2 v_diffuseTexUV = v_diffuseUV;
+    vec2 v_diffuseTexUV = diffuseUV;
     #endif
 
     #if defined(emissiveTextureFlag)
-    vec2 v_emissiveTexUV = v_emissiveUV;
+    vec2 v_emissiveTexUV = emissiveUV;
     #endif
 
     #if defined(diffuseTextureFlag) && defined(colorFlag)
@@ -239,7 +239,7 @@ void main() {
     #endif
 
     #ifdef normalFlag
-    gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
+    gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(normal, groove)).r, gl_FragColor.w);
     #endif
 
     #ifdef fogFlag

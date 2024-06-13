@@ -8,18 +8,24 @@ import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorld;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class WorldShader extends DefaultShader {
+    public static final Vector3 CAMERA_UP = new Vector3();
     private final static Attributes tmpAttributes = new Attributes();
     public final int u_globalSunlight;
     public final int u_atlasSize;
     public final int u_atlasOffset;
+    private final int u_cameraUp0;
     private String log;
+
 
     public WorldShader(final Renderable renderable) {
         this(renderable, new GeomShaderConfig());
@@ -55,14 +61,15 @@ public class WorldShader extends DefaultShader {
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
         this.u_atlasSize = this.register(Inputs.atlasSize, Setters.atlasSize);
         this.u_atlasOffset = this.register(Inputs.atlasOffset, Setters.atlasOffset);
+        this.u_cameraUp0 = this.register(Inputs.cameraUp, Setters.cameraUp);
     }
-
     public static class Inputs extends DefaultShader.Inputs {
         public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
         public final static Uniform atlasSize = new Uniform("u_atlasSize");
         public final static Uniform atlasOffset = new Uniform("u_atlasOffset");
-    }
+        public final static Uniform cameraUp = new Uniform("u_cameraUp0");
 
+    }
     public static class Setters extends DefaultShader.Setters {
         public final static Setter globalSunlight = new LocalSetter() {
             @Override
@@ -89,6 +96,13 @@ public class WorldShader extends DefaultShader {
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Vec2f f = ClientWorld.ATLAS_OFFSET.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
+            }
+        };
+
+        public final static Setter cameraUp = new LocalSetter() {
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                shader.set(inputID, CAMERA_UP);
             }
         };
     }

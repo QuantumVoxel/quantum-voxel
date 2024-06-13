@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -117,6 +118,7 @@ public final class WorldRenderer implements DisposableContainer {
     private final Array<ClientChunk> removedChunks = new Array<>();
     private final Map<ChunkPos, Pair<ClientChunk, ModelInstance>> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
+    private final Quaternion tmpQ = new Quaternion();
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;

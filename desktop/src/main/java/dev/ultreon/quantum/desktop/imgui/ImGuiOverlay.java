@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
@@ -370,6 +372,7 @@ public class ImGuiOverlay {
                 ImGuiEx.editDouble("FogEnd", "Shader::World::FogEnd", ClientWorld.FOG_END::get, ClientWorld.FOG_END::set);
                 ImGuiEx.editVec2f("AtlasSize", "Shader::World::AtlasSize", ClientWorld.ATLAS_SIZE::get, ClientWorld.ATLAS_SIZE::set);
                 ImGuiEx.editVec2f("AtlasOffset", "Shader::World::AtlasOffset", ClientWorld.ATLAS_OFFSET::get, ClientWorld.ATLAS_OFFSET::set);
+                ImGuiEx.editVec3f("CameraUp", "Shader::World::CameraUp", () -> new Vec3f(WorldShader.CAMERA_UP.x, WorldShader.CAMERA_UP.y, WorldShader.CAMERA_UP.z), vec3f -> WorldShader.CAMERA_UP.set(vec3f.x, vec3f.y, vec3f.z));
                 ImGui.treePop();
             }
 

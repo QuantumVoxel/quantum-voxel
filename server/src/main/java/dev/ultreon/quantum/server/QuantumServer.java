@@ -77,7 +77,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static final String NAMESPACE = "quantum";
 //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
-    private final List<ServerDisposable> disposables = new ArrayList<>();
+    private final List<ServerDisposable> disposables = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);

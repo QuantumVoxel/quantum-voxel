@@ -19,7 +19,7 @@ precision mediump float;
 #define specularFlag
 #endif
 
-in vec3 normal;
+in vec3 v_normal;
 
 #if defined(colorFlag)
 varying vec4 v_color;
@@ -203,12 +203,12 @@ vec2 transformUV(vec2 uv) {
     float vPerBlock = float(blockWidth) / float(u_atlasSize.y);
 
     #ifdef normalFlag
-        vec3 texGetNormal = -abs(normal);
+        vec3 texGetNormal = -abs(v_normal);
         vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
         dot(texGetNormal.yzx, v_position)));
         vec2 uvStart = uv;
         vec2 v_texUV;
-        if(normal.x != 0.0) {
+        if(v_normal.x != 0.0) {
             v_texUV = uvStart / u_atlasOffset + vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);
         } else {
             v_texUV = uvStart / u_atlasOffset + vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
@@ -267,7 +267,7 @@ void main() {
     #endif
 
     #ifdef normalFlag
-        gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(normal, groove)).r, gl_FragColor.w);
+        gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
     #endif
 
     #ifdef fogFlag

@@ -18,7 +18,6 @@ attribute vec3 a_position;
 uniform mat4 u_projViewTrans;
 
 #if defined(colorFlag)
-varying vec4 v_color;
 attribute vec4 a_color;
 #endif // colorFlag
 
@@ -34,17 +33,14 @@ attribute vec2 a_texCoord0;
 
 #ifdef diffuseTextureFlag
 uniform vec4 u_diffuseUVTransform;
-varying vec2 v_diffuseUV;
 #endif
 
 #ifdef emissiveTextureFlag
 uniform vec4 u_emissiveUVTransform;
-varying vec2 v_emissiveUV;
 #endif
 
 #ifdef specularTextureFlag
 uniform vec4 u_specularUVTransform;
-varying vec2 v_specularUV;
 #endif
 
 #ifdef boneWeight0Flag
@@ -123,11 +119,9 @@ const float u_shininess = 20.0;
 
 #ifdef blendedFlag
 uniform float u_opacity;
-varying float v_opacity;
 
 #ifdef alphaTestFlag
 uniform float u_alphaTest;
-varying float v_alphaTest;
 #endif //alphaTestFlag
 #endif // blendedFlag
 
@@ -196,7 +190,23 @@ varying vec3 v_ambientLight;
 varying vec2 v_rawUV;
 varying vec3 v_position;
 
+out VS_OUT {
+	vec2 diffuseUV;
+	vec2 emissiveUV;
+	vec2 specularUV;
+	vec4 color;
+	float opacity;
+	float alphaTest;
+} gs_out;
+
 void main() {
+	vec2 v_diffuseUV;
+	vec2 v_emissiveUV;
+	vec2 v_specularUV;
+	vec4 v_color;
+	float v_opacity;
+	float v_alphaTest;
+
 	#ifdef diffuseTextureFlag
 		v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
 		v_position = a_position.xyz;
@@ -229,9 +239,12 @@ void main() {
 		v_fog = min(fog, 1.0);
 	#endif
 
-	gl_Position = u_projViewTrans * pos;
+	gs_out.diffuseUV = v_diffuseUV;
+	gs_out.emissiveUV = v_emissiveUV;
+	gs_out.specularUV = v_specularUV;
+	gs_out.color = v_color;
+	gs_out.opacity = v_opacity;
+	gs_out.alphaTest = v_alphaTest;
 
-	#ifdef normalFlag
-		v_normal = a_normal;
-	#endif
+	gl_Position = u_projViewTrans * pos;
 }
