@@ -34,6 +34,7 @@ public final class Blocks {
     public static final Block META_SWITCH_TEST = Blocks.register("meta_switch_test", new MetaSwitchTestBlock());
     public static final Block BLAST_FURNACE = Blocks.register("blast_furnace", new BlastFurnaceBlock(new Properties().hardness(12.0F).effectiveTool(ToolType.PICKAXE).requiresTool().dropsItems(Items.BLAST_FURNACE)));
     public static final Block IRON_ORE = Blocks.register("iron_ore", new Block(new Properties().hardness(3.0F).effectiveTool(ToolType.PICKAXE).toolRequirement(ToolLevel.STONE).requiresTool().dropsItems(Items.IRON_ORE)));
+    public static final Block SNOWY_GRASS_BLOCK = Blocks.register("snowy_grass_block", new Block(new Properties().hardness(3F).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT, Items.SNOW_BALL)));
 
     private static <T extends Block> T register(String name, T block) {
         Registries.BLOCK.register(new Identifier(name), block);

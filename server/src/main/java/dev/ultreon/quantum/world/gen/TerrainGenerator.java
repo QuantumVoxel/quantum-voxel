@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world.gen;
 
-import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.vector.Vec2i;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
@@ -11,9 +10,6 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4
 import de.articdive.jnoise.pipeline.JNoise;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
-import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -32,11 +28,7 @@ import reactor.core.Disposable;
 
 import java.util.*;
 
-import static dev.ultreon.quantum.block.Blocks.SAND;
-import static dev.ultreon.quantum.block.Blocks.SANDSTONE;
-import static dev.ultreon.quantum.block.state.BlockProperties.AIR;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
-import static dev.ultreon.quantum.world.gen.Carver.HAS_CAVES_FLAG;
 
 public class TerrainGenerator implements Disposable {
     private final DomainWarping biomeDomain;
@@ -47,6 +39,9 @@ public class TerrainGenerator implements Disposable {
     private final List<BiomeData> biomeGenData = new ArrayList<>();
     @Nullable
     private Carver carver;
+    private BiomeNoise humidNoise;
+    private BiomeNoise tempNoise;
+    private BiomeNoise variatioNoise;
 
     public TerrainGenerator(DomainWarping biomeDomain, DomainWarping layerDomain, NoiseConfig noiseConfig) {
         this.biomeDomain = biomeDomain;
@@ -61,13 +56,16 @@ public class TerrainGenerator implements Disposable {
                 .build();
 
         TerrainNoise noise = new TerrainNoise(world.getSeed());
-        this.carver = new Carver(biomeDomain, noise, world.getSeed() + 1);
+        this.humidNoise = new BiomeNoise(world.getSeed() + 200);
+        this.tempNoise = new BiomeNoise(world.getSeed() + 210);
+        this.variatioNoise = new BiomeNoise(world.getSeed() + 220);
+        this.carver = new Carver(biomeDomain, noise, world.getSeed() + 300);
     }
 
     @CanIgnoreReturnValue
-    public BiomeData registerBiome(ServerWorld world, long seed, Biome biome, float temperatureStart, float temperatureEnd, boolean isOcean) {
+    public BiomeData registerBiome(ServerWorld world, long seed, Biome biome, float temperatureStart, float temperatureEnd, float humidityStart, float humidityEnd, boolean isOcean) {
         var generator = biome.create(world, seed);
-        var biomeData = new BiomeData(temperatureStart, temperatureEnd, isOcean, generator);
+        var biomeData = new BiomeData(temperatureStart, temperatureEnd, humidityStart, humidityEnd, isOcean, generator);
         this.biomeGenData.add(biomeData);
         return biomeData;
     }
@@ -146,8 +144,9 @@ public class TerrainGenerator implements Disposable {
             offset.add(domainOffset.x, 0, domainOffset.y);
         }
 
-        var temp = this.noise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
-        BiomeGenerator biomeGen = this.biomeGenData.get(0).biomeGen();
+        var humid = this.humidNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
+        var temp = this.tempNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
+        BiomeGenerator biomeGen = this.biomeGenData.getFirst().biomeGen();
 
         for (var data : this.biomeGenData) {
             var currentlyOcean = height < World.SEA_LEVEL - 4;

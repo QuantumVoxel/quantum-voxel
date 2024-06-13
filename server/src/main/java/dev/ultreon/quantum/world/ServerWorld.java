@@ -94,7 +94,7 @@ public class ServerWorld extends World {
 
         for (Biome value : Registries.BIOME.values()) {
             if (value.doesNotGenerate()) continue;
-            this.terrainGen.registerBiome(this, this.getSeed(), value, value.getTemperatureStart(), value.getTemperatureEnd(), value.isOcean());
+            this.terrainGen.registerBiome(this, this.getSeed(), value, value.getTemperatureStart(), value.getTemperatureEnd(), value.getHumidityStart(), value.getHumidityEnd(), value.isOcean());
         }
 
         this.terrainGen.create(this, this.seed);

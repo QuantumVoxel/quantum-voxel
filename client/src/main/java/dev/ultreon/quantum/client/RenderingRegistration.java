@@ -83,6 +83,7 @@ public class RenderingRegistration {
     private static void registerBlockModels() {
         // Register block models for grass block, log, and crafting bench
         BlockModelRegistry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        BlockModelRegistry.register(Blocks.SNOWY_GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/snowy_grass"), QuantumClient.id("blocks/snowy_grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
         BlockModelRegistry.register(Blocks.LOG, meta -> true , CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
         BlockModelRegistry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/crafting_bench_top"), QuantumClient.id("blocks/crafting_bench_bottom"), QuantumClient.id("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
 

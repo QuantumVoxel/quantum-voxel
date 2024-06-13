@@ -2,6 +2,7 @@ package dev.ultreon.quantum.world.gen.feature;
 
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -46,7 +47,8 @@ public class TreeFeature extends WorldGenFeature {
         this.random.setSeed(seed);
         this.random.setSeed(this.random.nextLong());
 
-        if (!chunk.get(x, height - 1, z).is(Blocks.GRASS_BLOCK)) {
+        BlockProperties blockProperties = chunk.get(x, height - 1, z);
+        if (!blockProperties.is(Blocks.GRASS_BLOCK) && !blockProperties.is(Blocks.SNOWY_GRASS_BLOCK)) {
             return false;
         }
 

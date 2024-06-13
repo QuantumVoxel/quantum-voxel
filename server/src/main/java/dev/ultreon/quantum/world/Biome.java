@@ -32,12 +32,16 @@ public abstract class Biome {
     private final float temperatureEnd;
     private final boolean isOcean;
     private final boolean doesNotGenerate;
+    private final float humidityStart;
+    private final float humidityEnd;
 
-    protected Biome(float temperatureStart, float temperatureEnd, boolean isOcean, boolean doesNotGenerate) {
+    protected Biome(float temperatureStart, float temperatureEnd, boolean isOcean, boolean doesNotGenerate, float humidityStart, float humidityEnd) {
         this.temperatureStart = temperatureStart;
         this.temperatureEnd = temperatureEnd;
         this.isOcean = isOcean;
         this.doesNotGenerate = doesNotGenerate;
+        this.humidityStart = humidityStart;
+        this.humidityEnd = humidityEnd;
     }
 
     public static Builder builder() {
@@ -110,13 +114,23 @@ public abstract class Biome {
         return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
     }
 
+    public float getHumidityStart() {
+        return humidityStart;
+    }
+
+    public float getHumidityEnd() {
+        return humidityEnd;
+    }
+
     public static class Builder {
         @Nullable
         private NoiseConfig biomeNoise;
         private final List<TerrainLayer> layers = new ArrayList<>();
         private final List<WorldGenFeature> features = new ArrayList<>();
-        private float temperatureStart = Float.NaN;
-        private float temperatureEnd = Float.NaN;
+        private float temperatureStart = -2.0f;
+        private float temperatureEnd = 2.0f;
+        private float humidityStart = -2.0f;
+        private float humidityEnd = 2.0f;
         private boolean isOcean;
         private boolean doesNotGenerate;
 
@@ -153,6 +167,16 @@ public abstract class Biome {
             return this;
         }
 
+        public Builder humidityStart(float humidityStart) {
+            this.humidityStart = humidityStart;
+            return this;
+        }
+
+        public Builder humidityEnd(float humidityEnd) {
+            this.humidityEnd = humidityEnd;
+            return this;
+        }
+
         public Builder ocean() {
             this.isOcean = true;
             return this;
@@ -164,7 +188,7 @@ public abstract class Biome {
             if (Float.isNaN(this.temperatureStart)) throw new IllegalArgumentException("Temperature start not set.");
             if (Float.isNaN(this.temperatureEnd)) throw new IllegalArgumentException("Temperature end not set.");
 
-            return new Biome(this.temperatureStart, this.temperatureEnd, this.isOcean, this.doesNotGenerate) {
+            return new Biome(this.temperatureStart, this.temperatureEnd, this.isOcean, this.doesNotGenerate, this.humidityStart, this.humidityEnd) {
                 @Override
                 protected void onBuildLayers(List<TerrainLayer> layerList, List<WorldGenFeature> featureList) {
                     layerList.addAll(Builder.this.layers);

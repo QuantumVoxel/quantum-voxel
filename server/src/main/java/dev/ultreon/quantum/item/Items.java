@@ -43,6 +43,7 @@ public class Items {
     public static final Item RAW_IRON = Items.register("raw_iron", new Item(new Properties()));
     public static final Item RAW_BACON = Items.register("raw_bacon", new Item(new Properties().food(Foods.RAW_BACON)));
     public static final Item BACON = Items.register("bacon", new Item(new Properties().food(Foods.BACON)));
+    public static final Item SNOW_BALL = Items.register("snow_ball", new Item(new Properties().stackSize(32)));
 
     private static <T extends Item> T register(String name, T block) {
         Registries.ITEM.register(new Identifier(name), block);
