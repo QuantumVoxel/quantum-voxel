@@ -11,6 +11,7 @@ import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
+import dev.ultreon.quantum.world.BlockFlags;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
@@ -66,7 +67,7 @@ public class BlockItem extends Item {
 
         if (world.isClientSide()) {
             var state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockPos, useItemContext);
-            world.set(blockPos, state);
+            world.set(blockPos, state, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.LIGHT);
         }
 
         Player player = useItemContext.player();

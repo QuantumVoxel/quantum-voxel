@@ -22,9 +22,7 @@ precision mediump float;
 varying vec3 v_normal;
 varying vec3 v_modelNormal;
 
-#if defined(colorFlag)
 varying vec4 v_color;
-#endif
 
 #ifdef blendedFlag
 varying float v_opacity;
@@ -231,16 +229,13 @@ void main() {
 
     vec3 normal = v_normal;
 
-    #if defined(diffuseTextureFlag) && defined(colorFlag)
-        vec4 diffuse = TEXTURE2D(u_diffuseTexture, v_diffuseTexUV) * v_color;
-    #elif defined(diffuseTextureFlag)
+    float sunLight = v_color.a;
+    vec4 blockLight = vec4(v_color.rgb, 1.0);
+
+    #if defined(diffuseTextureFlag)
         vec4 diffuse = TEXTURE2D(u_diffuseTexture, v_diffuseTexUV);
     #elif defined(diffuseColorFlag) && defined(colorFlag)
-        vec4 diffuse = u_diffuseColor * v_color;
-    #elif defined(diffuseColorFlag)
         vec4 diffuse = u_diffuseColor;
-    #elif defined(colorFlag)
-        vec4 diffuse = v_color;
     #else
         vec4 diffuse = vec4(1.0);
     #endif
@@ -251,7 +246,11 @@ void main() {
         vec4 emissive = vec4(0.0);
     #endif
 
-    gl_FragColor.rgb = (diffuse.rgb) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+    vec3 light = vec3(u_globalSunlight);
+    light *= sunLight * 2 - 0.4;
+    light += (blockLight.rgb - (light * blockLight.rgb));
+
+    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive.rgb * (1.0 - light));
 
     #ifdef blendedFlag
         gl_FragColor.a = diffuse.a * v_opacity;

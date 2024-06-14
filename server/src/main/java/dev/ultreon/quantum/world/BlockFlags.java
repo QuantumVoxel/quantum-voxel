@@ -19,4 +19,5 @@ public class BlockFlags {
      * The block will be synced to clients or the server
      */
     public static final int SYNC = 0b00000010;
+    public static final int LIGHT = 0b00000100;
 }

@@ -19,7 +19,7 @@ public class NormalBlockRenderer implements BlockRenderer {
 
     @Override
     public void renderNorth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
-        var lightLevel = lld.lightLevel();
+        var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
 
@@ -31,17 +31,17 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y1, z).setNor(0, 0, 1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y2, z).setNor(0, 0, 1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
+        Color c = RgbColor.rgba(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness(), lld.sunBrightness());
         if (lightData == null) {
-            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
         } else {
-            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha() / 255f * lightData.s00);
+            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha() / 255f * lightData.s01);
+            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha() / 255f * lightData.s10);
+            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha() / 255f * lightData.s11);
         }
 
         builder.rect(this.c00, this.c10, this.c11, this.c01);
@@ -49,7 +49,7 @@ public class NormalBlockRenderer implements BlockRenderer {
 
     @Override
     public void renderSouth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
-        var lightLevel = lld.lightLevel();
+        var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
 
@@ -61,17 +61,17 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y1, z).setNor(0, 0, -1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y2, z).setNor(0, 0, -1).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
+        Color c = RgbColor.rgba(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness(), lld.sunBrightness());
         if (lightData == null) {
-            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
         } else {
-            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha() / 255f * lightData.s00);
+            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha() / 255f * lightData.s01);
+            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha() / 255f * lightData.s10);
+            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha() / 255f * lightData.s11);
         }
 
         builder.rect(this.c01, this.c11, this.c10, this.c00);
@@ -79,7 +79,7 @@ public class NormalBlockRenderer implements BlockRenderer {
 
     @Override
     public void renderWest(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
-        var lightLevel = lld.lightLevel();
+        var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
 
@@ -91,17 +91,17 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x, y2, z1).setNor(-1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x, y2, z2).setNor(-1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
+        Color c = RgbColor.rgba(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness(), lld.sunBrightness());
         if (lightData == null) {
-            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
         } else {
-            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha() / 255f * lightData.s00);
+            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha() / 255f * lightData.s01);
+            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha() / 255f * lightData.s10);
+            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha() / 255f * lightData.s11);
         }
 
         builder.rect(this.c01, this.c11, this.c10, this.c00);
@@ -109,7 +109,7 @@ public class NormalBlockRenderer implements BlockRenderer {
 
     @Override
     public void renderEast(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
-        var lightLevel = lld.lightLevel();
+        var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
 
@@ -121,17 +121,17 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x, y2, z1).setNor(1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x, y2, z2).setNor(1, 0, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
+        Color c = RgbColor.rgba(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness(), lld.sunBrightness());
         if (lightData == null) {
-            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
         } else {
-            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha() / 255f * lightData.s00);
+            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha() / 255f * lightData.s01);
+            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha() / 255f * lightData.s10);
+            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha() / 255f * lightData.s11);
         }
 
         builder.rect(this.c00, this.c10, this.c11, this.c01);
@@ -139,7 +139,7 @@ public class NormalBlockRenderer implements BlockRenderer {
 
     @Override
     public void renderTop(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
-        var lightLevel = lld.lightLevel();
+        var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
 
@@ -151,17 +151,17 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y, z1).setNor(0, 1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y, z2).setNor(0, 1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
+        Color c = RgbColor.rgba(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness(), lld.sunBrightness());
         if (lightData == null) {
-            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
         } else {
-            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha() / 255f * lightData.s00);
+            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha() / 255f * lightData.s01);
+            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha() / 255f * lightData.s10);
+            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha() / 255f * lightData.s11);
         }
 
         builder.rect(this.c01, this.c11, this.c10, this.c00);
@@ -169,7 +169,7 @@ public class NormalBlockRenderer implements BlockRenderer {
 
     @Override
     public void renderBottom(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
-        var lightLevel = lld.lightLevel();
+        var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
 
@@ -181,17 +181,17 @@ public class NormalBlockRenderer implements BlockRenderer {
         this.c10.setPos(x2, y, z1).setNor(0, -1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
         this.c11.setPos(x2, y, z2).setNor(0, -1, 0).setUV(NormalBlockRenderer.getU(region), NormalBlockRenderer.getV(region));
 
-        Color c = RgbColor.rgb(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness());
+        Color c = RgbColor.rgba(lld.blockBrightness(), lld.blockBrightness(), lld.blockBrightness(), lld.sunBrightness());
         if (lightData == null) {
-            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c01.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c10.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
+            this.c11.setCol(c.getRed() / 255f * lightLevel, c.getGreen() / 255f * lightLevel, c.getBlue() / 255f * lightLevel, c.getAlpha() / 255f * lightLevel);
         } else {
-            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha());
-            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha());
-            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha());
-            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha());
+            this.c00.setCol(c.getRed() / 255f * lightData.l00, c.getGreen() / 255f * lightData.l00, c.getBlue() / 255f * lightData.l00, c.getAlpha() / 255f * lightData.s00);
+            this.c01.setCol(c.getRed() / 255f * lightData.l01, c.getGreen() / 255f * lightData.l01, c.getBlue() / 255f * lightData.l01, c.getAlpha() / 255f * lightData.s01);
+            this.c10.setCol(c.getRed() / 255f * lightData.l10, c.getGreen() / 255f * lightData.l10, c.getBlue() / 255f * lightData.l10, c.getAlpha() / 255f * lightData.s10);
+            this.c11.setCol(c.getRed() / 255f * lightData.l11, c.getGreen() / 255f * lightData.l11, c.getBlue() / 255f * lightData.l11, c.getAlpha() / 255f * lightData.s11);
         }
 
         builder.rect(this.c00, this.c10, this.c11, this.c01);

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.ubo.types.LongType;
@@ -989,5 +990,17 @@ public abstract class World implements ServerDisposable {
         blockProperties.onDestroy(this, breaking, breaker);
         set(breaking, Blocks.AIR.createMeta(), BlockFlags.UPDATE);
         return true;
+    }
+
+    public int getBlockLight(int x, int y, int z) {
+        return 0;
+    }
+
+    public void setBlockLight(int x, int y, int z, int intensity) {
+
+    }
+
+    public void updateLightSources(Vec3i offset, ObjectMap<Vec3i, LightSource> lights) {
+
     }
 }

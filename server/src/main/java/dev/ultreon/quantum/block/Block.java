@@ -45,6 +45,7 @@ public class Block implements DataWriter<MapType> {
     private final boolean occlude;
     private final boolean greedyMerge;
     private final @Nullable ToolLevel toolLevel;
+    private final int lightReduction;
 
     public Block() {
         this(new Properties());
@@ -64,6 +65,7 @@ public class Block implements DataWriter<MapType> {
         this.occlude = properties.occlude;
         this.greedyMerge = properties.greedyMerge;
         this.toolLevel = properties.toolLevel;
+        this.lightReduction = properties.lightReduction;
     }
 
     public Identifier getId() {
@@ -230,6 +232,15 @@ public class Block implements DataWriter<MapType> {
         return this.lootGen.generate(breaker.getRng());
     }
 
+    public int getLight(BlockProperties blockProperties) {
+        return 0;
+    }
+
+    public int getLightReduction(BlockProperties blockProperties) {
+        if (isAir()) return 0;
+        return lightReduction;
+    }
+
     public static class Properties {
         private boolean greedyMerge = true;
         private boolean occlude = true;
@@ -244,6 +255,7 @@ public class Block implements DataWriter<MapType> {
         private boolean requiresTool = false;
         private LootGenerator loot = ConstantLoot.EMPTY;
         private boolean disableRendering = false;
+        private int lightReduction = 15;
         private @Nullable ToolLevel toolLevel = null;
 
         public @This Properties transparent() {
@@ -298,6 +310,13 @@ public class Block implements DataWriter<MapType> {
 
         public @This Properties usesCustomRender() {
             this.hasCustomRender = true;
+            return this;
+        }
+
+        public @This Properties lightReduction(int reduction) {
+            if (reduction < 1)
+                throw new IllegalArgumentException("Light reduction needs to be 1 or higher.");
+            this.lightReduction = reduction;
             return this;
         }
 

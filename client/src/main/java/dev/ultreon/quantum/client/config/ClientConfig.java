@@ -17,11 +17,11 @@ import dev.ultreon.quantum.util.Identifier;
 public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.renderDistance", comment = "The render distance of chunks in the game.")
     @Ranged(min = 4, max = 32)
-    public static int renderDistance = 16;
+    public static int renderDistance = 8;
 
     @ConfigEntry(path = "video.entityRenderDistance", comment = "The render distance of entities.")
     @Ranged(min = 4, max = 32)
-    public static int entityRenderDistance = 16;
+    public static int entityRenderDistance = 8;
 
     @ConfigEntry(path = "video.fog", comment = "Whether fog is enabled.")
     public static boolean fog = true;

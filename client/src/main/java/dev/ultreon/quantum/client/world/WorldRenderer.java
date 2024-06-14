@@ -661,7 +661,6 @@ public final class WorldRenderer implements DisposableContainer {
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(renderLayer, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
             renderer.animate(instance, context);
-
             renderer.render(instance, context);
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);

@@ -252,4 +252,12 @@ public class BlockProperties {
             }
         }
     }
+
+    public int getLight() {
+        return block.getLight(this);
+    }
+
+    public int getLightReduction() {
+        return block.getLightReduction(this);
+    }
 }

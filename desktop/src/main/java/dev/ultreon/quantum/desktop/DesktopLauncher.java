@@ -2,6 +2,7 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
+import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
@@ -119,7 +120,8 @@ public class DesktopLauncher {
         config.useVsync(false);
         config.setForegroundFPS(0);
         config.setIdleFPS(10);
-        config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 0);
+        config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
+        config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
         config.setTitle("Quantum");

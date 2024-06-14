@@ -547,7 +547,7 @@ public abstract class Chunk implements ServerDisposable, ChunkAccess {
         if (this.isOutOfBounds(x, y, z))
             return 0;
 
-        return 15;
+        return lightMap.getSunlight(x, y, z);
     }
 
     /**

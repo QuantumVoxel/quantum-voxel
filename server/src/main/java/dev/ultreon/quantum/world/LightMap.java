@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.world;
 
+import java.util.Arrays;
+
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
@@ -27,7 +29,7 @@ public class LightMap {
 
     public int getSunlight(int x, int y, int z) {
         byte datum = this.data[this.getIndex(x, y, z)];
-        return datum >> 4;
+        return (datum & 0xF0) >> 4;
     }
 
     public int getBlockLight(int x, int y, int z) {
@@ -37,7 +39,7 @@ public class LightMap {
 
     public void setSunlight(int x, int y, int z, int value) {
         byte datum = this.data[this.getIndex(x, y, z)];
-        datum = (byte) ((datum & 0x0F) | (value << 4));
+        datum = (byte) ((datum & 0x0F) | ((value << 4) & 0xF0));
         this.data[this.getIndex(x, y, z)] = datum;
     }
 
@@ -54,5 +56,9 @@ public class LightMap {
     public void load(byte[] data) {
         if (data == null) return;
         this.data = data;
+    }
+
+    public void clear() {
+        Arrays.fill(data, (byte) 0);
     }
 }

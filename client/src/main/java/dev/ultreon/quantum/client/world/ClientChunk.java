@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
@@ -22,15 +23,14 @@ import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.*;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static dev.ultreon.quantum.world.World.WORLD_HEIGHT;
 
 public final class ClientChunk extends Chunk {
     public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
@@ -52,6 +52,8 @@ public final class ClientChunk extends Chunk {
     private final Map<BlockPos, ModelInstance> models = new ConcurrentHashMap<>();
     private final Array<BlockPos> removedModels = new Array<>();
     public boolean visible;
+    private ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
+
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
@@ -85,6 +87,20 @@ public final class ClientChunk extends Chunk {
         float blockLightMapped = Chunk.lightLevelMap[Mth.clamp(blockLight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
 
         return Mth.clamp(sunlightMapped + blockLightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
+    }
+
+    public float getSunlightLevel(int x, int y, int z) {
+        int sunlight = this.lightMap.getSunlight(x, y, z);
+        float sunlightMapped = Chunk.lightLevelMap[Mth.clamp(sunlight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
+        
+        return Mth.clamp(sunlightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
+    }
+
+    public float getBlockLightLevel(int x, int y, int z) {
+        int blockLight = this.lightMap.getBlockLight(x, y, z);
+        float blockLightMapped = Chunk.lightLevelMap[Mth.clamp(blockLight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
+        
+        return Mth.clamp(blockLightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
     }
 
     @Override
@@ -269,5 +285,37 @@ public final class ClientChunk extends Chunk {
         for (var model : this.models.values()) {
             RenderLayer.WORLD.destroy(model);
         }
+    }
+
+    public void setBlockLight(int x, int y, int z, int level) {
+        this.lightMap.setBlockLight(x, y, z, level);
+    }
+
+    public void setBlockLight(Vec3i pos, int light) {
+        this.setBlockLight(pos.x, pos.y, pos.z, light);
+    }
+
+    public void updateLight(World world) {
+        world.updateLightSources(this.getOffset(), lights);
+    }
+
+    public void setLightSource(Vec3i tmp, int light) {
+        if (light == 0) {
+            this.lights.remove(tmp);
+        }
+
+        this.lights.put(tmp.cpy(), new LightSource(tmp.x, tmp.y, tmp.z, light));
+    }
+
+    public void clearLight() {
+        this.lightMap.clear();
+    }
+
+    public void setSunlight(BlockPos pos, int intensity) {
+        lightMap.setSunlight(pos.x(), pos.y(), pos.z(), intensity);
+    }
+
+    public int getSunlight(BlockPos pos) {
+        return lightMap.getSunlight(pos.x(), pos.y(), pos.z());
     }
 }
