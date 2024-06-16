@@ -9,13 +9,13 @@ precision mediump float;
 #define HIGH
 #endif
 
-attribute MED vec4 a_position;
-attribute MED vec4 a_diffuseColor;
-attribute MED vec2 a_texCoord0;
-attribute MED vec2 a_texCoord1;
+in MED vec4 a_position;
+in MED vec4 a_diffuseColor;
+in MED vec2 a_texCoord0;
+in MED vec2 a_texCoord1;
 uniform mat4 u_projTrans;
-varying MED vec4 v_color;
-varying MED vec2 v_texCoords;
+out MED vec4 v_color;
+out MED vec2 v_texCoords;
 
 void main()
 {

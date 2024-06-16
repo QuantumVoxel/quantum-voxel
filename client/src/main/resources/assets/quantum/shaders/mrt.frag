@@ -21,6 +21,9 @@ layout(location = 0) out vec4 diffuseOut;
 layout(location = 1) out vec3 normalOut;
 layout(location = 2) out vec3 positionOut;
 
+out vec4 fragColor;
+in vec3 fragCoord;
+
 void main() {
     #ifdef texturedFlag
     vec4 diffuse = texture(u_diffuseTexture, v_texCoords);

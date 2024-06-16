@@ -2,12 +2,12 @@ package dev.ultreon.mixinprovider.mixin;
 
 import com.badlogic.gdx.graphics.GL32;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
+import de.damios.guacamole.gdx.graphics.ShaderCompatibilityHelper;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.mixinprovider.ShaderProgramAccess;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.lwjgl.opengl.GL20;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -16,17 +16,54 @@ import static com.badlogic.gdx.Gdx.gl;
 
 @Mixin(ShaderProgram.class)
 public abstract class ShaderProgramMixin implements ShaderProgramAccess {
-    @Shadow @Final private String fragmentShaderSource;
     @Unique
     private final ThreadLocal<Boolean> quantum$isGeom = new ThreadLocal<>();
 
     @Unique
     private int quantum$geometryHandle;
 
+    protected ShaderProgramMixin(String fragmentShaderSource) {
+    }
+
     @Shadow protected abstract int loadShader(int type, String source);
+
+    @Final
+    @Shadow @Mutable
+    private String vertexShaderSource;
+    @Final
+    @Shadow @Mutable
+    private String fragmentShaderSource;
+
+    @Redirect(method = "compileShaders", at = @At(value = "INVOKE", target = "Lcom/badlogic/gdx/graphics/glutils/ShaderProgram;loadShader(ILjava/lang/String;)I", ordinal = 0))
+    public int quantum$shaderInjectFixMacOS(ShaderProgram instance, int type, String source) {
+        if (SharedLibraryLoader.isMac && !(vertexShaderSource.startsWith("#version ") || fragmentShaderSource.startsWith("#version "))) {
+            vertexShaderSource = vertexShaderSource.replace("attribute", "in")
+                    .replace("varying", "out");
+            fragmentShaderSource = fragmentShaderSource.replace("varying", "in");
+
+            if (fragmentShaderSource.contains("gl_FragColor")) {
+                fragmentShaderSource = fragmentShaderSource.replace("void main()", "out vec4 fragColor; \nvoid main()");
+                fragmentShaderSource = fragmentShaderSource.replace("gl_FragColor", "fragColor");
+            }
+            fragmentShaderSource = fragmentShaderSource.replace("texture2D(", "texture(");
+            fragmentShaderSource = fragmentShaderSource.replace("textureCube(", "texture(");
+            vertexShaderSource = "#version 150\n" + vertexShaderSource;
+            fragmentShaderSource = "#version 150\n" + fragmentShaderSource;
+
+            System.err.println("\n// __VERT__");
+            System.err.println(vertexShaderSource);
+            System.err.println("\n// __FRAG__");
+            System.err.println(fragmentShaderSource);
+        }
+
+        source = vertexShaderSource;
+        return loadShader(type, source);
+    }
 
     @Redirect(method = "compileShaders", at = @At(value = "INVOKE", target = "Lcom/badlogic/gdx/graphics/glutils/ShaderProgram;loadShader(ILjava/lang/String;)I", ordinal = 1))
     public int quantum$shaderInjectGeomLoad(ShaderProgram instance, int type, String source) {
+        source = fragmentShaderSource;
+
         if ((Object)this instanceof GeomShaderProgram) {
             int i = loadShader(type, source);
             String quantum$geometryShader = source.split("\0")[1];

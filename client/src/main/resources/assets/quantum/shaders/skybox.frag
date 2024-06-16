@@ -4,7 +4,7 @@ precision mediump float;
 
 uniform float iTime; // 0 is sunrise 12000 is sunset, 6000 is noon, 18000 is midnight. Wraps around at 24000.
 
-varying vec3 v_position;
+in vec3 v_position;
 
 uniform vec4 u_topColor; // = vec3(0.5, 0.64, 0.985);
 uniform vec4 u_midColor; // = vec3(0.75, 0.825, 0.945);
@@ -12,6 +12,9 @@ uniform vec4 u_bottomColor; // = vec3(0.75, 0.825, 0.945);
 
 uniform vec4 u_posZColor;
 uniform vec4 u_negZColor;
+
+out vec4 fragColor;
+in vec3 fragCoord;
 
 void main() {
     // Normalize the position to getConfig values between 0 and 1
@@ -31,5 +34,5 @@ void main() {
     gradient = mix(gradient, u_negZColor.rgb, clamp((normalizedPosition.z + 0.25), 0.0, 1.0) * u_negZColor.a);
 
     // Output the color
-    gl_FragColor = vec4(gradient, 1.0);
+    fragColor = vec4(gradient, 1.0);
 }

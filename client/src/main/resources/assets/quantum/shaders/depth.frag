@@ -1,12 +1,15 @@
 #if defined(diffuseTextureFlag) && defined(blendedFlag)
 #define blendedTextureFlag
-varying vec2 v_texCoords0;
+in vec2 v_texCoords0;
 uniform sampler2D u_diffuseTexture;
 uniform float u_alphaTest;
 #endif
 
+out vec4 fragColor;
+in vec3 fragCoord;
+
 void main() {
-    float depth = gl_FragCoord.z / gl_FragCoord.w;
+    float depth = fragCoord.z / fragCoord.w;
 
     vec3 depthIn3Channels;
     depthIn3Channels.r = mod(depth, 1.0);
@@ -19,5 +22,5 @@ void main() {
 
     depthIn3Channels.b = depth;
 
-    gl_FragColor = vec4(depthIn3Channels, 1.0);
+    fragColor = vec4(depthIn3Channels, 1.0);
 }

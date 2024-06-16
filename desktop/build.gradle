@@ -89,6 +89,8 @@ dependencies {
     implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
     implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion")
 
+    implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
+
     // Apache Log4J
     runtimeOnly api("org.apache.logging.log4j:log4j:$log4j_version")
     runtimeOnly api("org.apache.logging.log4j:log4j-core:$log4j_version")

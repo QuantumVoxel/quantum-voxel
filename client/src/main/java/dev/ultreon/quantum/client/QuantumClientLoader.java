@@ -236,7 +236,7 @@ class QuantumClientLoader implements Runnable {
         ClientLifecycleEvents.CLIENT_STARTED.factory().onGameLoaded(client);
 
         ClientParticleRegistry.registerAll();
-        ClientParticleRegistry.loadAll(client.batches);
+//        ClientParticleRegistry.loadAll(client.batches);
 
         client.loading = false;
 

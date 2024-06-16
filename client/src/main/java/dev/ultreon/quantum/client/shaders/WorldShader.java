@@ -110,7 +110,7 @@ public class WorldShader extends DefaultShader {
     public static String createPrefix(final Renderable renderable, final GeomShaderConfig config) {
         final Attributes attributes = WorldShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
-        prefix.append("#version 330\n");
+        prefix.append("#version 410\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (WorldShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");

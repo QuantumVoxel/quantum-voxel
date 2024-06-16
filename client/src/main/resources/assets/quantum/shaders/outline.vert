@@ -1,4 +1,4 @@
-attribute vec4 a_position;
+in vec4 a_position;
 
 uniform mat4 u_projViewTrans;
 uniform mat4 u_worldTrans;

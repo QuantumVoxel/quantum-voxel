@@ -172,9 +172,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final RenderPipeline pipeline;
     public final Renderer renderer;
     public final IClipboard clipboard = getClipboard();
-    public Array<ParticleBatch<?>> batches = new Array<ParticleBatch<?>>(new ParticleBatch[]{
-            new BillboardParticleBatch(ParticleShader.AlignMode.Screen, true, 5000)
-    });
+//    public Array<ParticleBatch<?>> batches = new Array<ParticleBatch<?>>(new ParticleBatch[]{
+//            new BillboardParticleBatch(ParticleShader.AlignMode.Screen, true, 5000)
+//    });
     private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
     public VideoPlayer backgroundVideo = VideoPlayerCreator.createVideoPlayer();
     public TouchPoint motionPointer = null;

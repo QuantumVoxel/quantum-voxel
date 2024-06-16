@@ -20,6 +20,15 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
     implementation("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
 
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
+    implementation("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
+    implementation("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
+    implementation("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
+    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
+    implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
+    implementation("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion")
+
+    implementation("com.github.crykn.guacamole:gdx:v0.3.5")
     implementation("net.fabricmc:sponge-mixin:${project.mixin_version}") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'

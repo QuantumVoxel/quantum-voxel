@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.shaders;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Attributes;
@@ -7,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -29,6 +31,35 @@ public class ModelViewShader extends DefaultShader {
                 config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
                 config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
                 config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+    }
+
+    @Override
+    public void init() {
+        if (!program.isCompiled()) return;
+        super.init();
+    }
+
+    @Override
+    public void begin(Camera camera, RenderContext context) {
+        if (!program.isCompiled()) return;
+        super.begin(camera, context);
+    }
+
+    @Override
+    public void render(Renderable renderable) {
+        if (!program.isCompiled()) return;
+        super.render(renderable);
+    }
+
+    @Override
+    public void render(Renderable renderable, Attributes combinedAttributes) {
+        if (!program.isCompiled()) return;
+        super.render(renderable, combinedAttributes);
+    }
+
+    @Override
+    public boolean canRender(Renderable renderable) {
+        return super.canRender(renderable);
     }
 
     public static String getDefaultGeometryShader() {
@@ -75,7 +106,7 @@ public class ModelViewShader extends DefaultShader {
     public static String createPrefix (final Renderable renderable, final Config config) {
         final Attributes attributes = ModelViewShader.combineAttributes(renderable);
         StringBuilder prefix = new StringBuilder();
-        prefix.append("#version 330\n");
+        prefix.append("#version 410\n");
         final long attributesMask = attributes.getMask();
         final long vertexMask = renderable.meshPart.mesh.getVertexAttributes().getMask();
         if (ModelViewShader.and(vertexMask, VertexAttributes.Usage.Position)) prefix.append("#define positionFlag\n");

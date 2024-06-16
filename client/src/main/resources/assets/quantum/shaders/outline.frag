@@ -10,8 +10,11 @@ uniform sampler2D u_texture;
 
 const float OUTLINE_WIDTH = 0.1;
 
+out vec4 fragColor;
+in vec3 fragCoord;
+
 void main() {
-    vec2 uv = gl_FragCoord.xy / textureSize(u_texture, 0).xy;
+    vec2 uv = fragCoord.xy / textureSize(u_texture, 0).xy;
     float dist = distance(uv, vec2(0.5));
     float alpha = smoothstep(0.5 - OUTLINE_WIDTH, 0.5 + OUTLINE_WIDTH, dist);
     fragColor = vec4(0.0, 0.0, 0.0, alpha);

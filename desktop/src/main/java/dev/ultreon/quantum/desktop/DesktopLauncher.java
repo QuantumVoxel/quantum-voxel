@@ -94,6 +94,8 @@ public class DesktopLauncher {
 
         QuantumClient.logDebug();
 
+        GamePlatform.get().setupMacOSX();
+
         if (GamePlatform.get().isMacOSX()) {
             GamePlatform.get().setupMacOSX();
         }
@@ -122,7 +124,7 @@ public class DesktopLauncher {
         config.setIdleFPS(10);
         config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
         config.setHdpiMode(HdpiMode.Pixels);
-        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
+        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);
         config.setInitialVisible(false);
         config.setTitle("Quantum");
         config.setWindowIcon(QuantumClient.getIcons());

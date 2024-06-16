@@ -14,18 +14,18 @@ precision mediump float;
 #define cameraPositionFlag
 #endif
 
-attribute vec3 a_position;
+in vec3 a_position;
 uniform mat4 u_projViewTrans;
 
 #if defined(colorFlag)
-attribute vec4 a_color;
+in vec4 a_color;
 #endif // colorFlag
 
-attribute vec3 a_normal;
+in vec3 a_normal;
 uniform mat3 u_normalMatrix;
 
 #ifdef textureFlag
-attribute vec2 a_texCoord0;
+in vec2 a_texCoord0;
 #endif // textureFlag
 
 #ifdef diffuseTextureFlag
@@ -42,56 +42,56 @@ uniform vec4 u_specularUVTransform;
 
 #ifdef boneWeight0Flag
 #define boneWeightsFlag
-attribute vec2 a_boneWeight0;
+in vec2 a_boneWeight0;
 #endif //boneWeight0Flag
 
 #ifdef boneWeight1Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight1;
+in vec2 a_boneWeight1;
 #endif //boneWeight1Flag
 
 #ifdef boneWeight2Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight2;
+in vec2 a_boneWeight2;
 #endif //boneWeight2Flag
 
 #ifdef boneWeight3Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight3;
+in vec2 a_boneWeight3;
 #endif //boneWeight3Flag
 
 #ifdef boneWeight4Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight4;
+in vec2 a_boneWeight4;
 #endif //boneWeight4Flag
 
 #ifdef boneWeight5Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight5;
+in vec2 a_boneWeight5;
 #endif //boneWeight5Flag
 
 #ifdef boneWeight6Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight6;
+in vec2 a_boneWeight6;
 #endif //boneWeight6Flag
 
 #ifdef boneWeight7Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-attribute vec2 a_boneWeight7;
+in vec2 a_boneWeight7;
 #endif //boneWeight7Flag
 
 #if defined(numBones) && defined(boneWeightsFlag)
@@ -123,7 +123,7 @@ uniform float u_alphaTest;
 #endif // blendedFlag
 
 #ifdef lightingFlag
-varying vec3 v_lightDiffuse;
+out vec3 v_lightDiffuse;
 
 #ifdef ambientLightFlag
 uniform vec3 u_ambientLight;
@@ -138,17 +138,12 @@ uniform vec3 u_sphericalHarmonics[9];
 #endif //sphericalHarmonicsFlag
 
 #ifdef specularFlag
-varying vec3 v_lightSpecular;
+out vec3 v_lightSpecular;
 #endif // specularFlag
 
 #ifdef cameraPositionFlag
 uniform vec4 u_cameraPosition;
 #endif // cameraPositionFlag
-
-#ifdef fogFlag
-varying float v_fog;
-#endif // fogFlag
-
 
 #if defined(numDirectionalLights) && (numDirectionalLights > 0)
 struct DirectionalLight
@@ -174,12 +169,12 @@ uniform PointLight u_pointLights[numPointLights];
 
 #ifdef shadowMapFlag
 uniform mat4 u_shadowMapProjViewTrans;
-varying vec3 v_shadowMapUv;
+out vec3 v_shadowMapUv;
 #define separateAmbientFlag
 #endif //shadowMapFlag
 
 #if defined(ambientFlag) && defined(separateAmbientFlag)
-varying vec3 v_ambientLight;
+out vec3 v_ambientLight;
 #endif //separateAmbientFlag
 
 #endif // lightingFlag
@@ -188,23 +183,17 @@ out VS_OUT {
 	vec3 normal;
 	vec2 diffuseUV;
 	vec2 emissiveUV;
-	vec2 specularUV;
 	vec4 color;
-	float opacity;
-	float alphaTest;
 	vec3 position;
-	vec2 rawUV;
+	float fog;
 } gs_out;
 
 void main() {
 	vec2 v_diffuseUV;
 	vec2 v_emissiveUV;
-	vec2 v_specularUV;
 	vec4 v_color;
-	float v_opacity;
-	float v_alphaTest;
 	vec3 v_position;
-	vec2 v_rawUV;
+	float v_fog;
 
 	#ifdef diffuseTextureFlag
 		v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
@@ -220,7 +209,6 @@ void main() {
 	#endif // colorFlag
 
 	#ifdef blendedFlag
-		v_opacity = u_opacity;
 		#ifdef alphaTestFlag
 			v_alphaTest = u_alphaTest;
 		#endif //alphaTestFlag
@@ -240,13 +228,10 @@ void main() {
 
 	gs_out.diffuseUV = v_diffuseUV;
 	gs_out.emissiveUV = v_emissiveUV;
-	gs_out.specularUV = v_specularUV;
 	gs_out.color = v_color;
-	gs_out.opacity = v_opacity;
-	gs_out.alphaTest = v_alphaTest;
-	gs_out.position = v_position;
-	gs_out.rawUV = v_rawUV;
+    gs_out.position = v_position;
 	gs_out.normal = a_normal;
+	gs_out.fog = v_fog;
 
 	gl_Position = u_projViewTrans * pos;
 }

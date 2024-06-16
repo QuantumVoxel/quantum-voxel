@@ -10,9 +10,9 @@ precision mediump float;
 #endif
 
 #if __VERSION__ < 130
-#define TEXTURE2D texture2D
+#define texture texture
 #else
-#define TEXTURE2D texture
+#define texture texture
 #endif
 
 #if defined(specularTextureFlag) || defined(specularColorFlag)
@@ -96,7 +96,7 @@ in vec3 v_shadowMapUv;
 float getShadowness(vec2 offset)
 {
     const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0);
-    return step(v_shadowMapUv.z, dot(TEXTURE2D(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));
+    return step(v_shadowMapUv.z, dot(texture(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));
 }
 
 float getShadow()
@@ -196,6 +196,9 @@ vec3 gamma(vec3 color){
     return pow(color, vec3(1.0/2.0));
 }
 
+out vec4 fragColor;
+in vec3 fragCoord;
+
 void main() {
     #if defined(diffuseTextureFlag)
     vec2 v_diffuseTexUV = diffuseUV;
@@ -206,9 +209,9 @@ void main() {
     #endif
 
     #if defined(diffuseTextureFlag) && defined(colorFlag)
-    vec4 diffuse = TEXTURE2D(u_diffuseTexture, v_diffuseTexUV) * v_color;
+    vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV) * v_color;
     #elif defined(diffuseTextureFlag)
-    vec4 diffuse = TEXTURE2D(u_diffuseTexture, v_diffuseTexUV);
+    vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
     #elif defined(diffuseColorFlag) && defined(colorFlag)
     vec4 diffuse = u_diffuseColor * v_color;
     #elif defined(diffuseColorFlag)
@@ -220,29 +223,29 @@ void main() {
     #endif
 
     #if defined(emissiveTextureFlag)
-    vec4 emissive = TEXTURE2D(u_emissiveTexture, v_emissiveTexUV);
+    vec4 emissive = texture(u_emissiveTexture, v_emissiveTexUV);
     #else
     vec4 emissive = vec4(0.0);
     #endif
 
-    gl_FragColor.rgb = (diffuse.rgb) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
+    fragColor.rgb = (diffuse.rgb) * u_globalSunlight + (emissive.rgb * (1.0 - u_globalSunlight));
 
     #ifdef blendedFlag
-    gl_FragColor.a = diffuse.a * v_opacity;
+    fragColor.a = diffuse.a * v_opacity;
     #ifdef alphaTestFlag
-    if (gl_FragColor.a <= v_alphaTest)
+    if (fragColor.a <= v_alphaTest)
     discard;
     #endif
     #else
-    gl_FragColor.a = 1.0;
+    fragColor.a = 1.0;
     if (diffuse.a <= 0.02) discard;
     #endif
 
     #ifdef normalFlag
-    gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(normal, groove)).r, gl_FragColor.w);
+    fragColor = vec4(fragColor.xyz*gamma(sh_light(normal, groove)).r, fragColor.w);
     #endif
 
     #ifdef fogFlag
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);
+    fragColor.rgb = mix(fragColor.rgb, vec3(u_fogColor), v_fog);
     #endif // end fogFlag
 }
