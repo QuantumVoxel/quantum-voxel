@@ -1871,7 +1871,6 @@ public class Renderer implements Disposable {
     @CanIgnoreReturnValue
     public Renderer flush() {
         this.batch.flush();
-        Gdx.gl.glFlush();
         return this;
     }
 
