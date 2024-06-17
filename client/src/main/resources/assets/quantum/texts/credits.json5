@@ -39,6 +39,15 @@
         "Leaves texture"
       ]
     },
+    hellay: {
+      url: null,
+      roles: [
+        "Artist",
+      ],
+      for: [
+        "Title button icons"
+      ]
+    },
     ItsBeck: {
       url: null,
       roles: [

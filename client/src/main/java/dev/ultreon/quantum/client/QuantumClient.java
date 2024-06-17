@@ -1245,7 +1245,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         renderer.begin();
-        renderer.fill(this.gameBounds.getX(), this.gameBounds.getY(), this.gameBounds.getWidth(), this.gameBounds.getHeight(), RgbColor.BLACK);
+        GridPoint2 drawOffset = this.getDrawOffset();
+        renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, RgbColor.BLACK);
         renderer.end();
 
         GameInput input = this.input;

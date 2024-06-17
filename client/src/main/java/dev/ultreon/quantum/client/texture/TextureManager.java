@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
-import com.badlogic.gdx.graphics.g2d.PixmapPackerIO;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
@@ -21,7 +20,6 @@ import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -30,17 +28,18 @@ public class TextureManager implements Disposable {
 
     private final ResourceManager resourceManager;
 
+    public static final Pixmap MISSING_NO = TextureManager.createMissingNo();
     @SuppressWarnings("GDXJavaStaticResource")
-    public static final Texture DEFAULT_TEX = new Texture(TextureManager.createMissingNo());
-    public static final TextureRegion DEFAULT_TEX_REG = new TextureRegion(TextureManager.DEFAULT_TEX, 0.0F, 0.0F, 1.0F, 1.0F);
+    private static Texture defaultTex = new Texture(MISSING_NO);
+    public static final TextureRegion DEFAULT_TEX_REG = new TextureRegion(TextureManager.getDefaultTex(), 0.0F, 0.0F, 1.0F, 1.0F);
     @Deprecated
     public static final TextureRegion DEFAULT_TEXTURE_REG = TextureManager.DEFAULT_TEX_REG;
 
     private TextureAtlas guiAtlas;
 
     static {
-        TextureManager.DEFAULT_TEX.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        TextureManager.DEFAULT_TEX.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        TextureManager.getDefaultTex().setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
+        TextureManager.getDefaultTex().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
     private boolean frozen = false;
@@ -51,6 +50,10 @@ public class TextureManager implements Disposable {
         this.resourceManager = resourceManager;
 
         this.setupGuiAtlas();
+    }
+
+    public static Texture getDefaultTex() {
+        return defaultTex;
     }
 
     private void setupGuiAtlas() {
@@ -105,7 +108,7 @@ public class TextureManager implements Disposable {
 
     @NotNull
     public Texture getTexture(Identifier id) {
-        return this.getTexture(id, TextureManager.DEFAULT_TEX);
+        return this.getTexture(id, TextureManager.getDefaultTex());
     }
 
     public boolean isTextureLoaded(Identifier id) {
@@ -120,7 +123,7 @@ public class TextureManager implements Disposable {
     @NewInstance
     @CanIgnoreReturnValue
     public Texture registerTexture(Identifier id) {
-        if (this.frozen) return TextureManager.DEFAULT_TEX;
+        if (this.frozen) return TextureManager.getDefaultTex();
 
         Preconditions.checkNotNull(id, "id");
         Texture oldTexture = this.textures.get(id);
@@ -129,8 +132,8 @@ public class TextureManager implements Disposable {
         FileHandle handle = QuantumClient.resource(id);
         if (!handle.exists()) {
             QuantumClient.LOGGER.warn("Texture not found: " + id);
-            this.textures.put(id, TextureManager.DEFAULT_TEX);
-            return TextureManager.DEFAULT_TEX;
+            this.textures.put(id, TextureManager.getDefaultTex());
+            return TextureManager.getDefaultTex();
         }
 
         Pixmap pixmap = new Pixmap(handle);
@@ -138,8 +141,8 @@ public class TextureManager implements Disposable {
         Texture texture = new Texture(pixmap);
         if (texture.getTextureData() == null) {
             QuantumClient.LOGGER.warn("Couldn't read texture data: " + id);
-            this.textures.put(id, TextureManager.DEFAULT_TEX);
-            return TextureManager.DEFAULT_TEX;
+            this.textures.put(id, TextureManager.getDefaultTex());
+            return TextureManager.getDefaultTex();
         }
 
         this.textures.put(id, texture);
@@ -180,13 +183,13 @@ public class TextureManager implements Disposable {
 
     @CanIgnoreReturnValue
     public Texture registerTexture(@NotNull Identifier id, @NotNull Texture texture) {
-        if (this.frozen) return TextureManager.DEFAULT_TEX;
+        if (this.frozen) return TextureManager.getDefaultTex();
 
         Preconditions.checkNotNull(id, "id");
         Preconditions.checkNotNull(texture, "texture");
 
         if (this.textures.containsKey(id)) throw new IllegalArgumentException("A texture is already registered with id: " + id);
-        if (texture.getTextureData() == null) return TextureManager.DEFAULT_TEX;
+        if (texture.getTextureData() == null) return TextureManager.getDefaultTex();
 
         this.textures.put(id, texture);
         return texture;
@@ -200,7 +203,7 @@ public class TextureManager implements Disposable {
     public void dispose() {
         this.frozen = true;
         for (Texture texture : this.textures.values()) {
-            if (texture != null) texture.dispose();
+            if (texture != null && texture != getDefaultTex()) texture.dispose();
         }
     }
 
@@ -209,8 +212,9 @@ public class TextureManager implements Disposable {
         context.submit(() -> {
             Iterable<Texture> textures = this.textures.values().stream().filter(Objects::nonNull).toList();
             this.textures.clear();
+            defaultTex = new Texture(MISSING_NO);
             for (Texture texture : textures) {
-                if (texture == null) continue;
+                if (texture == null || texture == getDefaultTex()) continue;
                 texture.dispose();
             }
             this.frozen = false;

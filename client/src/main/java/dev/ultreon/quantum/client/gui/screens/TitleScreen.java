@@ -120,8 +120,6 @@ public class TitleScreen extends Screen {
             float drawY = (this.size.height - drawHeight) / 2;
 
             renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
-        } else {
-            ScreenUtils.clear(Color.CLEAR, true);
         }
     }
 

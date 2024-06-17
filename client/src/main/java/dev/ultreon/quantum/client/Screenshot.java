@@ -6,6 +6,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -116,26 +117,30 @@ public class Screenshot {
      * @return A Screenshot object representing the captured image
      */
     public static Screenshot grab(int width, int height) {
+        GridPoint2 drawOffset = QuantumClient.get().getDrawOffset();
+        width -= drawOffset.x * 2;
+        height -= drawOffset.y * 2;
+
         // Set the pixel store alignment
         Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
 
         // Calculate the length of the pixel data
-        int dataLen = width * height * 3;
+        int dataLen = width * height * 4;
         final ByteBuffer pixels = BufferUtils.newByteBuffer(dataLen);
 
         // Read the pixel data from the frame buffer
-        Gdx.gl.glReadPixels(0, 0, width, height, GL20.GL_RGB, GL20.GL_UNSIGNED_BYTE, pixels);
+        Gdx.gl.glReadPixels(drawOffset.x, drawOffset.y, width, height, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
 
         // Rearrange the pixel data to match the image format
         byte[] lines = new byte[dataLen];
-        final int numBytesPerLine = width * 3;
+        final int numBytesPerLine = width * 4;
         for (int i = 0; i < height; i++) {
             ((Buffer) pixels).position((height - i - 1) * numBytesPerLine);
             pixels.get(lines, i * numBytesPerLine, numBytesPerLine);
         }
 
         // Create a Pixmap and copy the pixel data to it
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGB888);
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
         BufferUtils.copy(lines, 0, pixmap.getPixels(), lines.length);
 
         // Return the captured screenshot as a Screenshot object

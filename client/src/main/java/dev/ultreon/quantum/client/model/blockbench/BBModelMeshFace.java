@@ -38,7 +38,7 @@ public final class BBModelMeshFace {
             try {
                 attributes.set(TextureAttribute.createDiffuse(texture2builder.get(texture).loadOrGetTexture()));
             } catch (IOException e) {
-                attributes.set(TextureAttribute.createDiffuse(TextureManager.DEFAULT_TEX));
+                attributes.set(TextureAttribute.createDiffuse(TextureManager.getDefaultTex()));
             }
             return model.part(integer.uuid().toString(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates, attributes);
         });
