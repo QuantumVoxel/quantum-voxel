@@ -1458,19 +1458,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     private void firstRender() {
-        if (SharedLibraryLoader.isWindows) {
-            InputStream resourceAsStream = QuantumClient.class.getResourceAsStream("/assets/quantum/native/acrylic.dll");
-            try {
-                if (!Files.exists(Paths.get(".", "acrylic.dll")))
-                    Files.copy(resourceAsStream, Paths.get(".", "acrylic.dll"));
-                if (System.getProperty("os.name").endsWith(" 11")) {
-                    Acrylic.applyMica(getWindow().getPeer());
-                    this.windowVibrancyEnabled = true;
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Acylic/mica effects not available", e);
-            }
-        }
+//        if (SharedLibraryLoader.isWindows) {
+//            InputStream resourceAsStream = QuantumClient.class.getResourceAsStream("/assets/quantum/native/acrylic.dll");
+//            try {
+//                if (!Files.exists(Paths.get(".", "acrylic.dll")))
+//                    Files.copy(resourceAsStream, Paths.get(".", "acrylic.dll"));
+//                if (System.getProperty("os.name").endsWith(" 11")) {
+//                    Acrylic.applyMica(getWindow().getPeer());
+//                    this.windowVibrancyEnabled = true;
+//                }
+//            } catch (Exception e) {
+//                LOGGER.warn("Acylic/mica effects not available", e);
+//            }
+//        }
 
         GamePlatform.get().setVisible(true);
     }

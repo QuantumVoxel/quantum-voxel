@@ -1,3 +1,5 @@
+#version 140
+
 #ifdef GL_ES
 #define LOWP lowp
 #define MED mediump
