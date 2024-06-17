@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.GL20;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
@@ -112,10 +113,10 @@ public abstract class Screen extends UIContainer<Screen> {
         this.setSize(width, height);
         GuiBuilder builder = new GuiBuilder(this);
         if (this.title != null || parentScreen != null) {
-            TitleWidget titleWidget = builder.title(TextObject.nullToEmpty(this.title));
-            if (parentScreen != null) titleWidget.parent(parentScreen);
-
-            this.size.height -= titleWidget.getHeight();
+//            TitleWidget titleWidget = builder.title(TextObject.nullToEmpty(this.title));
+//            if (parentScreen != null) titleWidget.parent(parentScreen);
+//
+//            this.size.height -= titleWidget.getHeight();
         }
         this.build(builder);
         this.revalidate();
@@ -157,9 +158,12 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clearColor(0, 0, 0, 0);
             renderer.clear();
         } else {
+            renderer.clearColor(0, 0, 0, 1);
+            renderer.clear();
             int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
             renderer.fill(0, -extraHeight, this.size.width, this.size.height + extraHeight, RgbColor.BLACK);
             renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, -extraHeight, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
+            renderer.flush();
         }
     }
 

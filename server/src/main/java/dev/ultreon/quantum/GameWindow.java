@@ -14,12 +14,21 @@ import java.awt.*;
 public abstract class GameWindow {
     private final long handle;
     private boolean resizable;
+    protected boolean dragging;
+    protected int dragX;
+    protected int dragY;
+    public int dragOffX;
+    public int dragOffY;
 
     /**
      * Initializes the game window by getting the window handle from LibGDX.
      */
     public GameWindow() {
         this.handle = 0;
+    }
+
+    public void update() {
+
     }
 
     /**
@@ -93,5 +102,19 @@ public abstract class GameWindow {
 
     public long getPeer() {
         return -1L;
+    }
+
+    public abstract String getTitle();
+
+    public boolean isDragging() {
+        return dragging;
+    }
+
+    public void setDragging(boolean dragging) {
+        if (dragging != this.dragging) {
+            this.dragging = dragging;
+            this.dragX = Gdx.input.getX();
+            this.dragY = Gdx.input.getY();
+        }
     }
 }

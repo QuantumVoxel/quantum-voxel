@@ -11,9 +11,33 @@ import java.awt.*;
 
 public class DesktopWindow extends GameWindow {
     private final Lwjgl3Window window;
+    private String title;
+    private final int[] xPos = new int[1];
+    private final int[] yPos = new int[1];
 
     public DesktopWindow(Lwjgl3Window window) {
         this.window = window;
+    }
+
+    @Override
+    public void update() {
+        super.update();
+
+        if (isDragging()) {
+            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
+            int x = dragX;
+            int y = dragY;
+
+            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+            Point location = pointerInfo.getLocation();
+            int nx = location.x;
+            int ny = location.y;
+
+            int i = nx - x;
+            int i1 = ny - y;
+
+            GLFW.glfwSetWindowPos(getHandle(), i + x - dragOffX, i1 + y - dragOffY);
+        }
     }
 
     @Override
@@ -25,8 +49,9 @@ public class DesktopWindow extends GameWindow {
     public boolean isHovered() {
         PointerInfo pointerInfo = MouseInfo.getPointerInfo();
         Point location = pointerInfo.getLocation();
-        int x = location.x;
-        int y = location.y;
+        GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
+        int x = location.x - xPos[0];
+        int y = location.y - yPos[0];
 
         return x >= 0 && x < Gdx.graphics.getWidth() && y >= 0 && y < Gdx.graphics.getHeight();
     }
@@ -63,6 +88,8 @@ public class DesktopWindow extends GameWindow {
 
     @Override
     public void restore() {
+        GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
+        GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_ICONIFIED, GLFW.GLFW_FALSE);
         GLFW.glfwRestoreWindow(getHandle());
     }
 
@@ -87,6 +114,33 @@ public class DesktopWindow extends GameWindow {
             return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
         } else {
             return -1L;
+        }
+    }
+
+    @Override
+    public void setTitle(String title) {
+        Gdx.graphics.setTitle(title);
+        this.title = title;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public void setDragging(boolean dragging) {
+        if (dragging != this.dragging) {
+            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
+            this.dragging = dragging;
+            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+            Point location = pointerInfo.getLocation();
+            int nx = location.x;
+            int ny = location.y;
+            this.dragX = nx;
+            this.dragY = ny;
+            this.dragOffX = nx - xPos[0];
+            this.dragOffY = ny - yPos[0];
         }
     }
 }

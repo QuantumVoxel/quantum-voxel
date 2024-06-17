@@ -17,9 +17,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
-import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
-import com.badlogic.gdx.graphics.g3d.particles.batches.ParticleBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -77,8 +74,6 @@ import dev.ultreon.quantum.client.render.MeshManager;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.pipeline.*;
-import dev.ultreon.quantum.client.render.shader.GameShaderProvider;
-import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
@@ -121,6 +116,7 @@ import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
+import kotlin.OptIn;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -183,6 +179,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
     private boolean windowVibrancyEnabled = false;
+    private Cursor cursor0;
+    private Bounds gameBounds = new Bounds();
+    private long lastPress;
 
     private IClipboard getClipboard() {
         if (GamePlatform.get().isMacOSX()) {
@@ -475,7 +474,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Initialize DepthShader configuration
         DepthShader.Config shaderConfig = new DepthShader.Config();
         shaderConfig.defaultCullFace = GL_BACK;
-        shaderConfig.defaultDepthFunc = GL_DEPTH_FUNC;
+        shaderConfig.defaultDepthFunc = GL_LEQUAL;
 
         // Initialize ModelBatch with GameShaderProvider
         this.modelBatch = deferDispose(new ModelBatch(new WorldShaderProvider(
@@ -504,9 +503,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Set current language
         LanguageManager.setCurrentLanguage(new Locale("en", "us"));
-
-        // Set normal cursor
-        Gdx.graphics.setCursor(this.normalCursor);
 
         // Start memory monitor
         HardwareMonitor.start();
@@ -669,7 +665,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param argv the arguments to pass to the game
      */
     @SuppressWarnings("unused")
-    @kotlin.OptIn(markerClass = InternalApi.class)
+    @OptIn(markerClass = InternalApi.class)
     private static void launch(String[] argv) {
     }
 
@@ -1136,10 +1132,25 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.renderer.end();
         }
 
-        if (this.isCustomBorderShown()) this.drawCustomBorder(renderer);
+        if (this.isCustomBorderShown() && !loading) this.drawCustomBorder(renderer);
 
         if (this.imGui) {
             GamePlatform.get().renderImGui();
+        }
+
+        if (this.window.isDragging()) {
+            Texture texture = null;
+            if (this.cursor0 == clickCursor) {
+                texture = textureManager.getTexture(id("textures/cursors/click.png"));
+            }
+            if (this.cursor0 == normalCursor) {
+                texture = textureManager.getTexture(id("textures/cursors/normal.png"));
+            }
+            if (texture != null) {
+                this.spriteBatch.begin();
+                this.spriteBatch.draw(texture, window.dragOffX, window.dragOffY - texture.getHeight() + getDrawOffset().y * 1.5f, texture.getWidth(), -texture.getHeight());
+                this.spriteBatch.end();
+            }
         }
     }
 
@@ -1166,7 +1177,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.renderer.begin();
         renderer.pushMatrix();
         renderer.scale(2, 2);
-        this.renderWindow(renderer, this.getWidth() / 2, this.getHeight() / 2);
+        this.renderWindow(renderer, this.getWidth() / 2 + 36, this.getHeight() / 2 + 44);
         renderer.popMatrix();
         this.renderer.end();
     }
@@ -1184,7 +1195,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private boolean renderGame(Renderer renderer, float deltaTime) {
         if (Gdx.graphics.getFrameId() == 2) {
             this.firstRender();
-            Gdx.graphics.setTitle(String.format("Quantum Voxel %s", QuantumClient.getGameVersion()));
+            this.window.setTitle(String.format("Quantum Voxel %s", QuantumClient.getGameVersion()));
         }
 
         this.updateActivity();
@@ -1214,7 +1225,14 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return true;
         }
 
-        this.renderMain(renderer, deltaTime);
+        ScreenUtils.clear(0, 0, 0, 0, true);
+
+        this.gameBounds.setPos(0, 0);
+        this.gameBounds.setSize(getScaledWidth() + getDrawOffset().x, getScaledHeight() + getDrawOffset().y);
+        if (renderer.pushScissors(this.gameBounds)) {
+            this.renderMain(renderer, deltaTime);
+            renderer.popScissors();
+        }
         return false;
     }
 
@@ -1225,6 +1243,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         } else {
             QuantumClient.PROFILER.section("playerRayCast", () -> this.hitResult = player.rayCast());
         }
+
+        renderer.begin();
+        renderer.fill(this.gameBounds.getX(), this.gameBounds.getY(), this.gameBounds.getWidth(), this.gameBounds.getHeight(), RgbColor.BLACK);
+        renderer.end();
+
         GameInput input = this.input;
         if (input != null) {
             QuantumClient.PROFILER.section("input", input::update);
@@ -1232,10 +1255,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         Screen screen = this.screen;
         if (screen != null && DesktopInput.isPressingAnyButton() && !this.wasClicking) {
-            Gdx.graphics.setCursor(this.clickCursor);
+            this.setCursor(this.clickCursor);
             this.wasClicking = true;
         } else if (screen != null && !DesktopInput.isPressingAnyButton() && this.wasClicking) {
-            Gdx.graphics.setCursor(this.normalCursor);
+            this.setCursor(this.normalCursor);
             this.wasClicking = false;
         }
 
@@ -1244,12 +1267,23 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         RenderEvents.POST_RENDER_GAME.factory().onRenderGame(gameRenderer, renderer, deltaTime);
     }
 
+    private void setCursor(Cursor cursor) {
+        this.cursor0 = cursor;
+        if (this.window.isDragging()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        } else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            Gdx.graphics.setCursor(this.cursor0);
+        }
+    }
+
     private void renderLoadingOverlay(Renderer renderer, float deltaTime, LoadingOverlay loading) {
         QuantumClient.PROFILER.section("loading", () -> {
             renderer.begin();
             renderer.pushMatrix();
             renderer.translate(this.getDrawOffset().x, this.getDrawOffset().y);
             renderer.scale(this.getGuiScale(), this.getGuiScale());
+            renderer.clearColor(0, 0, 0, 1);
             loading.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
             renderer.popMatrix();
             renderer.end();
@@ -1396,10 +1430,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.activity != this.oldActivity) {
             this.oldActivity = this.activity;
             if (this.activity == null) {
-                Gdx.graphics.setTitle("Quantum Voxel " + QuantumClient.getGameVersion());
+                this.window.setTitle("Quantum Voxel " + QuantumClient.getGameVersion());
             } else {
                 var name = this.activity.getDisplayName();
-                Gdx.graphics.setTitle("Quantum Voxel " + QuantumClient.getGameVersion() + " - " + name);
+                this.window.setTitle("Quantum Voxel " + QuantumClient.getGameVersion() + " - " + name);
             }
 
             notifications.addOnce(UUID.fromString("35c2d972-6699-4cf6-86d3-1f2daaedfc47"), Notification.builder("Missing Feature", "Game activity updates are not implemented yet!").build());
@@ -1442,7 +1476,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     private void renderWindow(Renderer renderer, int width, int height) {
-        renderer.draw9PatchTexture(this.windowTex, 0, 0, width, height, 0, 0, 18, 22, 256, 256);
+        renderer.draw9PatchTexture(new Identifier("textures/gui/window.png"), 0, 0, width, height, 0, 0, 18, 22, 256, 256);
+        renderer.textCenter("<bold>" + window.getTitle(), width / 2, 5);
+
+        this.window.update();
     }
 
     public static void crash(Throwable throwable) {
@@ -1495,7 +1532,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         try {
             var crashLog = crash.getCrashLog();
             CrashHandler.handleCrash(crashLog);
-            GameLibGDXWrapper.displayCrash(crash);
+            Main.displayCrash(crash);
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
             System.exit(1);
@@ -1826,11 +1863,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public int getScaledWidth() {
-        return ceil(Gdx.graphics.getWidth() / this.getGuiScale());
+        return ceil(Gdx.graphics.getWidth() / this.getGuiScale() - getDrawOffset().x);
     }
 
     public int getScaledHeight() {
-        return ceil(Gdx.graphics.getHeight() / this.getGuiScale());
+        return ceil(Gdx.graphics.getHeight() / this.getGuiScale() - getDrawOffset().y);
     }
 
     public void exitWorldToTitle() {
@@ -2081,7 +2118,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     @ApiStatus.Experimental
     public boolean isCustomBorderShown() {
-        return false;
+        return GamePlatform.get().isDesktop() && !loading;
     }
 
     public boolean isLoading() {
@@ -2365,5 +2402,35 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public boolean isWindowVibrancyEnabled() {
         return windowVibrancyEnabled;
+    }
+
+    public boolean mousePress(int mouseX, int mouseY, int button) {
+        if (mouseY < 44 && button == Input.Buttons.LEFT) {
+            if (this.lastPress - System.currentTimeMillis() + 1000L > 0) {
+                if (SharedLibraryLoader.isMac) {
+                    window.setResizable(true);
+                    window.restore();
+                    window.maximize();
+                } else {
+                    if (window.isMaximized())
+                        window.restore();
+                    else
+                        window.maximize();
+                }
+            } else {
+                this.window.setDragging(true);
+            }
+            this.lastPress = System.currentTimeMillis();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        if (mouseY < 44) {
+            this.window.setDragging(false);
+            return true;
+        }
+        return false;
     }
 }

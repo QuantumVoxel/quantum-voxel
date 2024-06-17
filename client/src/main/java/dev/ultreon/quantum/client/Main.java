@@ -9,19 +9,27 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.profiling.GLErrorListener;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import kotlin.OptIn;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 
 /**
  * LibGDX wrapper for Quantum Voxel to handle uncaught exceptions.
@@ -31,8 +39,8 @@ import java.util.List;
  */
 @ApiStatus.Internal
 @OptIn(markerClass = InternalApi.class)
-public final class GameLibGDXWrapper implements ApplicationListener {
-    private static GameLibGDXWrapper instance;
+public final class Main implements ApplicationListener {
+    private static Main instance;
     private static CrashLog crashOverride;
     private final String[] argv;
     @Nullable
@@ -41,13 +49,15 @@ public final class GameLibGDXWrapper implements ApplicationListener {
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
+    private GLProfiler glProfiler;
+    private final Logger logger = LoggerFactory.getLogger("GAME");
 
     /**
      * Constructs a new GameLibGDXWrapper object.
      *
      * @param argv The command line arguments.
      */
-    private GameLibGDXWrapper(String[] argv) {
+    private Main(String[] argv) {
         this.argv = argv;
 
         if (instance == null) {
@@ -63,9 +73,9 @@ public final class GameLibGDXWrapper implements ApplicationListener {
         CommonConstants.LOGGER.error("\n" + crash);
     }
 
-    public static GameLibGDXWrapper createInstance(String[] argv) {
+    public static Main createInstance(String[] argv) {
         if (instance == null) {
-            instance = new GameLibGDXWrapper(argv);
+            instance = new Main(argv);
         }
         return instance;
     }
@@ -98,6 +108,18 @@ public final class GameLibGDXWrapper implements ApplicationListener {
     @Override
     public void create() {
         if (client != null) return;
+
+        if (GamePlatform.get().isDevEnvironment()) {
+            glProfiler = new GLProfiler(Gdx.graphics);
+            glProfiler.setListener(new GLErrorListener() {
+                @Override
+                public void onError(int error) {
+                    String stackTrace = ExceptionUtils.getStackTrace(new Exception());
+                    Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
+                }
+            });
+            glProfiler.enable();
+        }
 
         try {
             batch = new SpriteBatch();
@@ -255,6 +277,16 @@ public final class GameLibGDXWrapper implements ApplicationListener {
     @Override
     public void dispose() {
         try {
+            if (this.glProfiler != null) {
+                this.glProfiler.disable();
+                logger.info("GL Draw Calls = {}", this.glProfiler.getDrawCalls());
+                logger.info("GL Calls = {}", this.glProfiler.getCalls());
+                logger.info("Shader Switches = {}", this.glProfiler.getShaderSwitches());
+                logger.info("Texture Bindings = {}", this.glProfiler.getTextureBindings());
+                logger.info("Max Vertex Count = {}", this.glProfiler.getVertexCount().max);
+                logger.info("Average Vertex Count = {}", this.glProfiler.getVertexCount().average);
+            }
+
             // Dispose the client if it exists
             if (this.client != null) this.client.dispose();
         } catch (ApplicationCrash e) {
@@ -264,12 +296,7 @@ public final class GameLibGDXWrapper implements ApplicationListener {
         }
     }
 
-    static boolean onWindowClose() {
-        if (instance.crashFrame > 0) {
-            Gdx.app.exit();
-            return false;
-        }
-
-        return false;
+    public static GLProfiler getGlProfiler() {
+        return instance.glProfiler;
     }
 }

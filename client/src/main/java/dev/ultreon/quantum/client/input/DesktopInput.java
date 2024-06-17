@@ -445,7 +445,7 @@ public class DesktopInput extends GameInput {
 
             // Check if mouse press event is canceled or pressed
             boolean canceled = ScreenEvents.MOUSE_PRESS.factory().onMousePressScreen(mouseX, mouseY, button).isCanceled();
-            boolean pressed = currentScreen.mousePress(mouseX, mouseY, button);
+            boolean pressed = client.mousePress(mouseX + client.getDrawOffset().x, mouseY + client.getDrawOffset().y, button) || currentScreen.mousePress(mouseX, mouseY, button);
             return !canceled && pressed;
         }
 
@@ -547,7 +547,7 @@ public class DesktopInput extends GameInput {
         // Handle mouse release event on the current screen
         boolean eventHandled = false;
         if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled())
-            eventHandled |= currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button);
+            eventHandled |= client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button) || currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button);
 
         // Handle mouse click event on the current screen
         if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1).isCanceled())

@@ -20,7 +20,7 @@ import java.io.PrintStream;
 import java.util.function.Supplier;
 
 import static com.badlogic.gdx.Gdx.gl;
-import static com.badlogic.gdx.graphics.GL20.GL_TEXTURE0;
+import static com.badlogic.gdx.graphics.GL20.*;
 
 public class MainRenderNode extends RenderNode {
     private Mesh quad = this.createFullScreenQuad();
@@ -38,6 +38,8 @@ public class MainRenderNode extends RenderNode {
 
         modelBatch.end();
         this.client.renderer.begin();
+        this.client.renderer.getBatch().enableBlending();
+        this.client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
         if (blurScale > 0f) {
             this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
@@ -48,6 +50,7 @@ public class MainRenderNode extends RenderNode {
             this.drawDiffuse(skyboxTexture);
             this.drawDiffuse(diffuseTexture);
         }
+        this.client.renderer.getBatch().disableBlending();
         this.client.renderer.end();
         this.client.spriteBatch.setShader(null);
 

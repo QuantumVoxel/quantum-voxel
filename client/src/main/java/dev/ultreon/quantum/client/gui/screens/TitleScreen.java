@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -104,9 +106,11 @@ public class TitleScreen extends Screen {
 
     @Override
     protected void renderSolidBackground(Renderer renderer) {
-        super.renderSolidBackground(renderer);
+//        super.renderSolidBackground(renderer);
+//
+//        renderer.setBlitColor(RgbColor.WHITE);
 
-        if (!ClientConfig.useFullWindowVibrancy || !client.isWindowVibrancyEnabled()) {
+        if (!(ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled())) {
             Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
             float drawWidth = thumbnail.x;
@@ -114,7 +118,10 @@ public class TitleScreen extends Screen {
 
             float drawX = (this.size.width - drawWidth) / 2;
             float drawY = (this.size.height - drawHeight) / 2;
+
             renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
+        } else {
+            ScreenUtils.clear(Color.CLEAR, true);
         }
     }
 

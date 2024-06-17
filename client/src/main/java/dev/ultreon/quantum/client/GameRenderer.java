@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
@@ -73,6 +74,9 @@ public class GameRenderer implements Disposable {
         var worldRenderer = this.client.worldRenderer;
 
         LocalPlayer player = this.client.player;
+        if (!(client.isWindowVibrancyEnabled() && ClientConfig.useFullWindowVibrancy)) {
+            renderer.clearColor(0, 0, 0, 1);
+        }
 
         if (player != null) {
             QuantumClient.PROFILER.section("camera", () -> {
@@ -127,6 +131,10 @@ public class GameRenderer implements Disposable {
         renderer.translate(this.client.getDrawOffset().x, this.client.getDrawOffset().y);
         renderer.scale(this.client.getGuiScale(), this.client.getGuiScale());
         QuantumClient.PROFILER.section("overlay", () -> {
+            if (!(this.client.isWindowVibrancyEnabled() && ClientConfig.useFullWindowVibrancy) && !(this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed())) {
+                renderer.clearColor(1 / 255f, 1 / 255f, 1 / 255f, 1);
+            }
+
             this.renderOverlays(renderer, screen, world, deltaTime);
 
             if (this.client.crashOverlay != null) {
@@ -181,8 +189,9 @@ public class GameRenderer implements Disposable {
 
         if (screen != null) {
             QuantumClient.PROFILER.section("screen", () -> {
+
                 float x = (Gdx.input.getX() - this.client.getDrawOffset().x) / this.client.getGuiScale();
-                float y = (Gdx.input.getY() + this.client.getDrawOffset().y) / this.client.getGuiScale();
+                float y = (Gdx.input.getY() - this.client.getDrawOffset().y) / this.client.getGuiScale();
 
                 if (GamePlatform.get().isMobile()) {
                     MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();
@@ -198,7 +207,12 @@ public class GameRenderer implements Disposable {
                     }
                 }
                 RenderEvents.PRE_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
+                Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+                renderer.getBatch().enableBlending();
+                renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
                 screen.render(renderer, (int) x, (int) y, deltaTime);
+                renderer.getBatch().enableBlending();
+                renderer.flush();
 
                 Overlays.MEMORY.render(renderer, deltaTime);
                 RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);

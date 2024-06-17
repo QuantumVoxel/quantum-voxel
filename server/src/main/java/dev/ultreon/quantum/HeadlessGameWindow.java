@@ -20,4 +20,9 @@ public class HeadlessGameWindow extends GameWindow {
     public boolean isFocused() {
         return true;
     }
+
+    @Override
+    public String getTitle() {
+        return "HEADLESS";
+    }
 }

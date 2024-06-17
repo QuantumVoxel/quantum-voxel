@@ -42,10 +42,11 @@ public class GuiBuilder {
     }
 
     TitleWidget title(TextObject title) {
-        TitleWidget widget = new TitleWidget(this.screen, title);
-        screen.titleWidget = widget;
-        screen.defineRoot(widget);
-        return widget;
+//        TitleWidget widget = new TitleWidget(this.screen, title);
+//        screen.titleWidget = widget;
+//        screen.defineRoot(widget);
+//        return widget;
+        return null;
     }
 
     TitleWidget title(String title) {

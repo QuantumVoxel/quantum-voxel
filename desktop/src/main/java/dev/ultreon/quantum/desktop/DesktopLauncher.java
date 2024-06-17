@@ -3,10 +3,11 @@ package dev.ultreon.quantum.desktop;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.GameLibGDXWrapper;
+import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.WindowEvents;
@@ -106,7 +107,7 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description))) {
             try {
-                new Lwjgl3Application(GameLibGDXWrapper.createInstance(argv), DesktopLauncher.createConfig());
+                new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);
@@ -126,6 +127,7 @@ public class DesktopLauncher {
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);
         config.setInitialVisible(false);
+        config.setDecorated(false);
         config.setTitle("Quantum");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);

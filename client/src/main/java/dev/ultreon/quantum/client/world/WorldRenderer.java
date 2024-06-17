@@ -201,12 +201,12 @@ public final class WorldRenderer implements DisposableContainer {
         this.material = new Material();
         this.material.set(TextureAttribute.createDiffuse(blockTex));
         this.material.set(TextureAttribute.createEmissive(emissiveBlockTex));
-        this.material.set(new DepthTestAttribute(GL_DEPTH_FUNC));
+        this.material.set(new DepthTestAttribute(GL_LEQUAL));
         this.transparentMaterial = new Material();
         this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
         this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
         this.transparentMaterial.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        this.transparentMaterial.set(new DepthTestAttribute(GL_DEPTH_FUNC));
+        this.transparentMaterial.set(new DepthTestAttribute(GL_LEQUAL));
 //        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
     }
 

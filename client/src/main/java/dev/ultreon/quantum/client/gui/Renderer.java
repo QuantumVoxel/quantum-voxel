@@ -1807,18 +1807,20 @@ public class Renderer implements Disposable {
     @CheckReturnValue
     private boolean pushScissorsInternal(Rectangle rect) {
         Vector3 translation = this.matrices.getTranslation(this.tmp3A);
+
         if (translation != null) {
             rect.setPosition(rect.getPosition(this.tmp2A).add(translation.x, translation.y));
         }
+        rect.setPosition(rect.getPosition(this.tmp2A).add(0, -client.getDrawOffset().y * 2));
 
         if (rect.x < 0) {
             rect.width = Math.max(rect.width + rect.x, 0);
             rect.x = 0;
         }
 
-        if (rect.y < 0) {
+        if (rect.y < -client.getDrawOffset().y * 2) {
             rect.height = Math.max(rect.height + rect.y, 0);
-            rect.y = 0;
+            rect.y = -client.getDrawOffset().y * 2;
         }
 
         if (rect.width < 1) return false;
@@ -1953,10 +1955,10 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer draw9PatchTexture(Texture texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int texWidth, int texHeight) {
-        this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v, uWidth, vHeight, texWidth, texHeight);
-        this.blit(texture, x + width - uWidth, y + height - vHeight, uWidth, vHeight, u + uWidth * 2, v, uWidth, vHeight, texWidth, texHeight);
-        this.blit(texture, x, y, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
-        this.blit(texture, x + width - uWidth, y, uWidth, vHeight, u + uWidth * 2, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x, y, uWidth, vHeight, u, v, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x + width - uWidth, y, uWidth, vHeight, u + uWidth * 2, v, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x + width - uWidth, y + height - vHeight, uWidth, vHeight, u + uWidth * 2, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
         for (int dx = x + uWidth; dx < width - uWidth; dx += uWidth) {
             int maxX = Math.min(dx + uWidth, width - uWidth);
             int uW = maxX - dx;
@@ -1978,10 +1980,10 @@ public class Renderer implements Disposable {
     public Renderer draw9PatchTexture(Identifier id, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int texWidth, int texHeight) {
         Texture texture = this.client.getTextureManager().getTexture(id);
 
-        this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v, uWidth, vHeight, texWidth, texHeight);
-        this.blit(texture, x + width - uWidth, y + height - vHeight, uWidth, vHeight, u + uWidth * 2, v, uWidth, vHeight, texWidth, texHeight);
-        this.blit(texture, x, y, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
-        this.blit(texture, x + width - uWidth, y, uWidth, vHeight, u + uWidth * 2, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x + width - uWidth, y + height - vHeight, uWidth, vHeight, u + uWidth * 2, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x, y, uWidth, vHeight, u, v, uWidth, vHeight, texWidth, texHeight);
+        this.blit(texture, x + width - uWidth, y, uWidth, vHeight, u + uWidth * 2, v, uWidth, vHeight, texWidth, texHeight);
         for (int dx = x + uWidth; dx < width - uWidth; dx += uWidth) {
             int maxX = Math.min(dx + uWidth, width - uWidth);
             int uW = maxX - dx;
@@ -1992,8 +1994,8 @@ public class Renderer implements Disposable {
         for (int dy = y + vHeight; dy < height - vHeight; dy += vHeight) {
             int maxX = Math.min(dy + vHeight, height - vHeight);
             int vH = maxX - dy;
-            this.blit(texture, x, dy, uWidth, vH, u, v + uWidth, uWidth, vH, texWidth, texHeight);
-            this.blit(texture, x + width - uWidth, dy, uWidth, vH, u + uWidth * 2, u + uWidth, uWidth, vH, texWidth, texHeight);
+            this.blit(texture, x, dy, uWidth, vH, u, v + vHeight, uWidth, vH, texWidth, texHeight);
+            this.blit(texture, x + width - uWidth, dy, uWidth, vH, u + uWidth * 2, u + vHeight, uWidth, vH, texWidth, texHeight);
         }
 
         return this;
@@ -2423,12 +2425,12 @@ public class Renderer implements Disposable {
 
             this.flush();
 
+            this.batch.setColor(1, 1, 1, 1);
             if (grid) {
                 //getConfig the texture for the hexagon grid
                 Texture colorBufferTexture = this.grid.getColorBufferTexture();
 
                 //render the grid to the screen
-                this.batch.setColor(1, 1, 1, 1);
                 blurred(32, false, 1, () -> {
                     this.batch.setColor(1f, 1f, 1f, overlayOpacity);
                     this.batch.draw(colorBufferTexture, 0, 0, (float) Gdx.graphics.getWidth() / guiScale, (float) Gdx.graphics.getHeight() / guiScale);
@@ -2438,7 +2440,9 @@ public class Renderer implements Disposable {
             //dispose of the FBOs
             blurTargetA.dispose();
             blurTargetB.dispose();
+            this.batch.setColor(1f, 1f, 1f, 1f);
         } finally {
+            this.batch.setColor(1, 1, 1, 1);
             this.blurred = false;
         }
     }

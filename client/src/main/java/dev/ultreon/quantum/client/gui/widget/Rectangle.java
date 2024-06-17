@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -55,7 +57,12 @@ public class Rectangle extends Widget {
 
     @Override
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+//        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+//        renderer.getBatch().setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+//        renderer.getBatch().setTransformMatrix(renderer.getBatch().getTransformMatrix().translate(0, 0, 10));
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, this.backgroundColor.get());
+//        renderer.getBatch().setTransformMatrix(renderer.getBatch().getTransformMatrix().translate(0, 0, -10));
+//        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
     }
 
     @Override
