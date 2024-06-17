@@ -88,8 +88,11 @@ public class DesktopWindow extends GameWindow {
 
     @Override
     public void restore() {
-        GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
-        GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_ICONIFIED, GLFW.GLFW_FALSE);
+        if (!SharedLibraryLoader.isMac) {
+            GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
+            GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_ICONIFIED, GLFW.GLFW_FALSE);
+        }
+
         GLFW.glfwRestoreWindow(getHandle());
     }
 

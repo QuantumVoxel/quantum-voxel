@@ -1228,7 +1228,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         ScreenUtils.clear(0, 0, 0, 0, true);
 
         this.gameBounds.setPos(0, 0);
-        this.gameBounds.setSize(getScaledWidth() + getDrawOffset().x, getScaledHeight() + getDrawOffset().y);
+        this.gameBounds.setSize(getScaledWidth() + getDrawOffset().x / 2, getScaledHeight() + getDrawOffset().y / 2);
         if (renderer.pushScissors(this.gameBounds)) {
             this.renderMain(renderer, deltaTime);
             renderer.popScissors();
@@ -2408,16 +2408,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public boolean mousePress(int mouseX, int mouseY, int button) {
         if (mouseY < 44 && button == Input.Buttons.LEFT) {
             if (this.lastPress - System.currentTimeMillis() + 1000L > 0) {
-                if (SharedLibraryLoader.isMac) {
-                    window.setResizable(true);
+                window.setResizable(true);
+                if (window.isMaximized())
                     window.restore();
+                else
                     window.maximize();
-                } else {
-                    if (window.isMaximized())
-                        window.restore();
-                    else
-                        window.maximize();
-                }
             } else {
                 this.window.setDragging(true);
             }

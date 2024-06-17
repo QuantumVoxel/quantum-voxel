@@ -226,6 +226,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     public void setupMacOSX() {
         if (isMacOSX()) {
             Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
+            Configuration.GLFW_CHECK_THREAD0.set(false);
         }
     }
 
