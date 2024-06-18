@@ -242,9 +242,13 @@ public class DesktopInput extends GameInput {
             this.client.setFullScreen(!this.client.isFullScreen());
         } else if (DesktopInput.THIRD_PERSON_KEY.isJustPressed()) {
             this.client.cyclePlayerView();
-        } else if (this.client.world != null && DesktopInput.PAUSE_KEY.isJustPressed() && Gdx.input.isCursorCatched()) {
+        } else if (this.client.world != null
+                && DesktopInput.PAUSE_KEY.isJustPressed()
+                && Gdx.input.isCursorCatched()) {
             this.client.showScreen(new PauseScreen());
-        } else if (DesktopInput.PAUSE_KEY.isJustPressed() && !Gdx.input.isCursorCatched() && this.client.screen instanceof PauseScreen) {
+        } else if (DesktopInput.PAUSE_KEY.isJustPressed()
+                && !Gdx.input.isCursorCatched()
+                && this.client.screen instanceof PauseScreen) {
             this.client.showScreen(null);
         } else if (DesktopInput.DROP_ITEM_KEY.isJustPressed() && player != null) {
             player.dropItem();

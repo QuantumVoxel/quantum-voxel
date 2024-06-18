@@ -11,113 +11,17 @@ precision mediump float;
 #define HIGH
 #endif
 
-#if __VERSION__ < 130
-#define texture texture
-#else
-#define texture texture
-#endif
-
-#if defined(specularTextureFlag) || defined(specularColorFlag)
-#define specularFlag
-#endif
-
 in vec3 v_normal;
 in vec3 v_modelNormal;
 
 in vec4 v_color;
 
-#ifdef blendedFlag
-#ifdef alphaTestFlag
-in float v_alphaTest;
-#endif //alphaTestFlag
-#endif //blendedFlag
-
-#if defined(diffuseTextureFlag) || defined(specularTextureFlag) || defined(emissiveTextureFlag)
-#define textureFlag
-#endif
-
-#ifdef diffuseTextureFlag
 in MED vec2 v_diffuseUV;
-#endif
-
-#ifdef specularTextureFlag
-in MED vec2 v_specularUV;
-#endif
-
-#ifdef emissiveTextureFlag
 in MED vec2 v_emissiveUV;
-#endif
-
-#ifdef diffuseColorFlag
-uniform vec4 u_diffuseColor;
-#endif
-
-#ifdef diffuseTextureFlag
 uniform sampler2D u_diffuseTexture;
-#endif
-
-#ifdef specularColorFlag
-uniform vec4 u_specularColor;
-#endif
-
-#ifdef specularTextureFlag
-uniform sampler2D u_specularTexture;
-#endif
-
-#ifdef normalTextureFlag
-uniform sampler2D u_normalTexture;
-#endif
-
-#ifdef emissiveColorFlag
-uniform vec4 u_emissiveColor;
-#endif
-
-#ifdef emissiveTextureFlag
 uniform sampler2D u_emissiveTexture;
-#endif
-
-#ifdef lightingFlag
-in vec3 v_lightDiffuse;
-
-#if	defined(ambientLightFlag) || defined(ambientCubemapFlag) || defined(sphericalHarmonicsFlag)
-#define ambientFlag
-#endif //ambientFlag
-
-#ifdef specularFlag
-in vec3 v_lightSpecular;
-#endif //specularFlag
-
-#ifdef shadowMapFlag
-uniform sampler2D u_shadowTexture;
-uniform float u_shadowPCFOffset;
-in vec3 v_shadowMapUv;
-#define separateAmbientFlag
-
-float getShadowness(vec2 offset)
-{
-    const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0);
-    return step(v_shadowMapUv.z, dot(texture(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));
-}
-
-float getShadow()
-{
-    return (//getShadowness(vec2(0,0)) +
-    getShadowness(vec2(u_shadowPCFOffset, u_shadowPCFOffset)) +
-    getShadowness(vec2(-u_shadowPCFOffset, u_shadowPCFOffset)) +
-    getShadowness(vec2(u_shadowPCFOffset, -u_shadowPCFOffset)) +
-    getShadowness(vec2(-u_shadowPCFOffset, -u_shadowPCFOffset))) * 0.25;
-}
-#endif //shadowMapFlag
-
-#if defined(ambientFlag) && defined(separateAmbientFlag)
-in vec3 v_ambientLight;
-#endif //separateAmbientFlag
-
-#endif //lightingFlag
-
 uniform vec4 u_fogColor;
 in float v_fog;
-
 in vec3 v_position;
 
 uniform float u_globalSunlight;
@@ -216,57 +120,29 @@ out vec4 fragColor;
 in vec3 fragCoord;
 
 void main() {
-    #if defined(diffuseTextureFlag)
-        vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
-    #endif
-
-    #if defined(emissiveTextureFlag)
-        vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
-    #endif
-
-    #if defined(specularTextureFlag)
-        vec2 v_specularTexUV = transformUV(v_specularUV);
-    #endif
+    vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
+    vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
 
     vec3 normal = v_normal;
 
     float sunLight = v_color.a;
     vec4 blockLight = vec4(v_color.rgb, 1.0);
 
-    #if defined(diffuseTextureFlag)
-        vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
-    #elif defined(diffuseColorFlag) && defined(colorFlag)
-        vec4 diffuse = u_diffuseColor;
-    #else
-        vec4 diffuse = vec4(1.0);
+    vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
+    fragColor.a = 1.0;
+    #ifdef blendedFlag
+        fragColor.a = diffuse.a;
     #endif
-
-    #if defined(emissiveTextureFlag)
-        vec4 emissive = texture(u_emissiveTexture, v_emissiveTexUV);
-    #else
-        vec4 emissive = vec4(0.0);
-    #endif
+    if (diffuse.a <= 0.02) discard;
 
     vec3 light = vec3(u_globalSunlight);
     light *= sunLight * 2 - 0.4;
     light += (blockLight.rgb - (light * blockLight.rgb));
 
+    vec4 emissive = texture(u_emissiveTexture, v_emissiveTexUV);
     fragColor.rgb = (diffuse.rgb) * light + (emissive.rgb * (1.0 - light));
-
-    #ifdef blendedFlag
-        fragColor.a = diffuse.a;
-        #ifdef alphaTestFlag
-            if (fragColor.a <= v_alphaTest)
-            discard;
-        #endif
-    #else
-        fragColor.a = 1.0;
-        if (diffuse.a <= 0.02) discard;
-    #endif
 
     fragColor = vec4(fragColor.xyz*gamma(sh_light(v_normal, groove)).r, fragColor.w);
 
-    #ifdef fogFlag
-        fragColor.rgb = mix(fragColor.rgb, vec3(u_fogColor), v_fog);
-    #endif // end fogFlag
+    fragColor.rgb = mix(fragColor.rgb, vec3(u_fogColor), v_fog);
 }
