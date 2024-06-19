@@ -48,9 +48,6 @@ group project_group // https://maven.apache.org/guides/mini/guide-naming-convent
 java {
     withSourcesJar()
     withJavadocJar()
-    
-    sourceCompatibility("21")
-    targetCompatibility("21")
 }
 
 dependencies {
@@ -205,8 +202,4 @@ tasks.register('copyJar', Copy) {
 
 compileJava {
     options.encoding = "UTF-8"
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "21"
 }

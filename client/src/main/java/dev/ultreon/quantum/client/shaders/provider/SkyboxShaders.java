@@ -9,20 +9,20 @@ import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.SkyboxShader;
 
-public class SkyboxShaderProvider extends DefaultShaderProvider implements GameShaders {
-    public SkyboxShaderProvider(final DefaultShader.Config config) {
+public class SkyboxShaders extends DefaultShaderProvider implements GameShaders {
+    public SkyboxShaders(final DefaultShader.Config config) {
         super(config);
     }
 
-    public SkyboxShaderProvider(final String vertexShader, final String fragmentShader) {
+    public SkyboxShaders(final String vertexShader, final String fragmentShader) {
         this(new DefaultShader.Config(vertexShader, fragmentShader));
     }
 
-    public SkyboxShaderProvider(final FileHandle vertexShader, final FileHandle fragmentShader) {
+    public SkyboxShaders(final FileHandle vertexShader, final FileHandle fragmentShader) {
         this(vertexShader.readString(), fragmentShader.readString());
     }
 
-    public SkyboxShaderProvider() {
+    public SkyboxShaders() {
         this(null);
     }
 

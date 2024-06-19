@@ -15,19 +15,28 @@ public class TextureAtlas implements Disposable {
     private final Identifier id;
     private final Texture atlas;
     private final Texture emissiveAtlas;
+    private final Texture normalAtlas;
+    private final Texture specularAtlas;
+    private final Texture reflectiveAtlas;
     private final Map<Identifier, TextureOffset> uvMap;
 
-    public TextureAtlas(TextureStitcher stitcher, Identifier id, Texture atlas, Texture emissiveAtlas, Map<Identifier, TextureOffset> uvMap) {
+    public TextureAtlas(TextureStitcher stitcher, Identifier id, Texture atlas, Texture emissiveAtlas, Texture normalAtlas, Texture specularAtlas, Texture reflectiveAtlas, Map<Identifier, TextureOffset> uvMap) {
         this.stitcher = stitcher;
         this.id = id;
         this.atlas = atlas;
         this.emissiveAtlas = emissiveAtlas;
+        this.normalAtlas = normalAtlas;
+        this.specularAtlas = specularAtlas;
+        this.reflectiveAtlas = reflectiveAtlas;
         this.uvMap = uvMap;
 
         QuantumClient client = QuantumClient.get();
         TextureManager textureManager = client.getTextureManager();
         textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".atlas"), atlas);
         textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".emissive.atlas"), emissiveAtlas);
+        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".normal.atlas"), emissiveAtlas);
+        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".specular.atlas"), emissiveAtlas);
+        textureManager.registerTexture(this.id.mapPath(path -> "atlas/" + path + ".reflective.atlas"), emissiveAtlas);
     }
 
     public TextureRegion get(Identifier id) {
@@ -54,6 +63,18 @@ public class TextureAtlas implements Disposable {
 
     public Texture getEmissiveTexture() {
         return this.emissiveAtlas;
+    }
+
+    public Texture getNormalTexture() {
+        return this.normalAtlas;
+    }
+
+    public Texture getSpecularTexture() {
+        return this.specularAtlas;
+    }
+
+    public Texture getReflectivnessTexture() {
+        return this.reflectiveAtlas;
     }
 
     @Override

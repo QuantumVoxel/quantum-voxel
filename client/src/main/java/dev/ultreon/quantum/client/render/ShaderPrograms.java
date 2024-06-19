@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public class ShaderPrograms {
     public static final Supplier<ShaderProgram> XOR = ShaderPrograms.register("xor");
     public static final Supplier<ShaderProgram> OUTLINE = ShaderPrograms.register("outline");
-    public static final Supplier<ShaderProgram> MODEL = ShaderPrograms.register("model");
+    public static final Supplier<ShaderProgram> MAIN = ShaderPrograms.register("main");
     public static final Supplier<ShaderProgram> DEFAULT = ShaderPrograms.register("default");
     public static final Supplier<ShaderProgram> DEPTH = ShaderPrograms.register("depth");
     public static final Supplier<ShaderProgram> WORLD = ShaderPrograms.register("world");

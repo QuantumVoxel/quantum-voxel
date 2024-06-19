@@ -55,7 +55,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
             renderer.translate(0, -this.scrollY);
-            this.renderChildren(renderer, mouseX, mouseY + innerYOffset, deltaTime);
+            this.renderChildren(renderer, mouseX, (int) (mouseY - scrollY), deltaTime);
             renderer.popScissors();
         }
         renderer.popMatrix();
@@ -68,7 +68,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     @Nullable
     public Widget getWidgetAt(int x, int y) {
-        y -= this.pos.y + this.innerYOffset;
+        y -= this.pos.y;
 
         if (!this.isWithinBounds(x, y)) return null;
         List<? extends Widget> entries = this.children();
@@ -92,10 +92,10 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY() + innerYOffset);
+            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY());
 
             if (widgetChanged) {
-                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY() + innerYOffset);
+                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
             }
         }
         super.mouseMove(x, y);
@@ -113,10 +113,10 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            x -= this.pos.x + this.innerXOffset;
-            y -= this.pos.y + this.innerYOffset;
+            x -= this.pos.x;
+            y -= this.pos.y;
             if (widgetChanged) {
-                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY() + innerYOffset);
+                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
             }
         }
         super.mouseMove(x, y);
@@ -125,8 +125,8 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     @Override
     public boolean mouseDrag(int x, int y, int dragX, int dragY, int pointer) {
         @Nullable Widget widgetAt = this.getWidgetAt(x, y);
-        dragX -= this.pos.x + this.innerXOffset;
-        dragY -= this.pos.y + this.innerYOffset;
+        dragX -= this.pos.x;
+        dragY -= this.pos.y;
         if (widgetAt != null)
             return widgetAt.mouseDrag(x, y - widgetAt.getY(), dragX, dragY, pointer);
         return super.mouseDrag(x, y, dragX, dragY, pointer);
@@ -143,7 +143,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     @Override
     public boolean mouseWheel(int x, int y, double rotation) {
         Widget widgetAt = this.getWidgetAt(x, y);
-        if (widgetAt != null && widgetAt.mouseWheel(x, y + innerYOffset, rotation)) {
+        if (widgetAt != null && widgetAt.mouseWheel(x, y, rotation)) {
             return true;
         }
 
@@ -160,17 +160,17 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        return super.mousePress(mouseX, mouseY + innerYOffset, button);
+        return super.mousePress(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
-        return super.mouseRelease(mouseX, mouseY + innerYOffset, button);
+        return super.mouseRelease(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
-        return super.mouseClick(mouseX, mouseY + innerYOffset, button, clicks);
+        return super.mouseClick(mouseX, mouseY, button, clicks);
     }
 
     public int getContentHeight() {

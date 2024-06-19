@@ -50,6 +50,9 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.enableFpsCounter", comment = "Whether the FPS counter is enabled in the HUD.")
     public static boolean enableFpsCounter = false;
 
+    @ConfigEntry(path = "video.maxReflectDistance", comment = "Maximum distance for reflections (for example in water).")
+    public static float maxReflectDistance = 80;
+
     @ConfigEntry(path = "generic.enable4xScreenshot", comment = "Whether 4× scaled screenshots are enabled.")
     public static boolean enable4xScreenshot = false;
 
@@ -151,4 +154,7 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "accessibility.doubleTapDelay", comment = "The delay between double presses or clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
     public static int doubleTapDelay = 40;
+
+    @ConfigEntry(path = "accessibility.closePrompt", comment = "Shows a confirmation when closing the game.")
+    public static boolean showClosePrompt = false;
 }

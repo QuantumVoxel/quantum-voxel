@@ -39,8 +39,6 @@ java {
     withJavadocJar()
 }
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = "21" // Need this here so eclipse task generates correctly.
-
 repositories {
     mavenCentral()
 }
@@ -78,10 +76,6 @@ processResources {
     inputs.property "version", version
     inputs.property "quantum_version", project(":client").version
     inputs.property "gdx_version", gdx_version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": version
-    }
 
     filesMatching("versions.properties") {
         expand "quantum_version": project(":client").version, "gdx_version": gdx_version

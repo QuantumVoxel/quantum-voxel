@@ -64,7 +64,7 @@ public class RenderPipeline implements Disposable {
             modelBatch.flush();
         }
 
-        ((MainRenderNode)this.main).blur(blurScale);
+        ((MainRenderNode) this.main).blur(blurScale);
         this.main.render(textures, modelBatch, this.camera, input, deltaTime);
         modelBatch.flush();
 
@@ -147,7 +147,7 @@ public class RenderPipeline implements Disposable {
         private float time = 0;
         private final RenderableFlushablePool pool = new RenderableFlushablePool();
 
-        private FrameBuffer fbo = new FrameBuffer(this.getFormat(), Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        private FrameBuffer fbo;
         protected final QuantumClient client = QuantumClient.get();
 
         protected Pixmap.Format getFormat() {
@@ -157,8 +157,9 @@ public class RenderPipeline implements Disposable {
         public abstract @NewInstance Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime);
 
         public void resize(int width, int height) {
-            this.fbo.dispose();
-            this.fbo = new FrameBuffer(this.getFormat(), width, height, true);
+            if (this.fbo != null)
+                this.fbo.dispose();
+            this.fbo = createFrameBuffer();
         }
 
         protected RenderableFlushablePool pool() {
@@ -166,7 +167,14 @@ public class RenderPipeline implements Disposable {
         }
 
         public FrameBuffer getFrameBuffer() {
+            if (this.fbo == null) {
+                this.fbo = createFrameBuffer();
+            }
             return this.fbo;
+        }
+
+        protected FrameBuffer createFrameBuffer() {
+            return new FrameBuffer(this.getFormat(), Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         }
 
         public void dispose() {
@@ -200,12 +208,12 @@ public class RenderPipeline implements Disposable {
 
         public static class RenderableFlushablePool extends FlushablePool<Renderable> {
             @Override
-            protected Renderable newObject () {
+            protected Renderable newObject() {
                 return new Renderable();
             }
 
             @Override
-            public Renderable obtain () {
+            public Renderable obtain() {
                 Renderable renderable = super.obtain();
                 renderable.environment = null;
                 renderable.material = null;

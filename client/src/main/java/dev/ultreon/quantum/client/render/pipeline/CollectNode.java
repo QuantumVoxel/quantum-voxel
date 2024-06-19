@@ -24,38 +24,6 @@ public class CollectNode extends RenderPipeline.RenderNode {
     @NewInstance
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-        var localPlayer = this.client.player;
-        var worldRenderer = this.client.worldRenderer;
-        var world = this.client.world;
-        if (localPlayer == null || worldRenderer == null || world == null) {
-            LOGGER.warn("worldRenderer or localPlayer is null");
-            return input;
-        }
-        var position = localPlayer.getPosition(client.partialTick);
-        List<Entity> toSort = new ArrayList<>(world.getAllEntities());
-        worldRenderer.render(RenderLayer.WORLD, deltaTime);
-        toSort.sort((e1, e2) -> {
-            var d1 = e1.getPosition().dst(position);
-            var d2 = e2.getPosition().dst(position);
-            return Double.compare(d1, d2);
-        });
-        for (Entity entity : toSort) {
-            if (entity instanceof LocalPlayer) continue;
-            worldRenderer.collectEntity(entity, RenderLayer.WORLD);
-        }
-
-        ParticleSystem particleSystem = worldRenderer.getParticleSystem();
-        particleSystem.begin();
-        particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
-        particleSystem.end();
-
-        modelBatch.render(particleSystem);
-
-        RenderLayer.WORLD.finish(input, this.pool());
-
-        ValueTracker.setObtainedRenderables(this.pool().getObtained());
         return input;
     }
 }

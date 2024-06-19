@@ -8,6 +8,7 @@ import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.Tab;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
+import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +59,8 @@ public abstract class TabbedUI extends Screen {
         this.tabs = tabbedUIBuilder.tabs;
         this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.getFirst();
 
+        this.client.setWindowTitle(getTitle());
+
         for (Tab tab : this.tabs) {
             this.defineRoot(tab);
         }
@@ -79,7 +82,6 @@ public abstract class TabbedUI extends Screen {
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-
         for (Tab tab : this.tabs) {
             if (!tab.bottom()) {
                 tab.render(renderer, mouseX, mouseY, deltaTime);
@@ -109,6 +111,17 @@ public abstract class TabbedUI extends Screen {
         super.renderChildren(renderer, mouseX, mouseY, deltaTime);
     }
 
+    @Override
+    public @Nullable TextObject getTitle() {
+        MutableText title;
+        if (this.title != null) {
+            title = this.title.copy();
+            return this.tab != null ? title.append(" | ").append(this.tab.title()) : title;
+        }
+
+        return null;
+    }
+
     public final @Nullable Tab getTab() {
         return this.tab;
     }
@@ -135,6 +148,8 @@ public abstract class TabbedUI extends Screen {
 
         this.tab = this.tabs.get(selected);
         this.bottomSelected = this.tabs.get(selected).bottom();
+
+        this.client.setWindowTitle(getTitle());
     }
 
     public final void setSelected(TextObject name) {
@@ -242,6 +257,8 @@ public abstract class TabbedUI extends Screen {
                 this.selected = this.tabs.indexOf(tab);
                 this.bottomSelected = tab.bottom();
                 this.tab = tab;
+
+                this.client.setWindowTitle(getTitle());
             }
             if (tab == this.tab && tab.content().mouseRelease(mouseX, mouseY, button)) flag = true;
         }

@@ -4,13 +4,12 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
-import dev.ultreon.quantum.client.shaders.provider.ModelViewShaderProvider;
-import dev.ultreon.quantum.client.shaders.provider.SkyboxShaderProvider;
-import dev.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
+import dev.ultreon.quantum.client.shaders.provider.ModelShaders;
+import dev.ultreon.quantum.client.shaders.provider.SkyboxShaders;
+import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 
 import static dev.ultreon.quantum.client.QuantumClient.get;
 import static dev.ultreon.quantum.client.QuantumClient.id;
@@ -24,18 +23,18 @@ public class Shaders {
 
     public static final Supplier<DefaultShaderProvider> DEFAULT = Shaders.register("default", MyDefaultShaderProvider::new);
     
-    public static final Supplier<WorldShaderProvider> WORLD = Shaders.register("world", () -> new WorldShaderProvider(
-            new ResourceFileHandle(id("shaders/world.vert")),
-            new ResourceFileHandle(id("shaders/world.frag")),
-            new ResourceFileHandle(id("shaders/world.geom"))));
-    public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaderProvider(
+    public static final Supplier<SceneShaders> SCENE = Shaders.register("world", () -> new SceneShaders(
+            new ResourceFileHandle(id("shaders/scene.vert")),
+            new ResourceFileHandle(id("shaders/scene.frag")),
+            new ResourceFileHandle(id("shaders/scene.geom"))));
+    public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaders(
             new ResourceFileHandle(id("shaders/skybox.vert")),
             new ResourceFileHandle(id("shaders/skybox.frag"))
     ));
-    public static final Supplier<ModelViewShaderProvider> MODEL_VIEW = Shaders.register("model_view", () -> new ModelViewShaderProvider(
-            new ResourceFileHandle(id("shaders/model_view.vert")),
-            new ResourceFileHandle(id("shaders/model_view.frag")),
-            new ResourceFileHandle(id("shaders/model_view.geom"))));
+    public static final Supplier<ModelShaders> MODEL_VIEW = Shaders.register("model_view", () -> new ModelShaders(
+            new ResourceFileHandle(id("shaders/model.vert")),
+            new ResourceFileHandle(id("shaders/model.frag")),
+            new ResourceFileHandle(id("shaders/model.geom"))));
     public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
             new ResourceFileHandle(id("shaders/outline.vert")),
             new ResourceFileHandle(id("shaders/outline.frag"))

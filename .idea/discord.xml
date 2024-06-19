@@ -5,10 +5,12 @@
     <option name="nameOverrideEnabled" value="true" />
     <option name="nameOverrideText" value="Quantum Voxel" />
     <option name="description" value="" />
-    <option name="theme" value="atom" />
+    <option name="applicationTheme" value="2024-icons" />
+    <option name="iconsTheme" value="default" />
     <option name="button1Title" value="GitHub Repository" />
     <option name="button1Url" value="https://github.com/Ultreon/quantum-voxel" />
     <option name="button2Title" value="Website" />
     <option name="button2Url" value="https://ultreon.github.io/quantum-voxel/" />
+    <option name="customApplicationId" value="" />
   </component>
 </project>

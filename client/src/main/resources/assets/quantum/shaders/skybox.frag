@@ -1,8 +1,8 @@
+#version 410
+
 #ifdef GL_ES
 precision mediump float;
 #endif
-
-uniform float iTime; // 0 is sunrise 12000 is sunset, 6000 is noon, 18000 is midnight. Wraps around at 24000.
 
 in vec3 v_position;
 

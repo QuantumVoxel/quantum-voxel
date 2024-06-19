@@ -232,11 +232,6 @@ tasks.withType(Jar).configureEach {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-
 delete "$projectDir/build/jars"
 
 tasks.register('copyDependencies', Copy) {

@@ -14,12 +14,12 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.shader.Shaders;
-import dev.ultreon.quantum.client.shaders.provider.WorldShaderProvider;
+import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 
 public class BackgroundNode extends RenderPipeline.RenderNode {
-    private final Supplier<WorldShaderProvider> shaderProvider = Shaders.WORLD;
+    private final Supplier<SceneShaders> shaderProvider = Shaders.SCENE;
 
     protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
         for (Renderable renderable : input) {
@@ -44,7 +44,7 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
 
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
-        WorldShaderProvider shaderProvider = this.shaderProvider.get();
+        SceneShaders shaderProvider = this.shaderProvider.get();
         ShaderContext.set(shaderProvider);
         this.renderWorld(modelBatch);
         textures.put("skybox", this.getFrameBuffer().getColorBufferTexture());

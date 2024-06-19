@@ -65,7 +65,7 @@
   "quantum.screen.death.respawn": "Respawn",
   "quantum.screen.death.title": "You Died",
   "quantum.screen.options": "Options...",
-  "quantum.screen.options.title": "Options",
+  "quantum.screen.settings.title": "Settings",
   "quantum.screen.options.video": "Video Settings...",
   "quantum.screen.options.video.title": "Video Settings",
   "quantum.screen.options.video.fov": "FOV",

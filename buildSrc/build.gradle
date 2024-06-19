@@ -15,11 +15,6 @@ dependencies {
     compileOnly api("com.google.guava:guava:33.1.0-jre")
 }
 
-java {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
-}
-
 repositories {
     mavenCentral()
     gradlePluginPortal()

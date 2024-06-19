@@ -788,8 +788,8 @@ public final class WorldRenderer implements DisposableContainer {
 
             this.setupMaterials(blockTex, emissiveBlockTex);
 
-            RenderLayer.WORLD.destroy(moon);
-            RenderLayer.WORLD.destroy(sun);
+            RenderLayer.BACKGROUND.destroy(moon);
+            RenderLayer.BACKGROUND.destroy(sun);
             RenderLayer.BACKGROUND.clear();
 
             ModelManager.INSTANCE.unloadModel(MOON_ID);

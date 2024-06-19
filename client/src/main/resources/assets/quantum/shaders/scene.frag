@@ -18,8 +18,14 @@ in vec4 v_color;
 
 in MED vec2 v_diffuseUV;
 in MED vec2 v_emissiveUV;
+in MED vec2 v_normalUV;
+in MED vec2 v_specularUV;
+in MED vec2 v_reflectiveUV;
 uniform sampler2D u_diffuseTexture;
 uniform sampler2D u_emissiveTexture;
+uniform sampler2D u_normalTexture;
+uniform sampler2D u_specularTexture;
+uniform sampler2D u_reflectiveTexture;
 uniform vec4 u_fogColor;
 in float v_fog;
 in vec3 v_position;
@@ -116,12 +122,17 @@ vec2 transformUV(vec2 uv) {
     return v_texUV;
 }
 
-out vec4 fragColor;
-in vec3 fragCoord;
+layout(location = 0) out vec4 diffuseOut;
+layout(location = 1) out vec3 reflectiveOut;
+layout(location = 2) out vec3 depthOut;
+layout(location = 3) out vec3 positionOut;
+layout(location = 4) out vec3 normalOut;
+layout(location = 5) out vec4 specularOut;
 
 void main() {
     vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
     vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
+    vec2 v_reflectiveTexUV = transformUV(v_reflectiveUV);
 
     vec3 normal = v_normal;
 
@@ -129,9 +140,9 @@ void main() {
     vec4 blockLight = vec4(v_color.rgb, 1.0);
 
     vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
-    fragColor.a = 1.0;
+    diffuseOut.a = 1.0;
     #ifdef blendedFlag
-        fragColor.a = diffuse.a;
+        diffuseOut.a = diffuse.a;
     #endif
     if (diffuse.a <= 0.02) discard;
 
@@ -139,10 +150,28 @@ void main() {
     light *= sunLight * 2 - 0.4;
     light += (blockLight.rgb - (light * blockLight.rgb));
 
-    vec4 emissive = texture(u_emissiveTexture, v_emissiveTexUV);
-    fragColor.rgb = (diffuse.rgb) * light + (emissive.rgb * (1.0 - light));
+    vec3 emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
+    vec4 reflective = texture(u_reflectiveTexture, v_reflectiveTexUV);
+    diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
 
-    fragColor = vec4(fragColor.xyz*gamma(sh_light(v_normal, groove)).r, fragColor.w);
+    float depth = gl_FragCoord.z / gl_FragCoord.w;
 
-    fragColor.rgb = mix(fragColor.rgb, vec3(u_fogColor), v_fog);
+    vec3 depthIn3Channels;
+    depthIn3Channels.r = mod(depth, 1.0);
+    depth -= depthIn3Channels.r;
+    depth /= 256.0;
+
+    depthIn3Channels.g = mod(depth, 1.0);
+    depth -= depthIn3Channels.g;
+    depth /= 256.0;
+
+    depthIn3Channels.b = depth;
+
+    diffuseOut = vec4(diffuseOut.xyz*gamma(sh_light(v_normal, groove)).r, diffuseOut.w);
+    diffuseOut.rgb = mix(diffuseOut.rgb, vec3(u_fogColor), v_fog);
+    positionOut = v_position;
+    normalOut = normal;
+    reflectiveOut = vec3(1.0 - reflective.a);
+    specularOut = vec4(0.0, 0.0, 0.0, 0.0);
+    depthOut = depthIn3Channels;
 }

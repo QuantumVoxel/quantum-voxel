@@ -4,6 +4,7 @@
   "package": "dev.ultreon.mixinprovider.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BaseShaderMixin",
     "ImmediateModeRenderer20Mixin"
   ],
   "client": [

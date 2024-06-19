@@ -261,7 +261,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     public Bounds getBounds() {
-        return new Bounds(this.pos, this.size);
+        return bounds;
     }
 
     public Position getPreferredPos() {

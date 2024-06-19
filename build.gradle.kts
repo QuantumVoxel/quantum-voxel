@@ -42,6 +42,7 @@ buildscript {
 plugins {
     id("idea")
     id("maven-publish")
+    id("java")
     id("io.freefair.javadoc-links") version "8.3"
 }
 
@@ -120,12 +121,16 @@ beforeEvaluate {
      * Dependencies
      */
     dependencies {
-
+        configurations["implementation"](project(":teavm"))
     }
 }
 
 allprojects {
     apply(plugin = "maven-publish")
+    apply(plugin = "java")
+
+    java.sourceCompatibility = JavaVersion.VERSION_21
+    java.targetCompatibility = JavaVersion.VERSION_21
 
     ext.also {
         it["app_name"] = "Quantum Voxel"
@@ -239,7 +244,7 @@ artifacts {
 }
 
 val publishProjects =
-    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"))
+    listOf(project(":client"), project(":desktop"), project(":server"), project(":teavm"), project(":gameprovider"))
 
 publishProjects.forEach {
     if (it.name == "android") return@forEach

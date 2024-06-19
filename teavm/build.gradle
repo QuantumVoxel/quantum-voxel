@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'org.gretty' version '3.+'
+}
+
+gretty {
+    contextPath = '/'
+    extraResourceBase 'build/dist/webapp'
+}
+
+sourceSets.main.resources.srcDirs += [rootProject.file('assets').path]
+project.ext.mainClassName = 'dev.ultreon.quantum.web.TeaVMBuilder'
+
+afterEvaluate {
+    dependencies {
+        implementation project(':client')
+        implementation "com.badlogicgames.gdx:gdx-box2d-gwt:$gdx_version"
+        implementation "com.github.xpenatan.gdx-teavm:backend-teavm:1.0.0-b9"
+        implementation "com.github.xpenatan.gdx-teavm:gdx-freetype-teavm:1.0.0-b9"
+        implementation "org.teavm:teavm-classlib:0.10.0"
+        implementation "org.teavm:teavm-core:0.10.0"
+        implementation "org.teavm:teavm-jso-apis:0.10.0"
+        implementation "org.teavm:teavm-jso-impl:0.10.0"
+        implementation "org.teavm:teavm-jso:0.10.0"
+        implementation "org.teavm:teavm-tooling:0.10.0"
+
+    }
+}
+
+tasks.register('buildJavaScript', JavaExec) {
+    dependsOn classes
+            setDescription("Transpile bytecode to JavaScript via TeaVM")
+    mainClass.set(project.mainClassName)
+    setClasspath(sourceSets.main.runtimeClasspath)
+}
+
+build.dependsOn buildJavaScript
+
+tasks.register("run") {
+    description = "Run the JavaScript application hosted via a local Jetty server at http://localhost:8080/"
+    dependsOn(buildJavaScript, tasks.named("tomcatRun"))
+}

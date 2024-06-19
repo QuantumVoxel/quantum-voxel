@@ -46,9 +46,6 @@ group project_group // https://maven.apache.org/guides/mini/guide-naming-convent
 
 java {
     withSourcesJar()
-    
-    sourceCompatibility("21")
-    targetCompatibility("21")
 }
 
 repositories {
@@ -125,9 +122,6 @@ processResources {
 
     inputs.property "version", version
 
-    filesMatching("metadata.json") {
-        expand(["version": version])
-    }
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
@@ -186,8 +180,4 @@ test {
 
 compileJava {
     options.encoding = "UTF-8"
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "21"
 }

@@ -9,23 +9,23 @@ import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.shaders.ModelViewShader;
 
-public class ModelViewShaderProvider extends DefaultShaderProvider implements GameShaders {
+public class ModelShaders extends DefaultShaderProvider implements GameShaders {
     private final GeomShaderConfig config;
 
-    public ModelViewShaderProvider(final GeomShaderConfig config) {
+    public ModelShaders(final GeomShaderConfig config) {
         super(config);
         this.config = config;
     }
 
-    public ModelViewShaderProvider(final String vertexShader, final String fragmentShader, String geometryShader) {
+    public ModelShaders(final String vertexShader, final String fragmentShader, String geometryShader) {
         this(new GeomShaderConfig(vertexShader, fragmentShader, geometryShader));
     }
 
-    public ModelViewShaderProvider(final FileHandle vertexShader, final FileHandle fragmentShader, FileHandle geometryShader) {
+    public ModelShaders(final FileHandle vertexShader, final FileHandle fragmentShader, FileHandle geometryShader) {
         this(vertexShader.readString(), fragmentShader.readString(), geometryShader.readString());
     }
 
-    public ModelViewShaderProvider() {
+    public ModelShaders() {
         this(new GeomShaderConfig());
     }
 

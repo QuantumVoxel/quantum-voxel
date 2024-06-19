@@ -87,8 +87,11 @@ public class BlockModelRegistry {
 
         for (Identifier texture : BlockModelRegistry.TEXTURES) {
             Texture emissive = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".emissive.png"), null);
+            Texture normal = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".normal.png"), null);
+            Texture specular = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".specular.png"), null);
+            Texture reflective = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".reflective.png"), null);
             if (emissive != null) {
-                stitcher.add(texture, textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".png")), emissive);
+                stitcher.add(texture, textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".png")), emissive, normal, specular, reflective);
             } else {
                 stitcher.add(texture, textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".png")));
             }

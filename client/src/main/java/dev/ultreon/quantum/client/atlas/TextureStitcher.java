@@ -22,6 +22,9 @@ import static dev.ultreon.quantum.client.QuantumClient.isOnMainThread;
 public class TextureStitcher implements Disposable {
     private final Map<Identifier, Texture> textures = new HashMap<>();
     private final Map<Identifier, Texture> emissiveTextures = new HashMap<>();
+    private final Map<Identifier, Texture> normalTextures = new HashMap<>();
+    private final Map<Identifier, Texture> specularTextures = new HashMap<>();
+    private final Map<Identifier, Texture> reflectiveTextures = new HashMap<>();
     private FrameBuffer fbo;
     private final Identifier atlasId;
 
@@ -38,6 +41,14 @@ public class TextureStitcher implements Disposable {
         this.emissiveTextures.put(id, emissive);
     }
 
+    public void add(Identifier id, Texture diffuse, Texture emissive, Texture normal, Texture specular, Texture reflective) {
+        this.textures.put(id, diffuse);
+        if (emissive != null) this.emissiveTextures.put(id, emissive);
+        if (normal != null) this.normalTextures.put(id, normal);
+        if (specular != null) this.specularTextures.put(id, specular);
+        if (reflective != null) this.reflectiveTextures.put(id, reflective);
+    }
+
     public TextureAtlas stitch() {
         if (!isOnMainThread()) {
             return QuantumClient.invokeAndWait(this::stitch);
@@ -51,8 +62,11 @@ public class TextureStitcher implements Disposable {
         Map<Identifier, TextureOffset> map = diffuseResult.uvMap().build();
 
         Result emissiveResult = this.generateAtlas(width, height, Type.EMISSIVE, this.emissiveTextures, map);
+        Result normalResult = this.generateAtlas(width, height, Type.NORMAL, this.normalTextures, map);
+        Result specularResult = this.generateAtlas(width, height, Type.SPECULAR, this.specularTextures, map);
+        Result reflectiveResult = this.generateAtlas(width, height, Type.REFLECTiVE, this.reflectiveTextures, map);
 
-        return new TextureAtlas(this, this.atlasId, diffuseResult.textureAtlas(), emissiveResult.textureAtlas(), map);
+        return new TextureAtlas(this, this.atlasId, diffuseResult.textureAtlas(), emissiveResult.textureAtlas(), normalResult.textureAtlas(), specularResult.textureAtlas(), reflectiveResult.textureAtlas(), map);
     }
 
     @NotNull
@@ -89,11 +103,6 @@ public class TextureStitcher implements Disposable {
             spriteBatch.flush();
 
             uvMap.put(id, textureOffset);
-
-            if (DebugFlags.DUMP_TEXTURE_ATLAS.enabled()) {
-                Pixmap frameBufferPixmap = Pixmap.createFromFrameBuffer(0, 0, width, height);
-                PixmapIO.writePNG(Gdx.files.local(String.format("%s.%s-%d.atlas-png", this.atlasId.toString().replace(':', '.').replace('/', '_'), type.name().toLowerCase(Locale.ROOT), x)), frameBufferPixmap);
-            }
 
             texHeight = Math.max(texture.getHeight(), texHeight);
             x += texture.getWidth();
@@ -195,6 +204,6 @@ public class TextureStitcher implements Disposable {
     }
 
     public enum Type {
-        DIFFUSE, EMISSIVE
+        DIFFUSE, EMISSIVE, NORMAL, SPECULAR, REFLECTiVE
     }
 }

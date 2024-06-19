@@ -63,7 +63,7 @@ public class DesktopWindow extends GameWindow {
 
     @Override
     public boolean isMaximized() {
-        return GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
+        return !SharedLibraryLoader.isMac && GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
     }
 
     @Override
