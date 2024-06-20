@@ -579,7 +579,7 @@ public final class WorldRenderer implements DisposableContainer {
             this.tmp.add(key.x(), key.y(), key.z());
 
             BlockProperties value = entry.getValue();
-            BlockModel blockModel = BlockModelRegistry.get(value);
+            BlockModel blockModel = BlockModelRegistry.get().get(value);
             if (!blockInstances.containsKey(key) && blockModel != null) {
                 Model model = blockModel.getModel();
                 if (model != null) {
@@ -787,6 +787,11 @@ public final class WorldRenderer implements DisposableContainer {
             Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
 
             this.setupMaterials(blockTex, emissiveBlockTex);
+
+            for (var entry : chunkModels.entrySet()) {
+                ClientChunk first = entry.getValue().getFirst();
+                unload(first);
+            }
 
             RenderLayer.BACKGROUND.destroy(moon);
             RenderLayer.BACKGROUND.destroy(sun);

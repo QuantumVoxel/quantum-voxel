@@ -119,7 +119,7 @@ public class GreedyMesher implements Mesher {
                     try {
                         BlockProperties curBlock = this.block(this.chunk, x, y, z);
                         if (curBlock == null) continue;
-                        BlockModel blockModel = BlockModelRegistry.get(curBlock);
+                        BlockModel blockModel = BlockModelRegistry.get().get(curBlock);
                         if (blockModel != null && !(blockModel instanceof BakedCubeModel)) {
                             this.chunk.addModel(new BlockPos(x, y, z), new ModelInstance(blockModel.getModel()));
                             continue;
@@ -189,7 +189,7 @@ public class GreedyMesher implements Mesher {
                     try {
                         BlockProperties curBlock = this.block(this.chunk, x, y, z);
                         if (curBlock == null) continue;
-                        BlockModel blockModel = BlockModelRegistry.get(curBlock);
+                        BlockModel blockModel = BlockModelRegistry.get().get(curBlock);
                         if (blockModel != null && !(blockModel instanceof BakedCubeModel)) {
                             continue;
                         }
@@ -273,7 +273,7 @@ public class GreedyMesher implements Mesher {
                     try {
                         BlockProperties curBlock = this.block(this.chunk, x, y, z);
                         if (curBlock == null) continue;
-                        BlockModel blockModel = BlockModelRegistry.get(curBlock);
+                        BlockModel blockModel = BlockModelRegistry.get().get(curBlock);
                         if (blockModel != null && !(blockModel instanceof BakedCubeModel)) {
                             continue;
                         }

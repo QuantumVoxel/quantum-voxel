@@ -3,7 +3,6 @@ package dev.ultreon.quantum.desktop;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
@@ -141,7 +140,6 @@ public class DesktopLauncher {
     }
 
     private static class WindowAdapter extends Lwjgl3WindowAdapter {
-        private Lwjgl3Window window;
 
         @Override
         public void created(Lwjgl3Window window) {
@@ -153,7 +151,6 @@ public class DesktopLauncher {
             gameWindow = new DesktopWindow(window);
 
             WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
-            this.window = window;
         }
 
         @Override

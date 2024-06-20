@@ -118,7 +118,7 @@ public final class Main implements ApplicationListener {
                     Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
                 }
             });
-            glProfiler.enable();
+//            glProfiler.enable();
         }
 
         try {

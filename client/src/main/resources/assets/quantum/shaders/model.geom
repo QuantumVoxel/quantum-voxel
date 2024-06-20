@@ -38,7 +38,7 @@ void main( void )
     for( int i=0; i<gl_in.length( ); ++i )
     {
         gl_Position = gl_in[i].gl_Position;
-        v_normal = normalize(u_normalMatrix * mat3(transpose(u_projViewWorldTrans)) * N);
+        normal = normalize(u_normalMatrix * mat3(transpose(u_projViewWorldTrans)) * N);
 
         v_modelNormal = gs_in[i].normal;
         v_diffuseUV = gs_in[i].diffuseUV;

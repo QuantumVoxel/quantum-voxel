@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.registry;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.LoadingContext;
 import dev.ultreon.quantum.collection.OrderedMap;
@@ -10,16 +9,13 @@ import dev.ultreon.quantum.tags.NamedTag;
 import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.registry.RegistryKey.ROOT;
 
-public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements RawIdMap<T>, Publisher<Registry<T>> {
+public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements RawIdMap<T> {
     public static final Registry<Registry<?>> REGISTRY = new Registry<>(new Builder<>(new Identifier("registry")), ROOT);
     private static final OrderedMap<RegistryKey<Registry<?>>, Registry<?>> REGISTRIES = new OrderedMap<>();
     private static Logger dumpLogger = (level, msg, t) -> {};
@@ -31,7 +27,6 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
     private final boolean overrideAllowed;
     private final boolean syncDisabled;
     private final RegistryKey<Registry<T>> key;
-    private final List<Subscriber<? super Registry<T>>> subscriptions = Lists.newArrayList();
     private final Map<Identifier, NamedTag<T>> tags = new HashMap<>();
 
     private Registry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {
@@ -260,33 +255,6 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
 
     public T get(RegistryKey<T> key) {
         return this.keyMap.get(key);
-    }
-
-    @Override
-    public void subscribe(Subscriber<? super Registry<T>> s) {
-        this.subscriptions.add(s);
-        s.onSubscribe(new Subscription() {
-            @Override
-            public void request(long n) {
-                // Do nothing
-            }
-
-            @Override
-            public void cancel() {
-                Registry.this.unsubscribe(s);
-            }
-        });
-    }
-
-    public void unsubscribe(Subscriber<? super Registry<T>> s) {
-        this.subscriptions.remove(s);
-    }
-
-    public void publish() {
-        for (Subscriber<? super Registry<T>> s : this.subscriptions) {
-            s.onNext(this);
-            s.onComplete();
-        }
     }
 
     public Optional<NamedTag<T>> getTag(Identifier identifier) {

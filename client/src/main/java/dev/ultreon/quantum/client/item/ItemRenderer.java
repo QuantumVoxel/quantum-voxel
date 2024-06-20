@@ -160,7 +160,7 @@ public class ItemRenderer implements Disposable {
     }
 
     private static Model getModel(BlockProperties block) {
-        BlockModel blockModel = BlockModelRegistry.get(block);
+        BlockModel blockModel = BlockModelRegistry.get().get(block);
         Model defaultModel = BakedCubeModel.defaultModel().getModel();
         if (blockModel == null) return defaultModel;
         Model model = blockModel.getModel();

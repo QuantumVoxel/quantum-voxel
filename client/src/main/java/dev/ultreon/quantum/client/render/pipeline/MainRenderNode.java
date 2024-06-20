@@ -31,7 +31,7 @@ public class MainRenderNode extends RenderNode {
     @NewInstance
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
-        Texture depthMap = textures.get("depth");
+        Texture depthTex = textures.get("depth");
         Texture skyboxTex = textures.get("skybox");
         Texture diffuseTex = textures.get("diffuse");
         Texture positionTex = textures.get("position");
@@ -46,11 +46,11 @@ public class MainRenderNode extends RenderNode {
 
         if (blurScale > 0f) {
             this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, positionTex);
+                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex);
             });
         } else {
             this.client.renderer.blurred(0, ClientConfig.blurRadius * 0, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, positionTex);
+                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex);
             });
         }
         this.client.renderer.getBatch().disableBlending();
@@ -77,14 +77,15 @@ public class MainRenderNode extends RenderNode {
         return input;
     }
 
-    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture positionTex) {
+    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex) {
         this.drawDiffuse(skyboxTex);
         this.client.spriteBatch.flush();
         this.client.modelBatch.flush();
         diffuseTex.bind(0);
         positionTex.bind(1);
         normalTex.bind(2);
-        reflectiveTex.bind(3);
+        depthTex.bind(3);
+        reflectiveTex.bind(4);
 
         FrameBuffer frameBuffer = this.getFrameBuffer();
         frameBuffer.begin();
@@ -92,11 +93,9 @@ public class MainRenderNode extends RenderNode {
         ShaderProgram program = this.program.get();
         program.setUniformi("uPosition", 0);
         program.setUniformi("uNormal", 1);
-        program.setUniformi("uDiffuse", 2);
+//        program.setUniformi("uDiffuse", 2);
         program.setUniformi("uReflective", 3);
         program.setUniformMatrix("view", client.camera.view);
-        program.setUniformMatrix("projection", client.camera.projection);
-        program.setUniformf("screenSize", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         program.setUniformf("maxDistance", ClientConfig.maxReflectDistance);
         program.setUniformf("thickness", 0.5f);
         program.setUniformf("resolution", 1.0f);

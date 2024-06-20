@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.sound;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -9,9 +10,7 @@ import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.SoundEvent;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ClientSoundRegistry {
     private Map<Identifier, Sound> soundMap = Collections.emptyMap();
@@ -36,5 +35,13 @@ public class ClientSoundRegistry {
 
     public Sound getSound(Identifier id) {
         return this.soundMap.get(id);
+    }
+
+    public void reload() {
+        Collection<Sound> old = List.copyOf(soundMap.values());
+        this.soundMap.clear();
+        old.forEach(Sound::dispose);
+
+        this.registerSounds();
     }
 }

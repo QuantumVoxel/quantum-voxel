@@ -195,6 +195,8 @@ class QuantumClientLoader implements Runnable {
         registerMenuScreens();
         RenderingRegistration.registerRendering(client);
 
+        client.j5ModelLoader = new Json5ModelLoader(client.getResourceManager());
+
         QuantumClient.LOGGER.info("Reloading resources");
         client.reloadResources();
 
@@ -209,18 +211,8 @@ class QuantumClientLoader implements Runnable {
 
         client.loadingOverlay.setProgress(0.98F);
 
-        Json5ModelLoader j5ModelLoader = new Json5ModelLoader(client.getResourceManager());
-
-        BlockModelRegistry.load(j5ModelLoader);
-        QuantumClient.LOGGER.info("Initializing sounds");
-        client.soundRegistry.registerSounds();
-
-        QuantumClient.LOGGER.info("Baking models");
-        BlockModelRegistry.bakeJsonModels(client);
-        client.bakedBlockModels = BlockModelRegistry.bake(client.blocksTextureAtlas);
-
         client.itemRenderer = QuantumClient.invokeAndWait(() -> new ItemRenderer(client));
-        client.itemRenderer.registerModels(j5ModelLoader);
+        client.itemRenderer.registerModels(client.j5ModelLoader);
         client.itemRenderer.loadModels(client);
 
         if (client.deferredWidth != null && client.deferredHeight != null) {

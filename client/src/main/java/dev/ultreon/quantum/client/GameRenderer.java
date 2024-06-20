@@ -53,11 +53,6 @@ public class GameRenderer implements Disposable {
 
         this.depthFbo = new FrameBuffer(Pixmap.Format.RGB888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-
-        ShaderProgram worldShaderProgram = ShaderPrograms.MAIN.get();
-        if (!worldShaderProgram.isCompiled()) {
-            LOGGER.error("Failed to compile model shader:\n{}", worldShaderProgram.getLog());
-        }
     }
 
     public void resize(int width, int height) {

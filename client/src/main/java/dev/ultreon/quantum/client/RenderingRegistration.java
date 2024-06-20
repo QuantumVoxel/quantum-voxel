@@ -82,42 +82,43 @@ public class RenderingRegistration {
      */
     private static void registerBlockModels() {
         // Register block models for grass block, log, and crafting bench
-        BlockModelRegistry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        BlockModelRegistry.register(Blocks.SNOWY_GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/snowy_grass"), QuantumClient.id("blocks/snowy_grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        BlockModelRegistry.register(Blocks.LOG, meta -> true , CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        BlockModelRegistry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/crafting_bench_top"), QuantumClient.id("blocks/crafting_bench_bottom"), QuantumClient.id("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        BlockModelRegistry registry = BlockModelRegistry.get();
+        registry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.SNOWY_GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/snowy_grass"), QuantumClient.id("blocks/snowy_grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.LOG, meta -> true , CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/crafting_bench_top"), QuantumClient.id("blocks/crafting_bench_bottom"), QuantumClient.id("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
 
         // Register block models for switch test block based on metadata
-        BlockModelRegistry.register(Blocks.META_SWITCH_TEST, meta -> meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_on"), QuantumClient.id("blocks/switch_on")));
-        BlockModelRegistry.register(Blocks.META_SWITCH_TEST, meta -> !meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_off"), QuantumClient.id("blocks/switch_off")));
+        registry.register(Blocks.META_SWITCH_TEST, meta -> meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_on"), QuantumClient.id("blocks/switch_on")));
+        registry.register(Blocks.META_SWITCH_TEST, meta -> !meta.<Boolean>getProperty("on").value, CubeModel.of(QuantumClient.id("blocks/switch_off"), QuantumClient.id("blocks/switch_off")));
 
         // Register block models for blast furnace with different rotations based on metadata
         for (CubicDirection direction : CubicDirection.HORIZONTAL) {
-            BlockModelRegistry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
-            BlockModelRegistry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            registry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            registry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>getProperty("lit").value && meta.<CubicDirection>getProperty("facing").value == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
         }
 
-        BlockModelRegistry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.TOP, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_top")));
-        BlockModelRegistry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.BOTTOM, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_bottom")));
-        BlockModelRegistry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.DOUBLE, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_double")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.TOP, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_top")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.BOTTOM, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_bottom")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>getProperty("type").value == SlabBlock.Type.DOUBLE, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_double")));
 
         // Trigger the block models factory registration event
         ClientRegistrationEvents.BLOCK_MODELS.factory().onRegister();
 
         // Register default block models for common blocks
-        BlockModelRegistry.registerDefault(Blocks.VOIDGUARD);
-        BlockModelRegistry.registerDefault(Blocks.ERROR);
-        BlockModelRegistry.registerDefault(Blocks.DIRT);
-        BlockModelRegistry.registerDefault(Blocks.SAND);
-        BlockModelRegistry.registerDefault(Blocks.SANDSTONE);
-        BlockModelRegistry.registerDefault(Blocks.GRAVEL);
-        BlockModelRegistry.registerDefault(Blocks.WATER);
-        BlockModelRegistry.registerDefault(Blocks.STONE);
-        BlockModelRegistry.registerDefault(Blocks.IRON_ORE);
-        BlockModelRegistry.registerDefault(Blocks.LEAVES);
-        BlockModelRegistry.registerDefault(Blocks.PLANKS);
-        BlockModelRegistry.registerDefault(Blocks.COBBLESTONE);
-        BlockModelRegistry.registerDefault(Blocks.TALL_GRASS);
+        registry.registerDefault(Blocks.VOIDGUARD);
+        registry.registerDefault(Blocks.ERROR);
+        registry.registerDefault(Blocks.DIRT);
+        registry.registerDefault(Blocks.SAND);
+        registry.registerDefault(Blocks.SANDSTONE);
+        registry.registerDefault(Blocks.GRAVEL);
+        registry.registerDefault(Blocks.WATER);
+        registry.registerDefault(Blocks.STONE);
+        registry.registerDefault(Blocks.IRON_ORE);
+        registry.registerDefault(Blocks.LEAVES);
+        registry.registerDefault(Blocks.PLANKS);
+        registry.registerDefault(Blocks.COBBLESTONE);
+        registry.registerDefault(Blocks.TALL_GRASS);
     }
 
     /**

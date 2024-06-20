@@ -144,10 +144,6 @@ out vec3 v_lightSpecular;
 uniform vec4 u_cameraPosition;
 #endif // cameraPositionFlag
 
-#ifdef fogFlag
-out float v_fog;
-#endif // fogFlag
-
 
 #if defined(numDirectionalLights) && (numDirectionalLights > 0)
 struct DirectionalLight
@@ -204,6 +200,7 @@ void main() {
 	vec4 v_color;
 	float v_opacity;
 	float v_alphaTest;
+	float v_fog;
 
 	#ifdef diffuseTextureFlag
 	v_diffuseUV = u_diffuseUVTransform.xy + a_texCoord0 * u_diffuseUVTransform.zw;
@@ -231,11 +228,9 @@ void main() {
 	vec4 pos = u_worldTrans * vec4(a_position, 1.0);
 	#endif
 
-	#ifdef fogFlag
-	vec3 flen = u_cameraPosition.xyz - pos.xyz;
-	float fog = dot(flen, flen) * u_cameraPosition.w;
+	vec3 flen = vec3(0.0) - pos.xyz;
+	float fog = dot(flen, flen) * 0.0;
 	v_fog = min(fog, 1.0);
-	#endif
 
 	gs_out.diffuseUV = v_diffuseUV;
 	gs_out.emissiveUV = v_emissiveUV;

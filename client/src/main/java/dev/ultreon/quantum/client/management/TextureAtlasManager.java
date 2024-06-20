@@ -47,7 +47,7 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
 
         atlasMap.clear();
 
-        this.client.blocksTextureAtlas = this.register(id("block"), BlockModelRegistry.stitch(this.client.getTextureManager()));
+        this.client.blocksTextureAtlas = this.register(id("block"), BlockModelRegistry.get().stitch(this.client.getTextureManager()));
 
         TextureStitcher itemTextures = new TextureStitcher(id("item"));
         for (Map.Entry<RegistryKey<Item>, Item> e : Registries.ITEM.entries()) {

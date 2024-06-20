@@ -2,6 +2,9 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
+import dev.ultreon.quantum.resources.ReloadContext;
+import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
@@ -22,23 +25,28 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class BlockModelRegistry {
-    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<CubeModel>>>> REGISTRY = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
-    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> CUSTOM_REGISTRY = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
-    private static final Set<Identifier> TEXTURES = new HashSet<>();
-    private static final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> FINISHED_REGISTRY = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+public class BlockModelRegistry implements ContextAwareReloadable {
+    private static final BlockModelRegistry INSTANCE = new BlockModelRegistry();
+    private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<CubeModel>>>> registry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private final Set<Identifier> TEXTURES = new HashSet<>();
+    private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> finishedRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
 
-    static {
-        BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking1"));
-        BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking2"));
-        BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking3"));
-        BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking4"));
-        BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking5"));
-        BlockModelRegistry.TEXTURES.add(new Identifier("misc/breaking6"));
+    public BlockModelRegistry() {
+        this.TEXTURES.add(new Identifier("misc/breaking1"));
+        this.TEXTURES.add(new Identifier("misc/breaking2"));
+        this.TEXTURES.add(new Identifier("misc/breaking3"));
+        this.TEXTURES.add(new Identifier("misc/breaking4"));
+        this.TEXTURES.add(new Identifier("misc/breaking5"));
+        this.TEXTURES.add(new Identifier("misc/breaking6"));
     }
 
-    public static BlockModel get(BlockProperties meta) {
-        for (Pair<Predicate<BlockProperties>, Supplier<BlockModel>> p : BlockModelRegistry.CUSTOM_REGISTRY.getOrDefault(meta.getBlock(), new ArrayList<>())) {
+    public static BlockModelRegistry get() {
+        return INSTANCE;
+    }
+
+    public BlockModel get(BlockProperties meta) {
+        for (Pair<Predicate<BlockProperties>, Supplier<BlockModel>> p : this.customRegistry.getOrDefault(meta.getBlock(), new ArrayList<>())) {
             if (p.getFirst().test(meta)) {
                 return p.getSecond().get();
             }
@@ -46,36 +54,36 @@ public class BlockModelRegistry {
         return null;
     }
 
-    public static void register(Block block, Predicate<BlockProperties> predicate, CubeModel model) {
-        BlockModelRegistry.REGISTRY.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, () -> model));
+    public void register(Block block, Predicate<BlockProperties> predicate, CubeModel model) {
+        this.registry.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, () -> model));
     }
 
-    public static void registerCustom(Block block, Predicate<BlockProperties> predicate, Supplier<BlockModel> model) {
-        BlockModelRegistry.CUSTOM_REGISTRY.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model::get)));
+    public void registerCustom(Block block, Predicate<BlockProperties> predicate, Supplier<BlockModel> model) {
+        this.customRegistry.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model)));
     }
 
-    public static void register(Supplier<Block> block, Predicate<BlockProperties> predicate, Supplier<CubeModel> model) {
-        BlockModelRegistry.REGISTRY.computeIfAbsent(block.get(), key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model::get)));
+    public void register(Supplier<Block> block, Predicate<BlockProperties> predicate, Supplier<CubeModel> model) {
+        this.registry.computeIfAbsent(block.get(), key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model)));
     }
 
-    public static void registerDefault(Block block) {
+    public void registerDefault(Block block) {
         Identifier key = Registries.BLOCK.getId(block);
         Preconditions.checkNotNull(key, "Block is not registered");
-        BlockModelRegistry.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
+        this.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
     }
 
-    public static void registerDefault(Supplier<Block> block) {
-        BlockModelRegistry.register(block, meta -> true, Suppliers.memoize(() -> {
+    public void registerDefault(Supplier<Block> block) {
+        this.register(block, meta -> true, Suppliers.memoize(() -> {
             Identifier key = Registries.BLOCK.getId(block.get());
             Preconditions.checkNotNull(key, "Block is not registered");
             return CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path));
         }));
     }
 
-    public static TextureAtlas stitch(TextureManager textureManager) {
+    public TextureAtlas stitch(TextureManager textureManager) {
         TextureStitcher stitcher = new TextureStitcher(QuantumClient.id("block"));
 
-        BlockModelRegistry.REGISTRY.values().stream().flatMap(Collection::stream).map(pair -> pair.getSecond().get().all()).forEach(BlockModelRegistry.TEXTURES::addAll);
+        this.registry.values().stream().flatMap(Collection::stream).map(pair -> pair.getSecond().get().all()).forEach(this.TEXTURES::addAll);
 
         final int breakStages = 6;
 
@@ -85,7 +93,7 @@ public class BlockModelRegistry {
             stitcher.add(texId, tex);
         }
 
-        for (Identifier texture : BlockModelRegistry.TEXTURES) {
+        for (Identifier texture : this.TEXTURES) {
             Texture emissive = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".emissive.png"), null);
             Texture normal = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".normal.png"), null);
             Texture specular = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".specular.png"), null);
@@ -100,9 +108,9 @@ public class BlockModelRegistry {
         return stitcher.stitch();
     }
 
-    public static BakedModelRegistry bake(TextureAtlas atlas) {
+    public BakedModelRegistry bake(TextureAtlas atlas) {
         ImmutableMap.Builder<Block, List<Pair<Predicate<BlockProperties>, BakedCubeModel>>> bakedModels = new ImmutableMap.Builder<>();
-        BlockModelRegistry.REGISTRY.forEach((block, models) -> {
+        this.registry.forEach((block, models) -> {
             List<Pair<Predicate<BlockProperties>, BakedCubeModel>> modelList = new ArrayList<>();
             for (var modelPair : models) {
                 var predicate = modelPair.getFirst();
@@ -117,29 +125,29 @@ public class BlockModelRegistry {
         return new BakedModelRegistry(atlas, bakedModels.build());
     }
 
-    public static void bakeJsonModels(QuantumClient client) {
-        for (var entry : CUSTOM_REGISTRY.entrySet()) {
+    public void bakeJsonModels(QuantumClient client) {
+        for (var entry : customRegistry.entrySet()) {
             List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>> models = new ArrayList<>();
             for (var pair : entry.getValue()) {
                 BlockModel model = pair.getSecond().get();
                 QuantumClient.invokeAndWait(() -> model.load(client));
                 models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
             }
-            FINISHED_REGISTRY.put(entry.getKey(), models);
+            finishedRegistry.put(entry.getKey(), models);
         }
     }
 
-    public static void load(Json5ModelLoader loader) {
+    public void load(Json5ModelLoader loader) {
         for (Block value : Registries.BLOCK.values()) {
-            if (!REGISTRY.containsKey(value)) {
+            if (!registry.containsKey(value)) {
                 try {
                     Json5Model load = loader.load(value);
                     if (load != null) {
-                        CUSTOM_REGISTRY.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> true, () -> load));
+                        customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> true, () -> load));
 
-                        load.getOverrides().cellSet().forEach((cell) -> CUSTOM_REGISTRY.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.getEntryUnsafe(cell.getRowKey()).equals(cell.getColumnKey()), cell::getValue)));
+                        load.getOverrides().cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.getEntryUnsafe(cell.getRowKey()).equals(cell.getColumnKey()), cell::getValue)));
                     } else if (value.doesRender()) {
-                        BlockModelRegistry.registerDefault(value);
+                        this.registerDefault(value);
                     }
                 } catch (IOException e) {
                     QuantumClient.LOGGER.error("Failed to load block model for " + value.getId(), e);
@@ -147,13 +155,25 @@ public class BlockModelRegistry {
             }
         }
 
-        for (var entry : CUSTOM_REGISTRY.entrySet()) {
+        for (var entry : customRegistry.entrySet()) {
             List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>> models = new ArrayList<>();
             for (var pair : entry.getValue()) {
                 BlockModel model = pair.getSecond().get();
                 models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
             }
-            FINISHED_REGISTRY.put(entry.getKey(), models);
+            finishedRegistry.put(entry.getKey(), models);
         }
+    }
+
+    @Override
+    public void reload(ResourceManager resourceManager, ReloadContext context) {
+        QuantumClient client = QuantumClient.get();
+        context.submit(() -> {
+            this.load(client.j5ModelLoader);
+
+            QuantumClient.LOGGER.info("Baking models");
+            this.bakeJsonModels(client);
+            client.bakedBlockModels = this.bake(client.blocksTextureAtlas);
+        });
     }
 }

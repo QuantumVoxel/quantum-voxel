@@ -62,6 +62,7 @@ import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BakedModelRegistry;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
+import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
 import dev.ultreon.quantum.client.network.system.ClientTcpConnection;
@@ -179,6 +180,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public VideoPlayer backgroundVideo = VideoPlayerCreator.createVideoPlayer();
     public TouchPoint motionPointer = null;
     public Vector2 scrollPointer = new Vector2();
+    public Json5ModelLoader j5ModelLoader;
     private boolean screenshotWorldOnly;
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
@@ -281,7 +283,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public TextureAtlas emmisiveTextureAtlas;
     @UnknownNullability
     public TextureAtlas itemTextureAtlas;
-    BakedModelRegistry bakedBlockModels;
+    public BakedModelRegistry bakedBlockModels;
 
     // Advanced Shadows
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
@@ -2011,7 +2013,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         List<Pair<Predicate<BlockProperties>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
 
         if (orDefault == null) {
-            BlockModel blockModel = BlockModelRegistry.get(block);
+            BlockModel blockModel = BlockModelRegistry.get().get(block);
             return Objects.requireNonNullElse(blockModel, BakedCubeModel.defaultModel());
 
         }
@@ -2021,7 +2023,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 .filter(pair -> pair.getFirst().test(block))
                 .findFirst()
                 .map(pair -> (BlockModel) pair.getSecond())
-                .orElseGet(() -> BlockModelRegistry.get(block));
+                .orElseGet(() -> BlockModelRegistry.get().get(block));
 
         if (blockModel == null) return BakedCubeModel.defaultModel();
 
@@ -2363,12 +2365,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.textureManager.reload(context);
         this.cubemapManager.reload(context);
         this.materialManager.reload(context);
+
+        QuantumClient.LOGGER.info("Initializing sounds");
+        this.soundRegistry.reload();
+
         this.entityModelManager.reload(this.resourceManager, context);
         this.entityRendererManager.reload(this.resourceManager, context);
         this.textureAtlasManager.reload(context);
+        this.shaderProgramManager.reload(context);
+        this.shaderProviderManager.reload(context);
         if (this.itemRenderer != null)
             this.itemRenderer.reload();
         this.skinManager.reload();
+
+        BlockModelRegistry.get().reload(resourceManager, context);
 
         RenderingRegistration.registerRendering(this);
 
