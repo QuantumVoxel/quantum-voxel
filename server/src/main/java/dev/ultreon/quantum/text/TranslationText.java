@@ -43,8 +43,7 @@ public class TranslationText extends MutableText {
         Object @NotNull [] objects = this.args;
         for (int i = 0, objectsLength = objects.length; i < objectsLength; i++) {
             Object arg = objects[i];
-            if (arg instanceof TextObject) {
-                TextObject textObject = (TextObject) arg;
+            if (arg instanceof TextObject textObject) {
                 objects[i] = textObject.createString();
             }
         }
@@ -61,11 +60,9 @@ public class TranslationText extends MutableText {
 
         ListType<MapType> argsData = new ListType<>();
         for (Object arg : this.args) {
-            if (arg instanceof TextObject) {
-                TextObject textObject = (TextObject) arg;
+            if (arg instanceof TextObject textObject) {
                 argsData.add(textObject.serialize());
-            } else if (arg instanceof String) {
-                String s = (String) arg;
+            } else if (arg instanceof String s) {
                 argsData.add(TextObject.literal(s).serialize());
             } else argsData.add(TextObject.literal(String.valueOf(arg)).serialize());
         }

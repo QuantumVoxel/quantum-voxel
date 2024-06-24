@@ -62,8 +62,7 @@ public class Overload {
 
         // Loop through all command parameters
         for(CommandParameter param : this.params) {
-            text: if (param instanceof CommandParameter.Text) {
-                CommandParameter.Text textParam = (CommandParameter.Text) param;
+            text: if (param instanceof CommandParameter.Text textParam) {
                 String[] text = textParam.getText();
                 List<String> strings = Arrays.asList(text.clone());
                 String arg;
@@ -84,8 +83,7 @@ public class Overload {
                 }
 
                 flag.set(flag.get() && strings.contains(arg));
-            } else if (param instanceof CommandParameter.ArgumentType) {
-                CommandParameter.ArgumentType t = (CommandParameter.ArgumentType) param;
+            } else if (param instanceof CommandParameter.ArgumentType t) {
                 try {
                     local.add(t.getParser().parse(context));
                 } catch (CommandParseException e) {

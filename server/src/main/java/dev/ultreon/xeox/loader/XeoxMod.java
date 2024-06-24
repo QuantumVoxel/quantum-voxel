@@ -72,8 +72,7 @@ public class XeoxMod implements Mod {
         enable();
 
         Object init = scope.get("init");
-        if (init instanceof NativeFunction) {
-            NativeFunction func = (NativeFunction) init;
+        if (init instanceof NativeFunction func) {
             func.call(cx, scope, scope, new Object[0]);
         } else {
             System.out.println("init = " + init.getClass().getSuperclass().getName());
@@ -95,8 +94,7 @@ public class XeoxMod implements Mod {
         }
 
         Object onEnable = scope.get("onEnable", scope);
-        if (onEnable instanceof FunctionObject) {
-            FunctionObject func = (FunctionObject) onEnable;
+        if (onEnable instanceof FunctionObject func) {
             func.call(cx, scope, scope, new Object[0]);
         }
     }
@@ -151,8 +149,7 @@ public class XeoxMod implements Mod {
      */
     public void disable() {
         Object onDisable = scope.get("onDisable", scope);
-        if (onDisable instanceof FunctionObject) {
-            FunctionObject func = (FunctionObject) onDisable;
+        if (onDisable instanceof FunctionObject func) {
             func.call(cx, scope, scope, new Object[0]);
             scope = null;
         }

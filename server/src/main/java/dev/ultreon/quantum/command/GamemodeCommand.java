@@ -19,8 +19,7 @@ public class GamemodeCommand extends Command {
     @DefineCommand("<game-mode>")
     @Perm("quantum.commands.gamemode.self")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, GameMode gamemode) {
-        if (!(sender instanceof Player)) return this.needPlayer();
-        Player target = (Player) sender;
+        if (!(sender instanceof Player target)) return this.needPlayer();
 
         target.setGameMode(gamemode);
 

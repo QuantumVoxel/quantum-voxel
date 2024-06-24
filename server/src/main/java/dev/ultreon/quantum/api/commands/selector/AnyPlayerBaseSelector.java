@@ -52,8 +52,7 @@ public class AnyPlayerBaseSelector extends BaseSelector<CacheablePlayer> {
                             return new Result<>((ServerPlayer) target0, null);
                         }
                     case "me":
-                        if (this.sender instanceof ServerPlayer) {
-                            ServerPlayer serverPlayer = (ServerPlayer) this.sender;
+                        if (this.sender instanceof ServerPlayer serverPlayer) {
                             return new Result<>(serverPlayer, null);
                         } else {
                             return new Result<>(null, new NeedPlayerError());

@@ -20,12 +20,10 @@ in MED vec2 v_diffuseUV;
 in MED vec2 v_emissiveUV;
 in MED vec2 v_normalUV;
 in MED vec2 v_specularUV;
-in MED vec2 v_reflectiveUV;
 uniform sampler2D u_diffuseTexture;
 uniform sampler2D u_emissiveTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_specularTexture;
-uniform sampler2D u_reflectiveTexture;
 uniform vec4 u_fogColor;
 in float v_fog;
 in vec3 v_position;
@@ -132,7 +130,6 @@ layout(location = 5) out vec4 specularOut;
 void main() {
     vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
     vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
-    vec2 v_reflectiveTexUV = transformUV(v_reflectiveUV);
 
     vec3 normal = v_normal;
 
@@ -151,7 +148,6 @@ void main() {
     light += (blockLight.rgb - (light * blockLight.rgb));
 
     vec3 emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
-    vec4 reflective = texture(u_reflectiveTexture, v_reflectiveTexUV);
     diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
 
     float depth = gl_FragCoord.z / gl_FragCoord.w;
@@ -171,7 +167,6 @@ void main() {
     diffuseOut.rgb = mix(diffuseOut.rgb, vec3(u_fogColor), v_fog);
     positionOut = v_position;
     normalOut = normal;
-    reflectiveOut = vec3(1.0 - reflective.a);
     specularOut = vec4(0.0, 0.0, 0.0, 0.0);
     depthOut = depthIn3Channels;
 }

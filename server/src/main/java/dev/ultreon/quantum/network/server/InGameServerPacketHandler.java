@@ -134,8 +134,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
-            if (item instanceof ToolItem && block.getEffectiveTool() == ((ToolItem) item).getToolType()) {
-                ToolItem toolItem = (ToolItem) item;
+            if (item instanceof ToolItem toolItem && block.getEffectiveTool() == ((ToolItem) item).getToolType()) {
                 efficiency = toolItem.getEfficiency();
             }
 

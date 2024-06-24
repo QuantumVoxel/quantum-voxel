@@ -278,8 +278,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 openMenu.setItem(index, stack);
             }
 
-            if (this.client.screen instanceof ContainerScreen) {
-                ContainerScreen screen = (ContainerScreen) this.client.screen;
+            if (this.client.screen instanceof ContainerScreen screen) {
                 screen.emitUpdate();
             }
         }
@@ -293,8 +292,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             Inventory inventory = player.inventory;
             inventory.setItem(index, stack);
 
-            if (this.client.screen instanceof InventoryScreen) {
-                InventoryScreen screen = (InventoryScreen) this.client.screen;
+            if (this.client.screen instanceof InventoryScreen screen) {
                 screen.emitUpdate();
             }
         }
@@ -353,8 +351,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onTabCompleteResult(String[] options) {
         Screen screen = this.client.screen;
-        if (screen instanceof ChatScreen) {
-            ChatScreen chatScreen = (ChatScreen) screen;
+        if (screen instanceof ChatScreen chatScreen) {
             QuantumClient.invoke(() -> chatScreen.onTabComplete(options));
         }
     }

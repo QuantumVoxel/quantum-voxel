@@ -262,8 +262,7 @@ public class LivingEntity extends Entity {
     }
 
     protected void removeDead() {
-        if (this.world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) this.world;
+        if (this.world instanceof ServerWorld serverWorld) {
             serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CRemoveEntityPacket(this.getId()));
         }
 

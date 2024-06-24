@@ -59,9 +59,6 @@ public abstract class CraftyConfig {
 
         // Add a shutdown hook to handle cleanup tasks
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            // Shutdown the scheduled task
-            WATCHER.shutdown();
-
             try {
                 // Close the watch service
                 WATCH_SERVICE.close();
@@ -74,6 +71,9 @@ public abstract class CraftyConfig {
             for (CraftyConfig config : CONFIGS.values()) {
                 config.save();
             }
+
+            // Shutdown the scheduled task
+            WATCHER.shutdown();
         }));
     }
 
@@ -427,7 +427,7 @@ public abstract class CraftyConfig {
         // Traverse the path and create any missing objects
         for (int i = 0; i < parts.length - 1; i++) {
             Json5Element tempCurrent = current.get(parts[i]);
-            if (tempCurrent == null || !(tempCurrent instanceof Json5Object)) {
+            if (tempCurrent == null || !(tempCurrent instanceof Json5Object object)) {
                 // Create a new JSON object if the current element is missing
                 Json5Object newValue = new Json5Object();
                 tempCurrent = newValue;
@@ -436,7 +436,6 @@ public abstract class CraftyConfig {
                 current = newValue;
                 continue;
             }
-            Json5Object object = (Json5Object) tempCurrent;
 
             current = object;
         }

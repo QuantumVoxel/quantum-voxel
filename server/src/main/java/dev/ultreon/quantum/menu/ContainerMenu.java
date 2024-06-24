@@ -103,8 +103,7 @@ public abstract class ContainerMenu {
      */
     protected void onItemChanged(ItemSlot slot) {
         for (Player player : this.watching) {
-            if (player instanceof ServerPlayer) {
-                ServerPlayer serverPlayer = (ServerPlayer) player;
+            if (player instanceof ServerPlayer serverPlayer) {
                 Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
                 if (packet != null) {
                     serverPlayer.connection.send(packet);
@@ -264,8 +263,7 @@ public abstract class ContainerMenu {
 
     @CanIgnoreReturnValue
     protected int inventoryMenu(int idx, int offX, int offY) {
-        if (getEntity() instanceof Player) {
-            Player player = (Player) getEntity();
+        if (getEntity() instanceof Player player) {
             for (int x = 0; x < 9; x++) {
                 this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 83));
             }

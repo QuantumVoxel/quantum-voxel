@@ -249,8 +249,7 @@ public class DebugOverlay {
     }
 
     public void updateProfiler() {
-        if (this.getPage() instanceof ProfilerDebugPage) {
-            ProfilerDebugPage profilerPage = (ProfilerDebugPage) this.getPage();
+        if (this.getPage() instanceof ProfilerDebugPage profilerPage) {
             var profiler = this.client.profiler;
             profilerPage.profile = profiler.collect();
         }

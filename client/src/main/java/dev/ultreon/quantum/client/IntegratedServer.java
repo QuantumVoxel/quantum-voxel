@@ -260,8 +260,7 @@ public class IntegratedServer extends QuantumServer {
             this.client.worldRenderer = new WorldRenderer(this.client.world);
             this.client.renderWorld = true;
 
-            if (this.client.screen instanceof WorldLoadScreen) {
-                WorldLoadScreen loadScreen = (WorldLoadScreen) this.client.screen;
+            if (this.client.screen instanceof WorldLoadScreen loadScreen) {
                 loadScreen.done();
                 this.client.showScreen(null);
             }

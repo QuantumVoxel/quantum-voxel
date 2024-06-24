@@ -65,8 +65,7 @@ public class CommandParserImpl {
             // Loop all arguments.
             final var i = new AtomicInteger();
             for (var param : overload.args()) {
-                if (param instanceof CommandParameter.Text) {
-                    CommandParameter.Text text = (CommandParameter.Text) param;
+                if (param instanceof CommandParameter.Text text) {
                     String[] strings = text.getText();
                     final var values = new CommandSpecValues();
                     final var duplicateValues = new CommandSpecValues();

@@ -19,7 +19,6 @@ plugins {
 include 'desktop-merge'
 include 'gameprovider'
 include 'desktop'
-include 'teavm'
 include 'client'
 include 'server'
 include 'testmod'

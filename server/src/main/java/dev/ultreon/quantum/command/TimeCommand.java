@@ -16,11 +16,9 @@ public class TimeCommand extends Command {
 
     @DefineCommand("add <int>")
     public @Nullable CommandResult executeAdd(CommandSender sender, CommandContext commandContext, String alias, int time) {
-        if (!(sender instanceof Player)) return this.needPlayer();
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return this.needPlayer();
 
-        if (player instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer) player;
+        if (player instanceof ServerPlayer serverPlayer) {
             serverPlayer.connection.send(new S2CTimePacket(S2CTimePacket.Operation.ADD, time));
         }
 
@@ -29,11 +27,9 @@ public class TimeCommand extends Command {
 
     @DefineCommand("set <int>")
     public @Nullable CommandResult executeSet(CommandSender sender, CommandContext commandContext, String alias, int time) {
-        if (!(sender instanceof Player)) return this.needPlayer();
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return this.needPlayer();
 
-        if (player instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer) player;
+        if (player instanceof ServerPlayer serverPlayer) {
             serverPlayer.connection.send(new S2CTimePacket(S2CTimePacket.Operation.SET, time));
         }
 
@@ -42,11 +38,9 @@ public class TimeCommand extends Command {
 
     @DefineCommand("sub <int>")
     public @Nullable CommandResult executeSubtract(CommandSender sender, CommandContext commandContext, String alias, int time) {
-        if (!(sender instanceof Player)) return this.needPlayer();
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return this.needPlayer();
 
-        if (player instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer) player;
+        if (player instanceof ServerPlayer serverPlayer) {
             serverPlayer.connection.send(new S2CTimePacket(S2CTimePacket.Operation.SUB, time));
         }
 

@@ -15,8 +15,7 @@ public class FlyCommand extends Command {
     @DefineCommand
     @Perm("quantum.commands.flight.self")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias) {
-        if (!(sender instanceof Player)) return this.needPlayer();
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return this.needPlayer();
 
         player.setAllowFlight(!player.isAllowFlight());
 

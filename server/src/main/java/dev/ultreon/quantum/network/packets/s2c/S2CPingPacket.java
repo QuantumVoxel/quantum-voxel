@@ -28,8 +28,7 @@ public class S2CPingPacket extends Packet<ClientPacketHandler> {
 
     @Override
     public void handle(PacketContext ctx, ClientPacketHandler handler) {
-        if (handler instanceof InGameClientPacketHandler) {
-            InGameClientPacketHandler inGameHandler = (InGameClientPacketHandler) handler;
+        if (handler instanceof InGameClientPacketHandler inGameHandler) {
             inGameHandler.onPing(this.serverTime, this.time);
         }
     }

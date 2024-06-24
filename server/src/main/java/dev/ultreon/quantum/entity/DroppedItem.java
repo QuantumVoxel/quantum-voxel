@@ -52,8 +52,7 @@ public class DroppedItem extends Entity {
 
         if (this.pickupDelay <= 0) {
             for (Entity entity : this.world.entitiesWithinDst(this, 4)) {
-                if (entity instanceof Player) {
-                    Player player = (Player) entity;
+                if (entity instanceof Player player) {
                     double deltaX = (player.getX() - this.getX()) / 10;
                     double deltaY = (player.getY() - this.getY()) / 10;
                     double deltaZ = (player.getZ() - this.getZ()) / 10;
@@ -63,8 +62,7 @@ public class DroppedItem extends Entity {
 
             for (Entity entity : this.world.collideEntities(this, getBoundingBox().ext(0.5, 0.5, 0.5))) {
                 if (this.isMarkedForRemoval()) continue;
-                if (entity instanceof ServerPlayer) {
-                    ServerPlayer player = (ServerPlayer) entity;
+                if (entity instanceof ServerPlayer player) {
                     this.markRemoved();
                     player.inventory.addItem(this.stack);
                 }

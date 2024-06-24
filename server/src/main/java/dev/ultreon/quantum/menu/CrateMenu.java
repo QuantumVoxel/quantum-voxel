@@ -37,8 +37,7 @@ public class CrateMenu extends BlockContainerMenu {
     private static CrateBlockEntity getBlockEntity(@NotNull World world, @Nullable BlockPos pos) {
         if (pos == null) return null;
         BlockEntity blockEntity1 = world.getBlockEntity(pos);
-        if (!(blockEntity1 instanceof CrateBlockEntity)) return null;
-        CrateBlockEntity crate = (CrateBlockEntity) blockEntity1;
+        if (!(blockEntity1 instanceof CrateBlockEntity crate)) return null;
         return crate;
     }
 

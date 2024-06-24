@@ -114,8 +114,7 @@ public class ExceptionMap {
             s.sendMessage("[B-0002] Illegal or invalid command: " + thrown.getMessage());
         } else if (thrown instanceof SpecSyntaxException) {
             s.sendMessage("[SRV-0001] Syntax error: " + thrown.getMessage());
-        } else if (thrown instanceof OverloadConflictException) {
-            OverloadConflictException overloadConflictException = (OverloadConflictException) thrown;
+        } else if (thrown instanceof OverloadConflictException overloadConflictException) {
             s.sendMessage("[SRV-0004] Overload conflicts for commands: " + StringUtils.join(overloadConflictException.getAliases(), ", ") + ": " + thrown.getMessage());
         } else if (thrown instanceof UnsupportedOperationException) {
             s.sendMessage("[J-0001] Unsupported operation: " + thrown.getMessage());

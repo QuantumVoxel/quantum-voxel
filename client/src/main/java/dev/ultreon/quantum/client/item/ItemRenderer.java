@@ -217,8 +217,7 @@ public class ItemRenderer implements Disposable {
     public void registerModels(Json5ModelLoader loader) {
         Registries.ITEM.values().forEach((e) -> {
             try {
-                if (e instanceof BlockItem) {
-                    BlockItem blockItem = (BlockItem) e;
+                if (e instanceof BlockItem blockItem) {
                     this.registerBlockModel(blockItem, () -> this.client.getBlockModel(blockItem.createBlockMeta()));
                     return;
                 }
@@ -237,9 +236,8 @@ public class ItemRenderer implements Disposable {
     }
 
     private void fallbackModel(Item e) {
-        if (e instanceof BlockItem) {
-            BlockItem blockItem = (BlockItem) e;
-//            this.registerBlockModel(blockItem, () -> this.client.getBakedBlockModel(blockItem.createBlockMeta()));
+        if (e instanceof BlockItem blockItem) {
+            //            this.registerBlockModel(blockItem, () -> this.client.getBakedBlockModel(blockItem.createBlockMeta()));
         }
     }
 

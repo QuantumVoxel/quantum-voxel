@@ -330,8 +330,7 @@ public abstract class Player extends LivingEntity {
             return;
         }
 
-        if (this instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer) this;
+        if (this instanceof ServerPlayer serverPlayer) {
             MenuEvents.MENU_CLOSE.factory().onMenuClose(this.openMenu, serverPlayer);
         }
 

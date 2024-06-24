@@ -1554,11 +1554,14 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             LOGGER.error("Double crash detected, ignoring.");
             return;
         }
+
         crashing = true;
         try {
             var crashLog = crash.getCrashLog();
             CrashHandler.handleCrash(crashLog);
-            Main.displayCrash(crash);
+            String string = crashLog.toString();
+            LOGGER.error("Dumping crash report...\n" + string);
+            Gdx.app.exit();
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
             System.exit(1);

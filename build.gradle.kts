@@ -244,7 +244,7 @@ artifacts {
 }
 
 val publishProjects =
-    listOf(project(":client"), project(":desktop"), project(":server"), project(":teavm"), project(":gameprovider"))
+    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"))
 
 publishProjects.forEach {
     if (it.name == "android") return@forEach

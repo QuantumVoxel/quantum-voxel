@@ -477,8 +477,7 @@ public class DesktopInput extends GameInput {
     private void doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
         // Get the position and metadata of the current and next blocks
         Vec3i pos = hitResult.getPos();
-        if (hitResult instanceof BlockHitResult){
-            BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+        if (hitResult instanceof BlockHitResult blockHitResult){
             BlockProperties block = world.get(new BlockPos(pos));
             Vec3i posNext = blockHitResult.getNext();
             BlockProperties blockNext = world.get(new BlockPos(posNext));
@@ -508,8 +507,7 @@ public class DesktopInput extends GameInput {
             if (button == Input.Buttons.RIGHT && blockNext != null && blockNext.isAir()) {
                 this.useItem(player, world, blockHitResult);
             }
-        } else if (hitResult instanceof EntityHitResult) {
-            EntityHitResult entityHitResult = (EntityHitResult) hitResult;
+        } else if (hitResult instanceof EntityHitResult entityHitResult) {
             if (!entityHitResult.isCollide()) {
                 return;
             }

@@ -37,10 +37,9 @@ public class NamedTag<T> {
         }
         Json5Element rootElem = res.loadJson5();
 
-        if (!(rootElem instanceof Json5Object)) {
+        if (!(rootElem instanceof Json5Object root)) {
             return;
         }
-        Json5Object root = (Json5Object) rootElem;
 
         for (Json5Element elem : root.getAsJson5Array("elements")) {
             if (!elem.isJson5Primitive() || !elem.getAsJson5Primitive().isString()) {

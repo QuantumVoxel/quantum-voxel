@@ -508,8 +508,7 @@ public class BBModelLoader implements ModelImporter {
 
     private void extracted(List<BBModelOutlineInfo> data, BBModelGroup parent, ModelBuilder groupBuilder, Map<UUID, ModelBuilder> subNodes0, Map<UUID, Node> nodes, Map<Integer, BBTexture> texture2texture) {
         for (BBModelOutlineInfo node : data) {
-            if (node instanceof BBModelGroup) {
-                BBModelGroup group = (BBModelGroup) node;
+            if (node instanceof BBModelGroup group) {
                 group.parent = parent;
                 ModelBuilder wrapperBuilder = new ModelBuilder();
                 wrapperBuilder.begin();
@@ -526,8 +525,7 @@ public class BBModelLoader implements ModelImporter {
                 wrapper.calculateLocalTransform();
 
                 nodes.put(group.uuid(), wrapper);
-            } else if (node instanceof BBModelElementReference) {
-                BBModelElementReference ref = (BBModelElementReference) node;
+            } else if (node instanceof BBModelElementReference ref) {
                 writeElement(groupBuilder, parent, subNodes0, nodes, texture2texture, ref);
             }
         }

@@ -38,8 +38,7 @@ public final class CrashLog extends CrashCategory {
     public CrashLog(String details, Throwable t) {
         super(details, t);
 
-        if (t instanceof ApplicationCrash) {
-            ApplicationCrash crash = (ApplicationCrash) t;
+        if (t instanceof ApplicationCrash crash) {
             this.addCrash(crash);
         }
     }

@@ -17,8 +17,7 @@ public class SummonItemCommand extends Command {
 
     @DefineCommand("<item>")
     public @Nullable CommandResult execute(CommandSender sender, CommandContext commandContext, String alias, Item item) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (sender instanceof Player player) {
             DroppedItem droppedItem = new DroppedItem(player.getWorld(), item.defaultStack(), player.getPosition(), new Vec3d());
             player.getWorld().spawn(droppedItem);
             return successMessage("Spawned " + droppedItem.getName() + " item");

@@ -38,8 +38,7 @@ public class AdvancedVertexInfo extends MeshPartBuilder.VertexInfo {
     @Override
     public AdvancedVertexInfo set(MeshPartBuilder.VertexInfo other) {
         if (other == null) return this.set(null, null, null, null);
-        if (other instanceof AdvancedVertexInfo) {
-            AdvancedVertexInfo info = (AdvancedVertexInfo) other;
+        if (other instanceof AdvancedVertexInfo info) {
             this.lightLevelData = info.lightLevelData;
             return (AdvancedVertexInfo) super.set(other);
         }
@@ -89,8 +88,7 @@ public class AdvancedVertexInfo extends MeshPartBuilder.VertexInfo {
     @Override
     public AdvancedVertexInfo lerp(MeshPartBuilder.VertexInfo target, float alpha) {
         if (target == null) return this.lerp(null, alpha);
-        if (target instanceof AdvancedVertexInfo) {
-            AdvancedVertexInfo info = (AdvancedVertexInfo) target;
+        if (target instanceof AdvancedVertexInfo info) {
             double blockLerp = Mth.lerp(this.lightLevelData.blockBrightness(), info.lightLevelData.blockBrightness(), alpha);
             double sunLerp = Mth.lerp(this.lightLevelData.sunBrightness(), info.lightLevelData.sunBrightness(), alpha);
             AdvancedVertexInfo infoLerp = (AdvancedVertexInfo) super.lerp(target, alpha);

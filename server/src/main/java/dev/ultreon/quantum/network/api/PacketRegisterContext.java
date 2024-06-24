@@ -52,13 +52,10 @@ public class PacketRegisterContext {
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException("Couldn't decode packet " + construct.getClass().getName() + " because it couldn't be accessed.", e);
                     } catch (InvocationTargetException e) {
-                        if (e.getCause() instanceof DecoderException) {
-                            DecoderException ex = (DecoderException) e.getCause();
+                        if (e.getCause() instanceof DecoderException ex) {
                             throw ex;
-                        } else if (e.getCause() instanceof InstantiationException) {
-                            InstantiationException ex = (InstantiationException) e.getCause();
-                            if (ex.getCause() instanceof DecoderException) {
-                                DecoderException ex2 = (DecoderException) ex.getCause();
+                        } else if (e.getCause() instanceof InstantiationException ex) {
+                            if (ex.getCause() instanceof DecoderException ex2) {
                                 throw ex2;
                             }
                         }

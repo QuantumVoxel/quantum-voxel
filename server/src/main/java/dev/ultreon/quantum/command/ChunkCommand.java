@@ -34,8 +34,7 @@ public class ChunkCommand extends Command {
 
         server.execute(() -> {
             Chunk chunkAt = serverWorld.getChunkAt(location.getBlockPos());
-            if (chunkAt instanceof ServerChunk) {
-                ServerChunk serverChunk = (ServerChunk) chunkAt;
+            if (chunkAt instanceof ServerChunk serverChunk) {
                 MapType save = serverChunk.save();
 
                 try {

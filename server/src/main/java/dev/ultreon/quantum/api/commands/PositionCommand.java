@@ -14,10 +14,9 @@ public class PositionCommand extends Command {
 
     @DefineCommand(value = "(1|1st|first)", comment = "Sets first region selection to current position")
     public CommandResult executeFirst(CommandSender sender, CommandContext commandCtx, String alias) {
-        if (!(sender instanceof Entity)) {
+        if (!(sender instanceof Entity entity)) {
             return this.needEntity();
         }
-        Entity entity = (Entity) sender;
         PositionSelection positions = Selections.get(sender).positions;
         if (!positions.world.equals(entity.getWorld())) {
             positions.reset(entity.getWorld());
@@ -48,10 +47,9 @@ public class PositionCommand extends Command {
 
     @DefineCommand(value = "(2|2nd|second)", comment = "Sets second region selection to current position")
     public CommandResult executeSecond(CommandSender sender, CommandContext commandCtx, String alias) {
-        if (!(sender instanceof Entity)) {
+        if (!(sender instanceof Entity entity)) {
             return this.needEntity();
         }
-        Entity entity = (Entity) sender;
         PositionSelection positions = Selections.get(sender).positions;
         if (!positions.world.equals(entity.getWorld())) {
             positions.reset(entity.getWorld());

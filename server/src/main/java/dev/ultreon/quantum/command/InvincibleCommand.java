@@ -14,8 +14,7 @@ public class InvincibleCommand extends Command {
 
     @DefineCommand
     public @Nullable CommandResult executeCoords(CommandSender sender, CommandContext commandContext, String alias) {
-        if (!(sender instanceof Player)) return this.needPlayer();
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return this.needPlayer();
 
         player.setInvincible(!player.isInvincible());
 

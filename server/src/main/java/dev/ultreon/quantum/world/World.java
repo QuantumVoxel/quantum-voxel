@@ -201,13 +201,11 @@ public abstract class World implements ServerDisposable {
     }
 
     private static void fail(Throwable throwable, String msg) {
-        if (throwable instanceof CompletionException && ((CompletionException) throwable).getCause() instanceof Error) {
-            CompletionException e = (CompletionException) throwable;
+        if (throwable instanceof CompletionException e && ((CompletionException) throwable).getCause() instanceof Error) {
             Error error = (Error) e.getCause();
             QuantumServer.get().crash(throwable);
         }
-        if (throwable instanceof Error) {
-            Error error = (Error) throwable;
+        if (throwable instanceof Error error) {
             QuantumServer.get().crash(throwable);
         }
 

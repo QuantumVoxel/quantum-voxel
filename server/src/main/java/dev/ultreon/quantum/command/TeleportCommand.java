@@ -18,8 +18,7 @@ public class TeleportCommand extends Command {
 
     @DefineCommand("at <position>")
     public @Nullable CommandResult executeCoords(CommandSender sender, CommandContext commandContext, String alias, Vec3d position) {
-        if (!(sender instanceof ServerPlayer)) return this.needPlayer();
-        ServerPlayer player = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         player.teleportTo(position);
 
@@ -28,8 +27,7 @@ public class TeleportCommand extends Command {
 
     @DefineCommand("at <position> <world>")
     public @Nullable CommandResult executeCoordsInWorld(CommandSender sender, CommandContext commandContext, String alias, Vec3d position, ServerWorld world) {
-        if (!(sender instanceof ServerPlayer)) return this.needPlayer();
-        ServerPlayer player = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         player.teleportDimension(position, world);
 
@@ -38,8 +36,7 @@ public class TeleportCommand extends Command {
 
     @DefineCommand("relative <position>")
     public @Nullable CommandResult executeRelative(CommandSender sender, CommandContext commandContext, String alias, Vec3d offset) {
-        if (!(sender instanceof ServerPlayer)) return this.needPlayer();
-        ServerPlayer player = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         player.teleportTo(player.getPosition().add(offset));
 
@@ -48,8 +45,7 @@ public class TeleportCommand extends Command {
 
     @DefineCommand("relative <position> <world>")
     public @Nullable CommandResult executeRelativeInWorld(CommandSender sender, CommandContext commandContext, String alias, Vec3d offset, ServerWorld world) {
-        if (!(sender instanceof ServerPlayer)) return this.needPlayer();
-        ServerPlayer player = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         player.teleportDimension(player.getPosition().add(offset), world);
 
@@ -58,8 +54,7 @@ public class TeleportCommand extends Command {
 
     @DefineCommand("to <entity>")
     public @Nullable CommandResult executePlayer(CommandSender sender, CommandContext commandContext, String alias, Entity target) {
-        if (!(sender instanceof ServerPlayer)) return this.needPlayer();
-        ServerPlayer player = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         player.teleportTo(target);
 
@@ -68,8 +63,7 @@ public class TeleportCommand extends Command {
 
     @DefineCommand("entity <entity> to <player>")
     public @Nullable CommandResult executeEntity(CommandSender sender, CommandContext commandContext, String alias, Entity source, Player target) {
-        if (!(sender instanceof ServerPlayer)) return this.needPlayer();
-        ServerPlayer player = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer player)) return this.needPlayer();
 
         source.teleportTo(target);
 

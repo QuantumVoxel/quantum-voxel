@@ -209,8 +209,7 @@ public interface CommandParameter {
      * @return the CommandParameter
      */
     default @This CommandParameter ifArgType(Consumer<ArgumentType> consumer) {
-        if (this instanceof ArgumentType) {
-            ArgumentType argType = (ArgumentType) this;
+        if (this instanceof ArgumentType argType) {
             consumer.accept(argType);
         }
         return this;
@@ -223,8 +222,7 @@ public interface CommandParameter {
      * @return the CommandParameter
      */
     default @This CommandParameter ifText(Consumer<String[]> consumer) {
-        if (this instanceof Text) {
-            Text text = (Text) this;
+        if (this instanceof Text text) {
             consumer.accept(text.text);
         }
         return this;

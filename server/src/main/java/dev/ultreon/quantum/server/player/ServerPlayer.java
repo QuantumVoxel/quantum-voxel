@@ -760,8 +760,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         Entity entity = this.world.getEntity(id);
         if (entity == null) return;
         this.world.sendAllTrackingExcept((int) entity.getX(), (int) entity.getY(), (int) entity.getZ(), new S2CPlayerAttackPacket(this.getId(), id), this);
-        if (entity instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity) entity;
+        if (entity instanceof LivingEntity livingEntity) {
             livingEntity.hurt(this.getAttackDamage(), DamageSource.PLAYER);
         }
     }

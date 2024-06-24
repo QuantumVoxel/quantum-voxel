@@ -337,8 +337,7 @@ public abstract class Chunk implements ServerDisposable, ChunkAccess {
             this.disposed = true;
             this.ready = false;
 
-            if (this.storage instanceof ServerDisposable) {
-                ServerDisposable disposable = (ServerDisposable) this.storage;
+            if (this.storage instanceof ServerDisposable disposable) {
                 disposable.dispose();
             }
         }

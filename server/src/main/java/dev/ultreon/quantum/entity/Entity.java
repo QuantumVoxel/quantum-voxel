@@ -784,8 +784,7 @@ public class Entity extends ComponentSystem implements CommandSender {
      * Sends the pipeline data for this entity to the client.
      */
     public void sendPipeline() {
-        if (this.world instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) this.world;
+        if (this.world instanceof ServerWorld serverWorld) {
             // Send the entity to all tracking players
             MapType pipeline1 = this.getPipeline();
             if (pipeline1.entries().isEmpty()) return;

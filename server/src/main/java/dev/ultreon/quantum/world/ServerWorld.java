@@ -1037,8 +1037,7 @@ public class ServerWorld extends World {
 
         T spawn = super.spawn(entity);
 
-        if (entity instanceof ServerPlayer) {
-            ServerPlayer player = (ServerPlayer) entity;
+        if (entity instanceof ServerPlayer player) {
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));
@@ -1053,8 +1052,7 @@ public class ServerWorld extends World {
 
         T spawn = super.spawn(entity, spawnData);
 
-        if (entity instanceof ServerPlayer) {
-            ServerPlayer player = (ServerPlayer) entity;
+        if (entity instanceof ServerPlayer player) {
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockPos().x() + 0.5, spawn.getBlockPos().y(), spawn.getBlockPos().z() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockPos().x(), spawn.getBlockPos().y(), spawn.getBlockPos().z(), new S2CAddEntityPacket(spawn));

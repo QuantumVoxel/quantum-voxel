@@ -33,8 +33,7 @@ public abstract class BlockContainerMenu extends ContainerMenu {
 
     @CanIgnoreReturnValue
     protected int inventoryMenu(int idx, int offX, int offY) {
-        if (getEntity() instanceof Player) {
-            Player player = (Player) getEntity();
+        if (getEntity() instanceof Player player) {
             for (int x = 0; x < 9; x++) {
                 this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 70));
             }

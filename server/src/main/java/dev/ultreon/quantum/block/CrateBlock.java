@@ -26,8 +26,7 @@ public class CrateBlock extends EntityBlock {
         super.use(world, player, item, pos);
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof CrateBlockEntity && world.isClientSide()) {
-            CrateBlockEntity crate = (CrateBlockEntity) blockEntity;
+        if (blockEntity instanceof CrateBlockEntity crate && world.isClientSide()) {
             crate.open(player);
             return UseResult.ALLOW;
         }

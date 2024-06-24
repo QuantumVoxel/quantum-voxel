@@ -11,8 +11,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void debug(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.out.printf("[DEBUG] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -28,8 +27,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void debug(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.out.printf("[DEBUG] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -50,8 +48,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void info(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.out.printf("[INFO] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -61,8 +58,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void info(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.out.printf("[INFO] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -89,8 +85,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void warn(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.err.printf("[WARN] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -100,8 +95,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void warn(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.err.printf("[WARN] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -128,8 +122,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void error(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.err.printf("[ERROR] %s %s%n", s, o);
             throwable.printStackTrace();
             return;
@@ -145,8 +138,7 @@ public class StdoutLogger implements Logger {
 
     @Override
     public void error(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
+        if (o instanceof Throwable throwable) {
             System.err.printf("[ERROR] %s %s%n", s, o);
             throwable.printStackTrace();
             return;

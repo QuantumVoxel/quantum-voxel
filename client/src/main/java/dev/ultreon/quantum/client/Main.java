@@ -89,8 +89,7 @@ public final class Main implements ApplicationListener {
      * @param throwable The uncaught exception
      */
     private void uncaughtException(Thread thread, Throwable throwable) {
-        if (throwable instanceof ApplicationCrash) {
-            ApplicationCrash e = (ApplicationCrash) throwable;
+        if (throwable instanceof ApplicationCrash e) {
             try {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.get().delayCrash(crashLog);

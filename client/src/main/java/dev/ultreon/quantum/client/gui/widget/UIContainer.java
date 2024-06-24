@@ -115,8 +115,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
             var widget = this.widgets.get(i);
             if (!widget.visible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?>) {
-                    UIContainer<?> uiContainer = (UIContainer<?>) widget;
+                if (widget instanceof UIContainer<?> uiContainer) {
                     return uiContainer.getExactWidgetAt(x, y);
                 }
                 return widget;
@@ -132,8 +131,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
             if (!widget.visible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?>) {
-                    UIContainer<?> container = (UIContainer<?>) widget;
+                if (widget instanceof UIContainer<?> container) {
                     output.addAll(container.getWidgetsAt(x, y));
                 }
                 output.add(widget);

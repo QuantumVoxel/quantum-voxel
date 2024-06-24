@@ -185,8 +185,7 @@ public class GyroscopeInput extends GameInput {
     }
 
     private boolean doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
-        if (!(hitResult instanceof BlockHitResult)) return false;
-        BlockHitResult hitResult1 = (BlockHitResult) hitResult;
+        if (!(hitResult instanceof BlockHitResult hitResult1)) return false;
         Vec3i pos = hitResult1.getPos();
         BlockProperties block = world.get(new BlockPos(pos));
         Vec3i posNext = hitResult1.getNext();

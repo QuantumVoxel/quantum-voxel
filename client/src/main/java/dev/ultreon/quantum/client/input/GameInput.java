@@ -314,8 +314,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         if (result == null)
             return UseResult.SKIP;
 
-        if (hitResult instanceof BlockHitResult) {
-            BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+        if (hitResult instanceof BlockHitResult blockHitResult) {
             Block block = blockHitResult.getBlock();
             if (block != null && !block.isAir()) {
                 UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockPos(result.getPos()));

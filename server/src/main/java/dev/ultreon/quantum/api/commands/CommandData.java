@@ -263,10 +263,9 @@ public class CommandData {
 
     public static Object readObject(CommandReader ctx) throws CommandParseException {
         CommandSender sender = ctx.getSender();
-        if (!(sender instanceof ServerPlayer)) {
+        if (!(sender instanceof ServerPlayer serverPlayer)) {
             throw new CommandParseException("Not ran from a server player.", ctx.getOffset());
         }
-        ServerPlayer serverPlayer = (ServerPlayer) sender;
         String first = ctx.readUntil('.');
         Object object;
         if (first.startsWith(":")) {
@@ -323,10 +322,9 @@ public class CommandData {
     }
 
     public static List<String> completeObject(CommandSender commandSender, CommandContext commandCtx, CommandReader ctx, String[] strings) throws CommandParseException {
-        if (!(commandSender instanceof ServerPlayer)) {
+        if (!(commandSender instanceof ServerPlayer serverPlayer)) {
             throw new CommandParseException("Not ran from a server player.", ctx.getOffset());
         }
-        ServerPlayer serverPlayer = (ServerPlayer) commandSender;
 
         if (ctx.isAtEndOfCmd()) {
             return List.of(":", "$");
@@ -502,8 +500,7 @@ public class CommandData {
 
     private static PlayerVariable readVariableAssignment(CommandReader commandReader) throws CommandParseException {
         CommandSender sender = commandReader.getSender();
-        if (!(sender instanceof ServerPlayer)) throw new CommandParseException.NotFound("player", commandReader.getOffset());
-        ServerPlayer serverPlayer = (ServerPlayer) sender;
+        if (!(sender instanceof ServerPlayer serverPlayer)) throw new CommandParseException.NotFound("player", commandReader.getOffset());
         Selector selector = commandReader.readSelector();
         SelectorKey key = selector.getKey();
         if (key != SelectorKey.VARIABLE) throw new CommandParseException.Invalid("variable assignment", commandReader.getOffset());
@@ -992,8 +989,7 @@ public class CommandData {
     }
 
     private static List<String> completeVariables(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
-        if (sender instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer) sender;
+        if (sender instanceof ServerPlayer serverPlayer) {
             return TabCompleting.variables(new ArrayList<>(), ctx.readString(), serverPlayer, Object.class);
         }
 
