@@ -3,18 +3,17 @@ package dev.ultreon.quantum.client.render.pipeline;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
+import dev.ultreon.quantum.client.gui.Matrices;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.DrawLayer;
+import dev.ultreon.quantum.client.render.TextureSamplers;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -32,7 +31,7 @@ public class WorldNode extends WorldRenderNode {
 
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
+    public Array<Renderable> render(Matrices matrices, TextureSamplers samplers, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         var localPlayer = this.client.player;
@@ -64,18 +63,18 @@ public class WorldNode extends WorldRenderNode {
 
 //        DrawLayer.WORLD.finish(input, this.pool());
 
-        worldRenderer.render(deltaTime);
+        worldRenderer.render(matrices, samplers, deltaTime);
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
 
         this.render(modelBatch, this.shaderProvider.get(), input);
 
-        textures.put("diffuse", this.getFrameBuffer().getTextureAttachments().get(0));
-        textures.put("reflective", this.getFrameBuffer().getTextureAttachments().get(1));
-        textures.put("depth", this.getFrameBuffer().getTextureAttachments().get(2));
-        textures.put("position", this.getFrameBuffer().getTextureAttachments().get(3));
-        textures.put("normal", this.getFrameBuffer().getTextureAttachments().get(4));
-        textures.put("specular", this.getFrameBuffer().getTextureAttachments().get(5));
+        samplers.set("diffuse", this.getFrameBuffer().getTextureAttachments().get(0));
+        samplers.set("reflective", this.getFrameBuffer().getTextureAttachments().get(1));
+        samplers.set("depth", this.getFrameBuffer().getTextureAttachments().get(2));
+        samplers.set("position", this.getFrameBuffer().getTextureAttachments().get(3));
+        samplers.set("normal", this.getFrameBuffer().getTextureAttachments().get(4));
+        samplers.set("specular", this.getFrameBuffer().getTextureAttachments().get(5));
         return input;
     }
 

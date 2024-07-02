@@ -118,4 +118,14 @@ public class Matrices {
         matrix.getRotation(rotation);
         return rotation;
     }
+
+    public Matrices translate(Vector3 renderOffset) {
+        this.stack.getLast().translate(renderOffset);
+        return this;
+    }
+
+    public Matrices scale(Vector3 scale) {
+        this.stack.getLast().scale(scale.x, scale.y, scale.z);
+        return this;
+    }
 }

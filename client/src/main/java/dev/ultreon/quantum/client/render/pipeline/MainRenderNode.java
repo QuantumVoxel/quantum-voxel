@@ -9,11 +9,12 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.Matrices;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
+import dev.ultreon.quantum.client.render.TextureSamplers;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
@@ -30,14 +31,14 @@ public class MainRenderNode extends RenderNode {
 
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
-        Texture depthTex = textures.get("depth");
-        Texture skyboxTex = textures.get("skybox");
-        Texture diffuseTex = textures.get("diffuse");
-        Texture positionTex = textures.get("position");
-        Texture normalTex = textures.get("normal");
-        Texture reflectiveTex = textures.get("reflective");
-        Texture specularTex = textures.get("specular");
+    public Array<Renderable> render(Matrices matrices, TextureSamplers samplers, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
+        Texture depthTex = samplers.get("depth");
+        Texture skyboxTex = samplers.get("skybox");
+        Texture diffuseTex = samplers.get("diffuse");
+        Texture positionTex = samplers.get("position");
+        Texture normalTex = samplers.get("normal");
+        Texture reflectiveTex = samplers.get("reflective");
+        Texture specularTex = samplers.get("specular");
 
         modelBatch.end();
         this.client.renderer.begin();

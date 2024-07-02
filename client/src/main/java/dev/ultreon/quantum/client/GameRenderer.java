@@ -16,6 +16,7 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.Matrices;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
@@ -39,6 +40,7 @@ public class GameRenderer implements Disposable {
     private final RenderContext context;
     private float cameraBop = 0.0f;
     private float blurScale = 0.0f;
+    private Matrices worldMatrices = new Matrices();
 
     public GameRenderer(QuantumClient client, ModelBatch modelBatch, RenderPipeline pipeline) {
         this.client = client;
@@ -166,7 +168,10 @@ public class GameRenderer implements Disposable {
     }
 
     void renderWorld(float blurScale, float deltaTime) {
-        this.pipeline.render(this.modelBatch, blurScale, deltaTime);
+        worldMatrices.push();
+        worldMatrices.last().set(client.camera.combined);
+        this.pipeline.render(this.worldMatrices, this.modelBatch, blurScale, deltaTime);
+        worldMatrices.pop();
     }
 
     private void renderOverlays(Renderer renderer, @Nullable Screen screen, @Nullable World world, float deltaTime) {
