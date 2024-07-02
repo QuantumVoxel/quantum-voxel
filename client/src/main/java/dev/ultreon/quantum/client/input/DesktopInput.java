@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -478,9 +478,9 @@ public class DesktopInput extends GameInput {
         // Get the position and metadata of the current and next blocks
         Vec3i pos = hitResult.getPos();
         if (hitResult instanceof BlockHitResult blockHitResult){
-            BlockProperties block = world.get(new BlockPos(pos));
+            BlockData block = world.get(new BlockPos(pos));
             Vec3i posNext = blockHitResult.getNext();
-            BlockProperties blockNext = world.get(new BlockPos(posNext));
+            BlockData blockNext = world.get(new BlockPos(posNext));
 
             // Check if the hit result is valid and the current block is not air
             if (!blockHitResult.isCollide() || block == null || block.isAir())

@@ -3,7 +3,7 @@ package dev.ultreon.quantum.network;
 import com.badlogic.gdx.math.MathUtils;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.partial.PartialPacket;
 import dev.ultreon.quantum.text.TextObject;
@@ -1140,11 +1140,11 @@ public class PacketIO {
         return EnumUtils.byOrdinal(this.readVarInt(), fallback);
     }
 
-    public BlockProperties readBlockMeta() {
-        return BlockProperties.read(this);
+    public BlockData readBlockMeta() {
+        return BlockData.read(this);
     }
 
-    public void writeBlockMeta(BlockProperties blockMeta) {
+    public void writeBlockMeta(BlockData blockMeta) {
         blockMeta.write(this);
     }
 

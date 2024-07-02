@@ -16,7 +16,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
@@ -173,11 +173,11 @@ public class ServerWorld extends World {
      * @param block the block type to set
      * @return true if the block was successfully set, false if setting the block failed
      * @see BlockFlags
-     * @deprecated due to block setting changes, use {@link #set(int, int, int, BlockProperties, int)} instead
+     * @deprecated due to block setting changes, use {@link #set(int, int, int, BlockData, int)} instead
      */
     @Override
     @Deprecated
-    public boolean set(int x, int y, int z, @NotNull BlockProperties block) {
+    public boolean set(int x, int y, int z, @NotNull BlockData block) {
         return set(x, y, z, block, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
 
@@ -193,7 +193,7 @@ public class ServerWorld extends World {
      * @see BlockFlags
      */
     @Override
-    public boolean set(int x, int y, int z, @NotNull BlockProperties block,
+    public boolean set(int x, int y, int z, @NotNull BlockData block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         boolean isBlockSet = super.set(x, y, z, block, flags);
         BlockPos blockPos = new BlockPos(x, y, z);
@@ -202,8 +202,8 @@ public class ServerWorld extends World {
         if (~(flags & BlockFlags.UPDATE) != 0) {
             for (CubicDirection direction : CubicDirection.values()) {
                 BlockPos offset = blockPos.offset(direction);
-                BlockProperties blockProperties = this.get(offset);
-                blockProperties.update(this, offset);
+                BlockData blockData = this.get(offset);
+                blockData.update(this, offset);
             }
         }
 
@@ -228,21 +228,21 @@ public class ServerWorld extends World {
 
     @Override
     public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
-        BlockProperties blockProperties = get(breaking);
-        if (blockProperties.isAir()) {
+        BlockData blockData = get(breaking);
+        if (blockData.isAir()) {
             QuantumServer.LOGGER.warn("Tried to break air block at {}!", breaking);
             return false;
         }
 
         boolean broken = super.destroyBlock(breaking, breaker);
         if (broken)
-            for (ItemStack item : blockProperties.getLootGen().generate(breaker != null ? breaker.getRng() : new JavaRNG())) {
+            for (ItemStack item : blockData.getLootGen().generate(breaker != null ? breaker.getRng() : new JavaRNG())) {
                 drop(item, breaking.vec().d().add(0.5));
             }
         return broken;
     }
 
-    private void sync(int x, int y, int z, BlockProperties block) {
+    private void sync(int x, int y, int z, BlockData block) {
         this.sendAllTracking(x, y, z, new S2CBlockSetPacket(new BlockPos(x, y, z), block));
     }
 
@@ -1122,7 +1122,7 @@ public class ServerWorld extends World {
         this.setSpawnPoint(spawnX, spawnZ);
     }
 
-    public void recordOutOfBounds(int x, int y, int z, BlockProperties block) {
+    public void recordOutOfBounds(int x, int y, int z, BlockData block) {
         if (!(QuantumServer.isOnServerThread())) {
             QuantumServer.invokeAndWait(() -> this.recordOutOfBounds(x, y, z, block));
             return;
@@ -1806,9 +1806,9 @@ public class ServerWorld extends World {
         private final int x;
         private final int y;
         private final int z;
-        private final BlockProperties block;
+        private final BlockData block;
 
-        public RecordedChange(int x, int y, int z, BlockProperties block) {
+        public RecordedChange(int x, int y, int z, BlockData block) {
             this.x = x;
             this.y = y;
             this.z = z;
@@ -1859,7 +1859,7 @@ public class ServerWorld extends World {
             return z;
         }
 
-        public BlockProperties block() {
+        public BlockData block() {
             return block;
         }
 

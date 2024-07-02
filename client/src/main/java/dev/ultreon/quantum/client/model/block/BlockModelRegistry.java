@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
@@ -27,10 +27,10 @@ import java.util.function.Supplier;
 
 public class BlockModelRegistry implements ContextAwareReloadable {
     private static final BlockModelRegistry INSTANCE = new BlockModelRegistry();
-    private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<CubeModel>>>> registry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
-    private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private final Map<Block, List<Pair<Predicate<BlockData>, Supplier<CubeModel>>>> registry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private final Map<Block, List<Pair<Predicate<BlockData>, Supplier<BlockModel>>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private final Set<Identifier> TEXTURES = new HashSet<>();
-    private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> finishedRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private final Map<Block, List<Pair<Predicate<BlockData>, Supplier<BlockModel>>>> finishedRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
 
     public BlockModelRegistry() {
         this.TEXTURES.add(new Identifier("misc/breaking1"));
@@ -45,8 +45,8 @@ public class BlockModelRegistry implements ContextAwareReloadable {
         return INSTANCE;
     }
 
-    public BlockModel get(BlockProperties meta) {
-        for (Pair<Predicate<BlockProperties>, Supplier<BlockModel>> p : this.customRegistry.getOrDefault(meta.getBlock(), new ArrayList<>())) {
+    public BlockModel get(BlockData meta) {
+        for (Pair<Predicate<BlockData>, Supplier<BlockModel>> p : this.customRegistry.getOrDefault(meta.getBlock(), new ArrayList<>())) {
             if (p.getFirst().test(meta)) {
                 return p.getSecond().get();
             }
@@ -54,15 +54,15 @@ public class BlockModelRegistry implements ContextAwareReloadable {
         return null;
     }
 
-    public void register(Block block, Predicate<BlockProperties> predicate, CubeModel model) {
+    public void register(Block block, Predicate<BlockData> predicate, CubeModel model) {
         this.registry.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, () -> model));
     }
 
-    public void registerCustom(Block block, Predicate<BlockProperties> predicate, Supplier<BlockModel> model) {
+    public void registerCustom(Block block, Predicate<BlockData> predicate, Supplier<BlockModel> model) {
         this.customRegistry.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model)));
     }
 
-    public void register(Supplier<Block> block, Predicate<BlockProperties> predicate, Supplier<CubeModel> model) {
+    public void register(Supplier<Block> block, Predicate<BlockData> predicate, Supplier<CubeModel> model) {
         this.registry.computeIfAbsent(block.get(), key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model)));
     }
 
@@ -109,9 +109,9 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public BakedModelRegistry bake(TextureAtlas atlas) {
-        ImmutableMap.Builder<Block, List<Pair<Predicate<BlockProperties>, BakedCubeModel>>> bakedModels = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<Block, List<Pair<Predicate<BlockData>, BakedCubeModel>>> bakedModels = new ImmutableMap.Builder<>();
         this.registry.forEach((block, models) -> {
-            List<Pair<Predicate<BlockProperties>, BakedCubeModel>> modelList = new ArrayList<>();
+            List<Pair<Predicate<BlockData>, BakedCubeModel>> modelList = new ArrayList<>();
             for (var modelPair : models) {
                 var predicate = modelPair.getFirst();
                 var model = modelPair.getSecond();
@@ -127,7 +127,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
     public void bakeJsonModels(QuantumClient client) {
         for (var entry : customRegistry.entrySet()) {
-            List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>> models = new ArrayList<>();
+            List<Pair<Predicate<BlockData>, Supplier<BlockModel>>> models = new ArrayList<>();
             for (var pair : entry.getValue()) {
                 BlockModel model = pair.getSecond().get();
                 QuantumClient.invokeAndWait(() -> model.load(client));
@@ -156,7 +156,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
         }
 
         for (var entry : customRegistry.entrySet()) {
-            List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>> models = new ArrayList<>();
+            List<Pair<Predicate<BlockData>, Supplier<BlockModel>>> models = new ArrayList<>();
             for (var pair : entry.getValue()) {
                 BlockModel model = pair.getSecond().get();
                 models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));

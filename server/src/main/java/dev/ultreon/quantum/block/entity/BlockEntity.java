@@ -2,7 +2,7 @@ package dev.ultreon.quantum.block.entity;
 
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;
@@ -25,7 +25,7 @@ public abstract class BlockEntity {
         return world.get(pos).getBlock();
     }
 
-    public BlockProperties getBlockMeta() {
+    public BlockData getBlockMeta() {
         return world.get(pos);
     }
 

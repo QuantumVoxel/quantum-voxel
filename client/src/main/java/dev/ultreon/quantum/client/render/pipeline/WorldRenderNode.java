@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.DrawLayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -86,10 +86,10 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
         System.out.println("toSort = " + toSort);
         for (Entity entity : toSort) {
             QuantumClient.PROFILER.section("(Entity #" + entity.getId() + ")", () -> {
-                batch.render((output, pool) -> worldRenderer.collectEntity(entity, RenderLayer.WORLD));
+                batch.render((output, pool) -> worldRenderer.collectEntity(entity));
             });
         }
 
-        batch.render(RenderLayer.WORLD::finish, worldRenderer.getEnvironment());
+        batch.render(DrawLayer.WORLD::finish, worldRenderer.getEnvironment());
     }
 }

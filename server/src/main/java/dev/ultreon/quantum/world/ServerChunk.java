@@ -5,7 +5,7 @@ import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.ubo.types.ShortArrayType;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.events.WorldEvents;
@@ -26,14 +26,14 @@ public final class ServerChunk extends Chunk {
     private boolean original = true;
     private boolean locked = false;
 
-    public ServerChunk(ServerWorld world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, ServerWorld.Region region) {
+    public ServerChunk(ServerWorld world, ChunkPos pos, Storage<BlockData> storage, Storage<Biome> biomeStorage, ServerWorld.Region region) {
         super(world, pos, storage, biomeStorage);
         this.world = world;
         this.region = region;
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockData block) {
         if (!QuantumServer.isOnServerThread()) {
             throw new InvalidThreadException("Should be on server thread.");
         }
@@ -54,11 +54,11 @@ public final class ServerChunk extends Chunk {
     }
 
     public static ServerChunk load(ServerWorld world, ChunkPos pos, MapType chunkData, ServerWorld.Region region) {
-        var storage = new PaletteStorage<>(BlockProperties.AIR, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
+        var storage = new PaletteStorage<>(BlockData.AIR, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
         var biomeStorage = new PaletteStorage<>(Biomes.PLAINS, CHUNK_SIZE * CHUNK_SIZE);
 
         MapType blockData = chunkData.getMap("Blocks");
-        storage.load(blockData, BlockProperties::load);
+        storage.load(blockData, BlockData::load);
 
         MapType biomeData = chunkData.getMap("Biomes");
         biomeStorage.load(biomeData, Biome::load);
@@ -118,7 +118,7 @@ public final class ServerChunk extends Chunk {
         MapType biomeData = new MapType();
         ListType<MapType> blockEntitiesData = new ListType<>();
 
-        this.storage.save(chunkData, BlockProperties::save);
+        this.storage.save(chunkData, BlockData::save);
         this.biomeStorage.save(biomeData, Biome::save);
 
         for (BlockEntity blockEntity : this.getBlockEntities()) {

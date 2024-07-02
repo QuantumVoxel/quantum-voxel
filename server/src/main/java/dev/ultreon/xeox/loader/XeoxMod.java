@@ -6,7 +6,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.ModOrigin;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.item.Item;
@@ -126,7 +126,7 @@ public class XeoxMod implements Mod {
         scope.put("loader", scope, XeoxLoader.get());
         scope.put("platform", scope, GamePlatform.get());
         scope.put("BlockPos", scope, BlockPos.class);
-        scope.put("BlockProps", scope, BlockProperties.class);
+        scope.put("BlockProps", scope, BlockData.class);
         scope.put("Block", scope, Block.class);
         scope.put("Entity", scope, Entity.class);
         scope.put("Registry", scope, Registry.class);

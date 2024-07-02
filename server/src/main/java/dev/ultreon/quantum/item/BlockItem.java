@@ -4,13 +4,12 @@ import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.util.Suppliers;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.BlockEvents;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.world.BlockFlags;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.UseResult;
@@ -53,7 +52,7 @@ public class BlockItem extends Item {
         if (!block.get().canBePlacedAt(world, blockPos, player, stack, direction))
             return UseResult.DENY;
 
-        BlockProperties oldBlock = world.get(pos.x, pos.y, pos.z);
+        BlockData oldBlock = world.get(pos.x, pos.y, pos.z);
         return oldBlock.isReplaceable() && oldBlock.canBeReplacedBy(useItemContext)
                 ? replaceBlock(world, pos, useItemContext)
                 : placeBlock(world, next, blockPos, useItemContext);
@@ -105,7 +104,7 @@ public class BlockItem extends Item {
         return this.block.get().getTranslationId();
     }
 
-    public BlockProperties createBlockMeta() {
+    public BlockData createBlockMeta() {
         return this.block.get().createMeta();
     }
 }

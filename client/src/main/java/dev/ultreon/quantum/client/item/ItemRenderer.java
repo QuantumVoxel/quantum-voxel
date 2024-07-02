@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
@@ -50,7 +50,7 @@ public class ItemRenderer implements Disposable {
     protected final Vector3 tmp = new Vector3();
     private final Map<Item, ItemModel> models = new HashMap<>();
     private final Map<Item, ModelInstance> modelsInstances = new HashMap<>();
-    private Cache<BlockProperties, ModelInstance> blockModelCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
+    private Cache<BlockData, ModelInstance> blockModelCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
 
     public ItemRenderer(QuantumClient client) {
         this.client = client;
@@ -113,7 +113,7 @@ public class ItemRenderer implements Disposable {
         }
     }
 
-    private void renderBlockItem(Item item, BlockProperties block, Renderer renderer, int x, int y) {
+    private void renderBlockItem(Item item, BlockData block, Renderer renderer, int x, int y) {
         renderer.external(() -> {
             float guiScale = this.client.getGuiScale();
             this.itemCam.zoom = 4.0f / guiScale;
@@ -152,14 +152,14 @@ public class ItemRenderer implements Disposable {
         });
     }
 
-    private void renderCustomBlock(Item item, BlockProperties block, Renderer renderer, int x, int y) {
+    private void renderCustomBlock(Item item, BlockData block, Renderer renderer, int x, int y) {
         ModelInstance modelInstance = new ModelInstance(getModel(block));
         this.modelsInstances.put(item, modelInstance);
 
         renderModel(modelInstance, models.get(item), renderer, x, y);
     }
 
-    private static Model getModel(BlockProperties block) {
+    private static Model getModel(BlockData block) {
         BlockModel blockModel = BlockModelRegistry.get().get(block);
         Model defaultModel = BakedCubeModel.defaultModel().getModel();
         if (blockModel == null) return defaultModel;

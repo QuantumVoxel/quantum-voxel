@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.gen.feature;
 
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -12,8 +12,6 @@ import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Random;
 
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 
@@ -47,8 +45,8 @@ public class TreeFeature extends WorldGenFeature {
         this.random.setSeed(seed);
         this.random.setSeed(this.random.nextLong());
 
-        BlockProperties blockProperties = chunk.get(x, height - 1, z);
-        if (!blockProperties.is(Blocks.GRASS_BLOCK) && !blockProperties.is(Blocks.SNOWY_GRASS_BLOCK)) {
+        BlockData blockData = chunk.get(x, height - 1, z);
+        if (!blockData.is(Blocks.GRASS_BLOCK) && !blockData.is(Blocks.SNOWY_GRASS_BLOCK)) {
             return false;
         }
 

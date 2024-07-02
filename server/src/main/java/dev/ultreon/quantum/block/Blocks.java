@@ -26,7 +26,7 @@ public final class Blocks {
     public static final Block LOG = Blocks.register("log", new Block(new Properties().hardness(2.0F).effectiveTool(ToolType.AXE).dropsItems(Items.LOG)));
     public static final Block PLANKS = Blocks.register("planks", new Block(new Properties().hardness(2.0F).effectiveTool(ToolType.AXE).dropsItems(Items.PLANKS)));
     public static final Block PLANKS_SLAB = Blocks.register("planks_slab", new SlabBlock(new Properties().hardness(2.0F).effectiveTool(ToolType.AXE).dropsItems(Items.PLANKS)));
-    public static final Block LEAVES = Blocks.register("leaves", new Block(new Properties().transparent().hardness(0.2F).lightReduction(2)));
+    public static final Block LEAVES = Blocks.register("leaves", new Block(new Properties().tag(Block.TAG_LEAVES).transparent().hardness(0.2F).lightReduction(2)));
     public static final Block CRATE = Blocks.register("crate", new CrateBlock(new Properties().hardness(2.0F).effectiveTool(ToolType.AXE).usesCustomRender().dropsItems(Items.CRATE)));
     public static final Block CRAFTING_BENCH = Blocks.register("crafting_bench", new Block(new Properties().hardness(3.0F).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
     public static final Block TALL_GRASS = Blocks.register("tall_grass", new Block(new Properties().noOcclude().replaceable().transparent().noCollision().usesCustomRender().dropsItems(new RandomLoot(new RandomLoot.ChanceLootEntry(0.4f, Items.GRASS_FIBRE)))));

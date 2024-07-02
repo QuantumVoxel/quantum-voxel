@@ -15,7 +15,7 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.Constants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -256,7 +256,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     private void updateInGame(Player player, @NotNull World world) {
         BlockHitResult hitResult = world.rayCast(new Ray(player.getPosition().add(0, player.getEyeHeight(), 0), player.getLookVector()));
         Vec3i pos = hitResult.getPos();
-        BlockProperties block = world.get(pos.x, pos.y, pos.z);
+        BlockData block = world.get(pos.x, pos.y, pos.z);
         if (!hitResult.isCollide() || block == null || block.isAir()) return;
 
         this.updateControllerBlockBreak();

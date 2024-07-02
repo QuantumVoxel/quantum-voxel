@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.gen;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -19,26 +19,26 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockData block) {
         this.recordedChanges.add(new ServerWorld.RecordedChange(x, y, z, block));
 
         return true;
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockData block) {
         this.recordedChanges.add(new ServerWorld.RecordedChange(x, y, z, block));
 
         return true;
     }
 
     @Override
-    public BlockProperties getFast(int x, int y, int z) {
+    public BlockData getFast(int x, int y, int z) {
         return this.chunk.getFast(x, y, z);
     }
 
     @Override
-    public BlockProperties get(int x, int y, int z) {
+    public BlockData get(int x, int y, int z) {
         return this.chunk.get(x, y, z);
     }
 

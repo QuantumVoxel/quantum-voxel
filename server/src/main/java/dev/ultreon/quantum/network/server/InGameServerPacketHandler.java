@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network.server;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.events.BlockEvents;
 import dev.ultreon.quantum.events.PlayerEvents;
@@ -130,7 +130,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     public void onBlockBreaking(BlockPos pos, C2SBlockBreakingPacket.BlockStatus status) {
         this.server.submit(() -> {
             ServerWorld world = this.player.getWorld();
-            BlockProperties block = world.get(pos);
+            BlockData block = world.get(pos);
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
@@ -176,9 +176,9 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
                 return;
             }
 
-            BlockProperties original = world.get(pos);
+            BlockData original = world.get(pos);
             ItemStack stack = this.player.getSelectedItem();
-            BlockProperties block = world.get(pos);
+            BlockData block = world.get(pos);
 
             if (BlockEvents.ATTEMPT_BLOCK_REMOVAL.factory().onAttemptBlockRemoval(this.player, original, pos, stack).isCanceled()) {
                 return;
@@ -258,7 +258,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         });
     }
 
-    public void onPlaceBlock(int x, int y, int z, BlockProperties block) {
+    public void onPlaceBlock(int x, int y, int z, BlockData block) {
         this.server.execute(() -> this.player.placeBlock(x, y, z, block));
     }
 

@@ -126,12 +126,12 @@ public class DesktopLauncher {
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);
         config.setInitialVisible(false);
-        config.setDecorated(false);
+//        config.setDecorated(false);
         config.setTitle("Quantum");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
-        config.setTransparentFramebuffer(true);
+//        config.setTransparentFramebuffer(true);
         return config;
     }
 

@@ -1,13 +1,15 @@
 package dev.ultreon.quantum.block;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -28,9 +30,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Block implements DataWriter<MapType> {
+    public static final String TAG_LEAVES = "leaves";
     private final boolean transparent;
     private final boolean collides;
     private final boolean fluid;
@@ -46,6 +50,7 @@ public class Block implements DataWriter<MapType> {
     private final boolean greedyMerge;
     private final @Nullable ToolLevel toolLevel;
     private final int lightReduction;
+    private final ImmutableSet<String> tags;
 
     public Block() {
         this(new Properties());
@@ -66,6 +71,7 @@ public class Block implements DataWriter<MapType> {
         this.greedyMerge = properties.greedyMerge;
         this.toolLevel = properties.toolLevel;
         this.lightReduction = properties.lightReduction;
+        this.tags = properties.tags.build();
     }
 
     public Identifier getId() {
@@ -89,12 +95,12 @@ public class Block implements DataWriter<MapType> {
         return this.fluid;
     }
 
-    public BoundingBox getBoundingBox(int x, int y, int z, BlockProperties blockProperties) {
+    public BoundingBox getBoundingBox(int x, int y, int z, BlockData blockData) {
         return new BoundingBox(new Vec3d(x, y, z), new Vec3d(x + 1, y + 1, z + 1));
     }
 
     @CanIgnoreReturnValue
-    public BoundingBox boundingBox(int x, int y, int z, BlockProperties blockProperties, BoundingBox box) {
+    public BoundingBox boundingBox(int x, int y, int z, BlockData blockData, BoundingBox box) {
         return box.set(box.min.set(x, y, z), box.max.set(x + 1, y + 1, z + 1));
     }
 
@@ -155,7 +161,7 @@ public class Block implements DataWriter<MapType> {
         return this.toolRequired;
     }
 
-    public LootGenerator getLootGen(BlockProperties blockProperties) {
+    public LootGenerator getLootGen(BlockData blockData) {
         return this.lootGen;
     }
 
@@ -190,24 +196,24 @@ public class Block implements DataWriter<MapType> {
         return this.occlude;
     }
 
-    public void onPlace(World world, BlockPos pos, BlockProperties blockProperties) {
+    public void onPlace(World world, BlockPos pos, BlockData blockData) {
         // Used in implementations
     }
 
-    public BlockProperties createMeta() {
-        return new BlockProperties(this, Collections.emptyMap());
+    public BlockData createMeta() {
+        return new BlockData(this, Collections.emptyMap());
     }
 
     @Deprecated
-    public BlockProperties onPlacedBy(World world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
+    public BlockData onPlacedBy(World world, BlockPos blockPos, BlockData blockMeta, Player player, ItemStack stack, CubicDirection direction) {
         return blockMeta;
     }
 
-    public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockPos at, UseItemContext context) {
+    public BlockData onPlacedBy(BlockData blockMeta, BlockPos at, UseItemContext context) {
         return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), ((BlockHitResult) context.result()).getDirection());
     }
 
-    public void update(World serverWorld, BlockPos offset, BlockProperties meta) {
+    public void update(World serverWorld, BlockPos offset, BlockData meta) {
         this.onPlace(serverWorld, offset, meta);
     }
 
@@ -215,7 +221,7 @@ public class Block implements DataWriter<MapType> {
         return true;
     }
 
-    public boolean canBeReplacedBy(UseItemContext context, BlockProperties blockProperties) {
+    public boolean canBeReplacedBy(UseItemContext context, BlockData blockData) {
         return true;
     }
 
@@ -223,25 +229,30 @@ public class Block implements DataWriter<MapType> {
         return toolLevel;
     }
 
-    public void onDestroy(World world, BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+    public void onDestroy(World world, BlockPos breaking, BlockData blockData, Player breaker) {
 
     }
 
-    public Iterable<ItemStack> getDrops(BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+    public Iterable<ItemStack> getDrops(BlockPos breaking, BlockData blockData, Player breaker) {
         if (breaker == null) return this.lootGen.generate(new JavaRNG());
         return this.lootGen.generate(breaker.getRng());
     }
 
-    public int getLight(BlockProperties blockProperties) {
+    public int getLight(BlockData blockData) {
         return 0;
     }
 
-    public int getLightReduction(BlockProperties blockProperties) {
+    public int getLightReduction(BlockData blockData) {
         if (isAir()) return 0;
         return lightReduction;
     }
 
+    public boolean isLeaves() {
+        return this.tags.contains(TAG_LEAVES);
+    }
+
     public static class Properties {
+        public ImmutableSet.Builder<String> tags = new ImmutableSet.Builder<>();
         private boolean greedyMerge = true;
         private boolean occlude = true;
         private boolean replaceable = false;
@@ -346,6 +357,16 @@ public class Block implements DataWriter<MapType> {
 
         public @This Properties noGreedyMerge() {
             this.greedyMerge = false;
+            return this;
+        }
+
+        public @This Properties tag(String tag) {
+            this.tags.add(tag);
+            return this;
+        }
+
+        public @This Properties tags(String... tags) {
+            this.tags.add(tags);
             return this;
         }
 

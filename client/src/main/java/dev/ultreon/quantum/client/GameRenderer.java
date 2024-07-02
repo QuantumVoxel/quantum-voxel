@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -23,15 +22,12 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.input.TouchscreenInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.RenderLayer;
-import dev.ultreon.quantum.client.render.ShaderPrograms;
+import dev.ultreon.quantum.client.render.DrawLayer;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
-
-import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
@@ -98,8 +94,8 @@ public class GameRenderer implements Disposable {
             });
         }
 
-        RenderLayer.BACKGROUND.update(deltaTime);
-        RenderLayer.WORLD.update(deltaTime);
+        DrawLayer.BACKGROUND.update(deltaTime);
+        DrawLayer.WORLD.update(deltaTime);
 
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
 

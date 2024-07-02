@@ -12,7 +12,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.entity.DroppedItem;
@@ -306,7 +306,7 @@ public abstract class World implements ServerDisposable {
      * @param state    the block state to set
      * @return true if the block was successfully set, false otherwise
      */
-    public boolean set(BlockPos blockPos, BlockProperties state) {
+    public boolean set(BlockPos blockPos, BlockData state) {
         return set(blockPos, state, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
 
@@ -317,7 +317,7 @@ public abstract class World implements ServerDisposable {
      * @param state    the block state to set
      * @return true if the block was successfully set, false otherwise
      */
-    public boolean set(BlockPos blockPos, BlockProperties state, int flags) {
+    public boolean set(BlockPos blockPos, BlockData state, int flags) {
         this.checkThread();
 
         return this.set(blockPos.x(), blockPos.y(), blockPos.z(), state, flags);
@@ -332,7 +332,7 @@ public abstract class World implements ServerDisposable {
      * @param block the block type to set
      * @return true if the block was successfully set, false otherwise
      */
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockData block) {
         return set(x, y, z, block, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
 
@@ -342,7 +342,7 @@ public abstract class World implements ServerDisposable {
      * @param pos the position
      * @return the block at the specified coordinates
      */
-    public BlockProperties get(BlockPos pos) {
+    public BlockData get(BlockPos pos) {
         this.checkThread();
 
         return this.get(pos.x(), pos.y(), pos.z());
@@ -356,7 +356,7 @@ public abstract class World implements ServerDisposable {
      * @param z the z-coordinate
      * @return the block at the specified coordinates
      */
-    public BlockProperties get(int x, int y, int z) {
+    public BlockData get(int x, int y, int z) {
         this.checkThread();
 
         Chunk chunkAt = this.getChunkAt(x, y, z);
@@ -499,11 +499,11 @@ public abstract class World implements ServerDisposable {
         return 0;
     }
 
-    public void setColumn(int x, int z, BlockProperties block) {
+    public void setColumn(int x, int z, BlockData block) {
         this.setColumn(x, z, World.CHUNK_HEIGHT, block);
     }
 
-    public void setColumn(int x, int z, int maxY, BlockProperties block) {
+    public void setColumn(int x, int z, int maxY, BlockData block) {
         if (this.getChunkAt(x, maxY, z) == null) return;
 
         // FIXME optimize
@@ -523,10 +523,10 @@ public abstract class World implements ServerDisposable {
      * @param depth  the depth of the 3D area
      * @param block  the block to be set in the specified area
      * @return a {@link CompletableFuture} representing the asynchronous operation
-     * @see #set(int, int, int, BlockProperties)
-     * @see #setColumn(int, int, BlockProperties)
+     * @see #set(int, int, int, BlockData)
+     * @see #setColumn(int, int, BlockData)
      */
-    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockProperties block) {
+    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockData block) {
         return CompletableFuture.runAsync(() -> {
             int curX = x, curY = y, curZ = z;
             int startX = Math.max(curX, 0);
@@ -682,7 +682,7 @@ public abstract class World implements ServerDisposable {
         for (int x = xMin; x <= xMax; x++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int z = zMin; z <= zMax; z++) {
-                    BlockProperties block = this.get(x, y, z);
+                    BlockData block = this.get(x, y, z);
                     if (block.hasCollider() && (!collideFluid || block.isFluid())) {
                         BoundingBox blockBox = block.getBoundingBox(x, y, z);
                         if (blockBox.intersects(box)) {
@@ -776,7 +776,7 @@ public abstract class World implements ServerDisposable {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return BreakResult.FAILED;
         BlockPos localBlockPos = World.toLocalBlockPos(breaking);
-        BlockProperties block = this.get(breaking);
+        BlockData block = this.get(breaking);
 
         if (block.isAir()) return BreakResult.FAILED;
 
@@ -925,7 +925,7 @@ public abstract class World implements ServerDisposable {
         return this.uid;
     }
 
-    public boolean set(int x, int y, int z, @NotNull BlockProperties block,
+    public boolean set(int x, int y, int z, @NotNull BlockData block,
                                 @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
@@ -979,13 +979,13 @@ public abstract class World implements ServerDisposable {
     }
 
     public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
-        BlockProperties blockProperties = get(breaking);
+        BlockData blockData = get(breaking);
 
-        if (breaker != null && BlockEvents.BREAK_BLOCK.factory().onBreakBlock(this, breaking, blockProperties, breaker).isCanceled()) {
+        if (breaker != null && BlockEvents.BREAK_BLOCK.factory().onBreakBlock(this, breaking, blockData, breaker).isCanceled()) {
             stopBreaking(breaking, breaker);
         }
 
-        blockProperties.onDestroy(this, breaking, breaker);
+        blockData.onDestroy(this, breaking, breaker);
         set(breaking, Blocks.AIR.createMeta(), BlockFlags.UPDATE);
         return true;
     }

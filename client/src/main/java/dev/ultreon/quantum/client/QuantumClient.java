@@ -38,7 +38,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec2i;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.client.api.events.ClientTickEvents;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
@@ -73,7 +73,7 @@ import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.render.MeshManager;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.DrawLayer;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
@@ -181,6 +181,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public TouchPoint motionPointer = null;
     public Vector2 scrollPointer = new Vector2();
     public Json5ModelLoader j5ModelLoader;
+    public float gameTime;
     private boolean screenshotWorldOnly;
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
@@ -269,7 +270,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Hud hud;
     public HitResult hitResult;
     private Vec3i breaking;
-    private BlockProperties breakingBlock;
+    private BlockData breakingBlock;
 
     // Public Flags
     public boolean renderWorld = false;
@@ -1069,6 +1070,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
 
+        this.gameTime += deltaTime;
+
         Disposable disposable;
         while ((disposable = this.disposalQueue.poll()) != null) {
             try {
@@ -1404,11 +1407,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         var canTick = false;
 
         double time2 = System.currentTimeMillis();
-        var passed = time2 - this.time;
+        var passed = time2 - this.gameTime;
         this.frameTime += (float) passed;
         this.tickTime += (float) passed;
 
-        this.time = time2;
+        this.gameTime = time2;
 
         float tickCap = 1000f / QuantumServer.TPS;
         while (this.frameTime >= tickCap) {
@@ -1701,7 +1704,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (player == null) return;
 
         this.world.stopBreaking(new BlockPos(this.breaking), player);
-        BlockProperties block = hitResult.getBlockMeta();
+        BlockData block = hitResult.getBlockMeta();
 
         if (block == null || block.isAir()) {
             this.breaking = null;
@@ -1816,8 +1819,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.fbo);
 
                 // Clear scenes
-                RenderLayer.BACKGROUND.clear();
-                RenderLayer.WORLD.clear();
+                DrawLayer.BACKGROUND.clear();
+                DrawLayer.WORLD.clear();
 
                 // Dispose Models
                 ModelManager.INSTANCE.dispose();
@@ -2012,8 +2015,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.futures.add(future);
     }
 
-    public @NotNull BlockModel getBlockModel(BlockProperties block) {
-        List<Pair<Predicate<BlockProperties>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
+    public @NotNull BlockModel getBlockModel(BlockData block) {
+        List<Pair<Predicate<BlockData>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
 
         if (orDefault == null) {
             BlockModel blockModel = BlockModelRegistry.get().get(block);
@@ -2155,7 +2158,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     @ApiStatus.Experimental
     public boolean isCustomBorderShown() {
-        return GamePlatform.get().isDesktop() && !loading;
+        return GamePlatform.get().isDesktop() && !loading && ClientConfig.customBorder;
     }
 
     public boolean isLoading() {

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +16,8 @@ public abstract class EntityBlock extends Block {
     }
 
     @Override
-    public void onPlace(World world, BlockPos pos, BlockProperties blockProperties) {
-        super.onPlace(world, pos, blockProperties);
+    public void onPlace(World world, BlockPos pos, BlockData blockData) {
+        super.onPlace(world, pos, blockData);
 
         world.setBlockEntity(pos, this.createBlockEntity(world, pos));
     }
