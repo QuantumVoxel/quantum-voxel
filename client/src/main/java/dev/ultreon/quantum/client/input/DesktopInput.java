@@ -48,6 +48,8 @@ public class DesktopInput extends GameInput {
     public static final KeyBind COMMAND_KEY = KeyBinds.commandKey;
     public static final KeyBind FULL_SCREEN_KEY = KeyBinds.fullScreenKey;
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
+    private static boolean[] pressed = new boolean[Input.Keys.MAX_KEYCODE];
+    private static boolean[] wasPressed = new boolean[Input.Keys.MAX_KEYCODE];
 
     public DesktopInput(QuantumClient client, Camera camera) {
         super(client, camera);
@@ -97,6 +99,30 @@ public class DesktopInput extends GameInput {
         return Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT);
     }
 
+    public static boolean isKeyPressed(int key) {
+        return pressed[key];
+    }
+
+    public static boolean isKeyJustPressed(int key) {
+        return pressed[key] && !wasPressed[key];
+    }
+
+    public static boolean isKeyReleased(int key) {
+        return !pressed[key];
+    }
+
+    public static boolean isKeyJustReleased(int key) {
+        return !pressed[key] && wasPressed[key];
+    }
+
+    public static boolean isButtonJustPressed(int keyCode) {
+        return Gdx.input.isButtonJustPressed(keyCode);
+    }
+
+    public static boolean isButtonPressed(int keyCode) {
+        return Gdx.input.isButtonPressed(keyCode);
+    }
+
     /**
      * Handles key down events.
      *
@@ -107,6 +133,8 @@ public class DesktopInput extends GameInput {
     public boolean keyDown(int keyCode) {
         super.keyDown(keyCode);
 
+        pressed[keyCode] = true;
+
         // Invoke key press event for the current screen
         Screen currentScreen = this.client.screen;
         if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
@@ -116,12 +144,50 @@ public class DesktopInput extends GameInput {
 
         // Handle key press for player
         Player player = this.client.player;
+        if (player != null) {
+            if (DesktopInput.IM_GUI_KEY.is(keyCode)) {
+                this.handleImGuiKey();
+            } else if (DesktopInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
+                this.handleImGuiFocus();
+            } else if (DesktopInput.INVENTORY_KEY.is(keyCode) && currentScreen == null && player != null) {
+                player.openInventory();
+            } else if (DesktopInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen && player != null) {
+                this.client.showScreen(null);
+            } else if (DesktopInput.CHAT_KEY.is(keyCode) && currentScreen == null) {
+                this.client.showScreen(new ChatScreen());
+            } else if (DesktopInput.COMMAND_KEY.is(keyCode) && currentScreen == null) {
+                this.client.showScreen(new ChatScreen("/"));
+            } else if (DesktopInput.DEBUG_KEY.is(keyCode)) {
+                this.handleDebugKey();
+            } else if (DesktopInput.INSPECT_KEY.is(keyCode)) {
+                this.handleInspectKey();
+            } else if (DesktopInput.SCREENSHOT_KEY.is(keyCode)) {
+                this.client.screenshot();
+            } else if (DesktopInput.HIDE_HUD_KEY.is(keyCode)) {
+                this.client.hideHud = !this.client.hideHud;
+            } else if (DesktopInput.FULL_SCREEN_KEY.is(keyCode)) {
+                this.client.setFullScreen(!this.client.isFullScreen());
+            } else if (DesktopInput.THIRD_PERSON_KEY.is(keyCode)) {
+                this.client.cyclePlayerView();
+            } else if (this.client.world != null
+                    && DesktopInput.PAUSE_KEY.is(keyCode)
+                    && Gdx.input.isCursorCatched()) {
+                this.client.showScreen(new PauseScreen());
+            } else if (DesktopInput.PAUSE_KEY.is(keyCode)
+                    && !Gdx.input.isCursorCatched()
+                    && this.client.screen instanceof PauseScreen) {
+                this.client.showScreen(null);
+            } else if (DesktopInput.DROP_ITEM_KEY.is(keyCode) && player != null) {
+                player.dropItem();
+            }
+        }
         if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
             return false;
 
         // Select block by index based on keycode for number keys.
         int index = keyCode - Input.Keys.NUM_1;
         player.selectBlock(index);
+
         return true;
 
     }
@@ -129,6 +195,8 @@ public class DesktopInput extends GameInput {
     @Override
     public boolean keyUp(int keyCode) {
         super.keyUp(keyCode);
+
+        pressed[keyCode] = false;
 
         Screen currentScreen = this.client.screen;
         if (currentScreen != null) {
@@ -167,40 +235,20 @@ public class DesktopInput extends GameInput {
     private static void cycleGamemode(Player player) {
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
             switch (player.getGamemode()) {
-                case SURVIVAL:
-                    player.execute("gm spectator");
-                    break;
-                case BUILDER:
-                    player.execute("gm survival");
-                    break;
-                case BUILDER_PLUS:
-                    player.execute("gm builder");
-                    break;
-                case ADVENTUROUS:
-                    player.execute("gm builder_plus");
-                    break;
-                case SPECTATOR:
-                    player.execute("gm adventurous");
-                    break;
+                case SURVIVAL -> player.execute("gm spectator");
+                case BUILDER -> player.execute("gm survival");
+                case BUILDER_PLUS -> player.execute("gm builder");
+                case ADVENTUROUS -> player.execute("gm builder_plus");
+                case SPECTATOR -> player.execute("gm adventurous");
             }
             return;
         }
         switch (player.getGamemode()) {
-            case SURVIVAL:
-                player.execute("gm builder");
-                break;
-            case BUILDER:
-                player.execute("gm builder_plus");
-                break;
-            case BUILDER_PLUS:
-                player.execute("gm adventurous");
-                break;
-            case ADVENTUROUS:
-                player.execute("gm spectator");
-                break;
-            case SPECTATOR:
-                player.execute("gm survival");
-                break;
+            case SURVIVAL -> player.execute("gm builder");
+            case BUILDER -> player.execute("gm builder_plus");
+            case BUILDER_PLUS -> player.execute("gm adventurous");
+            case ADVENTUROUS -> player.execute("gm spectator");
+            case SPECTATOR -> player.execute("gm survival");
         }
     }
 
@@ -216,42 +264,6 @@ public class DesktopInput extends GameInput {
                 QuantumClient.get().reloadResourcesAsync();
             }
             return;
-        }
-
-        if (DesktopInput.IM_GUI_KEY.isJustPressed()) {
-            this.handleImGuiKey();
-        } else if (DesktopInput.IM_GUI_FOCUS_KEY.isJustPressed()) {
-            this.handleImGuiFocus();
-        } else if (DesktopInput.INVENTORY_KEY.isJustPressed() && currentScreen == null && player != null) {
-            player.openInventory();
-        } else if (DesktopInput.INVENTORY_KEY.isJustPressed() && currentScreen instanceof InventoryScreen && player != null) {
-            this.client.showScreen(null);
-        } else if (DesktopInput.CHAT_KEY.isJustPressed() && currentScreen == null) {
-            this.client.showScreen(new ChatScreen());
-        } else if (DesktopInput.COMMAND_KEY.isJustPressed() && currentScreen == null) {
-            this.client.showScreen(new ChatScreen("/"));
-        } else if (DesktopInput.DEBUG_KEY.isJustPressed()) {
-            this.handleDebugKey();
-        } else if (DesktopInput.INSPECT_KEY.isJustPressed()) {
-            this.handleInspectKey();
-        } else if (DesktopInput.SCREENSHOT_KEY.isJustPressed()) {
-            this.client.screenshot();
-        } else if (DesktopInput.HIDE_HUD_KEY.isJustPressed()) {
-            this.client.hideHud = !this.client.hideHud;
-        } else if (DesktopInput.FULL_SCREEN_KEY.isJustPressed()) {
-            this.client.setFullScreen(!this.client.isFullScreen());
-        } else if (DesktopInput.THIRD_PERSON_KEY.isJustPressed()) {
-            this.client.cyclePlayerView();
-        } else if (this.client.world != null
-                && DesktopInput.PAUSE_KEY.isJustPressed()
-                && Gdx.input.isCursorCatched()) {
-            this.client.showScreen(new PauseScreen());
-        } else if (DesktopInput.PAUSE_KEY.isJustPressed()
-                && !Gdx.input.isCursorCatched()
-                && this.client.screen instanceof PauseScreen) {
-            this.client.showScreen(null);
-        } else if (DesktopInput.DROP_ITEM_KEY.isJustPressed() && player != null) {
-            player.dropItem();
         }
     }
 

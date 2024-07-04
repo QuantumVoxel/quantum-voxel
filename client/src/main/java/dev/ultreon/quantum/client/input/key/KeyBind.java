@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.input.key;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
+import dev.ultreon.quantum.client.input.DesktopInput;
 
 import java.util.function.Predicate;
 
@@ -35,11 +35,11 @@ public class KeyBind {
     }
 
     public boolean isJustPressed() {
-        if ((modifiers & SHIFT_MOD) != 0 && !Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && !Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))
+        if ((modifiers & SHIFT_MOD) != 0 && !DesktopInput.isKeyPressed(Keys.SHIFT_LEFT) && !DesktopInput.isKeyPressed(Keys.SHIFT_RIGHT))
             return false;
-        if ((modifiers & CTRL_MOD) != 0 && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && !Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT))
+        if ((modifiers & CTRL_MOD) != 0 && !DesktopInput.isKeyPressed(Keys.CONTROL_LEFT) && !DesktopInput.isKeyPressed(Keys.CONTROL_RIGHT))
             return false;
-        if ((modifiers & ALT_MOD) != 0 && !Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) && !Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
+        if ((modifiers & ALT_MOD) != 0 && !DesktopInput.isKeyPressed(Keys.ALT_LEFT) && !DesktopInput.isKeyPressed(Keys.ALT_RIGHT))
             return false;
         return type.justPressed.test(this);
     }
@@ -64,9 +64,13 @@ public class KeyBind {
         this.modifiers = modifiers;
     }
 
+    public boolean is(int keyCode) {
+        return this.keyCode == keyCode;
+    }
+
     public enum Type {
-        KEY(key -> Gdx.input.isKeyJustPressed(key.keyCode), key -> Gdx.input.isKeyPressed(key.keyCode)),
-        MOUSE(key -> Gdx.input.isButtonJustPressed(key.keyCode), key -> Gdx.input.isButtonPressed(key.keyCode));
+        KEY(key -> DesktopInput.isKeyJustPressed(key.keyCode), key -> DesktopInput.isKeyPressed(key.keyCode)),
+        MOUSE(key -> DesktopInput.isButtonJustPressed(key.keyCode), key -> DesktopInput.isButtonPressed(key.keyCode));
 
         private final Predicate<KeyBind> justPressed;
         private final Predicate<KeyBind> pressed;

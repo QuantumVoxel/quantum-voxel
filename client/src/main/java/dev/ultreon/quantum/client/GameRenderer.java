@@ -74,7 +74,15 @@ public class GameRenderer implements Disposable {
         if (player != null) {
             QuantumClient.PROFILER.section("camera", () -> {
                 if (this.client.screen == null && !GamePlatform.get().isShowingImGui()) {
-                    player.rotateHead(-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity, -Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
+                    // Calculate delta position for player rotation.
+                    int centerX = Gdx.graphics.getWidth() / 2;
+                    int centerY = Gdx.graphics.getHeight() / 2;
+                    float dx = -(Gdx.input.getX() - (float) centerX) * ClientConfig.cameraSensitivity;
+                    float dy = -(Gdx.input.getY() - (float) centerY) * ClientConfig.cameraSensitivity;
+                    player.rotateHead(dx, dy);
+
+                    // Reset position
+                    Gdx.input.setCursorPosition(centerX, centerY);
                 }
 
                 this.client.camera.update(player);
