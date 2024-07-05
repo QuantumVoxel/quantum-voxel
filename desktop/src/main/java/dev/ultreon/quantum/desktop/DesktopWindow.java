@@ -5,6 +5,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.quantum.GameWindow;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.lwjgl.glfw.GLFWNativeWin32;
 
 import java.awt.*;
@@ -115,6 +116,8 @@ public class DesktopWindow extends GameWindow {
     public long getPeer() {
         if (SharedLibraryLoader.isWindows) {
             return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
+        } else if (SharedLibraryLoader.isMac) {
+            return GLFWNativeCocoa.glfwGetCocoaWindow(this.getHandle());
         } else {
             return -1L;
         }

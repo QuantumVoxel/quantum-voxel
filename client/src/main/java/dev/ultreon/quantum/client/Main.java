@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import kotlin.OptIn;
@@ -51,6 +52,8 @@ public final class Main implements ApplicationListener {
     private BitmapFont font;
     private GLProfiler glProfiler;
     private final Logger logger = LoggerFactory.getLogger("GAME");
+    private GameWindow window;
+    private boolean windowVibrancyEnabled;
 
     /**
      * Constructs a new GameLibGDXWrapper object.
@@ -110,14 +113,10 @@ public final class Main implements ApplicationListener {
 
         if (GamePlatform.get().isDevEnvironment()) {
             glProfiler = new GLProfiler(Gdx.graphics);
-            glProfiler.setListener(new GLErrorListener() {
-                @Override
-                public void onError(int error) {
-                    String stackTrace = ExceptionUtils.getStackTrace(new Exception());
-                    Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
-                }
+            glProfiler.setListener(error -> {
+                String stackTrace = ExceptionUtils.getStackTrace(new Exception());
+                Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
             });
-//            glProfiler.enable();
         }
 
         try {
@@ -135,12 +134,6 @@ public final class Main implements ApplicationListener {
 
             // Initialize QuantumClient with given arguments
             this.client = new QuantumClient(this.argv);
-
-            // Set default uncaught exception handler
-//            Thread.setDefaultUncaughtExceptionHandler(this::uncaughtException);
-
-            // Set current thread's uncaught exception handler
-//            Thread.currentThread().setUncaughtExceptionHandler(this::uncaughtException);
         } catch (ApplicationCrash t) {
             // Handle ApplicationCrash exception
             QuantumClient.crash(t);
@@ -190,36 +183,46 @@ public final class Main implements ApplicationListener {
         }
     }
 
+    /**
+     * Renders the crash screen with the provided crash log.
+     * Clears the screen, displays crash log, and handles input for copying crash log to clipboard or uploading to GitHub.
+     *
+     * @param crashLog The crash log to be displayed.
+     */
     private void renderCrash(CrashLog crashLog) {
+        // Clear any active scissors
         while (ScissorStack.peekScissors() != null) ScissorStack.popScissors();
 
+        // Set window mode if currently in fullscreen
         if (Gdx.graphics.isFullscreen()) {
             Gdx.graphics.setWindowedMode(1280, 720);
             Gdx.graphics.setResizable(false);
             Gdx.graphics.setVSync(false);
         }
 
+        // Set crash frame if not set
         if (this.crashFrame == 0) {
             this.crashFrame = Gdx.graphics.getFrameId();
         }
 
+        // Clear the screen
         ScreenUtils.clear(0, 0, 0, 1, true);
-        this.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
+        // Render filled shapes for crash screen
+        this.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         this.shapeRenderer.setColor(Color.BLACK);
         this.shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
         this.shapeRenderer.setColor(Color.RED);
         this.shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), 2);
         this.shapeRenderer.rect(0, Gdx.graphics.getHeight() - 2, Gdx.graphics.getWidth(), 2);
-
         this.shapeRenderer.end();
 
+        // Begin rendering crash log text
         this.batch.begin();
         this.batch.setColor(Color.WHITE);
 
+        // Split crash log into lines and render each line
         List<String> string = StringUtils.splitIntoLines(crashLog.toString().replace("\t", "    "));
-
         for (int i = 0; i < string.size(); i++) {
             String line = string.get(i);
             this.font.draw(this.batch, line, 10, Gdx.graphics.getHeight() - 30 - i * (this.font.getLineHeight() + 2));
@@ -227,6 +230,7 @@ public final class Main implements ApplicationListener {
 
         this.batch.end();
 
+        // Handle input for copying or uploading crash log
         if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
             if (Gdx.input.isKeyPressed(Input.Keys.C)) {
                 Clipboard clipboard = Gdx.app.getClipboard();
@@ -297,5 +301,13 @@ public final class Main implements ApplicationListener {
 
     public static GLProfiler getGlProfiler() {
         return instance.glProfiler;
+    }
+
+    public GameWindow getWindow() {
+        return window;
+    }
+
+    public boolean isWindowVibrancyEnabled() {
+        return windowVibrancyEnabled;
     }
 }

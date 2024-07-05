@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -23,14 +25,23 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class DesktopLauncher {
     private static DesktopPlatform platform;
     private static DesktopWindow gameWindow;
+    private static boolean windowVibrancyEnabled = false;
+
 
     /**
      * Launches the game.
@@ -43,7 +54,7 @@ public class DesktopLauncher {
         try {
             DesktopLauncher.launch(argv);
         } catch (Exception | OutOfMemoryError e) {
-            e.printStackTrace();
+            CommonConstants.LOGGER.error("Failed to launch game", e);
             CrashHandler.handleCrash(new CrashLog("Launch failed", e).createCrash().getCrashLog());
         }
     }
@@ -139,7 +150,20 @@ public class DesktopLauncher {
         return platform;
     }
 
+    public boolean isWindowVibrancyEnabled() {
+        return windowVibrancyEnabled;
+    }
+
     private static class WindowAdapter extends Lwjgl3WindowAdapter {
+        public static MessageDigest SHA_256;
+
+        static {
+            try {
+                SHA_256 = MessageDigest.getInstance("SHA-256");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         @Override
         public void created(Lwjgl3Window window) {
@@ -151,6 +175,96 @@ public class DesktopLauncher {
             gameWindow = new DesktopWindow(window);
 
             WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+
+//            extractAcrylicNative();
+//
+//            // Check for OS and apply acrylic/mica/vibrancy
+//            if (GamePlatform.get().isWindows()) {
+//                if (System.getProperty("os.name").startsWith("Windows 11")) {
+//                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
+//                        CommonConstants.LOGGER.warn("Unsupported Windows 11 build for mica background: {}", System.getProperty("os.name"));
+//                    }
+//                    windowVibrancyEnabled = true;
+//                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
+//                    if (!Acrylic.applyAcrylic(gameWindow.getPeer())) {
+//                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
+//                    }
+//                    windowVibrancyEnabled = true;
+//                } else {
+//                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
+//                }
+//            } else if (GamePlatform.get().isMacOSX()) {
+//                if (!Acrylic.applyVibrancy(gameWindow.getPeer())) {
+//                    CommonConstants.LOGGER.warn("Unsupported macOS version for vibrancy background: {}", System.getProperty("os.name"));
+//                }
+//                windowVibrancyEnabled = true;
+//            } else if (GamePlatform.get().isLinux()) {
+//                CommonConstants.LOGGER.warn("Unsupported operating system for blur background: {}", System.getProperty("os.name"));
+//            }
+
+        }
+
+        private void extractAcrylicNative() {
+            if (!GamePlatform.get().isWindows() && !GamePlatform.get().isMacOSX()) {
+                return;
+            }
+
+            String osName = System.getProperty("os.name");
+            if (osName.startsWith("Windows 11") || osName.startsWith("Windows 10")) {
+                extractWindows();
+            } else if (GamePlatform.get().isMacOSX()) {
+                extractDarwin();
+            } else {
+                CommonConstants.LOGGER.warn("Unsupported operating system for blur background: {}", osName);
+            }
+        }
+
+        private static void extractDarwin() {
+            if (!System.getProperty("os.arch").equals("aarch64")) {
+                CommonConstants.LOGGER.warn("Unsupported macOS architecture for vibrancy: {}", System.getProperty("os.arch"));
+                return;
+            }
+            try {
+                extractFile("lib/arm64/libacrylic.dylib", "libacrylic.dylib");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private static void extractWindows() {
+            if (!System.getProperty("os.arch").equals("x86_64")) {
+                CommonConstants.LOGGER.warn("Unsupported Windows architecture for acrylic/mica: {}", System.getProperty("os.arch"));
+                return;
+            }
+            try {
+                extractFile("lib/x64/acrylic.dll", "acrylic.dll");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private static void extractFile(String providedPath, String extractedPath) throws IOException {
+            String selfHash = getHash(DesktopLauncher.class.getResourceAsStream("/" + providedPath));
+            Path path = Paths.get(extractedPath);
+            if (Files.exists(path)) {
+                InputStream curHash = Files.newInputStream(path);
+                if (Objects.equals(selfHash, getHash(curHash))) {
+                    CommonConstants.LOGGER.info("File {} is up to date", extractedPath);
+                    return;
+                }
+            }
+            InputStream resourceAsStream = DesktopLauncher.class.getResourceAsStream("/" + providedPath);
+            if (resourceAsStream == null) {
+                throw new RuntimeException("Failed to extract " + providedPath + " to " + extractedPath + " because it does not exist.");
+            }
+            Files.copy(resourceAsStream, path, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        private static String getHash(InputStream path) throws IOException {
+            MessageDigest digest = SHA_256;
+
+            byte[] hash = digest.digest(path.readAllBytes());
+            return Base64.getEncoder().encodeToString(hash);
         }
 
         @Override
