@@ -20,9 +20,6 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.badlogic.gdx.graphics.GL30.*;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 
@@ -42,7 +39,7 @@ public class WorldNode extends WorldRenderNode {
             return input;
         }
         var position = localPlayer.getPosition(client.partialTick);
-        List<Entity> toSort = new ArrayList<>(world.getAllEntities());
+        Array<Entity> toSort = new Array<>(world.getAllEntities());
 //        worldRenderer.render(DrawLayer.WORLD, deltaTime);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);

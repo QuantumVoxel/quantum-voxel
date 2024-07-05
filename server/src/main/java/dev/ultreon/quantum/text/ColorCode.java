@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.text;
 
+import com.badlogic.gdx.utils.IntMap;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.util.Color;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceArrayMap;
@@ -98,7 +99,7 @@ public enum ColorCode implements Color {
 
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + '§' + "[0-9A-FK-OR]");
 
-    private static final Int2ReferenceMap<ColorCode> BY_ID = new Int2ReferenceArrayMap<>();
+    private static final IntMap<ColorCode> BY_ID = new IntMap<>();
     private static final Char2ReferenceMap<ColorCode> BY_CHAR = new Char2ReferenceArrayMap<>();
 
     static {

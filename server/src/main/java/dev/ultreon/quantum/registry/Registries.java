@@ -8,6 +8,7 @@ import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.recipe.RecipeType;
+import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.weather.Weather;
 import dev.ultreon.quantum.world.Biome;
@@ -31,6 +32,7 @@ public final class Registries {
     public static final Registry<RecipeType<?>> RECIPE_TYPE = Registries.create(RegistryKeys.RECIPE_TYPE);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = Registries.create(RegistryKeys.BLOCK_ENTITY_TYPE);
     public static final Registry<ParticleType> PARTICLE_TYPES = Registries.create(RegistryKeys.PARTICLE_TYPE);
+    public static final Registry<FontIconMap> FONT_ICON_MAP = Registries.create(RegistryKeys.FONT_ICON_MAP);
 
     public static void nopInit() {
         // Load class

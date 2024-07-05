@@ -387,7 +387,7 @@ public class TabCompleting {
     }
 
     public static List<String> entityIds(List<String> list, ServerWorld world, String currentArgument) {
-        for (var id : world.getEntities().stream().map(Entity::getId).collect(Collectors.toList())) {
+        for (var id : Arrays.stream(world.getEntities().toArray(Entity.class)).map(Entity::getId).collect(Collectors.toList())) {
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
 

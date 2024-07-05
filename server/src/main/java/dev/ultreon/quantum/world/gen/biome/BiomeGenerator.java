@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.world.gen.biome;
 
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
-import dev.ultreon.quantum.server.ServerDisposable;
 import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.RecordingChunk;
@@ -21,7 +21,7 @@ import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 
-public class BiomeGenerator implements ServerDisposable {
+public class BiomeGenerator implements Disposable {
     private final World world;
     private final List<TerrainLayer> layers;
     private final List<WorldGenFeature> features;

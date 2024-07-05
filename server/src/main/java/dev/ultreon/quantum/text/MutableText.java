@@ -19,7 +19,7 @@ public abstract class MutableText extends TextObject {
     }
 
     @Override
-    public final String getText() {
+    public String getText() {
         var builder = new StringBuilder();
         builder.append(this.createString());
         for (var extra : this.extras) {

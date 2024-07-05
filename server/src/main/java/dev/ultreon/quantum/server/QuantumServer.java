@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.server;
 
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -77,7 +78,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static final String NAMESPACE = "quantum";
 //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
-    private final List<ServerDisposable> disposables = new CopyOnWriteArrayList<>();
+    private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
@@ -526,7 +527,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param <T>        the type of the server disposable.
      * @return the same server disposable.
      */
-    public <T extends ServerDisposable> T disposeOnClose(T disposable) {
+    public <T extends Disposable> T disposeOnClose(T disposable) {
         this.disposables.add(disposable);
         return disposable;
     }
@@ -544,7 +545,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public void close() {
-        for (ServerDisposable disposable : this.disposables) {
+        for (Disposable disposable : this.disposables) {
             disposable.dispose();
         }
 
@@ -844,7 +845,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public @Nullable Entity getEntity(@NotNull UUID uuid) {
-        return this.worlds.values().stream().map(World::getEntities).flatMap(Collection::stream).filter(entity -> entity.getUuid().equals(uuid)).findAny().orElse(null);
+        return this.worlds.values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
     public CommandSender getConsoleSender() {
@@ -879,7 +880,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Experimental
     public final <T extends Entity> T getEntity(int id, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-        Entity entityById = this.worlds.values().stream().map(World::getEntities).flatMap(Collection::stream).filter(entity -> entity.getId() == id).findAny().orElse(null);;
+        Entity entityById = this.worlds.values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getId() == id).findAny().orElse(null);;
 
         if (type.isInstance(entityById)) {
             return type.cast(entityById);

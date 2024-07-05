@@ -7,6 +7,8 @@ import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.GameCommands;
+import dev.ultreon.quantum.text.icon.EmoteMap;
+import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Queues;
@@ -29,7 +30,6 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.ServerDisposable;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.gen.TerrainGenerator;
@@ -443,7 +443,7 @@ public class ServerWorld extends World {
     public void tick() {
         this.playTime++;
 
-        for (Entity entity1 : List.copyOf(this.entitiesById.values())) {
+        for (Entity entity1 : this.entitiesById.values()) {
             if (entity1.isMarkedForRemoval()) {
                 this.entitiesById.remove(entity1.getId());
                 BlockPos blockPos = entity1.getBlockPos();
@@ -1200,7 +1200,7 @@ public class ServerWorld extends World {
      * @since 0.1.0
      */
     @NotThreadSafe
-    public static class Region implements ServerDisposable {
+    public static class Region implements Disposable {
         private final Set<ChunkPos> activeChunks = new CopyOnWriteArraySet<>();
         private final RegionPos pos;
         public int dataVersion;

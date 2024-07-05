@@ -1,6 +1,9 @@
 package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -23,13 +26,10 @@ import dev.ultreon.quantum.events.BlockEvents;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.ServerDisposable;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.ServerWorld.Region;
 import dev.ultreon.quantum.world.particles.ParticleType;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -54,7 +53,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
-public abstract class World implements ServerDisposable {
+public abstract class World implements Disposable {
     public static final int CHUNK_SIZE = 16;
     public static final int CHUNK_HEIGHT = 256;
     public static final int WORLD_HEIGHT = 256;
@@ -70,7 +69,7 @@ public abstract class World implements ServerDisposable {
     protected final long seed;
     private int renderedChunks;
 
-    protected final Int2ReferenceMap<Entity> entitiesById = new Int2ReferenceArrayMap<>();
+    protected final IntMap<Entity> entitiesById = new IntMap<>();
     private int curId;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final List<ChunkPos> alwaysLoaded = new ArrayList<>();
@@ -284,7 +283,7 @@ public abstract class World implements ServerDisposable {
     }
 
     private Stream<Entity> getEntitiesWithin(BoundingBox boundingBox) {
-        return this.entitiesById.values().stream().filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
+        return Arrays.stream(this.entitiesById.values().toArray().toArray(Entity.class)).filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
     }
 
     /**
@@ -913,12 +912,12 @@ public abstract class World implements ServerDisposable {
         return this.info;
     }
 
-    public Collection<Entity> getEntities() {
-        return this.entitiesById.values();
+    public Array<Entity> getEntities() {
+        return this.entitiesById.values().toArray();
     }
 
-    public <T extends Entity> Collection<Entity> getEntitiesByClass(Class<T> clazz) {
-        return this.entitiesById.values().stream().filter(clazz::isInstance).collect(Collectors.toList());
+    public <T extends Entity> Iterable<Entity> getEntitiesByClass(Class<T> clazz) {
+        return this.entitiesById.values().toArray().select(clazz::isInstance);
     }
 
     public UUID getUID() {
@@ -966,12 +965,12 @@ public abstract class World implements ServerDisposable {
         this.spawn(new DroppedItem(this, itemStack, position, velocity), new MapType());
     }
 
-    public List<Entity> entitiesWithinDst(Entity entity, int distance) {
-        return entitiesById.values().stream().filter(entity1 -> entity1.distanceTo(entity) <= distance).collect(Collectors.toList());
+    public Iterable<Entity> entitiesWithinDst(Entity entity, int distance) {
+        return entitiesById.values().toArray().select(entity1 -> entity1.distanceTo(entity) <= distance);
     }
 
-    public List<Entity> collideEntities(Entity droppedItem, BoundingBox ext) {
-        return entitiesById.values().stream().filter(entity -> entity.getBoundingBox().intersects(ext)).collect(Collectors.toList());
+    public Iterable<Entity> collideEntities(Entity droppedItem, BoundingBox ext) {
+        return entitiesById.values().toArray().select(entity -> entity.getBoundingBox().intersects(ext));
     }
 
     public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {

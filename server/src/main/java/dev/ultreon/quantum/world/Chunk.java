@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.ubo.types.MapType;
+import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
@@ -11,12 +11,12 @@ import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.server.ServerDisposable;
 import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.ValidationError;
 import dev.ultreon.quantum.world.gen.TreeData;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
+import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -36,7 +36,7 @@ import static dev.ultreon.quantum.world.World.*;
  */
 @NotThreadSafe
 @ApiStatus.NonExtendable
-public abstract class Chunk implements ServerDisposable, ChunkAccess {
+public abstract class Chunk implements Disposable, ChunkAccess {
     public static final int VERTEX_SIZE = 6;
     private final ChunkPos pos;
     final Map<BlockPos, Float> breaking = new HashMap<>();
@@ -337,7 +337,7 @@ public abstract class Chunk implements ServerDisposable, ChunkAccess {
             this.disposed = true;
             this.ready = false;
 
-            if (this.storage instanceof ServerDisposable disposable) {
+            if (this.storage instanceof Disposable disposable) {
                 disposable.dispose();
             }
         }

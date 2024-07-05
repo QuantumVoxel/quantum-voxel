@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.world.gen.noise;
 
+import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.quantum.server.ServerDisposable;
 
-public class NoiseInstance implements ServerDisposable {
+public class NoiseInstance implements Disposable {
     private final NoiseType noise;
     private final long seed;
     private final double noiseZoom;

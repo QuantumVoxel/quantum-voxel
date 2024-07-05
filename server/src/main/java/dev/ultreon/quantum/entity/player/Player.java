@@ -27,6 +27,7 @@ import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
@@ -373,24 +374,30 @@ public abstract class Player extends LivingEntity {
         this.openMenu(this.inventory);
     }
 
-    public @Nullable Entity rayCast(Collection<Entity> entities) {
+    public @Nullable Entity rayCast(Iterable<Entity> entities) {
         Ray ray = new Ray(this.getPosition(), this.getLookVector());
-        return entities.stream()
-                .filter(entity -> Intersector.intersectRayBounds(ray, entity.getBoundingBox(), null))
-                .min(Comparator.comparing(entity -> entity.getPosition().dst(ray.origin)))
-                .orElse(null);
+        boolean seen = false;
+        Entity best = null;
+        Comparator<Entity> comparator = Comparator.comparing(entity -> entity.getPosition().dst(ray.origin));
+        for (Entity entity : entities) {
+            if (Intersector.intersectRayBounds(ray, entity.getBoundingBox(), null) && (!seen || comparator.compare(entity, best) < 0)) {
+                seen = true;
+                best = entity;
+            }
+        }
+        return seen ? best : null;
     }
 
     public @Nullable Entity nearestEntity() {
-        return this.world.getEntities()
-                .stream()
+        return Arrays.stream(this.world.getEntities()
+                .toArray(Entity.class))
                 .min(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
                 .orElse(null);
     }
 
     public @Nullable <T extends Entity> T nearestEntity(Class<T> clazz) {
-        return this.world.getEntities()
-                .stream()
+        return Arrays.stream(this.world.getEntities()
+                .toArray(Entity.class))
                 .filter(clazz::isInstance)
                 .map(clazz::cast)
                 .min(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))

@@ -1,20 +1,21 @@
 package dev.ultreon.quantum.collection;
 
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.quantum.server.ServerDisposable;
-import dev.ultreon.quantum.ubo.DataKeys;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -31,7 +32,7 @@ import java.util.function.Function;
  */
 @NotThreadSafe
 @ApiStatus.Experimental
-public class PaletteStorage<D> implements ServerDisposable, Storage<D> {
+public class PaletteStorage<D> implements Disposable, Storage<D> {
     private final D defaultValue;
     private short[] palette;
     private Array<D> data = new Array<>();

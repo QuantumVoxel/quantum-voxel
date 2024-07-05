@@ -8,6 +8,8 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Version;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.IntSet;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -18,10 +20,6 @@ import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.loader.XeoxModFile;
 import de.mxapplications.openfiledialog.OpenFileDialog;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.IntArraySet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.mozilla.javascript.Context;
 
 import java.io.File;
@@ -36,12 +34,12 @@ public class AndroidPlatform extends GamePlatform {
     public static final int IMPORT_MOD_CODE = 0x00000001;
     private final Map<String, Mod> mods = new IdentityHashMap<>();
     private final AndroidLauncher launcher;
-    final Int2ReferenceMap<InputDevice> devices = new Int2ReferenceArrayMap<>();
-    private final IntSet mice = new IntArraySet();
-    private final IntSet keyboards = new IntArraySet();
-    private final Int2ReferenceMap<MouseDevice> motions = new Int2ReferenceArrayMap<>();
+    final IntMap<InputDevice> devices = new IntMap<>();
+    private final IntSet mice = new IntSet();
+    private final IntSet keyboards = new IntSet();
+    private final IntMap<MouseDevice> motions = new IntMap<MouseDevice>();
     private AndroidMouseDevice mouseDevice;
-    private final Int2ReferenceMap<Device> gameDevices = new Int2ReferenceArrayMap<>();
+    private final IntMap<Device> gameDevices = new IntMap<Device>();
 
     AndroidPlatform(AndroidLauncher launcher) {
         super();

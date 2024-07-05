@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.world.gen.noise;
 
-import dev.ultreon.quantum.server.ServerDisposable;
+import com.badlogic.gdx.utils.Disposable;
 
-public interface NoiseType extends ServerDisposable {
+public interface NoiseType extends Disposable {
 
     double eval(double x, double y);
 

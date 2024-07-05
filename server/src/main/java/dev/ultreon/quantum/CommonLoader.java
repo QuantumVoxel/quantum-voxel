@@ -2,6 +2,8 @@ package dev.ultreon.quantum;
 
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.events.ConfigEvents;
+import dev.ultreon.quantum.text.icon.EmoteMap;
+import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import dev.ultreon.quantum.util.Env;
 
@@ -19,5 +21,8 @@ public class CommonLoader {
 
         // Trigger event for config load on the client side.
         ConfigEvents.LOAD.factory().onConfigLoad(Env.CLIENT);
+
+        IconMap.register();
+        EmoteMap.register();
     }
 }

@@ -5,6 +5,7 @@ import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Options;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import dev.ultreon.quantum.util.Identifier;
 
 public class CommonConstants {
     public static final String EX_NOT_ON_RENDER_THREAD = "Current thread is not the rendering thread.";
@@ -38,5 +39,9 @@ public class CommonConstants {
 
     public static String strId(String outlineCursor) {
         return NAMESPACE + ":" + outlineCursor;
+    }
+
+    public static Identifier id(String path) {
+        return new Identifier(NAMESPACE, path);
     }
 }

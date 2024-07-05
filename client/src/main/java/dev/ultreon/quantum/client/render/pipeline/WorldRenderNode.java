@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
+import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
@@ -77,7 +78,7 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
     }
 
     private void renderWorldOnce(WorldRenderer worldRenderer, ClientWorld world, Vec3d position, ModelBatch batch) {
-        List<Entity> toSort = new ArrayList<>(world.getAllEntities());
+        Array<Entity> toSort = new Array<>(world.getAllEntities());
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);
@@ -85,9 +86,7 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
         });
         System.out.println("toSort = " + toSort);
         for (Entity entity : toSort) {
-            QuantumClient.PROFILER.section("(Entity #" + entity.getId() + ")", () -> {
-                batch.render((output, pool) -> worldRenderer.collectEntity(entity));
-            });
+            QuantumClient.PROFILER.section("(Entity #" + entity.getId() + ")", () -> batch.render((output, pool) -> worldRenderer.collectEntity(entity)));
         }
 
         batch.render(DrawLayer.WORLD::finish, worldRenderer.getEnvironment());

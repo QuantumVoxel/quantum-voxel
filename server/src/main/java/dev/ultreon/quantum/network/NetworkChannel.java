@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.network;
 
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectIntMap;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.network.api.packet.ClientEndpoint;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
@@ -11,11 +13,6 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Identifier;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import dev.ultreon.quantum.util.Env;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +25,9 @@ public class NetworkChannel {
     private static final Map<Identifier, NetworkChannel> CHANNELS = new HashMap<>();
     private final Identifier key;
     private int curId;
-    private final Reference2IntMap<Class<? extends ModPacket<?>>> idMap = new Reference2IntArrayMap<>();
+    private final ObjectIntMap<Class<? extends ModPacket<?>>> idMap = new ObjectIntMap<>();
     private final Map<Class<? extends ModPacket<?>>, BiConsumer<? extends ModPacket<?>, PacketIO>> encoders = new HashMap<>();
-    private final Int2ReferenceMap<Function<PacketIO, ? extends ModPacket<?>>> decoders = new Int2ReferenceArrayMap<>();
+    private final IntMap<Function<PacketIO, ? extends ModPacket<?>>> decoders = new IntMap<>();
     private final Map<Class<? extends ModPacket<?>>, BiConsumer<? extends ModPacket<?>, Supplier<ModPacketContext>>> consumers = new HashMap<>();
 
     private IConnection<ClientPacketHandler, ServerPacketHandler> c2sConnection;
@@ -100,7 +97,8 @@ public class NetworkChannel {
         return this.consumers.get(type);
     }
 
+    @SuppressWarnings("unchecked")
     public int getId(ModPacket<?> packet) {
-        return this.idMap.getInt(packet.getClass());
+        return this.idMap.get((Class<? extends ModPacket<?>>) packet.getClass(), -1);
     }
 }

@@ -8,6 +8,7 @@ import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.recipe.RecipeType;
+import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.weather.Weather;
 import dev.ultreon.quantum.world.Biome;
@@ -29,4 +30,5 @@ public class RegistryKeys {
     public static final RegistryKey<Registry<RecipeType<?>>> RECIPE_TYPE = RegistryKey.registry(new Identifier("recipe_type"));
     public static final RegistryKey<Registry<BlockEntityType<?>>> BLOCK_ENTITY_TYPE = RegistryKey.registry(new Identifier("block_entity_type"));
     public static final RegistryKey<Registry<ParticleType>> PARTICLE_TYPE = RegistryKey.registry(new Identifier("particle_type"));
+    public static final RegistryKey<Registry<FontIconMap>> FONT_ICON_MAP = RegistryKey.registry(new Identifier("font_icon_map"));
 }

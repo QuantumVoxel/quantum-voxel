@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectIntMap;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.Queue;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -607,8 +605,8 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
-    public Collection<Entity> getAllEntities() {
-        return this.entitiesById.values();
+    public Array<Entity> getAllEntities() {
+        return this.entitiesById.values().toArray();
     }
 
     public float getGlobalSunlight() {

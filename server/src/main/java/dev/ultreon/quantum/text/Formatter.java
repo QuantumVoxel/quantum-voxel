@@ -4,6 +4,8 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.registry.CustomKeyRegistry;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.text.icon.EmoteMap;
+import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Identifier;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
@@ -109,15 +111,6 @@ public class Formatter {
 //                    }
 
                     case '!':
-                        if (this.sender == null) {
-                            this.currentBuilder.append(this.c());
-                            if (this.redirect) {
-                                this.redirect = false;
-                                return this.redirectValue;
-                            }
-                            this.offset++;
-                            continue;
-                        }
                         if (this.offset + 1 == this.message.length()) {
                             this.currentBuilder.append(this.c());
                             this.offset++;
@@ -126,6 +119,8 @@ public class Formatter {
                         this.offset++;
                         if (this.c() == '(') {
                             this.parseIcon();
+                        } else {
+                            currentBuilder.append("!");
                         }
                         continue;
                     default:
@@ -221,11 +216,8 @@ public class Formatter {
         var arg = new String(characters.toCharArray()).substring(0, characters.size() - 1);
         this.pushBuilder();
 
-        if (EmoteMap.get(arg) != null) {
-            var texture = TextObject.literal(String.valueOf(EmoteMap.get(arg).getChar())).style(style ->
-                    style.font(EmoteMap.get(arg).getFont())
-                            .color(RgbColor.rgb(0xffffff)));
-            this.builder.append(texture);
+        if (EmoteMap.INSTANCE.get(arg) != null) {
+            this.builder.append(new FontIconObject(arg, EmoteMap.INSTANCE));
         }
     }
 
@@ -242,14 +234,11 @@ public class Formatter {
 
         this.offset++;
 
-        var arg = String.join(new String(characters.toCharArray())).substring(0, characters.size() - 1);
+        var arg = new String(characters.toCharArray()).substring(0, characters.size() - 1);
         this.pushBuilder();
 
-        if (IconMap.get(arg) != null) {
-            var texture = TextObject.literal(String.valueOf(IconMap.get(arg).getChar()))
-                    .style(style -> style.font(IconMap.get(arg).getFont())
-                            .color(RgbColor.rgb(0xffffff)));
-            this.builder.append(texture);
+        if (IconMap.INSTANCE.get(arg) != null) {
+            this.builder.append(new FontIconObject(arg, IconMap.INSTANCE));
         }
     }
 

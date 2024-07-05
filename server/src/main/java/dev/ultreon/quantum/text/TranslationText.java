@@ -6,12 +6,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
     private final Object @NotNull [] args;
+    private String translated = null;
+    private boolean initialized = false;
 
     TranslationText(@NotNull String path, Object @NotNull ... args) {
         this.path = path;
@@ -40,6 +42,26 @@ public class TranslationText extends MutableText {
 
     @Override
     public @NotNull String createString() {
+        String translated = getTranslated();
+        if (!Objects.equals(this.translated, translated)) {
+            this.translated = translated;
+            this.initFormat();
+        }
+        return "";
+    }
+
+    private void initFormat() {
+        if (this.initialized) this.extras.removeFirst();
+        this.extras.addFirst(Formatter.format(getTranslated(), false));
+        this.initialized = true;
+    }
+
+    private String getTranslated() {
+        return LanguageBootstrap.translate(this.path, this.args);
+    }
+
+    @Override
+    public @NotNull String getText() {
         Object @NotNull [] objects = this.args;
         for (int i = 0, objectsLength = objects.length; i < objectsLength; i++) {
             Object arg = objects[i];
@@ -47,7 +69,7 @@ public class TranslationText extends MutableText {
                 objects[i] = textObject.createString();
             }
         }
-        return LanguageBootstrap.translate(this.path, this.args);
+        return getTranslated();
     }
 
     @Override
@@ -84,7 +106,7 @@ public class TranslationText extends MutableText {
 
     @Override
     public MutableText copy() {
-        var copy = this.extras.stream().map(TextObject::copy).collect(Collectors.toList());
+        var copy = this.extras.stream().map(TextObject::copy).toList();
         var translationText = new TranslationText(this.path, this.args);
         translationText.extras.addAll(copy);
         return translationText;

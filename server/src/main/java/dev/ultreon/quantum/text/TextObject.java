@@ -14,16 +14,13 @@ public abstract class TextObject implements Iterable<TextObject> {
 
     public static TextObject deserialize(MapType data) {
         String type = data.getString("type");
-        switch (type) {
-            case "literal":
-                return LiteralText.deserialize(data);
-            case "translation":
-                return TranslationText.deserialize(data);
-            case "empty":
-                return TextObject.empty();
-            default:
-                throw new IllegalStateException("Unexpected value: " + type);
-        }
+        return switch (type) {
+            case "literal" -> LiteralText.deserialize(data);
+            case "translation" -> TranslationText.deserialize(data);
+            case "empty" -> TextObject.empty();
+            case "font_icon" -> FontIconObject.deserialize(data);
+            default -> throw new IllegalStateException("Unexpected value: " + type);
+        };
     }
 
     public static TextObject nullToEmpty(TextObject title) {
