@@ -1,17 +1,17 @@
 package dev.ultreon.quantum.client.render.pipeline;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.quantum.client.gui.Matrices;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.input.GameCamera;
-import dev.ultreon.quantum.client.render.TextureSamplers;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 public class PostEffectsNode extends RenderPipeline.RenderNode {
     @NewInstance
     @Override
-    public Array<Renderable> render(Matrices matrices, TextureSamplers samplers, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
+    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         // Implement post-effects rendering logic here
         System.out.println("Post Effects Rendering");
         return input;

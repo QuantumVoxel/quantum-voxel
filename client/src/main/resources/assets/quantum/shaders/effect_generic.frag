@@ -166,6 +166,4 @@ void main() {
     normalOut = normal;
     specularOut = vec4(0.0, 0.0, 0.0, 0.0);
     depthOut = depthIn3Channels;
-
-    diffuseOut =  vec4(1.0);
 }

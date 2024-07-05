@@ -181,8 +181,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public TouchPoint motionPointer = null;
     public Vector2 scrollPointer = new Vector2();
     public Json5ModelLoader j5ModelLoader;
-    public double gameTime;
-    public float runTime;
+    public float gameTime;
     private boolean screenshotWorldOnly;
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
@@ -1071,7 +1070,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
 
-        this.runTime += deltaTime;
+        this.gameTime += deltaTime;
 
         Disposable disposable;
         while ((disposable = this.disposalQueue.poll()) != null) {
@@ -1408,11 +1407,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         var canTick = false;
 
         double time2 = System.currentTimeMillis();
-        var passed = time2 - this.time;
+        var passed = time2 - this.gameTime;
         this.frameTime += (float) passed;
         this.tickTime += (float) passed;
 
-        this.time = time2;
+        this.gameTime = time2;
 
         float tickCap = 1000f / QuantumServer.TPS;
         while (this.frameTime >= tickCap) {

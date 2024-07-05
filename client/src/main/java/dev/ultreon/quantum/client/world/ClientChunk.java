@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -16,15 +17,16 @@ import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
-import dev.ultreon.quantum.client.gui.Matrices;
+import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.render.DrawLayer;
 import dev.ultreon.quantum.client.render.RenderEffect;
-import dev.ultreon.quantum.client.render.TextureSamplers;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.collection.Storage;
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
@@ -322,10 +324,10 @@ public final class ClientChunk extends Chunk {
         return lightMap.getSunlight(pos.x(), pos.y(), pos.z());
     }
 
-    public void renderLayer(RenderEffect effect, Matrices matrices, TextureSamplers textureSamplers) {
+    public void renderLayer(RenderEffect effect) {
         Mesh mesh = this.layers.get(effect);
         if (mesh == null) return;
-        effect.begin(mesh, matrices, textureSamplers);
+        effect.begin(mesh);
         effect.render(GL20.GL_TRIANGLES);
     }
 }

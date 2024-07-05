@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
@@ -33,7 +34,6 @@ import dev.ultreon.quantum.block.state.BlockData;
 import dev.ultreon.quantum.client.DisposableContainer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.gui.Matrices;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
@@ -45,7 +45,10 @@ import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.entity.renderer.EntityRenderer;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.*;
+import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.DrawLayer;
+import dev.ultreon.quantum.client.render.RenderEffect;
+import dev.ultreon.quantum.client.render.RenderEffects;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -116,8 +119,6 @@ public final class WorldRenderer implements DisposableContainer {
     private boolean wasSunMoonShown = true;
     private final Quaternion tmpQ = new Quaternion();
     private MeshBuilder meshBuilder = new MeshBuilder();
-    private Texture blockTex;
-    private Texture emissiveBlockTex;
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;
@@ -126,8 +127,8 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     private void setup() {
-        this.blockTex = this.client.blocksTextureAtlas.getTexture();
-        this.emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
+        Texture blockTex = this.client.blocksTextureAtlas.getTexture();
+        Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
 
         this.setupMaterials(blockTex, emissiveBlockTex);
         this.setupDynamicSkybox();
@@ -144,6 +145,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     private void setupEnvironment() {
+        final Environment environment;
         this.environment = new Environment();
         this.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
@@ -151,6 +153,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     private void setupBreaking() {
+        final Texture breakingTex;
         // Breaking animation meshes.
         this.breakingTex = this.client.getTextureManager().getTexture(id("textures/break_stages.png"));
         this.breakingMaterial = this.client.getMaterialManager().get(id("block/breaking"));
@@ -327,13 +330,10 @@ public final class WorldRenderer implements DisposableContainer {
             throw new IllegalStateException("Should only be called on the main thread!");
     }
 
-    public void render(Matrices matrices, TextureSamplers samplers, float deltaTime) {
+    public void render(float deltaTime) {
         var player = this.client.player;
         if (player == null) return;
         if (this.disposed) return;
-
-        samplers.set("diffuse", blockTex);
-        samplers.set("emissive", emissiveBlockTex);
 
         this.skybox.update(this.world.getDaytime(), deltaTime);
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
@@ -345,7 +345,7 @@ public final class WorldRenderer implements DisposableContainer {
         var ref = new ChunkRenderRef();
 
         Array<ChunkPos> positions = new Array<>();
-        QuantumClient.PROFILER.section("chunks", () -> this.renderChunks(matrices, samplers, chunks, positions, player, ref));
+        QuantumClient.PROFILER.section("chunks", () -> this.renderChunks(chunks, positions, player, ref));
 
         BlockHitResult gameCursor = this.client.cursor;
         if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
@@ -406,7 +406,7 @@ public final class WorldRenderer implements DisposableContainer {
         });
     }
 
-    private void renderChunks(Matrices matrices, TextureSamplers samplers, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
+    private void renderChunks(List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
         for (var chunk : chunks) {
             if (positions.contains(chunk.getPos(), false)) {
                 QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getPos());
@@ -467,13 +467,10 @@ public final class WorldRenderer implements DisposableContainer {
                 });
             }
 
-            matrices.push();
-            matrices.translate(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-            chunk.renderLayer(RenderEffect.GENERIC, matrices, samplers);
-            chunk.renderLayer(RenderEffect.CUTOUT, matrices, samplers);
-            chunk.renderLayer(RenderEffect.TRANSPARENT, matrices, samplers);
-            chunk.renderLayer(RenderEffect.WATER, matrices, samplers);
-            matrices.pop();
+            chunk.renderLayer(RenderEffect.GENERIC);
+            chunk.renderLayer(RenderEffect.CUTOUT);
+            chunk.renderLayer(RenderEffect.TRANSPARENT);
+            chunk.renderLayer(RenderEffect.WATER);
 
             this.renderBlockBreaking(chunk);
             this.renderBlockModels(chunk);
