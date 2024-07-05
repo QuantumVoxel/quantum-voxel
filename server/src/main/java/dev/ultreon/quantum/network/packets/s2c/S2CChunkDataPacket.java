@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network.packets.s2c;
 
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketContext;
@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
     private final ChunkPos pos;
-    private final Storage<BlockData> storage;
+    private final Storage<BlockProperties> storage;
     private final Storage<Biome> biomeStorage;
     private final IntList blockEntityPositions = new IntArrayList();
     private final IntList blockEntities = new IntArrayList();
@@ -32,7 +32,7 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
 
     public S2CChunkDataPacket(PacketIO buffer) {
         this.pos = buffer.readChunkPos();
-        this.storage = new PaletteStorage<>(BlockData.AIR, buffer, PacketIO::readBlockMeta);
+        this.storage = new PaletteStorage<>(BlockProperties.AIR, buffer, PacketIO::readBlockMeta);
         this.biomeStorage = new PaletteStorage<>(Biomes.PLAINS, buffer, buf -> Registries.BIOME.byId(buf.readShort()));
 
         int blockEntityCount = buffer.readVarInt();
@@ -42,7 +42,7 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
         }
     }
 
-    public S2CChunkDataPacket(ChunkPos pos, Storage<BlockData> storage, Storage<Biome> biomeStorage, Collection<BlockEntity> blockEntities) {
+    public S2CChunkDataPacket(ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Collection<BlockEntity> blockEntities) {
         this.pos = pos;
         this.storage = storage;
         this.biomeStorage = biomeStorage;

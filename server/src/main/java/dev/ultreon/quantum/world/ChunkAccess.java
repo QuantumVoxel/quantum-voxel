@@ -1,17 +1,17 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 
 public interface ChunkAccess {
 
-    boolean setFast(int x, int y, int z, BlockData block);
+    boolean setFast(int x, int y, int z, BlockProperties block);
 
-    boolean set(int x, int y, int z, BlockData block);
+    boolean set(int x, int y, int z, BlockProperties block);
 
-    BlockData getFast(int x, int y, int z);
+    BlockProperties getFast(int x, int y, int z);
 
-    BlockData get(int x, int y, int z);
+    BlockProperties get(int x, int y, int z);
 
     Vec3i getOffset();
 

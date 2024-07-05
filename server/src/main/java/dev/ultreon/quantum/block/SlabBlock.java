@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.world.BlockPos;
@@ -16,8 +16,8 @@ public class SlabBlock extends Block {
     }
 
     @Override
-    public BoundingBox getBoundingBox(int x, int y, int z, BlockData blockData) {
-        var type = blockData.<Type>get("type");
+    public BoundingBox getBoundingBox(int x, int y, int z, BlockProperties blockProperties) {
+        var type = blockProperties.<Type>get("type");
 
         switch (type) {
             case TOP:
@@ -32,12 +32,12 @@ public class SlabBlock extends Block {
     }
 
     @Override
-    public BlockData createMeta() {
+    public BlockProperties createMeta() {
         return super.createMeta().withEntry("type", BlockDataEntry.ofEnum(Type.BOTTOM));
     }
 
     @Override
-    public BlockData onPlacedBy(BlockData blockMeta, BlockPos pos, UseItemContext context) {
+    public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockPos pos, UseItemContext context) {
         double y = context.result().getPosition().y % 1;
         return blockMeta.withEntry("type", y < 0.5 ? Type.TOP : Type.BOTTOM);
     }

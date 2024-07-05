@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.events;
 
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
@@ -20,7 +20,7 @@ public class BlockEvents {
 
     @FunctionalInterface
     public interface SetBlock {
-        void onSetBlock(World world, BlockPos pos, BlockData block);
+        void onSetBlock(World world, BlockPos pos, BlockProperties block);
     }
 
     @FunctionalInterface
@@ -35,16 +35,16 @@ public class BlockEvents {
 
     @FunctionalInterface
     public interface AttemptBlockRemoval {
-        EventResult onAttemptBlockRemoval(ServerPlayer player, BlockData removed, BlockPos pos, ItemStack stack);
+        EventResult onAttemptBlockRemoval(ServerPlayer player, BlockProperties removed, BlockPos pos, ItemStack stack);
     }
 
     @FunctionalInterface
     public interface BlockRemoved {
-        void onBlockRemoved(ServerPlayer player, BlockData removed, BlockPos pos, ItemStack stack);
+        void onBlockRemoved(ServerPlayer player, BlockProperties removed, BlockPos pos, ItemStack stack);
     }
 
     @FunctionalInterface
     public interface BreakBlock {
-        EventResult onBreakBlock(World player, BlockPos removed, BlockData pos, Player stack);
+        EventResult onBreakBlock(World player, BlockPos removed, BlockProperties pos, Player stack);
     }
 }

@@ -4,7 +4,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.BlockPos;
@@ -21,7 +21,7 @@ public class BlockHitResult implements HitResult {
     protected Vec3d normal = new Vec3d();
     protected Vec3i pos = new Vec3i();
     protected Vec3i next = new Vec3i();
-    protected BlockData blockMeta = BlockData.AIR;
+    protected BlockProperties blockMeta = BlockProperties.AIR;
     protected Block block = Blocks.AIR;
     protected boolean collide;
     protected double distance;
@@ -56,7 +56,7 @@ public class BlockHitResult implements HitResult {
         this.distance = buffer.readDouble();
     }
 
-    public BlockHitResult(Ray ray, BlockPos blockPos, BlockData block) {
+    public BlockHitResult(Ray ray, BlockPos blockPos, BlockProperties block) {
         this.ray = ray;
         this.blockMeta = block;
         this.block = block.getBlock();
@@ -117,7 +117,7 @@ public class BlockHitResult implements HitResult {
         return this.next;
     }
 
-    public BlockData getBlockMeta() {
+    public BlockProperties getBlockMeta() {
         return this.blockMeta;
     }
 

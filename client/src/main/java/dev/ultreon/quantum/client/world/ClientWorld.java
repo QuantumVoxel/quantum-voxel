@@ -12,7 +12,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec2d;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.particle.ClientParticle;
@@ -206,7 +206,7 @@ public final class ClientWorld extends World implements Disposable {
     }
 
     @Override
-    public boolean set(int x, int y, int z, @NotNull BlockData block, int flags) {
+    public boolean set(int x, int y, int z, @NotNull BlockProperties block, int flags) {
         if (!QuantumClient.isOnMainThread()) {
             return QuantumClient.invokeAndWait(() -> this.set(x, y, z, block, flags));
         }
@@ -228,8 +228,8 @@ public final class ClientWorld extends World implements Disposable {
 
             for (CubicDirection direction : CubicDirection.values()) {
                 BlockPos offset = blockPos.offset(direction);
-                BlockData blockData = this.get(offset);
-                blockData.update(this, offset);
+                BlockProperties blockProperties = this.get(offset);
+                blockProperties.update(this, offset);
             }
         }
 
@@ -394,8 +394,8 @@ public final class ClientWorld extends World implements Disposable {
     private void newState(Queue<int[]> queue, int x, int y, int z, int intensity) {
         ClientChunk chunkAt = this.getChunkAt(x, y, z);
         if (chunkAt == null) return;
-        BlockData blockData = chunkAt.get(toLocalBlockPos(x, y, z, this.tmp));
-        int lightReduction = max(blockData.getLightReduction(), 1);
+        BlockProperties blockProperties = chunkAt.get(toLocalBlockPos(x, y, z, this.tmp));
+        int lightReduction = max(blockProperties.getLightReduction(), 1);
         queue.addLast(new int[]{x, y, z, intensity - lightReduction});
     }
 
@@ -548,7 +548,7 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
-    private void sync(int x, int y, int z, BlockData block) {
+    private void sync(int x, int y, int z, BlockProperties block) {
         this.client.connection.send(new C2SPlaceBlockPacket(x, y, z, block));
     }
 

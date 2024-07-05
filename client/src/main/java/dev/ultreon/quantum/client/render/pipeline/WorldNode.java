@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.DrawLayer;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -49,7 +49,7 @@ public class WorldNode extends WorldRenderNode {
         });
         for (Entity entity : toSort) {
             if (entity instanceof LocalPlayer) continue;
-            worldRenderer.collectEntity(entity);
+            worldRenderer.collectEntity(entity, RenderLayer.WORLD);
         }
 
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();
@@ -59,9 +59,7 @@ public class WorldNode extends WorldRenderNode {
 
         modelBatch.render(particleSystem);
 
-//        DrawLayer.WORLD.finish(input, this.pool());
-
-        worldRenderer.render(deltaTime);
+        RenderLayer.WORLD.finish(input, this.pool());
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
 

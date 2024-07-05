@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 
 /**
  * Block flags for block updates.
  *
- * @see World#set(int, int, int, BlockData, int)
+ * @see World#set(int, int, int, BlockProperties, int)
  */
 public class BlockFlags {
     public static final int NONE = 0b00000000;

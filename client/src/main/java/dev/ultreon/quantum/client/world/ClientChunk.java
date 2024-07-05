@@ -1,10 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -14,29 +11,26 @@ import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
-import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.render.DrawLayer;
-import dev.ultreon.quantum.client.render.RenderEffect;
+import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
-import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.collection.Storage;
-import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.*;
-import org.codehaus.groovy.util.ListHashMap;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static dev.ultreon.quantum.world.World.WORLD_HEIGHT;
 
 public final class ClientChunk extends Chunk {
     public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
@@ -44,10 +38,13 @@ public final class ClientChunk extends Chunk {
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
 
+    public Model model;
+    public ModelInstance modelInstance;
+
     public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();
-    private final Map<BlockPos, BlockData> customRendered = new HashMap<>();
+    private final Map<BlockPos, BlockProperties> customRendered = new HashMap<>();
     public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
@@ -55,9 +52,6 @@ public final class ClientChunk extends Chunk {
     private final Map<BlockPos, ModelInstance> models = new ConcurrentHashMap<>();
     private final Array<BlockPos> removedModels = new Array<>();
     public boolean visible;
-    public Map<RenderEffect, Mesh> layers = new ListHashMap<>();
-    public boolean shouldRebuild = true;
-    public Matrix4 worldTransform = new Matrix4();
     private ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
 
 
@@ -65,11 +59,11 @@ public final class ClientChunk extends Chunk {
      * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkPos pos, Storage<BlockData> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
         this(world, pos, storage, biomeStorage, blockEntities);
     }
 
-    public ClientChunk(ClientWorld world, ChunkPos pos, Storage<BlockData> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
         this.clientWorld = world;
         this.active = false;
@@ -120,7 +114,7 @@ public final class ClientChunk extends Chunk {
             super.dispose();
 
             WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
-            if (!this.shouldRebuild) {
+            if (this.model != null && this.modelInstance != null) {
                 if (worldRenderer != null) {
                     worldRenderer.unload(this);
                 }
@@ -134,7 +128,7 @@ public final class ClientChunk extends Chunk {
     }
 
     @Override
-    public BlockData getFast(int x, int y, int z) {
+    public BlockProperties getFast(int x, int y, int z) {
         if (!QuantumClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -142,7 +136,7 @@ public final class ClientChunk extends Chunk {
     }
 
     @Override
-    public void setFast(Vec3i pos, BlockData block) {
+    public void setFast(Vec3i pos, BlockProperties block) {
         if (!QuantumClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -150,7 +144,7 @@ public final class ClientChunk extends Chunk {
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockData block) {
+    public boolean set(int x, int y, int z, BlockProperties block) {
         if (!QuantumClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -158,7 +152,7 @@ public final class ClientChunk extends Chunk {
     }
 
     @Override
-    public void set(Vec3i pos, BlockData block) {
+    public void set(Vec3i pos, BlockProperties block) {
         if (!QuantumClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -166,7 +160,7 @@ public final class ClientChunk extends Chunk {
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockData block) {
+    public boolean setFast(int x, int y, int z, BlockProperties block) {
         if (!QuantumClient.isOnMainThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -213,7 +207,7 @@ public final class ClientChunk extends Chunk {
         return null;
     }
 
-    public Map<BlockPos, BlockData> getCustomRendered() {
+    public Map<BlockPos, BlockProperties> getCustomRendered() {
         return this.customRendered;
     }
 
@@ -235,18 +229,19 @@ public final class ClientChunk extends Chunk {
     public ModelInstance addModel(BlockPos pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
             ModelInstance modelInstance1 = this.models.get(pos);
-            DrawLayer.WORLD.destroy(modelInstance1);
+            RenderLayer.WORLD.destroy(modelInstance1);
             this.models.remove(pos);
         }
         return this.addedModels.put(pos, instance);
     }
 
-    public void renderModels() {
+    public void renderModels(RenderLayer renderLayer) {
         for (BlockPos pos : this.addedModels.keySet()) {
             ModelInstance model = this.addedModels.get(pos);
             model.userData = Shaders.MODEL_VIEW.get();
             this.addedModels.remove(pos);
             this.models.put(pos, model);
+            renderLayer.add(model);
         }
 
         for (BlockPos pos : this.models.keySet()) {
@@ -256,9 +251,9 @@ public final class ClientChunk extends Chunk {
 
         for (BlockPos pos : this.removedModels) {
             this.removedModels.removeValue(pos, false);
-//            ModelInstance model = this.models.remove(pos);
-//            if (model != null)
-//                drawLayer.destroy(model);
+            ModelInstance model = this.models.remove(pos);
+            if (model != null)
+                renderLayer.destroy(model);
         }
     }
 
@@ -288,7 +283,7 @@ public final class ClientChunk extends Chunk {
 
     public void destroyModels() {
         for (var model : this.models.values()) {
-            DrawLayer.WORLD.destroy(model);
+            RenderLayer.WORLD.destroy(model);
         }
     }
 
@@ -322,12 +317,5 @@ public final class ClientChunk extends Chunk {
 
     public int getSunlight(BlockPos pos) {
         return lightMap.getSunlight(pos.x(), pos.y(), pos.z());
-    }
-
-    public void renderLayer(RenderEffect effect) {
-        Mesh mesh = this.layers.get(effect);
-        if (mesh == null) return;
-        effect.begin(mesh);
-        effect.render(GL20.GL_TRIANGLES);
     }
 }

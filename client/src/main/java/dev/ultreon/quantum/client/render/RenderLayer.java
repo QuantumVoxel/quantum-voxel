@@ -12,16 +12,16 @@ import com.badlogic.gdx.utils.Pool;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.model.QVModel;
 
-public class DrawLayer {
-    public static final DrawLayer BACKGROUND = new DrawLayer();
-    public static final DrawLayer WORLD = new DrawLayer();
+public class RenderLayer {
+    public static final RenderLayer BACKGROUND = new RenderLayer();
+    public static final RenderLayer WORLD = new RenderLayer();
 
     private final Array<ModelInstance> inactiveObjects = new Array<>();
     private final Array<ModelInstance> activeObjects = new Array<>();
     private final Array<AnimationController> animationControllers = new Array<>();
     private final Matrix4 matrixTemp = new Matrix4();
 
-    private DrawLayer() { }
+    private RenderLayer() { }
 
     @Deprecated(forRemoval = true)
     public MeshBuilder meshBuilder() {

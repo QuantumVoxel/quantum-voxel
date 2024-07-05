@@ -3,7 +3,7 @@ package dev.ultreon.quantum.world;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.world.gen.layer.GroundTerrainLayer;
 import dev.ultreon.quantum.world.gen.layer.SurfaceTerrainLayer;
 import dev.ultreon.ubo.types.MapType;
@@ -101,16 +101,16 @@ public abstract class Biome {
         return this.isOcean;
     }
 
-    public boolean isTopBlock(BlockData currentBlock) {
+    public boolean isTopBlock(BlockProperties currentBlock) {
         if (currentBlock.getBlock() == Blocks.AIR) return true;
         return layers.stream().anyMatch(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer && layer.surfaceBlock == currentBlock.getBlock());
     }
 
-    public BlockData getTopMaterial() {
+    public BlockProperties getTopMaterial() {
         return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer ? layer.surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
     }
 
-    public BlockData getFillerMaterial() {
+    public BlockProperties getFillerMaterial() {
         return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
     }
 

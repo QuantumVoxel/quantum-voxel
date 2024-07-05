@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
+import org.checkerframework.common.returnsreceiver.qual.This;
 
 public class LightBlock extends Block {
     public LightBlock(Block.Properties properties) {
@@ -8,7 +9,7 @@ public class LightBlock extends Block {
     }
 
     @Override
-    public int getLight(BlockData blockData) {
+    public int getLight(BlockProperties blockProperties) {
         return 15;
     }
 }

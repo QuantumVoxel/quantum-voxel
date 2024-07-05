@@ -3,7 +3,7 @@ package dev.ultreon.quantum.util;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.World;
 
@@ -83,13 +83,13 @@ public class WorldRayCaster {
 				continue;
 			}
 
-			BlockData blockData = chunk.get(loc.cpy());
-			if(blockData != null && !blockData.isAir() && predicate.test(blockData)) {
-				Block block = blockData.getBlock();
-				block.boundingBox(abs.x, abs.y, abs.z, blockData, box);
+			BlockProperties blockProperties = chunk.get(loc.cpy());
+			if(blockProperties != null && !blockProperties.isAir() && predicate.test(blockProperties)) {
+				Block block = blockProperties.getBlock();
+				block.boundingBox(abs.x, abs.y, abs.z, blockProperties, box);
 				box.update();
 
-				doIntersect(result, ray, blockData);
+				doIntersect(result, ray, blockProperties);
 
 				return result;
 			}
@@ -113,7 +113,7 @@ public class WorldRayCaster {
 		}
 	}
 
-	private static void doIntersect(BlockHitResult result, Ray ray, BlockData block) {
+	private static void doIntersect(BlockHitResult result, Ray ray, BlockProperties block) {
 		if(Intersector.intersectRayBounds(ray, box, intersection)){
 			double dst = intersection.dst(ray.origin);
 			result.collide = true;

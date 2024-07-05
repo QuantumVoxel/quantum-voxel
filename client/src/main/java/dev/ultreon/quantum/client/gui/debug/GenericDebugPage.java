@@ -2,8 +2,10 @@ package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.IntegratedServer;
+import dev.ultreon.quantum.client.util.RenderableArray;
+import dev.ultreon.quantum.client.world.ChunkMesh;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -94,7 +96,7 @@ public class GenericDebugPage implements DebugPage {
 
         BlockHitResult cursor = client.cursor;
         if (cursor != null && cursor.isCollide()) {
-            BlockData block = cursor.getBlockMeta();
+            BlockProperties block = cursor.getBlockMeta();
             if (block != null && !block.isAir()) {
                 context.right("Block", block);
             }

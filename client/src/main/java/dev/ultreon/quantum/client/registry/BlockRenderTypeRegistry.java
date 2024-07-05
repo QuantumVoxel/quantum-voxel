@@ -14,6 +14,6 @@ public class BlockRenderTypeRegistry {
     }
 
     public static RenderEffect get(Block block) {
-        return BlockRenderTypeRegistry.registry.getOrDefault(block, RenderEffect.GENERIC);
+        return BlockRenderTypeRegistry.registry.getOrDefault(block, RenderEffect.DEFAULT);
     }
 }

@@ -11,7 +11,7 @@ import dev.ultreon.quantum.api.commands.CommandContext;
 import dev.ultreon.quantum.api.commands.TabCompleting;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -745,7 +745,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param z     the z-coordinate
      * @param block the block to place
      */
-    public void placeBlock(int x, int y, int z, BlockData block) {
+    public void placeBlock(int x, int y, int z, BlockProperties block) {
         BlockPos blockPos = new BlockPos(x, y, z);
         if (block == null || !this.world.isLoaded(blockPos)) return;
 

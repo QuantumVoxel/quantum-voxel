@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockData;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
@@ -187,9 +187,9 @@ public class GyroscopeInput extends GameInput {
     private boolean doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
         if (!(hitResult instanceof BlockHitResult hitResult1)) return false;
         Vec3i pos = hitResult1.getPos();
-        BlockData block = world.get(new BlockPos(pos));
+        BlockProperties block = world.get(new BlockPos(pos));
         Vec3i posNext = hitResult1.getNext();
-        BlockData blockNext = world.get(new BlockPos(posNext));
+        BlockProperties blockNext = world.get(new BlockPos(posNext));
 
         if (!hitResult1.isCollide() || block == null || block.isAir())
             return false;

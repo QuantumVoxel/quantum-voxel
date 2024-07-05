@@ -23,23 +23,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class BlockData {
-    public static final BlockData AIR = Blocks.AIR.createMeta();
+public class BlockProperties {
+    public static final BlockProperties AIR = Blocks.AIR.createMeta();
     private final Block block;
     private final Map<String, BlockDataEntry<?>> entries;
 
-    public BlockData(Block block, Map<String, BlockDataEntry<?>> entries) {
+    public BlockProperties(Block block, Map<String, BlockDataEntry<?>> entries) {
         this.block = block;
         this.entries = entries;
     }
 
-    public static BlockData read(PacketIO packetBuffer) {
+    public static BlockProperties read(PacketIO packetBuffer) {
         int rawId = packetBuffer.readVarInt();
         Block block = Registries.BLOCK.byId(rawId);
         if (block == null)
             throw new DecoderException("Block " + rawId + " does not exist");
 
-        BlockData meta = block.createMeta();
+        BlockProperties meta = block.createMeta();
         meta.entries.putAll(meta.readEntries(packetBuffer));
 
         return meta;
@@ -69,9 +69,9 @@ public class BlockData {
         return entries.size();
     }
 
-    public static BlockData load(MapType data) {
+    public static BlockProperties load(MapType data) {
         Block block = Registries.BLOCK.get(Identifier.parse(data.getString("block")));
-        BlockData meta = block.createMeta();
+        BlockProperties meta = block.createMeta();
         meta.entries.putAll(meta.loadEntries(data.getMap("entries", new MapType())));
 
         return meta;
@@ -200,17 +200,17 @@ public class BlockData {
         return block.isTransparent();
     }
 
-    public <T> BlockData withEntry(String name, BlockDataEntry<T> value) {
+    public <T> BlockProperties withEntry(String name, BlockDataEntry<T> value) {
         HashMap<String, BlockDataEntry<?>> entries = new HashMap<>(this.entries);
         entries.put(name, value);
-        return new BlockData(block, entries);
+        return new BlockProperties(block, entries);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> BlockData withEntry(String name, T value) {
+    public <T> BlockProperties withEntry(String name, T value) {
         HashMap<String, BlockDataEntry<?>> entries = new HashMap<>(this.entries);
         entries.put(name, entries.get(name).cast((Class<T>) value.getClass()).with(value));
-        return new BlockData(block, entries);
+        return new BlockProperties(block, entries);
     }
 
     @Override
@@ -222,7 +222,7 @@ public class BlockData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BlockData that = (BlockData) o;
+        BlockProperties that = (BlockProperties) o;
         return Objects.equals(block, that.block) && Objects.equals(entries, that.entries);
     }
 

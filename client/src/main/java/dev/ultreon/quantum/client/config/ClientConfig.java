@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.config;
 
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.GraphicsMode;
 import dev.ultreon.quantum.config.crafty.ConfigEntry;
 import dev.ultreon.quantum.config.crafty.ConfigInfo;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
@@ -158,6 +157,4 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "accessibility.closePrompt", comment = "Shows a confirmation when closing the game.")
     public static boolean showClosePrompt = false;
-    public static GraphicsMode graphicsMode = GraphicsMode.FANCY;
-    public static boolean customBorder = false;
 }
