@@ -2155,7 +2155,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     @ApiStatus.Experimental
     public boolean isCustomBorderShown() {
-        return GamePlatform.get().isDesktop() && !loading;
+//        return GamePlatform.get().isDesktop() && !loading;
+        return false;
     }
 
     public boolean isLoading() {

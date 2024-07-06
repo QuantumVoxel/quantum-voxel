@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.font;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -8,8 +9,11 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.text.*;
+import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.Identifier;
 
 import java.util.List;
 
@@ -135,6 +139,17 @@ public class Font implements Disposable {
 
         for (TextObject child : text) {
             boolean isBold = false;
+            if (child instanceof FontIconObject fontIcon) {
+                FontIconMap iconMap = fontIcon.getIconMap();
+                Identifier icon = iconMap.get(fontIcon.getIconName());
+                if (icon != null) {
+                    TextureManager textureManager = QuantumClient.get().getTextureManager();
+                    Texture texture = textureManager.getTexture(icon, null);
+                    if (texture != null) {
+                        width += texture.getWidth();
+                    }
+                }
+            }
             if (child instanceof MutableText mutableText) {
                 isBold = mutableText.isBold();
             }

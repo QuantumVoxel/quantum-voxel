@@ -41,7 +41,7 @@ public class WorldNode extends WorldRenderNode {
         }
         var position = localPlayer.getPosition(client.partialTick);
         Array<Entity> toSort = new Array<>(world.getAllEntities());
-//        worldRenderer.render(DrawLayer.WORLD, deltaTime);
+        worldRenderer.render(RenderLayer.WORLD, deltaTime);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);
