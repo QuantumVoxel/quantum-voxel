@@ -5,7 +5,10 @@ import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import dev.ultreon.mixinprovider.GeomShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import dev.ultreon.mixinprovider.NewShaderProgram;
+import dev.ultreon.mixinprovider.ShaderPart;
+import dev.ultreon.mixinprovider.ShaderStage;
 
 public class ModelViewShader extends DefaultShader {
     public final int u_globalSunlight;
@@ -64,10 +67,10 @@ public class ModelViewShader extends DefaultShader {
 
     public ModelViewShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
                            final String fragmentShader, String geometryShader) {
-        this(renderable, config, new GeomShaderProgram(prefix + vertexShader, prefix + fragmentShader, prefix + geometryShader));
+        this(renderable, config, new NewShaderProgram(new ShaderPart(ShaderStage.fragment, prefix + fragmentShader), new ShaderPart(ShaderStage.vertex, prefix + vertexShader), new ShaderPart(ShaderStage.geometry, prefix + geometryShader)));
     }
 
-    public ModelViewShader(Renderable renderable, Config config, GeomShaderProgram shaderProgram) {
+    public ModelViewShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
         super(renderable, config, shaderProgram);
 
         this.u_globalSunlight = this.register(WorldShader.Inputs.globalSunlight, WorldShader.Setters.globalSunlight);

@@ -85,7 +85,7 @@ public class Screenshot {
 
         // Copy the screenshot file to clipboard
         if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
-            IClipboard clipboard = QuantumClient.get().clipboard;
+            Clipboard clipboard = QuantumClient.get().clipboard;
             try(InputStream read = data.read()) {
                 clipboard.copy(ImageIO.read(read));
             } catch (IOException e) {

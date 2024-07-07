@@ -3,10 +3,9 @@ package dev.ultreon.mixinprovider.mixin;
 import com.badlogic.gdx.graphics.GL32;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
-import de.damios.guacamole.gdx.graphics.ShaderCompatibilityHelper;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
+import dev.ultreon.mixinprovider.NewShaderProgram;
 import dev.ultreon.mixinprovider.ShaderProgramAccess;
-import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,6 +20,8 @@ public abstract class ShaderProgramMixin implements ShaderProgramAccess {
 
     @Unique
     private int quantum$geometryHandle;
+    @Unique
+    private boolean qantum$hasChecked = false;
 
     protected ShaderProgramMixin(String fragmentShaderSource) {
     }
@@ -33,6 +34,22 @@ public abstract class ShaderProgramMixin implements ShaderProgramAccess {
     @Final
     @Shadow @Mutable
     private String fragmentShaderSource;
+
+    @Inject(method = "compileShaders", at = @At(value = "HEAD"), cancellable = true)
+    public void quantum$shaderInjectFixMacOS(String vertexShader, String fragmentShader, CallbackInfo ci) {
+        if ((Object)this instanceof NewShaderProgram) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "isCompiled", at = @At(value = "HEAD"), cancellable = true)
+    public void quantum$shaderReplaceCompiledCheck(CallbackInfoReturnable<Boolean> cir) {
+        if ((Object)this instanceof NewShaderProgram) {
+            if (this.qantum$hasChecked) return;
+            this.qantum$hasChecked = true;
+            cir.setReturnValue(false);
+        }
+    }
 
     @Redirect(method = "compileShaders", at = @At(value = "INVOKE", target = "Lcom/badlogic/gdx/graphics/glutils/ShaderProgram;loadShader(ILjava/lang/String;)I", ordinal = 0))
     public int quantum$shaderInjectFixMacOS(ShaderProgram instance, int type, String source) {

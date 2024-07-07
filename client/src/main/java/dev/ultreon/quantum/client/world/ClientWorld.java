@@ -32,6 +32,7 @@ import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,6 +71,11 @@ public final class ClientWorld extends World implements Disposable {
     private final Queue<LightData> panelQueue = new Queue<>();
     private final ObjectIntMap<LightData> panelMap = new ObjectIntMap<>();
 
+    /**
+     * Constructs a new ClientWorld object.
+     *
+     * @param client The QuantumClient object that this ClientWorld is associated with.
+     */
     public ClientWorld(@NotNull QuantumClient client) {
         super();
         this.client = client;
@@ -80,19 +86,35 @@ public final class ClientWorld extends World implements Disposable {
         return ClientConfig.renderDistance;
     }
 
+    /**
+     * Unloads a chunk from the world.
+     *
+     * @param chunk The chunk to unload.
+     * @param pos   The position of the chunk.
+     * @return True if the chunk was successfully unloaded, false otherwise.
+     */
     @Override
     protected boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
+        // Check if the current thread is the main thread
         if (!QuantumClient.isOnMainThread()) {
+            // If not, invoke the unloadChunk method on the main thread and return the result
             return QuantumClient.invokeAndWait(() -> this.unloadChunk(chunk, pos));
         }
 
-        if (shouldStayLoaded(pos)) return false;
+        // Check if the chunk should stay loaded
+        if (shouldStayLoaded(pos)) {
+            // If it should, return false
+            return false;
+        }
 
+        // Try to remove the chunk from the chunks map
         boolean removed = this.chunks.remove(pos) == chunk;
         if (removed) {
+            // If the chunk was removed, decrement the total number of chunks
             this.totalChunks--;
         }
 
+        // Return true if the chunk was removed, false otherwise
         return removed;
     }
 
@@ -161,42 +183,89 @@ public final class ClientWorld extends World implements Disposable {
         super.startBreaking(breaking, breaker);
     }
 
+    /**
+     * Continues breaking a block at the specified position by the given amount.
+     *
+     * @param breaking the position of the block being broken.
+     * @param amount   the amount of breaking progress to be made.
+     * @param breaker  the player breaking the block.
+     * @return the result of the block breaking operation.
+     */
     @Override
     public BreakResult continueBreaking(@NotNull BlockPos breaking, float amount, @NotNull Player breaker) {
+        // Check if the breaker is the current player
         if (breaker == this.client.player) {
+            // Send a packet to continue breaking the block
             this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.CONTINUE));
         }
+
+        // Call the superclass method to continue breaking the block
         BreakResult breakResult = super.continueBreaking(breaking, amount, breaker);
+
+        // Check if the block has been fully broken
         if (breakResult == BreakResult.BROKEN) {
+            // Attempt to destroy the block and send appropriate packets
             if (this.destroyBlock(breaking, breaker)) {
                 this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.BROKEN));
                 this.client.connection.send(new C2SBlockBreakPacket(breaking));
             }
         }
+
         return breakResult;
     }
 
+    /**
+     * Stops the breaking of a block.
+     *
+     * @param breaking the position of the block being broken.
+     * @param breaker  the player breaking the block.
+     */
     @Override
     public void stopBreaking(@NotNull BlockPos breaking, @NotNull Player breaker) {
+        // Check if the breaker is the local player
         if (breaker == this.client.player) {
+            // Send a packet to stop the breaking process
             this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.STOP));
         }
+
         super.stopBreaking(breaking, breaker);
     }
 
+    /**
+     * Triggered when a chunk is updated.
+     *
+     * @param chunk the updated chunk.
+     */
     @Override
     public void onChunkUpdated(@NotNull Chunk chunk) {
+        // Check the current thread
         this.checkThread();
 
         super.onChunkUpdated(chunk);
     }
 
+    /**
+     * Plays a sound at a specific position.
+     *
+     * @param sound The sound event to be played.
+     * @param x     The x position of the sound.
+     * @param y     The y position of the sound.
+     * @param z     The z position of the sound.
+     */
     @Override
     public void playSound(@NotNull SoundEvent sound, double x, double y, double z) {
+        // Get the range of the sound
         float range = sound.getRange();
+
+        // Get the player associated with the client
         Player player = this.client.player;
+
+        // If the player exists, calculate the distance between the player and the sound position
+        // and play the sound with the calculated volume
         if (player != null) {
-            player.playSound(sound, (float) ((range - player.getPosition().dst(x, y, z)) / range));
+            float distance = (float) player.getPosition().dst(x, y, z);
+            float volume = (range - distance) / range;
+            player.playSound(sound, volume);
         }
     }
 
@@ -205,27 +274,51 @@ public final class ClientWorld extends World implements Disposable {
         return true;
     }
 
+    /**
+     * Sets the block at the specified position to the given block properties.
+     *
+     * @param x The x-coordinate of the block position.
+     * @param y The y-coordinate of the block position.
+     * @param z The z-coordinate of the block position.
+     * @param block The block properties to set.
+     * @param flags Flags indicating how the block should be set.
+     * @return True if the block was successfully set, false otherwise.
+     */
     @Override
     public boolean set(int x, int y, int z, @NotNull BlockProperties block, int flags) {
+        // Check if we're on the main thread, if not invokeAndWait the method on the main thread
         if (!QuantumClient.isOnMainThread()) {
             return QuantumClient.invokeAndWait(() -> this.set(x, y, z, block, flags));
         }
+
+        // Set the block and get the result
         boolean isBlockSet = super.set(x, y, z, block, flags);
 
+        // Get the chunk containing the block
         BlockPos blockPos = new BlockPos(x, y, z);
-        ClientChunk chunk = getChunkAt(blockPos);
+        ClientChunk chunk = this.getChunkAt(blockPos);
+
+        // If the chunk exists, set the light source
         if (chunk != null) {
             chunk.setLightSource(World.toLocalBlockPos(x, y, z, this.tmp), block.getLight());
         }
 
-        if ((flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
-        if ((flags & BlockFlags.LIGHT) != 0 && chunk != null && isBlockSet) {
-            updateLightChunks(chunk);
+        // If the SYNC flag is set, sync the block
+        if ((flags & BlockFlags.SYNC) != 0) {
+            this.sync(x, y, z, block);
         }
+
+        // If the LIGHT flag is set and the chunk exists, update the light chunks
+        if ((flags & BlockFlags.LIGHT) != 0 && chunk != null && isBlockSet) {
+            this.updateLightChunks(chunk);
+        }
+
+        // If the UPDATE flag is set and the chunk exists, update the chunk and its neighbors
         if ((flags & BlockFlags.UPDATE) != 0 && chunk != null && isBlockSet) {
             chunk.set(World.toLocalBlockPos(x, y, z, this.tmp), block);
-            updateChunkAndNeighbours(chunk);
+            this.updateChunkAndNeighbours(chunk);
 
+            // Update the blocks in each direction of the block
             for (CubicDirection direction : CubicDirection.values()) {
                 BlockPos offset = blockPos.offset(direction);
                 BlockProperties blockProperties = this.get(offset);
@@ -236,33 +329,44 @@ public final class ClientWorld extends World implements Disposable {
         return isBlockSet;
     }
 
+    /**
+     * Updates the light in the current chunk and its neighboring chunks.
+     *
+     * @param chunk The chunk for which to update the light.
+     */
     private void updateLightChunks(ClientChunk chunk) {
-        ClientChunk[] neighbourChunks = getNeighbourChunks(chunk);
-        Vec3i offset = chunk.getOffset();
+        // Get the neighboring chunks of the current chunk
+        ClientChunk[] neighbourChunks = this.getNeighbourChunks(chunk);
 
-        chunk.clearLight();;
+        // Clear light in the current chunk
+        chunk.clearLight();
+
+        // Clear light in each neighboring chunk
         for (ClientChunk neighbourChunk : neighbourChunks) {
             if (neighbourChunk != null)
                 neighbourChunk.clearLight();
         }
 
-        updateLightChunk(chunk);
+        // Update light in the current chunk
+        this.updateLightChunk(chunk);
+
+        // Update light in each neighboring chunk
         for (ClientChunk neighbourChunk : neighbourChunks) {
             if (neighbourChunk != null)
-                updateLightChunk(neighbourChunk);
+                this.updateLightChunk(neighbourChunk);
         }
     }
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
         return new ClientChunk[]{
-                getChunk(chunk.getPos().x() - 1, chunk.getPos().z() - 1),
-                getChunk(chunk.getPos().x(), chunk.getPos().z() - 1),
-                getChunk(chunk.getPos().x() + 1, chunk.getPos().z() - 1),
-                getChunk(chunk.getPos().x() - 1, chunk.getPos().z()),
-                getChunk(chunk.getPos().x() + 1, chunk.getPos().z()),
-                getChunk(chunk.getPos().x() - 1, chunk.getPos().z() + 1),
-                getChunk(chunk.getPos().x(), chunk.getPos().z() + 1),
-                getChunk(chunk.getPos().x() + 1, chunk.getPos().z() + 1)
+                this.getChunk(chunk.getPos().x() - 1, chunk.getPos().z() - 1),
+                this.getChunk(chunk.getPos().x(), chunk.getPos().z() - 1),
+                this.getChunk(chunk.getPos().x() + 1, chunk.getPos().z() - 1),
+                this.getChunk(chunk.getPos().x() - 1, chunk.getPos().z()),
+                this.getChunk(chunk.getPos().x() + 1, chunk.getPos().z()),
+                this.getChunk(chunk.getPos().x() - 1, chunk.getPos().z() + 1),
+                this.getChunk(chunk.getPos().x(), chunk.getPos().z() + 1),
+                this.getChunk(chunk.getPos().x() + 1, chunk.getPos().z() + 1)
         };
     }
 
@@ -287,8 +391,8 @@ public final class ClientWorld extends World implements Disposable {
 
         // Start from the top of the world and move downward
         for (int y = WORLD_HEIGHT - 1; y >= 0; y--) {
-            BlockPos localBlockPos = toLocalBlockPos(startX, y, startZ);
-            int lightReduction = chunk.get(localBlockPos).getLightReduction();
+            BlockPos localBlockPos = new BlockPos(startX, y, startZ);
+            int lightReduction = chunk.get(toLocalBlockPos(startX, y, startZ)).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
                 setSunlight(localBlockPos.x(), localBlockPos.y(), localBlockPos.z(), intensity); // Assuming maximum sunlight intensity is 15
@@ -313,10 +417,14 @@ public final class ClientWorld extends World implements Disposable {
                 int reduction = getReduction(x, y, z);
 
                 // Check and propagate to neighboring blocks
-                if (!(currentLight == 15 && current[0] == 15)) propagateSunlight(queue, x + 1, y, z, newLight, reduction);
-                if (!(currentLight == 15 && current[0] == 0)) propagateSunlight(queue, x - 1, y, z, newLight, reduction);
-                if (!(currentLight == 15 && current[2] == 15)) propagateSunlight(queue, x, y, z + 1, newLight, reduction);
-                if (!(currentLight == 15 && current[2] == 0)) propagateSunlight(queue, x, y, z - 1, newLight, reduction);
+                if (!(currentLight == 15 && current[0] == 15))
+                    propagateSunlight(queue, x + 1, y, z, newLight, reduction);
+                if (!(currentLight == 15 && current[0] == 0))
+                    propagateSunlight(queue, x - 1, y, z, newLight, reduction);
+                if (!(currentLight == 15 && current[2] == 15))
+                    propagateSunlight(queue, x, y, z + 1, newLight, reduction);
+                if (!(currentLight == 15 && current[2] == 0))
+                    propagateSunlight(queue, x, y, z - 1, newLight, reduction);
 
                 // Check the block below to propagate sunlight downward
                 if (y > 0 && getReduction(x, y - 1, z) < 15) {
@@ -361,25 +469,41 @@ public final class ClientWorld extends World implements Disposable {
         panelMap.clear();
     }
 
+    /**
+     * Fills a region with light starting from a given position.
+     * Uses a breadth-first search algorithm to traverse the region.
+     *
+     * @param startX The x-coordinate of the starting position.
+     * @param startY The y-coordinate of the starting position.
+     * @param startZ The z-coordinate of the starting position.
+     * @param light  The initial light intensity.
+     */
     private void floodfill(int startX, int startY, int startZ, int light) {
+        // Initialize a queue to store the positions to be processed
         Queue<int[]> queue = new Queue<>();
         queue.addLast(new int[]{startX, startY, startZ, light});
 
+        // Continue processing until the queue is empty
         while (!queue.isEmpty()) {
+            // Remove the next position from the queue
             int[] current = queue.removeFirst();
             int x = current[0];
             int y = current[1];
             int z = current[2];
             int intensity = current[3];
 
+            // Skip if the current position is out of bounds
             if (y < 0 || y >= WORLD_HEIGHT) continue;
 
+            // If the current block light is less than the intensity, update the block light
             if (getBlockLight(x, y, z) < intensity) {
                 setBlockLight(x, y, z, intensity);
             } else {
-                continue; // Skip processing if the current block light is not less than the intensity
+                // Skip processing if the current block light is not less than the intensity
+                continue;
             }
 
+            // If there is still light to propagate, add the neighboring positions to the queue
             if (intensity > 0) {
                 newState(queue, x + 1, y, z, intensity);
                 newState(queue, x, y + 1, z, intensity);
@@ -391,6 +515,15 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
+    /**
+     * Adds a new position to the queue to be processed in the floodfill algorithm.
+     *
+     * @param queue     The queue of positions to be processed.
+     * @param x         The x-coordinate of the new position.
+     * @param y         The y-coordinate of the new position.
+     * @param z         The z-coordinate of the new position.
+     * @param intensity The light intensity of the new position.
+     */
     private void newState(Queue<int[]> queue, int x, int y, int z, int intensity) {
         ClientChunk chunkAt = this.getChunkAt(x, y, z);
         if (chunkAt == null) return;
@@ -411,14 +544,29 @@ public final class ClientWorld extends World implements Disposable {
         this.setBlockLight(pos.x, pos.y, pos.z, level);
     }
 
+    /**
+     * Gets the neighboring light data for a given light data.
+     *
+     * @param data the light data for which neighbors are needed
+     * @return an array of neighboring light data
+     */
     public LightData[] getNeighbors(LightData data) {
         LightData[] neighbors = new LightData[6];
+
+        // Right / left neighbor
         neighbors[0] = getBlockLightData(data.pos.x + 1, data.pos.y, data.pos.z);
         neighbors[1] = getBlockLightData(data.pos.x - 1, data.pos.y, data.pos.z);
-        if (data.pos.y + 1 < WORLD_HEIGHT) neighbors[2] = getBlockLightData(data.pos.x, data.pos.y + 1, data.pos.z);
-        if (data.pos.y - 1 >= 0) neighbors[3] = getBlockLightData(data.pos.x, data.pos.y - 1, data.pos.z);
+
+        // Top / bottom neighbor
+        if (data.pos.y + 1 < WORLD_HEIGHT)
+            neighbors[2] = getBlockLightData(data.pos.x, data.pos.y + 1, data.pos.z);
+        if (data.pos.y - 1 >= 0)
+            neighbors[3] = getBlockLightData(data.pos.x, data.pos.y - 1, data.pos.z);
+
+        // Front / back neighbor
         neighbors[4] = getBlockLightData(data.pos.x, data.pos.y, data.pos.z + 1);
         neighbors[5] = getBlockLightData(data.pos.x, data.pos.y, data.pos.z - 1);
+
         return neighbors;
     }
 
@@ -442,22 +590,32 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
+    /**
+     * Updates the light sources in the world at a given offset with the provided lights.
+     *
+     * @param offset The offset at which the light sources are updated.
+     * @param lights A map of light sources to be updated.
+     */
     @Override
     public void updateLightSources(@NotNull Vec3i offset, ObjectMap<Vec3i, LightSource> lights) {
+        // Call the superclass method to update light sources
         super.updateLightSources(offset, lights);
 
+        // Update sunlight for each block in the chunk
         for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
-            for (int z = offset.x; z < offset.x + CHUNK_SIZE; z++) {
+            for (int z = offset.z; z < offset.z + CHUNK_SIZE; z++) {
                 setInitialSunlight(x, z);
             }
         }
 
+        // Process each light source and perform floodfill algorithm
         for (LightSource source : lights.values()) {
             int x = offset.x + source.x();
             int y = offset.y + source.y();
             int z = offset.z + source.z();
             int level = source.level();
 
+            // Fill the region with light starting from the source position
             floodfill(x, y, z, level);
         }
     }
@@ -487,6 +645,7 @@ public final class ClientWorld extends World implements Disposable {
 
         // Process the queue to update sunlight propagation
         while (!queue.isEmpty()) {
+            // Remove the first element from the queue and get its position and light information
             int[] current = queue.removeFirst();
             int x = current[0];
             int y = current[1];
@@ -494,42 +653,65 @@ public final class ClientWorld extends World implements Disposable {
             int currentLight = getSunlight(x, y, z);
             int reduction = getReduction(x, y, z);
 
-            // Check and propagate to neighboring blocks
+            // Update sunlight for neighboring blocks
             updateNeighborSunlight(queue, x + 1, y, z, currentLight, reduction);
             updateNeighborSunlight(queue, x - 1, y, z, currentLight, reduction);
             updateNeighborSunlight(queue, x, y, z + 1, currentLight, reduction);
             updateNeighborSunlight(queue, x, y, z - 1, currentLight, reduction);
 
-            // Check the block below to update sunlight downward
+            // Update sunlight for the block below if it exists
             if (y > 0) {
                 updateNeighborSunlight(queue, x, y - 1, z, currentLight, reduction);
             }
 
-            // Check the block above to update sunlight upward if the block is transparent
+            // Update sunlight for the block above if it is transparent and within world height limits
             if (y < WORLD_HEIGHT - 1 && reduction < 15) {
                 updateNeighborSunlight(queue, x, y + 1, z, currentLight, reduction);
             }
         }
     }
 
+    /**
+     * Updates the sunlight of a neighboring block and adds it to the queue.
+     *
+     * @param queue        The queue to add the block to.
+     * @param x            The x-coordinate of the block.
+     * @param y            The y-coordinate of the block.
+     * @param z            The z-coordinate of the block.
+     * @param currentLight The current sunlight of the block.
+     * @param reduction    The amount of sunlight to reduce.
+     */
     private void updateNeighborSunlight(Queue<int[]> queue, int x, int y, int z, int currentLight, int reduction) {
+        // Check if the block is within the world height limits
         if (y >= 0 && y < WORLD_HEIGHT) {
+            // Get the current sunlight of the neighboring block
             int neighborLight = getSunlight(x, y, z);
+
+            // Calculate the reduced sunlight
             int reduced = currentLight - reduction;
+
+            // Check if the neighboring block has sunlight and if it is less than the current block
             if (neighborLight != 0 && neighborLight < currentLight) {
-                int max = max(neighborLight, max(reduced, 0));
+                // Calculate the maximum sunlight between the neighboring block and the reduced sunlight
+                int max = Math.max(neighborLight, Math.max(reduced, 0));
+
+                // Set the sunlight of the neighboring block
                 setSunlight(x, y, z, max);
+
+                // Add the block to the queue
                 queue.addLast(new int[]{x, y, z, max});
             } else if (neighborLight > currentLight) {
                 // If the neighboring light is greater than the current block light, reduce it
                 setSunlight(x, y, z, reduced);
+
+                // Add the block to the queue
                 queue.addLast(new int[]{x, y, z, reduced});
             }
         }
     }
 
-
     @Override
+    @ApiStatus.Experimental
     public void spawnParticles(@NotNull ParticleType particleType, @NotNull Vec3d position, @NotNull Vec3d motion, int count) {
         if (!QuantumClient.isOnMainThread()) {
             QuantumClient.invokeAndWait(() -> this.spawnParticles(particleType, position, motion, count));
@@ -552,55 +734,107 @@ public final class ClientWorld extends World implements Disposable {
         this.client.connection.send(new C2SPlaceBlockPacket(x, y, z, block));
     }
 
+    /**
+     * Loads a chunk into the client world.
+     *
+     * @param pos  The position of the chunk.
+     * @param data The data for the chunk.
+     */
     public void loadChunk(ChunkPos pos, ClientChunk data) {
+        // Get the current chunk at the given position
         var chunk = QuantumClient.invokeAndWait(() -> this.chunks.get(pos));
+
+        // If the chunk doesn't exist, set it to the new data
         if (chunk == null) {
             chunk = data;
         } else {
+            // If the chunk already exists, log a warning and return
             World.LOGGER.warn("Duplicate chunk packet detected! Chunk {}", pos);
             return;
         }
+
+        // Get the local player
         LocalPlayer player = this.client.player;
+
+        // If the player is null, send a failed chunk status packet and return
         if (player == null) {
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
             return;
         }
+
+        // Calculate the distance between the chunk and the player
         if (new Vec2d(pos.x(), pos.z()).dst(new Vec2d(player.getChunkPos().x(), player.getChunkPos().z())) > ClientConfig.renderDistance) {
+            // If the distance is greater than the render distance, send a skip chunk status packet and return
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
             return;
         }
 
+        // Set the final chunk to the chunk variable
         ClientChunk finalChunk = chunk;
+
+        // Run the chunk loading logic on the client thread
         QuantumClient.invoke(() -> {
             synchronized (this) {
+                // Add the chunk to the map of chunks
                 this.chunks.put(pos, finalChunk);
+                // Increment the total number of chunks
                 this.totalChunks++;
+                // Mark the chunk as ready
                 finalChunk.ready();
             }
+            // Send a success chunk status packet
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
         });
     }
 
+    /**
+     * Tick method to update the state of the ClientWorld.
+     * It increments the time and checks if the chunk refresh is due.
+     * If the chunk refresh is due, it updates the chunks based on the player's position.
+     */
     public void tick() {
+        // Increment the time
         this.time++;
 
+        // Check if the chunk refresh is due
         if (this.chunkRefresh-- <= 0) {
+            // Reset the chunk refresh counter
             this.chunkRefresh = 40;
 
+            // Get the local player
             LocalPlayer player = this.client.player;
+
+            // If the player is not null
             if (player != null) {
-                if (this.oldChunkPos.equals(player.getChunkPos())) return;
-                this.oldChunkPos = player.getChunkPos();
-                for (Iterator<Map.Entry<ChunkPos, ClientChunk>> iterator = this.chunks.entrySet().iterator(); iterator.hasNext(); ) {
-                    Map.Entry<ChunkPos, ClientChunk> entry = iterator.next();
-                    ChunkPos chunkPos = entry.getKey();
-                    ClientChunk clientChunk = entry.getValue();
-                    if (new Vec2d(chunkPos.x(), chunkPos.z()).dst(player.getChunkPos().x(), player.getChunkPos().z()) > ClientConfig.renderDistance) {
-                        iterator.remove();
-                        clientChunk.dispose();
-                        this.updateNeighbours(clientChunk);
-                    }
-                }
+                this.tickLocalPlayer(player);
+            }
+        }
+    }
+
+    private void tickLocalPlayer(LocalPlayer player) {
+        // Check if the old chunk position is the same as the current player's chunk position
+        if (this.oldChunkPos.equals(player.getChunkPos())) {
+            return;
+        }
+
+        // Update the old chunk position with the current player's chunk position
+        this.oldChunkPos = player.getChunkPos();
+
+        // Iterate over the chunks
+        for (Iterator<Map.Entry<ChunkPos, ClientChunk>> iterator = this.chunks.entrySet().iterator(); iterator.hasNext(); ) {
+            // Get the chunk entry
+            Map.Entry<ChunkPos, ClientChunk> entry = iterator.next();
+            ChunkPos chunkPos = entry.getKey();
+            ClientChunk clientChunk = entry.getValue();
+
+            // Check if the distance between the chunk and the player's position is greater than the render distance
+            if (new Vec2d(chunkPos.x(), chunkPos.z()).dst(player.getChunkPos().x(), player.getChunkPos().z()) > ClientConfig.renderDistance) {
+                // Remove the chunk from the map and dispose it
+                iterator.remove();
+                clientChunk.dispose();
+
+                // Update the neighbours of the chunk
+                this.updateNeighbours(clientChunk);
             }
         }
     }
@@ -693,16 +927,25 @@ public final class ClientWorld extends World implements Disposable {
         return remove;
     }
 
+    /**
+     * Handles the attack action initiated by a player.
+     *
+     * @param playerId The ID of the player initiating the attack.
+     * @param entityId The ID of the entity being attacked.
+     */
     public void onPlayerAttack(int playerId, int entityId) {
+        // Get the player entity and the target entity based on their IDs
         Entity player = this.entitiesById.get(playerId);
         Entity entity = this.entitiesById.get(entityId);
 
+        // If the target entity exists and the player is a remote player, trigger the attack
         if (entity != null && player instanceof RemotePlayer remotePlayer) {
             remotePlayer.onAttack(entity);
         }
 
+        // This should not happen, as only remote players should trigger attacks
         if (player instanceof LocalPlayer) {
-            //??? This should not happen...
+            // Log a warning if a local player tries to attack (sanity check)
             LOGGER.warn("SANITY CHECK: local player tried to attack entity {}!", entityId);
         }
     }

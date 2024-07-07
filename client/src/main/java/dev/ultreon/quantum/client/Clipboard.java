@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 
-public interface IClipboard {
+public interface Clipboard {
     boolean copy(BufferedImage image);
 
     boolean copy(String text);

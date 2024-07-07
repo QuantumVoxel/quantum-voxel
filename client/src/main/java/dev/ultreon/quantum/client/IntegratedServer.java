@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.client;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -26,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,11 +32,19 @@ public class IntegratedServer extends QuantumServer {
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
 
+    /**
+     * Constructs a new IntegratedServer with the given WorldStorage.
+     *
+     * @param storage The WorldStorage to use.
+     * @throws RuntimeException If the world directory does not exist and cannot be created.
+     */
     public IntegratedServer(WorldStorage storage) {
         super(storage, QuantumClient.PROFILER, QuantumClient.get().inspection);
 
+        // Check if the world directory exists.
         if (Files.notExists(storage.getDirectory())) {
             try {
+                // If the world directory does not exist, try to create it.
                 storage.createWorld();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -138,6 +143,12 @@ public class IntegratedServer extends QuantumServer {
         return ClientConfig.renderDistance;
     }
 
+    /**
+     * Places the player on the server.
+     * <p>Called when the player joins the server.</p>
+     *
+     * @param player the player to place.
+     */
     @Override
     public void placePlayer(ServerPlayer player) {
         this.deferWorldLoad(() -> {
@@ -150,40 +161,75 @@ public class IntegratedServer extends QuantumServer {
         });
     }
 
+    /**
+     * Defer world load.
+     * <p>Useful for when the world is not loaded yet.</p>
+     *
+     * @param func the function to defer.
+     */
     private void deferWorldLoad(Runnable func) {
         this.client.runInTick(func);
     }
 
+    /**
+     * Check if the server is integrated.
+     * Which is true for the {@link IntegratedServer}.
+     *
+     * @return true if the server is integrated.
+     */
     @Override
     public boolean isIntegrated() {
         return true;
     }
 
+    /**
+     * Check if the server is opened to LAN.
+     * <p>
+     * NOTE: This is an experimental feature.
+     *
+     * @return true if the server is opened to LAN.
+     * @see #openToLan()
+     */
+    @ApiStatus.Experimental
     public boolean isOpenToLan() {
         return this.openToLan;
     }
 
+    /**
+     * Opens the server to LAN.
+     * Open to LAN is a server that can be accessed from the local network.
+     * This is also hosted locally by the {@link QuantumClient client}.
+     * <p>
+     * NOTE: This is an experimental feature.
+     *
+     * @see #isOpenToLan()
+     */
     @ApiStatus.Experimental
     public void openToLan() {
         this.openToLan = true;
     }
 
+    /**
+     * Save the world to disk.
+     *
+     * @param silent true to silence the logs.
+     * @throws IOException when saving the world fails.
+     */
     @Override
     public void save(boolean silent) throws IOException {
         try {
+            // Normal server saving.
             super.save(silent);
         } catch (IOException e) {
             QuantumServer.LOGGER.error("Failed to save world", e);
         }
 
         try {
+            // Save player data.
             this.savePlayer();
         } catch (Exception e) {
             QuantumServer.LOGGER.error("Failed to save local player data.", e);
         }
-    }
-
-    private void saveScreenshot() {
     }
 
     @Override
@@ -252,16 +298,30 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.crash(throwable);
     }
 
+    /**
+     * This method is called when the initial chunks are loaded.
+     * It performs the necessary setup for rendering the world and
+     * handling the WorldLoadScreen.
+     */
     @Override
     public void onInitialChunksLoaded() {
+        // Call the parent method to ensure the initial chunks are loaded
         super.onInitialChunksLoaded();
 
+        // Invoke the setup code on the QuantumClient's event thread
         QuantumClient.invoke(() -> {
+            // Create a new WorldRenderer instance with the current world
             this.client.worldRenderer = new WorldRenderer(this.client.world);
+
+            // Set the renderWorld flag to true to enable world rendering
             this.client.renderWorld = true;
 
+            // Check if the current screen is an instance of WorldLoadScreen
             if (this.client.screen instanceof WorldLoadScreen loadScreen) {
+                // If it is, call the done() method to complete the loading process
                 loadScreen.done();
+
+                // Show the null screen to reset the screen after loading
                 this.client.showScreen(null);
             }
         });

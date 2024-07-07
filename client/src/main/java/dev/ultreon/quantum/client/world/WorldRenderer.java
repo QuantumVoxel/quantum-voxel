@@ -1,16 +1,14 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
@@ -119,6 +117,8 @@ public final class WorldRenderer implements DisposableContainer {
     private final Map<ChunkPos, Pair<ClientChunk, ModelInstance>> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Quaternion tmpQ = new Quaternion();
+    private DirectionalShadowLight shadowLight;
+    private final Vector3 sunDirection = new Vector3();
 
     public WorldRenderer(ClientWorld world) {
         this.world = world;
@@ -150,6 +150,11 @@ public final class WorldRenderer implements DisposableContainer {
         this.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
         this.environment.set(new ColorAttribute(ColorAttribute.Specular, 1, 1, 1, 1f));
+
+        this.shadowLight = new DirectionalShadowLight(1024, 1024, 60f, 60f, 0.001f, 1000f);
+        this.shadowLight.set(Color.WHITE, this.sunDirection);
+        this.environment.add(this.shadowLight);
+        this.environment.shadowMap = this.shadowLight;
     }
 
     private void setupBreaking() {
@@ -849,6 +854,10 @@ public final class WorldRenderer implements DisposableContainer {
 
             this.sun.transform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
             this.moon.transform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, moonAngle * MathUtils.radDeg - 180);
+
+            this.sunDirection.setZero().setLength(1).rotate(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
+            this.shadowLight.direction.set(this.sunDirection);
+            this.shadowLight.update(client.camera);
         } else if (wasSunMoonShown) {
             RenderLayer.BACKGROUND.deactivate(this.sun);
             RenderLayer.BACKGROUND.deactivate(this.moon);

@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
@@ -146,75 +145,140 @@ import static com.badlogic.gdx.graphics.GL20.*;
 import static com.badlogic.gdx.math.MathUtils.ceil;
 import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
 
+/**
+ * This class is the main entry point for the Quantum Voxel Client.
+ *
+ * @see <a href="https://github.com/Ultreon/quantum-voxel">QuantumVoxel</a>
+ * @author <a href="https://github.com/Ultreon">Ultreon Team</a>
+ * @since <i>Always :smirk:</i>
+ */
 @SuppressWarnings("UnusedReturnValue")
 public class QuantumClient extends PollingExecutorService implements DeferredDisposable {
-    @SuppressWarnings("removal")
-    @Deprecated(since = "0.1.0", forRemoval = true)
-    public static final String NAMESPACE = QuantumServer.NAMESPACE;
+    // Public constants
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumClient");
     public static final Gson GSON = new GsonBuilder().disableJdkUnsafe().setPrettyPrinting().create();
     public static final int[] SIZES = new int[]{16, 24, 32, 40, 48, 64, 72, 80, 96, 108, 128, 160, 192, 256, 1024};
     public static final float FROM_ZOOM = 2.0f;
     public static final float TO_ZOOM = 1.3f;
-    private static final float DURATION = 6000f;
-    private static final int MINIMUM_WIDTH = 480;
-    private static final int MINIMUM_HEIGHT = 300;
+
+    // Profiler
     @SuppressWarnings("GDXJavaStaticResource")
     public static final Profiler PROFILER = new Profiler();
+
+    // Maximize offset for custom window border
     public static final GridPoint2 MAXIMIZE_OFF = new GridPoint2(18, 0);
+
+    // Constants
+    private static final float DURATION = 6000f;
+
+    // Maximum-scaled size before automatic resize.
+    // This is used for the "Automatic" gui scale.
+    private static final int MINIMUM_WIDTH = 480;
+    private static final int MINIMUM_HEIGHT = 300;
+
+    // Zero, what else could it be? :thinking:
     private static final GridPoint2 ZERO = new GridPoint2();
+
+    // Client instance
+    @UnknownNullability
+    @SuppressWarnings("GDXJavaStaticResource")
+    private static QuantumClient instance;
+
+    // Arguments
     private static ArgParser arguments = new ArgParser();
+
+    // Crash handling
     private static boolean crashing;
+
+    @ApiStatus.Experimental
+    private static Callback<CrashLog> crashHook;
+    private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
+
+    ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
+
+    // Cursors
     private final Cursor normalCursor;
     private final Cursor clickCursor;
+    private Cursor cursor0;
+
+    // Render pipeline
     private final RenderPipeline pipeline;
-    public final Renderer renderer;
-    public final IClipboard clipboard = getClipboard();
+
+    // Game clipboard
+    public final Clipboard clipboard = createClipboard();
+
+    // Particle batches (currently disabled), so this is a TODO
 //    public Array<ParticleBatch<?>> batches = new Array<ParticleBatch<?>>(new ParticleBatch[]{
 //            new BillboardParticleBatch(ParticleShader.AlignMode.Screen, true, 5000)
 //    });
+
+    // Useless asset manager
     private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
+
+    // Window buttons
     private final ControlButton closeButton;
     private final ControlButton maximizeButton;
     private final ControlButton minimizeButton;
+
+    // Thread
+    private final Thread mainThread;
+
+    // Background video because why peanuts.
+    // TODO: See if this is a good idea, or if it's just a lil' bit too much.
     public VideoPlayer backgroundVideo = VideoPlayerCreator.createVideoPlayer();
+
+    // Input
     public TouchPoint motionPointer = null;
     public Vector2 scrollPointer = new Vector2();
+
+    // JSON5 model loader
     public Json5ModelLoader j5ModelLoader;
-    private boolean screenshotWorldOnly;
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
+
+    // Window vibrancy
     private final boolean windowVibrancyEnabled = false;
-    private Cursor cursor0;
     private final Bounds gameBounds = new Bounds();
     private long lastPress;
 
-    private IClipboard getClipboard() {
-        if (GamePlatform.get().isMacOSX()) {
-            return new NullClipboard();
-        }
-
-        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
-    }
-
+    // G3D model loader (libGDX 3D models)
     public final G3dModelLoader modelLoader;
+
+    // Multiplayer stuff
     public IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     public ServerData serverData;
+    private MultiplayerData multiplayerData;
     public ExecutorService chunkLoadingExecutor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 1), r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
         thread.setName("ChunkLoadingExecutor");
         return thread;
     });
+
+    // Local user
+    private final User user;
+
+    // Developer stuff
     final boolean devWorld;
     boolean imGui = false;
+    boolean isDevMode;
+
+    private boolean startDevLoading = true;
+
     public InspectionRoot<QuantumClient> inspection;
+
+    // Configuration
     public ClientConfig newConfig;
+
+    // HUD stuff
     public boolean hideHud = false;
 
+    // Boot info
+    @SuppressWarnings("FieldMayBeFinal")
+    boolean booted;
     Duration bootTime;
-    GarbageCollector garbageCollector;
-    GameEnvironment gameEnv;
+
+    // Splash stuff
     private final Sound logoRevealSound;
     private final Texture ultreonBgTex;
     private final Texture ultreonLogoTex;
@@ -224,52 +288,95 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private boolean showLibGDXSplash = !GamePlatform.get().isDevEnvironment();
     private long ultreonSplashTime;
     private long libGDXSplashTime;
-    public FileHandle configDir;
-    public Metadata metadata = Metadata.load();
 
+    // File handles
+    public FileHandle configDir;
+
+    // Metadata
+    public Metadata metadata = Metadata.get();
+
+    // Error messages
     private static final String FATAL_ERROR_MSG = "Fatal error occurred when handling crash:";
+
+    // Font stuff
     public boolean forceUnicode = false;
-    public ItemRenderer itemRenderer;
-    public NotifyManager notifications = new NotifyManager(this);
-    @SuppressWarnings("FieldMayBeFinal")
-    boolean booted;
     public final Font font;
     public final Font newFont;
     @UnknownNullability
     public BitmapFont unifont;
-    public GameInput input;
-    @Nullable
-    public ClientWorld world;
-    private boolean skipScreenshot = false;
+
+    // Generic renderers
     @Nullable
     public WorldRenderer worldRenderer;
-    @UnknownNullability
-    @SuppressWarnings("GDXJavaStaticResource")
-    private static QuantumClient instance;
+    public ItemRenderer itemRenderer;
+    private final GameRenderer gameRenderer;
+
+    // GUI stuff
     @Nullable
-    public LocalPlayer player;
+    public Screen screen;
+    public Hud hud;
+
+    private FrameBuffer fbo;
+
     @NotNull
     public final SpriteBatch spriteBatch;
     public final ModelBatch modelBatch;
+    public final ShapeDrawer shapes;
+    public final Renderer renderer;
+
+    private float guiScale = this.calcMaxGuiScale();
+
+    // Notifications
+    public NotifyManager notifications = new NotifyManager(this);
+
+    // Input
+    public GameInput input;
+
+    // World
+    @Nullable
+    public ClientWorld world;
+
+    // Screenshots
+    private CompletableFuture<Screenshot> screenshotFuture;
+    private boolean skipScreenshot = false;
+    private boolean screenshotWorldOnly = false;
+    private boolean triggerScreenshot = false;
+    private boolean captureScreenshot = false;
+    public int screenshotScale = 4;
+    private long screenshotFlashTime = 0;
+
+    // Player
+    @Nullable
+    public LocalPlayer player;
     public final GameCamera camera;
     public final PlayerInput playerInput = new PlayerInput(this);
-    boolean isDevMode;
-    @Nullable
-    public Screen screen;
+
+    // Game settings
     @Deprecated
     public GameSettings settings = new GameSettings();
-    public final ShapeDrawer shapes;
+
+    // Managers
     private final TextureManager textureManager;
     private final CubemapManager cubemapManager;
     private final ResourceManager resourceManager;
+    private final SkinManager skinManager = new SkinManager();
+    private final MaterialManager materialManager;
+    private final ShaderProviderManager shaderProviderManager;
+    private final ShaderProgramManager shaderProgramManager;
+    private final TextureAtlasManager textureAtlasManager;
+    private final FontManager fontManager = FontManager.get();
+
+    // Registries
     public final EntityModelRegistry entityModelManager;
     public final EntityRendererRegistry entityRendererManager;
-    private float guiScale = this.calcMaxGuiScale();
+    public final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
 
-    public Hud hud;
+    // Raycast and block breaking
     public HitResult hitResult;
     private Vec3i breaking;
     private BlockProperties breakingBlock;
+
+    public BlockHitResult cursor;
 
     // Public Flags
     public boolean renderWorld = false;
@@ -278,41 +385,37 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public static final long BOOT_TIMESTAMP = System.currentTimeMillis();
 
     // Texture Atlases
-    @UnknownNullability
     public TextureAtlas blocksTextureAtlas;
-    public TextureAtlas emmisiveTextureAtlas;
-    @UnknownNullability
     public TextureAtlas itemTextureAtlas;
+
+    // Baked Models
     public BakedModelRegistry bakedBlockModels;
 
     // Advanced Shadows
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
 
+    // Scheduler
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
         thread.setName("QVoxelClientScheduler");
         return thread;
     });
+
+    // Window stuff
     @Nullable
     Integer deferredWidth;
     @Nullable
     Integer deferredHeight;
+
+    private int width;
+    private int height;
+
     Texture windowTex;
-    public DebugOverlay debugGui;
-    private boolean closingWorld;
-    private int oldSelected;
-    private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
-    private final List<Shutdownable> shutdownables = new CopyOnWriteArrayList<>();
-    private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
-    boolean loading = true;
-    private final Thread mainThread;
-    public BlockHitResult cursor;
-    LoadingOverlay loadingOverlay;
-    final String[] argv;
-    public final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
-    public IntegratedServer integratedServer;
-    private final User user;
+
+    private final GameWindow window;
+
+    // Frames and ticking
     private int currentTps;
     private float tickTime = 0f;
     public float partialTick = 0f;
@@ -320,41 +423,43 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private int ticksPassed = 0;
 
     double time = System.currentTimeMillis();
+
+    // Debug
+    public DebugOverlay debugGui;
+
+    // Flags
+    private boolean closingWorld;
+
+    // Finalize lists. Those are used to clean up after the game is shutdown.
+    private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
+    private final List<Shutdownable> shutdownables = new CopyOnWriteArrayList<>();
+    private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
+
+    // Disposal queue for deferred disposables, this is disposed next frame
+    private final Queue<Disposable> disposalQueue = new ArrayDeque<>();
+
+    // Server
+    public IntegratedServer integratedServer;
+
+    // Game activity
     private GameActivity activity = null;
     private GameActivity oldActivity = null;
-    private Vec2i oldMode;
-    private boolean triggerScreenshot;
-    private boolean captureScreenshot;
-    public int screenshotScale = 4;
-    private final GameRenderer gameRenderer;
-    private FrameBuffer fbo;
-    private int width;
-    private int height;
-    private MultiplayerData multiplayerData;
-    ManualCrashOverlay crashOverlay;
-    private boolean wasClicking;
-    private final Queue<Runnable> serverTickQueue = new ArrayDeque<>();
-    private boolean startDevLoading = true;
+
+    // Loading overlay
+    LoadingOverlay loadingOverlay;
+
+    // Environment
     private final Environment defaultEnv = new Environment();
     private boolean autoScale;
     private boolean disposed;
-    private final GameWindow window;
 
-    @ApiStatus.Experimental
-    private static Callback<CrashLog> crashHook;
-    private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
-    private long screenshotFlashTime;
+    // Temporaries
     private final Color tmpColor = new Color();
-    private final SkinManager skinManager = new SkinManager();
-    private CompletableFuture<Screenshot> screenshotFuture;
-    private final MaterialManager materialManager;
-    private final ShaderProviderManager shaderProviderManager;
-    private final ShaderProgramManager shaderProgramManager;
-    private final TextureAtlasManager textureAtlasManager;
-    private final FontManager fontManager = FontManager.get();
-    private final Queue<Disposable> disposalQueue = new ArrayDeque<>();
+
+    // Player view
     private PlayerView playerView = PlayerView.FIRST_PERSON;
 
+    // Touch input variables
     public Vector2[] touchPosStartScl = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchPosStart = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchMovedScl = new Vector2[Gdx.input.getMaxPointers()];
@@ -369,8 +474,31 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
     }
 
+    // Misc
+    GarbageCollector garbageCollector;
+    GameEnvironment gameEnv;
+
+    boolean loading = true;
+
+    final String[] argv;
+    private Vec2i oldMode;
+    private int oldSelected;
+    private boolean wasClicking;
+    private final Queue<Runnable> serverTickQueue = new ArrayDeque<>();
+
     private final QuantumClientLoader loader = new QuantumClientLoader();
 
+    /**
+     * Initializer for the Quantum Voxel Client.
+     * It does all preparations for the game to start.
+     * This is called by {@link Main#create()}.
+     * <p>
+     * NOTE: This method should not be called.
+     *
+     * @param argv the arguments to pass to the game
+     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @since <i>Always :smirk:</i>
+     */
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
 
@@ -419,6 +547,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Set the language bootstrap
         LanguageBootstrap.bootstrap.set(Language::translate);
 
+        // Initialize texture, texture atlas, cubemap, and material managers
         this.textureManager = new TextureManager(this.resourceManager);
         this.cubemapManager = new CubemapManager(this.resourceManager);
         this.materialManager = new MaterialManager(this.resourceManager, this.textureManager, this.cubemapManager);
@@ -434,6 +563,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Register auto fillers for debugging
         DebugRegistration.registerAutoFillers();
 
+        // Set the command line arguments
         this.argv = argv;
 
         // Set the flag for the development world
@@ -476,11 +606,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.spriteBatch = deferDispose(new SpriteBatch());
         this.shapes = new ShapeDrawer(this.spriteBatch, white);
         this.renderer = new Renderer(this.shapes);
-
-        // Initialize DepthShader configuration
-        DepthShader.Config shaderConfig = new DepthShader.Config();
-        shaderConfig.defaultCullFace = GL_BACK;
-        shaderConfig.defaultDepthFunc = GL_LEQUAL;
 
         // Initialize ModelBatch with GameShaderProvider
         this.modelBatch = deferDispose(new ModelBatch(new SceneShaders(
@@ -545,6 +670,24 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
+     * Returns an instance of IClipboard.
+     * If the game platform is macOS, a NullClipboard is returned.
+     * Otherwise, a GameClipboard is returned.
+     *
+     * @return An instance of IClipboard.
+     */
+    private Clipboard createClipboard() {
+        // Check if the game platform is macOS
+        if (GamePlatform.get().isMacOSX()) {
+            // If it is, return a NullClipboard
+            return new NullClipboard();
+        }
+
+        // Otherwise, return a GameClipboard
+        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
+    }
+
+    /**
      * Game crash hook, which will be called when a crash occurs.
      * <p>
      * <p style="font-size: 16px"><b>ONLY USE THIS IF YOU KNOW WHAT YOU ARE DOING</b></p>
@@ -583,9 +726,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.camera.fov = ClientConfig.fov;
 
+        // TODO: Add support for Discord RPC
         notifications.addOnce(UUID.fromString("b26c6826-1086-4b34-a5f2-5172e65bb55f"), Notification.builder("Missing Feature", "Discord RPC is not implemented yet!").build());
-//        if (ClientConfig.hideRPC) {
 //            RpcHandler.disable();
+//        if (ClientConfig.hideRPC) {
 //        } else {
 //            RpcHandler.enable();
 //            if (this.activity != null) {
@@ -594,20 +738,22 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //            }
 //        }
 
+        // Cancel vibration if it is not enabled
         if (!ClientConfig.vibration) {
             GameInput.cancelVibration();
         }
 
-        GamePlatform.get().setTransparentFBO(ClientConfig.useFullWindowVibrancy);
-
         QuantumClient.invoke(() -> {
+            // Set vsync
             boolean enableVsync = ClientConfig.enableVsync;
             Gdx.graphics.setVSync(enableVsync);
 
+            // Set fps limit
             int fpsLimit = ClientConfig.fpsLimit;
             if (fpsLimit >= 240) QuantumClient.setFpsLimit(240);
             else QuantumClient.setFpsLimit(fpsLimit < 10 ? 60 : fpsLimit);
 
+            // Reset grid
             this.renderer.resetGrid();
         });
     }

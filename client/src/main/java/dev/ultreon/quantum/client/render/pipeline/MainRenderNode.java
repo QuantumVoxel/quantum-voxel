@@ -79,6 +79,7 @@ public class MainRenderNode extends RenderNode {
 
     private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex) {
         this.drawDiffuse(skyboxTex);
+
         this.client.spriteBatch.flush();
         this.client.modelBatch.flush();
         diffuseTex.bind(0);

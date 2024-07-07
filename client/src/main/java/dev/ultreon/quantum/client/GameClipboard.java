@@ -4,14 +4,13 @@ import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.client.Screenshot.ImageSelection;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.datatransfer.Clipboard;
 import java.awt.image.BufferedImage;
 
-public class GameClipboard implements IClipboard {
-    private final Clipboard toolkitClipboard;
+public class GameClipboard implements Clipboard {
+    private final java.awt.datatransfer.Clipboard toolkitClipboard;
     private final com.badlogic.gdx.utils.Clipboard gdxClipboard;
 
-    public GameClipboard(Clipboard toolkitClipboard) {
+    public GameClipboard(java.awt.datatransfer.Clipboard toolkitClipboard) {
         super();
 
         this.toolkitClipboard = toolkitClipboard;
