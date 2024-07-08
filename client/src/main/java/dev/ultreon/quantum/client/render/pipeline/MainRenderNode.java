@@ -28,9 +28,20 @@ public class MainRenderNode extends RenderNode {
     private final Supplier<ShaderProgram> program = ShaderPrograms.MAIN;
     private float blurScale = 0f;
 
+    /**
+     * Renders the scene with the given textures and parameters.
+     *
+     * @param textures   The map containing textures.
+     * @param modelBatch The ModelBatch used for rendering.
+     * @param camera     The GameCamera representing the camera.
+     * @param input      The array of Renderables.
+     * @param deltaTime  The time passed since the last frame.
+     * @return The array of Renderables after rendering.
+     */
     @NewInstance
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
+        // Extract textures
         Texture depthTex = textures.get("depth");
         Texture skyboxTex = textures.get("skybox");
         Texture diffuseTex = textures.get("diffuse");
@@ -39,11 +50,13 @@ public class MainRenderNode extends RenderNode {
         Texture reflectiveTex = textures.get("reflective");
         Texture specularTex = textures.get("specular");
 
+        // End modelBatch and begin rendering
         modelBatch.end();
         this.client.renderer.begin();
         this.client.renderer.getBatch().enableBlending();
-        this.client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+        this.client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+        // Handle blur effect
         if (blurScale > 0f) {
             this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
                 render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex);
@@ -53,26 +66,33 @@ public class MainRenderNode extends RenderNode {
                 render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex);
             });
         }
+
+        // Disable blending and end rendering
         this.client.renderer.getBatch().disableBlending();
         this.client.renderer.end();
         this.client.spriteBatch.setShader(null);
 
         gl.glActiveTexture(GL_TEXTURE0);
 
+        // Show render pipeline
         if (GamePlatform.get().showRenderPipeline()) {
             this.client.renderer.begin();
-            this.client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+            this.client.renderer.getBatch().setBlendFunctionSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             this.client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(positionTex, (float) (Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
-            this.client.spriteBatch.draw(normalTex, (float) (2 *  Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            this.client.spriteBatch.draw(normalTex, (float) (2 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(reflectiveTex, (float) (3 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(skyboxTex, (float) (4 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.renderer.end();
         }
+
+        // Enable blending and set blend function
+        this.client.renderer.getBatch().enableBlending();
+        this.client.renderer.getBatch().setBlendFunctionSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         return input;
     }

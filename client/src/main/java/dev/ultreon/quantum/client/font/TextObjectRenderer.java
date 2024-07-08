@@ -47,6 +47,9 @@ public class TextObjectRenderer {
 
         this.lineHeight = font.lineHeight;
 
+        renderer.enableBlend();
+        renderer.disableDepth();
+
         for (TextObject cur : this.text) {
             if (cur instanceof FontIconObject fontIcon) {
                 renderFontIcon(renderer, fontIcon, shadow);

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.text;
 
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
@@ -84,6 +85,47 @@ public abstract class MutableText extends TextObject {
 
     public void setSize(int size) {
         this.style.size(size);
+    }
+
+    public Identifier getFont() {
+        return this.style.getFont();
+    }
+
+    public MutableText setFont(Identifier font) {
+        this.style.font(font);
+        return this;
+    }
+
+    public boolean isShadow() {
+        return this.style.isShadow();
+    }
+
+    public MutableText setShadow(boolean shadow) {
+        this.style.shadow(shadow);
+        return this;
+    }
+
+    public ClickEvent getClickEvent() {
+        return this.style.getClickEvent();
+    }
+
+    public MutableText setClickEvent(ClickEvent clickEvent) {
+        this.style.clickEvent(clickEvent);
+        return this;
+    }
+
+    public HoverEvent<?> getHoverEvent() {
+        return this.style.getHoverEvent();
+    }
+
+    public MutableText setHoverEvent(HoverEvent<?> hoverEvent) {
+        this.style.hoverEvent(hoverEvent);
+        return this;
+    }
+
+    public MutableText clearExtras() {
+        this.extras.clear();
+        return this;
     }
 
     /**

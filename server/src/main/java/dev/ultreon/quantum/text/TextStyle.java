@@ -6,6 +6,8 @@ import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static dev.ultreon.quantum.CommonConstants.id;
+
 public class TextStyle {
     private int size = 1;
     private boolean bold = false;
@@ -16,6 +18,7 @@ public class TextStyle {
     private @Nullable ClickEvent clickEvent = null;
     private RgbColor color = RgbColor.WHITE;
     private Identifier font;
+    private boolean shadow = false;
 
     public static TextStyle deserialize(MapType data) {
         TextStyle textStyle = new TextStyle();
@@ -118,12 +121,21 @@ public class TextStyle {
         return this;
     }
 
+    public TextStyle shadow(boolean shadow) {
+        this.shadow = shadow;
+        return this;
+    }
+
+    public boolean isShadow() {
+        return this.shadow;
+    }
+
     public TextStyle copy() {
-        return new TextStyle().color(this.color).bold(this.bold).italic(this.italic).underline(this.underline).strikethrough(this.strikethrough).hoverEvent(this.hoverEvent).clickEvent(this.clickEvent);
+        return new TextStyle().color(this.color).bold(this.bold).italic(this.italic).underline(this.underline).strikethrough(this.strikethrough).hoverEvent(this.hoverEvent).clickEvent(this.clickEvent).size(this.size).font(this.font).shadow(this.shadow);
     }
 
     public static TextStyle defaultStyle() {
-        return new TextStyle().color(RgbColor.WHITE).bold(false).italic(false).underline(false).strikethrough(false);
+        return new TextStyle().color(RgbColor.WHITE).bold(false).italic(false).underline(false).strikethrough(false).clickEvent(null).hoverEvent(null).size(1).font(id("quantium")).shadow(false);
     }
 
     public void color(ColorCode color) {
