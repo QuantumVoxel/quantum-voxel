@@ -549,7 +549,7 @@ commonProperties
                                 Application::class.java
                         ) {                       // Create new run configuration "MyApp" that will run class foo.App
                             jvmArgs =
-                                    "--exports java.desktop/com.apple.eawt=ALL-UNNAMED -Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
                             moduleName = rootProject.name + ".${dependency.name}.main"
                             workingDirectory = "$projectDir/run/client/main/"
@@ -560,7 +560,7 @@ commonProperties
                                 Application::class.java
                         ) {                       // Create new run configuration "MyApp" that will run class foo.App
                             jvmArgs =
-                                    "--exports java.desktop/com.apple.eawt=ALL-UNNAMED -Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
                             mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
                             moduleName = rootProject.name + ".desktop.main"
                             workingDirectory = "$projectDir/run/data/main/"
@@ -582,7 +582,7 @@ commonProperties
                                 Application::class.java
                         ) {                       // Create new run configuration "MyApp" that will run class foo.App
                             jvmArgs =
-                                    "--exports java.desktop/com.apple.eawt=ALL-UNNAMED -Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
                             moduleName = rootProject.name + ".${dependency.name}.main"
                             workingDirectory = "$projectDir/run/server/"
