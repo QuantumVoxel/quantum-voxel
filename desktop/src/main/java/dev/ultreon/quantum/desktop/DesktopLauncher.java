@@ -2,8 +2,11 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.sun.jna.platform.mac.SystemB;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
@@ -23,9 +26,13 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWNativeCocoa;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -173,6 +180,21 @@ public class DesktopLauncher {
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.HIGH, true);
 
             gameWindow = new DesktopWindow(window);
+
+            if (SharedLibraryLoader.isMac) {
+                // Setup icons the mac way, using JNA.
+                // So this requires native interaction.
+                long l = GLFWNativeCocoa.glfwGetCocoaWindow(gameWindow.getHandle());
+
+
+                try {
+                    final Image image = QuantumClient.getIconImage();
+                    Taskbar taskbar = Taskbar.getTaskbar();
+                    taskbar.setIconImage(image);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            }
 
             WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
 

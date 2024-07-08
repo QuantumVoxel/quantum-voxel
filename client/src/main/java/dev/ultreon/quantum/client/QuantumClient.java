@@ -128,7 +128,9 @@ import dev.ultreon.quantum.log.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -148,8 +150,8 @@ import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
 /**
  * This class is the main entry point for the Quantum Voxel Client.
  *
- * @see <a href="https://github.com/Ultreon/quantum-voxel">QuantumVoxel</a>
  * @author <a href="https://github.com/Ultreon">Ultreon Team</a>
+ * @see <a href="https://github.com/Ultreon/quantum-voxel">QuantumVoxel</a>
  * @since <i>Always :smirk:</i>
  */
 @SuppressWarnings("UnusedReturnValue")
@@ -829,13 +831,61 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public static String[] getIcons() {
-        String[] icons = new String[QuantumClient.SIZES.length];
-        for (int i = 0, sizesLength = QuantumClient.SIZES.length; i < sizesLength; i++) {
-            var size = QuantumClient.SIZES[i];
-            icons[i] = "icons/icon_" + size + ".png";
+        int[] sizes = QuantumClient.SIZES;
+        if (!isMac) {
+            sizes = new int[]{16, 32, 64, 128, 256, 512, 1024};
+        }
+        String[] icons = new String[sizes.length];
+        for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
+            var size = sizes[i];
+            if (isMac) {
+                icons[i] = "icons/" + size + "-mac.png";
+            } else {
+                icons[i] = "icons/icon_" + size + ".png";
+            }
         }
 
         return icons;
+    }
+
+    public static Image[] getIconImages() {
+        int[] sizes = QuantumClient.SIZES;
+        if (!isMac) {
+            sizes = new int[]{16, 32, 64, 128, 256, 512, 1024};
+        }
+        Image[] icons = new Image[sizes.length];
+        for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
+            var size = sizes[i];
+            try {
+                if (isMac) {
+                    icons[i] = ImageIO.read(QuantumClient.class.getResourceAsStream("/icons/" + size + "-mac.png"));
+
+                } else {
+                    icons[i] = ImageIO.read(QuantumClient.class.getResourceAsStream("/icons/icon_" + size + ".png"));
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return icons;
+    }
+
+    public static Image getIconImage() {
+        try {
+            BufferedImage read;
+            if (isMac) {
+                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/1024-mac.png")));
+            } else {
+                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
+            }
+            if (read == null) {
+                throw new RuntimeException("Failed to load icon image");
+            }
+            return read;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -1171,7 +1221,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (this.screen == null) {
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
-        } else  {
+        } else {
             this.setWindowTitle(this.screen.getTitle());
         }
 
@@ -2166,7 +2216,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return Objects.requireNonNullElse(blockModel, BakedCubeModel.defaultModel());
 
         }
-        
+
         BlockModel blockModel = orDefault
                 .stream()
                 .filter(pair -> pair.getFirst().test(block))
@@ -2598,9 +2648,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public boolean mousePress(int mouseX, int mouseY, int button) {
         if (mouseY < 44 && button == Input.Buttons.LEFT) {
-            if (closeButton.isWithinBounds(mouseX - 18, mouseY - 22)) return closeButton.mousePress(mouseX - 18, mouseY - 22, button);
-            if (maximizeButton.isWithinBounds(mouseX - 18, mouseY - 22)) return maximizeButton.mousePress(mouseX - 18, mouseY - 22, button);
-            if (minimizeButton.isWithinBounds(mouseX - 18, mouseY - 22)) return minimizeButton.mousePress(mouseX - 18, mouseY - 22, button);
+            if (closeButton.isWithinBounds(mouseX - 18, mouseY - 22))
+                return closeButton.mousePress(mouseX - 18, mouseY - 22, button);
+            if (maximizeButton.isWithinBounds(mouseX - 18, mouseY - 22))
+                return maximizeButton.mousePress(mouseX - 18, mouseY - 22, button);
+            if (minimizeButton.isWithinBounds(mouseX - 18, mouseY - 22))
+                return minimizeButton.mousePress(mouseX - 18, mouseY - 22, button);
 
             if (this.lastPress - System.currentTimeMillis() + 1000L > 0) {
                 lastPress = 0;
