@@ -875,7 +875,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         try {
             BufferedImage read;
             if (isMac) {
-                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/1024-mac.png")));
+                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
             } else {
                 read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
             }
