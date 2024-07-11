@@ -516,10 +516,12 @@ idea {
 //language=TEXT
                     val conf = """
 commonProperties
-	fabric.development=true
-	log4j2.formatMsgNoLookups=true
-	fabric.log.disableAnsi=false
-	log4j.configurationFile=${rootProject.projectDir}/log4j.xml
+  fabric.development=true
+  log4j2.formatMsgNoLookups=true
+  fabric.log.disableAnsi=false
+  fabric.skipMcProvider=true
+  fabric.zipfs.use_temp_file=false
+  log4j.configurationFile=${rootProject.projectDir}/log4j.xml
     """.trimIndent()
                     val launchFile = file("${dependency.projectDir}/build/gameutils/launch.cfg")
                     Files.writeString(
@@ -539,6 +541,12 @@ commonProperties
                             StandardOpenOption.WRITE
                     )
 
+                    var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=${launchFile.path}"
+
+                    if (System.getProperty("os.name").lowercase().startsWith("mac")) {
+                        defaultJvmArgs += " -XstartOnFirstThread"
+                    }
+
                     withIDEADir {
                         println("Callback 1 executed with: $absolutePath")
                     }
@@ -547,9 +555,8 @@ commonProperties
                         create(
                                 "Quantum Voxel Client $name",
                                 Application::class.java
-                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
-                            jvmArgs =
-                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                        ) {
+                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
                             moduleName = rootProject.name + ".${dependency.name}.main"
                             workingDirectory = "$projectDir/run/client/main/"
@@ -558,9 +565,8 @@ commonProperties
                         create(
                                 "Quantum Voxel Data $name",
                                 Application::class.java
-                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
-                            jvmArgs =
-                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                        ) {
+                                jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
                             mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
                             moduleName = rootProject.name + ".desktop.main"
                             workingDirectory = "$projectDir/run/data/main/"
@@ -569,9 +575,8 @@ commonProperties
                         create(
                                 "Quantum Voxel Client $name Alt",
                                 Application::class.java
-                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
-                            jvmArgs =
-                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                        ) {
+                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
                             moduleName = rootProject.name + ".${dependency.name}.main"
                             workingDirectory = "$projectDir/run/client/alt/"
@@ -580,9 +585,8 @@ commonProperties
                         create(
                                 "Quantum Voxel Server $name",
                                 Application::class.java
-                        ) {                       // Create new run configuration "MyApp" that will run class foo.App
-                            jvmArgs =
-                                    "-Xmx4g -Dfabric.skipMcProvider=true -Dfabric.dli.config=${launchFile.path} -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Dfabric.zipfs.use_temp_file=false"
+                        ) {
+                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
                             moduleName = rootProject.name + ".${dependency.name}.main"
                             workingDirectory = "$projectDir/run/server/"

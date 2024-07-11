@@ -133,19 +133,19 @@ void main() {
 
     vec3 normal = v_normal;
 
-    float sunLight = v_color.a;
-    vec4 blockLight = vec4(v_color.rgb, 1.0);
+//    float sunLight = v_color.a;
+//    vec4 blockLight = vec4(v_color.rgb, 1.0);
 
     vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
-    diffuseOut.a = 1.0;
     #ifdef blendedFlag
         diffuseOut.a = diffuse.a;
     #endif
-    if (diffuse.a <= 0.02) discard;
+    if (diffuse.a <= 0.01) discard;
+    diffuseOut.a = 1.0;
 
     vec3 light = vec3(u_globalSunlight);
-    light *= sunLight * 2 - 0.4;
-    light += (blockLight.rgb - (light * blockLight.rgb));
+//    light *= sunLight * 2 - 0.4;
+//    light += (blockLight.rgb - (light * blockLight.rgb));
 
     vec3 emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
     diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));

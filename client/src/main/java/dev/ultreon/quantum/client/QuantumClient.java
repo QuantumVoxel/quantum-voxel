@@ -128,9 +128,6 @@ import dev.ultreon.quantum.log.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -207,7 +204,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final RenderPipeline pipeline;
 
     // Game clipboard
-    public final Clipboard clipboard = createClipboard();
+    public final IClipboard clipboard = createClipboard();
 
     // Particle batches (currently disabled), so this is a TODO
 //    public Array<ParticleBatch<?>> batches = new Array<ParticleBatch<?>>(new ParticleBatch[]{
@@ -678,15 +675,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @return An instance of IClipboard.
      */
-    private Clipboard createClipboard() {
-        // Check if the game platform is macOS
-        if (GamePlatform.get().isMacOSX()) {
-            // If it is, return a NullClipboard
-            return new NullClipboard();
-        }
-
-        // Otherwise, return a GameClipboard
-        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
+    private IClipboard createClipboard() {
+//        // Check if the game platform is macOS
+//        if (GamePlatform.get().isMacOSX()) {
+//            // If it is, return a NullClipboard
+//            return new NullClipboard();
+//        }
+//
+//        // Otherwise, return a GameClipboard
+//        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
+        return new NullClipboard();
     }
 
     /**
@@ -848,45 +846,22 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return icons;
     }
 
-    public static Image[] getIconImages() {
-        int[] sizes = QuantumClient.SIZES;
-        if (!isMac) {
-            sizes = new int[]{16, 32, 64, 128, 256, 512, 1024};
-        }
-        Image[] icons = new Image[sizes.length];
-        for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
-            var size = sizes[i];
-            try {
-                if (isMac) {
-                    icons[i] = ImageIO.read(QuantumClient.class.getResourceAsStream("/icons/" + size + "-mac.png"));
-
-                } else {
-                    icons[i] = ImageIO.read(QuantumClient.class.getResourceAsStream("/icons/icon_" + size + ".png"));
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return icons;
-    }
-
-    public static Image getIconImage() {
-        try {
-            BufferedImage read;
-            if (isMac) {
-                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
-            } else {
-                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
-            }
-            if (read == null) {
-                throw new RuntimeException("Failed to load icon image");
-            }
-            return read;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static Image getIconImage() {
+//        try {
+//            BufferedImage read;
+//            if (isMac) {
+//                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
+//            } else {
+//                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
+//            }
+//            if (read == null) {
+//                throw new RuntimeException("Failed to load icon image");
+//            }
+//            return read;
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     /**
      * Check whether the application is packaged using JPackage.

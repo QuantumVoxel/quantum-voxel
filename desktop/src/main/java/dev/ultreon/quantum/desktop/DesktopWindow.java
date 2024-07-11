@@ -8,8 +8,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.lwjgl.glfw.GLFWNativeWin32;
 
-import java.awt.*;
-
 public class DesktopWindow extends GameWindow {
     private final Lwjgl3Window window;
     private String title;
@@ -26,18 +24,18 @@ public class DesktopWindow extends GameWindow {
 
         if (isDragging()) {
             GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-            int x = dragX;
-            int y = dragY;
-
-            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-            Point location = pointerInfo.getLocation();
-            int nx = location.x;
-            int ny = location.y;
-
-            int i = nx - x;
-            int i1 = ny - y;
-
-            GLFW.glfwSetWindowPos(getHandle(), i + x - dragOffX, i1 + y - dragOffY);
+//            int x = dragX;
+//            int y = dragY;
+//
+//            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+//            Point location = pointerInfo.getLocation();
+//            int nx = location.x;
+//            int ny = location.y;
+//
+//            int i = nx - x;
+//            int i1 = ny - y;
+//
+//            GLFW.glfwSetWindowPos(getHandle(), i + x - dragOffX, i1 + y - dragOffY);
         }
     }
 
@@ -48,13 +46,14 @@ public class DesktopWindow extends GameWindow {
 
     @Override
     public boolean isHovered() {
-        PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-        Point location = pointerInfo.getLocation();
-        GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-        int x = location.x - xPos[0];
-        int y = location.y - yPos[0];
-
-        return x >= 0 && x < Gdx.graphics.getWidth() && y >= 0 && y < Gdx.graphics.getHeight();
+//        booleanPointerInfo pointerInfo = MouseInfo.getPointerInfo();
+//        Point location = pointerInfo.getLocation();
+//        GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
+//        int x = location.x - xPos[0];
+//        int y = location.y - yPos[0];
+//
+//        return x >= 0 && x < Gdx.graphics.getWidth() && y >= 0 && y < Gdx.graphics.getHeight();
+        return true;
     }
 
     @Override
@@ -137,16 +136,16 @@ public class DesktopWindow extends GameWindow {
     @Override
     public void setDragging(boolean dragging) {
         if (dragging != this.dragging) {
-            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-            this.dragging = dragging;
-            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-            Point location = pointerInfo.getLocation();
-            int nx = location.x;
-            int ny = location.y;
-            this.dragX = nx;
-            this.dragY = ny;
-            this.dragOffX = nx - xPos[0];
-            this.dragOffY = ny - yPos[0];
+//            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
+//            this.dragging = dragging;
+//            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+//            Point location = pointerInfo.getLocation();
+//            int nx = location.x;
+//            int ny = location.y;
+//            this.dragX = nx;
+//            this.dragY = ny;
+//            this.dragOffX = nx - xPos[0];
+//            this.dragOffY = ny - yPos[0];
         }
     }
 }

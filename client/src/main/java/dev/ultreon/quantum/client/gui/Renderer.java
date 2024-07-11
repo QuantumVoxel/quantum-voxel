@@ -35,9 +35,6 @@ import org.jetbrains.annotations.NotNull;
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -262,24 +259,6 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer outline(Rectangle2D rect) {
-        this.rectLine((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(), (float) rect.getHeight());
-        return this;
-    }
-
-    @CanIgnoreReturnValue
-    public Renderer outline(Ellipse2D ellipse) {
-        this.ovalLine((float) ellipse.getX(), (float) ellipse.getY(), (float) ellipse.getWidth(), (float) ellipse.getHeight());
-        return this;
-    }
-
-    @CanIgnoreReturnValue
-    public Renderer outline(Line2D s) {
-        this.line((float) s.getX1(), (float) s.getY1(), (float) s.getX2(), (float) s.getY2());
-        return this;
-    }
-
-    @CanIgnoreReturnValue
     public Renderer circle(float x, float y, float radius) {
         this.shapes.filledCircle(x, y, radius);
         return this;
@@ -288,24 +267,6 @@ public class Renderer implements Disposable {
     @CanIgnoreReturnValue
     public Renderer circleLine(float x, float y, float radius) {
         this.shapes.circle(x, y, radius);
-        return this;
-    }
-
-    @CanIgnoreReturnValue
-    public Renderer fill(Rectangle2D rect) {
-        this.rect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(), (float) rect.getHeight());
-        return this;
-    }
-
-    @CanIgnoreReturnValue
-    public Renderer fill(Ellipse2D ellipse) {
-        this.oval((float) ellipse.getX(), (float) ellipse.getY(), (float) ellipse.getWidth(), (float) ellipse.getHeight());
-        return this;
-    }
-
-    @CanIgnoreReturnValue
-    public Renderer fill(Line2D line) {
-        this.line((float) line.getX1(), (float) line.getY1(), (float) line.getX2(), (float) line.getY2());
         return this;
     }
 
@@ -3061,23 +3022,6 @@ public class Renderer implements Disposable {
         this.grid.end();
 
         var old = this.grid;
-
-//        this.grid = new FrameBuffer(Format.RGBA8888, width, height, false);
-//        this.grid.begin();
-//        this.batch.begin();
-//        this.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-//
-//        Gdx.gl.glClearColor(0, 0, 0, 0);
-//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-//
-//        this.batch.draw(old.getColorBufferTexture(), 0, 0, width, height);
-//        this.batch.flush();
-//
-//        this.batch.setShader(null);
-//        this.batch.end();
-//        this.grid.end();
-//
-//        old.dispose();
     }
 
     @Override

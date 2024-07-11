@@ -98,6 +98,9 @@ public class MainRenderNode extends RenderNode {
     }
 
     private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex) {
+        this.client.spriteBatch.enableBlending();
+        this.client.spriteBatch.setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         this.drawDiffuse(skyboxTex);
 
         this.client.spriteBatch.flush();

@@ -452,7 +452,7 @@ public class ServerWorld extends World {
             }
         }
 
-        for (var entity : this.entitiesById.values()) {
+        for (var entity : this.entitiesById.values().toArray().toArray(Entity.class)) {
             entity.tick();
         }
 

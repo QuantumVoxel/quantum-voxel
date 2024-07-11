@@ -2,15 +2,11 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import com.sun.jna.platform.mac.SystemB;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -28,11 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,7 +40,7 @@ import java.util.Objects;
 public class DesktopLauncher {
     private static DesktopPlatform platform;
     private static DesktopWindow gameWindow;
-    private static boolean windowVibrancyEnabled = false;
+    private static final boolean windowVibrancyEnabled = false;
 
 
     /**
@@ -75,7 +68,7 @@ public class DesktopLauncher {
      */
     @SuppressWarnings("unused")
     private static void launch(String[] argv) {
-        FlatMacLightLaf.setup();
+        if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
 
         platform = new DesktopPlatform() {
             @Override
@@ -112,12 +105,6 @@ public class DesktopLauncher {
 
         QuantumClient.logDebug();
 
-        GamePlatform.get().setupMacOSX();
-
-        if (GamePlatform.get().isMacOSX()) {
-            GamePlatform.get().setupMacOSX();
-        }
-
         new PyLang().init();
         new JsLang().init();
 
@@ -128,7 +115,8 @@ public class DesktopLauncher {
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                platform.getLogger("CrashHandler").error("Failed to launch game", e);
                 QuantumClient.crash(e);
             }
         }
@@ -139,10 +127,9 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.useVsync(false);
         config.setForegroundFPS(0);
-        config.setIdleFPS(10);
         config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
         config.setHdpiMode(HdpiMode.Pixels);
-        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);
+        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
 //        config.setDecorated(false);
         config.setTitle("Quantum");
@@ -150,6 +137,12 @@ public class DesktopLauncher {
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
 //        config.setTransparentFramebuffer(true);
+
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+
         return config;
     }
 
@@ -188,9 +181,9 @@ public class DesktopLauncher {
 
 
                 try {
-                    final Image image = QuantumClient.getIconImage();
-                    Taskbar taskbar = Taskbar.getTaskbar();
-                    taskbar.setIconImage(image);
+//                    final Image image = QuantumClient.getIconImage();
+//                    Taskbar taskbar = Taskbar.getTaskbar();
+//                    taskbar.setIconImage(image);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }

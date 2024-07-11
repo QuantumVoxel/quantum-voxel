@@ -8,13 +8,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.utils.BufferUtils;
-import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
@@ -85,9 +79,9 @@ public class Screenshot {
 
         // Copy the screenshot file to clipboard
         if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
-            Clipboard clipboard = QuantumClient.get().clipboard;
+            IClipboard clipboard = QuantumClient.get().clipboard;
             try(InputStream read = data.read()) {
-                clipboard.copy(ImageIO.read(read));
+//                clipboard.copy(ImageIO.read(read));
             } catch (IOException e) {
                 QuantumClient.LOGGER.error("Failed to copy screenshot to clipboard", e);
             }
@@ -149,31 +143,5 @@ public class Screenshot {
 
     public void save(Path resolve) {
         this.save(resolve.toString());
-    }
-
-    static class ImageSelection implements Transferable {
-        private final Image image;
-
-        public ImageSelection(Image image) {
-            this.image = image;
-        }
-
-        // Returns supported flavors
-        public DataFlavor[] getTransferDataFlavors() {
-            return new DataFlavor[] { DataFlavor.imageFlavor };
-        }
-
-        // Returns true if flavor is supported
-        public boolean isDataFlavorSupported(DataFlavor flavor) {
-            return DataFlavor.imageFlavor.equals(flavor);
-        }
-
-        // Returns image
-        public @NotNull Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
-            if (!DataFlavor.imageFlavor.equals(flavor)) {
-                throw new UnsupportedFlavorException(flavor);
-            }
-            return image;
-        }
     }
 }

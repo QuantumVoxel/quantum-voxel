@@ -106,6 +106,11 @@ void main()
     vec2 fragCoord = gl_FragCoord.xy;
     vec4 fragColor;
     mainImage(fragColor, fragCoord);
-    FragColor = vec4(diffuse * fragColor.rgb, 1.0);
+
+    vec3 color = diffuse * fragColor.rgb;
+
+    if (color.a < 0.01) discard;
+
+    FragColor = vec4(color, 1.0);
     return;
 }

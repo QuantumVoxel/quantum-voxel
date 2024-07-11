@@ -95,13 +95,13 @@ public class RenderLayer {
     }
 
     public void finish(Array<Renderable> output, Pool<Renderable> pool) {
-        for (ModelInstance modelInstance : this.activeObjects) {
+        for (ModelInstance modelInstance : this.activeObjects.toArray(ModelInstance.class)) {
             modelInstance.getRenderables(output, pool);
         }
     }
 
     public void update(float delta) {
-        for (AnimationController controller : this.animationControllers) {
+        for (AnimationController controller : this.animationControllers.toArray(AnimationController.class)) {
             controller.update(delta);
         }
     }

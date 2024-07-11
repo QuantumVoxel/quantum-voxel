@@ -2,11 +2,7 @@ package dev.ultreon.quantum.client;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.image.BufferedImage;
-
-public interface Clipboard {
-    boolean copy(BufferedImage image);
-
+public interface IClipboard {
     boolean copy(String text);
 
     default @Nullable String paste() {

@@ -52,13 +52,30 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
         return switch (userData) {
-            case QVModel qvModel -> qvModel.getShaderProvider().createShader(renderable);
-            case GameShaders provider -> provider.createShader(renderable);
-            case ItemModel itemModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case BlockModel blockModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case Shader shader -> shader;
-            case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
-            case null, default -> new DefaultShader(renderable, new DefaultShader.Config());
+            case QVModel qvModel -> {
+                yield qvModel.getShaderProvider().createShader(renderable);
+            }
+            case SkyboxShaders provider -> {
+                yield provider.createShader(renderable);
+            }
+            case GameShaders provider -> {
+                yield provider.createShader(renderable);
+            }
+            case ItemModel itemModel -> {
+                yield Shaders.MODEL_VIEW.get().createShader(renderable);
+            }
+            case BlockModel blockModel -> {
+                yield Shaders.MODEL_VIEW.get().createShader(renderable);
+            }
+            case Shader shader -> {
+                yield shader;
+            }
+            case ModelObject modelObject -> {
+                yield modelObject.shaderProvider().createShader(renderable);
+            }
+            case null, default -> {
+                yield new DefaultShader(renderable, new DefaultShader.Config());
+            }
         };
     }
 }

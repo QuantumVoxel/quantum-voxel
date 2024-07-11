@@ -3,8 +3,6 @@ package dev.ultreon.quantum.client.render.pipeline;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
@@ -20,17 +18,6 @@ import dev.ultreon.quantum.client.world.WorldRenderer;
 
 public class BackgroundNode extends RenderPipeline.RenderNode {
     private final Supplier<SceneShaders> shaderProvider = Shaders.SCENE;
-
-    protected void render(ModelBatch modelBatch, ShaderProvider shaderProvider, Array<Renderable> input) {
-        for (Renderable renderable : input) {
-            renderable.environment = this.client.getEnvironment();
-            renderable.shader = null;
-            Shader shader = shaderProvider.getShader(renderable);
-            if (shader == null) throw new IllegalStateException("Shader not found");
-            renderable.shader = shader;
-            modelBatch.render(renderable);
-        }
-    }
 
     public void renderWorld(ModelBatch batch) {
         ClientWorld world = this.client.world;

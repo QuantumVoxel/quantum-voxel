@@ -5,7 +5,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.desktop.DesktopLogger.Slf4jLogger;
@@ -39,8 +39,6 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     DesktopPlatform() {
         super();
-
-        FlatMacDarkLaf.setup();
     }
 
     @Override
@@ -87,7 +85,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean showRenderPipeline() {
-        return ImGuiOverlay.SHOW_RENDER_PIPELINE.get();
+        return ImGuiOverlay.SHOW_RENDER_PIPELINE.get() || (FabricLoader.getInstance().isDevelopmentEnvironment()) && SharedLibraryLoader.isMac;
     }
 
     @Override
@@ -223,6 +221,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
+    @Deprecated
     public void setupMacOSX() {
         if (isMacOSX()) {
             Configuration.GLFW_LIBRARY_NAME.set("glfw_async");

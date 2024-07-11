@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.render.pipeline;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -77,13 +78,13 @@ public class WorldNode extends WorldRenderNode {
     @Override
     protected FrameBuffer createFrameBuffer() {
         return new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
-                .addColorTextureAttachment(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
-                .addColorTextureAttachment(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE)
-                .addColorTextureAttachment(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE)
-                .addColorTextureAttachment(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE)
-                .addColorTextureAttachment(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE)
-                .addColorTextureAttachment(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
-                .addDepthRenderBuffer(GL30.GL_DEPTH_COMPONENT16)
+                .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888)
+                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
+                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
+                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
+                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
+                .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888)
+                .addDepthRenderBuffer(GL_DEPTH_COMPONENT24)
                 .build();
     }
 }
