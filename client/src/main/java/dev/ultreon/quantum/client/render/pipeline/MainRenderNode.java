@@ -77,7 +77,7 @@ public class MainRenderNode extends RenderNode {
         // Show render pipeline
         if (GamePlatform.get().showRenderPipeline()) {
             this.client.renderer.begin();
-            this.client.renderer.getBatch().setBlendFunctionSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            this.client.renderer.getBatch().enableBlending();
             this.client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(positionTex, (float) (Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
@@ -92,47 +92,46 @@ public class MainRenderNode extends RenderNode {
 
         // Enable blending and set blend function
         this.client.renderer.getBatch().enableBlending();
-        this.client.renderer.getBatch().setBlendFunctionSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         return input;
     }
 
     private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex) {
         this.client.spriteBatch.enableBlending();
-        this.client.spriteBatch.setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         this.drawDiffuse(skyboxTex);
+        this.drawDiffuse(diffuseTex);
 
-        this.client.spriteBatch.flush();
-        this.client.modelBatch.flush();
-        diffuseTex.bind(0);
-        positionTex.bind(1);
-        normalTex.bind(2);
-        depthTex.bind(3);
-        reflectiveTex.bind(4);
-
-        FrameBuffer frameBuffer = this.getFrameBuffer();
-        frameBuffer.begin();
-
-        ShaderProgram program = this.program.get();
-        program.setUniformi("uPosition", 0);
-        program.setUniformi("uNormal", 1);
+//        this.client.spriteBatch.flush();
+//        this.client.modelBatch.flush();
+//        diffuseTex.bind(0);
+//        positionTex.bind(1);
+//        normalTex.bind(2);
+//        depthTex.bind(3);
+//        reflectiveTex.bind(4);
+//
+//        FrameBuffer frameBuffer = this.getFrameBuffer();
+//        frameBuffer.begin();
+//
+//        ShaderProgram program = this.program.get();
+//        program.setUniformi("uPosition", 0);
+//        program.setUniformi("uNormal", 1);
 //        program.setUniformi("uDiffuse", 2);
-        program.setUniformi("uReflective", 3);
-        program.setUniformMatrix("view", client.camera.view);
-        program.setUniformf("maxDistance", ClientConfig.maxReflectDistance);
-        program.setUniformf("thickness", 0.5f);
-        program.setUniformf("resolution", 1.0f);
-        quad.render(program, GL_TRIANGLES);
-
-        frameBuffer.end();
-        Texture colorBufferTexture = frameBuffer.getColorBufferTexture();
-        this.client.spriteBatch.draw(colorBufferTexture, 0, 0);
-        this.client.spriteBatch.flush();
+//        program.setUniformi("uReflective", 3);
+//        program.setUniformMatrix("view", client.camera.view);
+//        program.setUniformf("maxDistance", ClientConfig.maxReflectDistance);
+//        program.setUniformf("thickness", 0.5f);
+//        program.setUniformf("resolution", 1.0f);
+//        quad.render(program, GL_TRIANGLES);
+//
+//        frameBuffer.end();
+//        Texture colorBufferTexture = frameBuffer.getColorBufferTexture();
+//        this.client.spriteBatch.draw(colorBufferTexture, 0, 0);
+//        this.client.spriteBatch.flush();
     }
 
     private void drawDiffuse(Texture diffuseTexture) {
-        this.client.spriteBatch.setShader(this.program.get());
+        this.client.spriteBatch.setShader(null);
         this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 

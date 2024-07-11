@@ -85,7 +85,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean showRenderPipeline() {
-        return ImGuiOverlay.SHOW_RENDER_PIPELINE.get() || (FabricLoader.getInstance().isDevelopmentEnvironment()) && SharedLibraryLoader.isMac;
+        return ImGuiOverlay.SHOW_RENDER_PIPELINE.get();
     }
 
     @Override

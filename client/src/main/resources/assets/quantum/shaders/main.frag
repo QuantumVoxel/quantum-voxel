@@ -102,15 +102,12 @@ void main()
 {
     vec2 texCoord = gl_FragCoord.xy / screenSize;
 
-    vec3 diffuse = texture(uDiffuse, texCoord).rgb;
+    vec4 diffuse = texture(uDiffuse, texCoord).rgba;
     vec2 fragCoord = gl_FragCoord.xy;
-    vec4 fragColor;
-    mainImage(fragColor, fragCoord);
+    vec4 color = diffuse;
 
-    vec3 color = diffuse * fragColor.rgb;
+    if (color.a < 0.1) discard;
 
-    if (color.a < 0.01) discard;
-
-    FragColor = vec4(color, 1.0);
+    FragColor = color;
     return;
 }
