@@ -23,8 +23,8 @@ public class JSModInfo {
      * @param mod the Xeox mod instance
      */
     public JSModInfo(XeoxMod mod) {
-        this.id = mod.getId();
-        this.name = mod.getName();
+        this.id = mod.getName();
+        this.name = mod.getDisplayName();
         this.version = mod.getVersion();
         this.description = mod.getDescription();
         this.authors = mod.getAuthors();

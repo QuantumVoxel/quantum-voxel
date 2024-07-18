@@ -24,7 +24,7 @@ public class JsLang {
     }
 
     public void init() {
-        Path modulesPath = GamePlatform.get().getGameDir().resolve("js-modules").toAbsolutePath();
+        Path modulesPath = GamePlatform.get().getGameDir().resolve("js").toAbsolutePath();
         if (Files.exists(modulesPath)) {
             // Delete recursively
             try {
@@ -42,18 +42,6 @@ public class JsLang {
             } catch (IOException e) {
                 LOGGER.error("Failed to create js-modules", e);
             }
-        }
-
-        InputStream resourceAsStream = JsLang.class.getResourceAsStream("/js-api.jsz");
-        if (resourceAsStream == null) {
-            LOGGER.error("Failed to load js-api.jsz");
-            return;
-        }
-        try (ZipInputStream zip = new ZipInputStream(resourceAsStream)) {
-            extract(zip, modulesPath);
-        } catch (IOException e) {
-            LOGGER.error("Failed to load js-api.jsz", e);
-            return;
         }
 
         context = Context.newBuilder()

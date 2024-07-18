@@ -219,12 +219,12 @@ public class XeoxMod implements Mod {
     }
 
     @Override
-    public @NotNull String getId() {
+    public @NotNull String getName() {
         return metadata.id();
     }
 
     @Override
-    public @NotNull String getName() {
+    public @NotNull String getDisplayName() {
         return metadata.name();
     }
 

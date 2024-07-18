@@ -119,6 +119,7 @@ Thumbs.db
 /lib/
 /client/build/
 /server/build/
+/desktop/run/
 /layout.json
 /.clj-kondo/
 

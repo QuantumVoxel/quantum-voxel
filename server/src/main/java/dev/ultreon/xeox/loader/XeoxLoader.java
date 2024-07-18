@@ -70,7 +70,7 @@ public class XeoxLoader {
     public void constructMods() {
         for (XeoxModFile modFile : this.modFiles) {
             XeoxMod xeoxMod = modFile.constructMod();
-            this.mods.put(xeoxMod.getId(), xeoxMod);
+            this.mods.put(xeoxMod.getName(), xeoxMod);
         }
     }
 

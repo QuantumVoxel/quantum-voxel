@@ -101,6 +101,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.tool.ToolItem;
+import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -909,8 +910,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * Thi also initializes and loads configurations from entry points.
      */
     private void setupMods() {
-        if (GamePlatform.get().isDesktop())
+        if (GamePlatform.get().isDesktop()) {
             PyLoader.getInstance().initMods();
+            JsLoader.getInstance().initMods();
+        }
 
         // Set mod icon overrides.
         ModIconOverrideRegistry.set("quantum", QuantumClient.id("icon.png"));
@@ -2606,11 +2609,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public ConfigScreenFactory getModConfigScreen(Mod caller) {
-        return cfgScreenFactories.get(caller.getId());
+        return cfgScreenFactories.get(caller.getName());
     }
 
     public void setModConfigScreen(Mod caller, ConfigScreenFactory factory) {
-        cfgScreenFactories.put(caller.getId(), factory);
+        cfgScreenFactories.put(caller.getName(), factory);
     }
 
     public CubemapManager getCubemapManager() {

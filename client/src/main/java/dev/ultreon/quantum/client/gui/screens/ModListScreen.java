@@ -5,7 +5,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
-import dev.ultreon.quantum.ModOrigin;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ConfigScreenFactory;
 import dev.ultreon.quantum.client.gui.*;
@@ -63,7 +62,7 @@ public class ModListScreen extends Screen {
                 })
                 .entries(GamePlatform.get().getMods()
                         .stream()
-                        .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
+                        .sorted((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName()))
                         .collect(Collectors.toList())));
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
@@ -113,7 +112,7 @@ public class ModListScreen extends Screen {
         Mod metadata = mod;
         var x = this.list.getX();
 
-        renderer.textLeft(Formatter.format("<bold>" + metadata.getName()), x + 50, y + this.list.getItemHeight() - 34);
+        renderer.textLeft(Formatter.format("<bold>" + metadata.getDisplayName()), x + 50, y + this.list.getItemHeight() - 34);
         renderer.textLeft("Version: " + metadata.getVersion(), x + 50, y + this.list.getItemHeight() - 34 + 12, RgbColor.rgb(0xa0a0a0));
 
         this.drawIcon(renderer, metadata, x + 7, y + 7, 32);
@@ -122,7 +121,7 @@ public class ModListScreen extends Screen {
     private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size) {
         Identifier iconId;
         @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
-        Identifier overrideId = ModIconOverrideRegistry.get(metadata.getId());
+        Identifier overrideId = ModIconOverrideRegistry.get(metadata.getName());
         TextureManager textureManager = this.client.getTextureManager();
         if (overrideId != null) {
             textureManager.registerTexture(overrideId);
@@ -130,14 +129,14 @@ public class ModListScreen extends Screen {
         } else if (iconPath != null) {
             FileHandle iconFileHandle = Gdx.files.internal(iconPath);
             if (!iconFileHandle.exists()) return;
-            if (!ModListScreen.TEXTURES.containsKey(metadata.getId())) {
+            if (!ModListScreen.TEXTURES.containsKey(metadata.getName())) {
                 Texture texture = new Texture(iconFileHandle);
                 texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
                 ModListScreen.TEXTURES.put(iconPath, texture);
             }
-            Texture texture = ModListScreen.TEXTURES.computeIfAbsent(metadata.getId(), s -> new Texture(Gdx.files.classpath(metadata.getIconPath(128).orElse(null))));
-            iconId = QuantumClient.id("generated/mod_icon/" + metadata.getId().replace("-", "_") + ".png");
+            Texture texture = ModListScreen.TEXTURES.computeIfAbsent(metadata.getName(), s -> new Texture(Gdx.files.classpath(metadata.getIconPath(128).orElse(null))));
+            iconId = QuantumClient.id("generated/mod_icon/" + metadata.getName().replace("-", "_") + ".png");
             if (!textureManager.isTextureLoaded(iconId)) textureManager.registerTexture(iconId, texture);
             if (!textureManager.isTextureLoaded(iconId)) iconId = ModListScreen.DEFAULT_MOD_ICON;
         } else {
@@ -170,8 +169,8 @@ public class ModListScreen extends Screen {
         if (selected != null) {
             this.drawIcon(renderer, selected, x, y, 64);
 
-            renderer.textLeft(TextObject.literal(selected.getName()).setBold(true), 2, xIcon, y);
-            renderer.textLeft("<aqua>ID: <light-gray>" + selected.getId(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft(TextObject.literal(selected.getDisplayName()).setBold(true), 2, xIcon, y);
+            renderer.textLeft("<aqua>ID: <light-gray>" + selected.getName(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
             renderer.textLeft("<aqua>Version: <light-gray>" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
             renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor)).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 

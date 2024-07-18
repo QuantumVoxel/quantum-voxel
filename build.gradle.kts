@@ -50,8 +50,11 @@ apply(plugin = "gameutils")
 
 
 //val gameVersion = "0.1.0"
-val gameVersion = "0.1.0+snapshot." + DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm").format(LocalDateTime.now())
+val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
+
+println("Current version: $gameVersion")
+if (ghBuildNumber != null) println("Build number: $ghBuildNumber")
 
 //********************************//
 // Setting up the main properties //
@@ -143,23 +146,24 @@ allprojects {
     }
 
     repositories {
+        // Ultreon Maven Repository
+        maven("https://gitlab.com/api/v4/groups/9962021/-/packages/maven")
+        
         mavenLocal()
         mavenCentral()
         google()
-        maven("https://repo1.maven.org/maven2/")
         maven("https://maven.fabricmc.net/")
-        maven("https://maven.quiltmc.org/repository/release/")
         maven("https://oss.sonatype.org/content/repositories/releases")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://jitpack.io")
 
-        maven("https://raw.githubusercontent.com/Ultreon/corelibs/main/.mvnrepo/")
         maven("https://raw.githubusercontent.com/Ultreon/ultreon-data/main/.mvnrepo/")
 
         flatDir {
             name = "Project Libraries"
             dirs = setOf(file("${projectDir}/libs"))
         }
+
         flatDir {
             name = "Project Libraries"
             dirs = setOf(file("${rootProject.projectDir}/libs"))
@@ -331,6 +335,20 @@ publishProjects.forEach {
 
                             roles.set(listOf("Tester", "Modeler"))
                         }
+                    }
+                }
+            }
+
+            repositories {
+                maven {
+                    url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
+                    credentials(HttpHeaderCredentials::class) {
+                        name = "Private-Token"
+                        value =
+                            findProperty("gitLabPrivateToken") as String? // the variable resides in $GRADLE_USER_HOME/gradle.properties
+                    }
+                    authentication {
+                        create("header", HttpHeaderAuthentication::class)
                     }
                 }
             }

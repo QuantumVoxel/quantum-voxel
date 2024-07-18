@@ -1,9 +1,16 @@
 package dev.ultreon.quantum.python;
 
+import dev.ultreon.quantum.Mod;
+import dev.ultreon.quantum.ModOrigin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
-public final class PyMod {
+public final class PyMod implements Mod {
     public final String id;
     String name = null;
     String description = "";
@@ -68,5 +75,40 @@ public final class PyMod {
 
     public void setPath(Path path) {
         this.path = path;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return name;
+    }
+
+    @Override
+    public @NotNull String getDisplayName() {
+        return name;
+    }
+
+    @Override
+    public @NotNull String getVersion() {
+        return version;
+    }
+
+    @Override
+    public @Nullable String getDescription() {
+        return description;
+    }
+
+    @Override
+    public @NotNull Collection<String> getAuthors() {
+        return List.of(author);
+    }
+
+    @Override
+    public @NotNull ModOrigin getOrigin() {
+        return ModOrigin.ACTUAL_PATH;
+    }
+
+    @Override
+    public @Nullable Iterable<Path> getRootPaths() {
+        return List.of(path);
     }
 }

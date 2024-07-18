@@ -117,6 +117,8 @@ dependencies {
     implementation(api("org.graalvm.polyglot:js:23.1.2"))
     implementation(api("org.graalvm.llvm:llvm-api:23.1.2"))
 
+    implementation(api("org.apache.commons:commons-compress:1.26.1"))
+
     api 'org.mozilla:rhino:1.7.15!!'
     api 'org.mozilla:rhino-engine:1.7.15!!'
 }

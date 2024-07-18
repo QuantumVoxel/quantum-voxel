@@ -242,7 +242,7 @@ public class TabCompleting {
     public static List<String> mods(List<String> list, String currentArgument) {
         GamePlatform manager = GamePlatform.get();
         for (Mod plugin : manager.getMods()) {
-            TabCompleting.addIfStartsWith(list, plugin.getId(), currentArgument);
+            TabCompleting.addIfStartsWith(list, plugin.getName(), currentArgument);
         }
         return list;
     }

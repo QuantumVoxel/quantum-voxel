@@ -38,12 +38,12 @@ public class FabricMod implements Mod {
     }
 
     @Override
-    public @NotNull String getId() {
+    public @NotNull String getName() {
         return id;
     }
 
     @Override
-    public @NotNull String getName() {
+    public @NotNull String getDisplayName() {
         return name;
     }
 

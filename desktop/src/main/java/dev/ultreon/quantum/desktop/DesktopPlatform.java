@@ -10,7 +10,9 @@ import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.desktop.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
+import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.python.PyLoader;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.loader.XeoxLoader;
@@ -102,6 +104,8 @@ public abstract class DesktopPlatform extends GamePlatform {
     public Collection<? extends Mod> getMods() {
         var list = new ArrayList<Mod>();
         list.addAll(FabricLoader.getInstance().getAllMods().stream().map(container -> this.mods.computeIfAbsent(container.getMetadata().getId(), v -> new FabricMod(container))).toList());
+        list.addAll(JsLoader.getInstance().getMods());
+        list.addAll(PyLoader.getInstance().getMods());
         list.addAll(super.getMods());
         return list;
     }

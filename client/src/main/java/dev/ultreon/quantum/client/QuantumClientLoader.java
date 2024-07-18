@@ -24,7 +24,6 @@ import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.TouchscreenInput;
 import dev.ultreon.quantum.client.item.ItemRenderer;
-import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.particle.ClientParticleRegistry;
 import dev.ultreon.quantum.client.particle.ParticleControllerRenderers;
@@ -38,6 +37,7 @@ import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.menu.MenuTypes;
 import dev.ultreon.quantum.python.PyLoader;
 import dev.ultreon.quantum.registry.Registries;
@@ -169,7 +169,7 @@ class QuantumClientLoader implements Runnable {
         });
 
         for (var mod : GamePlatform.get().getMods()) {
-            final String id = mod.getId();
+            final String id = mod.getName();
             LoadingContext.withinContext(new LoadingContext(id), () -> {
                 for (Registry<?> registry : Registry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
@@ -181,6 +181,14 @@ class QuantumClientLoader implements Runnable {
             LoadingContext.withinContext(new LoadingContext(pyMod.id), () -> {
                 for (Registry<?> registry : Registry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(pyMod.id, registry);
+                }
+            });
+        }
+
+        for (var jsMod : JsLoader.getInstance().getMods()) {
+            LoadingContext.withinContext(new LoadingContext(jsMod.name), () -> {
+                for (Registry<?> registry : Registry.getRegistries()) {
+                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(jsMod.name, registry);
                 }
             });
         }
