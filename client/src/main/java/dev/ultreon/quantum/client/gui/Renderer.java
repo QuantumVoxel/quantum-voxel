@@ -2857,126 +2857,110 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(float overlayOpacity, float radius, boolean grid, int guiScale, Runnable block) {
-        if (this.blurred) {
+//        if (this.blurred) {
             block.run();
-            return;
-        }
-
-        this.blurred = true;
-        try {
-            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-            TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
-
-            //Start rendering to an offscreen color buffer
-            blurTargetA.begin();
-
-            //before rendering, ensure we are using the default shader
-            batch.setShader(null);
-
-            batch.flush();
-
-            //render the batch contents to the offscreen buffer
-            this.flush();
-
-            block.run();
-
-            //finish rendering to the offscreen buffer
-            batch.flush();
-
-            //finish rendering to the offscreen buffer
-            blurTargetA.end();
-
-            //now let's start blurring the offscreen image
-            batch.setShader(blurShader);
-
-            //since we never called batch.end(), we should still be drawing
-            //which means are blurShader should now be in use
-
-            // set the shader uniforms
-            blurShader.setUniformf("iBlurDirection", 1f, 0f);
-            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            blurShader.setUniformf("iBlurRadius", radius / guiScale);
-            blurShader.setUniformf("iTime", iTime);
-
-            //our first blur pass goes to target B
-            blurTargetB.begin();
-
-            //we want to render FBO target A into target B
-            fboRegion.setTexture(blurTargetA.getColorBufferTexture());
-
-            //draw the scene to target B with a horizontal blur effect
-            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0);
-
-            //flush the batch before ending the FBO
-            batch.flush();
-
-            //finish rendering target B
-            blurTargetB.end();
-
-            //now we can render to the screen using the vertical blur shader
-
-            //update the blur only along Y-axis
-            blurShader.setUniformf("iBlurDirection", 0f, 1f);
-
-            //update the resolution of the blur along Y-axis
-            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-            //update the Y-axis blur radius
-            blurShader.setUniformf("radius", radius);
-
-            //draw target B to the screen with a vertical blur effect
-            fboRegion.setTexture(blurTargetB.getColorBufferTexture());
-            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0);
-
-            //reset to default shader without blurs
-            batch.setShader(null);
-
-            this.flush();
-
-            this.batch.setColor(1, 1, 1, 1);
-            if (grid) {
-                //getConfig the texture for the hexagon grid
-                Texture colorBufferTexture = this.grid.getColorBufferTexture();
-
-                //render the grid to the screen
-                blurred(32, false, 1, () -> {
-                    this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-                    this.batch.draw(colorBufferTexture, 0, 0, (float) Gdx.graphics.getWidth() / guiScale, (float) Gdx.graphics.getHeight() / guiScale);
-                });
-            }
-
-            //dispose of the FBOs
-            blurTargetA.dispose();
-            blurTargetB.dispose();
-            this.batch.setColor(1f, 1f, 1f, 1f);
-        } finally {
-            this.batch.setColor(1, 1, 1, 1);
-            this.blurred = false;
-        }
-    }
-
-    public void blurred(Texture texture) {
-        if (this.blurred) {
-            return;
-        }
-
-        vfxManager.useAsInput(texture);
-        vfxManager.applyEffects();
-        vfxManager.renderToScreen(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-        this.flush();
+//            return;
+//        }
+//
+//        this.blurred = true;
+//        try {
+//            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+//            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+//            TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
+//
+//            //Start rendering to an offscreen color buffer
+//            blurTargetA.begin();
+//
+//            //before rendering, ensure we are using the default shader
+//            batch.setShader(null);
+//
+//            batch.flush();
+//
+//            //render the batch contents to the offscreen buffer
+//            this.flush();
+//
+//            block.run();
+//
+//            //finish rendering to the offscreen buffer
+//            batch.flush();
+//
+//            //finish rendering to the offscreen buffer
+//            blurTargetA.end();
+//
+//            //now let's start blurring the offscreen image
+//            batch.setShader(blurShader);
+//
+//            //since we never called batch.end(), we should still be drawing
+//            //which means are blurShader should now be in use
+//
+//            // set the shader uniforms
+//            blurShader.setUniformf("iBlurDirection", 1f, 0f);
+//            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//            blurShader.setUniformf("iBlurRadius", radius / guiScale);
+//            blurShader.setUniformf("iTime", iTime);
+//
+//            //our first blur pass goes to target B
+//            blurTargetB.begin();
+//
+//            //we want to render FBO target A into target B
+//            fboRegion.setTexture(blurTargetA.getColorBufferTexture());
+//
+//            //draw the scene to target B with a horizontal blur effect
+//            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+//            batch.draw(fboRegion, 0, 0);
+//
+//            //flush the batch before ending the FBO
+//            batch.flush();
+//
+//            //finish rendering target B
+//            blurTargetB.end();
+//
+//            //now we can render to the screen using the vertical blur shader
+//
+//            //update the blur only along Y-axis
+//            blurShader.setUniformf("iBlurDirection", 0f, 1f);
+//
+//            //update the resolution of the blur along Y-axis
+//            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//
+//            //update the Y-axis blur radius
+//            blurShader.setUniformf("radius", radius);
+//
+//            //draw target B to the screen with a vertical blur effect
+//            fboRegion.setTexture(blurTargetB.getColorBufferTexture());
+//            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+//            batch.draw(fboRegion, 0, 0);
+//
+//            //reset to default shader without blurs
+//            batch.setShader(null);
+//
+//            this.flush();
+//
+//            this.batch.setColor(1, 1, 1, 1);
+//            if (grid) {
+//                //getConfig the texture for the hexagon grid
+//                Texture colorBufferTexture = this.grid.getColorBufferTexture();
+//
+//                //render the grid to the screen
+//                blurred(32, false, 1, () -> {
+//                    this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+//                    this.batch.draw(colorBufferTexture, 0, 0, (float) Gdx.graphics.getWidth() / guiScale, (float) Gdx.graphics.getHeight() / guiScale);
+//                });
+//            }
+//
+//            //dispose of the FBOs
+//            blurTargetA.dispose();
+//            blurTargetB.dispose();
+//            this.batch.setColor(1f, 1f, 1f, 1f);
+//        } finally {
+//            this.batch.setColor(1, 1, 1, 1);
+//            this.blurred = false;
+//        }
     }
 
     public void resize(int width, int height) {
         this.width = width;
         this.height = height;
-
-        // VfxManager manages internal off-screen buffers,
-        // which should always match the required viewport (whole screen in our case).
-        vfxManager.resize(width, height);
 
         this.resizeGrid(width, height);
     }

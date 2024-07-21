@@ -72,7 +72,6 @@ extensions.configure<GameUtilsExt> {
     coreProject = project(":client")
     desktopProject = project(":desktop")
     packageProject = project(":desktop-merge")
-//    androidProject = project(":android")
 
     mainClass = "dev.ultreon.quantum.premain.PreMain"
     javaVersion = 21
@@ -156,8 +155,6 @@ allprojects {
         maven("https://oss.sonatype.org/content/repositories/releases")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://jitpack.io")
-
-        maven("https://raw.githubusercontent.com/Ultreon/ultreon-data/main/.mvnrepo/")
 
         flatDir {
             name = "Project Libraries"

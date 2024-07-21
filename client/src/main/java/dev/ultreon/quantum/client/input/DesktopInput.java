@@ -144,10 +144,12 @@ public class DesktopInput extends GameInput {
 
         // Handle key press for player
         Player player = this.client.player;
+
+        if (DesktopInput.IM_GUI_KEY.is(keyCode)) {
+            this.handleImGuiKey();
+        }
         if (player != null) {
-            if (DesktopInput.IM_GUI_KEY.is(keyCode)) {
-                this.handleImGuiKey();
-            } else if (DesktopInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
+            if (DesktopInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
                 this.handleImGuiFocus();
             } else if (DesktopInput.INVENTORY_KEY.is(keyCode) && currentScreen == null && player != null) {
                 player.openInventory();
@@ -305,10 +307,10 @@ public class DesktopInput extends GameInput {
         if (!ClientConfig.enableDebugUtils) return;
 
         // Toggle ImGui visibility and cursor caught status
-        if (this.client.isShowingImGui() && this.client.world != null)
+        if (GamePlatform.get().isShowingImGui() && this.client.world != null)
             DesktopInput.setCursorCaught(true);
 
-        this.client.setShowingImGui(!this.client.isShowingImGui());
+        GamePlatform.get().setShowingImGui((!GamePlatform.get().isShowingImGui()));
     }
 
     /**
@@ -352,7 +354,7 @@ public class DesktopInput extends GameInput {
      * then toggles the cursor catch status.
      */
     private void handleImGuiFocus() {
-        if (this.client.isShowingImGui() && this.client.world != null && this.client.screen == null) {
+        if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null) {
             DesktopInput.setCursorCaught(!Gdx.input.isCursorCatched());
         }
     }
@@ -470,7 +472,7 @@ public class DesktopInput extends GameInput {
             return false;
 
         // Check if the cursor is not caught and ImGui is not showing
-        if (!Gdx.input.isCursorCatched() && !QuantumClient.get().isShowingImGui()) {
+        if (!Gdx.input.isCursorCatched() && !GamePlatform.get().isShowingImGui()) {
             return true;
         }
 

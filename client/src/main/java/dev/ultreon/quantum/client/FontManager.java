@@ -14,15 +14,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class FontManager implements Disposable {
-    private static final FontManager INSTANCE = new FontManager();
     private final Map<Identifier, Font> fonts = new HashMap<>();
 
-    private FontManager() {
+    FontManager() {
         // No-op
-    }
-
-    public static FontManager get() {
-        return INSTANCE;
     }
 
     public Font getFont(Identifier id) {

@@ -5,6 +5,7 @@ layout(triangle_strip, max_vertices=3) out;
 
 uniform mat4 u_projViewWorldTrans;
 uniform mat3 u_normalMatrix;
+uniform float u_lodThreshold;
 
 in VS_OUT {
     vec3 normal;

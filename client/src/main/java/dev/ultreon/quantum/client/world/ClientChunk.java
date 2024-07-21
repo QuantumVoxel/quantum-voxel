@@ -28,12 +28,18 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static dev.ultreon.quantum.world.World.WORLD_HEIGHT;
+import static dev.ultreon.quantum.world.World.*;
 
 public final class ClientChunk extends Chunk {
     public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
+
+    private static final int[] dx = {-1, 0, 1, 0, 0, 0};
+    private static final int[] dy = {0, -1, 0, 1, 0, 0};
+    private static final int[] dz = {0, 0, 0, 0, -1, 1};
+
     final GreedyMesher mesher;
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
@@ -53,7 +59,7 @@ public final class ClientChunk extends Chunk {
     private final Array<BlockPos> removedModels = new Array<>();
     public boolean visible;
     private ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
-
+    private Stack<Integer> stack = new Stack<>();
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
@@ -75,6 +81,10 @@ public final class ClientChunk extends Chunk {
         });
 
         this.mesher = new GreedyMesher(this, true);
+    }
+
+    private int index(int x, int y, int z) {
+        return (z * CHUNK_HEIGHT + y) * CHUNK_SIZE + x;
     }
 
     public float getLightLevel(int x, int y, int z) throws PosOutOfBoundsException {
@@ -313,6 +323,36 @@ public final class ClientChunk extends Chunk {
 
     public void setSunlight(BlockPos pos, int intensity) {
         lightMap.setSunlight(pos.x(), pos.y(), pos.z(), intensity);
+    }
+
+    public void floodFill(int startX, int startY, int startZ, byte newValue) {
+        byte oldValue = lightMap.getBlockLight(index(startX, startY, startZ));
+        if (oldValue == newValue) return;
+
+        stack.clear();
+        stack.push(index(startX, startY, startZ));
+
+        while (!stack.isEmpty()) {
+            int idx = stack.pop();
+            if (lightMap.getBlockLight(idx) != oldValue) continue;
+
+            lightMap.setBlockLight(idx, newValue);
+            int x = idx % CHUNK_SIZE;
+            int y = (idx / CHUNK_SIZE) % CHUNK_HEIGHT;
+            int z = idx / (CHUNK_SIZE * CHUNK_HEIGHT);
+            for (int i = 0; i < 6; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+                int nz = z + dz[i];
+                if (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_HEIGHT && nz >= 0 && nz < CHUNK_SIZE) {
+                    int lightReduction = get(nx, ny, nz).getLightReduction();
+                    if (lightReduction == 0) continue;
+                    if (lightMap.getSunlight(nx, ny, nz) > lightReduction) continue;
+                    if (lightMap.getBlockLight(index(nx, ny, nz)) != oldValue) continue;
+                    stack.push(index(nx, ny, nz));
+                }
+            }
+        }
     }
 
     public int getSunlight(BlockPos pos) {

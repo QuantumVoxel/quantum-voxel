@@ -31,6 +31,18 @@ public abstract class GamePlatform {
         // Implemented in subclasses
     }
 
+    public void setTextCursorPos(int x, int y) {
+        // Implemented in subclasses
+    }
+
+    public void onEnterTextInput() {
+        // Implemented in subclasses
+    }
+
+    public void onExitTextInput() {
+        // Implemented in subclasses
+    }
+
     public void setupImGui() {
         // Implemented in subclasses
     }

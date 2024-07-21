@@ -3,6 +3,9 @@ package dev.ultreon.quantum.client.model.block;
 import com.badlogic.gdx.graphics.Texture;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
+import dev.ultreon.quantum.crash.ApplicationCrash;
+import dev.ultreon.quantum.crash.CrashCategory;
+import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Suppliers;
@@ -31,6 +34,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private final Set<Identifier> TEXTURES = new HashSet<>();
     private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> finishedRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private Block loadingBlock = null;
 
     public BlockModelRegistry() {
         this.TEXTURES.add(new Identifier("misc/breaking1"));
@@ -139,6 +143,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
     public void load(Json5ModelLoader loader) {
         for (Block value : Registries.BLOCK.values()) {
+            this.loadingBlock = value;
             if (!registry.containsKey(value)) {
                 try {
                     Json5Model load = loader.load(value);
@@ -153,15 +158,19 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                     QuantumClient.LOGGER.error("Failed to load block model for " + value.getId(), e);
                 }
             }
+
+            this.loadingBlock = null;
         }
 
         for (var entry : customRegistry.entrySet()) {
+            this.loadingBlock = entry.getKey();
             List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>> models = new ArrayList<>();
             for (var pair : entry.getValue()) {
                 BlockModel model = pair.getSecond().get();
                 models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
             }
             finishedRegistry.put(entry.getKey(), models);
+            this.loadingBlock = null;
         }
     }
 
@@ -169,11 +178,25 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     public void reload(ResourceManager resourceManager, ReloadContext context) {
         QuantumClient client = QuantumClient.get();
         context.submit(() -> {
-            this.load(client.j5ModelLoader);
+            try {
+                this.load(client.j5ModelLoader);
 
-            QuantumClient.LOGGER.info("Baking models");
-            this.bakeJsonModels(client);
-            client.bakedBlockModels = this.bake(client.blocksTextureAtlas);
+                QuantumClient.LOGGER.info("Baking models");
+                this.bakeJsonModels(client);
+                client.bakedBlockModels = this.bake(client.blocksTextureAtlas);
+                if (client.bakedBlockModels == null) {
+                    throw new RuntimeException("Failed to bake block models");
+                }
+            } catch (Exception e) {
+                CrashLog crashLog = new CrashLog("Failed to load block models", e);
+                CrashCategory model = new CrashCategory("Model");
+                model.add("Block", this.loadingBlock.getId());
+                model.add("Location", this.loadingBlock.getId().mapPath(path -> "models/blocks/" + path + ".json5"));
+                crashLog.addCategory(model);
+                QuantumClient.crash(crashLog);
+            } catch (ApplicationCrash e) {
+                QuantumClient.crash(e.getCrashLog());
+            }
         });
     }
 }

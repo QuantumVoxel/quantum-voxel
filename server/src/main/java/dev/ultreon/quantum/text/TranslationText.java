@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
@@ -47,7 +48,7 @@ public class TranslationText extends MutableText {
             this.translated = translated;
             this.initFormat();
         }
-        return "";
+        return this.translated;
     }
 
     private void initFormat() {
@@ -57,7 +58,9 @@ public class TranslationText extends MutableText {
     }
 
     private String getTranslated() {
-        return LanguageBootstrap.translate(this.path, this.args);
+        String translate = LanguageBootstrap.translate(this.path, this.args);
+        if (translate == null) translate = this.path;
+        return translate;
     }
 
     @Override
@@ -102,6 +105,21 @@ public class TranslationText extends MutableText {
     @Override
     public TranslationText style(Consumer<TextStyle> consumer) {
         return (TranslationText) super.style(consumer);
+    }
+
+    @Override
+    protected Stream<TextObject> stream() {
+        var builder = new ArrayList<TextObject>();
+        builder.add(this);
+        boolean e = false;
+        for (var extra : this.extras) {
+            if (!e) {
+                e = true;
+                continue;
+            }
+            builder.addAll(extra.stream().toList());
+        }
+        return builder.stream();
     }
 
     @Override

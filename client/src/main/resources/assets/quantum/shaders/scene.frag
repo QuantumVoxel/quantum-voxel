@@ -31,6 +31,7 @@ in vec3 v_position;
 uniform float u_globalSunlight;
 uniform vec2 u_atlasSize;
 uniform vec2 u_atlasOffset;
+uniform float lodThreshold;
 
 struct SHC{
     vec3 L00, L1m1, L10, L11, L2m2, L2m1, L20, L21, L22;
@@ -133,24 +134,30 @@ void main() {
 
     vec3 normal = v_normal;
 
-//    float sunLight = v_color.a;
-//    vec4 blockLight = vec4(v_color.rgb, 1.0);
+    float depth = gl_FragCoord.z / gl_FragCoord.w;
+
+    float sunLight = v_color.a;
+    vec4 blockLight = vec4(v_color.rgb, 1.0);
 
     vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
-    #ifdef blendedFlag
-        diffuseOut.a = diffuse.a;
-    #endif
-    if (diffuse.a <= 0.01) discard;
-    diffuseOut.a = 1.0;
+//    if (depth > lodThreshold) diffuseOut.a = 1.0;
+//    else {
+//        #ifdef blendedFlag
+//            diffuseOut.a = diffuse.a;
+//        #else
+            if (diffuse.a <= 0.01) discard;
+            diffuseOut.a = 1.0;
+//        #endif
+//    }
 
     vec3 light = vec3(u_globalSunlight);
-//    light *= sunLight * 2 - 0.4;
-//    light += (blockLight.rgb - (light * blockLight.rgb));
+    light *= sunLight * 2 - 0.4;
+    light += (blockLight.rgb - (light * blockLight.rgb));
 
-    vec3 emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
+    vec3 emissive;
+    if (depth > lodThreshold) emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
+    else emissive = vec3(0.0);
     diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
-
-    float depth = gl_FragCoord.z / gl_FragCoord.w;
 
     vec3 depthIn3Channels;
     depthIn3Channels.r = mod(depth, 1.0);

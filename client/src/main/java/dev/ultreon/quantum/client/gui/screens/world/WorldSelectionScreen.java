@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.gui.screens.world;
 
 import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.*;
 import dev.ultreon.quantum.client.gui.widget.*;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WorldSelectionScreen extends Screen {
-    public static final Path WORLDS_DIR = Gdx.files.external("worlds").file().toPath();
+    public static final Path WORLDS_DIR = QuantumClient.data("worlds").file().toPath();
     private static final int ENTRY_WIDTH = 200;
     private WorldCardList worldList;
     private WorldStorage selected;

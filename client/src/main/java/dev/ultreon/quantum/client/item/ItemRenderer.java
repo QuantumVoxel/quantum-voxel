@@ -99,14 +99,17 @@ public class ItemRenderer implements Disposable {
         if (instance != null) {
             renderer.external(() -> {
                 float guiScale = this.client.getGuiScale();
-                this.itemCam.zoom = 4.0f / guiScale;
+                this.itemCam.zoom = guiScale / 2.0f;
                 this.itemCam.far = 100000;
                 this.itemCam.update();
                 this.batch.begin(this.itemCam);
+                this.scale.set(40, 40, 40).scl(guiScale / 8f);
                 Vector3 scl = this.scale.cpy().scl(itemModel.getScale());
-                instance.transform.idt().translate(this.position.cpy().add((x - (int) (this.client.getScaledWidth() / 2.0F)) * guiScale, (y - (int) (this.client.getScaledHeight() / 2.0F)) * guiScale, 100)).translate(itemModel.getOffset().scl(1 / scl.x, 1 / scl.y, 1 / scl.z)).scale(scl.x, scl.y, scl.z);
+                instance.transform.idt().translate(this.position.cpy().add((x / 2f - (int) (this.client.getScaledWidth() / 4.0F)) * guiScale, (y / 2f - (int) (this.client.getScaledHeight() / 4.0F)) * guiScale, 100)).translate(itemModel.getOffset().add(2, 20, 0).scl(-1 / scl.x, 1 / scl.y, 1 / scl.z).scl(0.4f)).scale(-scl.x, -scl.y, scl.z);
                 instance.transform.rotate(Vector3.X, this.rotation.x);
                 instance.transform.rotate(Vector3.Y, this.rotation.y);
+                instance.transform.rotate(Vector3.Y, 180);
+                instance.transform.rotate(Vector3.Z, 180);
                 this.batch.render(instance, environment);
                 this.batch.end();
             });

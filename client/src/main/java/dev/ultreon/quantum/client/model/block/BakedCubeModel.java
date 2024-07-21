@@ -8,17 +8,24 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
+import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.BakedModel;
+import dev.ultreon.quantum.client.model.blockbench.BBModelFace;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.LazyValue;
+import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.world.CubicDirection;
 
 import java.util.Objects;
 
 public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final LazyValue<BakedCubeModel> DEFAULT = new LazyValue<>();
+    private static final Vector3 from = new Vector3(-8f, 8f, -8f);
+    private static final Vector3 to = new Vector3(8f, 24f, 8f);
     private final TextureRegion top;
     private final TextureRegion bottom;
     private final TextureRegion left;
@@ -101,7 +108,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
             material.set(new TextureAttribute(TextureAttribute.Diffuse, QuantumClient.get().blocksTextureAtlas.getTexture()));
             material.set(new TextureAttribute(TextureAttribute.Emissive, QuantumClient.get().blocksTextureAtlas.getEmissiveTexture()));
 
-            modelBuilder.part("cube", createMesh(top, bottom, left, right, front, back), GL20.GL_TRIANGLES, material);
+            modelBuilder.part("cube", createMesh(resourceId, top, bottom, left, right, front, back), GL20.GL_TRIANGLES, material);
         });
     }
 
@@ -129,17 +136,86 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         return this.back;
     }
 
-    private static Mesh createMesh(TextureRegion top, TextureRegion bottom, TextureRegion west, TextureRegion east, TextureRegion north, TextureRegion south) {
+    private static Mesh createMesh(Identifier resourceId, TextureRegion top, TextureRegion bottom, TextureRegion west, TextureRegion east, TextureRegion north, TextureRegion south) {
         MeshBuilder builder = new MeshBuilder();
         builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
         builder.setColor(Color.WHITE);
 
-        createTop(top, builder);
-        createBottom(bottom, builder);
-        createLeft(west, builder);
-        createRight(east, builder);
-        createFront(north, builder);
-        createBack(south, builder);
+        MeshPartBuilder.VertexInfo v00 = new MeshPartBuilder.VertexInfo();
+        MeshPartBuilder.VertexInfo v01 = new MeshPartBuilder.VertexInfo();
+        MeshPartBuilder.VertexInfo v10 = new MeshPartBuilder.VertexInfo();
+        MeshPartBuilder.VertexInfo v11 = new MeshPartBuilder.VertexInfo();
+
+        int faces = 0;
+
+        for (CubicDirection blockFace : CubicDirection.values()) {
+            TextureRegion entry = switch (blockFace) {
+                case UP -> top;
+                case DOWN -> bottom;
+                case WEST -> west;
+                case EAST -> east;
+                case NORTH -> north;
+                case SOUTH -> south;
+            };
+
+            if (entry == null) continue;
+
+            faces++;
+            
+            v00.setCol(RgbColor.WHITE.toGdx());
+            v01.setCol(RgbColor.WHITE.toGdx());
+            v10.setCol(RgbColor.WHITE.toGdx());
+            v11.setCol(RgbColor.WHITE.toGdx());
+
+            v00.setUV(entry.getU(), entry.getV2());
+            v01.setUV(entry.getU(), entry.getV());
+            v10.setUV(entry.getU2(), entry.getV2());
+            v11.setUV(entry.getU2(), entry.getV());
+
+            switch (blockFace) {
+                case UP:
+                    v00.setPos(to.x, to.y, from.z);
+                    v01.setPos(to.x, to.y, to.z);
+                    v10.setPos(from.x, to.y, from.z);
+                    v11.setPos(from.x, to.y, to.z);
+                    break;
+                case DOWN:
+                    v00.setPos(from.x, from.y, from.z);
+                    v01.setPos(from.x, from.y, to.z);
+                    v10.setPos(to.x, from.y, from.z);
+                    v11.setPos(to.x, from.y, to.z);
+                    break;
+                case WEST:
+                    v00.setPos(from.x, from.y, from.z);
+                    v01.setPos(from.x, to.y, from.z);
+                    v10.setPos(from.x, from.y, to.z);
+                    v11.setPos(from.x, to.y, to.z);
+                    break;
+                case EAST:
+                    v00.setPos(to.x, from.y, to.z);
+                    v01.setPos(to.x, to.y, to.z);
+                    v10.setPos(to.x, from.y, from.z);
+                    v11.setPos(to.x, to.y, from.z);
+                    break;
+                case NORTH:
+                    v00.setPos(to.x, from.y, from.z);
+                    v01.setPos(to.x, to.y, from.z);
+                    v10.setPos(from.x, from.y, from.z);
+                    v11.setPos(from.x, to.y, from.z);
+                    break;
+                case SOUTH:
+                    v00.setPos(from.x, from.y, to.z);
+                    v01.setPos(from.x, to.y, to.z);
+                    v10.setPos(to.x, from.y, to.z);
+                    v11.setPos(to.x, to.y, to.z);
+                    break;
+            }
+
+            builder.rect(v00, v10, v11, v01);
+        }
+
+        if (faces == 0)
+            CommonConstants.LOGGER.warn("Model {} has no faces", resourceId);
 
         return builder.end();
     }

@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client;
+package dev.ultreon.quantum;
 
 import com.badlogic.gdx.utils.Disposable;
 

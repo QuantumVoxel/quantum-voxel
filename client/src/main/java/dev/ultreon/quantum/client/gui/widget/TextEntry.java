@@ -399,7 +399,24 @@ public class TextEntry extends Widget {
 
         this.cursorX = this.font.width(this.value.substring(0, this.cursorIdx)) + 3;
 
+        GamePlatform.get().setTextCursorPos((int) this.cursorX, getY());
+
         this.callback.call(this);
+    }
+
+    @Override
+    public void onFocusGained() {
+        super.onFocusGained();
+
+        GamePlatform.get().onEnterTextInput();
+        this.revalidateCursor();
+    }
+
+    @Override
+    public void onFocusLost() {
+        super.onFocusLost();
+
+        GamePlatform.get().onExitTextInput();
     }
 
     @Override

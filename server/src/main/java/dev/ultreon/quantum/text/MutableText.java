@@ -157,7 +157,7 @@ public abstract class MutableText extends TextObject {
         var builder = new ArrayList<TextObject>();
         builder.add(this);
         for (var extra : this.extras) {
-            builder.addAll(extra.stream().collect(Collectors.toList()));
+            builder.addAll(extra.stream().toList());
         }
         return builder.stream();
     }

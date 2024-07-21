@@ -30,77 +30,81 @@ public class PyLoader implements LangLoader {
     @SuppressWarnings({"PyUnresolvedReferences", "PyInterpreter", "PyClassHasNoInit", "PyPep8Naming"})
     @Language("python")
     private static final String INTEROP_CALL = """
-            from polyglot import interop_behavior
+            # from polyglot import interop_behavior
+            # \s
+            # # Interop behaviors for string
+            # @interop_behavior(str)
+            # class StringInteropBehavior:
+            #     @staticmethod
+            #     def isString(_):
+            #         return True
+            # \s
+            # # Interop behaviors for all integer subtypes
+            # @interop_behavior(int)
+            # class IntInteropBehavior:
+            #     @staticmethod
+            #     def isNumber(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def fitsInByte(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def asByte(v):
+            #         return int(v) & 0xFF  # Ensure it fits in a byte
+            # \s
+            #     @staticmethod
+            #     def fitsInShort(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def asShort(v):
+            #         return int(v) & 0xFFFF  # Ensure it fits in a short
+            # \s
+            #     @staticmethod
+            #     def fitsInInt(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def asInt(v):
+            #         return int(v)
+            # \s
+            #     @staticmethod
+            #     def fitsInLong(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def asLong(v):
+            #         return int(v)
+            # \s
+            # # Interop behaviors for all float subtypes
+            # @interop_behavior(float)
+            # class FloatInteropBehavior:
+            #     @staticmethod
+            #     def isNumber(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def fitsInFloat(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def asFloat(v):
+            #         return float(v)
+            # \s
+            #     @staticmethod
+            #     def fitsInDouble(_):
+            #         return True
+            # \s
+            #     @staticmethod
+            #     def asDouble(v):
+            #         return float(v)
+            # \s
+            # \s
             
-            # Interop behaviors for string
-            @interop_behavior(str)
-            class StringInteropBehavior:
-                @staticmethod
-                def isString(_):
-                    return True
-            
-            # Interop behaviors for all integer subtypes
-            @interop_behavior(int)
-            class IntInteropBehavior:
-                @staticmethod
-                def isNumber(_):
-                    return True
-            
-                @staticmethod
-                def fitsInByte(_):
-                    return True
-            
-                @staticmethod
-                def asByte(v):
-                    return int(v) & 0xFF  # Ensure it fits in a byte
-            
-                @staticmethod
-                def fitsInShort(_):
-                    return True
-            
-                @staticmethod
-                def asShort(v):
-                    return int(v) & 0xFFFF  # Ensure it fits in a short
-            
-                @staticmethod
-                def fitsInInt(_):
-                    return True
-            
-                @staticmethod
-                def asInt(v):
-                    return int(v)
-            
-                @staticmethod
-                def fitsInLong(_):
-                    return True
-            
-                @staticmethod
-                def asLong(v):
-                    return int(v)
-            
-            # Interop behaviors for all float subtypes
-            @interop_behavior(float)
-            class FloatInteropBehavior:
-                @staticmethod
-                def isNumber(_):
-                    return True
-            
-                @staticmethod
-                def fitsInFloat(_):
-                    return True
-            
-                @staticmethod
-                def asFloat(v):
-                    return float(v)
-            
-                @staticmethod
-                def fitsInDouble(_):
-                    return True
-            
-                @staticmethod
-                def asDouble(v):
-                    return float(v)
-            
+            if __name__ == '__main__':
+                print('WIP!')
             """;
 
     public static PyLoader getInstance() {

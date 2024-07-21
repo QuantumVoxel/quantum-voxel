@@ -13,6 +13,6 @@ public class Fonts {
     public static RegistryKey<Font> QUANTIUM = new RegistryKey<>(ClientRegistries.FONT.key(), id("quantum"));
 
     public static void register() {
-        FontManager.get().registerFonts(QuantumClient.get().getResourceManager());
+        QuantumClient.get().fontManager.registerFonts(QuantumClient.get().getResourceManager());
     }
 }

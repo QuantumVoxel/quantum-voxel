@@ -1,9 +1,11 @@
 package dev.ultreon.quantum.client.gui.screens.container;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
@@ -18,7 +20,11 @@ import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
+
+import static com.google.common.primitives.Ints.max;
 
 public abstract class ContainerScreen extends Screen {
     private final int maxSlots;
@@ -121,9 +127,26 @@ public abstract class ContainerScreen extends Screen {
 
     protected void renderTooltip(Renderer renderer, int x, int y, TextObject title, List<TextObject> description, @Nullable String subTitle) {
         var all = Lists.newArrayList(description);
-        all.add(0, title);
+        all.addFirst(title);
         if (subTitle != null) all.add(TextObject.literal(subTitle));
-        int textWidth = all.stream().mapToInt(value -> this.font.width(value)).max().orElse(0);
+        boolean seen = false;
+        int best = 0;
+        int[] arr = new int[10];
+        int count = 0;
+        Font font1 = this.font;
+        for (TextObject textObject : all) {
+            int width = font1.width(textObject);
+            if (arr.length == count) arr = Arrays.copyOf(arr, count * 2);
+            arr[count++] = width;
+        }
+        arr = Arrays.copyOfRange(arr, 0, count);
+        for (int i : arr) {
+            if (!seen || i > best) {
+                seen = true;
+                best = i;
+            }
+        }
+        int textWidth = seen ? best : 0;
         int descHeight = description.size() * (this.font.lineHeight + 1) - 1;
         int textHeight = descHeight + 3 + this.font.lineHeight;
 

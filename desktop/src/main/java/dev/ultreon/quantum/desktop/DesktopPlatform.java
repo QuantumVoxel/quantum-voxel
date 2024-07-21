@@ -1,11 +1,9 @@
 package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.desktop.DesktopLogger.Slf4jLogger;
@@ -19,7 +17,6 @@ import dev.ultreon.xeox.loader.XeoxLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModOrigin;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Platform;
 import org.slf4j.LoggerFactory;

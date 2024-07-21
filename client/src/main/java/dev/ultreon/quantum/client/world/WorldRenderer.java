@@ -31,7 +31,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.client.DisposableContainer;
+import dev.ultreon.quantum.DisposableContainer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
@@ -205,7 +205,7 @@ public final class WorldRenderer implements DisposableContainer {
         this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
         this.transparentMaterial.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         this.transparentMaterial.set(new DepthTestAttribute(GL_LEQUAL));
-//        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
+        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
     }
 
     private void setupSunAndMoon() {

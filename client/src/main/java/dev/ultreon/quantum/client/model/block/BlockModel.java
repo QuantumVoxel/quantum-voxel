@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.client.model.model.Json5Model;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.resources.LoadableResource;
@@ -33,10 +34,10 @@ public interface BlockModel extends LoadableResource {
     Identifier resourceId();
 
     default Vector3 getItemScale() {
-        return DEFAULT_ITEM_SCALE;
+        return new Vector3(0.0625f, 0.0625f, 0.0625f);
     }
 
     default Vector3 getItemOffset() {
-        return Vector3.Zero;
+        return new Vector3(0, -20, 0);
     }
 }

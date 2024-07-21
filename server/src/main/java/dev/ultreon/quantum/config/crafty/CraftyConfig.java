@@ -59,17 +59,17 @@ public abstract class CraftyConfig {
 
         // Add a shutdown hook to handle cleanup tasks
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // Save all the CraftyConfig instances
+            for (CraftyConfig config : CONFIGS.values()) {
+                config.save();
+            }
+
             try {
                 // Close the watch service
                 WATCH_SERVICE.close();
             } catch (IOException e) {
                 // Throw a runtime exception if an IOException occurs
                 throw new RuntimeException(e);
-            }
-
-            // Save all the CraftyConfig instances
-            for (CraftyConfig config : CONFIGS.values()) {
-                config.save();
             }
 
             // Shutdown the scheduled task

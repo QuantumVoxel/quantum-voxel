@@ -53,6 +53,10 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.maxReflectDistance", comment = "Maximum distance for reflections (for example in water).")
     public static float maxReflectDistance = 80;
 
+    @ConfigEntry(path = "video.lodThreshold", comment = "The threshold in blocks for when a chunk is rendered at high or low level of detail.")
+    @Ranged(min = 0, max = 128)
+    public static float lodThreshold = 16.0f;
+
     @ConfigEntry(path = "generic.enable4xScreenshot", comment = "Whether 4× scaled screenshots are enabled.")
     public static boolean enable4xScreenshot = false;
 

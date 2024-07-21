@@ -364,7 +364,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final ShaderProviderManager shaderProviderManager;
     private final ShaderProgramManager shaderProgramManager;
     private final TextureAtlasManager textureAtlasManager;
-    private final FontManager fontManager = FontManager.get();
+    public final FontManager fontManager = new FontManager();
 
     // Registries
     public final EntityModelRegistry entityModelManager;
@@ -771,7 +771,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @see #getGameDir()
      */
     public static FileHandle data(String path) {
-        return Gdx.files.absolute(QuantumClient.getGameDir().toAbsolutePath().toString()).child(path);
+        return Gdx.files.absolute(GamePlatform.get().getGameDir().toAbsolutePath().toString()).child(path);
     }
 
     /**
@@ -2028,15 +2028,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public boolean isDevMode() {
         return this.isDevMode;
-    }
-
-    @Deprecated
-    public boolean isShowingImGui() {
-        return GamePlatform.get().isShowingImGui();
-    }
-
-    public void setShowingImGui(boolean value) {
-        GamePlatform.get().setShowingImGui(value);
     }
 
     public int getWidth() {

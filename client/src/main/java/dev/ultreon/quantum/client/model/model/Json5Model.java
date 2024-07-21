@@ -23,7 +23,7 @@ public class Json5Model implements BlockModel, ItemModel {
     private final Identifier id;
     private Model model;
     private final Table<String, BlockDataEntry<?>, Json5Model> overrides;
-    private static final Vector3 SCALE = new Vector3(-0.0625f, -0.0625f, 0.0625f);
+    private static final Vector3 SCALE = new Vector3(0.0625f, 0.0625f, 0.0625f);
 
     public Json5Model(RegistryKey<?> key, Map<String, Identifier> textureElements, List<Json5ModelLoader.ModelElement> modelElements, boolean ambientOcclusion, Json5ModelLoader.Display display, Table<String, BlockDataEntry<?>, Json5Model> overrides) {
         this.key = key;
@@ -80,7 +80,7 @@ public class Json5Model implements BlockModel, ItemModel {
 
     @Override
     public Vector3 getItemOffset() {
-        return new Vector3(-18, -30,0);
+        return new Vector3(0, -20,0);
     }
 
     public Table<String, BlockDataEntry<?>, Json5Model> getOverrides() {

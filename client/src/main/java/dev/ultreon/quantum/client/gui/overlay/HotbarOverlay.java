@@ -51,11 +51,11 @@ public class HotbarOverlay extends Overlay {
     private void drawHotbarSlot(Renderer renderer, List<ItemSlot> allowed, int index) {
         ItemStack item = allowed.get(index).getItem();
         int ix = (int) ((float) this.client.getScaledWidth() / 2) - 90 + index * 20 + 2;
-        this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 24);
+        this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 21);
         int count = item.getCount();
         if (!item.isEmpty() && count > 1) {
             String text = Integer.toString(count);
-            renderer.textLeft(text, ix + 18 - this.client.font.width(text), this.client.getScaledHeight() - 7 - this.client.font.lineHeight, RgbColor.WHITE, false);
+            renderer.textLeft(text, ix + 18 - this.client.font.width(text), this.client.getScaledHeight() - 5 - this.client.font.lineHeight, RgbColor.WHITE, false);
         }
     }
 }
