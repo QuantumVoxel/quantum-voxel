@@ -60,13 +60,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_BOTTOM_COLOR;
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_TOP_COLOR;
 
 public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     private static final Environment ENVIRONMENT = new Environment();
-
     public Model PREFAB;
     public TerrainNode root;
 
