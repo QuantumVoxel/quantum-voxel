@@ -10,6 +10,7 @@ import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.JavascriptDebuggerScreen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.Screen;
@@ -148,6 +149,29 @@ public class DesktopInput extends GameInput {
         if (DesktopInput.IM_GUI_KEY.is(keyCode)) {
             this.handleImGuiKey();
         }
+
+        if (DesktopInput.isAltDown() && GamePlatform.get().isDevEnvironment()) {
+            if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
+                this.client.viewMode = 0;
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
+                this.client.viewMode = 1;
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) {
+                this.client.viewMode = 2;
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_4)) {
+                this.client.viewMode = 3;
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_5)) {
+                this.client.viewMode = 4;
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_6)) {
+                this.client.viewMode = 5;
+            }
+        }
+
+        if (DesktopInput.isCtrlDown() && GamePlatform.get().isDevEnvironment()) {
+            if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
+                this.client.showScreen(new JavascriptDebuggerScreen());
+            }
+        }
+
         if (player != null) {
             if (DesktopInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
                 this.handleImGuiFocus();

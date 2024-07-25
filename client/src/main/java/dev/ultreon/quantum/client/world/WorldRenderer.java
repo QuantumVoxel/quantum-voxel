@@ -294,7 +294,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     public void free(ClientChunk chunk) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.free(chunk));
             return;
         }
@@ -327,7 +327,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     private void checkThread() {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new IllegalStateException("Should only be called on the main thread!");
     }
 
@@ -335,6 +335,8 @@ public final class WorldRenderer implements DisposableContainer {
         var player = this.client.player;
         if (player == null) return;
         if (this.disposed) return;
+
+        Gdx.gl.glLineWidth(10f);
 
         this.skybox.update(this.world.getDaytime(), deltaTime);
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
@@ -376,7 +378,7 @@ public final class WorldRenderer implements DisposableContainer {
                         var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                         var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-                        WorldRenderer.buildOutlineBox(0.02f, sizeX, sizeY, sizeZ, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
+                        WorldRenderer.buildOutlineBox(10f, sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
                     });
 
                     this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
@@ -464,13 +466,14 @@ public final class WorldRenderer implements DisposableContainer {
                         ModelManager modelManager = ModelManager.INSTANCE;
                         ChunkPos pos = chunk.getPos();
                         Model model = modelManager.generateModel(createId(pos), modelBuilder -> {
+                            MeshBuilder meshBuilder = new MeshBuilder();
                             chunk.mesher.meshVoxels(modelBuilder,
-                                    modelBuilder.part("solid:" + createId(pos), GL_TRIANGLES, QV_CHUNK_ATTRS, this.material),
+                                    meshBuilder,
                                     block -> block.doesRender() && !block.isTransparent()
                             );
 
                             chunk.mesher.meshVoxels(modelBuilder,
-                                    modelBuilder.part("transparent:" + createId(pos), GL_TRIANGLES, QV_CHUNK_ATTRS, this.transparentMaterial),
+                                    meshBuilder,
                                     block -> block.doesRender() && block.isTransparent()
                             );
                         });
@@ -526,7 +529,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     void unload(ClientChunk chunk) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.unload(chunk));
             return;
         }
@@ -688,8 +691,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     public static void buildOutlineBox(float thickness, float width, float height, float depth, MeshPartBuilder meshBuilder) {
-        Gdx.gl20.glLineWidth(thickness);
-        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-width / 2, -height / 2, -depth / 2), new Vector3(width / 2, height / 2, depth / 2)));
+        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, depth)));
     }
 
     public static void buildLine(float thickness, float x1, float y1, float z1, float x2, float y2, float z2, MeshPartBuilder meshBuilder) {

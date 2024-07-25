@@ -6,16 +6,21 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
+import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.data.gen.provider.DepthFunc;
 import dev.ultreon.quantum.client.render.DestinationBlending;
 import dev.ultreon.quantum.client.render.SourceBlending;
 import dev.ultreon.quantum.client.texture.TextureManager;
+import dev.ultreon.quantum.client.util.ClientCodecs;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Identifier;
@@ -27,14 +32,17 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 public class MaterialManager implements Manager<Material> {
+    public static final Material DEFAULT_MATERIAL = new Material();
     public static final @NotNull Identifier DEFAULT_ID = Identifier.parse("default");
+    private final Map<Block, Material> blockMaterialRegistry = new LinkedHashMap<>();
+
     private final ResourceManager resourceManager;
     private final TextureManager textureManager;
     private final CubemapManager cubemapManager;
 
-    private final Material defaultMaterial = new Material();
     private final Map<Identifier, Material> materials = new LinkedHashMap<>();
 
     public MaterialManager(ResourceManager resourceManager, TextureManager textureManager, CubemapManager cubemapManager) {
@@ -43,10 +51,35 @@ public class MaterialManager implements Manager<Material> {
         this.cubemapManager = cubemapManager;
     }
 
+    public Material getMaterialFor(Block block) {
+        Material blockMaterial = blockMaterialRegistry.get(block);
+        if (blockMaterial == null) {
+            registerBlockMaterial(block);
+            blockMaterial = blockMaterialRegistry.get(block);
+            if (blockMaterial == null) {
+                blockMaterialRegistry.put(block, DEFAULT_MATERIAL);
+                return DEFAULT_MATERIAL;
+            }
+        }
+        return blockMaterial;
+    }
+
+    public void registerBlockMaterial(Block block, Material material) {
+        if (blockMaterialRegistry.containsKey(block))
+            QuantumClient.LOGGER.warn("Material for block {} already registered, overwriting...", block.getId());
+        blockMaterialRegistry.put(block, material);
+    }
+
+    public void registerBlockMaterial(Block block) {
+        Material material = get(block.getId().mapPath(path -> "block/" + path));
+        if (material == null) return;
+        registerBlockMaterial(block, material);
+    }
+
     public void reload(ReloadContext context) {
         this.materials.clear();
-        this.defaultMaterial.id = "default";
-        this.register(Identifier.parse("default"), this.defaultMaterial);
+        DEFAULT_MATERIAL.id = "default";
+        this.register(Identifier.parse("default"), DEFAULT_MATERIAL);
     }
 
     @Override
@@ -57,7 +90,7 @@ public class MaterialManager implements Manager<Material> {
 
     public @Nullable Material get(Identifier id) {
         if (id.equals(DEFAULT_ID)) {
-            return this.defaultMaterial;
+            return DEFAULT_MATERIAL;
         }
 
         if (this.materials.containsKey(id)) {
@@ -65,6 +98,9 @@ public class MaterialManager implements Manager<Material> {
         }
 
         try (InputStream inputStream = resourceManager.openResourceStream(id.mapPath(path -> "materials/" + path + ".json5"))) {
+            if (inputStream == null) {
+                return null;
+            }
             Material material = new Material();
             material.id = id.toString();
             Json5Element parse = CommonConstants.JSON5.parse(inputStream);
@@ -88,27 +124,17 @@ public class MaterialManager implements Manager<Material> {
         attributesArr.forEach(attributeElem -> {
             Json5Object attrObj = attributeElem.getAsJson5Object();
             String type = attrObj.getAsJson5Primitive("type").getAsString();
-            Attribute attribute;
-            switch (type) {
-                case "blending":
-                    attribute = loadBlending(attrObj);
-                    break;
-                case "depth_test":
-                    attribute = loadDepthTest(attrObj);
-                    break;
-                case "color":
-                    attribute = loadColor(attrObj);
-                    break;
-                case "texture":
-                    attribute = loadTexture(attrObj, textureManager);
-                    break;
-                case "cubemap":
-                    attribute = loadCubemap(attrObj, cubemapManager);
-                    break;
-                default:
+            Attribute attribute = switch (type) {
+                case "blending" -> loadBlending(attrObj);
+                case "depth_test" -> loadDepthTest(attrObj);
+                case "color" -> loadColor(attrObj);
+                case "texture" -> loadTexture(attrObj, textureManager);
+                case "cubemap" -> loadCubemap(attrObj, cubemapManager);
+                default -> {
                     QuantumClient.LOGGER.warn("Unknown material attribute type {}", type);
-                    attribute = null;
-            }
+                    yield null;
+                }
+            };
 
             if (attribute != null) {
                 material.set(attribute);
@@ -165,25 +191,19 @@ public class MaterialManager implements Manager<Material> {
 
         Color color = new Color(r.getAsFloat(), g.getAsFloat(), b.getAsFloat(), a.getAsFloat());
 
-        switch (type) {
-            case "diffuse":
-                return ColorAttribute.createDiffuse(color);
-            case "ambient":
-                return ColorAttribute.createAmbient(color);
-            case "ambient_light":
-                return ColorAttribute.createAmbientLight(color);
-            case "emissive":
-                return ColorAttribute.createEmissive(color);
-            case "specular":
-                return ColorAttribute.createSpecular(color);
-            case "fog":
-                return ColorAttribute.createFog(color);
-            case "reflection":
-                return ColorAttribute.createReflection(color);
-            default:
+        return switch (type) {
+            case "diffuse" -> ColorAttribute.createDiffuse(color);
+            case "ambient" -> ColorAttribute.createAmbient(color);
+            case "ambient_light" -> ColorAttribute.createAmbientLight(color);
+            case "emissive" -> ColorAttribute.createEmissive(color);
+            case "specular" -> ColorAttribute.createSpecular(color);
+            case "fog" -> ColorAttribute.createFog(color);
+            case "reflection" -> ColorAttribute.createReflection(color);
+            default -> {
                 QuantumClient.LOGGER.warn("Unknown material color type {}", type);
-                return null;
-        }
+                yield null;
+            }
+        };
     }
 
     private Attribute loadTexture(Json5Object attrObj, TextureManager textureManager) {
@@ -197,22 +217,27 @@ public class MaterialManager implements Manager<Material> {
 
     @Nullable
     private static Attribute createTexAttr(String textureType, Texture texture) {
-        switch (textureType) {
-            case "diffuse":
-                return TextureAttribute.createDiffuse(texture);
-            case "normal":
-                return TextureAttribute.createNormal(texture);
-            case "specular":
-                return TextureAttribute.createSpecular(texture);
-            case "emissive":
-                return TextureAttribute.createEmissive(texture);
-            case "bump":
-                return TextureAttribute.createBump(texture);
-            case "reflection":
-                return TextureAttribute.createReflection(texture);
-            default:
+        return switch (textureType) {
+            case "diffuse" -> TextureAttribute.createDiffuse(texture);
+            case "normal" -> TextureAttribute.createNormal(texture);
+            case "specular" -> TextureAttribute.createSpecular(texture);
+            case "emissive" -> TextureAttribute.createEmissive(texture);
+            case "bump" -> TextureAttribute.createBump(texture);
+            case "reflection" -> TextureAttribute.createReflection(texture);
+            default -> {
                 QuantumClient.LOGGER.warn("Unknown material texture type {}", textureType);
-                return null;
-        }
+                yield null;
+            }
+        };
     }
+
+    public static final Codec<Material> CODEC = RecordCodecBuilder.create(instance -> instance
+            .group(
+                    ClientCodecs.ATTRIBUTE.codec().listOf().xmap(
+                            list -> new Material(list.toArray(Attribute[]::new)),
+                            Lists::newArrayList
+                    ).fieldOf("attributes").forGetter(Function.identity())
+            )
+            .apply(instance, Function.identity())
+    );
 }

@@ -1,25 +1,28 @@
+#version 410
+
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-out vec4 fragColor;
+uniform vec2 u_aa_radius;
 
-uniform vec2 u_resolution;
+in vec4 g_col;
+in float g_u;
+in float g_v;
+in float g_line_width;
+in float g_line_length;
 
-uniform sampler2D u_texture;
-
-const float OUTLINE_WIDTH = 0.1;
-
-out vec4 fragColor;
-in vec3 fragCoord;
-
-void main() {
-    vec2 uv = fragCoord.xy / textureSize(u_texture, 0).xy;
-    float dist = distance(uv, vec2(0.5));
-    float alpha = smoothstep(0.5 - OUTLINE_WIDTH, 0.5 + OUTLINE_WIDTH, dist);
-    fragColor = vec4(0.0, 0.0, 0.0, alpha);
-
-    if (alpha == 0.0) {
-        discard;
-    }
+out vec4 frag_color;
+void main()
+{
+    /* We render a quad that is fattened by r, giving total width of the line to be w+r. We want smoothing to happen
+       around w, so that the edge is properly smoothed out. As such, in the smoothstep function we have:
+       Far edge   : 1.0                                          = (w+r) / (w+r)
+       Close edge : 1.0 - (2r / (w+r)) = (w+r)/(w+r) - 2r/(w+r)) = (w-r) / (w+r)
+       This way the smoothing is centered around 'w'.
+     */
+    float au = 1.0 - smoothstep( 1.0 - ((2.0*u_aa_radius[0]) / g_line_width),  1.0, abs(g_u / g_line_width) );
+    float av = 1.0 - smoothstep( 1.0 - ((2.0*u_aa_radius[1]) / g_line_length), 1.0, abs(g_v / g_line_length) );
+    frag_color = g_col;
+    frag_color.a *= min(av, au);
 }

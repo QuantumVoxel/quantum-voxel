@@ -92,16 +92,16 @@ in vec3 v_shadowMapUv;
 float getShadowness(vec2 offset)
 {
     const vec4 bitShifts = vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0);
-    return step(v_shadowMapUv.z, dot(texture(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts));//+(1.0/255.0));
+    return step(v_shadowMapUv.z, dot(texture(u_shadowTexture, v_shadowMapUv.xy + offset), bitShifts)); //+(1.0/255.0));
 }
 
 float getShadow()
 {
-    return (//getShadowness(vec2(0,0)) +
+    return ( //getShadowness(vec2(0,0)) +
     getShadowness(vec2(u_shadowPCFOffset, u_shadowPCFOffset)) +
-    getShadowness(vec2(-u_shadowPCFOffset, u_shadowPCFOffset)) +
-    getShadowness(vec2(u_shadowPCFOffset, -u_shadowPCFOffset)) +
-    getShadowness(vec2(-u_shadowPCFOffset, -u_shadowPCFOffset))) * 0.25;
+        getShadowness(vec2(-u_shadowPCFOffset, u_shadowPCFOffset)) +
+        getShadowness(vec2(u_shadowPCFOffset, -u_shadowPCFOffset)) +
+        getShadowness(vec2(-u_shadowPCFOffset, -u_shadowPCFOffset))) * 0.25;
 }
 #endif //shadowMapFlag
 
@@ -204,7 +204,7 @@ void main() {
     fragColor.a = diffuse.a * v_opacity;
     #ifdef alphaTestFlag
     if (fragColor.a <= v_alphaTest)
-    discard;
+        discard;
     #endif
     #else
     fragColor.a = 1.0;

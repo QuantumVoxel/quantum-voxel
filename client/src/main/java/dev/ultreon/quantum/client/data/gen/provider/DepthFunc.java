@@ -23,6 +23,20 @@ public enum DepthFunc {
         this.predicate = predicate;
     }
 
+    public static DepthFunc byGlId(int depthFunc) {
+        return switch (depthFunc) {
+            case GL20.GL_LESS -> LESS;
+            case GL20.GL_LEQUAL -> LEQUAL;
+            case GL20.GL_GREATER -> GREATER;
+            case GL20.GL_GEQUAL -> GEQUAL;
+            case GL20.GL_EQUAL -> EQUAL;
+            case GL20.GL_NOTEQUAL -> NOTEQUAL;
+            case GL20.GL_ALWAYS -> ALWAYS;
+            case GL20.GL_NEVER -> NEVER;
+            default -> throw new IllegalArgumentException("Invalid depth function: " + depthFunc);
+        };
+    }
+
     public int getGlFunc() {
         return glFunc;
     }

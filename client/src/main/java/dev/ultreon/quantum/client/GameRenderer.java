@@ -28,6 +28,7 @@ import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +44,8 @@ public class GameRenderer implements Disposable {
     private final RenderContext context;
     private float cameraBop = 0.0f;
     private float blurScale = 0.0f;
+    private int lastX;
+    private int lastY;
 
     public GameRenderer(QuantumClient client, ModelBatch modelBatch, RenderPipeline pipeline) {
         this.client = client;
@@ -77,10 +80,12 @@ public class GameRenderer implements Disposable {
             QuantumClient.PROFILER.section("camera", () -> {
                 if (this.client.screen == null && !GamePlatform.get().isShowingImGui()) {
                     // Calculate delta position for player rotation.
-                    int centerX = Gdx.graphics.getWidth() / 2;
-                    int centerY = Gdx.graphics.getHeight() / 2;
-                    float dx = -(Gdx.input.getX() - (float) centerX) * ClientConfig.cameraSensitivity;
-                    float dy = -(Gdx.input.getY() - (float) centerY) * ClientConfig.cameraSensitivity;
+                    int width = Gdx.graphics.getWidth();
+                    int height = Gdx.graphics.getHeight();
+                    int centerX = width / 2;
+                    int centerY = height / 2;
+                    float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfig.cameraSensitivity);
+                    float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfig.cameraSensitivity);
                     player.rotateHead(dx, dy);
 
                     // Reset position

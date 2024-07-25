@@ -58,6 +58,7 @@ class QuantumClientLoader implements Runnable {
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("generic"), new GenericDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("rendering"), new RenderingDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("profiler"), new ProfilerDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("chunk_info"), new ChunkInfoDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("inspector"), new InspectorDebugPage());
     }
 

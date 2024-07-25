@@ -1,7 +1,7 @@
 #version 410
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices=3) out;
+layout(line_strip, max_vertices=3) out;
 
 uniform mat4 u_projViewWorldTrans;
 uniform mat3 u_normalMatrix;

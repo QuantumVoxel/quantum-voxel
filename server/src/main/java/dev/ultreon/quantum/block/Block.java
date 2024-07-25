@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.block;
 
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.world.rng.JavaRNG;

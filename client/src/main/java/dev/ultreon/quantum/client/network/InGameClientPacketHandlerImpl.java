@@ -468,7 +468,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         ClientWorld world = this.client.world;
         if (world == null) return;
 
-        world.spawnParticles(particleType, position, motion, count);
+        // TODO: Implement this
+//        world.spawnParticles(particleType, position, motion, count);
     }
 
     @Override

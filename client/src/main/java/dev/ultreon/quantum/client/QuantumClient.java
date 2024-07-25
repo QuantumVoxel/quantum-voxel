@@ -193,6 +193,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     @ApiStatus.Experimental
     private static Callback<CrashLog> crashHook;
     private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
+    public int viewMode;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -623,7 +624,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.ultreonBgTex = new Texture("assets/quantum/textures/gui/loading_overlay_bg.png");
         this.ultreonLogoTex = new Texture("assets/quantum/logo.png");
         this.libGDXLogoTex = new Texture("assets/quantum/libgdx_logo.png");
-        this.logoRevealSound = Gdx.audio.newSound(Gdx.files.internal("assets/quantum/sounds/logo_reveal.mp3"));
+        this.logoRevealSound = Gdx.audio.newSound(Gdx.files.internal("assets/quantum/sounds/logo_reveal.ogg"));
 
         // Initialize Resizer
         this.resizer = new Resizer(this.ultreonLogoTex.getWidth(), this.ultreonLogoTex.getHeight());
@@ -938,7 +939,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     @CanIgnoreReturnValue
     public static <T> T invokeAndWait(@NotNull Callable<T> func) {
-        if (isOnMainThread()) {
+        if (isOnRenderThread()) {
             try {
                 return func.call();
             } catch (Exception e) {
@@ -956,7 +957,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param func the {@link Runnable} function to be executed on the QuantumClient thread
      */
     public static void invokeAndWait(Runnable func) {
-        if (isOnMainThread()) {
+        if (isOnRenderThread()) {
             func.run();
             return;
         }
@@ -1003,7 +1004,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @return true if the current thread is the main thread, false otherwise.
      */
-    public static boolean isOnMainThread() {
+    public static boolean isOnRenderThread() {
         return Thread.currentThread().threadId() == QuantumClient.instance.mainThread.threadId();
     }
 
@@ -1152,7 +1153,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     @CanIgnoreReturnValue
     public boolean showScreen(@Nullable Screen next) {
-        if (!isOnMainThread()) {
+        if (!isOnRenderThread()) {
             @Nullable Screen finalNext = next;
             return invokeAndWait(() -> this.showScreen(finalNext));
         }
@@ -1895,7 +1896,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param height The new height of the display
      */
     public void resize(int width, int height) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invokeAndWait(() -> this.resize(width, height));
             return;
         }
@@ -1943,7 +1944,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     @Override
     public void dispose() {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             throw new IllegalThreadError("Should only dispose on LibGDX main thread");
         }
 
@@ -2350,7 +2351,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             QuantumClient.LOGGER.warn("Unknown sound event: %s", soundEvent.getId());
             return;
         }
-        sound.play(volume);
+        if (soundEvent.isVaryingPitch()) {
+            sound.play(volume, 1.0F + MathUtils.random(-0.1F, 0.1F), 1.0F);
+        } else {
+            sound.play(volume);
+        }
     }
 
     public void startIntegratedServer() {
@@ -2509,7 +2514,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public void reloadResourcesAsync() {
-        if (!isOnMainThread()) {
+        if (!isOnRenderThread()) {
             invokeAndWait(this::reloadResourcesAsync);
             return;
         }
@@ -2673,5 +2678,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return;
         }
         this.window.setTitle(String.format("Quantum Voxel %s", QuantumClient.getGameVersion().split("\\+")[0]));
+    }
+
+    public double getGameTime() {
+        return System.currentTimeMillis() / 1000.0;
     }
 }

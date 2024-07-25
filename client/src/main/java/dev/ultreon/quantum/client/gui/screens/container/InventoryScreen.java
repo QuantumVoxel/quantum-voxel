@@ -62,7 +62,7 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     private void rebuildSlots() {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(this::rebuildSlots);
             return;
         }

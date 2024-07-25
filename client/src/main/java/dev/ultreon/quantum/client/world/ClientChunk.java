@@ -16,8 +16,9 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
+import dev.ultreon.quantum.client.render.GreedyMesher;
 import dev.ultreon.quantum.client.render.RenderLayer;
-import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
+import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
@@ -40,7 +41,7 @@ public final class ClientChunk extends Chunk {
     private static final int[] dy = {0, -1, 0, 1, 0, 0};
     private static final int[] dz = {0, 0, 0, 0, -1, 1};
 
-    final GreedyMesher mesher;
+    final Mesher mesher;
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
 
@@ -80,7 +81,7 @@ public final class ClientChunk extends Chunk {
             }
         });
 
-        this.mesher = new GreedyMesher(this, true);
+        this.mesher = new GreedyMesher(this);
     }
 
     private int index(int x, int y, int z) {
@@ -115,7 +116,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public void dispose() {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
         }
 
@@ -139,7 +140,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public BlockProperties getFast(int x, int y, int z) {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         return super.getFast(x, y, z);
@@ -147,7 +148,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public void setFast(Vec3i pos, BlockProperties block) {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         super.setFast(pos, block);
@@ -155,7 +156,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public boolean set(int x, int y, int z, BlockProperties block) {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         return super.set(x, y, z, block);
@@ -163,7 +164,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public void set(Vec3i pos, BlockProperties block) {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         super.set(pos, block);
@@ -171,7 +172,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public boolean setFast(int x, int y, int z, BlockProperties block) {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         this.removedModels.add(new BlockPos(x, y, z));
@@ -189,7 +190,7 @@ public final class ClientChunk extends Chunk {
 
     @Override
     public void onUpdated() {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
         }
 
@@ -204,7 +205,7 @@ public final class ClientChunk extends Chunk {
     }
 
     void ready() {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
         }
         this.ready = true;
@@ -278,7 +279,7 @@ public final class ClientChunk extends Chunk {
 
     @ApiStatus.Internal
     public void whileLocked(Runnable func) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
         }
 

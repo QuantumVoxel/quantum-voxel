@@ -23,6 +23,7 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,8 @@ public class LocalPlayer extends ClientPlayer {
     private final ClientWorld world;
     private int oldSelected;
     private final ClientPermissionMap permissions = new ClientPermissionMap();
+    private double lastWalkSound;
+    private Vec3d tmp = new Vec3d();
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorld world, UUID uuid) {
         super(entityType, world);
@@ -63,8 +66,14 @@ public class LocalPlayer extends ClientPlayer {
             this.oldSelected = this.selected;
         }
 
+
         // Handle player movement if there is a significant change in position
         if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
+            double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
+            if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime()) {
+                this.client.playSound(SoundEvents.WALK, 1.0F);
+                this.lastWalkSound = this.client.getGameTime();
+            }
             this.handleMove();
         } else {
             // Update previous position if no significant change

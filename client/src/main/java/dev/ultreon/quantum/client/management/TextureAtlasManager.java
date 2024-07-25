@@ -1,10 +1,13 @@
 package dev.ultreon.quantum.client.management;
 
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
+import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.item.BlockItem;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.Items;
@@ -54,7 +57,12 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
             if (e.getValue() == Items.AIR || e.getValue() instanceof BlockItem) continue;
 
             Identifier texId = e.getKey().element().mapPath(path -> "textures/items/" + path + ".png");
-            Texture tex = this.client.getTextureManager().getTexture(texId);
+            FileHandle resource = QuantumClient.resource(texId);
+            if (!resource.exists()) {
+                itemTextures.add(texId, TextureManager.MISSING_NO);
+                continue;
+            }
+            Pixmap tex = new Pixmap(resource);
             itemTextures.add(texId, tex);
         }
         this.client.itemTextureAtlas = this.register(id("item"), itemTextures.stitch());

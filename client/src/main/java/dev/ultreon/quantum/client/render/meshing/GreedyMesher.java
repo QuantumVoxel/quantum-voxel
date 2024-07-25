@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.render.meshing;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -81,7 +82,7 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public void meshVoxels(ModelBuilder builder, MeshPartBuilder meshBuilder, UseCondition condition) {
+    public void meshVoxels(ModelBuilder builder, MeshBuilder meshBuilder, UseCondition condition) {
         List<Face> faces = this.getFaces(builder, condition);
 
         this.meshFaces(faces, meshBuilder);

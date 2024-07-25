@@ -49,8 +49,9 @@ public final class ClientWorld extends World implements Disposable {
     public static final AtomicDouble FOG_DENSITY = new AtomicDouble(0.001);
     public static final AtomicDouble FOG_START = new AtomicDouble(0.0);
     public static final AtomicDouble FOG_END = new AtomicDouble(1.0);
-    public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(512, 512));
-    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(0.99908f, 1.03125f));
+    public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(2048, 2048));
+    //                                                                           off.get().set(f(1 - 1 / size.get().x * size.get().x * 2 / 87), 1)
+    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
     public static Rot SKYBOX_ROTATION = deg(-60);
     public static RgbColor DAY_TOP_COLOR = RgbColor.rgb(0x7fb0fe);
     public static RgbColor DAY_BOTTOM_COLOR = RgbColor.rgb(0xc1d3f1);
@@ -96,7 +97,7 @@ public final class ClientWorld extends World implements Disposable {
     @Override
     protected boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
         // Check if the current thread is the main thread
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             // If not, invoke the unloadChunk method on the main thread and return the result
             return QuantumClient.invokeAndWait(() -> this.unloadChunk(chunk, pos));
         }
@@ -120,7 +121,7 @@ public final class ClientWorld extends World implements Disposable {
 
     @Override
     protected void checkThread() {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
     }
 
@@ -168,7 +169,7 @@ public final class ClientWorld extends World implements Disposable {
 
     @Override
     public void updateChunk(@Nullable Chunk chunk) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invokeAndWait(() -> this.updateChunk(chunk));
             return;
         }
@@ -287,7 +288,7 @@ public final class ClientWorld extends World implements Disposable {
     @Override
     public boolean set(int x, int y, int z, @NotNull BlockProperties block, int flags) {
         // Check if we're on the main thread, if not invokeAndWait the method on the main thread
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             return QuantumClient.invokeAndWait(() -> this.set(x, y, z, block, flags));
         }
 
@@ -447,7 +448,7 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
-    private int getSunlight(int x, int y, int z) {
+    public int getSunlight(int x, int y, int z) {
         ClientChunk chunk = getChunkAt(x, y, z);
         if (chunk != null) {
             return chunk.getSunlight(toLocalBlockPos(x, y, z));
@@ -713,21 +714,21 @@ public final class ClientWorld extends World implements Disposable {
     @Override
     @ApiStatus.Experimental
     public void spawnParticles(@NotNull ParticleType particleType, @NotNull Vec3d position, @NotNull Vec3d motion, int count) {
-        if (!QuantumClient.isOnMainThread()) {
-            QuantumClient.invokeAndWait(() -> this.spawnParticles(particleType, position, motion, count));
-        }
-
-        super.spawnParticles(particleType, position, motion, count);
-
-        ClientParticle clientParticle = ClientParticleRegistry.getParticle(particleType);
-        WorldRenderer worldRenderer = this.client.worldRenderer;
-        if (worldRenderer != null && clientParticle != null) {
-            PFXPool particleController = clientParticle.getPool();
-            ParticleEffect obtained = particleController.obtain();
-            worldRenderer.addParticles(obtained, position, motion, count);
-        } else if (clientParticle == null) {
-            World.LOGGER.warn("Unknown particle type: {}", particleType.getId());
-        }
+//        if (!QuantumClient.isOnRenderThread()) {
+//            QuantumClient.invokeAndWait(() -> this.spawnParticles(particleType, position, motion, count));
+//        }
+//
+//        super.spawnParticles(particleType, position, motion, count);
+//
+//        ClientParticle clientParticle = ClientParticleRegistry.getParticle(particleType);
+//        WorldRenderer worldRenderer = this.client.worldRenderer;
+//        if (worldRenderer != null && clientParticle != null) {
+//            PFXPool particleController = clientParticle.getPool();
+//            ParticleEffect obtained = particleController.obtain();
+//            worldRenderer.addParticles(obtained, position, motion, count);
+//        } else if (clientParticle == null) {
+//            World.LOGGER.warn("Unknown particle type: {}", particleType.getId());
+//        }
     }
 
     private void sync(int x, int y, int z, BlockProperties block) {

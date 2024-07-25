@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
@@ -43,6 +45,7 @@ public class TextureManager implements Disposable {
     }
 
     private boolean frozen = false;
+    private final BiMap<Identifier, TextureAtlas> atlasMap = HashBiMap.create();
 
     public TextureManager(ResourceManager resourceManager) {
         Preconditions.checkNotNull(resourceManager, "resourceManager");
@@ -92,7 +95,7 @@ public class TextureManager implements Disposable {
     public Texture getTexture(Identifier id, Texture fallback) {
         Preconditions.checkNotNull(id, "id");
 
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             return QuantumClient.invokeAndWait(() -> this.getTexture(id, fallback));
         }
 
@@ -223,5 +226,13 @@ public class TextureManager implements Disposable {
 
     public String getManagedStatus() {
         return "<white>Size: <gray>" + this.textures.size() + " <gold><b>|</b> <white>Frozen: <gray>" + this.frozen;
+    }
+
+    public Identifier getAtlasId(TextureAtlas atlas) {
+        return this.atlasMap.inverse().get(atlas);
+    }
+
+    public TextureAtlas getAtlas(Identifier id) {
+        return this.atlasMap.get(id);
     }
 }
