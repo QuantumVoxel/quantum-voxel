@@ -118,3 +118,18 @@ build {
 test {
     useJUnitPlatform()
 }
+
+publishing {
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
+}

@@ -147,7 +147,7 @@ allprojects {
     repositories {
         // Ultreon Maven Repository
         maven("https://gitlab.com/api/v4/groups/9962021/-/packages/maven")
-        
+
         mavenLocal()
         mavenCentral()
         google()
@@ -245,7 +245,7 @@ artifacts {
 }
 
 val publishProjects =
-    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"))
+    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"), project(":mixinprovider"))
 
 publishProjects.forEach {
     if (it.name == "android") return@forEach
@@ -254,7 +254,7 @@ publishProjects.forEach {
 
     it.publishing {
         publications {
-            create<MavenPublication>("mavenJava") {
+            create<MavenPublication>("library") {
                 from(it.components["java"])
 
                 groupId = "dev.ultreon.quantum"
@@ -265,7 +265,7 @@ publishProjects.forEach {
                     this@pom.name.set("QuantumVoxel")
                     this@pom.description.set("Quantum Voxel is a voxel game that focuses on technology based survival.")
 
-                    this@pom.url.set("https://github.com/Ultreon/quantum-voxel")
+                    this@pom.url.set("https://gitlab.com/ultreon/quantum-voxel")
                     this@pom.inceptionYear.set("2023")
 
                     this@pom.developers {
@@ -294,13 +294,13 @@ publishProjects.forEach {
 
                     this@pom.scm {
                         url.set("https://github.com/Ultreon/quantum-voxel")
-                        connection.set("scm:git:git://github.com/Ultreon/quantum.git")
+                        connection.set("scm:git:git://gitlab.com/ultreon/quantum-voxel.git")
                     }
 
                     this@pom.licenses {
                         license {
-                            name.set("AGPL-3.0")
-                            url.set("https://github.com/Ultreon/quantum-voxel/blob/main/LICENSE")
+                            name.set("Ultreon-PSL-1.0")
+                            url.set("https://gitlab.com/ultreon/quantum-voxel/blob/main/LICENSE.md")
                         }
                     }
 

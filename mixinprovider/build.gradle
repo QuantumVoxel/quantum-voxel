@@ -3,6 +3,14 @@ plugins {
     id 'maven-publish'
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+group = 'dev.ultreon.quantum'
+version = project_version
+
 repositories {
     // Add repositories to retrieve artifacts from in here.
     // You should only use this when depending on other mods because
@@ -37,4 +45,20 @@ dependencies {
 
 processResources {
 
+}
+
+
+publishing {
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
 }

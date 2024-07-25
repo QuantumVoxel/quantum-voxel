@@ -7,12 +7,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.world.rng.JavaRNG;
-import dev.ultreon.ubo.DataIo;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.LongType;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
@@ -25,6 +19,7 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.EntityEvents;
 import dev.ultreon.quantum.events.WorldEvents;
+import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
@@ -36,6 +31,11 @@ import dev.ultreon.quantum.world.gen.TerrainGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.rng.JavaRNG;
+import dev.ultreon.ubo.DataIo;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.LongType;
+import dev.ultreon.ubo.types.MapType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import org.checkerframework.common.reflection.qual.NewInstance;
@@ -325,6 +325,14 @@ public class ServerWorld extends World {
             // Check if there's an existing chunk at the global position
             var oldChunk = this.getChunk(globalPos);
             if (oldChunk != null && !overwrite) {
+                Region regionAt = this.regionStorage.getRegionAt(globalPos);
+                if (regionAt == null) {
+                    throw new IllegalChunkStateException("Region is not loaded.");
+                }
+
+                if (!oldChunk.active) {
+                    regionAt.activate(localPos, globalPos);
+                }
                 return oldChunk;
             }
 
@@ -410,6 +418,14 @@ public class ServerWorld extends World {
             // Check if there is an existing chunk at the global position
             var oldChunk = this.getChunk(globalPos);
             if (oldChunk != null && !overwrite) {
+                Region regionAt = this.regionStorage.getRegionAt(globalPos);
+                if (regionAt == null) {
+                    throw new IllegalChunkStateException("Region is not loaded.");
+                }
+
+                if (!oldChunk.active) {
+                    regionAt.activate(localPos, globalPos);
+                }
                 return oldChunk;
             }
 
@@ -1284,6 +1300,7 @@ public class ServerWorld extends World {
         public Chunk deactivate(@NotNull ChunkPos chunkPos) {
             this.validateLocalPos(chunkPos);
             this.validateThread();
+
             Chunk chunk = this.chunks.get(chunkPos);
 
             if (chunk == null) return null;
@@ -1316,6 +1333,12 @@ public class ServerWorld extends World {
 
             this.activeChunks.add(chunkPos);
             chunk.active = true;
+
+            try {
+                this.world.server.sendChunk(globalPos, chunk);
+            } catch (IOException e) {
+                QuantumServer.get().crash(e);
+            }
 
             return chunk;
         }
@@ -1529,11 +1552,18 @@ public class ServerWorld extends World {
                 try {
                     this.world.server.sendChunk(globalPos, builtChunk);
                 } catch (CancellationException e) {
+                    // Chunk isn't generating anymore.
+                    QuantumServer.LOGGER.error("Failed to send chunk to connections:", e);
                     this.generatingChunks.remove(globalPos);
                 } catch (IOException e) {
+                    QuantumServer.LOGGER.error("Failed to send chunk to connections:", e);
                     this.generatingChunks.remove(globalPos);
                     throw new RuntimeException(e);
                 }
+            }).exceptionally(e -> {
+                QuantumServer.LOGGER.error("Failed to send chunk to connections:", e);
+                this.generatingChunks.remove(globalPos);
+                return null;
             });
 
             // Mark the chunk as ready.

@@ -1,7 +1,10 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -28,10 +31,10 @@ import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.DisposableContainer;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.DisposableContainer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
@@ -548,6 +551,8 @@ public final class WorldRenderer implements DisposableContainer {
         chunk.model = null;
 
         chunk.destroyModels();
+
+        world.unloadChunk(chunk, chunk.getPos());
 
         Identifier id = createId(chunk.getPos());
         if (!ModelManager.INSTANCE.unloadModel(id)) {

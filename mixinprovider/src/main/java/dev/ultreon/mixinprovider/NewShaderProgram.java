@@ -16,12 +16,6 @@
 
 package dev.ultreon.mixinprovider;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
@@ -33,11 +27,10 @@ import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectIntMap;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.*;
+
+import java.nio.*;
+import java.lang.StringBuilder;
 
 /** <p>
  * A shader program encapsulates several shader parts (typically a vertex and fragment shader) linked to form a shader program.
@@ -79,7 +72,7 @@ public class NewShaderProgram extends ShaderProgram implements Disposable {
 	/** default name for boneweight attribute **/
 	public static final String BONEWEIGHT_ATTRIBUTE = "a_boneWeight";
 
-	/** flag indicating whether attributes & uniforms must be present at all times **/
+	/** flag indicating whether attributes &amp; uniforms must be present at all times **/
 	public static boolean pedantic = true;
 
 	/** the list of currently available shaders **/
@@ -646,7 +639,7 @@ public class NewShaderProgram extends ShaderProgram implements Disposable {
 	/** Sets the vertex attribute with the given name. The {@link NewShaderProgram} must be bound for this to work.
 	 * 
 	 * @param name the attribute name
-	 * @param size the number of components, must be >= 1 and <= 4
+	 * @param size the number of components, must be &gt;= 1 and &lt;= 4
 	 * @param type the type, must be one of GL20.GL_BYTE, GL20.GL_UNSIGNED_BYTE, GL20.GL_SHORT,
 	 *           GL20.GL_UNSIGNED_SHORT,GL20.GL_FIXED, or GL20.GL_FLOAT. GL_FIXED will not work on the desktop
 	 * @param normalize whether fixed point data should be normalized. Will not work on the desktop
@@ -669,7 +662,7 @@ public class NewShaderProgram extends ShaderProgram implements Disposable {
 	/** Sets the vertex attribute with the given name. The {@link NewShaderProgram} must be bound for this to work.
 	 * 
 	 * @param name the attribute name
-	 * @param size the number of components, must be >= 1 and <= 4
+	 * @param size the number of components, must be &gt;= 1 and &lt;= 4
 	 * @param type the type, must be one of GL20.GL_BYTE, GL20.GL_UNSIGNED_BYTE, GL20.GL_SHORT,
 	 *           GL20.GL_UNSIGNED_SHORT,GL20.GL_FIXED, or GL20.GL_FLOAT. GL_FIXED will not work on the desktop
 	 * @param normalize whether fixed point data should be normalized. Will not work on the desktop

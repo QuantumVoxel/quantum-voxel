@@ -13,6 +13,7 @@ import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.weather.Weather;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.SoundEvent;
+import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.particles.ParticleType;
 
@@ -31,4 +32,5 @@ public class RegistryKeys {
     public static final RegistryKey<Registry<BlockEntityType<?>>> BLOCK_ENTITY_TYPE = RegistryKey.registry(new Identifier("block_entity_type"));
     public static final RegistryKey<Registry<ParticleType>> PARTICLE_TYPE = RegistryKey.registry(new Identifier("particle_type"));
     public static final RegistryKey<Registry<FontIconMap>> FONT_ICON_MAP = RegistryKey.registry(new Identifier("font_icon_map"));
+    public static final RegistryKey<Registry<CapabilityType<?, ?>>> CAPABILITY_TYPE = RegistryKey.registry(new Identifier("capability_type"));
 }

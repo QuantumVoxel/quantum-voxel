@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.util.Objects;
@@ -51,6 +52,10 @@ public final class BlockPos {
      */
     public BlockPos(Vec3i vec) {
         this(vec.x, vec.y, vec.z);
+    }
+
+    public BlockPos(MapType data) {
+        this(data.getInt("x"), data.getInt("y"), data.getInt("z"));
     }
 
     /**
@@ -139,4 +144,10 @@ public final class BlockPos {
         return Objects.hash(x, y, z);
     }
 
+    public MapType save(MapType data) {
+        data.putInt("x", this.x);
+        data.putInt("y", this.y);
+        data.putInt("z", this.z);
+        return data;
+    }
 }

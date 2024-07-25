@@ -1,16 +1,16 @@
 package dev.ultreon.quantum.block.entity;
 
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.ubo.types.MapType;
 
 import java.util.Objects;
 
-public abstract class BlockEntity {
+public abstract class BlockEntity implements CapabilityHolder {
     private final BlockEntityType<?> type;
     protected final World world;
     protected final BlockPos pos;

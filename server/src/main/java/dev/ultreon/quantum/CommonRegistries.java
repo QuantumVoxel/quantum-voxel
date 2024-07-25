@@ -6,6 +6,7 @@ import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.server.GameCommands;
 import dev.ultreon.quantum.sound.event.SoundEvents;
+import dev.ultreon.quantum.world.capability.Capabilities;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 
@@ -18,6 +19,7 @@ public class CommonRegistries {
         EntityTypes.init();
         SoundEvents.init();
         ParticleTypes.init();
+        Capabilities.init();
 
         GameCommands.register();
     }

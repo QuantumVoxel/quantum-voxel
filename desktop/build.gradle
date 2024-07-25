@@ -2,8 +2,6 @@
 
 
 //import dev.ultreon.gameutils.ProjectType
-import org.jetbrains.gradle.ext.Application
-
 
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -202,4 +200,24 @@ tasks.withType(ProcessResources).configureEach {
 
 tasks.withType(Jar).configureEach {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+publishing {
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
 }

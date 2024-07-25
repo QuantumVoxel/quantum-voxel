@@ -1,16 +1,21 @@
 package dev.ultreon.quantum.block.entity;
 
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.menu.CrateMenu;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.capability.Capabilities;
+import dev.ultreon.quantum.world.capability.CapabilityType;
+import dev.ultreon.quantum.world.capability.ItemStorageCapability;
+import dev.ultreon.quantum.world.container.ItemContainer;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ContainerBlockEntity<T extends ContainerMenu> extends BlockEntity {
+import java.util.Optional;
+
+public abstract class ContainerBlockEntity<T extends ContainerMenu> extends BlockEntity implements ItemContainer<T> {
     private final ItemStack[] items;
     private T menu;
 
@@ -24,6 +29,7 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
         }
     }
 
+    @Override
     public T getMenu() {
         return menu;
     }
@@ -50,32 +56,39 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
         return super.save(data);
     }
 
+    @Override
     public ItemStack get(int slot) {
         return items[slot];
     }
 
+    @Override
     public void set(int slot, ItemStack item) {
         items[slot] = item;
     }
 
+    @Override
     public ItemStack remove(int slot) {
         ItemStack item = items[slot];
         items[slot] = ItemStack.empty();
         return item;
     }
 
+    @Override
     public ItemStack get(int x, int y) {
         return get(y * 3 + x);
     }
 
+    @Override
     public void set(int x, int y, ItemStack item) {
         set(y * 3 + x, item);
     }
 
+    @Override
     public ItemStack remove(int x, int y) {
         return remove(y * 3 + x);
     }
 
+    @Override
     public void open(Player player) {
         if (this.menu != null) {
             player.openMenu(this.menu);
@@ -89,15 +102,35 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     @NotNull
     public abstract T createMenu(Player player);
 
-    public void onGainedViewer(Player player, CrateMenu menu) {
+    @Override
+    public void onGainedViewer(Player player, T menu) {
         // Implementation purposes
     }
 
-    public void onLostViewer(Player player, CrateMenu menu) {
+    @Override
+    public void onLostViewer(Player player, T menu) {
         if (this.menu != menu) return;
 
         if (this.menu.isOnItsOwn()) {
             this.menu = null;
         }
+    }
+
+    @Override
+    public int getItemCapacity() {
+        return items.length;
+    }
+
+    @Override
+    public int getCapacity(CapabilityType<?, ?> capability) {
+        if (capability == Capabilities.ITEM_STORAGE) {
+            Optional<ItemStorageCapability> itemStorage = getCapability(Capabilities.ITEM_STORAGE);
+
+            if (itemStorage.isPresent()) {
+                return itemStorage.get().size();
+            }
+        }
+
+        return -1;
     }
 }
