@@ -12,6 +12,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -31,6 +32,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -333,7 +335,7 @@ public class ImGuiOverlay {
         if (client.player != null && ImGui.begin("Chunk Debugging", ImGuiOverlay.getDefaultFlags())) {
             if (ImGui.button(String.format("Reset chunk at %s", ImGuiOverlay.RESET_CHUNK))) {
                 CompletableFuture.runAsync(() -> {
-                    ClientWorld world = client.world;
+                    @Nullable ClientWorldAccess world = client.world;
                     QuantumClient.invokeAndWait(() -> {
                         if (world != null) {
                             world.unloadChunk(ImGuiOverlay.RESET_CHUNK);

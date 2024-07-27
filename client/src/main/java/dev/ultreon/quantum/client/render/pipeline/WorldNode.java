@@ -54,11 +54,13 @@ public class WorldNode extends WorldRenderNode {
         }
 
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();
-        particleSystem.begin();
-        particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
-        particleSystem.end();
+        if (particleSystem != null) {
+            particleSystem.begin();
+            particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
+            particleSystem.end();
+            modelBatch.render(particleSystem);
+        }
 
-        modelBatch.render(particleSystem);
 
         RenderLayer.WORLD.finish(input, this.pool());
 

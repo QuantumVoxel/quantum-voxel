@@ -1,7 +1,9 @@
 package dev.ultreon.quantum.client.gui.screens;
 
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
@@ -18,8 +20,8 @@ public class LanguageScreen extends Screen {
     private TextButton backButton;
     private SelectionList<Locale> list;
 
-    public LanguageScreen() {
-        super(TextObject.translation("quantum.screen.language.title"));
+    public LanguageScreen(Screen back) {
+        super(TextObject.translation("quantum.screen.language"), back);
     }
 
     @Override
@@ -45,6 +47,17 @@ public class LanguageScreen extends Screen {
     }
 
     private void renderItem(Renderer renderer, Locale locale, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+        if (locale.getLanguage().equalsIgnoreCase("utn") && locale.getCountry().equalsIgnoreCase("aa")) {
+            renderer.textCenter("Ultanian (Ultania) - Utanïanī (Utanïa)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
+            return;
+        } else if (locale.getLanguage().equalsIgnoreCase("qya") && locale.getCountry().equalsIgnoreCase("aa")) {
+            renderer.textCenter("Quenya (Quenya) - Quenya (Quenya)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
+            return;
+        } else if (locale.getLanguage().equalsIgnoreCase("en") && locale.getCountry().equalsIgnoreCase("ud")) {
+            renderer.textCenter("English (Upside Down) - English (Upside Down)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
+            return;
+        }
+
         String text = locale.getDisplayLanguage(new Locale("en")) + " (" + locale.getDisplayCountry(new Locale("en")) + ")";
         text += " - " + locale.getDisplayLanguage(locale) + " (" + locale.getDisplayCountry(locale) + ")";
 
@@ -66,5 +79,7 @@ public class LanguageScreen extends Screen {
     private void setLanguage(Locale locale) {
         ClientConfig.language = LanguageManager.INSTANCE.getLanguageID(locale);
         this.client.newConfig.save();
+
+        LanguageManager.setCurrentLanguage(locale);
     }
 }

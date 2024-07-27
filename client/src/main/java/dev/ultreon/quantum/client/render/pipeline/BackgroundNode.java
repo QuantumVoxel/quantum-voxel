@@ -11,17 +11,18 @@ import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
-import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import org.jetbrains.annotations.Nullable;
 
 public class BackgroundNode extends RenderPipeline.RenderNode {
     private final Supplier<SceneShaders> shaderProvider = Shaders.SCENE;
 
     public void renderWorld(ModelBatch batch) {
-        ClientWorld world = this.client.world;
-        WorldRenderer worldRenderer = this.client.worldRenderer;
+        @Nullable ClientWorldAccess world = this.client.world;
+        @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
         LocalPlayer localPlayer = this.client.player;
 
         if (world != null && worldRenderer != null && this.client.renderWorld && localPlayer != null) {
@@ -43,8 +44,10 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
         return true;
     }
 
-    private void renderWorldOnce(WorldRenderer worldRenderer, ClientWorld world, Vec3d position, ModelBatch batch) {
-        worldRenderer.updateBackground();
+    private void renderWorldOnce(@Nullable TerrainRenderer worldRenderer, @Nullable ClientWorldAccess world, Vec3d position, ModelBatch batch) {
+        if (worldRenderer != null) {
+            worldRenderer.updateBackground();
+        }
         batch.render(RenderLayer.BACKGROUND::finish);
     }
 }

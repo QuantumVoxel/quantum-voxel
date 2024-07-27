@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -59,11 +58,11 @@ public class MainRenderNode extends RenderNode {
         // Handle blur effect
         if (blurScale > 0f) {
             this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex);
+                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
             });
         } else {
             this.client.renderer.blurred(0, ClientConfig.blurRadius * 0, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex);
+                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
             });
         }
 
@@ -96,38 +95,23 @@ public class MainRenderNode extends RenderNode {
         return input;
     }
 
-    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex) {
+    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex) {
         this.client.spriteBatch.enableBlending();
 
-        this.drawDiffuse(skyboxTex);
-        this.drawDiffuse(diffuseTex);
-
-//        this.client.spriteBatch.flush();
-//        this.client.modelBatch.flush();
-//        diffuseTex.bind(0);
-//        positionTex.bind(1);
-//        normalTex.bind(2);
-//        depthTex.bind(3);
-//        reflectiveTex.bind(4);
-//
-//        FrameBuffer frameBuffer = this.getFrameBuffer();
-//        frameBuffer.begin();
-//
-//        ShaderProgram program = this.program.get();
-//        program.setUniformi("uPosition", 0);
-//        program.setUniformi("uNormal", 1);
-//        program.setUniformi("uDiffuse", 2);
-//        program.setUniformi("uReflective", 3);
-//        program.setUniformMatrix("view", client.camera.view);
-//        program.setUniformf("maxDistance", ClientConfig.maxReflectDistance);
-//        program.setUniformf("thickness", 0.5f);
-//        program.setUniformf("resolution", 1.0f);
-//        quad.render(program, GL_TRIANGLES);
-//
-//        frameBuffer.end();
-//        Texture colorBufferTexture = frameBuffer.getColorBufferTexture();
-//        this.client.spriteBatch.draw(colorBufferTexture, 0, 0);
-//        this.client.spriteBatch.flush();
+        if (this.client.viewMode == 0) {
+            this.drawDiffuse(skyboxTex);
+            this.drawDiffuse(diffuseTex);
+        } else if (this.client.viewMode == 1) {
+            this.drawDiffuse(normalTex);
+        } else if (this.client.viewMode == 2) {
+            this.drawDiffuse(reflectiveTex);
+        } else if (this.client.viewMode == 3) {
+            this.drawDiffuse(depthTex);
+        } else if (this.client.viewMode == 4) {
+            this.drawDiffuse(positionTex);
+        } else if (this.client.viewMode == 5) {
+            this.drawDiffuse(specularTex);
+        }
     }
 
     private void drawDiffuse(Texture diffuseTexture) {

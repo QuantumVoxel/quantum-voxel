@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.client.model.block;
 
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
@@ -93,19 +95,26 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
         for (int i = 0; i < breakStages; i++) {
             Identifier texId = new Identifier("textures/misc/breaking" + (i + 1) + ".png");
-            Texture tex = textureManager.getTexture(texId);
+            Pixmap tex = new Pixmap(QuantumClient.resource(texId));
             stitcher.add(texId, tex);
+            tex.dispose();
         }
 
         for (Identifier texture : this.TEXTURES) {
-            Texture emissive = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".emissive.png"), null);
-            Texture normal = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".normal.png"), null);
-            Texture specular = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".specular.png"), null);
-            Texture reflective = textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".reflective.png"), null);
-            if (emissive != null) {
-                stitcher.add(texture, textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".png")), emissive, normal, specular, reflective);
+            FileHandle emissiveRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".emissive.png"));
+            FileHandle normalRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".normal.png"));
+            FileHandle specularRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".specular.png"));
+            FileHandle reflectiveRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".reflective.png"));
+
+            Pixmap diffuse = new Pixmap(QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".png")));
+            Pixmap emissive = emissiveRes.exists() ? new Pixmap(emissiveRes) : null;
+            Pixmap normal = normalRes.exists() ? new Pixmap(normalRes) : null;
+            Pixmap specular = specularRes.exists() ? new Pixmap(specularRes) : null;
+            Pixmap reflective = reflectiveRes.exists() ? new Pixmap(reflectiveRes) : null;
+            if (emissive != null || normal != null || specular != null || reflective != null) {
+                stitcher.add(texture, diffuse, emissive, normal, specular, reflective);
             } else {
-                stitcher.add(texture, textureManager.getTexture(texture.mapPath(path -> "textures/" + path + ".png")));
+                stitcher.add(texture, diffuse);
             }
         }
 

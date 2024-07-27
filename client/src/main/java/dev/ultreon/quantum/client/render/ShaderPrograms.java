@@ -24,7 +24,7 @@ public class ShaderPrograms {
     }
 
     public static ShaderProgram createShader(Identifier id) {
-        if (!QuantumClient.isOnMainThread()) return QuantumClient.invokeAndWait(() -> createShader(id));
+        if (!QuantumClient.isOnRenderThread()) return QuantumClient.invokeAndWait(() -> createShader(id));
 
         ResourceFileHandle vertexResource = new ResourceFileHandle(id.mapPath(s -> "shaders/" + s + ".vert"));
         ResourceFileHandle fragmentResource = new ResourceFileHandle(id.mapPath(s -> "shaders/" + s + ".frag"));

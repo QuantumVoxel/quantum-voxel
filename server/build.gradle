@@ -117,6 +117,8 @@ dependencies {
     implementation(api("org.graalvm.polyglot:js:23.1.2"))
     implementation(api("org.graalvm.llvm:llvm-api:23.1.2"))
 
+    implementation(api("com.mojang:datafixerupper:8.0.16"))
+
     implementation(api("org.apache.commons:commons-compress:1.26.1"))
 
     api 'org.mozilla:rhino:1.7.15!!'
@@ -125,8 +127,7 @@ dependencies {
 
 processResources {
     from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
-    from(project(":api-javascript").tasks.getByName("dist").outputs)
-    exclude "*.pdn", "*.xcf", "*.ps"
+    exclude "*.pdn", "*.xcf", "*.ps", "*.cache", "*.tmp", "*.temp", "*.bak", "*.old"
 
     inputs.property "version", version
 
@@ -137,8 +138,6 @@ processResources {
 }
 
 jar {
-    dependsOn ":api-javascript:dist"
-
     //noinspection GroovyAssignabilityCheck
     manifest {
         //noinspection GroovyAssignabilityCheck
@@ -199,21 +198,6 @@ tasks.register('copyDependencies', Copy) {
 tasks.register('copyJar', Copy) {
     from(tasks.jar)
     into("$projectDir/build/jars")
-}
-
-publishing {
-    repositories {
-        maven {
-            url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
-            }
-            authentication {
-                header(HttpHeaderAuthentication)
-            }
-        }
-    }
 }
 
 compileJava {

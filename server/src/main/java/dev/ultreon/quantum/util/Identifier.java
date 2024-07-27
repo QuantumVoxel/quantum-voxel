@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.util;
 
+import com.mojang.serialization.Codec;
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.CommonConstants;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  */
 public final class Identifier {
+    public static final Codec<Identifier> CODEC = Codec.STRING.xmap(Identifier::parse, Identifier::toString);
     private final @NotNull String namespace;
     private final @NotNull String path;
 

@@ -19,6 +19,15 @@ public class TranslationText extends MutableText {
     TranslationText(@NotNull String path, Object @NotNull ... args) {
         this.path = path;
         this.args = args;
+
+        for (int i = 0, argsLength = args.length; i < argsLength; i++) {
+            Object arg = args[i];
+            if (arg instanceof TextObject textObject) {
+                args[i] = textObject.createString();
+            } else if (arg instanceof String s) {
+                args[i] = s;
+            }
+        }
     }
 
     public static TranslationText deserialize(MapType data) {

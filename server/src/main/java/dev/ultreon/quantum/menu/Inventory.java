@@ -11,6 +11,7 @@ import dev.ultreon.quantum.network.packets.s2c.S2CInventoryItemChangedPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +25,7 @@ public class Inventory extends ContainerMenu {
 
     private final Player holder;
 
-    public Inventory(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockPos pos) {
+    public Inventory(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockPos pos) {
         super(type, world, entity, pos, MAX_SLOTS);
 
         if (!(entity instanceof Player player)) {

@@ -95,6 +95,7 @@ public final class ServerChunk extends Chunk {
         WorldEvents.LOAD_CHUNK.factory().onLoadChunk(this, extra);
     }
 
+    @Override
     protected void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
         if (!QuantumServer.isOnServerThread()) {
             QuantumServer.invokeAndWait(() -> setBlockEntity(blockPos, blockEntity));

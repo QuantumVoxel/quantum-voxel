@@ -2,6 +2,7 @@ package dev.ultreon.quantum.entity;
 
 import com.google.common.collect.Lists;
 import dev.ultreon.quantum.cs.ComponentSystem;
+import dev.ultreon.quantum.world.*;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
@@ -12,10 +13,6 @@ import dev.ultreon.quantum.events.api.ValueEventResult;
 import dev.ultreon.quantum.item.food.AppliedEffect;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
 import dev.ultreon.quantum.server.util.Utils;
-import dev.ultreon.quantum.world.ChunkPos;
-import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.SoundEvent;
-import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +40,7 @@ public class LivingEntity extends Entity {
     private boolean tagged;
     private Navigator navigator;
 
-    public LivingEntity(EntityType<? extends LivingEntity> entityType, World world) {
+    public LivingEntity(EntityType<? extends LivingEntity> entityType, WorldAccess world) {
         super(entityType, world);
     }
 

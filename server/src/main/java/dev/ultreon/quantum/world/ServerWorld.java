@@ -152,7 +152,7 @@ public class ServerWorld extends World {
     }
 
     @Override
-    protected boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
+    public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
         this.checkThread();
 
         if (!chunk.getPos().equals(pos)) {

@@ -1,10 +1,9 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.client.CameraPlayer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
@@ -13,6 +12,8 @@ import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
 import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
+import dev.ultreon.quantum.client.util.VoxelTerrain;
+import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
@@ -26,7 +27,8 @@ public class TitleScreen extends Screen {
     private TitleButton optionsButton;
     private TitleButton quitButton;
     private final Resizer resizer;
-    private TextButton worldGenTestButton;
+    private @Nullable TextButton worldGenTestButton;
+    private @Nullable TextButton newWorldTestButton;
 
     public TitleScreen() {
         super((TextObject) null, null);
@@ -51,8 +53,11 @@ public class TitleScreen extends Screen {
 
         if (GamePlatform.get().isDevEnvironment()) {
             this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
-                    .position(() -> new Position(50, this.size.height / 2 - 125))
+                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, this.size.height / 2 - 125))
                     .callback(this::openTest));
+            this.newWorldTestButton = builder.add(TextButton.of(TextObject.literal("NEW-WORLD TEST"), 100)
+                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100, this.size.height / 2 - 125))
+                    .callback(this::openNewWorldTest));
         }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
@@ -78,6 +83,21 @@ public class TitleScreen extends Screen {
         if (GamePlatform.get().isMobile()) {
             this.quitButton.enabled = false;
         }
+    }
+
+    private void openNewWorldTest(TextButton textButton) {
+        VoxelTerrain voxelTerrain = new VoxelTerrain(client.camera);
+        voxelTerrain.create();
+
+        client.world = voxelTerrain;
+        client.worldRenderer = voxelTerrain;
+
+        client.player = new CameraPlayer(voxelTerrain, Utils.ZEROED_UUID);
+        client.player.setPosition(2000, 2000, 2000);
+
+        client.renderWorld = true;
+
+        client.showScreen(null);
     }
 
     private void openTest(TextButton textButton) {
@@ -106,9 +126,6 @@ public class TitleScreen extends Screen {
 
     @Override
     protected void renderSolidBackground(Renderer renderer) {
-//        super.renderSolidBackground(renderer);
-//
-//        renderer.setBlitColor(RgbColor.WHITE);
 
         if (!(ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled())) {
             Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
@@ -129,6 +146,10 @@ public class TitleScreen extends Screen {
 
     public @Nullable TextButton getWorldGenTestButton() {
         return worldGenTestButton;
+    }
+
+    public @Nullable TextButton getNewWorldTestButton() {
+        return newWorldTestButton;
     }
 
     public TitleButton getMultiplayerButton() {

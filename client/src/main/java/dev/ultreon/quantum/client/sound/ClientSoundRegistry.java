@@ -25,7 +25,7 @@ public class ClientSoundRegistry {
         Map<Identifier, Sound> soundMap = new HashMap<>();
         for (Map.Entry<RegistryKey<SoundEvent>, SoundEvent> entry : soundEvents.entries()) {
             Identifier key = entry.getKey().element();
-            Sound sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.mp3", key.namespace(), key.path().replaceAll("\\.", "/"))));
+            Sound sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", key.namespace(), key.path().replaceAll("\\.", "/"))));
 
             soundMap.put(key, sound);
         }

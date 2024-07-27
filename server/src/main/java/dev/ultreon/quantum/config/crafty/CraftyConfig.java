@@ -174,6 +174,16 @@ public abstract class CraftyConfig {
         return CONFIGS.values();
     }
 
+    public static Collection<CraftyConfig> getByMod(Mod mod) {
+        Set<CraftyConfig> configs = new LinkedHashSet<>();
+        for (CraftyConfig config : CONFIGS.values()) {
+            if (config.getMod() == mod) {
+                configs.add(config);
+            }
+        }
+        return Collections.unmodifiableSet(configs);
+    }
+
     /**
      * Load the configuration from the specified file, replacing any existing values with defaults if necessary.
      *
@@ -227,6 +237,8 @@ public abstract class CraftyConfig {
                 success = false;
             }
         }
+
+        event.factory().load();
 
         return success;
     }
@@ -1003,6 +1015,14 @@ public abstract class CraftyConfig {
 
     public Path getConfigPath() {
         return configPath;
+    }
+
+    public Ranged getRange(String key) {
+        return rangesMap.get(key);
+    }
+
+    public String getComment(String key) {
+        return entriesMap.get(key).comment();
     }
 
     /**

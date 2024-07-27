@@ -2327,6 +2327,10 @@ public class Renderer implements Disposable {
         if (rect.height < 1) return false;
 
         rect.y = this.client.getHeight() - rect.y - rect.height;
+        
+        if (!Gdx.gl.glIsEnabled(GL20.GL_SCISSOR_TEST)) {
+            Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
+        }
 
         this.flush();
         return ScissorStack.pushScissors(rect);

@@ -17,6 +17,7 @@ public final class ChunkPos implements Comparable<ChunkPos>, Serializable {
     @Serial
     private static final long serialVersionUID = 782820744815861493L;
     private final int x;
+    private final int y;
     private final int z;
 
     /**
@@ -24,7 +25,16 @@ public final class ChunkPos implements Comparable<ChunkPos>, Serializable {
      * @param z The z coordinate.
      */
     public ChunkPos(int x, int z) {
+        this(x, 0, z);
+    }
+
+    /**
+     * @param x The x coordinate.
+     * @param z The z coordinate.
+     */
+    public ChunkPos(int x, int y, int z) {
         this.x = x;
+        this.y = y;
         this.z = z;
     }
 
@@ -35,7 +45,7 @@ public final class ChunkPos implements Comparable<ChunkPos>, Serializable {
      */
     @Override
     public String toString() {
-        return this.x + "," + this.z;
+        return this.x + "," + this.y + "," + this.z;
     }
 
     /**
@@ -46,12 +56,23 @@ public final class ChunkPos implements Comparable<ChunkPos>, Serializable {
      */
     @Nullable
     public static RegionPos parse(String s) {
-        String[] split = s.split(",", 2);
-        Integer x = ChunkPos.parseInt(split[0]);
-        Integer z = ChunkPos.parseInt(split[1]);
-        if (x == null) return null;
-        if (z == null) return null;
-        return new RegionPos(x, z);
+        String[] split = s.split(",", 3);
+        if (split.length == 2) {
+            Integer x = ChunkPos.parseInt(split[0]);
+            Integer z = ChunkPos.parseInt(split[1]);
+            if (x == null) return null;
+            if (z == null) return null;
+            return new RegionPos(x, 0, z);
+        } else if (split.length == 3) {
+            Integer x = ChunkPos.parseInt(split[0]);
+            Integer y = ChunkPos.parseInt(split[1]);
+            Integer z = ChunkPos.parseInt(split[2]);
+            if (x == null) return null;
+            if (y == null) return null;
+            if (z == null) return null;
+            return new RegionPos(x, y, z);
+        }
+        return null;
     }
 
     @Nullable
@@ -73,7 +94,7 @@ public final class ChunkPos implements Comparable<ChunkPos>, Serializable {
     /**
      * Compare this chunk position to another.
      *
-     * @param chunkPos the chunk positon to be compared.
+     * @param chunkPos the chunk position to be compared.
      * @return the comparison result.
      */
     @Override
@@ -101,14 +122,19 @@ public final class ChunkPos implements Comparable<ChunkPos>, Serializable {
 
     @Override
     public int hashCode() {
-        return 31 * (31 + this.x) + this.z;
+        return 31 * (31 * (31 + this.x) + this.y) + this.z;
     }
 
+    @Deprecated
     public Vec2d vec() {
         return new Vec2d(this.x, this.z);
     }
 
+    public Vec3d vec3d() {
+        return new Vec3d(this.x, this.y, this.z);
+    }
+
     public ChunkPos offset(int x, int z) {
-        return new ChunkPos(this.x + x, this.z + z);
+        return new ChunkPos(this.x + x, this.y + y, this.z + z);
     }
 }

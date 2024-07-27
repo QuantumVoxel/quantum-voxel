@@ -6,20 +6,18 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
-import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.shader.GameShaders;
-import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.badlogic.gdx.Gdx.gl;
 import static com.badlogic.gdx.graphics.GL20.GL_NONE;
@@ -51,8 +49,8 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
     }
 
     public void renderWorld(ModelBatch batch) {
-        ClientWorld world = this.client.world;
-        WorldRenderer worldRenderer = this.client.worldRenderer;
+        @Nullable ClientWorldAccess world = this.client.world;
+        @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
         LocalPlayer localPlayer = this.client.player;
 
         if (world != null && worldRenderer != null && this.client.renderWorld && localPlayer != null) {
@@ -77,7 +75,7 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
         return true;
     }
 
-    private void renderWorldOnce(WorldRenderer worldRenderer, ClientWorld world, Vec3d position, ModelBatch batch) {
+    private void renderWorldOnce(@Nullable TerrainRenderer worldRenderer, @Nullable ClientWorldAccess world, Vec3d position, ModelBatch batch) {
         Array<Entity> toSort = new Array<>(world.getAllEntities());
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);

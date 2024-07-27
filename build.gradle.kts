@@ -50,7 +50,7 @@ apply(plugin = "gameutils")
 
 
 //val gameVersion = "0.1.0"
-val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
+val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now()) + ".1"
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 
 println("Current version: $gameVersion")
@@ -87,6 +87,7 @@ repositories {
     maven("https://maven.atlassian.com/3rdparty/")
     maven("https://repo1.maven.org/maven2/")
     maven("https://repo.runelite.net/")
+    maven("https://repo.glaremasters.me/repository/public/")
     maven("https://jitpack.io") {
         content {
             includeGroup("dev.ultreon")
@@ -147,14 +148,25 @@ allprojects {
     repositories {
         // Ultreon Maven Repository
         maven("https://gitlab.com/api/v4/groups/9962021/-/packages/maven")
-
+        
         mavenLocal()
         mavenCentral()
         google()
         maven("https://maven.fabricmc.net/")
         maven("https://oss.sonatype.org/content/repositories/releases")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
-        maven("https://jitpack.io")
+        maven("https://repo.glaremasters.me/repository/public/")
+        maven("https://jitpack.io") {
+            content {
+                includeGroup("dev.ultreon")
+                includeGroup("com.github.mgsx-dev.gdx-gltf")
+                includeGroup("com.github.JnCrMx")
+                includeGroup("com.github.jagrosh")
+                includeGroup("com.github.crykn.guacamole")
+                includeGroup("com.github.Ultreon")
+                includeGroup("space.earlygrey")
+            }
+        }
 
         flatDir {
             name = "Project Libraries"
@@ -245,7 +257,7 @@ artifacts {
 }
 
 val publishProjects =
-    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"), project(":mixinprovider"))
+    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"))
 
 publishProjects.forEach {
     if (it.name == "android") return@forEach
@@ -254,7 +266,7 @@ publishProjects.forEach {
 
     it.publishing {
         publications {
-            create<MavenPublication>("library") {
+            create<MavenPublication>("mavenJava") {
                 from(it.components["java"])
 
                 groupId = "dev.ultreon.quantum"
@@ -265,7 +277,7 @@ publishProjects.forEach {
                     this@pom.name.set("QuantumVoxel")
                     this@pom.description.set("Quantum Voxel is a voxel game that focuses on technology based survival.")
 
-                    this@pom.url.set("https://gitlab.com/ultreon/quantum-voxel")
+                    this@pom.url.set("https://github.com/Ultreon/quantum-voxel")
                     this@pom.inceptionYear.set("2023")
 
                     this@pom.developers {
@@ -294,13 +306,13 @@ publishProjects.forEach {
 
                     this@pom.scm {
                         url.set("https://github.com/Ultreon/quantum-voxel")
-                        connection.set("scm:git:git://gitlab.com/ultreon/quantum-voxel.git")
+                        connection.set("scm:git:git://github.com/Ultreon/quantum.git")
                     }
 
                     this@pom.licenses {
                         license {
-                            name.set("Ultreon-PSL-1.0")
-                            url.set("https://gitlab.com/ultreon/quantum-voxel/blob/main/LICENSE.md")
+                            name.set("AGPL-3.0")
+                            url.set("https://github.com/Ultreon/quantum-voxel/blob/main/LICENSE")
                         }
                     }
 
@@ -338,6 +350,7 @@ publishProjects.forEach {
 
             repositories {
                 maven {
+                    name = "GitLabMaven"
                     url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
                     credentials(HttpHeaderCredentials::class) {
                         name = "Private-Token"

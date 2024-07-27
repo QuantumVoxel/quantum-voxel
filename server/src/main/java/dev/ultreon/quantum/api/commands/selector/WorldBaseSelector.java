@@ -8,6 +8,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 
 import java.util.ArrayList;
 
@@ -41,7 +42,11 @@ public class WorldBaseSelector extends BaseSelector<World> {
                 if (player == null) {
                     return new Result<>(null, new NeedPlayerError());
                 } else {
-                    return new Result<>(player.getWorld(), null);
+                    WorldAccess worldAccess = player.getWorld();
+                    if (!(worldAccess instanceof World world)) {
+                        return new Result<>(null, new NotFoundError("world"));
+                    }
+                    return new Result<>(world, null);
                 }
             } else {
                 return new Result<>(null, new OverloadError());

@@ -120,7 +120,7 @@ public class Block implements DataWriter<MapType> {
         return block == null ? Blocks.AIR : block;
     }
 
-    public UseResult use(@NotNull World world, @NotNull Player player, @NotNull Item item, @NotNull BlockPos pos) {
+    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockPos pos) {
         return UseResult.SKIP;
     }
 
@@ -199,7 +199,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     @Deprecated
-    public BlockProperties onPlacedBy(World world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
+    public BlockProperties onPlacedBy(WorldAccess world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
         return blockMeta;
     }
 
@@ -211,7 +211,7 @@ public class Block implements DataWriter<MapType> {
         this.onPlace(serverWorld, offset, meta);
     }
 
-    public boolean canBePlacedAt(World world, BlockPos blockPos, Player player, ItemStack stack, CubicDirection direction) {
+    public boolean canBePlacedAt(WorldAccess world, BlockPos blockPos, Player player, ItemStack stack, CubicDirection direction) {
         return true;
     }
 

@@ -7,6 +7,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ConfigScreenFactory;
+import dev.ultreon.quantum.client.config.gui.CraftyConfigGui;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
 import dev.ultreon.quantum.client.gui.widget.Button;
@@ -15,6 +16,7 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.texture.TextureManager;
+import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
@@ -49,13 +51,15 @@ public class ModListScreen extends Screen {
                 .itemRenderer(this::renderItem)
                 .selectable(true)
                 .callback(caller -> {
-                    ConfigScreenFactory modConfigScreen = QuantumClient.get().getModConfigScreen(caller);
                     try {
-                        if (modConfigScreen != null) {
-                            this.client.showScreen(modConfigScreen.create(this.client.screen));
+                        ConfigScreenFactory modConfigScreen = QuantumClient.get().getModConfigScreen(caller);
+                        if (modConfigScreen != null || !CraftyConfig.getByMod(caller).isEmpty()) {
+                            this.configButton.enable();
+                        } else {
+                            this.configButton.disable();
                         }
                     } catch (Exception e) {
-                        QuantumClient.LOGGER.error("Can't show mod config", e);
+                        QuantumClient.LOGGER.error("Failed to get mod config screen factory", e);
                         this.client.notifications.add(Notification.builder(TextObject.literal("Failed to show mod config"), TextObject.literal(e.getMessage()))
                                 .icon(MessageIcon.ERROR).build());
                     }
@@ -67,6 +71,23 @@ public class ModListScreen extends Screen {
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
                 .position(() -> new Position(5, this.size.height - 51))
+                .callback(button -> {
+                    Mod mod = this.list.getSelected();
+                    if (mod != null) {
+                        try {
+                            ConfigScreenFactory modConfigScreen = QuantumClient.get().getModConfigScreen(mod);
+                            if (modConfigScreen != null) {
+                                this.client.showScreen(modConfigScreen.create(this));
+                            } else if (!CraftyConfig.getByMod(mod).isEmpty()) {
+                                this.client.showScreen(new CraftyConfigGui(this, mod));
+                            }
+                        } catch (Exception e) {
+                            QuantumClient.LOGGER.error("Can't show mod config", e);
+                            this.client.notifications.add(Notification.builder(TextObject.literal("Failed to show mod config"), TextObject.literal(e.getMessage()))
+                                    .icon(MessageIcon.ERROR).build());
+                        }
+                    }
+                })
                 .type(Button.Type.DARK_EMBED));
         this.configButton.disable();
 

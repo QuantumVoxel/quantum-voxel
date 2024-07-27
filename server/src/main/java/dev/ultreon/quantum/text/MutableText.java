@@ -43,6 +43,11 @@ public abstract class MutableText extends TextObject {
         return this;
     }
 
+    public MutableText setColor(ColorCode color) {
+        this.style.color(color);
+        return this;
+    }
+
     public boolean isUnderlined() {
         return this.style.isUnderline();
     }

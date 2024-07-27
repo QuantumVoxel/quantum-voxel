@@ -50,6 +50,7 @@ import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -78,7 +79,7 @@ import static dev.ultreon.quantum.client.QuantumClient.id;
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
-public final class WorldRenderer implements DisposableContainer {
+public final class WorldRenderer implements DisposableContainer, TerrainRenderer {
     public static final float SCALE = 1;
     private static final Vec3d TMP_3D_A = new Vec3d();
     private static final Vec3d TMp_3D_B = new Vec3d();
@@ -115,13 +116,13 @@ public final class WorldRenderer implements DisposableContainer {
     private BlockHitResult lastHitResult;
     private final Map<BlockPos, ModelInstance> breakingInstances = new HashMap<>();
     private final Map<BlockPos, ModelInstance> blockInstances = new ConcurrentHashMap<>();
-    private final Array<ClientChunk> removedChunks = new Array<>();
+    private final Array<ClientChunkAccess> removedChunks = new Array<ClientChunkAccess>();
     private final Map<ChunkPos, Pair<ClientChunk, ModelInstance>> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Quaternion tmpQ = new Quaternion();
     private final Vector3 sunDirection = new Vector3();
 
-    public WorldRenderer(ClientWorld world) {
+    public WorldRenderer(@Nullable ClientWorld world) {
         this.world = world;
 
         this.setup();
@@ -281,6 +282,7 @@ public final class WorldRenderer implements DisposableContainer {
         return new MeshMaterial(mesh, material);
     }
 
+    @Override
     public Environment getEnvironment() {
         return this.environment;
     }
@@ -293,13 +295,14 @@ public final class WorldRenderer implements DisposableContainer {
         return ValueTracker.getVertexCount();
     }
 
-    public void free(ClientChunk chunk) {
-        if (!QuantumClient.isOnMainThread()) {
+    @Override
+    public void free(ClientChunkAccess chunk) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.free(chunk));
             return;
         }
 
-        if (!chunk.initialized) return;
+        if (!chunk.isInitialized()) return;
 
 //        ModelInstance modelInstance = chunk.modelInstance;
 //        if (modelInstance == null)
@@ -315,26 +318,31 @@ public final class WorldRenderer implements DisposableContainer {
 //
 //        chunk.model = null;
 
-        chunk.initialized = false;
+        chunk.revalidate();
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
 
-    public void removeEntity(int id) {
+    @Override
+    public Entity removeEntity(int id) {
         this.checkThread();
         ModelInstance remove = this.modelInstances.remove(id);
-        if (remove == null) return;
+        if (remove == null) return null;
         RenderLayer.WORLD.destroy(remove);
+        return null;
     }
 
     private void checkThread() {
-        if (!QuantumClient.isOnMainThread())
+        if (!QuantumClient.isOnRenderThread())
             throw new IllegalStateException("Should only be called on the main thread!");
     }
 
+    @Override
     public void render(RenderLayer renderLayer, float deltaTime) {
         var player = this.client.player;
         if (player == null) return;
         if (this.disposed) return;
+
+        Gdx.gl.glLineWidth(10f);
 
         this.skybox.update(this.world.getDaytime(), deltaTime);
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
@@ -376,7 +384,7 @@ public final class WorldRenderer implements DisposableContainer {
                         var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                         var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-                        WorldRenderer.buildOutlineBox(0.02f, sizeX, sizeY, sizeZ, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
+                        WorldRenderer.buildOutlineBox(10f, sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
                     });
 
                     this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
@@ -411,9 +419,9 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     private void collectChunks(RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
-        for (var chunk : this.removedChunks) {
-            if (chunk.modelInstance != null) {
-                renderLayer.destroy(chunk.modelInstance);
+        for (ClientChunkAccess chunk : this.removedChunks) {
+            if (chunk.getModelInstance() != null) {
+                renderLayer.destroy(chunk.getModelInstance());
             }
         }
 
@@ -447,7 +455,7 @@ public final class WorldRenderer implements DisposableContainer {
 
             if ((chunk.dirty && !ref.chunkRendered && chunk.modelInstance != null) || (chunk.modelInstance != null && chunk.getWorld().isChunkInvalidated(chunk))) {
                 if (client.screen instanceof WorldLoadScreen) continue;
-                this.unload(chunk);
+                this.remove(chunk);
                 chunk.immediateRebuild = true;
                 chunk.getWorld().onChunkUpdated(chunk);
                 chunk.dirty = false;
@@ -464,15 +472,22 @@ public final class WorldRenderer implements DisposableContainer {
                         ModelManager modelManager = ModelManager.INSTANCE;
                         ChunkPos pos = chunk.getPos();
                         Model model = modelManager.generateModel(createId(pos), modelBuilder -> {
+                            MeshBuilder meshBuilder = new MeshBuilder();
+                            meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
                             chunk.mesher.meshVoxels(modelBuilder,
-                                    modelBuilder.part("solid:" + createId(pos), GL_TRIANGLES, QV_CHUNK_ATTRS, this.material),
+                                    meshBuilder,
                                     block -> block.doesRender() && !block.isTransparent()
                             );
+                            Mesh end = meshBuilder.end();
+                            modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
 
+                            meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
                             chunk.mesher.meshVoxels(modelBuilder,
-                                    modelBuilder.part("transparent:" + createId(pos), GL_TRIANGLES, QV_CHUNK_ATTRS, this.transparentMaterial),
+                                    meshBuilder,
                                     block -> block.doesRender() && block.isTransparent()
                             );
+                            Mesh end2 = meshBuilder.end();
+                            modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
                         });
 
                         if (model == null) {
@@ -526,7 +541,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     void unload(ClientChunk chunk) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.unload(chunk));
             return;
         }
@@ -630,6 +645,7 @@ public final class WorldRenderer implements DisposableContainer {
         return this.lastChunkBuild < System.currentTimeMillis() - 100L;
     }
 
+    @Override
     public void collectEntity(Entity entity, RenderLayer renderLayer) {
         try {
             @Nullable QVModel model = this.qvModels.get(entity.getId());
@@ -688,8 +704,7 @@ public final class WorldRenderer implements DisposableContainer {
     }
 
     public static void buildOutlineBox(float thickness, float width, float height, float depth, MeshPartBuilder meshBuilder) {
-        Gdx.gl20.glLineWidth(thickness);
-        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(-width / 2, -height / 2, -depth / 2), new Vector3(width / 2, height / 2, depth / 2)));
+        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, depth)));
     }
 
     public static void buildLine(float thickness, float x1, float y1, float z1, float x2, float y2, float z2, MeshPartBuilder meshBuilder) {
@@ -707,11 +722,13 @@ public final class WorldRenderer implements DisposableContainer {
         return list;
     }
 
+    @Override
     public int getVisibleChunks() {
         return this.visibleChunks;
     }
 
-    public int getLoadedChunks() {
+    @Override
+    public int getLoadedChunksCount() {
         return this.loadedChunks;
     }
 
@@ -727,6 +744,7 @@ public final class WorldRenderer implements DisposableContainer {
         return ValueTracker.getPoolMax();
     }
 
+    @Override
     public World getWorld() {
         return this.world;
     }
@@ -753,6 +771,7 @@ public final class WorldRenderer implements DisposableContainer {
         this.disposables.forEach(Disposable::dispose);
     }
 
+    @Override
     public boolean isDisposed() {
         return this.disposed;
     }
@@ -769,6 +788,7 @@ public final class WorldRenderer implements DisposableContainer {
         return this.transparentMaterial;
     }
 
+    @Override
     public <T extends Disposable> T deferDispose(T disposable) {
         Preconditions.checkNotNull(disposable, "Disposable cannot be null");
 
@@ -782,6 +802,7 @@ public final class WorldRenderer implements DisposableContainer {
         return disposable;
     }
 
+    @Override
     public void reload(ReloadContext context, MaterialManager materialManager) {
         context.submit(() -> {
             this.breakingMaterial = materialManager.get(id("block/breaking"));
@@ -825,10 +846,12 @@ public final class WorldRenderer implements DisposableContainer {
         if (clientChunk != null) this.unload(clientChunk);
     }
 
+    @Override
     public Skybox getSkybox() {
         return skybox;
     }
 
+    @Override
     public void updateBackground() {
         if (ClientConfig.showSunAndMoon) {
             if (!wasSunMoonShown) {
@@ -862,10 +885,12 @@ public final class WorldRenderer implements DisposableContainer {
         }
     }
 
-    public void remove(ClientChunk clientChunk) {
+    @Override
+    public void remove(ClientChunkAccess clientChunk) {
         this.removedChunks.add(clientChunk);
     }
 
+    @Override
     public void addParticles(ParticleEffect obtained, Vec3d position, Vec3d motion, int count) {
         LocalPlayer player = client.player;
         if (player == null) return;
@@ -876,50 +901,24 @@ public final class WorldRenderer implements DisposableContainer {
         particleSystem.add(obtained);
     }
 
+    @Override
+    public void unload(ClientChunkAccess clientChunk) {
+        this.chunkModels.remove(clientChunk.getPos());
+    }
+
+    @Override
     public ParticleSystem getParticleSystem() {
         return particleSystem;
     }
 
-    private static final class MeshMaterial {
-        private final Mesh mesh;
-        private final Material material;
-
-        private MeshMaterial(Mesh mesh, Material material) {
-            this.mesh = mesh;
-            this.material = material;
-        }
-
-        public Mesh mesh() {
-            return mesh;
-        }
-
-        public Material material() {
-            return material;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (MeshMaterial) obj;
-            return Objects.equals(this.mesh, that.mesh) &&
-                   Objects.equals(this.material, that.material);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mesh, material);
-        }
-
+    private record MeshMaterial(Mesh mesh, Material material) {
         @Override
         public String toString() {
             return "MeshMaterial[" +
                    "mesh=" + mesh + ", " +
                    "material=" + material + ']';
         }
-
-
-        }
+    }
 
     private static class ChunkRenderRef {
         boolean chunkRendered = false;

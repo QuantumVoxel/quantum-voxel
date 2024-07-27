@@ -52,7 +52,7 @@ public class VideoSettingsUI {
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 110, 150, 21))
                 .formatter(scale -> {
                     if (scale.get() == 0) {
-                        return TextObject.literal("Automatic");
+                        return TextObject.translation("quantum.ui.auto");
                     }
                     return TextObject.literal(scale.get() + "x");
                 })

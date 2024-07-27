@@ -84,6 +84,7 @@ public class ChatScreen extends Screen {
     public void send() {
         var input = this.entry.getValue();
         if (input.startsWith("/")) {
+            if (this.client.connection == null) return;
             this.client.connection.send(new C2SCommandPacket(input.substring(1)));
             this.close();
             return;

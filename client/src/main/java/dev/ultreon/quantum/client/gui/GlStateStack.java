@@ -130,12 +130,12 @@ public class GlStateStack {
 
     public void lineWidth(int width) {
         this.top.lineWidth = width;
-        Gdx.gl.glLineWidth(width);
+//        Gdx.gl.glLineWidth(width);
     }
 
     public void lineWidth(float width) {
         this.top.lineWidth = width;
-        Gdx.gl.glLineWidth(width);
+//        Gdx.gl.glLineWidth(width);
     }
 
     public void enableScissor() {
@@ -247,7 +247,7 @@ public class GlStateStack {
         }
         
         public void apply() {
-            Gdx.gl.glLineWidth(this.lineWidth);
+//            Gdx.gl.glLineWidth(this.lineWidth);
             
             if (this.blend) {
                 Gdx.gl.glEnable(GL20.GL_BLEND);
