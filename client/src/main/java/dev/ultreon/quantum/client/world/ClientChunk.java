@@ -18,6 +18,8 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.render.GreedyMesher;
 import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.collection.Storage;
@@ -26,6 +28,7 @@ import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.*;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static dev.ultreon.quantum.world.World.*;
 
-public final class ClientChunk extends Chunk {
+public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
 
     private static final int[] dx = {-1, 0, 1, 0, 0, 0};
@@ -88,6 +91,7 @@ public final class ClientChunk extends Chunk {
         return (z * CHUNK_HEIGHT + y) * CHUNK_SIZE + x;
     }
 
+    @Override
     public float getLightLevel(int x, int y, int z) throws PosOutOfBoundsException {
         if(this.isOutOfBounds(x, y, z))
             throw new PosOutOfBoundsException();
@@ -100,6 +104,7 @@ public final class ClientChunk extends Chunk {
         return Mth.clamp(sunlightMapped + blockLightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
     }
 
+    @Override
     public float getSunlightLevel(int x, int y, int z) {
         int sunlight = this.lightMap.getSunlight(x, y, z);
         float sunlightMapped = Chunk.lightLevelMap[Mth.clamp(sunlight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
@@ -107,11 +112,27 @@ public final class ClientChunk extends Chunk {
         return Mth.clamp(sunlightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
     }
 
+    @Override
     public float getBlockLightLevel(int x, int y, int z) {
         int blockLight = this.lightMap.getBlockLight(x, y, z);
         float blockLightMapped = Chunk.lightLevelMap[Mth.clamp(blockLight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
         
         return Mth.clamp(blockLightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    @Override
+    public void revalidate() {
+        this.initialized = false;
+    }
+
+    @Override
+    public ModelInstance getModelInstance() {
+        return this.modelInstance;
     }
 
     @Override
@@ -124,7 +145,7 @@ public final class ClientChunk extends Chunk {
         synchronized (this) {
             super.dispose();
 
-            WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
+            @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
             if (this.model != null && this.modelInstance != null) {
                 if (worldRenderer != null) {
                     worldRenderer.unload(this);
@@ -200,8 +221,18 @@ public final class ClientChunk extends Chunk {
     }
 
     @Override
-    public ClientWorld getWorld() {
+    public ClientWorldAccess getWorld() {
         return this.clientWorld;
+    }
+
+    @Override
+    public Vector3 getRenderOffset() {
+        return renderOffset;
+    }
+
+    @Override
+    public Model getModel() {
+        return model;
     }
 
     void ready() {
@@ -306,7 +337,7 @@ public final class ClientChunk extends Chunk {
         this.setBlockLight(pos.x, pos.y, pos.z, light);
     }
 
-    public void updateLight(World world) {
+    public void updateLight(WorldAccess world) {
         world.updateLightSources(this.getOffset(), lights);
     }
 

@@ -17,7 +17,7 @@ import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
-import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
@@ -25,7 +25,7 @@ import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.EntityHitResult;
 import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
 
@@ -303,7 +303,7 @@ public class DesktopInput extends GameInput {
         if (player == null || currentScreen != null) return;
         if (!Gdx.input.isCursorCatched()) return;
 
-        ClientWorld world = this.client.world;
+        @Nullable ClientWorldAccess world = this.client.world;
         if (world == null) return;
 
         HitResult hitResult = this.client.hitResult;
@@ -476,7 +476,7 @@ public class DesktopInput extends GameInput {
         screenY -= this.client.getDrawOffset().y;
 
         Screen currentScreen = this.client.screen;
-        World world = this.client.world;
+        @Nullable ClientWorldAccess world = this.client.world;
         Player player = this.client.player;
         HitResult hitResult = this.client.hitResult;
 
@@ -512,7 +512,7 @@ public class DesktopInput extends GameInput {
      * @param world the game world
      * @param player the player entity
      */
-    private void doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
+    private void doPlayerInteraction(int button, HitResult hitResult, @Nullable ClientWorldAccess world, Player player) {
         // Get the position and metadata of the current and next blocks
         Vec3i pos = hitResult.getPos();
         if (hitResult instanceof BlockHitResult blockHitResult){
@@ -603,7 +603,7 @@ public class DesktopInput extends GameInput {
 
     /**
      * Overrides the scrolled method to handle mouse scroll events.
-     * If the {@link ImGuiOverlay} is shown, the method returns {@code false}.
+     * If the ImGui overlay is shown, the method returns {@code false}.
      *
      * @param amountX The amount scrolled on the x-axis.
      * @param amountY The amount scrolled on the y-axis.

@@ -20,7 +20,7 @@ public class Location {
         this.yRot = yRot;
     }
 
-    public Location(World world, double x, double y, double z, float xRot, float yRot) {
+    public Location(WorldAccess world, double x, double y, double z, float xRot, float yRot) {
         this(world.getDimension().getId(), x, y, z, xRot, yRot);
     }
 

@@ -33,7 +33,7 @@ public enum DepthFunc {
             case GL20.GL_NOTEQUAL -> NOTEQUAL;
             case GL20.GL_ALWAYS -> ALWAYS;
             case GL20.GL_NEVER -> NEVER;
-            default -> throw new IllegalArgumentException("Invalid depth function: " + depthFunc);
+            default -> throw new IllegalArgumentException("Invalid depth func: " + depthFunc);
         };
     }
 

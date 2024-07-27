@@ -1,11 +1,13 @@
 package dev.ultreon.quantum.client.font;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -15,24 +17,79 @@ import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.Identifier;
 
+import java.nio.IntBuffer;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import static dev.ultreon.quantum.client.QuantumClient.id;
 
 public class Font implements Disposable {
+    public static final Font DEFAULT = new Font(id("default"));
     @SuppressWarnings("GDXJavaStaticResource")
     static final BitmapFont UNIFONT = QuantumClient.get().unifont;
-    final BitmapFont bitmapFont;
-    public final int lineHeight;
+    static final Map<Identifier, Font> registry = new LinkedHashMap<>();
+    static ShaderProgram shader = null;
+    private static boolean shaderDisabled;
+    private static IntBuffer buffer;
+    BitmapFont bitmapFont;
+    public int lineHeight;
     private final boolean special;
+    private final Identifier id;
 
-    public Font(BitmapFont bitmapFont) {
-        this(bitmapFont, false);
+    public Font(Identifier id) {
+        this(id, false);
     }
 
-    public Font(BitmapFont bitmapFont, boolean special) {
+    public Font(Identifier id, boolean special) {
+        this.id = id;
+        this.special = special;
+
+        this.reload();
+    }
+
+    private void reload() {
+        if (this.bitmapFont != null && this.bitmapFont != UNIFONT) {
+            this.bitmapFont.dispose();
+        }
+
+        FileHandle resource = QuantumClient.resource(this.id.mapPath(path -> "font/" + path + ".fnt"));
+        if (!resource.exists()) {
+            this.bitmapFont = UNIFONT;
+            return;
+        }
+        BitmapFont bitmapFont = QuantumClient.invokeAndWait(() ->
+                new BitmapFont(resource, true));
+        if (bitmapFont == null) {
+            this.bitmapFont = UNIFONT;
+            return;
+        }
         this.bitmapFont = bitmapFont;
         this.lineHeight = MathUtils.ceil(bitmapFont.getLineHeight());
-        this.special = special;
         QuantumClient.get().deferDispose(this);
+    }
+
+    public static void reloadAll() {
+        for (Font font : registry.values()) {
+            font.reload();
+        }
+
+//        if (shader != null) shader.dispose();
+//
+//        shader = new ShaderProgram(
+//                QuantumClient.resource(id("shaders/font.vert")),
+//                QuantumClient.resource(id("shaders/font.frag"))
+//        );
+//
+//        QuantumClient.get().deferDispose(shader);
+//
+//        if (!shader.isCompiled()) {
+//            shaderDisabled = true;
+//            CommonConstants.LOGGER.error("Failed to compile font shader: {}", shader.getLog());
+//            shader = null;
+//        } else {
+//            shaderDisabled = false;
+//        }
     }
 
     public void drawText(Renderer renderer, String text, float x, float y, Color color, boolean shadow) {
@@ -80,6 +137,7 @@ public class Font implements Disposable {
     }
 
     private void draw(Renderer renderer, BitmapFont font, Color color, Batch batch, String text, float x, float y, boolean bold, boolean italic, boolean underlined, boolean strikethrough, float scale) {
+        if (font == null) return;
         font.setUseIntegerPositions(true);
         font.setColor(color.toGdx());
         font.draw(batch, text, x / scale, y);
@@ -159,7 +217,9 @@ public class Font implements Disposable {
     }
 
     public void dispose() {
+        if (this.bitmapFont == null || this.bitmapFont == Font.UNIFONT) return;
         this.bitmapFont.dispose();
+        this.bitmapFont = null;
     }
 
     public List<FormattedText> wordWrap(TextObject text, int width) {

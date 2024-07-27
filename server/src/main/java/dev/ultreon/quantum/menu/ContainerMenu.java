@@ -16,7 +16,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public abstract class ContainerMenu {
     private final @NotNull MenuType<?> type;
-    private final @NotNull World world;
+    private final @NotNull WorldAccess world;
     private final @NotNull Entity entity;
     private final @Nullable BlockPos pos;
     @LazyInit
@@ -52,7 +52,7 @@ public abstract class ContainerMenu {
      * @param pos    the position where the menu is opened.
      * @param size   the number of slots.
      */
-    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockPos pos, int size) {
+    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockPos pos, int size) {
         Preconditions.checkNotNull(type, "Menu type cannot be null!");
         Preconditions.checkNotNull(world, "World cannot be null!");
         Preconditions.checkNotNull(entity, "Entity cannot be null!");
@@ -74,7 +74,7 @@ public abstract class ContainerMenu {
         return this.type;
     }
 
-    public @NotNull World getWorld() {
+    public @NotNull WorldAccess getWorld() {
         return this.world;
     }
 

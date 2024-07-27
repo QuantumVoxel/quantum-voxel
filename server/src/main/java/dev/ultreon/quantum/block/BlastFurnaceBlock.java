@@ -7,6 +7,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.CubicDirection;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 
 public class BlastFurnaceBlock extends Block {
     public BlastFurnaceBlock(Properties properties) {
@@ -20,7 +21,7 @@ public class BlastFurnaceBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public BlockProperties onPlacedBy(World world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
+    public BlockProperties onPlacedBy(WorldAccess world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
         System.out.println("On placed by " + player.getName() + " at " + blockPos + " facing " + direction);
 
         return blockMeta.withEntry("facing", BlockDataEntry.ofEnum(direction));

@@ -13,6 +13,7 @@ import dev.ultreon.quantum.world.CubicDirection;
 import java.util.Objects;
 
 public class BlockHitResult implements HitResult {
+    public static final BlockHitResult MISS = new BlockHitResult();
     protected CubicDirection direction;
     // input
     protected Ray ray;

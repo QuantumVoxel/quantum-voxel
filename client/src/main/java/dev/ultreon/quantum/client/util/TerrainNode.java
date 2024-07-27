@@ -17,8 +17,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -27,9 +27,21 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Pool;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.collection.FlatStorage;
+import dev.ultreon.quantum.util.PosOutOfBoundsException;
+import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.HeightMap;
 
-public class TerrainNode implements Disposable {
+public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
     public static final int TERRAIN_SIZE = 16;
 
     static int nodes = 0;
@@ -41,7 +53,7 @@ public class TerrainNode implements Disposable {
     public TerrainNode parent;
     public TerrainNode[] children = new TerrainNode[8];
 
-    public byte[] materials = new byte[TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE];
+    public FlatStorage<BlockProperties> materials = new FlatStorage<>(BlockProperties.AIR, TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE);
 
     public ModelInstance modelInstance;
     public Mesh mesh;
@@ -54,14 +66,26 @@ public class TerrainNode implements Disposable {
     private final Array<Color> colors = new Array<>();
     private final Array<Short> indices = new Array<>();
     private final Array<Vector3> normals = new Array<>();
+    private final HeightMap heightMap = new HeightMap(TERRAIN_SIZE);
+    private final ClientWorldAccess voxelWorld;
+    private boolean disposed = false;
 
     public TerrainNode(int size, int x, int y, int z, TerrainNode parent, int idx) {
+        this(size, x, y, z, parent, idx, null);
+    }
+
+    public TerrainNode(int size, int x, int y, int z, TerrainNode parent, int idx, ClientWorldAccess voxelWorld) {
         this.size = size;
         this.x = x;
         this.y = y;
         this.z = z;
         this.parent = parent;
         this.idx = idx;
+        this.voxelWorld = voxelWorld != null ? voxelWorld : parent.voxelWorld;
+
+        if (this.voxelWorld == null) {
+            throw new IllegalStateException("Voxel world not found in parent node or passed in");
+        }
         ModelBuilder modelBuilder = new ModelBuilder();
         modelInstance = new ModelInstance(modelBuilder.createBox(1, 1, 1,
                 new Material(ColorAttribute.createDiffuse(Color.WHITE)),
@@ -77,11 +101,16 @@ public class TerrainNode implements Disposable {
         return nodes;
     }
 
-    public byte getMaterial(int x, int y, int z) {
-        if (x < 0 || y < 0 || z < 0 || x >= TERRAIN_SIZE || y >= TERRAIN_SIZE || z >= TERRAIN_SIZE) return 0;
-        return materials[x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE];
+    public Block getMaterial(int x, int y, int z) {
+        if (x < 0 || y < 0 || z < 0 || x >= TERRAIN_SIZE || y >= TERRAIN_SIZE || z >= TERRAIN_SIZE) return Blocks.AIR;
+        BlockProperties blockProperties = materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
+        if (blockProperties == null) return Blocks.AIR;
+        return blockProperties.getBlock();
     }
 
+    /**
+     * Generates the terrain
+     */
     public void generate() {
         float blockSize = size / (float) TERRAIN_SIZE;
 
@@ -94,7 +123,7 @@ public class TerrainNode implements Disposable {
 
                     double noise = VoxelTerrain.noise.eval(wx / 8.0f, wy / 8.0f, wz / 8.0f) + ((wy - 256) / 512.0f);
                     if (noise < 0) {
-                        materials[x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE] = 1;
+                        materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.DIRT.createMeta());
                     }
                 }
             }
@@ -107,8 +136,8 @@ public class TerrainNode implements Disposable {
                     float wx = x * blockSize + this.x;
                     float wy = y * blockSize + this.y;
                     float wz = z * blockSize + this.z;
-                    if (getMaterial(x, y, z) > 0) {
-                        if (getMaterial(x, y + 1, z) == 0) {
+                    if (!getMaterial(x, y, z).isAir()) {
+                        if (!getMaterial(x, y + 1, z).isAir()) {
                             vertices.add(new Vector3(wx, wy + blockSize, wz));
                             vertices.add(new Vector3(wx, wy + blockSize, wz + blockSize));
                             vertices.add(new Vector3(wx + blockSize, wy + blockSize, wz + blockSize));
@@ -137,7 +166,7 @@ public class TerrainNode implements Disposable {
                             index += 4;
                         }
 
-                        if (getMaterial(x, y - 1, z) == 0) {
+                        if (getMaterial(x, y - 1, z).isAir()) {
                             vertices.add(new Vector3(wx, wy, wz + blockSize));
                             vertices.add(new Vector3(wx, wy, wz));
                             vertices.add(new Vector3(wx + blockSize, wy, wz));
@@ -166,7 +195,7 @@ public class TerrainNode implements Disposable {
                             index += 4;
                         }
 
-                        if (getMaterial(x - 1, y, z) == 0) {
+                        if (getMaterial(x - 1, y, z).isAir()) {
                             vertices.add(new Vector3(wx, wy, wz + blockSize));
                             vertices.add(new Vector3(wx, wy + blockSize, wz + blockSize));
                             vertices.add(new Vector3(wx, wy + blockSize, wz));
@@ -195,7 +224,7 @@ public class TerrainNode implements Disposable {
                             index += 4;
                         }
 
-                        if (getMaterial(x + 1, y, z) == 0) {
+                        if (getMaterial(x + 1, y, z).isAir()) {
                             vertices.add(new Vector3(wx + blockSize, wy, wz));
                             vertices.add(new Vector3(wx + blockSize, wy + blockSize, wz));
                             vertices.add(new Vector3(wx + blockSize, wy + blockSize, wz + blockSize));
@@ -224,7 +253,7 @@ public class TerrainNode implements Disposable {
                             index += 4;
                         }
 
-                        if (getMaterial(x, y, z - 1) == 0) {
+                        if (getMaterial(x, y, z - 1).isAir()) {
                             vertices.add(new Vector3(wx, wy, wz));
                             vertices.add(new Vector3(wx, wy + blockSize, wz));
                             vertices.add(new Vector3(wx + blockSize, wy + blockSize, wz));
@@ -253,7 +282,7 @@ public class TerrainNode implements Disposable {
                             index += 4;
                         }
 
-                        if (getMaterial(x, y, z + 1) == 0) {
+                        if (getMaterial(x, y, z + 1).isAir()) {
                             vertices.add(new Vector3(wx + blockSize, wy, wz + blockSize));
                             vertices.add(new Vector3(wx + blockSize, wy + blockSize, wz + blockSize));
                             vertices.add(new Vector3(wx, wy + blockSize, wz + blockSize));
@@ -292,7 +321,7 @@ public class TerrainNode implements Disposable {
     public void buildMesh() {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
-        MeshPartBuilder meshPartBuilder = modelBuilder.part("terrain", GL20.GL_TRIANGLES,
+        MeshPartBuilder meshPartBuilder = modelBuilder.part("terrain", GL20.GL_LINES,
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorUnpacked,
                 new Material(ColorAttribute.createDiffuse(Color.WHITE)));
 
@@ -361,7 +390,7 @@ public class TerrainNode implements Disposable {
         }
     }
 
-    public void UpdateVisibility() {
+    public void updateVisibility() {
         modelInstance.model.meshes.clear();
         modelInstance.model.meshes.add(mesh);
 
@@ -371,7 +400,7 @@ public class TerrainNode implements Disposable {
                 if (child.meshBuilt) {
                     built++;
                 }
-                child.UpdateVisibility();
+                child.updateVisibility();
             }
         }
         if (built == children.length) {
@@ -385,6 +414,9 @@ public class TerrainNode implements Disposable {
 
     @Override
     public void dispose() {
+        if (disposed) return;
+
+        disposed = true;
         if (mesh != null) {
             mesh.dispose();
         }
@@ -399,5 +431,148 @@ public class TerrainNode implements Disposable {
 
         mesh = null;
         modelInstance = null;
+    }
+
+    @Override
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+        if (modelInstance != null) {
+            modelInstance.getRenderables(renderables, pool);
+        }
+
+        for (TerrainNode child : children) {
+            if (child != null) {
+                child.getRenderables(renderables, pool);
+            }
+        }
+    }
+
+    public ModelInstance getModelInstance() {
+        return modelInstance;
+    }
+
+    @Override
+    public ClientWorldAccess getWorld() {
+        return voxelWorld;
+    }
+
+    @Override
+    public int getSunlight(Vec3i pos) {
+        return 15;
+    }
+
+    @Override
+    public int getBlockLight(Vec3i pos) {
+        return 0;
+    }
+
+    @Override
+    public Vector3 getRenderOffset() {
+        return new Vector3(0, 0, 0);
+    }
+
+    @Override
+    public Model getModel() {
+        return modelInstance.model;
+    }
+
+    @Override
+    public float getBrightness(int lightLevel) {
+        return 1;
+    }
+
+    @Override
+    public ModelInstance addModel(BlockPos blockPos, ModelInstance modelInstance) {
+        // TODO
+        return modelInstance;
+    }
+
+    @Override
+    public BlockProperties get(Vec3i tmp3i) {
+        return materials.get(tmp3i.x + tmp3i.y * TERRAIN_SIZE + tmp3i.z * TERRAIN_SIZE * TERRAIN_SIZE);
+    }
+
+    public Mesh getMesh() {
+        return mesh;
+    }
+
+    public boolean isGenerated() {
+        return generated;
+    }
+
+    public void setGenerated(boolean generated) {
+        this.generated = generated;
+    }
+
+    public boolean isMeshBuilt() {
+        return meshBuilt;
+    }
+
+    public void setMeshBuilt(boolean meshBuilt) {
+        this.meshBuilt = meshBuilt;
+    }
+
+    @Override
+    public float getLightLevel(int x, int y, int z) throws PosOutOfBoundsException {
+        return 15;
+    }
+
+    @Override
+    public float getSunlightLevel(int x, int y, int z) {
+        return 15;
+    }
+
+    @Override
+    public float getBlockLightLevel(int x, int y, int z) {
+        return 0;
+    }
+
+    @Override
+    public ChunkPos getPos() {
+        return new ChunkPos(x, y, z);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return true;
+    }
+
+    @Override
+    public void revalidate() {
+        this.updateVisibility();
+    }
+
+    @Override
+    public boolean setFast(int x, int y, int z, BlockProperties block) {
+        return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
+    }
+
+    @Override
+    public boolean set(int x, int y, int z, BlockProperties block) {
+        return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
+    }
+
+    @Override
+    public BlockProperties getFast(int x, int y, int z) {
+        return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
+    }
+
+    @Override
+    public BlockProperties get(int x, int y, int z) {
+        return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
+    }
+
+    @Override
+    public Vec3i getOffset() {
+        return new Vec3i(x, y, z);
+    }
+
+    @Override
+    public int getHighest(int x, int z) {
+        return heightMap.get(x, z);
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return disposed;
     }
 }

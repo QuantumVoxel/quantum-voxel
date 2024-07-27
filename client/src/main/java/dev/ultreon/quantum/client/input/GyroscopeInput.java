@@ -12,12 +12,12 @@ import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.World;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
@@ -155,7 +155,7 @@ public class GyroscopeInput extends GameInput {
         screenY -= this.client.getDrawOffset().y;
 
         Screen currentScreen = this.client.screen;
-        World world = this.client.world;
+        @Nullable ClientWorldAccess world = this.client.world;
         Player player = this.client.player;
         if (!Gdx.input.isCursorCatched() && currentScreen != null) {
             int mouseX = (int) (screenX / this.client.getGuiScale());
@@ -184,9 +184,10 @@ public class GyroscopeInput extends GameInput {
         return this.doPlayerInteraction(button, hitResult, world, player);
     }
 
-    private boolean doPlayerInteraction(int button, HitResult hitResult, World world, Player player) {
+    private boolean doPlayerInteraction(int button, HitResult hitResult, @Nullable ClientWorldAccess world, Player player) {
         if (!(hitResult instanceof BlockHitResult hitResult1)) return false;
         Vec3i pos = hitResult1.getPos();
+        if (world == null) return false;
         BlockProperties block = world.get(new BlockPos(pos));
         Vec3i posNext = hitResult1.getNext();
         BlockProperties blockNext = world.get(new BlockPos(posNext));

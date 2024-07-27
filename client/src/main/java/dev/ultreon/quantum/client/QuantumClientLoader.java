@@ -20,6 +20,7 @@ import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
+import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.TouchscreenInput;
@@ -249,6 +250,8 @@ class QuantumClientLoader implements Runnable {
         if (client.imGui) {
             GamePlatform.get().setupImGui();
         }
+
+        client.onReloadConfig();
 
         client.booted = true;
 

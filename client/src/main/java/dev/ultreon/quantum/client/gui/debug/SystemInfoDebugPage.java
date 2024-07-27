@@ -6,7 +6,7 @@ import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.util.RenderableArray;
 import dev.ultreon.quantum.client.world.ChunkMesh;
-import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.player.Player;
@@ -62,7 +62,7 @@ public class SystemInfoDebugPage implements DebugPage {
                 BlockPos blockPosition = player.getBlockPos();
                 Vec3i sectionPos = context.block2sectionPos(blockPosition);
                 ChunkPos chunkPos = player.getChunkPos();
-                ClientChunk chunk = world.getChunk(chunkPos);
+                @Nullable ClientChunkAccess chunk = world.getChunk(chunkPos);
                 BlockPos localBlockPos = World.toLocalBlockPos(blockPosition);
 
                 context.left("XYZ", player.getPosition())
@@ -73,7 +73,7 @@ public class SystemInfoDebugPage implements DebugPage {
                     int sunlight = chunk.getSunlight(localBlockPos.vec());
                     int blockLight = chunk.getBlockLight(localBlockPos.vec());
 
-                    context.left("Chunk Offset", chunk.renderOffset)
+                    context.left("Chunk Offset", chunk.getRenderOffset())
                             .left("Sunlight", sunlight)
                             .left("Block Light", blockLight);
                 }
@@ -86,7 +86,7 @@ public class SystemInfoDebugPage implements DebugPage {
 
             context.left("World");
             if (worldRenderer != null) {
-                context.left("Visible Chunks", worldRenderer.getVisibleChunks() + "/" + worldRenderer.getLoadedChunks());
+                context.left("Visible Chunks", worldRenderer.getVisibleChunks() + "/" + worldRenderer.getLoadedChunksCount());
             }
 
             context.left("Chunk Mesh Disposes", WorldRenderer.getChunkMeshFrees());

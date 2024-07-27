@@ -19,7 +19,9 @@ import dev.ultreon.quantum.client.registry.BlockRendererRegistry;
 import dev.ultreon.quantum.client.render.BlockRenderer;
 import dev.ultreon.quantum.client.render.NormalBlockRenderer;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.CubicDirection;
@@ -68,7 +70,7 @@ public class GreedyMesher implements Mesher {
     private static final int OFF_X = 0;
     private static final int OFF_Z = 0;
     private static final int OFF_Y = 0;
-    private final ClientChunk chunk;
+    private final @Nullable ClientChunkAccess chunk;
     private final boolean perCornerLight;
     private final Vec3i tmp3i = new Vec3i();
 
@@ -76,7 +78,7 @@ public class GreedyMesher implements Mesher {
      * @param chunk          Chunk to mesh
      * @param perCornerLight Whether to average light on a per-corner basis
      */
-    public GreedyMesher(ClientChunk chunk, boolean perCornerLight) {
+    public GreedyMesher(@Nullable ClientChunkAccess chunk, boolean perCornerLight) {
         this.chunk = chunk;
         this.perCornerLight = perCornerLight;
     }
@@ -198,8 +200,8 @@ public class GreedyMesher implements Mesher {
 
                         int westNeighborX = x - 1;
                         int eastNeighborX = x + 1;
-                        ClientChunk westNeighborChunk = this.chunk;
-                        ClientChunk eastNeighborChunk = this.chunk;
+                        @Nullable ClientChunkAccess westNeighborChunk = this.chunk;
+                        @Nullable ClientChunkAccess eastNeighborChunk = this.chunk;
                         if (westNeighborX < 0) {
                             westNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getPos().x() - 1, this.chunk.getPos().z());
                             westNeighborX += World.CHUNK_SIZE;
@@ -282,8 +284,8 @@ public class GreedyMesher implements Mesher {
 
                         int northNeighborZ = z + 1;
                         int southNeighborZ = z - 1;
-                        ClientChunk northNeighborChunk = this.chunk;
-                        ClientChunk southNeighborChunk = this.chunk;
+                        @Nullable ClientChunkAccess northNeighborChunk = this.chunk;
+                        @Nullable ClientChunkAccess southNeighborChunk = this.chunk;
                         if (northNeighborZ >= World.CHUNK_SIZE) {
                             assert this.chunk != null;
                             northNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getPos().x(), this.chunk.getPos().z() + 1);
@@ -377,9 +379,9 @@ public class GreedyMesher implements Mesher {
                 break;
         }
 
-        ClientWorld world = this.chunk.getWorld();
+        ClientWorldAccess world = this.chunk.getWorld();
         int chunkSize = World.CHUNK_SIZE;
-        ClientChunk sChunk = this.chunk;
+        @Nullable ClientChunkAccess sChunk = this.chunk;
         if (z < 0) {
             sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Z + z);
             z += chunkSize;
@@ -571,7 +573,7 @@ public class GreedyMesher implements Mesher {
             if (sy < 0 || sy >= World.CHUNK_HEIGHT) continue;
             for (int sz = cz + negZ; sz <= cz + posZ; sz++) {
                 for (int sx = cx + negX; sx <= cx + posX; sx++) {
-                    ClientChunk sChunk = this.chunk;
+                    @Nullable ClientChunkAccess sChunk = this.chunk;
                     boolean getChunk = false; // whether the block is not in the current chunk and a new chunk should be found
                     int getChunkX = GreedyMesher.OFF_X + sx;
                     int getChunkZ = GreedyMesher.OFF_Z + sz;
@@ -660,7 +662,7 @@ public class GreedyMesher implements Mesher {
             if (sy < 0 || sy >= World.CHUNK_HEIGHT) continue;
             for (int sz = cz + negZ; sz <= cz + posZ; sz++) {
                 for (int sx = cx + negX; sx <= cx + posX; sx++) {
-                    ClientChunk sChunk = this.chunk;
+                    @Nullable ClientChunkAccess sChunk = this.chunk;
                     boolean getChunk = false; // whether the block is not in the current chunk and a new chunk should be found
                     int getChunkX = GreedyMesher.OFF_X + sx;
                     int getChunkZ = GreedyMesher.OFF_Z + sz;
@@ -859,31 +861,31 @@ public class GreedyMesher implements Mesher {
         boolean shouldMerge(BlockProperties data1, float light1, PerCornerLightData lightData1, BlockProperties data2, float light2, PerCornerLightData lightData2);
     }
 
-    private BlockProperties block(ClientChunk chunk, int x, int y, int z) {
+    private BlockProperties block(@Nullable ClientChunkAccess chunk, int x, int y, int z) {
         if (y < WORLD_DEPTH) return null;
-        ClientWorld world = chunk.getWorld();
+        ClientWorldAccess world = chunk.getWorld();
         this.tmp3i.set(chunk.getPos().x(), 0, chunk.getPos().z()).mul(16).add(x, y, z);
-        ClientChunk chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
+        @Nullable ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
         if (chunkAt != null)
             return chunkAt.get(World.toLocalBlockPos(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
         return Blocks.AIR.createMeta();
     }
 
-    private int blockLight(ClientChunk chunk, int x, int y, int z) {
+    private int blockLight(@Nullable ClientChunkAccess chunk, int x, int y, int z) {
         if (y < WORLD_DEPTH) return 0;
-        ClientWorld world = chunk.getWorld();
+        ClientWorldAccess world = chunk.getWorld();
         this.tmp3i.set(chunk.getPos().x(), 0, chunk.getPos().z()).mul(16).add(x, y, z);
-        ClientChunk chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
+        @Nullable ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
         if (chunkAt != null)
             return chunkAt.getBlockLight(World.toLocalBlockPos(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
         return 0;
     }
 
-    private int sunlight(ClientChunk chunk, int x, int y, int z) {
+    private int sunlight(@Nullable ClientChunkAccess chunk, int x, int y, int z) {
         if (y < WORLD_DEPTH) return 0;
-        ClientWorld world = chunk.getWorld();
+        ClientWorldAccess world = chunk.getWorld();
         this.tmp3i.set(chunk.getPos().x(), 0, chunk.getPos().z()).mul(16).add(x, y, z);
-        ClientChunk chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
+        @Nullable ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
         if (chunkAt != null)
             return chunkAt.getSunlight(World.toLocalBlockPos(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
         return 0;

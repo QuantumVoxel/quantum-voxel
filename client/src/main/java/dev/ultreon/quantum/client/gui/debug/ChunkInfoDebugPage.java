@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.profiler.ProfileData;
 import dev.ultreon.quantum.debug.profiler.Section;
 import dev.ultreon.quantum.debug.profiler.ThreadSection;
@@ -28,13 +30,13 @@ public class ChunkInfoDebugPage implements DebugPage {
 
         QuantumClient client = context.client();
 
-        ClientWorld world = client.world;
+        @Nullable ClientWorldAccess world = client.world;
         LocalPlayer player = client.player;
         if (world == null) return;
         if (player == null) return;
 
         ChunkPos chunkPos = player.getChunkPos();
-        ClientChunk chunk = world.getChunk(chunkPos);
+        @Nullable ClientChunkAccess chunk = world.getChunk(chunkPos);
 
         if (chunk == null) {
             context.left("Chunk", "N/A");
@@ -46,9 +48,9 @@ public class ChunkInfoDebugPage implements DebugPage {
         context.left("Z", chunkPos.z());
 
         context.left("Heightmap", chunk.getHighest(chunkPos.x(), chunkPos.z()));
-        context.left("Render Offset", chunk.renderOffset);
+        context.left("Render Offset", chunk.getRenderOffset());
 
-        Model model = chunk.model;
+        Model model = chunk.getModel();
         if (model != null) {
             context.left();
             context.left("Chunk Model");
@@ -59,7 +61,7 @@ public class ChunkInfoDebugPage implements DebugPage {
             context.left("Animations", model.animations.size);
         }
 
-        ModelInstance instance = chunk.modelInstance;
+        ModelInstance instance = chunk.getModelInstance();
         if (instance != null) {
             context.left();
             context.left("Chunk Model Instance");

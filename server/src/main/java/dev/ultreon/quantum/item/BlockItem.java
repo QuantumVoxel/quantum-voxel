@@ -10,11 +10,7 @@ import dev.ultreon.quantum.events.BlockEvents;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockFlags;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.UseResult;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -61,7 +57,7 @@ public class BlockItem extends Item {
     }
 
     @NotNull
-    private UseResult placeBlock(World world, Vec3i next, BlockPos blockPos, UseItemContext useItemContext) {
+    private UseResult placeBlock(WorldAccess world, Vec3i next, BlockPos blockPos, UseItemContext useItemContext) {
         if (world.intersectEntities(this.getBlock().getBoundingBox(next)))
             return UseResult.DENY;
 
@@ -79,7 +75,7 @@ public class BlockItem extends Item {
     }
 
     @NotNull
-    private UseResult replaceBlock(World world, Vec3i vec, UseItemContext useItemContext) {
+    private UseResult replaceBlock(WorldAccess world, Vec3i vec, UseItemContext useItemContext) {
         if (world.intersectEntities(this.getBlock().getBoundingBox(vec)))
             return UseResult.DENY;
 

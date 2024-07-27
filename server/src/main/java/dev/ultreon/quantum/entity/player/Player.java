@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity.player;
 
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
@@ -50,7 +51,7 @@ public abstract class Player extends LivingEntity {
     private GameMode gamemode = GameMode.SURVIVAL;
     private final FoodStatus foodStatus = new FoodStatus(this);
 
-    protected Player(EntityType<? extends Player> entityType, World world, String name) {
+    protected Player(EntityType<? extends Player> entityType, WorldAccess world, String name) {
         super(entityType, world);
 
         this.inventory = new Inventory(MenuTypes.INVENTORY, world, this, null);

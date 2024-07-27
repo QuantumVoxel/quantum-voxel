@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.ubo.types.IntType;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
@@ -20,7 +21,7 @@ public class DroppedItem extends Entity {
         this.stack = new ItemStack();
     }
 
-    public DroppedItem(World world, ItemStack stack, Vec3d position, Vec3d velocity) {
+    public DroppedItem(WorldAccess world, ItemStack stack, Vec3d position, Vec3d velocity) {
         super(EntityTypes.DROPPED_ITEM, world);
         this.stack = stack;
         this.setPosition(position);

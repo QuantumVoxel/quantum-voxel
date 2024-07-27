@@ -3,7 +3,9 @@ package dev.ultreon.quantum.client;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.font.Font;
+import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
 import dev.ultreon.quantum.debug.Debugger;
+import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Identifier;
@@ -13,7 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FontManager implements Disposable {
+public class FontManager implements Disposable, ContextAwareReloadable {
     private final Map<Identifier, Font> fonts = new HashMap<>();
 
     FontManager() {
@@ -40,7 +42,7 @@ public class FontManager implements Disposable {
 
                 if (!id.path().endsWith(".fnt")) continue;
                 Debugger.log("Registering font: " + id);
-                this.registerFont(id, new Font(QuantumClient.invokeAndWait(() -> ClientResources.bitmapFont(id))));
+                this.registerFont(id, new Font(id.mapPath(path -> path.substring("font/".length(), path.length() - ".fnt".length()))));
             }
         }
     }
@@ -52,5 +54,13 @@ public class FontManager implements Disposable {
         }
 
         this.fonts.clear();
+    }
+
+    @Override
+    public void reload(ResourceManager resourceManager, ReloadContext context) {
+        this.dispose();
+        this.registerFonts(resourceManager);
+
+        QuantumClient.get().font = this.fonts.getOrDefault(QuantumClient.get().fontId, Font.DEFAULT);
     }
 }

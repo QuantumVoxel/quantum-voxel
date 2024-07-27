@@ -13,6 +13,7 @@ import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.world.CubicDirection;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,7 @@ public class GreedyMesher implements Mesher {
     private Quad[][][] voxels;
     private ShaderProgram shader;
     private final Vector3 VOXEL_SIZE = new Vector3(1, 1, 1);
-    private final ClientWorld world;
+    private final ClientWorldAccess world;
     private final QuantumClient client = QuantumClient.get();
     private final MaterialManager materialManager = client.getMaterialManager();
 

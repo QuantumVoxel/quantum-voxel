@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.input.GameCamera;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.reflection.qual.NewInstance;
@@ -45,7 +45,7 @@ public class RenderPipeline implements Disposable {
 
     @SuppressWarnings("GDXJavaFlushInsideLoop") // We need to flush before the next node.
     public void render(ModelBatch modelBatch, float blurScale, float deltaTime) {
-        @Nullable WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
+        @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
         if (worldRenderer != null) ScreenUtils.clear(worldRenderer.getSkybox().bottomColor, true);
         else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
 

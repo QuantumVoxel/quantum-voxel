@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -67,7 +67,7 @@ public class SkyboxShader extends DefaultShader {
         public final static Setter negZColor = create((w) -> w.getSkybox().negZColor);
         public final static Setter posZColor = create((w) -> w.getSkybox().posZColor);
 
-        public static Setter create(Function<WorldRenderer, Color> getter) {
+        public static Setter create(Function<TerrainRenderer, Color> getter) {
             return new LocalSetter() {
                 @Override
                 public void set (BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
@@ -75,7 +75,7 @@ public class SkyboxShader extends DefaultShader {
                         shader.set(inputID, Color.WHITE);
                         return;
                     }
-                    @Nullable WorldRenderer world = QuantumClient.get().worldRenderer;
+                    @Nullable TerrainRenderer world = QuantumClient.get().worldRenderer;
                     if (world == null) {
                         shader.set(inputID, Color.WHITE);
                         return;

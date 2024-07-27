@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.Queue;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2d;
@@ -15,9 +15,6 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.particle.ClientParticle;
-import dev.ultreon.quantum.client.particle.ClientParticleRegistry;
-import dev.ultreon.quantum.client.particle.PFXPool;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.util.Rot;
@@ -43,7 +40,7 @@ import static com.badlogic.gdx.math.MathUtils.lerp;
 import static dev.ultreon.quantum.client.util.ExtKt.deg;
 import static java.lang.Math.max;
 
-public final class ClientWorld extends World implements Disposable {
+public final class ClientWorld extends World implements Disposable, ClientWorldAccess {
     public static final int DAY_CYCLE = 24000;
     public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
     public static final AtomicDouble FOG_DENSITY = new AtomicDouble(0.001);
@@ -95,7 +92,7 @@ public final class ClientWorld extends World implements Disposable {
      * @return True if the chunk was successfully unloaded, false otherwise.
      */
     @Override
-    protected boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
+    public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
         // Check if the current thread is the main thread
         if (!QuantumClient.isOnRenderThread()) {
             // If not, invoke the unloadChunk method on the main thread and return the result
@@ -138,12 +135,12 @@ public final class ClientWorld extends World implements Disposable {
     }
 
     @Override
-    public @Nullable ClientChunk getChunkAt(@NotNull BlockPos pos) {
+    public ClientChunk getChunkAt(@NotNull BlockPos pos) {
         return (ClientChunk) super.getChunkAt(pos);
     }
 
     @Override
-    public @Nullable ClientChunk getChunkAt(int x, int y, int z) {
+    public ClientChunk getChunkAt(int x, int y, int z) {
         return (ClientChunk) super.getChunkAt(x, y, z);
     }
 
@@ -328,6 +325,16 @@ public final class ClientWorld extends World implements Disposable {
         }
 
         return isBlockSet;
+    }
+
+    @Override
+    public void destroy(@NotNull BlockPos pos) {
+        this.set(pos, BlockProperties.AIR);
+    }
+
+    @Override
+    public void destroy(int x, int y, int z) {
+        this.set(x, y, z, BlockProperties.AIR);
     }
 
     /**
@@ -575,6 +582,7 @@ public final class ClientWorld extends World implements Disposable {
         return new LightData(x, y, z, (byte) getBlockLight(x, y, z));
     }
 
+    @Override
     public int getBlockLight(int x, int y, int z) {
         ClientChunk chunk = getChunkAt(x, y, z);
         if (chunk != null) {
@@ -584,6 +592,7 @@ public final class ClientWorld extends World implements Disposable {
         }
     }
 
+    @Override
     public void setBlockLight(int x, int y, int z, int light) {
         ClientChunk chunk = this.getChunkAt(x, y, z);
         if (chunk != null) {
@@ -868,7 +877,7 @@ public final class ClientWorld extends World implements Disposable {
 
     @Deprecated
     public RgbColor getSkyColor() {
-        WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
+        @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
         if (worldRenderer == null) return RgbColor.BLACK;
         return RgbColor.gdx(worldRenderer.getSkybox().topColor);
     }
@@ -921,7 +930,7 @@ public final class ClientWorld extends World implements Disposable {
     @CanIgnoreReturnValue
     public Entity removeEntity(int id) {
         Entity remove = this.entitiesById.remove(id);
-        WorldRenderer worldRenderer = client.worldRenderer;
+        @Nullable TerrainRenderer worldRenderer = client.worldRenderer;
         if (worldRenderer != null) {
             worldRenderer.removeEntity(id);
         }

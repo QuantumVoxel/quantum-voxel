@@ -40,45 +40,6 @@ public class TextObjectRenderer {
         return this.text.getText();
     }
 
-    public void render(Renderer renderer, Color altColor, float x, float y, boolean shadow) {
-        this.currentX = x;
-        this.currentY = y;
-        this.startX = x;
-
-        this.lineHeight = font.lineHeight;
-
-        renderer.enableBlend();
-        renderer.disableDepth();
-
-        for (TextObject cur : this.text) {
-            if (cur instanceof FontIconObject fontIcon) {
-                renderFontIcon(renderer, fontIcon, shadow);
-                continue;
-            }
-
-            String rawText = cur.createString();
-            Color color = RgbColor.WHITE;
-            boolean bold = false;
-            boolean italic = false;
-            boolean underlined = false;
-            boolean strikethrough = false;
-
-            if (cur instanceof MutableText mutableText) {
-                color = mutableText.getColor();
-                bold = mutableText.isBold();
-                italic = mutableText.isItalic();
-                underlined = mutableText.isUnderlined();
-                strikethrough = mutableText.isStrikethrough();
-            }
-
-            if (color == null) {
-                color = altColor;
-            }
-
-            this.renderSingle(renderer, shadow, rawText, color, bold, italic, underlined, strikethrough);
-        }
-    }
-
     private void renderFontIcon(Renderer renderer, FontIconObject fontIcon, boolean shadow) {
         FontIconMap iconMap = fontIcon.getIconMap();
         String iconName = fontIcon.getIconName();
@@ -97,6 +58,47 @@ public class TextObjectRenderer {
         currentX += texture.getWidth();
 
         lineHeight = Math.max(lineHeight, texture.getHeight());
+    }
+
+    public void render(Renderer renderer, Color altColor, float x, float y, boolean shadow) {
+        this.currentX = x;
+        this.currentY = y;
+        this.startX = x;
+
+        this.lineHeight = font.lineHeight;
+
+        renderer.enableBlend();
+        renderer.disableDepth();
+
+        for (TextObject cur : this.text) {
+            switch (cur) {
+                case FontIconObject fontIcon -> renderFontIcon(renderer, fontIcon, shadow);
+                case MutableText mutableText -> {
+                    String rawText = mutableText.createString();
+                    Color color = mutableText.getColor();
+                    boolean bold = mutableText.isBold();
+                    boolean italic = mutableText.isItalic();
+                    boolean underlined = mutableText.isUnderlined();
+                    boolean strikethrough = mutableText.isStrikethrough();
+
+                    if (color == null) {
+                        color = altColor;
+                    }
+
+                    renderSingle(renderer, shadow, rawText, color, bold, italic, underlined, strikethrough);
+                }
+                default -> {
+                    String rawText = cur.createString();
+                    Color color = RgbColor.WHITE;
+                    boolean bold = false;
+                    boolean italic = false;
+                    boolean underlined = false;
+                    boolean strikethrough = false;
+
+                    renderSingle(renderer, shadow, rawText, color, bold, italic, underlined, strikethrough);
+                }
+            }
+        }
     }
 
     private void renderSingle(Renderer renderer, boolean shadow, String rawText, Color color, boolean bold, boolean italic, boolean underlined, boolean strikethrough) {
@@ -129,6 +131,7 @@ public class TextObjectRenderer {
         this.nextPart(renderer, shadow, color, bold, italic, underlined, strikethrough, scale);
     }
 
+
     private void nextPart(Renderer renderer, boolean shadow, Color color, boolean bold, boolean italic, boolean underlined, boolean strikethrough, float scale) {
         var part = this.partBuilder.toString();
         this.renderPart(renderer, shadow, color, bold, italic, underlined, strikethrough, part, scale);
@@ -137,7 +140,7 @@ public class TextObjectRenderer {
 
         this.layout.setText(this.currentFont, part);
         float width = this.font.width0(part);
-        this.currentX += width * scale;
+        this.currentX += width + (bold ? 1 : 0) * scale;
 
         this.partBuilder = new StringBuilder();
     }

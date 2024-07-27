@@ -4,8 +4,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.*;
 
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
@@ -21,19 +20,19 @@ public class WorldRayCaster {
 	private static final Vec3d local = new Vec3d();
 	private static final BoundingBox box = new BoundingBox();
 
-	public static BlockHitResult rayCast(World map) {
+	public static BlockHitResult rayCast(WorldReader map) {
 		return rayCast(new BlockHitResult(), map);
 	}
 
 	// sources : https://www.researchgate.net/publication/2611491_A_Fast_Voxel_Traversal_Algorithm_for_Ray_Tracing
 	// and https://www.gamedev.net/blogs/entry/2265248-voxel-traversal-algorithm-ray-casting/
-	public static BlockHitResult rayCast(BlockHitResult result, World world) {
+	public static BlockHitResult rayCast(BlockHitResult result, WorldReader world) {
 		return rayCast(result, world, BlockMetaPredicate.NON_FLUID);
 	}
 
 	// sources : https://www.researchgate.net/publication/2611491_A_Fast_Voxel_Traversal_Algorithm_for_Ray_Tracing
 	// and https://www.gamedev.net/blogs/entry/2265248-voxel-traversal-algorithm-ray-casting/
-	public static BlockHitResult rayCast(BlockHitResult result, World world, BlockMetaPredicate predicate) {
+	public static BlockHitResult rayCast(BlockHitResult result, WorldReader world, BlockMetaPredicate predicate) {
 		result.collide = false;
 
 		final Ray ray = result.ray;
@@ -45,7 +44,7 @@ public class WorldRayCaster {
 				ray.direction.y > 0 ? 1 : 0,
 				ray.direction.z > 0 ? 1 : 0);
 
-		Chunk chunk = null;
+		ChunkReader chunk = null;
 
 		origin.set((int) Math.floor(ray.origin.x), (int) Math.floor(ray.origin.y), (int) Math.floor(ray.origin.z));
 		abs.set(origin);

@@ -3,9 +3,9 @@ package dev.ultreon.quantum.client.api.events;
 import dev.ultreon.quantum.client.GameRenderer;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.events.api.Event;
-import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.ApiStatus;
 
 public class RenderEvents {
@@ -28,7 +28,7 @@ public class RenderEvents {
 
     @FunctionalInterface
     public interface RenderWorld {
-        void onRenderWorld(World world, WorldRenderer worldRenderer);
+        void onRenderWorld(ClientWorldAccess world, TerrainRenderer worldRenderer);
     }
 
     @FunctionalInterface
