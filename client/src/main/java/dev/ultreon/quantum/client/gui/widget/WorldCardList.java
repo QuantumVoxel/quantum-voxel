@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.WorldEditScreen;
@@ -191,7 +192,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                 if (renderer.pushScissors(this.pos.x + 2, ref.y, list.itemWidth - 4, list.itemHeight - 4)) {
                     renderer.textCenter(world.getName(), this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 71, ColorCode.WHITE);
 
-                    renderer.line(this.pos.x + 30, y1 + this.size.height - 59, this.pos.x + this.list.itemWidth - 30, y1 + this.size.height - 59, RgbColor.argb(0x80ffffff));
+                    renderer.line(this.pos.x + 30, y1 + this.size.height - 59, this.pos.x + this.list.itemWidth - 30, y1 + this.size.height - 59, new Color(0xffffff80));
                     renderer.textCenter(worldSaveInfo.lastPlayedInMode().name().toLowerCase().replace("_", " "), this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 59, false);
 
                     this.button.setPos(this.pos.x + 5, y1 + this.size.height - 29);

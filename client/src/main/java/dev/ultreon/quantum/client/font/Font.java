@@ -4,12 +4,13 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.text.*;
@@ -17,7 +18,6 @@ import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.Identifier;
 
-import java.nio.IntBuffer;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +29,12 @@ public class Font implements Disposable {
     @SuppressWarnings("GDXJavaStaticResource")
     static final BitmapFont UNIFONT = QuantumClient.get().unifont;
     static final Map<Identifier, Font> registry = new LinkedHashMap<>();
-    static ShaderProgram shader = null;
-    private static boolean shaderDisabled;
-    private static IntBuffer buffer;
     BitmapFont bitmapFont;
     public int lineHeight;
     private final boolean special;
     private final Identifier id;
+    private final com.badlogic.gdx.graphics.Color color = new com.badlogic.gdx.graphics.Color();
+    private GlyphLayout glyphLayout = new GlyphLayout();
 
     public Font(Identifier id) {
         this(id, false);
@@ -58,8 +57,7 @@ public class Font implements Disposable {
             this.bitmapFont = UNIFONT;
             return;
         }
-        BitmapFont bitmapFont = QuantumClient.invokeAndWait(() ->
-                new BitmapFont(resource, true));
+        BitmapFont bitmapFont = QuantumClient.invokeAndWait(() -> new BitmapFont(resource, true));
         if (bitmapFont == null) {
             this.bitmapFont = UNIFONT;
             return;
@@ -101,11 +99,13 @@ public class Font implements Disposable {
         textRenderer.render(renderer, color, x, y, shadow);
     }
 
+    @Deprecated
     public void drawText(Renderer renderer, FormattedText text, float x, float y, Color color, boolean shadow) {
 //        TextObjectRenderer textRenderer = new TextObjectRenderer(Collections.singletonList(text));
 //        textRenderer.render(renderer, color, x, y, shadow);
     }
 
+    @Deprecated
     public void drawText(Renderer renderer, List<FormattedText> text, float x, float y, Color color, boolean shadow) {
 //        TextObjectRenderer textRenderer = new TextObjectRenderer(text);
 //        textRenderer.render(renderer, color, x, y, shadow);
@@ -119,27 +119,31 @@ public class Font implements Disposable {
         return this.special;
     }
 
-    void drawTextScaled(Renderer renderer, BitmapFont font, Batch batch, String text, float x, float y, float scale, Color color, boolean shadow) {
+    void drawTextScaled(Renderer renderer, BitmapFont font, Batch batch, String text, float x, float y, float scale, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         this.drawTextScaled(renderer, font, batch, text, x, y, false, false, false, false, scale, color, shadow);
     }
 
-    void drawTextScaled(Renderer renderer, BitmapFont font, Batch batch, String text, float x, float y, boolean bold, boolean italic, boolean underlined, boolean strikethrough, float scale, Color color, boolean shadow) {
+    void drawTextScaled(Renderer renderer, BitmapFont font, Batch batch, String text, float x, float y, boolean bold, boolean italic, boolean underlined, boolean strikethrough, float scale, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         renderer.pushMatrix();
         renderer.scale(scale, scale);
         if (shadow) {
             float shadowX = x;
             if (ClientConfig.diagonalFontShadow) shadowX += (font == UNIFONT ? 0.5F : 1);
-            this.draw(renderer, font, color.darker().darker(), batch, text, shadowX, y / scale + 1, bold, italic, underlined, strikethrough, scale);
+            this.draw(renderer, font, this.color.set(color).sub(color.r / 3f, color.g / 3f, color.b / 3f, 0f), batch, text, shadowX, y / scale + 1, bold, italic, underlined, strikethrough, scale);
         }
 
         this.draw(renderer, font, color, batch, text, x, y / scale, bold, italic, underlined, strikethrough, scale);
         renderer.popMatrix();
     }
 
-    private void draw(Renderer renderer, BitmapFont font, Color color, Batch batch, String text, float x, float y, boolean bold, boolean italic, boolean underlined, boolean strikethrough, float scale) {
+    private void draw(Renderer renderer, BitmapFont font, com.badlogic.gdx.graphics.Color color, Batch batch, String text, float x, float y, boolean bold, boolean italic, boolean underlined, boolean strikethrough, float scale) {
         if (font == null) return;
         font.setUseIntegerPositions(true);
-        font.setColor(color.toGdx());
+        font.setColor(color);
+
+        if (bold) {
+            text = text.replaceAll("(.)", "\1$1").substring(text.isEmpty() ? 0 : 1);
+        }
         font.draw(batch, text, x / scale, y);
 
         if (bold)
@@ -195,11 +199,10 @@ public class Font implements Disposable {
     public int width(TextObject text) {
         float width = 0;
 
-        for (TextObject child : text) {
-            boolean isBold = false;
-            if (child instanceof FontIconObject fontIcon) {
-                FontIconMap iconMap = fontIcon.getIconMap();
-                Identifier icon = iconMap.get(fontIcon.getIconName());
+        for (TextPart child : text.bake()) {
+            if (child instanceof FontIconPart part) {
+                FontIconMap iconMap = part.map();
+                Identifier icon = iconMap.get(part.icon());
                 if (icon != null) {
                     TextureManager textureManager = QuantumClient.get().getTextureManager();
                     Texture texture = textureManager.getTexture(icon, null);
@@ -207,11 +210,11 @@ public class Font implements Disposable {
                         width += texture.getWidth();
                     }
                 }
+                continue;
             }
-            if (child instanceof MutableText mutableText) {
-                isBold = mutableText.isBold();
+            if (child instanceof StylePart part) {
+                width += (int) (this.width0(part.text()) + (part.bold() ? (isForcingUnicode() ? 0.5F : 1) : 0));
             }
-            width += (int) (this.width0(child.createString()) + (isBold ? (isForcingUnicode() ? 0.5F : 1) : 0));
         }
         return (int) width;
     }
@@ -222,15 +225,7 @@ public class Font implements Disposable {
         this.bitmapFont = null;
     }
 
-    public List<FormattedText> wordWrap(TextObject text, int width) {
-        FormattedText formattedText = getFormattedText(text);
-        return new WordWrapper(this.bitmapFont, this).wrap(formattedText, width);
-    }
-
-    public FormattedText getFormattedText(TextObject text) {
-        return FormattedText.from(text);
-    }
-
+    @Deprecated
     protected float width(FormattedText.TextFormatElement element) {
         String text = element.text();
         TextStyle style = element.style();
@@ -238,6 +233,7 @@ public class Font implements Disposable {
         return this.width0(text) + (style.isBold() ? 1 : 0);
     }
 
+    @Deprecated
     public int width(List<FormattedText> text) {
         int width = 0;
         for (FormattedText line : text) {
@@ -246,6 +242,7 @@ public class Font implements Disposable {
         return width;
     }
 
+    @Deprecated
     public int width(FormattedText line) {
         int width = 0;
         for (FormattedText.TextFormatElement element : line.getElements()) {

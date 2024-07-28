@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.text;
 
+import com.badlogic.gdx.utils.Array;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.stream.Stream;
+public abstract class TextObject {
+    private Array<TextPart> baked;
 
-public abstract class TextObject implements Iterable<TextObject> {
     protected TextObject() {
         super();
     }
@@ -37,6 +37,8 @@ public abstract class TextObject implements Iterable<TextObject> {
 
     public static TextObject empty() {
         return new TextObject() {
+            private static final StylePart BAKED = new StylePart("", 0, 0, (byte) 1);
+
             @Override
             public @NotNull String createString() {
                 return "";
@@ -53,6 +55,11 @@ public abstract class TextObject implements Iterable<TextObject> {
             public MutableText copy() {
                 return new LiteralText(this.createString());
             }
+
+            @Override
+            protected void bake(Array<TextPart> bake) {
+                bake.add(BAKED);
+            }
         };
     }
 
@@ -68,18 +75,21 @@ public abstract class TextObject implements Iterable<TextObject> {
         return text == null ? TextObject.empty() : TextObject.literal(text);
     }
 
+    public Array<TextPart> bake() {
+        if (baked != null) return baked;
+
+        Array<TextPart> baked = new Array<>(TextPart.class);
+        this.bake(baked);
+        this.baked = baked;
+
+        return baked;
+    }
+
     public abstract MutableText copy();
-
-    @Override
-    public @NotNull Iterator<TextObject> iterator() {
-        return this.stream().iterator();
-    }
-
-    protected Stream<TextObject> stream() {
-        return Stream.of(this);
-    }
 
     public TextStyle getStyle() {
         return TextStyle.defaultStyle();
     }
+
+    protected abstract void bake(Array<TextPart> bake);
 }

@@ -30,6 +30,7 @@ public class CommonConstants {
             .quoteless()
             .build();
     public static final int MAX_BLOCK_REGISTRY = 128;
+    public static final Identifier DEFAULT_FONT = new Identifier("quantium");
 
     private CommonConstants() {
 
