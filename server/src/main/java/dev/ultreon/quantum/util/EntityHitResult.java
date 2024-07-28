@@ -9,6 +9,7 @@ import dev.ultreon.quantum.world.CubicDirection;
 import java.util.Objects;
 
 public class EntityHitResult implements HitResult {
+    public static final EntityHitResult MISS = new EntityHitResult();
     protected CubicDirection direction;
     // input
     protected Ray ray;

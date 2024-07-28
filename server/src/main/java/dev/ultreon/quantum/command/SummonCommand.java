@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.command;
 
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
@@ -25,7 +26,10 @@ public class SummonCommand extends Command {
         }
 
         Vec3d position = senderEntity.getPosition();
-        World world = senderEntity.getWorld();
+        WorldAccess worldAccess = senderEntity.getWorld();
+        if (!(worldAccess instanceof World world)) {
+            return errorMessage("Entity is not in a world");
+        }
 
         Entity entity = entityType.create(world);
         entity.setPosition(position);

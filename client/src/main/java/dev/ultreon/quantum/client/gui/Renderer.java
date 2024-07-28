@@ -22,7 +22,6 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.texture.TextureManager;
-import dev.ultreon.quantum.client.util.InvalidValueException;
 import dev.ultreon.quantum.client.world.RenderablePool;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.FormattedText;
@@ -79,9 +78,9 @@ public class Renderer implements Disposable {
     public static final int FBO_SIZE = 1024;
 
     private FrameBuffer grid;
-    private float iTime;
     private final RenderablePool renderablePool = new RenderablePool();
     private final com.badlogic.gdx.graphics.Color tmpC = new com.badlogic.gdx.graphics.Color();
+    private float iTime;
 
     /**
      * Creates a new Renderer instance with the default matrices.
@@ -95,7 +94,7 @@ public class Renderer implements Disposable {
     /**
      * Creates a new Renderer instance with the given matrices.
      *
-     * @param shapes      shape drawer instance from {@link QuantumClient}
+     * @param shapes   shape drawer instance from {@link QuantumClient}
      * @param matrices current matrix stack.
      */
     public Renderer(ShapeDrawer shapes, Matrices matrices) {
@@ -379,8 +378,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x   the x coordinate
+     * @param y   the y coordinate
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float)
      */
@@ -396,10 +395,10 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates with the specified width and height.
      * This assumes that the texture is 256×256.
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
+     * @param tex    the texture to draw
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param width  the width
      * @param height the height
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float)
@@ -417,8 +416,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x   the x coordinate
+     * @param y   the y coordinate
      * @return this
      * @see #blit(Identifier, float, float, float, float)
      */
@@ -434,9 +433,9 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates with a background color.
      * This assumes that the texture is 256×256.
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param tex             the texture to draw
+     * @param x               the x coordinate
+     * @param y               the y coordinate
      * @param backgroundColor the background color to use
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, Color)
@@ -455,11 +454,11 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates with a background color and the specified width and height.
      * This assumes that the texture is 256×256.
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
+     * @param tex             the texture to draw
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
      * @param backgroundColor the background color to use
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, Color)
@@ -476,12 +475,12 @@ public class Renderer implements Disposable {
      * This also allows you to specify the UV coordinates of the texture.
      * This assumes that the texture is 256×256.
      *
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
      * @param backgroundColor the background color to use
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float, Color)
@@ -499,15 +498,15 @@ public class Renderer implements Disposable {
      * And the UV width and height.
      * This assumes that the texture is 256×256.
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
-     * @param vHeight the texture uv height
+     * @param tex             the texture to draw
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
+     * @param uWidth          the texture uv width
+     * @param vHeight         the texture uv height
      * @param backgroundColor the background color to use
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float, int, int, Color)
@@ -524,17 +523,17 @@ public class Renderer implements Disposable {
      * This also allows you to specify the UV coordinates of the texture.
      * And the UV width and height.
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
-     * @param vHeight the texture uv height
-     * @param texWidth the texture width
-     * @param texHeight the texture height
+     * @param tex             the texture to draw
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
+     * @param uWidth          the texture uv width
+     * @param vHeight         the texture uv height
+     * @param texWidth        the texture width
+     * @param texHeight       the texture height
      * @param backgroundColor the background color to use
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float, int, int, Color)
@@ -555,10 +554,10 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates
      * This assumes that the texture is 256×256.
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
+     * @param tex    the texture to draw
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param width  the width
      * @param height the height
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float)
@@ -573,13 +572,13 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture at the specified coordinates
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
+     * @param tex    the texture to draw
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param width  the width
      * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
+     * @param u      the texture u coordinate of the region
+     * @param v      the texture v coordinate of the region
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float)
      */
@@ -593,14 +592,14 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture at the specified coordinates
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
+     * @param tex     the texture to draw
+     * @param x       the x coordinate
+     * @param y       the y coordinate
+     * @param width   the width
+     * @param height  the height
+     * @param u       the texture u coordinate of the region
+     * @param v       the texture v coordinate of the region
+     * @param uWidth  the texture uv width
      * @param vHeight the texture uv height
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float)
@@ -615,16 +614,16 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture at the specified coordinates
      *
-     * @param tex the texture to draw
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
-     * @param vHeight the texture uv height
-     * @param texWidth the texture width
+     * @param tex       the texture to draw
+     * @param x         the x coordinate
+     * @param y         the y coordinate
+     * @param width     the width
+     * @param height    the height
+     * @param u         the texture u coordinate of the region
+     * @param v         the texture v coordinate of the region
+     * @param uWidth    the texture uv width
+     * @param vHeight   the texture uv height
+     * @param texWidth  the texture width
      * @param texHeight the texture height
      * @return this
      * @see #blit(Identifier, float, float, float, float, float, float, float, float, int, int)
@@ -642,11 +641,11 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
+     * @param id              the texture identifier
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
      * @param backgroundColor the background color
      * @return this
      */
@@ -659,13 +658,13 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
+     * @param id              the texture identifier
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
      * @param backgroundColor the background color
      * @return this
      */
@@ -679,15 +678,15 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
-     * @param vHeight the texture uv height
+     * @param id              the texture identifier
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
+     * @param uWidth          the texture uv width
+     * @param vHeight         the texture uv height
      * @param backgroundColor the background color
      * @return this
      */
@@ -701,10 +700,10 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
+     * @param id     the texture identifier
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param width  the width
      * @param height the height
      * @return this
      */
@@ -713,17 +712,17 @@ public class Renderer implements Disposable {
         this.blit(id, x, y, width, height, 0.0F, 0.0F);
         return this;
     }
-    
+
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
+     * @param id     the texture identifier
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param width  the width
      * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
+     * @param u      the texture u coordinate of the region
+     * @param v      the texture v coordinate of the region
      * @return this
      */
     @CanIgnoreReturnValue
@@ -735,14 +734,14 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
+     * @param id      the texture identifier
+     * @param x       the x coordinate
+     * @param y       the y coordinate
+     * @param width   the width
+     * @param height  the height
+     * @param u       the texture u coordinate of the region
+     * @param v       the texture v coordinate of the region
+     * @param uWidth  the texture uv width
      * @param vHeight the texture uv height
      * @return this
      */
@@ -755,16 +754,16 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
-     * @param vHeight the texture uv height
-     * @param texWidth the texture width
+     * @param id        the texture identifier
+     * @param x         the x coordinate
+     * @param y         the y coordinate
+     * @param width     the width
+     * @param height    the height
+     * @param u         the texture u coordinate of the region
+     * @param v         the texture v coordinate of the region
+     * @param uWidth    the texture uv width
+     * @param vHeight   the texture uv height
+     * @param texWidth  the texture width
      * @param texHeight the texture height
      * @return this
      */
@@ -781,17 +780,17 @@ public class Renderer implements Disposable {
     /**
      * Draws a texture by id at the specified coordinates
      *
-     * @param id the texture identifier
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
-     * @param height the height
-     * @param u the texture u coordinate of the region
-     * @param v the texture v coordinate of the region
-     * @param uWidth the texture uv width
-     * @param vHeight the texture uv height
-     * @param texWidth the texture width
-     * @param texHeight the texture height
+     * @param id              the texture identifier
+     * @param x               the x coordinate
+     * @param y               the y coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
+     * @param uWidth          the texture uv width
+     * @param vHeight         the texture uv height
+     * @param texWidth        the texture width
+     * @param texHeight       the texture height
      * @param backgroundColor the background color
      * @return this
      */
@@ -811,8 +810,8 @@ public class Renderer implements Disposable {
      * Draws a sprite
      *
      * @param sprite the sprite
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x      the x coordinate
+     * @param y      the y coordinate
      * @return this
      */
     @CanIgnoreReturnValue
@@ -825,9 +824,9 @@ public class Renderer implements Disposable {
      * Draws a sprite
      *
      * @param sprite the sprite
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param width the width
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param width  the width
      * @param height the height
      * @return this
      */
@@ -841,8 +840,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x    the x coordinate
+     * @param y    the y coordinate
      * @return this
      */
     @CanIgnoreReturnValue
@@ -854,9 +853,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text  the text
+     * @param x     the x coordinate
+     * @param y     the y coordinate
      * @param color the color
      * @return this
      */
@@ -869,9 +868,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text  the text
+     * @param x     the x coordinate
+     * @param y     the y coordinate
      * @param color the color
      * @return this
      */
@@ -884,9 +883,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text   the text
+     * @param x      the x coordinate
+     * @param y      the y coordinate
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -899,10 +898,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text   the text
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -915,10 +914,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text   the text
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -932,8 +931,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x    the x coordinate
+     * @param y    the y coordinate
      * @return this
      */
     @CanIgnoreReturnValue
@@ -945,9 +944,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text  the text
+     * @param x     the x coordinate
+     * @param y     the y coordinate
      * @param color the color
      * @return this
      */
@@ -960,9 +959,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text  the text
+     * @param x     the x coordinate
+     * @param y     the y coordinate
      * @param color the color
      * @return this
      */
@@ -975,9 +974,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text   the text
+     * @param x      the x coordinate
+     * @param y      the y coordinate
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -990,10 +989,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text   the text
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -1006,10 +1005,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text   the text
+     * @param x      the x coordinate
+     * @param y      the y coordinate
+     * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -1022,9 +1021,9 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1038,10 +1037,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1055,10 +1054,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1072,10 +1071,10 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param shadow if the text should be drawn with a shadow
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1089,11 +1088,11 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
-     * @param shadow if the text should be drawn with a shadow
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
+     * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1107,11 +1106,11 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
-     * @param shadow if the text should be drawn with a shadow
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
+     * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1125,11 +1124,11 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
      * @param maxWidth the max width
-     * @param wrap if the text should be wrapped
+     * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
      * @return this
      */
@@ -1142,12 +1141,12 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
      * @param maxWidth the max width
-     * @param wrap if the text should be wrapped
+     * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
      * @return this
      */
@@ -1160,12 +1159,12 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
      * @param maxWidth the max width
-     * @param wrap if the text should be wrapped
+     * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
      * @return this
      */
@@ -1178,11 +1177,11 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
      * @param maxWidth the max width
-     * @param wrap if the text should be wrapped
+     * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
      * @return this
      */
@@ -1195,13 +1194,13 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
-     * @param shadow if the text should be drawn with a shadow
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
+     * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
-     * @param wrap if the text should be wrapped
+     * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
      * @return this
      */
@@ -1214,13 +1213,13 @@ public class Renderer implements Disposable {
     /**
      * Draws text anchored to the left
      *
-     * @param text the text
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param color the color
-     * @param shadow if the text should be drawn with a shadow
+     * @param text     the text
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     * @param color    the color
+     * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
-     * @param wrap if the text should be wrapped
+     * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
      * @return this
      */
@@ -1290,120 +1289,140 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y) {
         this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, Color color) {
         this.textLeft(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, ColorCode color) {
         this.textLeft(String.valueOf(text), x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, boolean shadow) {
         this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, Color color, boolean shadow) {
         this.font.drawText(this, text, x, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, ColorCode color, boolean shadow) {
         this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y) {
         this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y, Color color) {
         this.textLeft(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y, boolean shadow) {
         this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
         this.font.drawText(this, text, x, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y) {
         this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, Color color) {
         this.textLeft(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ColorCode color) {
         this.textLeft(String.valueOf(text), x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, boolean shadow) {
         this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, Color color, boolean shadow) {
         this.font.drawText(this, text, x, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ColorCode color, boolean shadow) {
         this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y) {
         this.textLeft(text, x, y, RgbColor.WHITE);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y, Color color) {
         this.textLeft(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y, boolean shadow) {
         this.textLeft(text, x, y, RgbColor.WHITE, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
         this.font.drawText(this, text, x, y, color, shadow);
@@ -1554,192 +1573,224 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y) {
         this.textLeft(text, x - this.font.width(text) / 2, y);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y, Color color) {
         this.textLeft(text, x - this.font.width(text) / 2, y, color);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y, boolean shadow) {
         this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y, Color color, boolean shadow) {
         this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y, Color color) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y, color);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y, boolean shadow) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, float x, float y) {
         this.textRight(text, x, y, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, float x, float y, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, float x, float y, Color color) {
         this.textRight(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, int x, int y) {
         this.textRight(text, x, y, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, int x, int y, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, int x, int y, Color color) {
         this.textRight(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, int x, int y, Color color, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y) {
         this.textLeft(text, x - this.font.width(text) / 2, y);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y, Color color) {
         this.textLeft(text, x - this.font.width(text) / 2, y, color);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y, boolean shadow) {
         this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y, Color color, boolean shadow) {
         this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y, Color color) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y, color);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y, boolean shadow) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
         this.textLeft(text, x - (float) this.font.width(text) / 2, y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, float x, float y) {
         this.textRight(text, x, y, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, float x, float y, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, float x, float y, Color color) {
         this.textRight(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, color, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, int x, int y) {
         this.textRight(text, x, y, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, int x, int y, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, shadow);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, int x, int y, Color color) {
         this.textRight(text, x, y, color, true);
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, int x, int y, Color color, boolean shadow) {
         this.textLeft(text, x - this.font.width(text), y, color, shadow);
@@ -2328,6 +2379,10 @@ public class Renderer implements Disposable {
 
         rect.y = this.client.getHeight() - rect.y - rect.height;
 
+        if (!Gdx.gl.glIsEnabled(GL20.GL_SCISSOR_TEST)) {
+            Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
+        }
+
         this.flush();
         return ScissorStack.pushScissors(rect);
     }
@@ -2551,8 +2606,8 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer line(float x1, float y1, float x2, float y2, Color color) {
-        this.shapes.line(x1, y1, x2, y2, color.toGdx(), this.strokeWidth);
+    public Renderer line(float x1, float y1, float x2, float y2, com.badlogic.gdx.graphics.Color color) {
+        this.shapes.line(x1, y1, x2, y2, color, this.strokeWidth);
         return this;
     }
 
@@ -2744,86 +2799,86 @@ public class Renderer implements Disposable {
                     """;
 
 
-//    @Language("GLSL")
+    @Language("GLSL")
     final String GRID_FRAG =
-        """
-                #ifdef GL_ES
-                precision mediump float;
-                #endif
+            """
+                    #ifdef GL_ES
+                    precision mediump float;
+                    #endif
 
-                varying vec2 vTexCoord;
-                varying vec4 vColor;
-                uniform sampler2D u_texture;
-                uniform vec2 iResolution;
-                uniform vec3 hexagonColor;
-                uniform float hexagonTransparency;
+                    varying vec2 vTexCoord;
+                    varying vec4 vColor;
+                    uniform sampler2D u_texture;
+                    uniform vec2 iResolution;
+                    uniform vec3 hexagonColor;
+                    uniform float hexagonTransparency;
 
-                float rng( in vec2 pos )
-                {
-                    return fract(sin( pos.y + pos.x*78.233 )*43758.5453)*2.0 - 1.0;
-                }
+                    float rng( in vec2 pos )
+                    {
+                        return fract(sin( pos.y + pos.x*78.233 )*43758.5453)*2.0 - 1.0;
+                    }
 
-                float simplexValue1DPart(vec2 uv, float ix) {
-                    float x = uv.x - ix;
-                    float f = 1.0 - x * x;
-                    float f2 = f * f;
-                    float f3 = f * f2;
-                    return f3;
-                }
+                    float simplexValue1DPart(vec2 uv, float ix) {
+                        float x = uv.x - ix;
+                        float f = 1.0 - x * x;
+                        float f2 = f * f;
+                        float f3 = f * f2;
+                        return f3;
+                    }
 
-                float simplexValue1D(vec2 uv) {
-                    vec2 iuv = floor(uv);   \s
-                    float n = simplexValue1DPart(uv, iuv.x);
-                    n += simplexValue1DPart(uv, iuv.x + 1.0);
-                    return rng(vec2(n * 2.0 - 1.0, 0.0));
-                }
+                    float simplexValue1D(vec2 uv) {
+                        vec2 iuv = floor(uv);   \s
+                        float n = simplexValue1DPart(uv, iuv.x);
+                        n += simplexValue1DPart(uv, iuv.x + 1.0);
+                        return rng(vec2(n * 2.0 - 1.0, 0.0));
+                    }
 
-                float perlin( in float pos )
-                {
-                    // Get node values
-                   \s
-                    float a = rng( vec2(floor(pos), 1.0) );
-                    float b = rng( vec2(ceil( pos), 1.0) );
-                   \s
-                    float a_x = rng( vec2(floor(pos), 2.0) );
-                    float b_x = rng( vec2(ceil( pos), 2.0) );
-                   \s
-                    a += a_x*fract(pos);
-                    b += b_x*(fract(pos)-1.0);
-                   \s
-                   \s
-                   \s
-                    // Interpolate values
-                   \s
-                    return a + (b-a)*smoothstep(0.0,1.0,fract(pos));
-                }
+                    float perlin( in float pos )
+                    {
+                        // Get node values
+                       \s
+                        float a = rng( vec2(floor(pos), 1.0) );
+                        float b = rng( vec2(ceil( pos), 1.0) );
+                       \s
+                        float a_x = rng( vec2(floor(pos), 2.0) );
+                        float b_x = rng( vec2(ceil( pos), 2.0) );
+                       \s
+                        a += a_x*fract(pos);
+                        b += b_x*(fract(pos)-1.0);
+                       \s
+                       \s
+                       \s
+                        // Interpolate values
+                       \s
+                        return a + (b-a)*smoothstep(0.0,1.0,fract(pos));
+                    }
 
-                void main() {\s
-                  vec2 uv = gl_FragCoord.xy;
-                  uv /= 24.0;
+                    void main() {\s
+                      vec2 uv = gl_FragCoord.xy;
+                      uv /= 24.0;
 
-                  vec4 color = texture2D(u_texture, vTexCoord);
-                  const float A = 0.0;
-                  const float B = 0.15;
+                      vec4 color = texture2D(u_texture, vTexCoord);
+                      const float A = 0.0;
+                      const float B = 0.15;
 
-                  float x = uv.x;
-                  float y = (uv.y) * (1.5 / 3.0);
+                      float x = uv.x;
+                      float y = (uv.y) * (1.5 / 3.0);
 
-                  float val = (0.5 + 0.5 * x + 0.5 * y);
+                      float val = (0.5 + 0.5 * x + 0.5 * y);
 
-                  float noise = perlin(val);
-                  if (noise > 0.1) {
-                      noise = -1.0;
-                  }
+                      float noise = perlin(val);
+                      if (noise > 0.1) {
+                          noise = -1.0;
+                      }
 
-                  noise = 1.0 - (noise + 1.0) / 2.0;
+                      noise = 1.0 - (noise + 1.0) / 2.0;
 
-                  color.rgb = vec3(1.0);
-                  color.a = color.a * (noise * (B - A)) + A;
+                      color.rgb = vec3(1.0);
+                      color.a = color.a * (noise * (B - A)) + A;
 
-                  gl_FragColor = color;
-                }
-                """;
+                      gl_FragColor = color;
+                    }
+                    """;
 
     @ApiStatus.Experimental
     public void blurred(Runnable block) {
@@ -2857,105 +2912,110 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(float overlayOpacity, float radius, boolean grid, int guiScale, Runnable block) {
-//        if (this.blurred) {
+        if (!ClientConfig.blurEnabled) {
             block.run();
-//            return;
-//        }
-//
-//        this.blurred = true;
-//        try {
-//            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-//            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-//            TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
-//
-//            //Start rendering to an offscreen color buffer
-//            blurTargetA.begin();
-//
-//            //before rendering, ensure we are using the default shader
-//            batch.setShader(null);
-//
-//            batch.flush();
-//
-//            //render the batch contents to the offscreen buffer
-//            this.flush();
-//
-//            block.run();
-//
-//            //finish rendering to the offscreen buffer
-//            batch.flush();
-//
-//            //finish rendering to the offscreen buffer
-//            blurTargetA.end();
-//
-//            //now let's start blurring the offscreen image
-//            batch.setShader(blurShader);
-//
-//            //since we never called batch.end(), we should still be drawing
-//            //which means are blurShader should now be in use
-//
-//            // set the shader uniforms
-//            blurShader.setUniformf("iBlurDirection", 1f, 0f);
-//            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//            blurShader.setUniformf("iBlurRadius", radius / guiScale);
-//            blurShader.setUniformf("iTime", iTime);
-//
-//            //our first blur pass goes to target B
-//            blurTargetB.begin();
-//
-//            //we want to render FBO target A into target B
-//            fboRegion.setTexture(blurTargetA.getColorBufferTexture());
-//
-//            //draw the scene to target B with a horizontal blur effect
-//            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-//            batch.draw(fboRegion, 0, 0);
-//
-//            //flush the batch before ending the FBO
-//            batch.flush();
-//
-//            //finish rendering target B
-//            blurTargetB.end();
-//
-//            //now we can render to the screen using the vertical blur shader
-//
-//            //update the blur only along Y-axis
-//            blurShader.setUniformf("iBlurDirection", 0f, 1f);
-//
-//            //update the resolution of the blur along Y-axis
-//            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//
-//            //update the Y-axis blur radius
-//            blurShader.setUniformf("radius", radius);
-//
-//            //draw target B to the screen with a vertical blur effect
-//            fboRegion.setTexture(blurTargetB.getColorBufferTexture());
-//            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-//            batch.draw(fboRegion, 0, 0);
-//
-//            //reset to default shader without blurs
-//            batch.setShader(null);
-//
-//            this.flush();
-//
-//            this.batch.setColor(1, 1, 1, 1);
-//            if (grid) {
-//                //getConfig the texture for the hexagon grid
-//                Texture colorBufferTexture = this.grid.getColorBufferTexture();
-//
-//                //render the grid to the screen
-//                blurred(32, false, 1, () -> {
-//                    this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-//                    this.batch.draw(colorBufferTexture, 0, 0, (float) Gdx.graphics.getWidth() / guiScale, (float) Gdx.graphics.getHeight() / guiScale);
-//                });
-//            }
-//
-//            //dispose of the FBOs
-//            blurTargetA.dispose();
-//            blurTargetB.dispose();
-//            this.batch.setColor(1f, 1f, 1f, 1f);
-//        } finally {
-//            this.batch.setColor(1, 1, 1, 1);
-//            this.blurred = false;
-//        }
+            return;
+        }
+
+        if (this.blurred) {
+            block.run();
+            return;
+        }
+
+        this.blurred = true;
+        try {
+            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+            TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
+
+            //Start rendering to an offscreen color buffer
+            blurTargetA.begin();
+
+            //before rendering, ensure we are using the default shader
+            batch.setShader(null);
+
+            batch.flush();
+
+            //render the batch contents to the offscreen buffer
+            this.flush();
+
+            block.run();
+
+            //finish rendering to the offscreen buffer
+            batch.flush();
+
+            //finish rendering to the offscreen buffer
+            blurTargetA.end();
+
+            //now let's start blurring the offscreen image
+            batch.setShader(blurShader);
+
+            //since we never called batch.end(), we should still be drawing
+            //which means are blurShader should now be in use
+
+            // set the shader uniforms
+            blurShader.setUniformf("iBlurDirection", 1f, 0f);
+            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            blurShader.setUniformf("iBlurRadius", radius / guiScale);
+            blurShader.setUniformf("iTime", iTime);
+
+            //our first blur pass goes to target B
+            blurTargetB.begin();
+
+            //we want to render FBO target A into target B
+            fboRegion.setTexture(blurTargetA.getColorBufferTexture());
+
+            //draw the scene to target B with a horizontal blur effect
+            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+            batch.draw(fboRegion, 0, 0);
+
+            //flush the batch before ending the FBO
+            batch.flush();
+
+            //finish rendering target B
+            blurTargetB.end();
+
+            //now we can render to the screen using the vertical blur shader
+
+            //update the blur only along Y-axis
+            blurShader.setUniformf("iBlurDirection", 0f, 1f);
+
+            //update the resolution of the blur along Y-axis
+            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+            //update the Y-axis blur radius
+            blurShader.setUniformf("radius", radius);
+
+            //draw target B to the screen with a vertical blur effect
+            fboRegion.setTexture(blurTargetB.getColorBufferTexture());
+            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+            batch.draw(fboRegion, 0, 0);
+
+            //reset to default shader without blurs
+            batch.setShader(null);
+
+            this.flush();
+
+            this.batch.setColor(1, 1, 1, 1);
+            if (grid) {
+                //getConfig the texture for the hexagon grid
+                Texture colorBufferTexture = this.grid.getColorBufferTexture();
+
+                //render the grid to the screen
+                blurred(32, false, 1, () -> {
+                    this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+                    this.batch.draw(colorBufferTexture, 0, 0, (float) Gdx.graphics.getWidth() / guiScale, (float) Gdx.graphics.getHeight() / guiScale);
+                });
+            }
+
+            //dispose of the FBOs
+            blurTargetA.dispose();
+            blurTargetB.dispose();
+            this.batch.setColor(1f, 1f, 1f, 1f);
+        } finally {
+            this.batch.setColor(1, 1, 1, 1);
+            this.blurred = false;
+        }
     }
 
     public void resize(int width, int height) {
@@ -2980,16 +3040,6 @@ public class Renderer implements Disposable {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Color hexagonColor;
-        try {
-            String hexagonColorHex = ClientConfig.hexagonColor;
-            if (hexagonColorHex.length() > 7) hexagonColorHex = hexagonColorHex.substring(0, 7);
-            if (hexagonColorHex.length() < 7 && hexagonColorHex.length() > 4)
-                hexagonColorHex = hexagonColorHex.substring(0, 4);
-            if (hexagonColorHex.length() < 4) hexagonColorHex = "#ffffff";
-            hexagonColor = RgbColor.hex(hexagonColorHex);
-        } catch (InvalidValueException e) {
-            hexagonColor = RgbColor.WHITE;
-        }
 
         float hexagonTransparency = ClientConfig.hexagonTransparency;
 

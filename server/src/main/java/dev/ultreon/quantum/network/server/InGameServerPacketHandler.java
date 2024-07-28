@@ -170,9 +170,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick) {
 
-                QuantumServer.invoke(new TickTask(2, () -> {
-                    world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockPos(pos.x(), pos.y(), pos.z()), world.get(pos)));
-                }));
+                QuantumServer.invoke(new TickTask(2, () -> world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockPos(pos.x(), pos.y(), pos.z()), world.get(pos)))));
                 return;
             }
 

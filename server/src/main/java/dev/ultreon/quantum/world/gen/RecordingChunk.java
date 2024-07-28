@@ -2,6 +2,7 @@ package dev.ultreon.quantum.world.gen;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -54,5 +55,15 @@ public class RecordingChunk implements ChunkAccess {
     @Override
     public int getHighest(int x, int z) {
         return this.chunk.getHighest(x, z);
+    }
+
+    @Override
+    public BlockProperties get(BlockPos localize) {
+        return get(localize.x(), localize.y(), localize.z());
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return false;
     }
 }

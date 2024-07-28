@@ -67,19 +67,19 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         }
 
         renderer.pushMatrix();
-        if (renderer.pushScissors(this.getBounds())) {
-            this.renderChildren(renderer, mouseX, mouseY, deltaTime);
-            renderer.popScissors();
-        }
+        this.renderChildren(renderer, mouseX, mouseY, deltaTime);
         renderer.popMatrix();
     }
 
     @Override
     public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        for (Entry<T> entry : this.entries) {
-            if (entry.visible) {
-                entry.render(renderer, 0, mouseX, mouseY - (int) this.scrollY, this.selectable && this.selected == entry, deltaTime);
+        if (renderer.pushScissors(this.getBounds())) {
+            for (Entry<T> entry : this.entries) {
+                if (entry.visible) {
+                    entry.render(renderer, 0, mouseX, mouseY - (int) this.scrollY, this.selectable && this.selected == entry, deltaTime);
+                }
             }
+            renderer.popScissors();
         }
     }
 
@@ -107,7 +107,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
             if (entryAt != null) {
                 this.selected = entryAt;
-                this.onSelected.call(this.selected.value);
+                this.onSelected.call(this.selected.getValue());
                 return true;
             }
         }
@@ -206,7 +206,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     public T getSelected() {
         if (this.selected == null) return null;
-        return this.selected.value;
+        return this.selected.getValue();
     }
 
     public int getGap() {
@@ -233,7 +233,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         int found = -1;
         int idx = 0;
         for (Entry<T> entry : this.entries) {
-            if (predicate.test(entry.value)) {
+            if (predicate.test(entry.getValue())) {
                 found = idx;
                 break;
             }
@@ -300,21 +300,25 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this;
     }
 
+    public float getScrollY() {
+        return this.scrollY;
+    }
+
     public static class Entry<T> extends Widget {
         private final T value;
         private final SelectionList<T> list;
 
         public Entry(T value, SelectionList<T> list) {
-            super(list.size.width, list.itemHeight);
+            super(list.size.width, list.getItemHeight());
             this.value = value;
             this.list = list;
         }
 
         public void render(Renderer renderer, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
             this.pos.x = this.list.pos.x;
-            this.pos.y = (int) (this.list.pos.y - this.list.scrollY + (this.list.itemHeight + this.list.gap) * this.list.entries.indexOf(this));
+            this.pos.y = (int) (this.list.pos.y - this.list.scrollY + (this.list.getItemHeight() + this.list.getGap()) * this.list.entries.indexOf(this));
             this.size.width = this.list.size.width;
-            this.size.height = this.list.itemHeight;
+            this.size.height = this.list.getItemHeight();
             ItemRenderer<T> itemRenderer = this.list.itemRenderer;
             if (itemRenderer != null && renderer.pushScissors(this.bounds)) {
 

@@ -12,6 +12,8 @@ import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import org.jetbrains.annotations.Nullable;
 
 public class WorldShader extends DefaultShader {
     public static final Vector3 CAMERA_UP = new Vector3();
@@ -72,7 +74,7 @@ public class WorldShader extends DefaultShader {
         public final static Setter globalSunlight = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                ClientWorld world = QuantumClient.get().world;
+                @Nullable ClientWorldAccess world = QuantumClient.get().world;
                 if (world != null) {
                     shader.set(inputID, world.getGlobalSunlight());
                 } else {

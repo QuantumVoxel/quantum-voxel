@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.network;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
@@ -18,7 +20,6 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -128,9 +129,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             }
 
             CompletableFuture.runAsync(() -> {
-                ClientWorld world = this.client.world;
+                @Nullable ClientWorldAccess worldAccess = this.client.world;
 
-                if (world == null) {
+                if (worldAccess == null) {
+                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
+                    return;
+                }
+
+                if (!(worldAccess instanceof ClientWorld world)) {
                     this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                     return;
                 }
@@ -188,12 +194,12 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
         this.client.submit(() -> {
             this.client.renderWorld = false;
-            @Nullable ClientWorld world = this.client.world;
-            if (world != null) {
-                world.dispose();
+            @Nullable ClientWorldAccess worldAccess = this.client.world;
+            if (worldAccess != null) {
+                worldAccess.dispose();
                 this.client.world = null;
             }
-            @Nullable WorldRenderer worldRenderer = this.client.worldRenderer;
+            @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
             if (worldRenderer != null) {
                 worldRenderer.dispose();
                 this.client.worldRenderer = null;
@@ -393,8 +399,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onBlockEntitySet(BlockPos pos, BlockEntityType<?> blockEntity) {
         QuantumClient.invoke(() -> {
-            ClientWorld world = client.world;
-            if (world != null) {
+            @Nullable ClientWorldAccess worldAccess = client.world;
+            if (worldAccess instanceof ClientWorld world) {
                 world.setBlockEntity(pos, blockEntity.create(world, pos));
             }
         });
@@ -430,7 +436,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onEntityPipeline(int id, MapType pipeline) {
-        ClientWorld world = this.client.world;
+        @Nullable ClientWorldAccess world = this.client.world;
         if (world != null) {
             this.client.execute(() -> {
                 Entity entity = world.getEntity(id);
@@ -458,17 +464,17 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onPlayerAttack(int playerId, int entityId) {
         if (this.client.world != null) {
-            this.client.world.
-                    onPlayerAttack(playerId, entityId);
+            this.client.world.onPlayerAttack(playerId, entityId);
         }
     }
 
     @Override
     public void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
-        ClientWorld world = this.client.world;
+        @Nullable ClientWorldAccess world = this.client.world;
         if (world == null) return;
 
-        world.spawnParticles(particleType, position, motion, count);
+        // TODO: Implement this
+//        world.spawnParticles(particleType, position, motion, count);
     }
 
     @Override

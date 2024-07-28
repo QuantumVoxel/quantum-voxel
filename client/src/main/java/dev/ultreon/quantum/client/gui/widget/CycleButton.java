@@ -74,6 +74,9 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
 
     public final CycleButton<T> formatter(Function<T, TextObject> formatter) {
         this.formatter = formatter;
+        if (values != null && values.length > 0 && this.label != null && this.formatter != null) {
+            this.text().set(this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+        }
         return this;
     }
 
@@ -152,11 +155,18 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
 
     public CycleButton<T> label(TextObject label) {
         this.label = label;
+        if (values != null && values.length > 0 && this.label != null && this.formatter != null) {
+            this.text().set(this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+        }
         return this;
     }
 
     public CycleButton<T> label(String label) {
         this.label = TextObject.literal(label);
+        if (values != null && values.length > 0 && this.formatter != null) {
+            this.text().set(this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+        }
+
         return this;
     }
 

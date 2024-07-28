@@ -3,13 +3,12 @@ plugins {
     id 'maven-publish'
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
+version = '0.1.0'
 group = 'dev.ultreon.quantum'
-version = project_version
+
+base {
+    archivesName = 'mixinprovider'
+}
 
 repositories {
     // Add repositories to retrieve artifacts from in here.
@@ -44,17 +43,30 @@ dependencies {
 }
 
 processResources {
-
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
-
 publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = "dev.ultreon"
+            artifactId = "mixinprovider"
+            version = project.version
+            from components.java
+        }
+    }
+
     repositories {
         maven {
-            url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
+            name = "GitLabMaven"
+            url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
             credentials(HttpHeaderCredentials) {
                 name = "Private-Token"
-                value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
+                value = findProperty("gitLabPrivateToken").toString()
+                // the variable resides in $GRADLE_USER_HOME/gradle.properties
             }
             authentication {
                 header(HttpHeaderAuthentication)

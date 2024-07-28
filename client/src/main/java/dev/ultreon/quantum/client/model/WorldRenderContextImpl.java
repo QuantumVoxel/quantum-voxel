@@ -2,16 +2,16 @@ package dev.ultreon.quantum.client.model;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.render.RenderLayer;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 
 public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
     final RenderLayer renderLayer;
     final T holder;
-    private final World world;
+    private final WorldAccess world;
     private final float worldScale;
     private final Vec3d cameraPos;
 
-    public WorldRenderContextImpl(RenderLayer renderLayer, T holder, World world, float worldScale, Vec3d cameraPos) {
+    public WorldRenderContextImpl(RenderLayer renderLayer, T holder, WorldAccess world, float worldScale, Vec3d cameraPos) {
         this.renderLayer = renderLayer;
         this.holder = holder;
         this.world = world;
@@ -29,7 +29,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
     }
 
     @Override
-    public World getWorld() {
+    public WorldAccess getWorld() {
         return world;
     }
 }

@@ -1,10 +1,12 @@
 package dev.ultreon.quantum.api.commands;
 
+import dev.ultreon.quantum.api.commands.error.NotFoundError;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 
 public class PositionCommand extends Command {
     public PositionCommand() {
@@ -18,8 +20,12 @@ public class PositionCommand extends Command {
             return this.needEntity();
         }
         PositionSelection positions = Selections.get(sender).positions;
-        if (!positions.world.equals(entity.getWorld())) {
-            positions.reset(entity.getWorld());
+        WorldAccess worldAccess = entity.getWorld();
+        if (!(worldAccess instanceof World world)) {
+            return new NotFoundError("world");
+        }
+        if (!positions.world.equals(world)) {
+            positions.reset(world);
         }
         BlockPos firstLoc = positions.first;
         String firstStr = "null";
@@ -52,7 +58,11 @@ public class PositionCommand extends Command {
         }
         PositionSelection positions = Selections.get(sender).positions;
         if (!positions.world.equals(entity.getWorld())) {
-            positions.reset(entity.getWorld());
+            WorldAccess worldAccess = entity.getWorld();
+            if (!(worldAccess instanceof World world)) {
+                return new NotFoundError("world");
+            }
+            positions.reset(world);
         }
         Location loc = sender.getLocation();
         positions.second = loc.getBlockPos();

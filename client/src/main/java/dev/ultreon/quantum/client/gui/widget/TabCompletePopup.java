@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.font.Font;
@@ -11,6 +12,7 @@ import dev.ultreon.quantum.util.RgbColor;
 import java.util.Arrays;
 
 public class TabCompletePopup implements Renderable {
+    public static final Color OVERLOW_COLOR = new Color(0xff4040ff);
     public int x;
     public int y;
     public boolean visible;
@@ -100,8 +102,8 @@ public class TabCompletePopup implements Renderable {
             down = false;
         }
 
-        if (down) renderer.line(textX, this.y - 3, textX + this.width - 4, this.y - 3, RgbColor.rgb(255, 64, 64));
-        if (up) renderer.line(textX, this.y - this.height + 3, textX + this.width - 4, this.y - this.height + 3, RgbColor.rgb(255, 64, 64));
+        if (down) renderer.line(textX, this.y - 3, textX + this.width - 4, this.y - 3, OVERLOW_COLOR);
+        if (up) renderer.line(textX, this.y - this.height + 3, textX + this.width - 4, this.y - this.height + 3, OVERLOW_COLOR);
 
         for (int i = 0, stringsLength = strings.length; i < stringsLength; i++) {
             if (i < min || i >= max) continue;

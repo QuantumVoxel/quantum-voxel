@@ -170,6 +170,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos the position of the block
      * @return the block at the given coordinates
      */
+    @Override
     public BlockProperties get(Vec3i pos) {
         if (this.disposed) return Blocks.AIR.createMeta();
         return this.get(pos.x, pos.y, pos.z);
@@ -181,6 +182,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos the position of the block
      * @return the block at the given coordinates
      */
+    @Override
     public BlockProperties get(BlockPos pos) {
         if (this.disposed) return Blocks.AIR.createMeta();
         return this.get(pos.x(), pos.y(), pos.z());
@@ -194,6 +196,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z the z coordinate of the block
      * @return the block at the given coordinates
      */
+    @Override
     public BlockProperties get(int x, int y, int z) {
         if (this.disposed) return Blocks.AIR.createMeta();
         if (this.isOutOfBounds(x, y, z)) return Blocks.AIR.createMeta();
@@ -222,6 +225,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z the z coordinate of the block
      * @return the block at the given coordinates
      */
+    @Override
     public BlockProperties getFast(int x, int y, int z) {
         if (this.disposed) return Blocks.AIR.createMeta();
         int dataIdx = this.getIndex(x, y, z);
@@ -236,6 +240,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos   the position of the block
      * @param block the block to set
      */
+    @Override
     public void set(Vec3i pos, BlockProperties block) {
         this.set(pos.x, pos.y, pos.z, block);
     }
@@ -249,6 +254,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param block the block to set
      * @return true if the block was successfully set, false if setting the block failed
      */
+    @Override
     public boolean set(int x, int y, int z, BlockProperties block) {
         if (this.isOutOfBounds(x, y, z)) return false;
         return this.setFast(x, y, z, block);
@@ -262,6 +268,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos   the position of the block
      * @param block the block to set
      */
+    @Override
     public void setFast(Vec3i pos, BlockProperties block) {
         this.setFast(pos.x, pos.y, pos.z, block);
     }
@@ -277,6 +284,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param block the block to set
      * @return true if the block was successfully set, false if setting the block failed
      */
+    @Override
     public boolean setFast(int x, int y, int z, BlockProperties block) {
         if (this.disposed) return false;
         int index = this.getIndex(x, y, z);
@@ -348,6 +356,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return "Chunk[x=" + this.getPos().x() + ", z=" + this.getPos().z() + "]";
     }
 
+    @Override
     public Vec3i getOffset() {
         return this.offset.cpy();
     }
@@ -387,6 +396,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return this.ready;
     }
 
+    @Override
     public boolean isDisposed() {
         return this.disposed;
     }
@@ -396,7 +406,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         this.world.onChunkUpdated(this);
     }
 
-    public World getWorld() {
+    public WorldAccess getWorld() {
         return this.world;
     }
 
@@ -415,6 +425,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z the z coordinate
      * @return The highest block Y coordinate.
      */
+    @Override
     public int getHighest(int x, int z) {
 //        return this.heightMap.get(x, z);
         for (int y = CHUNK_HEIGHT - 1; y >= 1; y--) {

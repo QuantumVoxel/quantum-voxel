@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
-public abstract class World implements Disposable {
+public abstract class World implements Disposable, WorldAccess {
     public static final int CHUNK_SIZE = 16;
     public static final int CHUNK_HEIGHT = 256;
     public static final int WORLD_HEIGHT = 256;
@@ -155,7 +155,8 @@ public abstract class World implements Disposable {
         return new Vec2i(Math.floorDiv(x, World.CHUNK_SIZE), Math.floorDiv(z, World.CHUNK_SIZE));
     }
 
-    public List<ChunkPos> getChunksAround(Vec3d pos) {
+    @Override
+    public @NotNull List<ChunkPos> getChunksAround(Vec3d pos) {
         int renderDistance = this.getRenderDistance();
         int startX = (int) (pos.x - renderDistance * World.CHUNK_SIZE);
         int startZ = (int) (pos.z - renderDistance * World.CHUNK_SIZE);
@@ -179,6 +180,7 @@ public abstract class World implements Disposable {
 		return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
     }
 
+    @Override
     public boolean isAlwaysLoaded(ChunkPos pos) {
         return this.alwaysLoaded.contains(pos);
     }
@@ -200,7 +202,7 @@ public abstract class World implements Disposable {
     }
 
     private static void fail(Throwable throwable, String msg) {
-        if (throwable instanceof CompletionException e && ((CompletionException) throwable).getCause() instanceof Error) {
+        if (throwable instanceof CompletionException e && throwable.getCause() instanceof Error) {
             Error error = (Error) e.getCause();
             QuantumServer.get().crash(throwable);
         }
@@ -211,6 +213,7 @@ public abstract class World implements Disposable {
         World.LOGGER.error(msg, throwable);
     }
 
+    @Override
     public boolean unloadChunk(@NotNull ChunkPos chunkPos) {
         this.checkThread();
 
@@ -219,25 +222,17 @@ public abstract class World implements Disposable {
         return this.unloadChunk(chunk, chunkPos);
     }
 
+    @Override
     @CanIgnoreReturnValue
-    protected abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos);
+    public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos);
 
-    /**
-     * Casts a ray in the world and returns the result.
-     * This uses the default of {@code 5} blocks.
-     *
-     * @param ray the ray to cast
-     * @return the result
-     */
-    public BlockHitResult rayCast(Ray ray) {
-        return WorldRayCaster.rayCast(new BlockHitResult(ray), this);
-    }
-
-    public EntityHitResult rayCastEntity(Ray ray) {
+    @Override
+    public @NotNull EntityHitResult rayCastEntity(Ray ray) {
         return rayCastEntity(ray, 5);
     }
 
-    public EntityHitResult rayCastEntity(Ray ray, float distance) {
+    @Override
+    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance) {
         EntityHitResult result = new EntityHitResult(ray, distance);
         Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
         entitiesWithin.forEach(entity -> {
@@ -254,7 +249,8 @@ public abstract class World implements Disposable {
         return result;
     }
 
-    public EntityHitResult rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
+    @Override
+    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
         EntityHitResult result = new EntityHitResult(ray, distance);
         Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
         entitiesWithin.forEach(entity -> {
@@ -274,28 +270,18 @@ public abstract class World implements Disposable {
         return result;
     }
 
-    public EntityHitResult rayCastEntity(Ray ray, float distance, EntityType<?> type) {
+    @Override
+    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, EntityType<?> type) {
         return rayCastEntity(ray, distance, e -> e.getType() == type);
     }
 
-    public EntityHitResult rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
+    @Override
+    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
         return rayCastEntity(ray, distance, type::isInstance);
     }
 
     private Stream<Entity> getEntitiesWithin(BoundingBox boundingBox) {
         return Arrays.stream(this.entitiesById.values().toArray().toArray(Entity.class)).filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
-    }
-
-    /**
-     * Casts a ray in the world and returns the result.
-     *
-     * @param ray      the ray to cast
-     * @param distance the maximum distance that the ray can travel
-     * @return the result
-     */
-    public BlockHitResult rayCast(Ray ray, float distance) {
-        BlockHitResult hitResult = new BlockHitResult(ray, distance);
-        return WorldRayCaster.rayCast(hitResult, this);
     }
 
     /**
@@ -305,6 +291,7 @@ public abstract class World implements Disposable {
      * @param state    the block state to set
      * @return true if the block was successfully set, false otherwise
      */
+    @Override
     public boolean set(BlockPos blockPos, BlockProperties state) {
         return set(blockPos, state, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
@@ -316,6 +303,7 @@ public abstract class World implements Disposable {
      * @param state    the block state to set
      * @return true if the block was successfully set, false otherwise
      */
+    @Override
     public boolean set(BlockPos blockPos, BlockProperties state, int flags) {
         this.checkThread();
 
@@ -331,6 +319,7 @@ public abstract class World implements Disposable {
      * @param block the block type to set
      * @return true if the block was successfully set, false otherwise
      */
+    @Override
     public boolean set(int x, int y, int z, BlockProperties block) {
         return set(x, y, z, block, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
@@ -341,7 +330,8 @@ public abstract class World implements Disposable {
      * @param pos the position
      * @return the block at the specified coordinates
      */
-    public BlockProperties get(BlockPos pos) {
+    @Override
+    public @NotNull BlockProperties get(BlockPos pos) {
         this.checkThread();
 
         return this.get(pos.x(), pos.y(), pos.z());
@@ -355,7 +345,8 @@ public abstract class World implements Disposable {
      * @param z the z-coordinate
      * @return the block at the specified coordinates
      */
-    public BlockProperties get(int x, int y, int z) {
+    @Override
+    public @NotNull BlockProperties get(int x, int y, int z) {
         this.checkThread();
 
         Chunk chunkAt = this.getChunkAt(x, y, z);
@@ -445,14 +436,12 @@ public abstract class World implements Disposable {
         return World.toLocalChunkPos(pos.x(), pos.z());
     }
 
-    @Nullable
-    public abstract Chunk getChunk(ChunkPos pos);
-
+    @Override
     public Chunk getChunk(int x, int z) {
         return this.getChunk(new ChunkPos(x, z));
     }
 
-    @Nullable
+    @Override
     public Chunk getChunkAt(int x, int y, int z) {
         int chunkX = Math.floorDiv(x, World.CHUNK_SIZE);
         int chunkZ = Math.floorDiv(z, World.CHUNK_SIZE);
@@ -463,17 +452,22 @@ public abstract class World implements Disposable {
         return this.getChunk(chunkPos);
     }
 
-    @Nullable
+    @Override
+    public abstract @Nullable Chunk getChunk(ChunkPos pos);
+
+    @Override
     public Chunk getChunkAt(BlockPos pos) {
         return this.getChunkAt(pos.x(), pos.y(), pos.z());
     }
 
+    @Override
     public boolean isOutOfWorldBounds(BlockPos pos) {
         return pos.y() < World.WORLD_DEPTH || pos.y() >= World.WORLD_HEIGHT
                || pos.x() < -30000000 || pos.x() > 30000000
                || pos.z() < -30000000 || pos.z() > 30000000;
     }
 
+    @Override
     public boolean isOutOfWorldBounds(int x, int y, int z) {
         return y < World.WORLD_DEPTH || y >= World.WORLD_HEIGHT - 1
                || x < -30000000 || x > 30000000
@@ -487,6 +481,7 @@ public abstract class World implements Disposable {
      * @param z the z coordinate of the column
      * @return The highest block in the column, or -1 if the chunk isn't loaded.
      */
+    @Override
     public int getHighest(int x, int z) {
         Chunk chunkAt = this.getChunkAt(x, 0, z);
         if (chunkAt == null) return Integer.MIN_VALUE;
@@ -498,10 +493,12 @@ public abstract class World implements Disposable {
         return 0;
     }
 
+    @Override
     public void setColumn(int x, int z, BlockProperties block) {
         this.setColumn(x, z, World.CHUNK_HEIGHT, block);
     }
 
+    @Override
     public void setColumn(int x, int z, int maxY, BlockProperties block) {
         if (this.getChunkAt(x, maxY, z) == null) return;
 
@@ -525,6 +522,7 @@ public abstract class World implements Disposable {
      * @see #set(int, int, int, BlockProperties)
      * @see #setColumn(int, int, BlockProperties)
      */
+    @Override
     public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockProperties block) {
         return CompletableFuture.runAsync(() -> {
             int curX = x, curY = y, curZ = z;
@@ -549,12 +547,15 @@ public abstract class World implements Disposable {
         });
     }
 
+    @Override
     public abstract Collection<? extends Chunk> getLoadedChunks();
 
+    @Override
     public boolean isChunkInvalidated(Chunk chunk) {
         return this.invalidatedChunks.contains(chunk.getPos());
     }
 
+    @Override
     @ApiStatus.Internal
     public void updateNeighbours(Chunk chunk) {
         ChunkPos pos = chunk.getPos();
@@ -564,6 +565,7 @@ public abstract class World implements Disposable {
         this.updateChunk(this.getChunk(new ChunkPos(pos.x(), pos.z() + 1)));
     }
 
+    @Override
     @ApiStatus.Internal
     public void updateChunkAndNeighbours(Chunk chunk) {
         ChunkPos pos = chunk.getPos();
@@ -571,6 +573,7 @@ public abstract class World implements Disposable {
         this.updateNeighbours(chunk);
     }
 
+    @Override
     @ApiStatus.Internal
     public void updateChunk(@Nullable Chunk chunk) {
         if (chunk == null) return;
@@ -585,6 +588,7 @@ public abstract class World implements Disposable {
      * @param entity The entity to spawn
      * @return The spawned entity
      */
+    @Override
     @ApiStatus.Obsolete
     public <T extends Entity> T spawn(T entity) {
         Preconditions.checkNotNull(entity, "Cannot spawn null entity");
@@ -607,6 +611,7 @@ public abstract class World implements Disposable {
      * @param spawnData The data for spawning the entity
      * @return The spawned entity
      */
+    @Override
     public <T extends Entity> T spawn(T entity, MapType spawnData) {
         // Check if entity is not null
         Preconditions.checkNotNull(entity, "Cannot spawn null entity");
@@ -645,6 +650,7 @@ public abstract class World implements Disposable {
      *
      * @param entity the entity to despawn
      */
+    @Override
     public void despawn(Entity entity) {
         this.entitiesById.remove(entity.getId());
     }
@@ -654,10 +660,12 @@ public abstract class World implements Disposable {
      *
      * @param id The ID of the entity to be removed.
      */
+    @Override
     public void despawn(int id) {
         this.entitiesById.remove(id);
     }
 
+    @Override
     public Entity getEntity(int id) {
         return this.entitiesById.get(id);
     }
@@ -669,6 +677,7 @@ public abstract class World implements Disposable {
      * @param collideFluid If true, will check for fluid collision.
      * @return A list of bounding boxes that got collided with.
      */
+    @Override
     public List<BoundingBox> collide(BoundingBox box, boolean collideFluid) {
         List<BoundingBox> boxes = new ArrayList<>();
         int xMin = (int) Math.floor(box.min.x);
@@ -743,6 +752,7 @@ public abstract class World implements Disposable {
      * @param boundingBox The bounding box to check with.
      * @return {@code true} if the bounding box intersects any entities, {@code false} otherwise.
      */
+    @Override
     public boolean intersectEntities(BoundingBox boundingBox) {
         for (Entity entity : this.entitiesById.values())
             if (entity.getBoundingBox().intersects(boundingBox)) return true;
@@ -756,6 +766,7 @@ public abstract class World implements Disposable {
      * @param breaking the position of the block.
      * @param breaker  the player breaking the block.
      */
+    @Override
     public void startBreaking(BlockPos breaking, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return;
@@ -771,6 +782,7 @@ public abstract class World implements Disposable {
      * @param breaker  the player breaking the block.
      * @return A {@link BreakResult} which indicates the current status of the block breaking.
      */
+    @Override
     public BreakResult continueBreaking(BlockPos breaking, float amount, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return BreakResult.FAILED;
@@ -788,6 +800,7 @@ public abstract class World implements Disposable {
      * @param breaking the position of the block.
      * @param breaker  the player breaking the block.
      */
+    @Override
     public void stopBreaking(BlockPos breaking, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return;
@@ -801,6 +814,7 @@ public abstract class World implements Disposable {
      * @param pos the position of the block.
      * @return The break progress of the block, or -1.0 if the block isn't being mined.
      */
+    @Override
     public float getBreakProgress(BlockPos pos) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return -1.0F;
@@ -811,6 +825,7 @@ public abstract class World implements Disposable {
     /**
      * @return thr world seed, which is the base seed of the whole world.
      */
+    @Override
     public long getSeed() {
         return this.seed;
     }
@@ -821,6 +836,7 @@ public abstract class World implements Disposable {
      * @param spawnX the x position of the spawn point
      * @param spawnZ the z position of the spawn point
      */
+    @Override
     public void setSpawnPoint(int spawnX, int spawnZ) {
         this.spawnPoint.set(spawnX, this.getHighest(spawnX, spawnZ), spawnZ);
     }
@@ -831,6 +847,7 @@ public abstract class World implements Disposable {
      * @param pos the chunk position
      * @return {@code true} if the chunk is a spawn chunk, {@code false} otherwise
      */
+    @Override
     public boolean isSpawnChunk(ChunkPos pos) {
         int x = pos.x() * 16;
         int z = pos.z() * 16;
@@ -844,6 +861,7 @@ public abstract class World implements Disposable {
      *
      * @return the spawn point
      */
+    @Override
     public BlockPos getSpawnPoint() {
         int highest = this.getHighest(this.spawnX, this.spawnZ);
         int spawnY = 0;
@@ -853,14 +871,17 @@ public abstract class World implements Disposable {
         return new BlockPos(this.spawnX, spawnY, this.spawnZ);
     }
 
+    @Override
     public int getChunksLoaded() {
         return this.getTotalChunks();
     }
 
+    @Override
     public boolean isDisposed() {
         return this.disposed;
     }
 
+    @Override
     public void onChunkUpdated(Chunk chunk) {
         this.invalidatedChunks.remove(chunk.getPos());
     }
@@ -873,16 +894,19 @@ public abstract class World implements Disposable {
      * @param y     the y position of the sound.
      * @param z     the z position of the sound.
      */
+    @Override
     public void playSound(SoundEvent sound, double x, double y, double z) {
 
     }
 
+    @Override
     @ApiStatus.Internal
     public void closeMenu(ContainerMenu containerMenu) {
         if (!this.menus.contains(containerMenu)) return;
         this.menus.remove(containerMenu);
     }
 
+    @Override
     @ApiStatus.Internal
     public void openMenu(ContainerMenu containerMenu) {
         if (this.menus.contains(containerMenu)) return;
@@ -890,17 +914,14 @@ public abstract class World implements Disposable {
     }
 
     /**
-     * @return true if the world is running on the client, false otherwise.
-     */
-    public abstract boolean isClientSide();
-
-    /**
      * @return true if the world is running on the server, false otherwise.
      */
+    @Override
     public boolean isServerSide() {
         return !this.isClientSide();
     }
 
+    @Override
     public Biome getBiome(BlockPos pos) {
         BlockPos localPos = World.toLocalBlockPos(pos);
         Chunk chunk = this.getChunkAt(pos);
@@ -908,24 +929,29 @@ public abstract class World implements Disposable {
         return chunk.getBiome(localPos.x(), localPos.z());
     }
 
+    @Override
     public DimensionInfo getDimension() {
         return this.info;
     }
 
+    @Override
     public Array<Entity> getEntities() {
         return this.entitiesById.values().toArray();
     }
 
-    public <T extends Entity> Iterable<Entity> getEntitiesByClass(Class<T> clazz) {
+    @Override
+    public @NotNull <T extends Entity> Iterable<Entity> getEntitiesByClass(Class<T> clazz) {
         return this.entitiesById.values().toArray().select(clazz::isInstance);
     }
 
-    public UUID getUID() {
+    @Override
+    public @NotNull UUID getUID() {
         return this.uid;
     }
 
+    @Override
     public boolean set(int x, int y, int z, @NotNull BlockProperties block,
-                                @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
+                       @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
         BlockEvents.SET_BLOCK.factory().onSetBlock(this, new BlockPos(x, y, z), block);
@@ -937,6 +963,7 @@ public abstract class World implements Disposable {
         return chunk.set(cp.x(), cp.y(), cp.z(), block);
     }
 
+    @Override
     public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return;
@@ -944,6 +971,7 @@ public abstract class World implements Disposable {
         chunk.setBlockEntity(World.toLocalBlockPos(pos), blockEntity);
     }
 
+    @Override
     public BlockEntity getBlockEntity(BlockPos pos) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return null;
@@ -952,10 +980,12 @@ public abstract class World implements Disposable {
         return chunk.getBlockEntity(localPos.x(), localPos.y(), localPos.z());
     }
 
+    @Override
     public void drop(ItemStack itemStack, Vec3d position) {
         drop(itemStack, position, new Vec3d());
     }
 
+    @Override
     public void drop(ItemStack itemStack, Vec3d position, Vec3d velocity) {
         if (this.isClientSide()) {
             CommonConstants.LOGGER.warn("Tried to drop an item on the client side!");
@@ -965,18 +995,22 @@ public abstract class World implements Disposable {
         this.spawn(new DroppedItem(this, itemStack, position, velocity), new MapType());
     }
 
+    @Override
     public Iterable<Entity> entitiesWithinDst(Entity entity, int distance) {
         return entitiesById.values().toArray().select(entity1 -> entity1.distanceTo(entity) <= distance);
     }
 
+    @Override
     public Iterable<Entity> collideEntities(Entity droppedItem, BoundingBox ext) {
         return entitiesById.values().toArray().select(entity -> entity.getBoundingBox().intersects(ext));
     }
 
+    @Override
     public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
 
     }
 
+    @Override
     public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
         BlockProperties blockProperties = get(breaking);
 
@@ -989,14 +1023,17 @@ public abstract class World implements Disposable {
         return true;
     }
 
+    @Override
     public int getBlockLight(int x, int y, int z) {
         return 0;
     }
 
+    @Override
     public void setBlockLight(int x, int y, int z, int intensity) {
 
     }
 
+    @Override
     public void updateLightSources(Vec3i offset, ObjectMap<Vec3i, LightSource> lights) {
 
     }

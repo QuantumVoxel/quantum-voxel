@@ -13,6 +13,7 @@ import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.util.ControllerButton;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.entity.player.Player;
@@ -23,8 +24,10 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
+import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,11 +36,13 @@ import java.util.UUID;
 
 public class LocalPlayer extends ClientPlayer {
     private final QuantumClient client = QuantumClient.get();
-    private final ClientWorld world;
+    private final ClientWorldAccess world;
     private int oldSelected;
     private final ClientPermissionMap permissions = new ClientPermissionMap();
+    private double lastWalkSound;
+    private final Vec3d tmp = new Vec3d();
 
-    public LocalPlayer(EntityType<? extends Player> entityType, ClientWorld world, UUID uuid) {
+    public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
         this.world = world;
         this.setUuid(uuid);
@@ -59,12 +64,19 @@ public class LocalPlayer extends ClientPlayer {
 
         // Send a packet when the selected item changes
         if (this.selected != this.oldSelected) {
-            this.client.connection.send(new C2SHotbarIndexPacket(this.selected));
+            if (this.client.connection != null)
+                this.client.connection.send(new C2SHotbarIndexPacket(this.selected));
             this.oldSelected = this.selected;
         }
 
+
         // Handle player movement if there is a significant change in position
         if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
+            double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
+            if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime()) {
+                this.client.playSound(SoundEvents.WALK, 1.0F);
+                this.lastWalkSound = this.client.getGameTime();
+            }
             this.handleMove();
         } else {
             // Update previous position if no significant change
@@ -80,7 +92,8 @@ public class LocalPlayer extends ClientPlayer {
      */
     private void handleMove() {
         // Send the player's new coordinates to the server
-        this.client.connection.send(new C2SPlayerMovePacket(this.x, this.y, this.z));
+        if (this.client.connection != null)
+            this.client.connection.send(new C2SPlayerMovePacket(this.x, this.y, this.z));
 
         // Update the old coordinates to the current ones
         this.ox = this.x;
@@ -166,6 +179,7 @@ public class LocalPlayer extends ClientPlayer {
 
     @Override
     protected void sendAbilities() {
+        if (this.client.connection == null) return;
         this.client.connection.send(new C2SAbilitiesPacket(this.abilities));
     }
 
@@ -203,17 +217,19 @@ public class LocalPlayer extends ClientPlayer {
     public void closeMenu() {
         super.closeMenu();
 
-        this.client.connection.send(new C2SCloseMenuPacket());
+        if (this.client.connection != null)
+            this.client.connection.send(new C2SCloseMenuPacket());
     }
 
     @Override
     public void openInventory() {
         super.openInventory();
-        this.client.connection.send(new C2SOpenInventoryPacket());
+        if (this.client.connection != null)
+            this.client.connection.send(new C2SOpenInventoryPacket());
     }
 
     @Override
-    public @NotNull ClientWorld getWorld() {
+    public @NotNull WorldAccess getWorld() {
         return this.world;
     }
 
@@ -233,7 +249,9 @@ public class LocalPlayer extends ClientPlayer {
             CommonConstants.LOGGER.warn("Opened menu {} instead of {}", menuType, openMenu);
         } else if (openedBefore == null) {
             CommonConstants.LOGGER.warn("Opened server menu {} before opening any on client side", menuType);
-            openedBefore = menuType.create(this.world, this, this.getBlockPos());
+            if (this.world instanceof ClientWorld clientWorld) {
+                openedBefore = menuType.create(clientWorld, this, this.getBlockPos());
+            }
         }
         ContainerScreen screen = MenuRegistry.getScreen(openedBefore);
         screen.setup(items);

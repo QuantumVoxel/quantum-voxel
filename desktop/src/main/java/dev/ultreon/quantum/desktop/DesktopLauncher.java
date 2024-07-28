@@ -42,7 +42,6 @@ public class DesktopLauncher {
     private static DesktopWindow gameWindow;
     private static final boolean windowVibrancyEnabled = false;
 
-
     /**
      * Launches the game.
      * <p style="color:red;"><b>Note: This method should not be called.</b></p>

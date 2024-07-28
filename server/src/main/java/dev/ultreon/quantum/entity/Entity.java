@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity;
 
 import dev.ultreon.quantum.cs.ComponentSystem;
+import dev.ultreon.quantum.world.*;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
@@ -19,10 +20,6 @@ import dev.ultreon.quantum.text.Translations;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.BoundingBoxUtils;
 import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.Location;
-import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.ApiStatus;
@@ -48,7 +45,7 @@ import java.util.UUID;
  */
 public class Entity extends ComponentSystem implements CommandSender {
     private final EntityType<? extends Entity> type;
-    protected final World world;
+    protected final WorldAccess world;
     protected double x;
     protected double y;
     protected double z;
@@ -90,7 +87,7 @@ public class Entity extends ComponentSystem implements CommandSender {
      * @param entityType the entity type
      * @param world      the world to create the entity in
      */
-    public Entity(EntityType<? extends Entity> entityType, World world) {
+    public Entity(EntityType<? extends Entity> entityType, WorldAccess world) {
         this.type = entityType;
         this.world = world;
 
@@ -630,7 +627,7 @@ public class Entity extends ComponentSystem implements CommandSender {
         this.setPosition(x, y, z);
     }
 
-    public World getWorld() {
+    public WorldAccess getWorld() {
         return this.world;
     }
 

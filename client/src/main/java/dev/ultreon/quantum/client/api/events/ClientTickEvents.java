@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.api.events;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.ClientPlayer;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 
@@ -36,11 +37,11 @@ public class ClientTickEvents {
 
     @FunctionalInterface
     public interface PreWorldTick {
-        EventResult onWorldTick(ClientWorld world);
+        EventResult onWorldTick(ClientWorldAccess world);
     }
 
     @FunctionalInterface
     public interface PostWorldTick {
-        void onWorldTick(ClientWorld world);
+        void onWorldTick(ClientWorldAccess world);
     }
 }

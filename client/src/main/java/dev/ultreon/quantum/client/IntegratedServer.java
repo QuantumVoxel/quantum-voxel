@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
+import dev.ultreon.quantum.client.util.VoxelTerrain;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Notification;
@@ -311,7 +313,12 @@ public class IntegratedServer extends QuantumServer {
         // Invoke the setup code on the QuantumClient's event thread
         QuantumClient.invoke(() -> {
             // Create a new WorldRenderer instance with the current world
-            this.client.worldRenderer = new WorldRenderer(this.client.world);
+            if (this.client.world instanceof ClientWorld clientWorld) {
+                this.client.worldRenderer = new WorldRenderer(clientWorld);
+            } else if (this.client.world instanceof VoxelTerrain terrain) {
+                this.client.worldRenderer = terrain;
+
+            }
 
             // Set the renderWorld flag to true to enable world rendering
             this.client.renderWorld = true;

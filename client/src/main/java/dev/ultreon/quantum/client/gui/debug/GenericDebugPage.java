@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.IntegratedServer;
-import dev.ultreon.quantum.client.util.RenderableArray;
-import dev.ultreon.quantum.client.world.ChunkMesh;
-import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.player.Player;
@@ -54,8 +52,7 @@ public class GenericDebugPage implements DebugPage {
                 context.left("Player");
                 BlockPos blockPosition = player.getBlockPos();
                 Vec3i sectionPos = context.block2sectionPos(blockPosition);
-                ChunkPos chunkPos = player.getChunkPos();
-                ClientChunk chunk = world.getChunk(chunkPos);
+                @Nullable ClientChunkAccess chunk = world.getChunkAt(blockPosition);
                 BlockPos localBlockPos = World.toLocalBlockPos(blockPosition);
 
                 context.left("XYZ", player.getPosition())
@@ -66,11 +63,11 @@ public class GenericDebugPage implements DebugPage {
                     int sunlight = chunk.getSunlight(localBlockPos.vec());
                     int blockLight = chunk.getBlockLight(localBlockPos.vec());
 
-                    context.left("Chunk Offset", chunk.renderOffset)
+                    context.left("Chunk Offset", chunk.getRenderOffset())
                             .left("Sunlight", sunlight)
                             .left("Block Light", blockLight);
                 }
-                context.left("Chunk Shown", world.getChunk(chunkPos) != null);
+                context.left("Chunk Shown", world.getChunkAt(blockPosition) != null);
                 HitResult hitResult = client.hitResult;
                 if (hitResult != null)
                     context.left("Break Progress", world.getBreakProgress(new BlockPos(hitResult.getPos())));
@@ -79,7 +76,7 @@ public class GenericDebugPage implements DebugPage {
 
             context.left("World");
             if (worldRenderer != null) {
-                context.left("Visible Chunks", worldRenderer.getVisibleChunks() + "/" + worldRenderer.getLoadedChunks());
+                context.left("Visible Chunks", worldRenderer.getVisibleChunks() + "/" + worldRenderer.getLoadedChunksCount());
             }
 
             context.left("Chunk Mesh Disposes", WorldRenderer.getChunkMeshFrees());

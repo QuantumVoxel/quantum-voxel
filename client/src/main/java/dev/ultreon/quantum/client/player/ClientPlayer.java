@@ -4,6 +4,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SCommandPacket;
@@ -25,7 +26,7 @@ public abstract class ClientPlayer extends Player {
     private float oYRot;
     private float oXHeadRot;
 
-    protected ClientPlayer(EntityType<? extends Player> entityType, World world) {
+    protected ClientPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world) {
         super(entityType, world, QuantumClient.get().getUser().name());
     }
 

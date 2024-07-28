@@ -80,7 +80,7 @@ public class NotifyManager implements Renderable {
     }
 
     public void add(Notification notification) {
-        if (!QuantumClient.isOnMainThread()) {
+        if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.add(notification));
             return;
         }

@@ -1,15 +1,15 @@
 package dev.ultreon.quantum.text;
 
+import com.badlogic.gdx.utils.Array;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.reflection.qual.NewInstance;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class MutableText extends TextObject {
     List<TextObject> extras = new ArrayList<>();
@@ -39,6 +39,11 @@ public abstract class MutableText extends TextObject {
     }
 
     public MutableText setColor(RgbColor color) {
+        this.style.color(color);
+        return this;
+    }
+
+    public MutableText setColor(ColorCode color) {
         this.style.color(color);
         return this;
     }
@@ -153,12 +158,13 @@ public abstract class MutableText extends TextObject {
     public abstract MutableText copy();
 
     @Override
-    protected Stream<TextObject> stream() {
-        var builder = new ArrayList<TextObject>();
-        builder.add(this);
-        for (var extra : this.extras) {
-            builder.addAll(extra.stream().toList());
+    protected void bake(Array<TextPart> bake) {
+        bake.add(createPart());
+
+        for (var extra : extras) {
+            extra.bake(bake);
         }
-        return builder.stream();
     }
+
+    protected abstract @NotNull TextPart createPart();
 }

@@ -21,6 +21,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.input.util.*;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.ItemEvents;
@@ -34,16 +35,14 @@ import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.UseResult;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import it.unimi.dsi.fastutil.ints.Int2BooleanArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class GameInput implements InputProcessor, ControllerListener, Disposable {
     protected static final float DEG_PER_PIXEL = 0.6384300433839F;
@@ -80,7 +79,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         this.camera = camera;
 
         Controllers.addListener(this);
-        this.controllers.addAll(Arrays.stream((Object[]) Controllers.getControllers().items).map(o -> (Controller) o).collect(Collectors.toList()));
+        this.controllers.addAll(Arrays.stream((Object[]) Controllers.getControllers().items).map(o -> (Controller) o).toList());
     }
 
     public static boolean isControllerButtonJustPressed(ControllerButton button) {
@@ -198,7 +197,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
 
         player.rotateHead(deltaX * GameInput.DEG_PER_PIXEL, deltaY * GameInput.DEG_PER_PIXEL);
 
-        @Nullable World world = this.client.world;
+        @Nullable ClientWorldAccess world = this.client.world;
         if (world != null)
             this.updateInGame(player, world);
 
@@ -253,7 +252,8 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         player.setVelocity(player.getVelocity().add(this.vel));
     }
 
-    private void updateInGame(Player player, @NotNull World world) {
+    private void updateInGame(Player player, @Nullable ClientWorldAccess world) {
+        assert world != null;
         BlockHitResult hitResult = world.rayCast(new Ray(player.getPosition().add(0, player.getEyeHeight(), 0), player.getLookVector()));
         Vec3i pos = hitResult.getPos();
         BlockProperties block = world.get(pos.x, pos.y, pos.z);
@@ -263,7 +263,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         this.updateControllerBlockPlace(player, world, hitResult);
     }
 
-    private void updateControllerBlockPlace(Player player, @NotNull World world, BlockHitResult hitResult) {
+    private void updateControllerBlockPlace(Player player, @Nullable ClientWorldAccess world, BlockHitResult hitResult) {
         float left = GameInput.TRIGGERS.get(TriggerType.LEFT).value;
         if (left >= 0.3F && this.itemUse < System.currentTimeMillis()) {
             this.useItem(player, world, hitResult);
@@ -290,7 +290,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     }
 
     @CanIgnoreReturnValue
-    public UseResult useItem(Player player, World world, HitResult hitResult) {
+    public UseResult useItem(Player player, @Nullable WorldAccess world, HitResult hitResult) {
         if (this.itemUseCooldown > System.currentTimeMillis())
             return UseResult.DENY;
 
@@ -300,7 +300,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         return useResult;
     }
 
-    private UseResult useItem0(Player player, World world, HitResult hitResult) {
+    private UseResult useItem0(Player player, @Nullable WorldAccess world, HitResult hitResult) {
         if (!(hitResult instanceof BlockHitResult)) return UseResult.DENY;
 
         ItemStack stack = player.getSelectedItem();

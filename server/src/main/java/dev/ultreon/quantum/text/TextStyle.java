@@ -143,4 +143,19 @@ public class TextStyle {
         if (!color.isColor()) return;
         this.color = RgbColor.rgb(c);
     }
+
+    public int compact() {
+        return (this.bold ? StylePart.BOLD : 0) |
+               (this.italic ? StylePart.ITALIC : 0) |
+               (this.underline ? StylePart.UNDERLINED : 0) |
+               (this.strikethrough ? StylePart.STRIKETHROUGH : 0);
+    }
+
+    public int compactColor() {
+        return this.color.getRgb();
+    }
+
+    public byte size() {
+        return (byte) size;
+    }
 }

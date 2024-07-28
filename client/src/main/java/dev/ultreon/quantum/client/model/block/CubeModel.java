@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Set;
 
-import static dev.ultreon.quantum.client.QuantumClient.isOnMainThread;
+import static dev.ultreon.quantum.client.QuantumClient.isOnRenderThread;
 
 public final class CubeModel {
     private final Identifier top;
@@ -80,7 +80,7 @@ public final class CubeModel {
     }
 
     public BakedCubeModel bake(Identifier resourceId, TextureAtlas texture) {
-        if (!isOnMainThread()) return QuantumClient.invokeAndWait(() -> this.bake(resourceId, texture));
+        if (!isOnRenderThread()) return QuantumClient.invokeAndWait(() -> this.bake(resourceId, texture));
         try {
             TextureRegion topTex = texture.get(this.top);
             TextureRegion bottomTex = texture.get(this.bottom);

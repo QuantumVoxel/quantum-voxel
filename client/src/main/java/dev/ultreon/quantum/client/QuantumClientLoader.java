@@ -20,6 +20,7 @@ import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
+import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.TouchscreenInput;
@@ -58,6 +59,7 @@ class QuantumClientLoader implements Runnable {
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("generic"), new GenericDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("rendering"), new RenderingDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("profiler"), new ProfilerDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("chunk_info"), new ChunkInfoDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("inspector"), new InspectorDebugPage());
     }
 
@@ -248,6 +250,8 @@ class QuantumClientLoader implements Runnable {
         if (client.imGui) {
             GamePlatform.get().setupImGui();
         }
+
+        client.onReloadConfig();
 
         client.booted = true;
 
