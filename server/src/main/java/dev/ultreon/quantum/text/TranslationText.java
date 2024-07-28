@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.text;
 
+import com.badlogic.gdx.utils.Array;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
@@ -20,14 +20,7 @@ public class TranslationText extends MutableText {
         this.path = path;
         this.args = args;
 
-        for (int i = 0, argsLength = args.length; i < argsLength; i++) {
-            Object arg = args[i];
-            if (arg instanceof TextObject textObject) {
-                args[i] = textObject.createString();
-            } else if (arg instanceof String s) {
-                args[i] = s;
-            }
-        }
+        this.revalidate();
     }
 
     public static TranslationText deserialize(MapType data) {
@@ -111,24 +104,18 @@ public class TranslationText extends MutableText {
         return data;
     }
 
-    @Override
-    public TranslationText style(Consumer<TextStyle> consumer) {
-        return (TranslationText) super.style(consumer);
+    private void revalidate() {
+
     }
 
     @Override
-    protected Stream<TextObject> stream() {
-        var builder = new ArrayList<TextObject>();
-        builder.add(this);
-        boolean e = false;
-        for (var extra : this.extras) {
-            if (!e) {
-                e = true;
-                continue;
-            }
-            builder.addAll(extra.stream().toList());
-        }
-        return builder.stream();
+    protected @NotNull StylePart createPart() {
+        return new StylePart(this.getTranslated(), this.style.compact(), this.style.compactColor(), this.style.size());
+    }
+
+    @Override
+    public TranslationText style(Consumer<TextStyle> consumer) {
+        return (TranslationText) super.style(consumer);
     }
 
     @Override

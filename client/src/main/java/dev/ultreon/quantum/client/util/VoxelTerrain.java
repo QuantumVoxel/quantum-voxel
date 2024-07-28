@@ -14,6 +14,8 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 
 package dev.ultreon.quantum.client.util;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -183,6 +185,9 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
         if (renderLayer != RenderLayer.WORLD) {
             return;
         }
+
+        Gdx.gl.glClearColor(.5f, .5f, .5f, .5f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         render();
 

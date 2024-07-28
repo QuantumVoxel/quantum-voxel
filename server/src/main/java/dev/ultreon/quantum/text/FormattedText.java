@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.chars.CharList;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class FormattedText {
     private final Map<Integer, TextFormatElement> indexedElements = Maps.newHashMap();
     private List<TextFormatElement> elements = new ArrayList<>();
@@ -59,22 +60,6 @@ public class FormattedText {
             if (element != null) return element;
         }
         return null;
-    }
-
-    public static FormattedText from(MutableText text) {
-        List<TextFormatElement> elements = new ArrayList<>();
-        int x = 0;
-        for (TextObject object : text) {
-            String string = object.createString();
-            elements.add(new TextFormatElement(object.getStyle(), string, x));
-            x += string.length();
-        }
-        return new FormattedText(elements);
-    }
-
-    public static FormattedText from(TextObject text) {
-        if (text instanceof MutableText) return from((MutableText) text);
-        else return new FormattedText(text.getStyle(), text.toString());
     }
 
     public List<TextFormatElement> getElements() {

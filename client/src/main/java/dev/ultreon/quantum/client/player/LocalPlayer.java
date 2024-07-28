@@ -217,13 +217,15 @@ public class LocalPlayer extends ClientPlayer {
     public void closeMenu() {
         super.closeMenu();
 
-        this.client.connection.send(new C2SCloseMenuPacket());
+        if (this.client.connection != null)
+            this.client.connection.send(new C2SCloseMenuPacket());
     }
 
     @Override
     public void openInventory() {
         super.openInventory();
-        this.client.connection.send(new C2SOpenInventoryPacket());
+        if (this.client.connection != null)
+            this.client.connection.send(new C2SOpenInventoryPacket());
     }
 
     @Override

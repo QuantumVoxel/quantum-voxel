@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.Bounds;
@@ -121,7 +122,7 @@ public class TextEntry extends Widget {
             }
 
             if (this.focused) {
-                renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, RgbColor.WHITE);
+                renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
             }
 
             renderer.popScissors();

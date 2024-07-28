@@ -161,4 +161,7 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "accessibility.closePrompt", comment = "Shows a confirmation when closing the game.")
     public static boolean showClosePrompt = false;
+
+    @ConfigEntry(path = "personalisation.blurEnabled", comment = "Whether the blur effect in menu backgrounds should be enabled. (Performance intense)")
+    public static boolean blurEnabled = true;
 }

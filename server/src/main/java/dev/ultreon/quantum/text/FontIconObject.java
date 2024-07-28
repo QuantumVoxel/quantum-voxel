@@ -49,6 +49,11 @@ public class FontIconObject extends MutableText {
         return new FontIconObject(id, this.fontIconMap);
     }
 
+    @Override
+    protected @NotNull FontIconPart createPart() {
+        return new FontIconPart(fontIconMap, id);
+    }
+
     public FontIconMap getIconMap() {
         return fontIconMap;
     }
