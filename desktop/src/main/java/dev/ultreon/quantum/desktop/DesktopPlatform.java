@@ -162,7 +162,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void locateResources() {try {
-        URL resource = QuantumClient.class.getResource("/.ucraft-resources");
+        URL resource = QuantumClient.class.getResource("/.quantum-resources");
         if (resource == null) {
             throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
         }

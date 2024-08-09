@@ -543,7 +543,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.shaderProviderManager = new ShaderProviderManager();
         this.shaderProgramManager = new ShaderProgramManager();
 
-        // Locate resources by finding the ".ucraft-resources" file using Class.getResource() and using the parent file.
+        // Locate resources by finding the ".quantum-resources" file using Class.getResource() and using the parent file.
         GamePlatform.get().locateResources();
 
         // Set the language bootstrap

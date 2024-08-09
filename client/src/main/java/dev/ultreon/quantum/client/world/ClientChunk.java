@@ -16,9 +16,9 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.render.GreedyMesher;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
@@ -84,7 +84,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             }
         });
 
-        this.mesher = new GreedyMesher(this);
+        this.mesher = new GreedyMesher(this, true);
     }
 
     private int index(int x, int y, int z) {
