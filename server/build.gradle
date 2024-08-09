@@ -72,6 +72,9 @@ dependencies {
     implementation api("dev.ultreon.corelibs:functions-v0:$corelibs_version")
     implementation api("dev.ultreon:ubo:$ultreon_data_version")
 
+    // Quantum Fabric Loader
+    implementation api("dev.ultreon.quantum:fabric-loader:$fabric_version")
+
     // Apache Log4J
     implementation api("org.apache.commons:commons-lang3:3.13.0")
     implementation api("org.apache.commons:commons-collections4:$commons_collections4_version")

@@ -168,6 +168,12 @@ allprojects {
             }
         }
 
+        maven("https://jcenter.bintray.com/") {
+            content {
+                includeGroup("com.jagrosh")
+            }
+        }
+
         flatDir {
             name = "Project Libraries"
             dirs = setOf(file("${projectDir}/libs"))
@@ -581,27 +587,17 @@ commonProperties
 
                     runConfigurations {
                         create(
-                                "Quantum Voxel Client $name",
+                                "Quantum Client",
                                 Application::class.java
                         ) {
                             jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
-                            moduleName = rootProject.name + ".${dependency.name}.main"
+                            moduleName = rootProject.name + ".desktop.main"
                             workingDirectory = "$projectDir/run/client/main/"
                             programParameters = "--gameDir=."
                         }
                         create(
-                                "Quantum Voxel Data $name",
-                                Application::class.java
-                        ) {
-                                jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
-                            mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
-                            moduleName = rootProject.name + ".desktop.main"
-                            workingDirectory = "$projectDir/run/data/main/"
-                            programParameters = "--gameDir=."
-                        }
-                        create(
-                                "Quantum Voxel Client $name Alt",
+                                "Quantum Client Alt",
                                 Application::class.java
                         ) {
                             jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
@@ -611,12 +607,22 @@ commonProperties
                             programParameters = "--gameDir=."
                         }
                         create(
-                                "Quantum Voxel Server $name",
+                            "Quantum Data Generator",
+                            Application::class.java
+                        ) {
+                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
+                            mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
+                            moduleName = rootProject.name + ".desktop.main"
+                            workingDirectory = "$projectDir/run/data/main/"
+                            programParameters = "--gameDir=."
+                        }
+                        create(
+                                "Quantum Voxel Server",
                                 Application::class.java
                         ) {
                             jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
-                            moduleName = rootProject.name + ".${dependency.name}.main"
+                            moduleName = rootProject.name + ".server.main"
                             workingDirectory = "$projectDir/run/server/"
                             programParameters = "--gameDir=."
                         }
@@ -626,7 +632,6 @@ commonProperties
             }
 
             setupIdea(rootProject.project(":desktop"), "Desktop")
-            setupIdea(rootProject.project(":testmod"), "Test Mod")
         }
     }
 }

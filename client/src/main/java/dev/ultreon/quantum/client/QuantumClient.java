@@ -76,6 +76,7 @@ import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
+import dev.ultreon.quantum.client.rpc.RpcHandler;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.sound.ClientSoundRegistry;
 import dev.ultreon.quantum.client.text.Language;
@@ -118,6 +119,9 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import kotlin.OptIn;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -472,7 +476,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     // Misc
-    GarbageCollector garbageCollector;
     GameEnvironment gameEnv;
 
     boolean loading = true;
@@ -519,6 +522,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Log the booting of the game
         QuantumClient.LOGGER.info("Booting game!");
         QuantumClient.instance = this;
+
+        FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
+        FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 
         // Initialize the unifont and font
         this.font = new Font(id("quantium"), true);
@@ -567,6 +573,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Create a new user
         this.user = new User("Player" + MathUtils.random(100, 999));
+
+        RpcHandler.enable();
 
         // Initialize ImGui if necessary
         this.imGui = !isMac && !SharedLibraryLoader.isAndroid && !SharedLibraryLoader.isARM && !SharedLibraryLoader.isIos;
@@ -720,18 +728,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         this.camera.fov = ClientConfig.fov;
-
-        // TODO: Add support for Discord RPC
-        notifications.addOnce(UUID.fromString("b26c6826-1086-4b34-a5f2-5172e65bb55f"), Notification.builder("Missing Feature", "Discord RPC is not implemented yet!").build());
-//            RpcHandler.disable();
-//        if (ClientConfig.hideRPC) {
-//        } else {
-//            RpcHandler.enable();
-//            if (this.activity != null) {
-//                this.setActivity(this.activity);
-//                RpcHandler.setActivity(this.activity);
-//            }
-//        }
 
         // Cancel vibration if it is not enabled
         if (!ClientConfig.vibration) {
@@ -916,7 +912,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Invoke entry points for initialization.
         GamePlatform loader = GamePlatform.get();
         loader.invokeEntrypoint(ModInit.ENTRYPOINT_KEY, ModInit.class, ModInit::onInitialize);
-        loader.invokeEntrypoint(ClientModInit.ENTRYPOINT_KEY, ClientModInit.class, ClientModInit::onInitializeClient);
 
         CommonLoader.initConfigEntrypoints(GamePlatform.get());
     }
@@ -1609,8 +1604,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.activity != this.oldActivity) {
             this.oldActivity = this.activity;
 
-            notifications.addOnce(UUID.fromString("35c2d972-6699-4cf6-86d3-1f2daaedfc47"), Notification.builder("Missing Feature", "Game activity updates are not implemented yet!").build());
-//            RpcHandler.setActivity(this.activity);
+            RpcHandler.newActivity(this.activity);
         }
     }
 
@@ -1962,7 +1956,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.fontManager);
                 if (this.chunkLoadingExecutor != null) this.chunkLoadingExecutor.shutdownNow();
 
-                QuantumClient.cleanUp(this.garbageCollector);
                 QuantumClient.cleanUp(this.world);
                 QuantumClient.cleanUp(this.profiler);
 

@@ -88,7 +88,6 @@ class QuantumClientLoader implements Runnable {
         Gdx.app.setApplicationLogger(new GdxSlf4jLogger());
 
         client.configDir = QuantumClient.createDir("config/");
-        client.garbageCollector = new GarbageCollector();
 
         QuantumClient.createDir("screenshots/");
         QuantumClient.createDir("game-crashes/");

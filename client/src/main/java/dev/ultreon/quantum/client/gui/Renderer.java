@@ -17,6 +17,7 @@ import com.crashinvaders.vfx.VfxManager;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.libs.commons.v0.vector.Vec4i;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -127,12 +128,18 @@ public class Renderer implements Disposable {
         // The grid shader is used to draw the grid on the screen, and only once per resize.
         // The blur shader is used to blur behind the grid, and is drawn every frame.
         blurShader = new ShaderProgram(VERT, FRAG);
+        String log = blurShader.getLog();
         if (!blurShader.isCompiled()) {
-            System.err.println(blurShader.getLog());
+            for (String line : log.lines().toList()) {
+                CommonConstants.LOGGER.error(line);
+            }
             QuantumClient.crash(new IllegalStateException("Failed to compile blur shader!"));
         }
-        if (!blurShader.getLog().isEmpty())
-            System.out.println(blurShader.getLog());
+        if (!log.isEmpty()) {
+            for (String line : log.lines().toList()) {
+                CommonConstants.LOGGER.warn(line);
+            }
+        }
 
         //setup uniforms for our shader
         blurShader.bind();
@@ -140,12 +147,18 @@ public class Renderer implements Disposable {
         blurShader.setUniformf("radius", 1f);
 
         gridShader = new ShaderProgram(VERT, GRID_FRAG);
+        String log1 = gridShader.getLog();
         if (!gridShader.isCompiled()) {
-            System.err.println(gridShader.getLog());
+            for (String line : log1.lines().toList()) {
+                CommonConstants.LOGGER.error(line);
+            }
             QuantumClient.crash(new IllegalStateException("Failed to compile grid shader!"));
         }
-        if (!gridShader.getLog().isEmpty())
-            System.out.println(gridShader.getLog());
+        if (!log1.isEmpty()) {
+            for (String line : log1.lines().toList()) {
+                CommonConstants.LOGGER.warn(line);
+            }
+        }
     }
 
     public Matrices getMatrices() {
@@ -2228,7 +2241,7 @@ public class Renderer implements Disposable {
         y -= this.font.lineHeight;
 
         for (String line : text.split("\n")) {
-            y += this.font.lineHeight;
+            y += this.font.lineHeight + 2;
             this.textLeft(line, x, y, color, shadow);
         }
 

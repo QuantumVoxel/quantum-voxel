@@ -121,7 +121,13 @@ public class QuantumVxlGameProvider implements GameProvider {
                 // Creating a BuiltinMod for LibGDX
                 new BuiltinMod(List.of(this.libGdxJar), new BuiltinModMetadata.Builder("gdx", this.versions.getProperty("gdx"))
                         .setName("LibGDX")
-                        .setDescription("A game framework used by Quantum Voxel (and various other games).")
+                        .setDescription("""
+                                LibGDX is a Java game development framework for
+                                 creating games across multiple platforms.
+                                It simplifies the development process with
+                                 cross-platform capabilities, high-performance rendering,
+                                 and a large community.
+                                """)
                         .addLicense("Apache-2.0")
                         .addAuthor("libGDX", Map.of("homepage", "http://www.libgdx.com/", "patreon", "https://patreon.com/libgdx", "github", "https://github.com/libgdx", "sources", "https://github.com/libgdx/libgdx"))
                         .addAuthor("Mario Zechner", Map.of("github", "https://github.com/badlogic", "email", "badlogicgames@gmail.com"))
@@ -137,7 +143,12 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .addIcon(128, "assets/craft/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
                         .setContact(new ContactInformationImpl(Map.of("sources", "https://github.con/Ultreon/quantum-voxel", "email", "contact.ultreon@gmail.com", "discord", "https://discord.gg/sQsU7sE2Sx")))
-                        .setDescription("It's the game you are now playing.")
+                        .setDescription("""
+                                A blocky, voxel-based world where you can explore,
+                                 build, and survive in a vast and ever-changing environment.
+                                Inspired by the best of the voxel game genre.
+                                
+                                It's also the game that you're playing right now!""")
                         .setName("Quantum Voxel")
                         .build())
         );

@@ -12,6 +12,10 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.dedicated.gui.DedicatedServerGui;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.ApiStatus;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
@@ -59,8 +63,8 @@ public class Main {
 
             // Invoke FabricMC entrypoint for dedicated server.
             GamePlatform loader = GamePlatform.get();
-            loader.invokeEntrypoint(ModInit.ENTRYPOINT_KEY, ModInit.class, ModInit::onInitialize);
-            loader.invokeEntrypoint(DedicatedServerModInit.ENTRYPOINT_KEY, DedicatedServerModInit.class, DedicatedServerModInit::onInitialize);
+            FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
+            FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
 
             LanguageBootstrap.bootstrap.set((path, args1) -> server != null ? server.handleTranslation(path, args1) : path);
 

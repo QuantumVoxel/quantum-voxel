@@ -9,6 +9,12 @@ public interface RpcHandler {
 
     void setActivity(GameActivity newActivity);
 
+    static void enable() {
+        for (RpcHandler handler : HANDLERS) {
+            handler.start();
+        }
+    }
+
     static void newActivity(GameActivity newActivity) {
         for (RpcHandler handler : HANDLERS) {
             handler.setActivity(newActivity);

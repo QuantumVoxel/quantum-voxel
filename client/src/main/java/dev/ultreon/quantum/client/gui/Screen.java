@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
-@ApiStatus.Experimental
 public abstract class Screen extends UIContainer<Screen> {
     protected @Nullable TextObject title;
     public Screen parentScreen;
@@ -112,12 +111,6 @@ public abstract class Screen extends UIContainer<Screen> {
     public final void init(int width, int height) {
         this.setSize(width, height);
         GuiBuilder builder = new GuiBuilder(this);
-        if (this.title != null || parentScreen != null) {
-//            TitleWidget titleWidget = builder.title(TextObject.nullToEmpty(this.title));
-//            if (parentScreen != null) titleWidget.parent(parentScreen);
-//
-//            this.size.height -= titleWidget.getHeight();
-        }
         this.build(builder);
         this.revalidate();
     }

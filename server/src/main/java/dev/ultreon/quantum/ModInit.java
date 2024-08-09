@@ -1,9 +1,11 @@
 package dev.ultreon.quantum;
 
+import net.fabricmc.api.ModInitializer;
+
 /**
  * This interface represents a modification initializer.
  */
-public interface ModInit {
+public interface ModInit extends ModInitializer {
     /**
      * Key for the entry point.
      */

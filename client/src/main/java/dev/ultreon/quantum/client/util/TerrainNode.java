@@ -35,6 +35,7 @@ import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.collection.FlatStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
@@ -405,10 +406,6 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
         if (built == children.length) {
             modelInstance.model.meshes.add(mesh);
         }
-    }
-
-    public void updateVisibility() {
-        // Implement the visibility update logic here
     }
 
     @Override

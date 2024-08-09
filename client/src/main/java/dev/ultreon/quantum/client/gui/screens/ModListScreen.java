@@ -17,6 +17,7 @@ import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
+import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
@@ -196,7 +197,8 @@ public class ModListScreen extends Screen {
             renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor)).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 
             y += 84;
-            renderer.textMultiline("<gray>" + selected.getDescription(), x, y, RgbColor.rgb(0x808080));
+            String description = selected.getDescription();
+            renderer.textMultiline(description != null ? description : "No description", x, y, ColorCode.GRAY);
         }
     }
 
