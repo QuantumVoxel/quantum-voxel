@@ -148,7 +148,7 @@ allprojects {
     repositories {
         // Ultreon Maven Repository
         maven("https://gitlab.com/api/v4/groups/9962021/-/packages/maven")
-        
+
         mavenLocal()
         mavenCentral()
         google()
@@ -421,7 +421,13 @@ java -cp ./server.jar:$classPath net.fabricmc.loader.impl.launch.knot.KnotClient
             into("$projectDir/build/docker")
         }
 
-        Files.writeString(Paths.get("$projectDir/build/docker/image-version.txt"), gameVersion, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        Files.writeString(
+            Paths.get("$projectDir/build/docker/image-version.txt"),
+            gameVersion,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.TRUNCATE_EXISTING,
+            StandardOpenOption.CREATE
+        )
     }
 }
 
@@ -461,7 +467,8 @@ tasks.register<DefaultTask>("docker-push") {
 
             // Push docker image
             if (!gameVersion.matches(Regex("[0-9]+\\.[0-9]+\\.[0-9]+")))
-                commandLine("docker", "build",
+                commandLine(
+                    "docker", "build",
                     "--label",
                     "org.opencontainers.image.description=A WIP voxel game that aims to have a lot of features",
 
@@ -475,7 +482,9 @@ tasks.register<DefaultTask>("docker-push") {
                     "org.opencontainers.image.version=latest",
 
                     "--label",
-                    "org.opencontainers.image.created=${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}",
+                    "org.opencontainers.image.created=${
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    }",
 
                     "--label",
                     "org.opencontainers.image.revision=${getenv("GH_SHA")}",
@@ -484,9 +493,11 @@ tasks.register<DefaultTask>("docker-push") {
                     "org.opencontainers.image.licenses=AGPL-3.0",
 
                     "--tag",
-                    "ghcr.io/ultreon/${project.name}:server-latest", ".")
+                    "ghcr.io/ultreon/${project.name}:server-latest", "."
+                )
             else
-                commandLine("docker", "build",
+                commandLine(
+                    "docker", "build",
                     "--label",
                     "org.opencontainers.image.description=A WIP voxel game that aims to have a lot of features",
 
@@ -500,7 +511,9 @@ tasks.register<DefaultTask>("docker-push") {
                     "org.opencontainers.image.version=${gameVersion}",
 
                     "--label",
-                    "org.opencontainers.image.created=${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}",
+                    "org.opencontainers.image.created=${
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    }",
 
                     "--label",
                     "org.opencontainers.image.revision=${getenv("GH_SHA")}",
@@ -509,7 +522,8 @@ tasks.register<DefaultTask>("docker-push") {
                     "org.opencontainers.image.licenses=AGPL-3.0",
 
                     "--tag",
-                    "ghcr.io/ultreon/${project.name}:server-${gameVersion}", ".")
+                    "ghcr.io/ultreon/${project.name}:server-${gameVersion}", "."
+                )
 
             isIgnoreExitValue = false
         }
@@ -530,24 +544,34 @@ apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
 idea {
     project {
         settings {
-            fun setupIdea(dependency: Project, name: String) {
+            fun setupIdea(
+                dependency: Project,
+                name: String,
+                env: String,
+                knotEnv: String,
+                workingDir: String = dependency.file("run").absolutePath
+            ) {
                 dependency.afterEvaluate {
-                    mkdir("${dependency.projectDir}/build/gameutils")
-                    mkdir("${dependency.projectDir}/run")
-                    mkdir("${dependency.projectDir}/run/client")
-                    mkdir("${dependency.projectDir}/run/client/alt")
-                    mkdir("${dependency.projectDir}/run/client/main")
-                    mkdir("${dependency.projectDir}/run/server")
+                    mkdir(workingDir)
+                    Files.createDirectories(Paths.get(dependency.projectDir.path, "build", "gameutils"))
 
                     val ps = File.pathSeparator!!
-                            val files = dependency.configurations["runtimeClasspath"]!!.files
+                    val clientFiles = dependency.configurations["runtimeClasspath"]!!.files
 
-                    val classPath = files.asSequence()
-                            .filter { it != null }
-                            .map { it.path }
-                            .joinToString(ps)
+                    val fs = File.separator!!
 
-//language=TEXT
+                    val clientClassPath = clientFiles.asSequence()
+                        .filter { it != null }
+                        .map { it.path }
+                        .joinToString(ps)
+
+                    val serverFiles = dependency.configurations["runtimeClasspath"]!!.files
+
+                    val serverClassPath = serverFiles.asSequence()
+                        .filter { it != null }
+                        .map { it.path }
+                        .joinToString(ps)
+
                     val conf = """
 commonProperties
   fabric.development=true
@@ -555,24 +579,26 @@ commonProperties
   fabric.log.disableAnsi=false
   fabric.skipMcProvider=true
   fabric.zipfs.use_temp_file=false
-  log4j.configurationFile=${rootProject.projectDir}/log4j.xml
+  fabric.gameJarPath.client=$clientClassPath
+  fabric.gameJarPath.server=$serverClassPath
+  log4j.configurationFile=${rootProject.projectDir}${fs}log4j.xml
     """.trimIndent()
                     val launchFile = file("${dependency.projectDir}/build/gameutils/launch.cfg")
                     Files.writeString(
-                            launchFile.toPath(),
-                            conf,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE
+                        launchFile.toPath(),
+                        conf,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE
                     )
 
                     val cpFile = file("${dependency.projectDir}/build/gameutils/classpath.txt")
                     Files.writeString(
-                            cpFile.toPath(),
-                            classPath,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE
+                        cpFile.toPath(),
+                        clientClassPath,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE
                     )
 
                     var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=${launchFile.path}"
@@ -587,43 +613,14 @@ commonProperties
 
                     runConfigurations {
                         create(
-                                "Quantum Client",
-                                Application::class.java
-                        ) {
-                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
-                            mainClass = "net.fabricmc.devlaunchinjector.Main"
-                            moduleName = rootProject.name + ".desktop.main"
-                            workingDirectory = "$projectDir/run/client/main/"
-                            programParameters = "--gameDir=."
-                        }
-                        create(
-                                "Quantum Client Alt",
-                                Application::class.java
-                        ) {
-                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
-                            mainClass = "net.fabricmc.devlaunchinjector.Main"
-                            moduleName = rootProject.name + ".${dependency.name}.main"
-                            workingDirectory = "$projectDir/run/client/alt/"
-                            programParameters = "--gameDir=."
-                        }
-                        create(
-                            "Quantum Data Generator",
+                            "Quantum $name",
                             Application::class.java
                         ) {
-                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=CLIENT -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient"
-                            mainClass = "dev.ultreon.quantum.data.gen.DataGenerator"
-                            moduleName = rootProject.name + ".desktop.main"
-                            workingDirectory = "$projectDir/run/data/main/"
-                            programParameters = "--gameDir=."
-                        }
-                        create(
-                                "Quantum Voxel Server",
-                                Application::class.java
-                        ) {
-                            jvmArgs ="$defaultJvmArgs -Dfabric.dli.env=SERVER -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer"
+                            jvmArgs =
+                                "$defaultJvmArgs -Dfabric.dli.env=$env -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.Knot$knotEnv"
                             mainClass = "net.fabricmc.devlaunchinjector.Main"
-                            moduleName = rootProject.name + ".server.main"
-                            workingDirectory = "$projectDir/run/server/"
+                            moduleName = rootProject.name + ".${dependency.name}.main"
+                            workingDirectory = workingDir
                             programParameters = "--gameDir=."
                         }
                     }
@@ -631,7 +628,9 @@ commonProperties
 
             }
 
-            setupIdea(rootProject.project(":desktop"), "Desktop")
+            setupIdea(rootProject.project(":desktop"), "Client", "CLIENT", "Client", "$projectDir/run/client/main/")
+            setupIdea(rootProject.project(":desktop"), "Client Alt", "CLIENT", "Client", "$projectDir/run/client/alt/")
+            setupIdea(rootProject.project(":server"), "Server", "SERVER", "Server", "$projectDir/run/server/")
         }
     }
 }

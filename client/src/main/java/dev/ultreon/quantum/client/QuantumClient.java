@@ -1166,8 +1166,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (next == null && this.world == null)
             next = new TitleScreen();
 
-        if (next == null)
+        if (next == null) {
+            this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return cur == null || this.closeScreen(cur);
+        }
 
         // Call open event.
         var openResult = ScreenEvents.OPEN.factory().onOpenScreen(next);
@@ -1179,18 +1181,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (cur != null && this.closeScreen(next, cur))
             return false; // Close was canceled
-        if (next == null)
+        if (next == null) {
+            this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return false; // The next screen is null, canceling.
+        }
 
         this.screen = next;
         this.screen.init(this.getScaledWidth(), this.getScaledHeight());
         DesktopInput.setCursorCaught(false);
 
-        if (this.screen == null) {
-            this.setWindowTitle(TextObject.literal("Playing in a world!"));
-        } else {
-            this.setWindowTitle(this.screen.getTitle());
-        }
+        this.setWindowTitle(this.screen.getTitle());
 
         return true;
     }
@@ -2657,6 +2657,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return false;
     }
 
+    /**
+     * Sets the title of the game window.
+     *
+     * @param title The title of the game window. If null or blank, the default title will be used.
+     */
     public void setWindowTitle(TextObject title) {
         String text = title == null ? null : title.getText();
         if (text != null && !text.isBlank()) {
@@ -2666,7 +2671,25 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.window.setTitle(String.format("Quantum Voxel %s", QuantumClient.getGameVersion().split("\\+")[0]));
     }
 
+    /**
+     * Returns the current game time in seconds.
+     *
+     * @return The current game time in seconds.
+     */
     public double getGameTime() {
         return System.currentTimeMillis() / 1000.0;
+    }
+
+    /**
+     * Schedules a task to be executed repeatedly at a fixed rate.
+     *
+     * @param func        The task to be executed.
+     * @param initialDelay The time to delay first execution.
+     * @param interval    The period between successive executions.
+     * @param unit        The time unit of the initialDelay and interval parameters.
+     * @return A ScheduledFuture representing pending completion of the task, and whose {@code get()} method will return null upon completion.
+     */
+    public ScheduledFuture<?> scheduleRepeat(Runnable func, int initialDelay, int interval, TimeUnit unit) {
+        return this.scheduler.scheduleAtFixedRate(func, initialDelay, interval, unit);
     }
 }
