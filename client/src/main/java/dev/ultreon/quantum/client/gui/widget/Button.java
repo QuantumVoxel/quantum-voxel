@@ -48,7 +48,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
         v += 42 * type.yOffset;
 
         renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 5, 256, 256);
-        if (!isPressed() && wasPressed) {
+        if (!pressed && wasPressed && !this.isWithinBounds(mouseX, mouseY)) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
         }
@@ -58,6 +58,8 @@ public abstract class Button<T extends Button<T>> extends Widget {
     public boolean click() {
         if (!this.enabled) return false;
         if (!wasPressed) return false;
+
+        this.wasPressed = false;
 
         this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
 

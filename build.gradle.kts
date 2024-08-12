@@ -32,7 +32,6 @@ buildscript {
 
     dependencies {
         classpath("gradle.plugin.org.danilopianini:javadoc.io-linker:0.1.4-700fdb6")
-//        classpath("com.android.tools.build:gradle:8.2.0")
     }
 }
 
@@ -43,6 +42,7 @@ plugins {
     id("idea")
     id("maven-publish")
     id("java")
+    id("application")
     id("io.freefair.javadoc-links") version "8.3"
 }
 
@@ -634,3 +634,41 @@ commonProperties
         }
     }
 }
+
+tasks.register<JavaExec>("runClient") {
+    mainClass = "net.fabricmc.devlaunchinjector.Main"
+    workingDir = file("$projectDir/run/client/main/")
+    systemProperty("fabric.dli.env", "CLIENT")
+    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotClient")
+
+    classpath = project(":desktop").sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runClientAlt") {
+    mainClass = "net.fabricmc.devlaunchinjector.Main"
+    workingDir = file("$projectDir/run/client/alt/")
+    systemProperty("fabric.dli.env", "CLIENT")
+    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotClient")
+
+    classpath = project(":desktop").sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runDataGen") {
+    mainClass = "net.fabricmc.devlaunchinjector.Main"
+    workingDir = file("$projectDir/run/server/")
+    systemProperty("fabric.dli.env", "SERVER")
+    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotServer")
+    systemProperty("quantum.dataGen", "true")
+
+    classpath = project(":server").sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runServer") {
+    mainClass = "net.fabricmc.devlaunchinjector.Main"
+    workingDir = file("$projectDir/run/server/")
+    systemProperty("fabric.dli.env", "SERVER")
+    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotServer")
+
+    classpath = project(":server").sourceSets["main"].runtimeClasspath
+}
+

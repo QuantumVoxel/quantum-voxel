@@ -7,11 +7,19 @@ public interface RpcHandler {
 
     void start();
 
+    void close();
+
     void setActivity(GameActivity newActivity);
 
     static void enable() {
         for (RpcHandler handler : HANDLERS) {
             handler.start();
+        }
+    }
+
+    static void disable() {
+        for (RpcHandler handler : HANDLERS) {
+            handler.close();
         }
     }
 

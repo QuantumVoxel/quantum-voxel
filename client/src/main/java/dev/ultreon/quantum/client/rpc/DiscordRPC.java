@@ -12,6 +12,7 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +30,7 @@ public class DiscordRPC implements RpcHandler {
      * A flag that indicates whether the Rich Presence has been updated since the last update.
      */
     private volatile boolean updated;
+    private IPCClient client;
 
     /**
      * Starts the DiscordRPC class, which initializes the Discord IPC client and sets up the IPC listener
@@ -37,7 +39,7 @@ public class DiscordRPC implements RpcHandler {
     @Override
     public void start() {
         // Initialize the Discord IPC client with the application ID.
-        IPCClient client = new IPCClient(1179401719902384138L);
+        client = new IPCClient(1179401719902384138L);
         // Sets up the IPC listener for the Discord IPC client. This method is called when the client is ready to start
         // sending Rich Presence updates to Discord.
         client.setListener(new IPCListener() {
@@ -81,7 +83,6 @@ public class DiscordRPC implements RpcHandler {
                 // Set up a shutdown hook to cancel the scheduled task and close the IPC client
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     scheduledFuture.cancel(false);
-                    client.close();
                 }));
             }
             /**
@@ -172,6 +173,7 @@ public class DiscordRPC implements RpcHandler {
              */
             @Override
             public void onDisconnect(IPCClient client, Throwable t) {
+                if (QuantumClient.get().isShutdown()) return;
                 QuantumClient.get().notifications.add("Discord RPC", "Disconnected from Discord!", "discordrpc");
             }
 
@@ -203,24 +205,34 @@ public class DiscordRPC implements RpcHandler {
             }
         });
 
+        CompletableFuture.runAsync(() -> {
+            try {
+                client.connect();
+            } catch (NoDiscordClientException e) {
+                QuantumClient.get().notifications.add("Discord RPC", "Unable to connect to Discord!", "discordrpc");
+                CommonConstants.LOGGER.error("Unable to connect to Discord", e);
+                try {
+                    client.close();
+                } catch (Throwable ignored) {
+                    // Ignored
+                }
+            } catch (Throwable e) {
+                CommonConstants.LOGGER.error("Unable to connect to Discord", e);
+                try {
+                    client.close();
+                } catch (Throwable ignored) {
+                    // Ignored
+                }
+            }
+        });
+    }
+
+    @Override
+    public void close() {
         try {
-            client.connect();
-        } catch (NoDiscordClientException e) {
-            QuantumClient.get().notifications.add("Discord RPC", "Unable to connect to Discord!", "discordrpc");
-            CommonConstants.LOGGER.error("Unable to connect to Discord", e);
-            try {
-                client.close();
-            } catch (Throwable ignored) {
-                // Ignored
-            }
-        } catch (Throwable e) {
-            QuantumClient.get().notifications.add("Discord RPC ERROR", e.getMessage(), "discordrpc");
-            CommonConstants.LOGGER.error("Unable to connect to Discord", e);
-            try {
-                client.close();
-            } catch (Throwable ignored) {
-                // Ignored
-            }
+            client.close();
+        } catch (Throwable ignored) {
+            // Ignored
         }
     }
 

@@ -61,9 +61,7 @@ public class ServerWorld extends World {
     @Nullable
     private ScheduledFuture<?> saveSchedule;
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r, "ServerWorld-Save");
-        thread.setDaemon(true);
-        return thread;
+        return new Thread(r, "ServerWorld-Save");
     });
     private static long chunkUnloads;
 
@@ -227,7 +225,7 @@ public class ServerWorld extends World {
     }
 
     @Override
-    public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
+    public boolean destroyBlock(@NotNull BlockPos breaking, @Nullable Player breaker) {
         BlockProperties blockProperties = get(breaking);
         if (blockProperties.isAir()) {
             QuantumServer.LOGGER.warn("Tried to break air block at {}!", breaking);
@@ -456,10 +454,12 @@ public class ServerWorld extends World {
         }
     }
 
+    @SuppressWarnings("GDXJavaUnsafeIterator")
     public void tick() {
         this.playTime++;
 
-        for (Entity entity1 : this.entitiesById.values()) {
+        Entity[] array = this.entitiesById.values().toArray().toArray(Entity.class);
+        for (Entity entity1 : array) {
             if (entity1.isMarkedForRemoval()) {
                 this.entitiesById.remove(entity1.getId());
                 BlockPos blockPos = entity1.getBlockPos();
@@ -468,7 +468,7 @@ public class ServerWorld extends World {
             }
         }
 
-        for (var entity : this.entitiesById.values().toArray().toArray(Entity.class)) {
+        for (var entity : array) {
             entity.tick();
         }
 
@@ -531,17 +531,6 @@ public class ServerWorld extends World {
 
         for (ChunkPos pos : refresher.toLoad) {
             this.deferLoadChunk(pos);
-        }
-
-        for (ChunkPos pos : refresher.toUnload) {
-            this.deferUnloadChunk(pos);
-        }
-    }
-
-    @ApiStatus.Internal
-    public void doRefreshNow(ChunkRefresher refresher) {
-        for (ChunkPos pos : refresher.toLoad) {
-            this.loadChunkNow(pos);
         }
 
         for (ChunkPos pos : refresher.toUnload) {

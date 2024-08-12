@@ -1,15 +1,12 @@
 package dev.ultreon.quantum.client.gui.screens.tabs;
 
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.TitleWidget;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Tab;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,11 +36,11 @@ public abstract class TabbedUI extends Screen {
         super(title);
     }
 
-    protected TabbedUI(String title, TabbedUI parent) {
+    protected TabbedUI(String title, Screen parent) {
         super(title, parent);
     }
 
-    protected TabbedUI(TextObject title, TabbedUI parent) {
+    protected TabbedUI(TextObject title, Screen parent) {
         super(title, parent);
     }
 
@@ -82,6 +79,15 @@ public abstract class TabbedUI extends Screen {
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+        Dialog dialog = getDialog();
+        int oldMouseY = mouseY;
+        int oldMouseX = mouseX;
+
+        if (dialog != null) {
+            mouseX = Integer.MIN_VALUE;
+            mouseY = Integer.MIN_VALUE;
+        }
+
         for (Tab tab : this.tabs) {
             if (!tab.bottom()) {
                 tab.render(renderer, mouseX, mouseY, deltaTime);
@@ -103,6 +109,11 @@ public abstract class TabbedUI extends Screen {
             if (tab.bottom()) {
                 tab.render(renderer, mouseX, mouseY, deltaTime);
             }
+        }
+
+        if (dialog != null) {
+            renderer.fill(0, 0, this.size.width, this.size.height, RgbColor.BLACK.withAlpha(0x70));
+            dialog.render(renderer, oldMouseX, oldMouseY, deltaTime);
         }
     }
 
@@ -207,6 +218,11 @@ public abstract class TabbedUI extends Screen {
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            return dialog.mouseClick(mouseX, mouseY, button, clicks);
+        }
+
         TitleWidget title = this.titleWidget;
         int oldMouseY = mouseY;
         if (title != null) {
@@ -223,6 +239,11 @@ public abstract class TabbedUI extends Screen {
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            return dialog.mousePress(mouseX, mouseY, button);
+        }
+
         TitleWidget title = this.titleWidget;
         int oldMouseY = mouseY;
         if (title != null) {
@@ -239,6 +260,11 @@ public abstract class TabbedUI extends Screen {
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            return dialog.mouseRelease(mouseX, mouseY, button);
+        }
+
         TitleWidget title = this.titleWidget;
         if (title != null) {
             if (isPosWithin(mouseX, mouseY, 0, 0, this.titleWidget.getWidth(), this.titleWidget.getHeight())) {

@@ -25,12 +25,6 @@ import java.util.function.Function;
 @ThreadSafe
 public final class InspectionRoot<T> extends InspectionNode<T> implements Disposable {
     private boolean inspecting;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, r -> {
-        var t = new Thread(r);
-        t.setDaemon(true);
-        t.setName("InspectionRootScheduler");
-        return t;
-    });
     private static final Map<Class<?>, Consumer<InspectionNode<?>>> AUTO_FILL = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Function<?, String>> FORMATTERS = new ConcurrentHashMap<>();
 
@@ -142,6 +136,6 @@ public final class InspectionRoot<T> extends InspectionNode<T> implements Dispos
 
     @Override
     public void dispose() {
-        this.scheduler.shutdownNow();
+
     }
 }

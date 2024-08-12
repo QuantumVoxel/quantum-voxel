@@ -59,7 +59,8 @@ public class WorldLoadScreen extends Screen {
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.size.width / 2, this.size.height / 3 + 31)));
 
-        new Thread(this::run, "World Loading").start();
+        Thread worldLoading = new Thread(this::run, "World Loading");
+        worldLoading.start();
     }
 
     @Override

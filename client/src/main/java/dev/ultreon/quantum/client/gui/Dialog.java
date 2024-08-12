@@ -77,6 +77,9 @@ public class Dialog extends UIContainer<Dialog> {
     }
 
     public void render(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+        pos.y = parent.getHeight() / 2 - size.height / 2 - 2;
+        closeButton.setPos(pos.x + size.width - 21, pos.y);
+
         renderer.renderFrame(parent.getWidth() / 2 - size.width / 2 - 2, parent.getHeight() / 2 - size.height / 2 - 2, size.width + 4, size.height + 4);
         renderer.renderPopoutFrame(pos.x - 1, pos.y - 2, size.width + 2, 27);
 
@@ -89,7 +92,7 @@ public class Dialog extends UIContainer<Dialog> {
             String message1 = message.getText();
             List<String> lines = StringUtils.splitIntoLines(message1);
             for (int i = 0; i < lines.size(); i++) {
-                renderer.textCenter(lines.get(i), pos.x + size.width / 2, pos.y + 30 + i * font.lineHeight, RgbColor.WHITE.withAlpha(0xa0), true);
+                renderer.textCenter(lines.get(i), pos.x + size.width / 2, pos.y + 30 + i * (font.lineHeight + 2), RgbColor.WHITE.withAlpha(0xa0), true);
             }
             renderer.popScissors();
         }

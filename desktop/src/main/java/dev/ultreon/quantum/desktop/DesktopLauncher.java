@@ -286,7 +286,7 @@ public class DesktopLauncher {
 
         @Override
         public boolean closeRequested() {
-            return QuantumClient.get().tryShutdown();
+            return !QuantumClient.get().tryShutdown();
         }
 
         @Override

@@ -41,6 +41,7 @@ import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.client.api.events.ClientTickEvents;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
+import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.audio.ClientSound;
@@ -118,7 +119,6 @@ import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
-import kotlin.OptIn;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -181,6 +181,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     // Zero, what else could it be? :thinking:
     private static final GridPoint2 ZERO = new GridPoint2();
+    private static final ThreadGroup CLIENT_GROUP = new ThreadGroup("RenderGroup");
 
     // Client instance
     @UnknownNullability
@@ -201,6 +202,18 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
     public int viewMode;
     public Identifier fontId = id("quantium");
+    public final ExecutorService executor = Executors.newFixedThreadPool(Math.min(Runtime.getRuntime().availableProcessors() / 2, 2), r -> {
+        Thread thread = new Thread(CLIENT_GROUP, r);
+        thread.setName("ClientTask");
+        thread.setDaemon(true);
+        return thread;
+    });
+    public final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(Math.min(Runtime.getRuntime().availableProcessors() / 2, 2), r -> {
+        Thread thread = new Thread(CLIENT_GROUP, r);
+        thread.setName("ClientScheduleTask");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -253,12 +266,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     public ServerData serverData;
     private MultiplayerData multiplayerData;
-    public ExecutorService chunkLoadingExecutor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 1), r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("ChunkLoadingExecutor");
-        return thread;
-    });
 
     // Local user
     private final User user;
@@ -309,7 +316,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
     // Font stuff
-    public boolean forceUnicode = false;
     public Font font;
     public final Font newFont;
     @UnknownNullability
@@ -337,7 +343,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private float guiScale = this.calcMaxGuiScale();
 
     // Notifications
-    public NotifyManager notifications = new NotifyManager(this);
+    public Notifications notifications = new Notifications(this);
 
     // Input
     public GameInput input;
@@ -399,14 +405,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     // Advanced Shadows
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
-
-    // Scheduler
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("QVoxelClientScheduler");
-        return thread;
-    });
 
     // Window stuff
     @Nullable
@@ -507,18 +505,14 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Add a shutdown hook to gracefully shut down the server
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                if (this.integratedServer != null) {
-                    this.integratedServer.shutdown();
-                }
-            } catch (Exception e) {
-                QuantumClient.LOGGER.error("Failed to shutdown server", e);
-            }
+            this.shutdown();
 
             QuantumClient.LOGGER.info("Shutting down game!");
             QuantumClient.instance = null;
         }));
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        }));
         // Log the booting of the game
         QuantumClient.LOGGER.info("Booting game!");
         QuantumClient.instance = this;
@@ -673,21 +667,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     /**
      * Returns an instance of IClipboard.
-     * If the game platform is macOS, a NullClipboard is returned.
-     * Otherwise, a GameClipboard is returned.
+     * If the game platform is macOS, a {@link NullClipboard} is returned.
+     * Otherwise, a {@link DefaultClipboard} is returned.
      *
      * @return An instance of IClipboard.
      */
     private IClipboard createClipboard() {
-//        // Check if the game platform is macOS
-//        if (GamePlatform.get().isMacOSX()) {
-//            // If it is, return a NullClipboard
-//            return new NullClipboard();
-//        }
-//
-//        // Otherwise, return a GameClipboard
-//        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
-        return new NullClipboard();
+        // Check if the game platform is macOS
+        if (GamePlatform.get().isMacOSX()) {
+            // If it is, return a NullClipboard
+            return new NullClipboard();
+        }
+
+        // Otherwise, return a DefaultClipboard
+        return new DefaultClipboard();
     }
 
     /**
@@ -783,35 +776,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return this.screenshotFuture;
     }
 
-    /**
-     * Launches the game.
-     * <p style="color:red;"><b>Note: This method should not be called.</b></p>
-     *
-     * @param argv the arguments to pass to the game
-     */
-    @ApiStatus.Internal
-    public static void main(String[] argv) {
-        try {
-            QuantumClient.arguments = new ArgParser(argv);
-
-            QuantumClient.launch(argv);
-        } catch (Exception | OutOfMemoryError e) {
-            CrashHandler.handleCrash(new CrashLog("Launch failed", e).createCrash().getCrashLog());
-        }
-    }
-
-    /**
-     * <h2 style="color:red;"><b>Note: This method should not be called.</b></h2>
-     * Launches the game.
-     * This method gets invoked dynamically by the FabricMC game provider.
-     *
-     * @param argv the arguments to pass to the game
-     */
-    @SuppressWarnings("unused")
-    @OptIn(markerClass = InternalApi.class)
-    private static void launch(String[] argv) {
-    }
-
     public static void logDebug() {
         if (QuantumClient.isPackaged()) QuantumClient.LOGGER.warn("Running in the JPackage environment.");
         QuantumClient.LOGGER.debug("Java Version: {}", System.getProperty("java.version"));
@@ -836,23 +800,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         return icons;
     }
-
-//    public static Image getIconImage() {
-//        try {
-//            BufferedImage read;
-//            if (isMac) {
-//                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
-//            } else {
-//                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
-//            }
-//            if (read == null) {
-//                throw new RuntimeException("Failed to load icon image");
-//            }
-//            return read;
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     /**
      * Check whether the application is packaged using JPackage.
@@ -1723,10 +1670,49 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             CrashHandler.handleCrash(crashLog);
             String string = crashLog.toString();
             LOGGER.error("Dumping crash report...\n" + string);
-            Gdx.app.exit();
+
+            if (instance != null) instance.shutdown();
+            System.exit(1);
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
+
+            if (instance != null) instance.shutdown();
             System.exit(1);
+        }
+    }
+
+    /**
+     * This method attempts to terminate all non-daemon threads by interrupting them and joining them.
+     * If the thread does not terminate after a certain amount of time, it will be forcibly terminated.
+     * <p>
+     * This method is useful when a crash occurs and some threads might be stuck in infinite loops or waiting for a resource that will never be released.
+     * <p>
+     * It's important to note that this method should only be used as a last resort, as it can cause data loss and other issues.
+     */
+    private static void slightlyInconvenientThreadDebug() {
+        for (Thread thread : Thread.getAllStackTraces().keySet()) {
+            // Only check non-daemon threads, as they might be stuck in infinite loops
+            // Daemon threads should be terminated when the JVM shuts down
+            if (thread.isDaemon()) continue;
+
+            thread.interrupt();
+            try {
+                int retry = 0;
+
+                // Do 3 attempts to join the thread
+                while (thread.isAlive()) {
+                    thread.join(10000);
+                    LOGGER.warn("Still running thread: " + thread.getName());
+                    if (retry++ < 2 || !thread.isAlive()) continue;
+
+                    // Forcefully terminate the thread if it's not responding after 3 attempts
+                    LOGGER.warn("Self destructing process...");
+                    MemoryUtil.selfDestruct(); // Funny but effective way to kill the process
+                }
+            } catch (InterruptedException e) {
+                LOGGER.error("Fatal error: ", e);
+                Runtime.getRuntime().halt(1); // Hard exit
+            }
         }
     }
 
@@ -1954,7 +1940,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.unifont);
                 QuantumClient.cleanUp(this.font);
                 QuantumClient.cleanUp(this.fontManager);
-                if (this.chunkLoadingExecutor != null) this.chunkLoadingExecutor.shutdownNow();
 
                 QuantumClient.cleanUp(this.world);
                 QuantumClient.cleanUp(this.profiler);
@@ -2127,26 +2112,32 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public boolean tryShutdown() {
+        if (WindowEvents.WINDOW_CLOSE_REQUESTED.factory().onWindowCloseRequested(this.window).isCanceled()) {
+            return false;
+        }
+
         ClientLifecycleEvents.WINDOW_CLOSED.factory().onWindowClose();
 
         if (ClientConfig.showClosePrompt && this.screen != null) {
             this.screen.showDialog(new DialogBuilder(this.screen).message(TextObject.literal("Are you sure you want to close the game?")).button(UITranslations.YES, () -> {
                 if (this.world != null) {
-                    this.exitWorldAndThen(() -> Gdx.app.exit());
+                    this.exitWorldAndThen(this::shutdown);
                     return;
                 }
 
-                Gdx.app.exit();
+                this.shutdown();
             }));
             return false;
         }
 
         if (this.world != null) {
-            this.exitWorldAndThen(() -> Gdx.app.exit());
+            this.exitWorldAndThen(this::shutdown);
             return false;
         }
 
-        return true;
+        CompletableFuture.runAsync(this::shutdown);
+
+        return false;
     }
 
     public boolean filesDropped(String[] files) {
@@ -2691,5 +2682,48 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public ScheduledFuture<?> scheduleRepeat(Runnable func, int initialDelay, int interval, TimeUnit unit) {
         return this.scheduler.scheduleAtFixedRate(func, initialDelay, interval, unit);
+    }
+
+    @SuppressWarnings("BusyWait")
+    @Override
+    public void shutdown() {
+        try {
+            super.shutdown();
+
+            LOGGER.info("Shutting down executor service");
+            executor.shutdown();
+
+            LOGGER.info("Shutting down scheduler");
+            scheduler.shutdown();
+
+            while (!executor.isTerminated() || !scheduler.isTerminated()) {
+                if (this.screen instanceof ShutdownScreen screen) {
+                    screen.setMessage("Waiting for executor services to terminate");
+                }
+                LOGGER.info("Waiting for executor services to terminate");
+                Thread.sleep(1000);
+            }
+
+            if (this.integratedServer != null) {
+                this.integratedServer.shutdown();
+
+                while (!this.integratedServer.isShutdown()) {
+                    if (this.screen instanceof ShutdownScreen screen) {
+                        screen.setMessage("Waiting for server to terminate");
+                    }
+                    LOGGER.info("Waiting for server to terminate");
+                    Thread.sleep(1000);
+                }
+            }
+
+            CommonConstants.LOGGER.info("Shutting down RPC handler");
+            RpcHandler.disable();
+        } catch (Exception e) {
+            QuantumClient.LOGGER.error("Failed to shutdown background tasks", e);
+            Runtime.getRuntime().halt(1); // Forcefully terminate the process
+        }
+
+        LOGGER.info("Shutting down Quantum Client");
+        Gdx.app.exit();
     }
 }

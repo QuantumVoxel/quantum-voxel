@@ -144,7 +144,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 ClientChunk data = new ClientChunk(world, pos, storage, biomeStorage, blockEntities);
                 ClientChunkEvents.RECEIVED.factory().onClientChunkReceived(data);
                 world.loadChunk(pos, data);
-            }, this.client.chunkLoadingExecutor).exceptionally(throwable -> {
+            }, this.client.executor).exceptionally(throwable -> {
                 this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                 QuantumClient.LOGGER.error("Failed to load chunk:", throwable);
                 return null;

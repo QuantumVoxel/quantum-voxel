@@ -76,12 +76,12 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumServer");
     @Deprecated(since = "0.1.0", forRemoval = true)
     public static final String NAMESPACE = "quantum";
-//    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
+    private static final ThreadGroup GROUP = new ThreadGroup("QuantumServer");
+    //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
+        Thread thread = new Thread(GROUP, r);
         thread.setName("QuantumServer");
         return thread;
     });

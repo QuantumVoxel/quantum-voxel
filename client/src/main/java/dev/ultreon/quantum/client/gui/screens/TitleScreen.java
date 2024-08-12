@@ -105,7 +105,7 @@ public class TitleScreen extends Screen {
     }
 
     private void quitGame(TitleButton caller) {
-        Gdx.app.exit();
+        this.client.tryShutdown();
     }
 
     private void openSingleplayer(TitleButton caller) {

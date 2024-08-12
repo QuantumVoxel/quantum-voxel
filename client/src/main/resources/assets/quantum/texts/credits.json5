@@ -77,6 +77,23 @@
       ]
     }
   },
+  // Downloaded resources
+  Downloads: {
+    spycrah: {
+      url: "https://freesound.org/people/spycrah/",
+      license: "CC BY 4.0",
+      links: [
+        {
+          name: "Grass Step Left",
+          url: "https://freesound.org/s/535220/"
+        },
+        {
+          name: "Grass Step Right",
+          url: "https://freesound.org/s/535222/"
+        }
+      ]
+    }
+  },
   // Contributors that contributed language changes/additions through GitHub pull requests.
   Translations: {
     Oszoou: {

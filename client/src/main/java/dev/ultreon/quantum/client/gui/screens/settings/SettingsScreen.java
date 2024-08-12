@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.screens.settings;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.gui.CraftyConfigGui;
 import dev.ultreon.quantum.client.gui.Bounds;
+import dev.ultreon.quantum.client.gui.screens.CreditsScreen;
 import dev.ultreon.quantum.client.gui.screens.LanguageScreen;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabbedUI;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
@@ -27,8 +28,8 @@ public class SettingsScreen extends TabbedUI {
         builder.add(PersonalSettingsUI.TITLE, false, 1, personalSettingsUI::build).icon(QuantumClient.id("gui/settings/personal"));
         builder.add(AccessibilitySettingsUI.TITLE, false, 0, accessibilitySettingsUI::build).icon(QuantumClient.id("gui/settings/accessibility"));
 
-        builder.contentBounds(() -> new Bounds(20, 50, size.width - 40, size.height - 40));
-        setTabX(170);
+        builder.contentBounds(() -> new Bounds(20, 50, size.width - 40, size.height - 80));
+        setTabX(220);
 
         builder.add(TextButton.of(UITranslations.BACK, 50))
                 .bounds(() -> new Bounds(20, 29, 48, 19))
@@ -41,5 +42,9 @@ public class SettingsScreen extends TabbedUI {
         builder.add(TextButton.of(TextObject.translation("quantum.screen.language"), 50))
                 .bounds(() -> new Bounds(120, 29, 48, 19))
                 .callback(button -> this.client.showScreen(new LanguageScreen(this)));
+
+        builder.add(TextButton.of(TextObject.translation("quantum.screen.credits"), 50))
+                .bounds(() -> new Bounds(170, 29, 48, 19))
+                .callback(button -> this.client.showScreen(new CreditsScreen(this)));
     }
 }

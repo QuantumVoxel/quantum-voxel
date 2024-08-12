@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class NotifyManager implements Renderable {
+public class Notifications implements Renderable {
     private static final int HEIGHT = 41;
     private static final int WIDTH = 150;
     private static final int OFFSET = 5;
@@ -24,7 +24,7 @@ public class NotifyManager implements Renderable {
     private final Set<UUID> usedNotifications = new HashSet<>();
     private float motionY;
 
-    public NotifyManager(QuantumClient client) {
+    public Notifications(QuantumClient client) {
         this.client = client;
     }
 
@@ -32,12 +32,12 @@ public class NotifyManager implements Renderable {
     public void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         if (this.client.isLoading()) return;
 
-        int y = (int) (NotifyManager.OFFSET + this.motionY);
+        int y = (int) (Notifications.OFFSET + this.motionY);
 
         this.lock.lock();
         this.notifications.removeIf(notification1 -> {
             if (notification1.isFinished()) {
-                this.motionY += NotifyManager.HEIGHT + NotifyManager.GAP;
+                this.motionY += Notifications.HEIGHT + Notifications.GAP;
                 return true;
             }
             return false;
@@ -49,17 +49,17 @@ public class NotifyManager implements Renderable {
             MutableText subText = notification.getSubText();
             Icon icon = notification.getIcon();
 
-            int width = NumberUtils.max(this.client.font.width(title), this.client.font.width(summary), this.client.font.width(subText), NotifyManager.WIDTH) + 10;
+            int width = NumberUtils.max(this.client.font.width(title), this.client.font.width(summary), this.client.font.width(subText), Notifications.WIDTH) + 10;
             if (icon != null) width += 37;
 
-            int x = this.client.getScaledWidth() - NotifyManager.OFFSET - width;
+            int x = this.client.getScaledWidth() - Notifications.OFFSET - width;
 
             float motionRatio = notification.getMotion();
-            int motion = (int) ((width + NotifyManager.OFFSET) * motionRatio);
+            int motion = (int) ((width + Notifications.OFFSET) * motionRatio);
 
-            renderer.fill(x + motion + 1, y, width - 2, NotifyManager.HEIGHT, RgbColor.rgb(0x101010))
-                    .fill(x + motion, y + 1, width, NotifyManager.HEIGHT - 2, RgbColor.rgb(0x101010))
-                    .box(x + motion + 1, y + 1, width - 2, NotifyManager.HEIGHT - 2, RgbColor.rgb(0x505050));
+            renderer.fill(x + motion + 1, y, width - 2, Notifications.HEIGHT, RgbColor.rgb(0x101010))
+                    .fill(x + motion, y + 1, width, Notifications.HEIGHT - 2, RgbColor.rgb(0x101010))
+                    .box(x + motion + 1, y + 1, width - 2, Notifications.HEIGHT - 2, RgbColor.rgb(0x505050));
 
             if (icon != null) {
                 icon.render(renderer, x + motion + 4, y + 4, 32, 32, deltaTime);
@@ -71,16 +71,17 @@ public class NotifyManager implements Renderable {
                     .textLeft(summary, x + motion + 5 + textX, y + 17, RgbColor.rgb(0xb0b0b0))
                     .textLeft(subText, x + motion + 5 + textX, y + 29, RgbColor.rgb(0x707070));
 
-            y += NotifyManager.HEIGHT + NotifyManager.GAP;
+            y += Notifications.HEIGHT + Notifications.GAP;
         }
 
-        this.motionY = Math.max(this.motionY - ((deltaTime * NotifyManager.HEIGHT) * 4 + (deltaTime * this.motionY) * 4), 0);
+        this.motionY = Math.max(this.motionY - ((deltaTime * Notifications.HEIGHT) * 4 + (deltaTime * this.motionY) * 4), 0);
 
         this.lock.unlock();
     }
 
     public void add(Notification notification) {
         if (!QuantumClient.isOnRenderThread()) {
+            if (QuantumClient.get().isShutdown()) return;
             QuantumClient.invoke(() -> this.add(notification));
             return;
         }

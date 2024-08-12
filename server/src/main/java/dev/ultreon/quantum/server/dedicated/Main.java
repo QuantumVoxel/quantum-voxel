@@ -161,6 +161,8 @@ public class Main {
             Main.LOGGER.info("We will wait 10 seconds so you would be able to stop the server for configuration.");
 
             Thread thread = new Thread(Main::waitForKey);
+            thread.setDaemon(true);
+            thread.setName("WaitForKey");
             thread.start();
 
             Duration.ofSeconds(10).sleep();

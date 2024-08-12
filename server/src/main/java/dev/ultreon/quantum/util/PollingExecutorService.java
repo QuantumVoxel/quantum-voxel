@@ -33,13 +33,25 @@ public class PollingExecutorService implements ExecutorService {
 
     @Override
     public void shutdown() {
-        this.isShutdown = true;
-        this.tasks.clear();
+        if (this.isSameThread()) {
+            this.isShutdown = true;
+            for (CompletableFuture<?> future : this.futures) {
+                future.completeExceptionally(new RejectedExecutionException("Executor has been shut down"));
+            }
 
-        for (CompletableFuture<?> future : this.futures) {
-            future.cancel(true);
+            this.tasks.clear();
+            this.futures.clear();
+        } else {
+            this.submit(() -> {
+                this.isShutdown = true;
+                for (CompletableFuture<?> future : this.futures) {
+                    future.completeExceptionally(new RejectedExecutionException("Executor has been shut down"));
+                }
+
+                this.tasks.clear();
+                this.futures.clear();
+            });
         }
-        this.futures.clear();
     }
 
     @Override
@@ -166,7 +178,7 @@ public class PollingExecutorService implements ExecutorService {
     public <T> @NotNull List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
         List<CompletableFuture<T>> futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
         return futures.stream()
                 .map(CompletableFuture::join)
                 .map(CompletableFuture::completedFuture)
@@ -178,7 +190,7 @@ public class PollingExecutorService implements ExecutorService {
         long endTime = System.currentTimeMillis() + unit.toMillis(timeout);
         List<CompletableFuture<T>> futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
         List<Future<T>> resultList = new ArrayList<>();
 
         for (CompletableFuture<T> future : futures) {
@@ -197,7 +209,7 @@ public class PollingExecutorService implements ExecutorService {
     public <T> @NotNull T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         var futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
 
         try {
             return CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]))
@@ -215,7 +227,7 @@ public class PollingExecutorService implements ExecutorService {
         var endTime = System.currentTimeMillis() + unit.toMillis(timeout);
         var futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
 
         try {
             var result = CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]))
@@ -246,7 +258,7 @@ public class PollingExecutorService implements ExecutorService {
     }
 
     private boolean isSameThread() {
-        return Thread.currentThread().getId() == this.thread.getId();
+        return Thread.currentThread().threadId() == this.thread.threadId();
     }
 
     public void poll() {

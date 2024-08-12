@@ -16,12 +16,6 @@ public final class Profiler implements Disposable {
     private final ConcurrentMap<Thread, ThreadSection> threads = new ConcurrentHashMap<>();
     private final ConcurrentMap<Thread, ThreadSection.FinishedThreadSection> finished = new ConcurrentHashMap<>();
     private boolean profiling;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("ProfilerScheduler");
-        return thread;
-    });
 
     private void start(String name) {
         if (!this.profiling) {
@@ -70,6 +64,6 @@ public final class Profiler implements Disposable {
 
     @Override
     public void dispose() {
-        this.scheduler.shutdown();
+
     }
 }

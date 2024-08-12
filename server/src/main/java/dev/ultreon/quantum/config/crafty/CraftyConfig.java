@@ -46,9 +46,6 @@ public abstract class CraftyConfig {
     private static final WatchService WATCH_SERVICE;
 
     static {
-        // Schedule the CraftyConfig update task to run every 2 seconds with an initial delay of 10 seconds
-        WATCHER.scheduleAtFixedRate(CraftyConfig::update, 10, 2, TimeUnit.SECONDS);
-
         try {
             // Create a watch service for the default file system
             WATCH_SERVICE = FileSystems.getDefault().newWatchService();
@@ -56,6 +53,9 @@ public abstract class CraftyConfig {
             // Throw a runtime exception if an IOException occurs
             throw new RuntimeException(e);
         }
+
+        // Schedule the CraftyConfig update task to run every 2 seconds with an initial delay of 10 seconds
+        WATCHER.scheduleAtFixedRate(CraftyConfig::update, 10, 2, TimeUnit.SECONDS);
 
         // Add a shutdown hook to handle cleanup tasks
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -67,13 +67,26 @@ public abstract class CraftyConfig {
             try {
                 // Close the watch service
                 WATCH_SERVICE.close();
-            } catch (IOException e) {
-                // Throw a runtime exception if an IOException occurs
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                // Log error if failed to close watch service
+                CommonConstants.LOGGER.error("Failed to close watch service", e);
+                Runtime.getRuntime().halt(1); // Terminate the JVM
             }
 
             // Shutdown the scheduled task
-            WATCHER.shutdown();
+            WATCHER.shutdownNow();
+
+            while (!WATCHER.isTerminated()) {
+                try {
+                    // Wait for the scheduled task to finish
+                    WATCHER.awaitTermination(1, TimeUnit.SECONDS);
+
+                    CommonConstants.LOGGER.info("CraftyConfig Watcher is still running");
+                } catch (InterruptedException e) {
+                    // Throw a runtime exception if an InterruptedException occurs
+                    throw new RuntimeException(e);
+                }
+            }
         }));
     }
 

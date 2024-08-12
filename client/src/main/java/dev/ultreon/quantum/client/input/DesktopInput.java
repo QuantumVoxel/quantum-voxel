@@ -587,7 +587,7 @@ public class DesktopInput extends GameInput {
         // Handle mouse release event on the current screen
         boolean eventHandled = false;
         if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled())
-            eventHandled |= client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button) || currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button);
+            eventHandled |= currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button) || client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button);
 
         // Handle mouse click event on the current screen
         if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1).isCanceled())
