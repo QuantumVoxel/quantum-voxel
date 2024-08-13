@@ -48,9 +48,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
 
-    public Model model;
-    public ModelInstance modelInstance;
-
     public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();

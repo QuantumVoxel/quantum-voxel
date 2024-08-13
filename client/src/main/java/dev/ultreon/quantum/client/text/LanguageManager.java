@@ -39,21 +39,26 @@ public class LanguageManager {
     }
 
     public Language load(Locale locale, Identifier id, ResourceManager resourceManager) {
-        Json5 gson = CommonConstants.JSON5;
-        String newPath = "lang/" + id.path() + ".json";
-        List<byte[]> assets = resourceManager.getAllDataById(id.withPath(newPath));
-        Map<String, String> languageMap = new HashMap<>();
-        for (byte[] asset : assets) {
-            String s = new String(asset, StandardCharsets.UTF_8);
-            System.out.println("s = " + s);
-            Json5Object object = gson.parse(new StringReader(s)).getAsJson5Object();
-            this.loadFile(languageMap, object);
-        }
+        try {
+            Json5 gson = CommonConstants.JSON5;
+            String newPath = "lang/" + id.path() + ".json";
+            List<byte[]> assets = resourceManager.getAllDataById(id.withPath(newPath));
+            Map<String, String> languageMap = new HashMap<>();
+            for (byte[] asset : assets) {
+                String s = new String(asset, StandardCharsets.UTF_8);
+                System.out.println("s = " + s);
+                Json5Object object = gson.parse(new StringReader(s)).getAsJson5Object();
+                this.loadFile(languageMap, object);
+            }
 
-        Language language = new Language(locale, languageMap, id);
-        this.languages.put(locale, language);
-        REGISTRY.register(id, language);
-        return language;
+            Language language = new Language(locale, languageMap, id);
+            this.languages.put(locale, language);
+            REGISTRY.register(id, language);
+
+            return language;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load language " + id, e);
+        }
     }
 
     public Language load(Locale locale, Identifier id, Reader reader) {

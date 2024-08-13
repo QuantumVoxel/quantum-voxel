@@ -50,15 +50,6 @@ apply plugin: 'maven-publish'
 
 group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
-tasks.register('runClient', JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-
-    mainClass = 'dev.ultreon.quantum.premain.DevMain'
-
-    // arguments to pass to the application
-    workingDir "$rootProject.projectDir/run/client/main/"
-}
-
 group = project_group
 def packageVersion = "1.0.0"
 
@@ -262,7 +253,7 @@ jpackage {
     destination = "$projectDir/build/bin"
 
     appName = app_name
-    appVersion = project.version.toString()
+    appVersion = project_version
     vendor = "Ultreon Team"
     copyright = "Copyright (c) 2023 Ultreon Team"
     runtimeImage = System.getProperty("java.home")
@@ -272,12 +263,8 @@ jpackage {
 
     destination = "$projectDir/build/dist"
 
-    licenseFile = "$rootProject.projectDir/package/LICENSE.txt"
-
     javaOptions = [ "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]
     arguments = [ "--packaged" ]
-
-    aboutUrl = "https://github.com/Ultreon/ultreon-craft"
 
     mac {
         javaOptions = javaOptions + [ "-XstartOnFirstThread" ]
@@ -313,16 +300,9 @@ jpackage {
     }
 
     windows {
-        icon = "$rootProject.projectDir/icons/icon.ico"
-        winMenu = true
-        winDirChooser = true
         winConsole = false
-        winPerUserInstall = true
-        winShortcutPrompt = true
-        winShortcut = false
-        winUpgradeUuid = "a539b496-ae50-4df2-9a1b-8a089e44f7ce"
-        winMenuGroup = "Ultreon Team"
-        appVersion = (project.version).toString().replaceAll("-cb\\.\\d+", "").replace("+", ".")
+
+        type ImageType.APP_IMAGE
     }
 }
 

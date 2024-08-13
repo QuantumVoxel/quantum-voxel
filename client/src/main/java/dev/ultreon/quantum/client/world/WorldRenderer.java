@@ -6,10 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
@@ -58,8 +55,7 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
 import dev.ultreon.quantum.world.World;
@@ -74,8 +70,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
-import static dev.ultreon.quantum.client.QuantumClient.crash;
-import static dev.ultreon.quantum.client.QuantumClient.id;
+import static dev.ultreon.quantum.client.QuantumClient.*;
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
@@ -117,7 +112,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Map<BlockPos, ModelInstance> breakingInstances = new HashMap<>();
     private final Map<BlockPos, ModelInstance> blockInstances = new ConcurrentHashMap<>();
     private final Array<ClientChunkAccess> removedChunks = new Array<ClientChunkAccess>();
-    private final Map<ChunkPos, Pair<ClientChunk, ModelInstance>> chunkModels = new ConcurrentHashMap<>();
+    private final Map<ChunkPos, ChunkModel> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Quaternion tmpQ = new Quaternion();
     private final Vector3 sunDirection = new Vector3();
@@ -212,60 +207,76 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
     }
 
+    /**
+     * Sets up the sun and moon models with the necessary materials and textures, and creates their respective ModelInstances.
+     */
     private void setupSunAndMoon() {
+        // Create sun model with sun material and texture
         Model sunModel = ModelManager.INSTANCE.generateModel(SUN_ID, modelBuilder -> {
             Material sunMat = new Material();
             sunMat.id = id("generated/sun_material").toString();
             sunMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
-            sunMat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
             sunMat.set(new DepthTestAttribute(GL_LEQUAL, true));
-            sunMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            sunMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE));
             sunMat.set(IntAttribute.createCullFace(0));
             sunMat.set(FogAttribute.createFog(1, 1, 1));
 
             modelBuilder.part(id("generated/sun_part").toString(), createSun(), GL_TRIANGLES, sunMat);
         });
 
+        // Create moon model with moon material and texture
         Model moonModel = ModelManager.INSTANCE.generateModel(MOON_ID, modelBuilder -> {
             Material moonMat = new Material();
             moonMat.id = id("generated/moon_material").toString();
             moonMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
-            moonMat.set(TextureAttribute.createEmissive(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
             moonMat.set(new DepthTestAttribute(GL_LEQUAL, true));
-            moonMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            moonMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE));
             moonMat.set(IntAttribute.createCullFace(0));
             moonMat.set(FogAttribute.createFog(1, 1, 1));
 
             modelBuilder.part(id("generated/moon_part").toString(), createMoon(), GL_TRIANGLES, moonMat);
         });
 
+        // Create ModelInstances for sun and moon
         this.sun = RenderLayer.BACKGROUND.create(sunModel, 0, 0, 0);
         this.moon = RenderLayer.BACKGROUND.create(moonModel, 0, 0, 0);
     }
 
+    /**
+     * Creates a mesh representing the sun, with a triangular quad shape.
+     *
+     * @return the sun mesh
+     */
     private Mesh createSun() {
         MeshBuilder meshBuilder = new MeshBuilder();
         meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
 
+        // Define the vertices of the quad, with their positions, normals, and UV coordinates
         meshBuilder.rect(
-                new VertexInfo().setPos(-2, -2, 15).setNor(0, 0, -1).setUV(0, 0),
-                new VertexInfo().setPos(-2, 2, 15).setNor(0, 0, -1).setUV(0, 1),
-                new VertexInfo().setPos(2, 2, 15).setNor(0, 0, -1).setUV(1, 1),
-                new VertexInfo().setPos(2, -2, 15).setNor(0, 0, -1).setUV(1, 0)
+                new VertexInfo().setPos(-2, -2, 15).setNor(0, 0, -1).setUV(0, 0),  // Bottom left
+                new VertexInfo().setPos(-2, 2, 15).setNor(0, 0, -1).setUV(0, 1),   // Top left
+                new VertexInfo().setPos(2, 2, 15).setNor(0, 0, -1).setUV(1, 1),    // Top right
+                new VertexInfo().setPos(2, -2, 15).setNor(0, 0, -1).setUV(1, 0)    // Bottom right
         );
 
         return meshBuilder.end();
     }
 
+    /**
+     * Creates a mesh representing the moon, with a triangular quad shape.
+     *
+     * @return the moon mesh
+     */
     private Mesh createMoon() {
         MeshBuilder meshBuilder = new MeshBuilder();
         meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
 
+        // Define the vertices of the quad, with their positions, normals, and UV coordinates
         meshBuilder.rect(
-                new VertexInfo().setPos(-2, -2, -15).setNor(0, 0, 1).setUV(0, 0),
-                new VertexInfo().setPos(-2, 2, -15).setNor(0, 0, 1).setUV(0, 1),
-                new VertexInfo().setPos(2, 2, -15).setNor(0, 0, 1).setUV(1, 1),
-                new VertexInfo().setPos(2, -2, -15).setNor(0, 0, 1).setUV(1, 0)
+                new VertexInfo().setPos(-2, -2, -15).setNor(0, 0, 1).setUV(0, 0),  // Bottom left
+                new VertexInfo().setPos(-2, 2, -15).setNor(0, 0, 1).setUV(0, 1),   // Top left
+                new VertexInfo().setPos(2, 2, -15).setNor(0, 0, 1).setUV(1, 1),    // Top right
+                new VertexInfo().setPos(2, -2, -15).setNor(0, 0, 1).setUV(1, 0)    // Bottom right
         );
 
         return meshBuilder.end();
@@ -304,20 +315,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         if (!chunk.isInitialized()) return;
 
-//        ModelInstance modelInstance = chunk.modelInstance;
-//        if (modelInstance == null)
-//            QuantumClient.LOGGER.warn("Model instance is null for chunk {}, not disposing it.", chunk.getPos());
-//        else Scene3D.WORLD.destroy(modelInstance);
-//
-//        chunk.modelInstance = null;
-//
-//        Identifier id = createId(chunk.getPos());
-//        if (!Models3D.INSTANCE.unloadModel(id)) {
-//            QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
-//        }
-//
-//        chunk.model = null;
-
         chunk.revalidate();
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
@@ -336,26 +333,38 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             throw new IllegalStateException("Should only be called on the main thread!");
     }
 
+    /**
+     * Renders the world to the screen using the provided ModelBatch and RenderLayer.
+     *
+     * @param batch the ModelBatch to render with
+     * @param renderLayer the RenderLayer to render with
+     * @param deltaTime the time between the last and current frame
+     */
     @Override
-    public void render(RenderLayer renderLayer, float deltaTime) {
+    public void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime) {
         var player = this.client.player;
         if (player == null) return;
         if (this.disposed) return;
 
         Gdx.gl.glLineWidth(10f);
 
+        // Update the skybox and environment.
         this.skybox.update(this.world.getDaytime(), deltaTime);
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
 
+        // Get the loaded chunks and sort them by distance from the player.
         var chunks = WorldRenderer.chunksInViewSorted(this.world.getLoadedChunks(), player);
         this.loadedChunks = chunks.size();
         this.visibleChunks = 0;
 
+        // Create a new ChunkRenderRef and an array of ChunkPos.
         var ref = new ChunkRenderRef();
-
         Array<ChunkPos> positions = new Array<>();
-        QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(renderLayer, chunks, positions, player, ref));
 
+        // Collect the chunks to render.
+        QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(batch, renderLayer, chunks, positions, player, ref));
+
+        // Render the cursor.
         BlockHitResult gameCursor = this.client.cursor;
         if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             QuantumClient.PROFILER.section("cursor", () -> {
@@ -365,6 +374,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 var boundingBox = gameCursor.getBlock().getBoundingBox(0, 0, 0, gameCursor.getBlockMeta());
                 renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
 
+                // Render the outline.
                 if (lastHitResult == null || !this.lastHitResult.equals(gameCursor)) {
                     this.lastHitResult = gameCursor;
 
@@ -391,16 +401,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                     this.cursor.userData = Shaders.OUTLINE.get();
                 }
             });
-        } else if (this.cursor != null) {
-            RenderLayer.WORLD.deactivate(this.cursor);
+
+            if (this.cursor != null) {
+                batch.render(this.cursor);
+            }
         }
 
         QuantumClient.PROFILER.section("(Local Player)", () -> {
             LocalPlayer localPlayer = this.client.player;
             if (localPlayer == null || !this.client.isInThirdPerson() && ClientConfig.hideFirstPersonPlayer) {
-                if (localPlayer != null) {
-                    renderLayer.deactivate(modelInstances.get(localPlayer.getId()));
-                }
+                if (localPlayer != null) modelInstances.remove(localPlayer.getId());
                 return;
             }
 
@@ -412,17 +422,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             if (multiplayerData == null) return;
             for (var remotePlayer : multiplayerData.getRemotePlayers()) {
                 QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> {
-                    // TODO: Implement if needed
+                    this.collectEntity(remotePlayer, renderLayer);
                 });
             }
         });
     }
 
-    private void collectChunks(RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
-        for (ClientChunkAccess chunk : this.removedChunks) {
-            if (chunk.getModelInstance() != null) {
-                renderLayer.destroy(chunk.getModelInstance());
-            }
+    private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
+        for (ClientChunkAccess chunk : this.removedChunks.toArray(ClientChunkAccess.class)) {
+            this.unload(chunk);
         }
 
         for (var chunk : chunks) {
@@ -435,9 +443,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             if (!chunk.isReady()) continue;
             if (chunk.isDisposed()) {
-                if (chunk.modelInstance != null) {
-                    unload(chunk);
-                }
+                unload(chunk);
                 continue;
             }
 
@@ -445,76 +451,38 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
             chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
             if (chunk.visible && !this.client.camera.frustum.boundsInFrustum(chunk.renderOffset.cpy().add(WorldRenderer.HALF_CHUNK_DIMENSIONS), WorldRenderer.CHUNK_DIMENSIONS)) {
-                RenderLayer.WORLD.deactivate(chunk.modelInstance);
                 chunk.visible = false;
                 continue;
             } else if (!chunk.visible) {
-                RenderLayer.WORLD.activate(chunk.modelInstance);
                 chunk.visible = true;
             }
 
-            if ((chunk.dirty && !ref.chunkRendered && chunk.modelInstance != null) || (chunk.modelInstance != null && chunk.getWorld().isChunkInvalidated(chunk))) {
+            ChunkModel model = this.chunkModels.get(chunk.getPos());
+            if (chunk.getWorld().isChunkInvalidated(chunk)) {
                 if (client.screen instanceof WorldLoadScreen) continue;
-                this.remove(chunk);
-                chunk.immediateRebuild = true;
-                chunk.getWorld().onChunkUpdated(chunk);
-                chunk.dirty = false;
-                ref.chunkRendered = true;
+
+                if (model != null) {
+                    model.rebuild();
+                }
             }
 
             chunk.dirty = false;
 
-            if (chunk.modelInstance == null) {
-                if (!this.shouldBuildChunks() && !chunk.immediateRebuild) continue;
-                chunk.immediateRebuild = false;
-                chunk.whileLocked(() -> {
-                    if (chunk.modelInstance == null) {
-                        ModelManager modelManager = ModelManager.INSTANCE;
-                        ChunkPos pos = chunk.getPos();
-                        Model model = modelManager.generateModel(createId(pos), modelBuilder -> {
-                            MeshBuilder meshBuilder = new MeshBuilder();
-                            meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                            chunk.mesher.meshVoxels(modelBuilder,
-                                    meshBuilder,
-                                    block -> block.doesRender() && !block.isTransparent()
-                            );
-                            Mesh end = meshBuilder.end();
-                            modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
+            if ((model == null || model.needsRebuild(world)) && rebuild(chunk, model, renderOffsetC))
+                continue;
 
-                            meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                            chunk.mesher.meshVoxels(modelBuilder,
-                                    meshBuilder,
-                                    block -> block.doesRender() && block.isTransparent()
-                            );
-                            Mesh end2 = meshBuilder.end();
-                            modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
-                        });
-
-                        if (model == null) {
-                            throw new IllegalStateException("Failed to generate chunk model: " + pos);
-                        }
-
-                        chunk.model = model;
-                        chunk.modelInstance = RenderLayer.WORLD.create(model);
-                        chunk.modelInstance.transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-
-                        chunk.modelInstance.userData = chunk;
-
-                        this.chunkModels.put(pos, new Pair<>(chunk, chunk.modelInstance));
-                    }
-                    chunk.loadCustomRendered();
-
-                    chunk.dirty = false;
-                    chunk.onUpdated();
-                    chunk.initialized = true;
-                    this.lastChunkBuild = System.currentTimeMillis();
-                });
+            if (model == null) {
+                LOGGER.warn("Model is null: {}", chunk.getPos());
+                continue;
             }
 
             this.renderBlockBreaking(renderLayer, chunk);
             this.renderBlockModels(renderLayer, chunk);
 
-            chunk.modelInstance.transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+            model.getModelInstance().transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+
+            if (model.getModelInstance() != null)
+                batch.render(model);
 
             chunk.renderModels(renderLayer);
 
@@ -540,34 +508,50 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
+    private boolean rebuild(ClientChunk chunk, ChunkModel model, Vec3f renderOffsetC) {
+        if (!this.shouldBuildChunks() && !chunk.immediateRebuild) return true;
+        if (model == null) {
+            model = new ChunkModel(chunk.getPos(), chunk);
+
+            if (model.build())
+                this.chunkModels.put(model.getPos(), model);
+        } else {
+            if (model.getChunk() != chunk) {
+                model.dispose();
+                model = new ChunkModel(chunk.getPos(), chunk);
+
+                if (model.build())
+                    this.chunkModels.put(model.getPos(), model);
+            }
+            model.rebuild();
+        }
+        this.lastChunkBuild = System.currentTimeMillis();
+        model.getModelInstance().transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+        return false;
+    }
+
     void unload(ClientChunk chunk) {
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.unload(chunk));
             return;
         }
 
-        if (!chunk.initialized) return;
-
         if (client.screen instanceof WorldLoadScreen) {
             QuantumClient.LOGGER.warn("Chunk unloaded when loading game: ", new Throwable());
         }
 
-        chunk.initialized = false;
+        ChunkModel chunkModel = chunkModels.remove(chunk.getPos());
+        if (chunkModel == null) {
+            LOGGER.warn("Tried to unload a chunk that didn't exist: " + chunk.getPos());
+            return;
+        }
+        if (RenderLayer.WORLD.destroy(chunkModel.getModelInstance()))
+            throw new DeprecationCheckException("World render layer shouldn't have a chunk model instance: " + chunk.getPos());
+        if (chunkModel.getChunk() != chunk)
+            throw new DeprecationCheckException("Model's chunk and chunk mismatch: " + chunk.getPos());
 
-        ModelInstance modelInstance = chunk.modelInstance;
-        if (modelInstance == null)
-            QuantumClient.LOGGER.warn("Model instance is null for chunk {}, not disposing it.", chunk.getPos());
-        else if (!RenderLayer.WORLD.destroy(modelInstance))
-            QuantumClient.LOGGER.warn("Model instance didn't exist in scene! Chunk at {}", chunk.getPos());
 
-        RenderLayer.WORLD.destroy(modelInstance);
-
-        chunk.modelInstance = null;
-        chunk.model = null;
-
-        chunk.destroyModels();
-
-        world.unloadChunk(chunk, chunk.getPos());
+        chunkModel.dispose();
 
         Identifier id = createId(chunk.getPos());
         if (!ModelManager.INSTANCE.unloadModel(id)) {
@@ -757,7 +741,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         ModelManager.INSTANCE.unloadModel(id("generated/skybox"));
 
         for (var entry : chunkModels.entrySet()) {
-            ClientChunk first = entry.getValue().getFirst();
+            ClientChunk first = entry.getValue().getChunk();
             unload(first);
         }
 
@@ -813,7 +797,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.setupMaterials(blockTex, emissiveBlockTex);
 
             for (var entry : chunkModels.entrySet()) {
-                ClientChunk first = entry.getValue().getFirst();
+                ClientChunk first = entry.getValue().getChunk();
                 unload(first);
             }
 

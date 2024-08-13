@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.utils.Disposable;
@@ -18,7 +19,7 @@ public interface TerrainRenderer extends Disposable {
 
     void free(ClientChunkAccess chunk);
 
-    void render(RenderLayer renderLayer, float deltaTime);
+    void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime);
 
     void collectEntity(Entity entity, RenderLayer renderLayer);
 

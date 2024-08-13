@@ -27,7 +27,7 @@ public final class BuilderChunk extends Chunk {
         this.thread = thread;
         this.region = region;
         this.rng = new JavaRNG(this.world.getSeed() + (pos.x() ^ ((long) pos.z() << 4)) & 0x3FFFFFFF);
-        this.biomeData = new PaletteStorage<>(Biomes.PLAINS.create(this.world, world.getSeed()), 256);
+        this.biomeData = new PaletteStorage<>(256, Biomes.PLAINS.create(this.world, world.getSeed()));
     }
 
     @Override

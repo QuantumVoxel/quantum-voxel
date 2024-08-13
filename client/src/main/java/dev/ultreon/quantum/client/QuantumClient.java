@@ -156,7 +156,7 @@ import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
  * @since <i>Always :smirk:</i>
  */
 @SuppressWarnings("UnusedReturnValue")
-public class QuantumClient extends PollingExecutorService implements DeferredDisposable {
+public non-sealed class QuantumClient extends PollingExecutorService implements DeferredDisposable, DesktopMain {
     // Public constants
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumClient");
     public static final Gson GSON = new GsonBuilder().disableJdkUnsafe().setPrettyPrinting().create();
@@ -189,7 +189,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private static QuantumClient instance;
 
     // Arguments
-    private static ArgParser arguments = new ArgParser();
+    private static final ArgParser arguments = new ArgParser();
 
     // Crash handling
     private static boolean crashing;
@@ -463,6 +463,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Vector2[] touchPosStart = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchMovedScl = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchMoved = new Vector2[Gdx.input.getMaxPointers()];
+    private boolean shuttingDown = false;
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -1114,6 +1115,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             next = new TitleScreen();
 
         if (next == null) {
+            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return cur == null || this.closeScreen(cur);
         }
@@ -1129,6 +1131,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (cur != null && this.closeScreen(next, cur))
             return false; // Close was canceled
         if (next == null) {
+            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return false; // The next screen is null, canceling.
         }
@@ -1681,41 +1684,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
     }
 
-    /**
-     * This method attempts to terminate all non-daemon threads by interrupting them and joining them.
-     * If the thread does not terminate after a certain amount of time, it will be forcibly terminated.
-     * <p>
-     * This method is useful when a crash occurs and some threads might be stuck in infinite loops or waiting for a resource that will never be released.
-     * <p>
-     * It's important to note that this method should only be used as a last resort, as it can cause data loss and other issues.
-     */
-    private static void slightlyInconvenientThreadDebug() {
-        for (Thread thread : Thread.getAllStackTraces().keySet()) {
-            // Only check non-daemon threads, as they might be stuck in infinite loops
-            // Daemon threads should be terminated when the JVM shuts down
-            if (thread.isDaemon()) continue;
-
-            thread.interrupt();
-            try {
-                int retry = 0;
-
-                // Do 3 attempts to join the thread
-                while (thread.isAlive()) {
-                    thread.join(10000);
-                    LOGGER.warn("Still running thread: " + thread.getName());
-                    if (retry++ < 2 || !thread.isAlive()) continue;
-
-                    // Forcefully terminate the thread if it's not responding after 3 attempts
-                    LOGGER.warn("Self destructing process...");
-                    MemoryUtil.selfDestruct(); // Funny but effective way to kill the process
-                }
-            } catch (InterruptedException e) {
-                LOGGER.error("Fatal error: ", e);
-                Runtime.getRuntime().halt(1); // Hard exit
-            }
-        }
-    }
-
     private static void cleanUp(@Nullable Disposable disposable) {
         if (disposable == null) return;
 
@@ -1826,7 +1794,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
-            if (item instanceof ToolItem toolItem && this.breakingBlock.getEffectiveTool() == ((ToolItem) item).getToolType()) {
+            if (item instanceof ToolItem toolItem && this.breakingBlock.getEffectiveTool() == toolItem.getToolType()) {
                 efficiency = toolItem.getEfficiency();
             }
 
@@ -2686,8 +2654,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     @SuppressWarnings("BusyWait")
     @Override
-    public void shutdown() {
+    public synchronized void shutdown() {
         try {
+            if (this.shuttingDown) return;
+            this.shuttingDown = true;
             super.shutdown();
 
             LOGGER.info("Shutting down executor service");
@@ -2697,8 +2667,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             scheduler.shutdown();
 
             while (!executor.isTerminated() || !scheduler.isTerminated()) {
-                if (this.screen instanceof ShutdownScreen screen) {
-                    screen.setMessage("Waiting for executor services to terminate");
+                if (this.screen instanceof ShutdownScreen shutdownScreen) {
+                    shutdownScreen.setMessage("Waiting for executor services to terminate");
                 }
                 LOGGER.info("Waiting for executor services to terminate");
                 Thread.sleep(1000);
@@ -2708,8 +2678,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 this.integratedServer.shutdown();
 
                 while (!this.integratedServer.isShutdown()) {
-                    if (this.screen instanceof ShutdownScreen screen) {
-                        screen.setMessage("Waiting for server to terminate");
+                    if (this.screen instanceof ShutdownScreen shutdownScreen) {
+                        shutdownScreen.setMessage("Waiting for server to terminate");
                     }
                     LOGGER.info("Waiting for server to terminate");
                     Thread.sleep(1000);

@@ -36,6 +36,7 @@ import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.FlatStorage;
+import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
@@ -53,7 +54,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     public TerrainNode parent;
     public TerrainNode[] children = new TerrainNode[8];
 
-    public FlatStorage<BlockProperties> materials = new FlatStorage<>(BlockProperties.AIR, TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE);
+    public FlatStorage<BlockProperties> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, BlockProperties.AIR);
 
     public ModelInstance modelInstance;
     public Mesh mesh;

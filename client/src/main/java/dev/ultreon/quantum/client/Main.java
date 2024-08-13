@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.profiling.GLErrorListener;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
@@ -29,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 
@@ -45,7 +45,7 @@ public final class Main implements ApplicationListener {
     private static CrashLog crashOverride;
     private final String[] argv;
     @Nullable
-    private QuantumClient client;
+    private DesktopMain client;
     private long crashFrame;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
@@ -131,6 +131,11 @@ public final class Main implements ApplicationListener {
 
             // Set log level to debug
             Gdx.app.setLogLevel(Application.LOG_DEBUG);
+
+            // Check for datagen system property
+            if (Objects.equals(System.getProperty("quantum.datagen"), "true")) {
+                this.client = new DataGeneratorClient();
+            }
 
             // Initialize QuantumClient with given arguments
             this.client = new QuantumClient(this.argv);

@@ -54,8 +54,8 @@ public final class ServerChunk extends Chunk {
     }
 
     public static ServerChunk load(ServerWorld world, ChunkPos pos, MapType chunkData, ServerWorld.Region region) {
-        var storage = new PaletteStorage<>(BlockProperties.AIR, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
-        var biomeStorage = new PaletteStorage<>(Biomes.PLAINS, CHUNK_SIZE * CHUNK_SIZE);
+        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockProperties.AIR);
+        var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS);
 
         MapType blockData = chunkData.getMap("Blocks");
         storage.load(blockData, BlockProperties::load);

@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client.render.pipeline;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -42,7 +41,7 @@ public class WorldNode extends WorldRenderNode {
         }
         var position = localPlayer.getPosition(client.partialTick);
         Array<Entity> toSort = new Array<>(world.getAllEntities());
-        worldRenderer.render(RenderLayer.WORLD, deltaTime);
+        worldRenderer.render(modelBatch, RenderLayer.WORLD, deltaTime);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);

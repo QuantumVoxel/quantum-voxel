@@ -208,6 +208,23 @@
   "quantum.misc.mebibytes": " MiB",
   "quantum.misc.gibibytes": " GiB",
   "quantum.misc.tebibytes": " TiB",
-  "quantum.misc.pebibytes": " PiB"
+  "quantum.misc.pebibytes": " PiB",
+  "quantum.screen.credits.title": "クレジット",
+  "quantum.screen.credits.tab.assets": "アセット",
+  "quantum.screen.credits.tab.code": "コード",
+  "quantum.screen.credits.tab.downloads": "外部ダウンロード",
+  "quantum.screen.credits.tab.translations": "翻訳",
+  "quantum.screen.credits.tab.testing": "テスト",
+  "quantum.screen.credits.tab.docs": "ドキュメント",
+  "quantum.screen.credits.tab.external_libs": "外部ライブラリ",
+  "quantum.screen.credits.tab.extra": "追加",
+  "quantum.screen.credits.tab.sound_effects": "音効果",
+  "quantum.screen.credits.detail.url": "URL",
+  "quantum.screen.credits.detail.license": "ライセンス",
+  "quantum.screen.credits.detail.roles": "プロジェクトの役割",
+  "quantum.screen.credits.detail.for": "に作成されました",
+  "quantum.screen.credits.detail.uses": "使用します",
+  "quantum.screen.credits.detail.links": "リンク",
+  "quantum.screen.credits.detail.mentions": "メンション"
 
 }

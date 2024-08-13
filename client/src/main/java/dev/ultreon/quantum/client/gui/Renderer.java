@@ -2742,8 +2742,7 @@ public class Renderer implements Disposable {
     }
 
     @Language("GLSL")
-    final String VERT =
-            """
+    final String VERT = """
                     attribute vec4 a_position;
                     attribute vec4 a_color;
                     attribute vec2 a_texCoord0;
@@ -2760,8 +2759,7 @@ public class Renderer implements Disposable {
                     """;
 
     @Language("GLSL")
-    final String FRAG =
-            """
+    final String FRAG = """
                     // Fragment shader
                     #ifdef GL_ES
                     precision mediump float;

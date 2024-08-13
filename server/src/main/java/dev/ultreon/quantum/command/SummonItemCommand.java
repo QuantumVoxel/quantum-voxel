@@ -12,7 +12,7 @@ public class SummonItemCommand extends Command {
     public SummonItemCommand() {
         this.requirePermission("quantum.commands.kill");
         this.setCategory(CommandCategory.TELEPORT);
-        this.data().aliases("summonItem", "si");
+        this.data().aliases("summon-item", "si");
     }
 
     @DefineCommand("<item>")

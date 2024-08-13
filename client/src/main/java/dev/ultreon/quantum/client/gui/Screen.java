@@ -191,6 +191,7 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     @Override
+    @ApiStatus.Experimental
     public Path path() {
         UIContainer<?> screen = this.parentScreen;
         if (screen == null) screen = UIContainer.ROOT;

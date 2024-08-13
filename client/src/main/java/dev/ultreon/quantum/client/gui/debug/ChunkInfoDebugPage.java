@@ -49,25 +49,5 @@ public class ChunkInfoDebugPage implements DebugPage {
 
         context.left("Heightmap", chunk.getHighest(chunkPos.x(), chunkPos.z()));
         context.left("Render Offset", chunk.getRenderOffset());
-
-        Model model = chunk.getModel();
-        if (model != null) {
-            context.left();
-            context.left("Chunk Model");
-            context.left("Nodes", model.nodes.size);
-            context.left("Meshes", model.meshes.size);
-            context.left("Materials", model.materials.size);
-            context.left("Mesh Parts", model.meshParts.size);
-            context.left("Animations", model.animations.size);
-        }
-
-        ModelInstance instance = chunk.getModelInstance();
-        if (instance != null) {
-            context.left();
-            context.left("Chunk Model Instance");
-            context.left("Nodes", instance.nodes.size);
-            context.left("Materials", instance.materials.size);
-            context.left("Animations", instance.animations.size);
-        }
     }
 }

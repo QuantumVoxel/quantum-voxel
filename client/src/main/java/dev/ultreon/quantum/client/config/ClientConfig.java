@@ -34,7 +34,7 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "video.fpsLimit", comment = "The limit of frames per second.")
     @Ranged(min = 10, max = 240)
-    public static int fpsLimit = 60;
+    public static int fpsLimit = 240;
 
     @ConfigEntry(path = "video.fov", comment = "The field of view.")
     @Ranged(min = 40, max = 120)

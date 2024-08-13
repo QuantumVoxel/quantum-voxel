@@ -11,7 +11,7 @@ public class SetVarCommand extends Command {
     public SetVarCommand() {
         this.requirePermission("quantum.commands.variable.set");
         this.setCategory(CommandCategory.TELEPORT);
-        this.data().aliases("setvar", "svar", "assign");
+        this.data().aliases("set", "export", "assign");
         this.requirePlayer();
     }
 
@@ -23,8 +23,6 @@ public class SetVarCommand extends Command {
 
     @DefineCommand("<variable> run <command>")
     public @Nullable CommandResult executeRun(CommandSender sender, CommandContext commandContext, String alias, PlayerVariable variable, CommandResult result) {
-        var player = (ServerPlayer) sender;
-
         if (result instanceof ObjectCommandResult commandResult) {
             switch (commandResult.getType()) {
                 case Object:
@@ -37,6 +35,6 @@ public class SetVarCommand extends Command {
             return new ObjectCommandResult(variable.getValue(), variable.getValue() == null ? ObjectCommandResult.Type.Void : ObjectCommandResult.Type.Object);
         }
 
-        return result;
+        return errorMessage("Invalid command result");
     }
 }

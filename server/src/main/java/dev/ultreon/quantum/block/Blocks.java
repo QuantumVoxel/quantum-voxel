@@ -9,6 +9,13 @@ import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.loot.RandomLoot;
 import org.apache.commons.lang3.IntegerRange;
 
+
+/**
+ * The registry for all blocks in the game.
+ *
+ * @see Block
+ * @see Registries
+ */
 public final class Blocks {
     public static final Block AIR = Blocks.register("air", new Block(new Properties().replaceable().noCollision().noRendering().transparent()));
     public static final Block CAVE_AIR = Blocks.register("cave_air", new Block(new Properties().replaceable().noCollision().noRendering().transparent()));

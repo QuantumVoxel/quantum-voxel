@@ -75,13 +75,23 @@ dependencies {
     // Quantum Fabric Loader
     implementation api("dev.ultreon.quantum:fabric-loader:$fabric_version")
 
-    // Apache Log4J
+    // Apache Commons
     implementation api("org.apache.commons:commons-lang3:3.13.0")
     implementation api("org.apache.commons:commons-collections4:$commons_collections4_version")
+
+    // Apache Arrow
+    implementation api("org.apache.arrow:arrow-vector:16.1.0")
+
+    // Tukaani XZ
     implementation api("org.tukaani:xz:$tukaani_xz_version")
+
+    // SwingBits
     implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
+
+    // Netty
     implementation api("io.netty:netty-all:$netty_version")
 
+    // LibGDX
     implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
     runtimeOnly "com.badlogicgames.gdx:gdx-backend-headless:$gdx_version"
 
@@ -156,6 +166,17 @@ jar {
 
     zip64 true
     duplicatesStrategy INCLUDE
+}
+
+test {
+    useJUnitPlatform()
+
+    // If the runClient task is executed, set the environment variable for RUNNING to true
+    afterEvaluate {
+        if (rootProject.gradle.taskGraph.hasTask(":runClient")) {
+            environment("RUNNING", "true")
+        }
+    }
 }
 
 //noinspection ConfigurationAvoidance

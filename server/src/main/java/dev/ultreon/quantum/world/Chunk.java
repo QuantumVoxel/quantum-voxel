@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
+import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
@@ -83,7 +84,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
     protected Chunk(World world, int size, int height, ChunkPos pos) {
-        this(world, size, height, pos, new PaletteStorage<>(BlockProperties.AIR, size * height * size));
+        this(world, size, height, pos, new PaletteStorage<>(size * height * size, BlockProperties.AIR));
     }
 
     /**
@@ -91,7 +92,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
     protected Chunk(World world, int size, int height, ChunkPos pos, Storage<BlockProperties> storage) {
-        this(world, size, height, pos, storage, new PaletteStorage<>(Biomes.PLAINS, 256));
+        this(world, size, height, pos, storage, new PaletteStorage<>(256, Biomes.PLAINS));
     }
 
     /**
@@ -109,7 +110,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos   the chunk position.
      */
     protected Chunk(World world, ChunkPos pos) {
-        this(world, pos, new PaletteStorage<>(BlockProperties.AIR, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE));
+        this(world, pos, new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockProperties.AIR));
     }
 
     /**
@@ -120,7 +121,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param storage the block storage.
      */
     protected Chunk(World world, ChunkPos pos, Storage<BlockProperties> storage) {
-        this(world, pos, storage, new PaletteStorage<>(Biomes.PLAINS, 256));
+        this(world, pos, storage, new PaletteStorage<>(256, Biomes.PLAINS));
     }
 
     /**
@@ -132,6 +133,9 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param biomeStorage the biome storage
      */
     protected Chunk(World world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage) {
+        Preconditions.checkNotNull(storage);
+        Preconditions.checkNotNull(biomeStorage);
+
         this.world = world;
 
         this.offset = new Vec3i(pos.x() * CHUNK_SIZE, WORLD_DEPTH, pos.z() * CHUNK_SIZE);

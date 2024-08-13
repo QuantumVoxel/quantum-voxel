@@ -4,6 +4,7 @@ import org.jetbrains.gradle.ext.runConfigurations
 import org.jetbrains.gradle.ext.settings
 import java.lang.System.getenv
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.time.LocalDateTime
@@ -165,12 +166,6 @@ allprojects {
                 includeGroup("com.github.crykn.guacamole")
                 includeGroup("com.github.Ultreon")
                 includeGroup("space.earlygrey")
-            }
-        }
-
-        maven("https://jcenter.bintray.com/") {
-            content {
-                includeGroup("com.jagrosh")
             }
         }
 
@@ -635,40 +630,183 @@ commonProperties
     }
 }
 
-tasks.register<JavaExec>("runClient") {
-    mainClass = "net.fabricmc.devlaunchinjector.Main"
-    workingDir = file("$projectDir/run/client/main/")
-    systemProperty("fabric.dli.env", "CLIENT")
-    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotClient")
+tasks.register<Exec>("runClient") {
+    workingDir = file("$projectDir/run/data/")
+    mkdir("$projectDir/run/data/")
 
-    classpath = project(":desktop").sourceSets["main"].runtimeClasspath
+    dependsOn(":desktop:build")
+
+    val classpath = project(":desktop").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
+
+    val argFile = File.createTempFile("argfile", ".args").apply {
+        deleteOnExit()
+        writeText(
+            """
+            -Xmx4g
+            -Xms4g
+            -Dfabric.dli.env=CLIENT
+            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
+            -Dfabric.development=true
+            -cp
+            $classpath
+            net.fabricmc.devlaunchinjector.Main
+            --gameDir=.
+            """.trimIndent()
+        )
+    }
+
+    commandLine(
+        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java" else "java.exe"
+        ),
+        "@${argFile.path}"
+    )
 }
 
-tasks.register<JavaExec>("runClientAlt") {
-    mainClass = "net.fabricmc.devlaunchinjector.Main"
-    workingDir = file("$projectDir/run/client/alt/")
-    systemProperty("fabric.dli.env", "CLIENT")
-    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotClient")
+tasks.register<Exec>("runClientAlt") {
+    workingDir = file("$projectDir/run/data/")
+    mkdir("$projectDir/run/data/")
 
-    classpath = project(":desktop").sourceSets["main"].runtimeClasspath
+    dependsOn(":desktop:build")
+
+    val classpath = project(":desktop").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
+
+    val argFile = File.createTempFile("argfile", ".args").apply {
+        deleteOnExit()
+        writeText(
+            """
+            -Xmx4g
+            -Xms4g
+            -Dfabric.dli.env=CLIENT
+            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
+            -Dfabric.development=true
+            -cp
+            $classpath
+            net.fabricmc.devlaunchinjector.Main
+            --gameDir=.
+            """.trimIndent()
+        )
+    }
+
+    commandLine(
+        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
+            else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
+            else "java"
+        ).toString(),
+        "@${argFile.absolutePath}"
+    )
+
+    group = "runs"
 }
 
-tasks.register<JavaExec>("runDataGen") {
-    mainClass = "net.fabricmc.devlaunchinjector.Main"
+tasks.register<Exec>("runDataGenClient") {
+    workingDir = file("$projectDir/run/data/")
+    mkdir("$projectDir/run/data/")
+
+    dependsOn(":desktop:build")
+
+    val classpath = project(":desktop").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
+
+    val argFile = File.createTempFile("argfile", ".args").apply {
+        deleteOnExit()
+        writeText(
+            """
+            -Xmx4g
+            -Xms4g
+            -Dfabric.dli.env=CLIENT
+            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
+            -Dfabric.development=true
+            -Dquantum.datagen=true
+            -Dquantum.datagen.path=${project(":client").projectDir}/src/main/datagen
+            -cp
+            $classpath
+            net.fabricmc.devlaunchinjector.Main
+            --gameDir=.
+            """.trimIndent()
+        )
+    }
+
+    commandLine(
+        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
+            else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
+            else "java"
+        ).toString(),
+        "@${argFile.absolutePath}"
+    )
+
+    group = "runs"
+}
+
+tasks.register<Exec>("runDataGenServer") {
+    workingDir = file("$projectDir/run/data/server/")
+    mkdir("$projectDir/run/data/server/")
+
+    dependsOn(":server:build")
+
+    val classpath = project(":server").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
+
+    val argFile = File.createTempFile("argfile", ".args").apply {
+        deleteOnExit()
+        writeText(
+            """
+            -Xmx4g
+            -Xms4g
+            -Dfabric.dli.env=SERVER
+            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer
+            -Dfabric.development=true
+            -Dquantum.datagen=true
+            -Dquantum.datagen.path=${project(":server").projectDir}/src/main/datagen
+            -cp
+            $classpath
+            net.fabricmc.devlaunchinjector.Main
+            --gameDir=.
+            """.trimIndent()
+        )
+    }
+
+    commandLine(
+        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
+            else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
+            else "java"
+        ).toString(),
+        "@${argFile.absolutePath}"
+    )
+}
+
+tasks.register<Exec>("runServer") {
     workingDir = file("$projectDir/run/server/")
-    systemProperty("fabric.dli.env", "SERVER")
-    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotServer")
-    systemProperty("quantum.dataGen", "true")
+    mkdir("$projectDir/run/server/")
 
-    classpath = project(":server").sourceSets["main"].runtimeClasspath
+    dependsOn(":server:build")
+
+    val classpath = project(":server").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
+
+    val argFile = File.createTempFile("argfile", ".args").apply {
+        deleteOnExit()
+        writeText(
+            """
+            -Xmx4g
+            -Xms4g
+            -Dfabric.dli.env=SERVER
+            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer
+            -Dfabric.development=true
+            -cp
+            $classpath
+            net.fabricmc.devlaunchinjector.Main
+            --gameDir=.
+            """.trimIndent()
+        )
+    }
+
+    commandLine(
+        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
+            else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
+            else "java"
+        ).toString(),
+        "@${argFile.absolutePath}"
+    )
 }
-
-tasks.register<JavaExec>("runServer") {
-    mainClass = "net.fabricmc.devlaunchinjector.Main"
-    workingDir = file("$projectDir/run/server/")
-    systemProperty("fabric.dli.env", "SERVER")
-    systemProperty("fabric.dli.main", "net.fabricmc.loader.impl.launch.knot.KnotServer")
-
-    classpath = project(":server").sourceSets["main"].runtimeClasspath
-}
-
