@@ -16,14 +16,12 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
@@ -101,7 +99,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private ModelInstance moon = null;
     private boolean disposed = false;
     private final Vector3 tmp = new Vector3();
-    private Material breakingMaterial;
     private final Array<Model> breakingModels = new Array<>();
     private final Int2ObjectMap<ModelInstance> modelInstances = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<QVModel> qvModels = new Int2ObjectOpenHashMap<>();
@@ -114,7 +111,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Array<ClientChunkAccess> removedChunks = new Array<ClientChunkAccess>();
     private final Map<ChunkPos, ChunkModel> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
-    private final Quaternion tmpQ = new Quaternion();
     private final Vector3 sunDirection = new Vector3();
 
     public WorldRenderer(@Nullable ClientWorld world) {
@@ -142,7 +138,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private void setupEnvironment() {
-        final Environment environment;
         this.environment = new Environment();
         this.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, 0.6F, 0.7F, 1.0F, 1.0F));
@@ -150,10 +145,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private void setupBreaking() {
-        final Texture breakingTex;
         // Breaking animation meshes.
         this.breakingTex = this.client.getTextureManager().getTexture(id("textures/break_stages.png"));
-        this.breakingMaterial = this.client.getMaterialManager().get(id("block/breaking"));
 
         Array<TextureRegion> breakingTexRegions = new Array<>(new TextureRegion[6]);
         for (int i = 0; i < 6; i++) {
@@ -284,7 +277,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @NotNull
     private MeshMaterial createChunkOutline() {
-        Mesh mesh = this.deferDispose(WorldRenderer.buildOutlineBox(2 / 16f, CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE));
+        Mesh mesh = this.deferDispose(WorldRenderer.buildOutlineBox(CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE));
 
         Material material = new Material();
         material.set(ColorAttribute.createDiffuse(0, 0f, 0f, 0.25f));
@@ -394,7 +387,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                         var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                         var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-                        WorldRenderer.buildOutlineBox(10f, sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
+                        WorldRenderer.buildOutlineBox(sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
                     });
 
                     this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
@@ -421,9 +414,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             MultiplayerData multiplayerData = this.client.getMultiplayerData();
             if (multiplayerData == null) return;
             for (var remotePlayer : multiplayerData.getRemotePlayers()) {
-                QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> {
-                    this.collectEntity(remotePlayer, renderLayer);
-                });
+                QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> this.collectEntity(remotePlayer, renderLayer));
             }
         });
     }
@@ -458,21 +449,59 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
 
             ChunkModel model = this.chunkModels.get(chunk.getPos());
-            if (chunk.getWorld().isChunkInvalidated(chunk)) {
+            if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
                 if (client.screen instanceof WorldLoadScreen) continue;
+                if (ref.chunkRendered || !this.shouldBuildChunks()) continue;
 
+                chunk.dirty = false;
                 if (model != null) {
-                    model.rebuild();
+                    if (model.rebuild()) {
+                        ref.chunkRendered = true;
+                        this.lastChunkBuild = System.currentTimeMillis();
+                        chunk.dirty = false;
+                    } else {
+                        LOGGER.warn("Failed to rebuild chunk: {}", chunk.getPos());
+                        continue;
+                    }
+                } else {
+                    model = new ChunkModel(chunk.getPos(), chunk, this);
+                    if (model.build()) {
+                        ref.chunkRendered = true;
+                        this.lastChunkBuild = System.currentTimeMillis();
+                        chunk.dirty = false;
+                        this.chunkModels.put(chunk.getPos(), model);
+                    } else {
+                        LOGGER.warn("Failed to build chunk: {}", chunk.getPos());
+                        continue;
+                    }
                 }
-            }
 
-            chunk.dirty = false;
-
-            if ((model == null || model.needsRebuild(world)) && rebuild(chunk, model, renderOffsetC))
-                continue;
-
-            if (model == null) {
-                LOGGER.warn("Model is null: {}", chunk.getPos());
+                chunk.onUpdated();
+                chunk.initialized = true;
+            } else if (model == null) {
+                if (ref.chunkRendered || !this.shouldBuildChunks()) continue;
+                chunk.dirty = false;
+                model = new ChunkModel(chunk.getPos(), chunk, this);
+                if (model.build()) {
+                    ref.chunkRendered = true;
+                    this.lastChunkBuild = System.currentTimeMillis();
+                    chunk.dirty = false;
+                    chunk.initialized = true;
+                    this.chunkModels.put(chunk.getPos(), model);
+                } else {
+                    LOGGER.warn("Failed to build chunk: {}", chunk.getPos());
+                    continue;
+                }
+            } else if (model.needsRebuild(world) && !(ref.chunkRendered || !this.shouldBuildChunks())) {
+                if (model.rebuild()) {
+                    ref.chunkRendered = true;
+                    this.lastChunkBuild = System.currentTimeMillis();
+                    chunk.dirty = false;
+                    chunk.onUpdated();
+                    chunk.initialized = true;
+                } else {
+                    LOGGER.warn("Failed to rebuild chunk: {}", chunk.getPos());
+                }
                 continue;
             }
 
@@ -508,26 +537,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
-    private boolean rebuild(ClientChunk chunk, ChunkModel model, Vec3f renderOffsetC) {
+    private boolean rebuild(ClientChunk chunk, ChunkModel model) {
         if (!this.shouldBuildChunks() && !chunk.immediateRebuild) return true;
-        if (model == null) {
-            model = new ChunkModel(chunk.getPos(), chunk);
-
-            if (model.build())
-                this.chunkModels.put(model.getPos(), model);
-        } else {
-            if (model.getChunk() != chunk) {
-                model.dispose();
-                model = new ChunkModel(chunk.getPos(), chunk);
-
-                if (model.build())
-                    this.chunkModels.put(model.getPos(), model);
-            }
-            model.rebuild();
-        }
-        this.lastChunkBuild = System.currentTimeMillis();
-        model.getModelInstance().transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-        return false;
+        return model.rebuild();
     }
 
     void unload(ClientChunk chunk) {
@@ -677,17 +689,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
-    public static Mesh buildOutlineBox(float thickness, float width, float height, float depth) {
+    public static Mesh buildOutlineBox(float width, float height, float depth) {
         MeshBuilder meshBuilder = new MeshBuilder();
         meshBuilder.begin(new VertexAttributes(VertexAttribute.Position()), GL_LINES);
 
-        WorldRenderer.buildOutlineBox(thickness, width, height, depth, meshBuilder);
+        WorldRenderer.buildOutlineBox(width, height, depth, meshBuilder);
 
         // Create the mesh from the mesh builder
         return meshBuilder.end();
     }
 
-    public static void buildOutlineBox(float thickness, float width, float height, float depth, MeshPartBuilder meshBuilder) {
+    public static void buildOutlineBox(float width, float height, float depth, MeshPartBuilder meshBuilder) {
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, depth)));
     }
 
@@ -789,7 +801,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     @Override
     public void reload(ReloadContext context, MaterialManager materialManager) {
         context.submit(() -> {
-            this.breakingMaterial = materialManager.get(id("block/breaking"));
 
             Texture blockTex = this.client.blocksTextureAtlas.getTexture();
             Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
@@ -819,10 +830,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.setupEnvironment();
             this.setupParticles();
         });
-    }
-
-    private void unloadAllChunks() {
-        new HashSet<>(this.chunkModels.keySet()).forEach(this::unload);
     }
 
     private void unload(ChunkPos chunkPos) {
@@ -871,7 +878,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void remove(ClientChunkAccess clientChunk) {
-        this.removedChunks.add(clientChunk);
+
     }
 
     @Override

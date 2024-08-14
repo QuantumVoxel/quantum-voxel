@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TextObject {
-    private Array<TextPart> baked;
-
     protected TextObject() {
         super();
     }
@@ -76,11 +74,8 @@ public abstract class TextObject {
     }
 
     public Array<TextPart> bake() {
-        if (baked != null) return baked;
-
         Array<TextPart> baked = new Array<>(TextPart.class);
         this.bake(baked);
-        this.baked = baked;
 
         return baked;
     }
@@ -92,4 +87,9 @@ public abstract class TextObject {
     }
 
     protected abstract void bake(Array<TextPart> bake);
+
+    @Override
+    public String toString() {
+        return getText();
+    }
 }

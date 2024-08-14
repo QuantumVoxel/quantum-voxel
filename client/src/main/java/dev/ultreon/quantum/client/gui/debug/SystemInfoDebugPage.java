@@ -1,112 +1,101 @@
 package dev.ultreon.quantum.client.gui.debug;
 
-import com.badlogic.gdx.graphics.Mesh;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
-import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.client.IntegratedServer;
-import dev.ultreon.quantum.client.util.RenderableArray;
-import dev.ultreon.quantum.client.world.ChunkMesh;
-import dev.ultreon.quantum.client.world.ClientChunkAccess;
-import dev.ultreon.quantum.client.world.WorldRenderer;
-import dev.ultreon.quantum.debug.ValueTracker;
-import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
-import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
-import org.jetbrains.annotations.Nullable;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.Notification;
+import dev.ultreon.quantum.text.TextObject;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
 
 public class SystemInfoDebugPage implements DebugPage {
+    private final SystemInfo systemInfo = new SystemInfo();
+    private Notification notification;
+
     @Override
     public void render(DebugPageContext context) {
-        var client = context.client();
-        var world = client.world;
-        var worldRenderer = client.worldRenderer;
-        if (worldRenderer != null && worldRenderer.isDisposed()) worldRenderer = null;
-        if (world != null && world.isDisposed()) world = null;
+        // Get current process's PID
+        long pid = ProcessHandle.current().pid();
+        CentralProcessor cpu = systemInfo.getHardware().getProcessor();
+        context.left("System");
+        context.left("Process PID", String.valueOf(pid));
 
-        context.left("CPU")
-                .left("", Mesh.getManagedStatus())
-                .left();
+        context.left();
+        context.left("Processor");
+        context.left("Name", cpu.getProcessorIdentifier().getName());
+        context.left("Vendor", cpu.getProcessorIdentifier().getVendor());
+        context.left("Family", cpu.getProcessorIdentifier().getFamily());
+        context.left("Model", cpu.getProcessorIdentifier().getModel());
+        context.left("Stepping", cpu.getProcessorIdentifier().getStepping());
+        context.left("Physical cores", String.valueOf(cpu.getPhysicalProcessorCount()));
+        context.left("Logical cores", String.valueOf(cpu.getLogicalProcessorCount()));
 
-        // World
-        @Nullable IntegratedServer integratedServer = client.integratedServer;
-        if (integratedServer != null) {
-            context.left("Integrated Server")
-                    .left("Server TPS", integratedServer.getCurrentTps())
-//                    .left("Packets", "rx = " + MemoryConnection.getPacketsReceived() + ", tx = " + MemoryConnection.getPacketsSent())
-                    .left();
+        context.left();
+        context.left("Memory");
+        context.left("Total", systemInfo.getHardware().getMemory().getTotal());
+        context.left("Free", systemInfo.getHardware().getMemory().getAvailable());
+        context.left("Used", systemInfo.getHardware().getMemory().getTotal() - systemInfo.getHardware().getMemory().getAvailable());
+
+        context.left();
+        context.left("Sensors");
+        context.left("CPU Temperature", String.format("%.2f°C", systemInfo.getHardware().getSensors().getCpuTemperature()));
+        context.left("GPU Temperature", String.format("%.2fV", systemInfo.getHardware().getSensors().getCpuVoltage()));
+
+        context.left();
+        context.left("Graphics");
+        context.left("Display", Gdx.graphics.getDisplayMode().toString());
+        context.left("GL Renderer", Gdx.gl.glGetString(GL20.GL_RENDERER));
+        context.left("GL Version", Gdx.gl.glGetString(GL20.GL_VERSION));
+        context.left("GL Vendor", Gdx.gl.glGetString(GL20.GL_VENDOR));
+        context.left("GL Extensions", Gdx.gl.glGetString(GL20.GL_EXTENSIONS));
+
+        context.right();
+        context.right("OS");
+        context.right("Name", System.getProperty("os.name"));
+        context.right("Version", System.getProperty("os.version"));
+        context.right("Architecture", System.getProperty("os.arch"));
+
+        context.right();
+        context.right("Java");
+        context.right("Version", System.getProperty("java.version"));
+        context.right("VM Name", System.getProperty("java.vm.name"));
+        context.right("VM Vendor", System.getProperty("java.vm.vendor"));
+        context.right("VM Version", System.getProperty("java.vm.version"));
+
+        if (System.getProperty("java.vm.vendor").equals("GraalVM")) {
+            context.right();
+            context.right("GraalVM");
+            context.right("Version", System.getProperty("graalvm.version"));
+            context.right("VM Name", System.getProperty("graalvm.vm.name"));
+            context.right("VM Vendor", System.getProperty("graalvm.vm.vendor"));
+            context.right("VM Version", System.getProperty("graalvm.vm.version"));
         }
 
-        context.left("Meshes")
-                .left("Meshes Disposed", ChunkMesh.getMeshesDisposed())
-                .left("Vertex Count", WorldRenderer.getVertexCount())
-                .left();
+        if (Gdx.graphics.getFrameId() % 10 == 0)
+            this.checkCpuTemp();
+    }
 
-        context.left("Renderables")
-                .left("Global Size", RenderableArray.getGlobalSize())
-                .left("Obtained Renderables", ValueTracker.getObtainedRenderables())
-                .left("Obtain Requests", ValueTracker.getObtainRequests())
-                .left("Free Requests", ValueTracker.getFreeRequests())
-                .left("Flush Requests", ValueTracker.getFlushRequests())
-                .left();
-
-        if (world != null) {
-            // Player
-            Player player = client.player;
-            if (player != null) {
-                context.left("Player");
-                BlockPos blockPosition = player.getBlockPos();
-                Vec3i sectionPos = context.block2sectionPos(blockPosition);
-                ChunkPos chunkPos = player.getChunkPos();
-                @Nullable ClientChunkAccess chunk = world.getChunk(chunkPos);
-                BlockPos localBlockPos = World.toLocalBlockPos(blockPosition);
-
-                context.left("XYZ", player.getPosition())
-                        .left("Block XYZ", blockPosition)
-                        .left("Chunk XYZ", sectionPos)
-                        .left("Biome", Registries.BIOME.getId(world.getBiome(blockPosition)));
-                if (chunk != null) {
-                    int sunlight = chunk.getSunlight(localBlockPos.vec());
-                    int blockLight = chunk.getBlockLight(localBlockPos.vec());
-
-                    context.left("Chunk Offset", chunk.getRenderOffset())
-                            .left("Sunlight", sunlight)
-                            .left("Block Light", blockLight);
-                }
-                context.left("Chunk Shown", world.getChunk(chunkPos) != null);
-                HitResult hitResult = client.hitResult;
-                if (hitResult != null)
-                    context.left("Break Progress", world.getBreakProgress(new BlockPos(hitResult.getPos())));
-                context.left();
-            }
-
-            context.left("World");
-            if (worldRenderer != null) {
-                context.left("Visible Chunks", worldRenderer.getVisibleChunks() + "/" + worldRenderer.getLoadedChunksCount());
-            }
-
-            context.left("Chunk Mesh Disposes", WorldRenderer.getChunkMeshFrees());
-            if (client.isSinglePlayer()) {
-                context.left("Chunk Loads", ValueTracker.getChunkLoads())
-                        .left("Chunk Unloads", ServerWorld.getChunkUnloads());
-            }
-
-            context.left("Pool Free", WorldRenderer.getPoolFree())
-                    .left("Pool Max", WorldRenderer.getPoolMax())
-                    .left("Pool Peak", WorldRenderer.getPoolPeak())
-                    .left();
+    private void checkCpuTemp() {
+        double cpuTemperature = systemInfo.getHardware().getSensors().getCpuTemperature();
+        if (cpuTemperature == 0.0 || Double.isNaN(cpuTemperature)) {
+            return;
         }
+        QuantumClient client = QuantumClient.get();
+        if (cpuTemperature > 90) {
+            if (this.notification == null) {
+                this.notification = Notification
+                        .builder("CPU Temperature", String.format("The CPU temperature is %.2f°C!", cpuTemperature))
+                        .sticky()
+                        .subText("processor-watcher")
+                        .build();
 
-        BlockHitResult cursor = client.cursor;
-        if (cursor.isCollide()) {
-            BlockProperties block = cursor.getBlockMeta();
-            if (block != null && !block.isAir()) {
-                context.right("Block", block);
+                client.notifications.add(this.notification);
+            } else {
+                this.notification.setSummary(TextObject.literal(String.format("The CPU temperature is %.2f°C!", cpuTemperature)));
             }
+        } else if (this.notification != null) {
+            this.notification.close();
+            this.notification = null;
         }
     }
 }

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
@@ -25,8 +24,6 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     void revalidate();
 
-    ModelInstance getModelInstance();
-
     ClientWorldAccess getWorld();
 
     int getSunlight(Vec3i pos);
@@ -34,8 +31,6 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
     int getBlockLight(Vec3i pos);
 
     Vector3 getRenderOffset();
-
-    Model getModel();
 
     float getBrightness(int lightLevel);
 

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -19,7 +18,6 @@ import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
-import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.collection.Storage;
@@ -128,11 +126,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public ModelInstance getModelInstance() {
-        return this.modelInstance;
-    }
-
-    @Override
     public void dispose() {
         if (!QuantumClient.isOnRenderThread()) {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
@@ -143,10 +136,8 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             super.dispose();
 
             @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
-            if (this.model != null && this.modelInstance != null) {
-                if (worldRenderer != null) {
-                    worldRenderer.unload(this);
-                }
+            if (worldRenderer != null) {
+                worldRenderer.unload(this);
             }
 
             this.tmp.setZero();
@@ -225,11 +216,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @Override
     public Vector3 getRenderOffset() {
         return renderOffset;
-    }
-
-    @Override
-    public Model getModel() {
-        return model;
     }
 
     void ready() {

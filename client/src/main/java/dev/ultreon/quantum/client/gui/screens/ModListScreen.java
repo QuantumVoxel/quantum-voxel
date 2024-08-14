@@ -101,23 +101,20 @@ public class ModListScreen extends Screen {
     private void onImportXeox(TextButton textButton) {
         GamePlatform.get().openImportDialog().ifFailure(throwable -> {
             QuantumClient.invoke(() -> {
-                if (throwable instanceof ZipException) {
-                    this.showDialog(new DialogBuilder(this)
+                switch (throwable) {
+                    case ZipException zipException -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Invalid Xeox mod file.\nXeox only supports .zip files!"))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                } else if (throwable instanceof IOException) {
-                    this.showDialog(new DialogBuilder(this)
+                    case IOException ioException -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                } else if (throwable instanceof RuntimeException) {
-                    this.showDialog(new DialogBuilder(this)
+                    case RuntimeException runtimeException -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                } else {
-                    this.showDialog(new DialogBuilder(this)
+                    case null, default -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Failed to import Xeox mod file!\nInternal error!"))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));

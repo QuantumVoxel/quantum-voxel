@@ -36,7 +36,6 @@ import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.FlatStorage;
-import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.ChunkPos;
@@ -465,11 +464,6 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     @Override
     public Vector3 getRenderOffset() {
         return new Vector3(0, 0, 0);
-    }
-
-    @Override
-    public Model getModel() {
-        return modelInstance.model;
     }
 
     @Override

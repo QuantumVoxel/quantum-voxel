@@ -631,8 +631,8 @@ commonProperties
 }
 
 tasks.register<Exec>("runClient") {
-    workingDir = file("$projectDir/run/data/")
-    mkdir("$projectDir/run/data/")
+    workingDir = file("$projectDir/run/client/")
+    Files.createDirectories(Paths.get(workingDir.path))
 
     dependsOn(":desktop:build")
 
@@ -657,7 +657,9 @@ tasks.register<Exec>("runClient") {
 
     commandLine(
         Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
-            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java" else "java.exe"
+            if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
+            else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
+            else "java"
         ),
         "@${argFile.path}"
     )
@@ -665,7 +667,7 @@ tasks.register<Exec>("runClient") {
 
 tasks.register<Exec>("runClientAlt") {
     workingDir = file("$projectDir/run/data/")
-    mkdir("$projectDir/run/data/")
+    Files.createDirectories(Paths.get("$projectDir/run/data/"))
 
     dependsOn(":desktop:build")
 
@@ -702,7 +704,7 @@ tasks.register<Exec>("runClientAlt") {
 
 tasks.register<Exec>("runDataGenClient") {
     workingDir = file("$projectDir/run/data/")
-    mkdir("$projectDir/run/data/")
+    Files.createDirectories(Paths.get("$projectDir/run/data/"))
 
     dependsOn(":desktop:build")
 
@@ -740,8 +742,8 @@ tasks.register<Exec>("runDataGenClient") {
 }
 
 tasks.register<Exec>("runDataGenServer") {
-    workingDir = file("$projectDir/run/data/server/")
-    mkdir("$projectDir/run/data/server/")
+    workingDir = file("$projectDir/run/data/")
+    Files.createDirectories(Paths.get("$projectDir/run/data/"))
 
     dependsOn(":server:build")
 
@@ -778,7 +780,7 @@ tasks.register<Exec>("runDataGenServer") {
 
 tasks.register<Exec>("runServer") {
     workingDir = file("$projectDir/run/server/")
-    mkdir("$projectDir/run/server/")
+    Files.createDirectories(Paths.get("$projectDir/run/server/"))
 
     dependsOn(":server:build")
 
