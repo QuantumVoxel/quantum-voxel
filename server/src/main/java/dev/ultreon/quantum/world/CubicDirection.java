@@ -3,10 +3,11 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3f;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Axis;
+import dev.ultreon.quantum.util.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -64,95 +65,55 @@ public enum CubicDirection {
     }
 
     public Axis getAxis() {
-        switch (this) {
-            case UP:
-            case DOWN:
-                return Axis.Y;
-            case WEST:
-            case EAST:
-                return Axis.X;
-            case NORTH:
-            case SOUTH:
-                return Axis.Z;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (this) {
+            case UP, DOWN -> Axis.Y;
+            case WEST, EAST -> Axis.X;
+            case NORTH, SOUTH -> Axis.Z;
+        };
     }
 
     public CubicDirection getOpposite() {
-        switch (this) {
-            case UP:
-                return DOWN;
-            case DOWN:
-                return UP;
-            case WEST:
-                return EAST;
-            case EAST:
-                return WEST;
-            case NORTH:
-                return SOUTH;
-            case SOUTH:
-                return NORTH;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (this) {
+            case UP -> DOWN;
+            case DOWN -> UP;
+            case WEST -> EAST;
+            case EAST -> WEST;
+            case NORTH -> SOUTH;
+            case SOUTH -> NORTH;
+        };
     }
 
     public CubicDirection getClockwise() {
-        switch (this) {
-            case UP:
-                return UP;
-            case DOWN:
-                return DOWN;
-            case WEST:
-                return SOUTH;
-            case EAST:
-                return NORTH;
-            case NORTH:
-                return EAST;
-            case SOUTH:
-                return WEST;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (this) {
+            case UP -> UP;
+            case DOWN -> DOWN;
+            case WEST -> SOUTH;
+            case EAST -> NORTH;
+            case NORTH -> EAST;
+            case SOUTH -> WEST;
+        };
     }
 
     public CubicDirection getCounterClockwise() {
-        switch (this) {
-            case UP:
-                return UP;
-            case DOWN:
-                return DOWN;
-            case WEST:
-                return NORTH;
-            case EAST:
-                return SOUTH;
-            case NORTH:
-                return WEST;
-            case SOUTH:
-                return EAST;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (this) {
+            case UP -> UP;
+            case DOWN -> DOWN;
+            case WEST -> NORTH;
+            case EAST -> SOUTH;
+            case NORTH -> WEST;
+            case SOUTH -> EAST;
+        };
     }
 
     public Quaternion getHorizontalRotation() {
-        switch (this) {
-            case UP:
-                return UP.rotation;
-            case DOWN:
-                return DOWN.rotation;
-            case WEST:
-                return WEST.rotation;
-            case EAST:
-                return EAST.rotation;
-            case NORTH:
-                return NORTH.rotation;
-            case SOUTH:
-                return SOUTH.rotation;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (this) {
+            case UP -> UP.rotation;
+            case DOWN -> DOWN.rotation;
+            case WEST -> WEST.rotation;
+            case EAST -> EAST.rotation;
+            case NORTH -> NORTH.rotation;
+            case SOUTH -> SOUTH.rotation;
+        };
     }
 
     public int getIndex() {
@@ -162,36 +123,23 @@ public enum CubicDirection {
     public CubicDirection rotateY(int hIndex) {
         if (this.hIndex == -1) return this;
 
-        switch (hIndex) {
-            case 0:
-                return this;
-            case 1:
-                return this.getClockwise();
-            case 2:
-                return this.getClockwise().getClockwise();
-            case 3:
-                return this.getCounterClockwise();
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (hIndex) {
+            case 0 -> this;
+            case 1 -> this.getClockwise();
+            case 2 -> this.getClockwise().getClockwise();
+            case 3 -> this.getCounterClockwise();
+            default -> throw new IllegalArgumentException();
+        };
     }
 
-    public BlockVec getOffset() {
-        switch (this) {
-            case UP:
-                return new BlockVec(0, 1, 0);
-            case DOWN:
-                return new BlockVec(0, -1, 0);
-            case WEST:
-                return new BlockVec(-1, 0, 0);
-            case EAST:
-                return new BlockVec(1, 0, 0);
-            case NORTH:
-                return new BlockVec(0, 0, -1);
-            case SOUTH:
-                return new BlockVec(0, 0, 1);
-            default:
-                throw new IllegalArgumentException();
-        }
+    public Vec3i getOffset() {
+        return switch (this) {
+            case UP -> new Vec3i(0, 1, 0);
+            case DOWN -> new Vec3i(0, -1, 0);
+            case WEST -> new Vec3i(-1, 0, 0);
+            case EAST -> new Vec3i(1, 0, 0);
+            case NORTH -> new Vec3i(0, 0, -1);
+            case SOUTH -> new Vec3i(0, 0, 1);
+        };
     }
 }

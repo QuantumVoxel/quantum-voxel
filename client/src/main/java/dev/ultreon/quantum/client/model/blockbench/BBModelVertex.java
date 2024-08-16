@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.client.model.blockbench;
 
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3f;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec3f;
 
 import java.util.Objects;
 

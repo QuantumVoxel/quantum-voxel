@@ -1,14 +1,13 @@
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Objects;
 
@@ -18,10 +17,10 @@ public class BlockHitResult implements HitResult {
     // input
     protected Ray ray;
     protected float distanceMax = 5.0F;
-    protected Vec3d position = new Vec3d();
-    protected Vec3d normal = new Vec3d();
-    protected Vec3i pos = new Vec3i();
-    protected Vec3i next = new Vec3i();
+    protected Vec position = new Vec();
+    protected Vec normal = new Vec();
+    protected BlockVec vec = new BlockVec(BlockVecSpace.WORLD);
+    protected BlockVec next = new BlockVec(BlockVecSpace.WORLD);
     protected BlockProperties blockMeta = BlockProperties.AIR;
     protected Block block = Blocks.AIR;
     protected boolean collide;
@@ -49,7 +48,7 @@ public class BlockHitResult implements HitResult {
         this.distanceMax = buffer.readFloat();
         this.position.set(buffer.readVec3d());
         this.normal.set(buffer.readVec3d());
-        this.pos.set(buffer.readVec3i());
+        this.vec.set(buffer.readVec3i());
         this.next.set(buffer.readVec3i());
         this.blockMeta = buffer.readBlockMeta();
         this.block = Registries.BLOCK.byId(buffer.readVarInt());
@@ -64,7 +63,7 @@ public class BlockHitResult implements HitResult {
         this.position.set(blockVec.vec().d());
         this.setDirection(ray.getDirection());
         this.distanceMax = 5.0F;
-        this.pos.set(blockVec.vec());
+        this.vec.set(blockVec.vec());
         this.next.set(blockVec.vec());
         this.normal.set(0, 0, 0);
         this.collide = true;
@@ -76,7 +75,7 @@ public class BlockHitResult implements HitResult {
         buffer.writeFloat(this.distanceMax);
         buffer.writeVec3d(this.position);
         buffer.writeVec3d(this.normal);
-        buffer.writeVec3i(this.pos);
+        buffer.writeVec3i(this.vec);
         buffer.writeVec3i(this.next);
         buffer.writeBlockMeta(this.getBlockMeta());
         buffer.writeVarInt(Registries.BLOCK.getRawId(this.getBlock()));
@@ -101,20 +100,20 @@ public class BlockHitResult implements HitResult {
     }
 
     @Override
-    public Vec3d getPosition() {
+    public Vec getVec() {
         return this.position;
     }
 
-    public Vec3d getNormal() {
+    public Vec getNormal() {
         return this.normal;
     }
 
     @Override
-    public Vec3i getPos() {
-        return this.pos;
+    public BlockVec getBlockVec() {
+        return this.vec;
     }
 
-    public Vec3i getNext() {
+    public BlockVec getNext() {
         return this.next;
     }
 
@@ -141,12 +140,12 @@ public class BlockHitResult implements HitResult {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BlockHitResult hitResult = (BlockHitResult) o;
-        return Float.compare(distanceMax, hitResult.distanceMax) == 0 && collide == hitResult.collide && Double.compare(getDistance(), hitResult.getDistance()) == 0 && getDirection() == hitResult.getDirection() && Objects.equals(ray, hitResult.ray) && Objects.equals(position, hitResult.position) && Objects.equals(normal, hitResult.normal) && Objects.equals(pos, hitResult.pos) && Objects.equals(next, hitResult.next) && Objects.equals(getBlockMeta(), hitResult.getBlockMeta()) && Objects.equals(getBlock(), hitResult.getBlock());
+        return Float.compare(distanceMax, hitResult.distanceMax) == 0 && collide == hitResult.collide && Double.compare(getDistance(), hitResult.getDistance()) == 0 && getDirection() == hitResult.getDirection() && Objects.equals(ray, hitResult.ray) && Objects.equals(position, hitResult.position) && Objects.equals(normal, hitResult.normal) && Objects.equals(vec, hitResult.vec) && Objects.equals(next, hitResult.next) && Objects.equals(getBlockMeta(), hitResult.getBlockMeta()) && Objects.equals(getBlock(), hitResult.getBlock());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDirection(), ray, distanceMax, position, normal, pos, next, getBlockMeta(), getBlock(), collide, getDistance());
+        return Objects.hash(getDirection(), ray, distanceMax, position, normal, vec, next, getBlockMeta(), getBlock(), collide, getDistance());
     }
 
     public CubicDirection getDirection() {

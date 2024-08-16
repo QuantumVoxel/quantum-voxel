@@ -15,7 +15,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

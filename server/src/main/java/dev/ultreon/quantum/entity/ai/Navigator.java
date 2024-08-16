@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.entity.ai;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.entity.LivingEntity;
 import dev.ultreon.quantum.world.rng.RNG;
 

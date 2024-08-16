@@ -4,7 +4,6 @@ import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
-import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.RecordingChunk;
 import dev.ultreon.quantum.world.gen.TreeData;
@@ -13,6 +12,7 @@ import dev.ultreon.quantum.world.gen.WorldGenFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.rng.RNG;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -38,7 +38,7 @@ public class BiomeGenerator implements Disposable {
         this.features = features;
     }
 
-    public BuilderChunk processColumn(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
+    public void processColumn(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
         LightMap lightMap = chunk.getLightMap();
 
         this.generateTerrainLayers(chunk, x, z, y);
@@ -47,12 +47,10 @@ public class BiomeGenerator implements Disposable {
 
         BiomeGenerator.updateLightMap(chunk, x, z, lightMap);
         chunk.set(x, chunk.getOffset().y, z, Blocks.VOIDGUARD.createMeta());
-
-        return chunk;
     }
 
     private static void updateLightMap(BuilderChunk chunk, int x, int z, LightMap lightMap) {
-        int highest = chunk.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK);
+        int highest = chunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
         for (int y = chunk.getOffset().y; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
             lightMap.setSunlight(x, y, z, y >= highest ? 15 : 7);
         }
@@ -82,7 +80,7 @@ public class BiomeGenerator implements Disposable {
             boolean isWithinChunkBounds = recordedChange.x() >= chunk.getOffset().x && recordedChange.x() < chunk.getOffset().x + World.CHUNK_SIZE
                     && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + World.CHUNK_SIZE;
             BlockVec localBlockVec = World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z());
-            if (isWithinChunkBounds && localBlockVec.x() == x && localBlockVec.z() == z) {
+            if (isWithinChunkBounds && localBlockVec.getIntX() == x && localBlockVec.getIntZ() == z) {
                 chunk.set(World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z()).vec(), recordedChange.block());
                 if (WorldGenDebugContext.isActive()) {
                     System.out.println("[DEBUG CHUNK-HASH " + System.identityHashCode(chunk) + "] Setting recorded change in chunk at " + recordedChange.x() + ", " + recordedChange.y() + ", " + recordedChange.z() + " of type " + recordedChange.block());
@@ -110,6 +108,10 @@ public class BiomeGenerator implements Disposable {
 
     public Biome getBiome() {
         return this.biome;
+    }
+
+    public void generateStructureFeatures(RecordingChunk recordingChunk, int x, int y, int z) {
+
     }
 
     public static class Index {

@@ -4,7 +4,8 @@ import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import org.jetbrains.annotations.NotNull;
 
 public class SlabBlock extends Block {
     public SlabBlock() {
@@ -32,13 +33,13 @@ public class SlabBlock extends Block {
     }
 
     @Override
-    public BlockProperties createMeta() {
+    public @NotNull BlockProperties createMeta() {
         return super.createMeta().withEntry("type", BlockDataEntry.ofEnum(Type.BOTTOM));
     }
 
     @Override
     public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockVec pos, UseItemContext context) {
-        double y = context.result().getPosition().y % 1;
+        double y = context.result().getVec().y % 1;
         return blockMeta.withEntry("type", y < 0.5 ? Type.TOP : Type.BOTTOM);
     }
 

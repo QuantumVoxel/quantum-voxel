@@ -8,8 +8,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
-import dev.ultreon.libs.commons.v0.vector.Vec2d;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec2d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -43,6 +43,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PollingExecutorService;
 import dev.ultreon.quantum.util.Shutdownable;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
@@ -377,13 +378,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * Crashes the server thread, or the client if we are the integrated server.
      *
      * @param t the throwable that caused the crash.
+     * @return
      */
-    public void crash(Throwable t) {
+    public CrashLog crash(Throwable t) {
         // Create crash log.
         CrashLog crashLog = new CrashLog("Server crashed! :(", t);
         this.world.fillCrashInfo(crashLog);
 
         this.crash(crashLog);
+        return crashLog;
     }
 
     /**

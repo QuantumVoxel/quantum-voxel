@@ -4,7 +4,7 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 public class C2SRequestChunkLoadPacket extends Packet<InGameServerPacketHandler> {
     private final ChunkVec pos;

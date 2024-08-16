@@ -5,7 +5,7 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 public class C2SChunkStatusPacket extends Packet<InGameServerPacketHandler> {
     private final Chunk.Status status;

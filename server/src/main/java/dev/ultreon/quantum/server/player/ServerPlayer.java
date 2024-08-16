@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.server.player;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.libs.commons.v0.vector.Vec2d;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec2d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.Command;
 import dev.ultreon.quantum.api.commands.CommandContext;
@@ -39,6 +39,9 @@ import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -401,9 +404,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public static void refreshChunks(ChunkRefresher refresher, QuantumServer server, ServerWorld world, ChunkVec chunkVec, ListOrderedSet<ChunkVec> toLoad, ListOrderedSet<ChunkVec> toUnload) {
         // Sort the chunks to load based on distance from player position.
         List<ChunkVec> load = toLoad.stream().sorted((o1, o2) -> {
-            Vec2d playerPos = new Vec2d(chunkVec.getX(), chunkVec.getZ());
-            Vec2d cPos1 = new Vec2d(o1.getX(), o1.getZ());
-            Vec2d cPos2 = new Vec2d(o2.getX(), o2.getZ());
+            Vec2d playerPos = new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ());
+            Vec2d cPos1 = new Vec2d(o1.getIntX(), o1.getIntZ());
+            Vec2d cPos2 = new Vec2d(o2.getIntX(), o2.getIntZ());
 
             return Double.compare(cPos1.dst(playerPos), cPos2.dst(playerPos));
         }).collect(Collectors.toList());
@@ -670,7 +673,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         Block block = result.getBlock();
         if (block != null && !block.isAir()) {
-            UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockVec(result.getPos()));
+            UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockVec(result.getBlockVec()));
 
             if (blockResult == UseResult.DENY || blockResult == UseResult.ALLOW)
                 return blockResult;
@@ -693,7 +696,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param block the block to place
      */
     public void placeBlock(int x, int y, int z, BlockProperties block) {
-        BlockVec blockVec = new BlockVec(x, y, z);
+        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
         if (block == null || !this.world.isLoaded(blockVec)) return;
 
         this.world.set(x, y, z, block, BlockFlags.SYNC | BlockFlags.UPDATE);

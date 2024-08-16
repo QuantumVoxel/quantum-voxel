@@ -3,8 +3,8 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.Entity;
@@ -16,6 +16,8 @@ import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.util.WorldRayCaster;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +43,7 @@ public interface WorldAccess extends Disposable, WorldReader {
     boolean set(BlockVec pos, BlockProperties block, int flags);
 
     default void destroy(@NotNull BlockVec pos) {
-        destroy(pos.x(), pos.y(), pos.z());
+        destroy(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     default void destroy(int x, int y, int z) {
@@ -61,7 +63,11 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean isOutOfWorldBounds(int x, int y, int z);
 
-    int getHighest(int x, int z);
+    default int getHeight(int x, int z) {
+        return getHeight(x, z, HeightmapType.WORLD_SURFACE);
+    }
+
+    int getHeight(int x, int z, HeightmapType type);
 
     void setColumn(int x, int z, BlockProperties block);
 

@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.gen;
 
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.ArrayList;
 import java.util.List;

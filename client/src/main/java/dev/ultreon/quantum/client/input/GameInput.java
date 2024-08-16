@@ -12,8 +12,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.Constants;
@@ -33,7 +33,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
 import it.unimi.dsi.fastutil.ints.Int2BooleanArrayMap;
@@ -255,7 +255,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
     private void updateInGame(Player player, @Nullable ClientWorldAccess world) {
         assert world != null;
         BlockHitResult hitResult = world.rayCast(new Ray(player.getPosition().add(0, player.getEyeHeight(), 0), player.getLookVector()));
-        Vec3i pos = hitResult.getPos();
+        Vec3i pos = hitResult.getBlockVec();
         BlockProperties block = world.get(pos.x, pos.y, pos.z);
         if (!hitResult.isCollide() || block == null || block.isAir()) return;
 
@@ -317,7 +317,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         if (hitResult instanceof BlockHitResult blockHitResult) {
             Block block = blockHitResult.getBlock();
             if (block != null && !block.isAir()) {
-                UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockVec(result.getPos()));
+                UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockVec(result.getBlockVec()));
 
                 if (blockResult == UseResult.DENY || blockResult == UseResult.ALLOW)
                     return blockResult;

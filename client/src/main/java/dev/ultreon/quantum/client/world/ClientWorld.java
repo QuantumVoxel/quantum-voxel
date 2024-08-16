@@ -4,10 +4,10 @@ import com.badlogic.gdx.utils.*;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec2d;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec2d;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -27,6 +27,10 @@ import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +68,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private final QuantumClient client;
     private final Map<ChunkVec, ClientChunk> chunks = new HashMap<>();
     private int chunkRefresh;
-    private ChunkVec oldChunkVec = new ChunkVec(0, 0);
+    private ChunkVec oldChunkVec = new ChunkVec(0, 0, ChunkVecSpace.WORLD);
     private int time = 0;
     private int totalChunks;
     private final Vec3i tmp = new Vec3i();
@@ -137,8 +141,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public @Nullable ClientChunk getChunk(@NotNull ChunkVec pos) {
-        synchronized (this) {
+        this.rwLock.readLock().lock();
+
+        try {
             return this.chunks.get(pos);
+        } finally {
+            this.rwLock.readLock().unlock();
         }
     }
 
@@ -306,7 +314,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         boolean isBlockSet = super.set(x, y, z, block, flags);
 
         // Get the chunk containing the block
-        BlockVec blockVec = new BlockVec(x, y, z);
+        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
         ClientChunk chunk = this.getChunkAt(blockVec);
 
         // If the chunk exists, set the light source
@@ -380,14 +388,14 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
         return new ClientChunk[]{
-                this.getChunk(chunk.getVec().getX() - 1, chunk.getVec().getZ() - 1),
-                this.getChunk(chunk.getVec().getX(), chunk.getVec().getZ() - 1),
-                this.getChunk(chunk.getVec().getX() + 1, chunk.getVec().getZ() - 1),
-                this.getChunk(chunk.getVec().getX() - 1, chunk.getVec().getZ()),
-                this.getChunk(chunk.getVec().getX() + 1, chunk.getVec().getZ()),
-                this.getChunk(chunk.getVec().getX() - 1, chunk.getVec().getZ() + 1),
-                this.getChunk(chunk.getVec().getX(), chunk.getVec().getZ() + 1),
-                this.getChunk(chunk.getVec().getX() + 1, chunk.getVec().getZ() + 1)
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1)
         };
     }
 
@@ -412,12 +420,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
         // Start from the top of the world and move downward
         for (int y = WORLD_HEIGHT - 1; y >= 0; y--) {
-            BlockVec localBlockVec = new BlockVec(startX, y, startZ);
-            int lightReduction = chunk.get(toLocalBlockVec(startX, y, startZ)).getLightReduction();
+            BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
+            int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
-                setSunlight(localBlockVec.x(), localBlockVec.y(), localBlockVec.z(), intensity); // Assuming maximum sunlight intensity is 15
-                queue.addLast(new int[]{localBlockVec.x(), localBlockVec.y(), localBlockVec.z(), intensity});
+                setSunlight(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity); // Assuming maximum sunlight intensity is 15
+                queue.addLast(new int[]{localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity});
             } else {
                 break; // Stop when hitting a non-transparent block
             }
@@ -429,7 +437,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             int x = chunk.getOffset().x + current[0];
             int y = chunk.getOffset().y + current[1];
             int z = chunk.getOffset().z + current[2];
-            BlockVec local = new BlockVec(current[0], current[1], current[2]);
 
             int currentLight = getSunlight(x, y, z);
 
@@ -620,7 +627,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * @param lights A map of light sources to be updated.
      */
     @Override
-    public void updateLightSources(@NotNull Vec3i offset, ObjectMap<Vec3i, LightSource> lights) {
+    public void updateLightSources(@NotNull Vec3i offset, @NotNull ObjectMap<Vec3i, LightSource> lights) {
         // Call the superclass method to update light sources
         super.updateLightSources(offset, lights);
 
@@ -632,7 +639,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         // Process each light source and perform floodfill algorithm
-        for (LightSource source : lights.values()) {
+        for (LightSource source : lights.values().toArray()) {
             int x = offset.x + source.x();
             int y = offset.y + source.y();
             int z = offset.z + source.z();
@@ -787,7 +794,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         // Calculate the distance between the chunk and the player
-        if (new Vec2d(pos.getX(), pos.getZ()).dst(new Vec2d(player.getChunkVec().getX(), player.getChunkVec().getZ())) > ClientConfig.renderDistance) {
+        if (new Vec2d(pos.getIntX(), pos.getIntZ()).dst(new Vec2d(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ())) > ClientConfig.renderDistance) {
             // If the distance is greater than the render distance, send a skip chunk status packet and return
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
             return;
@@ -852,7 +859,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             ClientChunk clientChunk = entry.getValue();
 
             // Check if the distance between the chunk and the player's position is greater than the render distance
-            if (new Vec2d(chunkVec.getX(), chunkVec.getZ()).dst(player.getChunkVec().getX(), player.getChunkVec().getZ()) > ClientConfig.renderDistance) {
+            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance) {
                 // Remove the chunk from the map and dispose it
                 iterator.remove();
                 clientChunk.dispose();

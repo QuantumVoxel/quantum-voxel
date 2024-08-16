@@ -7,7 +7,7 @@ import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 
 public class BlockEvents {

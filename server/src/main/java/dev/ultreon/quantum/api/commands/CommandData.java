@@ -2,7 +2,7 @@ package dev.ultreon.quantum.api.commands;
 
 import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Either;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.error.CommandError;

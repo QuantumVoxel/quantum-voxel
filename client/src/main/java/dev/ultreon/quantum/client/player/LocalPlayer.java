@@ -3,8 +3,8 @@ package dev.ultreon.quantum.client.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -30,7 +30,7 @@ import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.event.SoundEvents;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
@@ -124,8 +124,8 @@ public class LocalPlayer extends ClientPlayer {
         int renderDistance = ClientConfig.renderDistance;
         for (int x = -renderDistance; x <= renderDistance; x++) {
             for (int z = -renderDistance; z <= renderDistance; z++) {
-                ChunkVec relativePos = new ChunkVec(playerPos.getX() + x, playerPos.getZ() + z);
-                if (this.tmp2I.set(x, z).dst(playerPos.getX(), playerPos.getZ()) <= renderDistance
+                ChunkVec relativePos = new ChunkVec(playerPos.getIntX() + x, playerPos.getIntZ() + z);
+                if (this.tmp2I.set(x, z).dst(playerPos.getIntX(), playerPos.getIntZ()) <= renderDistance
                         && !this.world.isLoaded(relativePos))
                     connection.send(new C2SRequestChunkLoadPacket(relativePos));
             }

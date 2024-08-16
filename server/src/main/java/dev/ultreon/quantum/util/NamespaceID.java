@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
  *  String name = id.toString();
  * </pre>
  *
- * @since 0.1.0
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @since 0.1.0
  */
 public final class NamespaceID {
     public static final Codec<NamespaceID> CODEC = Codec.STRING.xmap(NamespaceID::parse, NamespaceID::toString);
@@ -59,8 +59,7 @@ public final class NamespaceID {
      */
     @NotNull
     @Contract("_ -> new")
-    public static NamespaceID parse(
-            @NotNull String name) {
+    public static NamespaceID parse(@NotNull String name) {
         return new NamespaceID(name);
     }
 
@@ -93,7 +92,7 @@ public final class NamespaceID {
      * @throws SyntaxException if the domain string is invalid
      */
     @Contract("_ -> param1")
-    public static String testDomain(String domain) {
+    public static @NotNull String testDomain(@NotNull String domain) {
         // Checks if the domain matches the specified pattern
         if (!Pattern.matches("([a-z\\d_]+)([.\\-][a-z\\-\\d_]+){0,16}", domain)) {
             throw new SyntaxException("Domain is invalid: " + domain);
@@ -109,7 +108,7 @@ public final class NamespaceID {
      * @throws SyntaxException If the path is invalid
      */
     @Contract("_ -> param1")
-    public static @NotNull String testPath(String path) {
+    public static @NotNull String testPath(@NotNull String path) {
         // Validate the path against a specific pattern
         if (!Pattern.matches("([a-z_.\\d]+)(/[a-z_.\\d]+){0,16}", path)) {
             throw new SyntaxException("Path is invalid: " + path);
@@ -193,7 +192,7 @@ public final class NamespaceID {
      * @return a new Identifier with the updated domain
      */
     @Contract("_ -> new")
-    public NamespaceID withDomain(String domain) {
+    public NamespaceID withDomain(@NotNull String domain) {
         return new NamespaceID(domain, this.path);
     }
 
@@ -204,7 +203,7 @@ public final class NamespaceID {
      * @return a new Identifier with the updated path
      */
     @Contract("_ -> new")
-    public NamespaceID withPath(String path) {
+    public NamespaceID withPath(@NotNull String path) {
         return new NamespaceID(this.domain, path);
     }
 
@@ -215,7 +214,7 @@ public final class NamespaceID {
      * @return a new Identifier with the mapped domain
      */
     @Contract("_ -> new")
-    public NamespaceID mapDomain(UnaryOperator<String> domain) {
+    public NamespaceID mapDomain(@NotNull UnaryOperator<@NotNull String> domain) {
         return new NamespaceID(domain.apply(this.domain), this.path);
     }
 
@@ -226,7 +225,7 @@ public final class NamespaceID {
      * @return a new Identifier with the mapped path
      */
     @Contract("_ -> new")
-    public NamespaceID mapPath(UnaryOperator<String> path) {
+    public NamespaceID mapPath(@NotNull UnaryOperator<@NotNull String> path) {
         return new NamespaceID(this.domain, path.apply(this.path));
     }
 
@@ -238,7 +237,7 @@ public final class NamespaceID {
      * @return a new Identifier with the mapped path and domain
      */
     @Contract("_, _ -> new")
-    public NamespaceID map(UnaryOperator<String> domain, UnaryOperator<String> path) {
+    public NamespaceID map(@NotNull UnaryOperator<@NotNull String> domain, @NotNull UnaryOperator<@NotNull String> path) {
         return new NamespaceID(domain.apply(this.domain), path.apply(this.path));
     }
 
@@ -246,7 +245,7 @@ public final class NamespaceID {
      * Reduce the domain and path using the provided function.
      *
      * @param reducer the function to apply to the domain and path
-     * @param <T> the type of the result
+     * @param <T>     the type of the result
      * @return the result of applying the function to the domain and path
      */
     public <T> T reduce(BiFunction<String, String, T> reducer) {

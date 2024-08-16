@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 

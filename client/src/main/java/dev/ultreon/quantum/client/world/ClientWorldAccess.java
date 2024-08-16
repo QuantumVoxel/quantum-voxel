@@ -1,12 +1,13 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,10 +15,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 public interface ClientWorldAccess extends WorldAccess {
-    ClientChunkAccess getChunkAt(@NotNull BlockVec pos);
+    ClientChunkAccess getChunkAt(@NotNull dev.ultreon.quantum.world.vec.BlockVec pos);
 
     @Override
-    @Nullable ClientChunkAccess getChunk(ChunkVec pos);
+    @Nullable ClientChunkAccess getChunk(dev.ultreon.quantum.world.vec.ChunkVec pos);
 
     @Override
     @Nullable ClientChunkAccess getChunk(int x, int z);
@@ -30,11 +31,11 @@ public interface ClientWorldAccess extends WorldAccess {
 
     void fillCrashInfo(CrashLog crashLog);
 
-    BreakResult continueBreaking(BlockVec breaking, float v, Player player);
+    BreakResult continueBreaking(dev.ultreon.quantum.world.vec.BlockVec breaking, float v, Player player);
 
-    void stopBreaking(BlockVec blockVec, Player player);
+    void stopBreaking(dev.ultreon.quantum.world.vec.BlockVec blockVec, Player player);
 
-    void startBreaking(BlockVec blockVec, Player player);
+    void startBreaking(dev.ultreon.quantum.world.vec.BlockVec blockVec, Player player);
 
     float getBreakProgress(BlockVec blockVec);
 
@@ -54,5 +55,5 @@ public interface ClientWorldAccess extends WorldAccess {
 
     float getGlobalSunlight();
 
-    boolean isLoaded(ChunkVec chunkVec);
+    boolean isLoaded(dev.ultreon.quantum.world.vec.ChunkVec chunkVec);
 }

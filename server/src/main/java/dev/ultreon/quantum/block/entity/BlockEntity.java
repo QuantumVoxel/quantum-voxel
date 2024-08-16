@@ -4,7 +4,7 @@ import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.ubo.types.MapType;
 
@@ -53,9 +53,13 @@ public abstract class BlockEntity implements CapabilityHolder {
 
     public MapType save(MapType data) {
         data.putString("type", Objects.requireNonNull(type.getId()).toString());
-        data.putInt("x", pos.x());
-        data.putInt("y", pos.y());
-        data.putInt("z", pos.z());
+        data.putInt("x", pos.getIntX());
+        data.putInt("y", pos.getIntY());
+        data.putInt("z", pos.getIntZ());
         return data;
+    }
+
+    public void tick() {
+        // For override
     }
 }

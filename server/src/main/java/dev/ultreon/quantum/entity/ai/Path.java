@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.entity.ai;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 
 import java.util.Collections;
 import java.util.List;

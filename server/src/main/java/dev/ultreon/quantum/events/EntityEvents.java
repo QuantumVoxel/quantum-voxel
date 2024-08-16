@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.events;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.LivingEntity;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;

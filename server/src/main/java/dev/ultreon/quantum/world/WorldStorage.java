@@ -3,6 +3,7 @@ package dev.ultreon.quantum.world;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.util.Hashing;
+import dev.ultreon.quantum.world.vec.RegionVec;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
@@ -195,8 +196,8 @@ public final class WorldStorage {
      * @param pos the position of the region.
      * @return the region file.
      */
-    public File regionFile(RegionPos pos) {
-        return this.regionFile(pos.x(), pos.z());
+    public File regionFile(RegionVec pos) {
+        return this.regionFile(pos.getIntX(), pos.getIntZ());
     }
 
     /**

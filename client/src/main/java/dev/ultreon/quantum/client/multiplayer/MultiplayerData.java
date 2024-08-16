@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.multiplayer;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 

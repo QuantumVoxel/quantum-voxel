@@ -30,7 +30,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pool;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
@@ -39,9 +39,9 @@ import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.FlatStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.BlockVec;
-import dev.ultreon.quantum.world.ChunkVec;
-import dev.ultreon.quantum.world.HeightMap;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.Heightmap;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
     public static final int TERRAIN_SIZE = 16;
@@ -68,7 +68,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     private final Array<Color> colors = new Array<>();
     private final Array<Short> indices = new Array<>();
     private final Array<Vector3> normals = new Array<>();
-    private final HeightMap heightMap = new HeightMap(TERRAIN_SIZE);
+    private final Heightmap heightMap = new Heightmap(TERRAIN_SIZE);
     private final ClientWorldAccess voxelWorld;
     private boolean disposed = false;
 
@@ -520,7 +520,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public ChunkVec getPos() {
+    public ChunkVec getVec() {
         return new ChunkVec(x, y, z);
     }
 
@@ -560,7 +560,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public int getHighest(int x, int z) {
+    public int getHeight(int x, int z) {
         return heightMap.get(x, z);
     }
 

@@ -14,12 +14,12 @@ public class PlayerTracker implements Audience {
 
     public void startTracking(ServerPlayer player) {
         this.players.add(player);
-        CommonConstants.LOGGER.info("Tracking player '%s'...", player.getName());
+        CommonConstants.LOGGER.info("Tracking player '{}'...", player.getName());
     }
 
     public void stopTracking(ServerPlayer player) {
         this.players.remove(player);
-        CommonConstants.LOGGER.info("Stopped tracking player '%s'...", player.getName());
+        CommonConstants.LOGGER.info("Stopped tracking player '{}'...", player.getName());
     }
 
     public boolean isTracking(ServerPlayer player) {

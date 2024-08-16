@@ -2,7 +2,7 @@ package dev.ultreon.quantum.entity;
 
 import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.entity.ai.Navigator;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.events.EntityEvents;
@@ -10,7 +10,7 @@ import dev.ultreon.quantum.events.api.ValueEventResult;
 import dev.ultreon.quantum.item.food.AppliedEffect;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
 import dev.ultreon.quantum.server.util.Utils;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
@@ -336,7 +336,7 @@ public class LivingEntity extends Entity {
      * @return the chunk position
      */
     public ChunkVec getChunkVec() {
-        return Utils.toChunkVec(this.getBlockVec());
+        return this.getBlockVec().chunk();
     }
 
     /**

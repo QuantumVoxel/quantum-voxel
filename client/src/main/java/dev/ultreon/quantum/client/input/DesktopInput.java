@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -24,7 +23,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.EntityHitResult;
 import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
@@ -514,14 +513,15 @@ public class DesktopInput extends GameInput {
      */
     private void doPlayerInteraction(int button, HitResult hitResult, @Nullable ClientWorldAccess world, Player player) {
         // Get the position and metadata of the current and next blocks
-        Vec3i pos = hitResult.getPos();
+        BlockVec pos = hitResult.getBlockVec();
         if (hitResult instanceof BlockHitResult blockHitResult){
+            assert world != null;
             BlockProperties block = world.get(new BlockVec(pos));
-            Vec3i posNext = blockHitResult.getNext();
-            BlockProperties blockNext = world.get(new BlockVec(posNext));
+            BlockVec posNext = blockHitResult.getNext();
+            BlockProperties blockNext = world.get(posNext);
 
             // Check if the hit result is valid and the current block is not air
-            if (!blockHitResult.isCollide() || block == null || block.isAir())
+            if (!blockHitResult.isCollide() || block.isAir())
                 return;
 
             // Handle left button input for block breaking
@@ -529,7 +529,7 @@ public class DesktopInput extends GameInput {
                 // Check for instant mine ability
                 if (player.abilities.instaMine) {
                     // Send a block break packet if instant mine is active
-                    this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getPos())));
+                    this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getBlockVec())));
                     return;
                 }
 
@@ -542,7 +542,7 @@ public class DesktopInput extends GameInput {
             }
 
             // Handle right button input for using items on the next block
-            if (button == Input.Buttons.RIGHT && blockNext != null && blockNext.isAir()) {
+            if (button == Input.Buttons.RIGHT && blockNext.isAir()) {
                 this.useItem(player, world, blockHitResult);
             }
         } else if (hitResult instanceof EntityHitResult entityHitResult) {
@@ -585,13 +585,15 @@ public class DesktopInput extends GameInput {
             return false;
 
         // Handle mouse release event on the current screen
-        boolean eventHandled = false;
-        if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled())
-            eventHandled |= currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button) || client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button);
+        if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled()) {
+            if (!currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button)) {
+                client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button);
+            }
+        }
 
         // Handle mouse click event on the current screen
         if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1).isCanceled())
-            eventHandled |= currentScreen.mouseClick((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1);
+            currentScreen.mouseClick((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1);
 
         return false;
     }

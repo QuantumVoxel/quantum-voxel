@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
@@ -17,6 +17,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.jetbrains.annotations.NotNull;
 
@@ -196,7 +197,7 @@ public class WorldLoadScreen extends Screen {
         try {
             WorldLoadScreen.LOGGER.info("Loading spawn chunks...");
 
-            ChunkVec spawnChunk = World.toChunkVec(this.world.getSpawnPoint());
+            ChunkVec spawnChunk = this.world.getSpawnPoint().chunk();
 
             ChunkRefresher refresher = new ChunkRefresher();
             ServerPlayer.refreshChunks(refresher, this.client.integratedServer, this.world, spawnChunk,

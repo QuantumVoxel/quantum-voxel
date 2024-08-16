@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.model;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.world.WorldAccess;
 

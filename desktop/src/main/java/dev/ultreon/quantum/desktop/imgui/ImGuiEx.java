@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.desktop.imgui;
 
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
-import dev.ultreon.libs.commons.v0.vector.*;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.libs.functions.v0.consumer.*;
 import dev.ultreon.libs.functions.v0.consumer.IntConsumer;
 import dev.ultreon.libs.functions.v0.supplier.FloatSupplier;
@@ -264,7 +264,7 @@ public class ImGuiEx {
         ImGui.sameLine();
         try {
             Vec3i v = getter.get();
-            int[] vec = {v.getX(), v.getY(), v.getZ()};
+            int[] vec = {v.getIntX(), v.getIntY(), v.getIntZ()};
             if (ImGui.inputInt3("##" + strId, vec)) {
                 setter.accept(new Vec3i(vec[0], vec[1], vec[2]));
             }

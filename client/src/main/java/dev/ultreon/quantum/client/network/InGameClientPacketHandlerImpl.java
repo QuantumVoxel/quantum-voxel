@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.network;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockProperties;
@@ -49,9 +49,9 @@ import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.Nullable;

@@ -14,7 +14,7 @@ import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 
 import java.util.HashMap;
 import java.util.Map;

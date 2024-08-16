@@ -11,9 +11,9 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.BlockVec;
-import dev.ultreon.quantum.world.ChunkVec;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -48,8 +48,8 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
         this.biomeStorage = biomeStorage;
 
         for (BlockEntity blockEntity : blockEntities) {
-            BlockVec bPos = World.toLocalBlockVec(blockEntity.pos());
-            this.blockEntityPositions.add((bPos.x() % 16) << 20 | (bPos.y() % 65536) << 4 | bPos.z() % 16);
+            BlockVec bPos = blockEntity.pos().chunkLocal();
+            this.blockEntityPositions.add((bPos.getIntX() % 16) << 20 | (bPos.getIntY() % 65536) << 4 | bPos.getIntZ() % 16);
             this.blockEntities.add(blockEntity.getType().getRawId());
         }
     }
@@ -77,11 +77,11 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         Map<BlockVec, BlockEntityType<?>> blockEntities = new HashMap<>();
         int i = 0;
-        for (Integer blockEntityPosition : this.blockEntityPositions) {
-            int x = (blockEntityPosition >> 20) & 0xF;
-            int y = (blockEntityPosition >> 4) & 0xFFFF;
-            int z = blockEntityPosition & 0xF;
-            blockEntities.put(World.toLocalBlockVec(x, y, z), Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntities.getInt(i)));
+        for (Integer blkEntityVec : this.blockEntityPositions) {
+            int x = (blkEntityVec >> 20) & 0xF;
+            int y = (blkEntityVec >> 4) & 0xFFFF;
+            int z = blkEntityVec & 0xF;
+            blockEntities.put(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntities.getInt(i)));
         }
 
         handler.onChunkData(this.pos, this.storage, this.biomeStorage, blockEntities);

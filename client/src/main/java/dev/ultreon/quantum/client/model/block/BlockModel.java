@@ -7,7 +7,7 @@ import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.resources.LoadableResource;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 
 @SuppressWarnings("unused")
 public interface BlockModel extends LoadableResource {

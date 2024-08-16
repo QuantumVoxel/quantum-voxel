@@ -4,15 +4,17 @@ import com.badlogic.gdx.math.MathUtils;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
-import dev.ultreon.libs.commons.v0.vector.*;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.partial.PartialPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.DataTypeRegistry;
 import dev.ultreon.ubo.types.DataType;
 import io.netty.buffer.ByteBuf;
@@ -30,7 +32,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class PacketIO {
@@ -75,7 +76,7 @@ public class PacketIO {
     public final List<ByteBuf> validate(List<PartialPacket> parts) throws PacketIntegrityException {
         List<ByteBuf> bufs = new ArrayList<>();
         int dataOffsetCheck = 0;
-        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).collect(Collectors.toList())) {
+        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).toList()) {
             if (dataOffsetCheck != partialPacket.dataOffset()) throw new PacketIntegrityException("Packet data offset mismatch. Expected " + dataOffsetCheck + " but got " + partialPacket.dataOffset());
             bufs.add(partialPacket.data());
             dataOffsetCheck += partialPacket.data().readableBytes();
@@ -488,33 +489,31 @@ public class PacketIO {
         int y = this.readInt();
         int z = this.readInt();
 
-        return new BlockVec(x, y, z);
+        return new BlockVec(x, y, z, this.readEnum(BlockVecSpace.WORLD));
     }
 
     @CanIgnoreReturnValue
     public PacketIO writeBlockVec(BlockVec pos) {
-        try {
-            this.output.writeInt(pos.x());
-            this.output.writeInt(pos.y());
-            this.output.writeInt(pos.z());
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeInt(pos.getIntX());
+        this.writeInt(pos.getIntY());
+        this.writeInt(pos.getIntZ());
+        this.writeEnum(pos.getSpace());
         return this;
     }
 
     public ChunkVec readChunkVec() {
         int x = this.readInt();
         int z = this.readInt();
+        ChunkVecSpace space = this.readEnum(ChunkVecSpace.WORLD);
 
-        return new ChunkVec(x, z);
+        return new ChunkVec(x, z, space);
     }
 
     @CanIgnoreReturnValue
     public PacketIO writeChunkVec(ChunkVec pos) {
         try {
-            this.output.writeInt(pos.getX());
-            this.output.writeInt(pos.getZ());
+            this.output.writeInt(pos.getIntX());
+            this.output.writeInt(pos.getIntZ());
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -1138,6 +1137,10 @@ public class PacketIO {
 
     public <T extends Enum<T>> T readEnum(T fallback) {
         return EnumUtils.byOrdinal(this.readVarInt(), fallback);
+    }
+
+    public void writeEnum(Enum<?> value) {
+        this.writeVarInt(value.ordinal());
     }
 
     public BlockProperties readBlockMeta() {

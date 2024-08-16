@@ -1,17 +1,20 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
-import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public final class BuilderChunk extends Chunk {
     private final ServerWorld world;
@@ -26,12 +29,12 @@ public final class BuilderChunk extends Chunk {
         this.world = world;
         this.thread = thread;
         this.region = region;
-        this.rng = new JavaRNG(this.world.getSeed() + (pos.getX() ^ ((long) pos.getZ() << 4)) & 0x3FFFFFFF);
+        this.rng = new JavaRNG(this.world.getSeed() + (pos.getIntX() ^ ((long) pos.getIntZ() << 4)) & 0x3FFFFFFF);
         this.biomeData = new PaletteStorage<>(256, Biomes.PLAINS.create(this.world, world.getSeed()));
     }
 
     @Override
-    public BlockProperties getFast(int x, int y, int z) {
+    public @NotNull BlockProperties getFast(int x, int y, int z) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
         return super.getFast(x, y, z);
     }
@@ -117,8 +120,25 @@ public final class BuilderChunk extends Chunk {
     }
 
     @Override
-    public int getHighest(int x, int z) {
-        return super.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK);
+    public int getHeight(int x, int z) {
+        if (isOutOfBounds(x, 0, z)) {
+            // Get from world
+            int globX = this.getVec().x * CHUNK_SIZE + x;
+            int globZ = this.getVec().z * CHUNK_SIZE + z;
+            return this.world.getHeight(globX, globZ);
+        }
+        return super.getHeight(x, z, HeightmapType.WORLD_SURFACE);
+    }
+
+    @Override
+    public int getHeight(int x, int z, HeightmapType type) {
+        if (isOutOfBounds(x, 0, z)) {
+            // Get from world
+            int globX = this.getVec().x * CHUNK_SIZE + x;
+            int globZ = this.getVec().z * CHUNK_SIZE + z;
+            return this.world.getHeight(globX, globZ, type);
+        }
+        return super.getHeight(x, z, type);
     }
 
     public RNG getRNG() {

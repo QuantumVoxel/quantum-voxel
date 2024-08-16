@@ -2,12 +2,10 @@ package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.CubicDirection;
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.WorldAccess;
+import org.jetbrains.annotations.NotNull;
 
 public class BlastFurnaceBlock extends Block {
     public BlastFurnaceBlock(Properties properties) {
@@ -15,20 +13,12 @@ public class BlastFurnaceBlock extends Block {
     }
 
     @Override
-    public BlockProperties createMeta() {
+    public @NotNull BlockProperties createMeta() {
         return super.createMeta().withEntry("lit", BlockDataEntry.of(false)).withEntry("facing", BlockDataEntry.ofEnum(CubicDirection.NORTH));
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public BlockProperties onPlacedBy(WorldAccess world, BlockVec blockVec, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
-        System.out.println("On placed by " + player.getName() + " at " + blockVec + " facing " + direction);
-
-        return blockMeta.withEntry("facing", BlockDataEntry.ofEnum(direction));
-    }
-
-    @Override
-    public void onPlace(World world, BlockVec pos, BlockProperties blockProperties) {
+    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockProperties blockProperties) {
         super.onPlace(world, pos, blockProperties);
     }
 }

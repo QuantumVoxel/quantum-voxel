@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.gen.noise;
 
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.quantum.util.Vec2f;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;

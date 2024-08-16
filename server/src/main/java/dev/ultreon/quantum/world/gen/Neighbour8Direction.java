@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.gen;
 
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.quantum.util.Vec2i;
 
 public enum Neighbour8Direction {
     E(0, 1),

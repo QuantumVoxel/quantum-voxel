@@ -22,9 +22,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3f;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3f;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DisposableContainer;
 import dev.ultreon.quantum.GamePlatform;
@@ -56,8 +56,8 @@ import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.DeprecationCheckException;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.World;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -363,7 +363,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             QuantumClient.PROFILER.section("cursor", () -> {
                 // Block outline.
-                Vec3i pos = gameCursor.getPos();
+                Vec3i pos = gameCursor.getBlockVec();
                 Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
                 var boundingBox = gameCursor.getBlock().getBoundingBox(0, 0, 0, gameCursor.getBlockMeta());
                 renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
@@ -581,14 +581,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private static @NotNull NamespaceID createId(ChunkVec pos) {
-        return id(("generated/chunk/" + pos.getX() + "." + pos.getZ()).replace('-', '_'));
+        return id(("generated/chunk/" + pos.getIntX() + "." + pos.getIntZ()).replace('-', '_'));
     }
 
     private void renderBlockModels(RenderLayer renderLayer, ClientChunk chunk) {
         for (var entry : chunk.getCustomRendered().entrySet()) {
             BlockVec key = entry.getKey();
             this.tmp.set(chunk.renderOffset);
-            this.tmp.add(key.x(), key.y(), key.z());
+            this.tmp.add(key.getIntX(), key.getIntY(), key.getIntZ());
 
             BlockProperties value = entry.getValue();
             BlockModel blockModel = BlockModelRegistry.get().get(value);
@@ -602,7 +602,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             ModelInstance modelInstance = blockInstances.get(key);
             modelInstance.userData = Shaders.MODEL_VIEW.get();
-            modelInstance.transform.setTranslation(this.tmp.set(chunk.renderOffset).add(key.x(), key.y(), key.z()));
+            modelInstance.transform.setTranslation(this.tmp.set(chunk.renderOffset).add(key.getIntX(), key.getIntY(), key.getIntZ()));
         }
 
         for (var entry : this.blockInstances.entrySet()) {
@@ -617,7 +617,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         for (var entry : breaking.entrySet()) {
             BlockVec key = entry.getKey();
             this.tmp.set(chunk.renderOffset);
-            this.tmp.add(key.x() + 1f, key.y(), key.z());
+            this.tmp.add(key.getIntX() + 1f, key.getIntY(), key.getIntZ());
 
             Model breakingMesh = this.breakingModels.get(Math.round(Mth.clamp(entry.getValue() * 5, 0, 5)));
             if (breakingInstances.containsKey(key)) {
@@ -876,7 +876,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void remove(ClientChunkAccess clientChunk) {
-        this.unload(clientChunk.getPos());
+        this.unload(clientChunk.getVec());
     }
 
     @Override
@@ -892,7 +892,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void unload(ClientChunkAccess clientChunk) {
-        ChunkModel remove = this.chunkModels.remove(clientChunk.getPos());
+        ChunkModel remove = this.chunkModels.remove(clientChunk.getVec());
 
         if (remove != null) {
             remove.dispose();

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.item;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.player.Player;
@@ -11,7 +11,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.Suppliers;
 import dev.ultreon.quantum.world.BlockFlags;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ public class BlockItem extends Item {
     public BlockItem(Properties properties, @NotNull Supplier<Block> block) {
         super(properties);
         Preconditions.checkNotNull(block, "block");
-        this.block = Suppliers.memoize(block::get);
+        this.block = Suppliers.memoize(block);
     }
 
     public Block getBlock() {
@@ -38,7 +38,7 @@ public class BlockItem extends Item {
         var world = useItemContext.world();
         var stack = useItemContext.stack();
         BlockHitResult result = (BlockHitResult) useItemContext.result();
-        var pos = result.getPos();
+        var pos = result.getBlockVec();
         var next = result.getNext();
         var direction = result.getDirection();
         var player = useItemContext.player();
@@ -78,7 +78,7 @@ public class BlockItem extends Item {
     }
 
     @NotNull
-    private UseResult replaceBlock(WorldAccess world, Vec3i vec, UseItemContext useItemContext) {
+    private UseResult replaceBlock(WorldAccess world, BlockVec vec, UseItemContext useItemContext) {
         if (world.intersectEntities(this.getBlock().getBoundingBox(vec)))
             return UseResult.DENY;
 

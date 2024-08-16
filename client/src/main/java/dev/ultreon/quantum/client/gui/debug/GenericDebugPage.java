@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
@@ -12,9 +12,8 @@ import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class GenericDebugPage implements DebugPage {
@@ -52,7 +51,7 @@ public class GenericDebugPage implements DebugPage {
                 BlockVec BlockVecition = player.getBlockVec();
                 Vec3i sectionPos = context.block2sectionPos(BlockVecition);
                 @Nullable ClientChunkAccess chunk = world.getChunkAt(BlockVecition);
-                BlockVec localBlockVec = World.toLocalBlockVec(BlockVecition);
+                BlockVec localBlockVec = BlockVecition.chunkLocal();
 
                 context.left("XYZ", player.getPosition())
                         .left("Block XYZ", BlockVecition)
@@ -69,7 +68,7 @@ public class GenericDebugPage implements DebugPage {
                 context.left("Chunk Shown", world.getChunkAt(BlockVecition) != null);
                 HitResult hitResult = client.hitResult;
                 if (hitResult != null)
-                    context.left("Break Progress", world.getBreakProgress(new BlockVec(hitResult.getPos())));
+                    context.left("Break Progress", world.getBreakProgress(new BlockVec(hitResult.getBlockVec())));
                 context.left();
             }
 

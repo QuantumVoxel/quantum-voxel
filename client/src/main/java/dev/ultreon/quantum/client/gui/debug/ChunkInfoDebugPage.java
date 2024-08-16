@@ -4,7 +4,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkInfoDebugPage implements DebugPage {
@@ -28,10 +28,10 @@ public class ChunkInfoDebugPage implements DebugPage {
         }
 
         context.left("Chunk", chunkVec.toString());
-        context.left("X", chunkVec.getX());
-        context.left("Z", chunkVec.getZ());
+        context.left("X", chunkVec.getIntX());
+        context.left("Z", chunkVec.getIntZ());
 
-        context.left("Heightmap", chunk.getHighest(chunkVec.getX(), chunkVec.getZ()));
+        context.left("Heightmap", chunk.getHeight(chunkVec.getIntX(), chunkVec.getIntZ()));
         context.left("Render Offset", chunk.getRenderOffset());
     }
 }

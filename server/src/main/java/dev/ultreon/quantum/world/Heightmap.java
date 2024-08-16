@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.world;
 
-public class HeightMap {
+public class Heightmap {
     private short[] map;
     private final int width;
 
-    public HeightMap(int width) {
+    public Heightmap(int width) {
         this.map = new short[width * width];
 
         this.width = width;

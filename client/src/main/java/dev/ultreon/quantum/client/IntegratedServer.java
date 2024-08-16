@@ -12,7 +12,7 @@ import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerSetPosPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;

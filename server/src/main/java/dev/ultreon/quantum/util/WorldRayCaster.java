@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.world.*;
@@ -118,7 +116,7 @@ public class WorldRayCaster {
 			result.collide = true;
 			result.distance = dst;
 			result.position.set(intersection);
-			result.pos.set(abs);
+			result.vec.set(abs);
 			result.blockMeta = block;
 			result.block = block.getBlock();
 
@@ -130,7 +128,7 @@ public class WorldRayCaster {
 	private static void computeFace(BlockHitResult result) {
 		// compute face
 		local.set(result.position)
-			.sub(result.pos.x,result.pos.y,result.pos.z)
+			.sub(result.vec.x,result.vec.y,result.vec.z)
 			.sub(.5f);
 
 		double absX = Math.abs(local.x);
@@ -152,7 +150,7 @@ public class WorldRayCaster {
 			}
 		}
 
-		result.next.set(result.pos).add(
+		result.next.set(result.vec).add(
 				(int) Math.floor(result.normal.x),
 				(int) Math.floor(result.normal.y),
 				(int) Math.floor(result.normal.z));

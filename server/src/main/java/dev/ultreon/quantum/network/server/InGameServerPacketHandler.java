@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.network.server;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.Attribute;
@@ -34,6 +34,9 @@ import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +49,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     private final PacketContext context;
     private boolean disconnected;
 
-    public InGameServerPacketHandler(QuantumServer server, ServerPlayer player, IConnection connection) {
+    public InGameServerPacketHandler(QuantumServer server, ServerPlayer player, IConnection<?, ?> connection) {
         this.server = server;
         this.player = player;
         this.connection = connection;
@@ -138,7 +141,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
-            if (item instanceof ToolItem toolItem && block.getEffectiveTool() == ((ToolItem) item).getToolType()) {
+            if (item instanceof ToolItem toolItem && block.getEffectiveTool() == toolItem.getToolType()) {
                 efficiency = toolItem.getEfficiency();
             }
 
@@ -163,7 +166,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     public void onBlockBroken(BlockVec pos) {
         var world = this.player.getWorld();
-        var ChunkVec = World.toChunkVec(pos);
+        var ChunkVec = pos.chunk();
 
         if (!this.player.isChunkActive(ChunkVec)) {
             QuantumServer.LOGGER.warn("Player %s attempted to break block that is not loaded.", this.player.getName());
@@ -174,7 +177,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick) {
 
-                QuantumServer.invoke(new TickTask(2, () -> world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockVec(pos.x(), pos.y(), pos.z()), world.get(pos)))));
+                QuantumServer.invoke(new TickTask(2, () -> world.sendAllTracking(pos.getIntX(), pos.getIntY(), pos.getIntZ(), new S2CBlockSetPacket(new BlockVec(pos.getIntX(), pos.getIntY(), pos.getIntZ(), BlockVecSpace.WORLD), world.get(pos)))));
                 return;
             }
 
@@ -195,7 +198,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             }
 
             for (ItemStack itemStack : original.getLootGen().generate(this.player.getRng())) {
-                world.drop(itemStack, new Vec3d(pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5), new Vec3d(0.0, 0.0, 0.0));
+                world.drop(itemStack, new Vec3d(pos.getIntX() + 0.5, pos.getIntY() + 0.5, pos.getIntZ() + 0.5), new Vec3d(0.0, 0.0, 0.0));
             }
         });
     }

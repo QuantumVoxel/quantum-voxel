@@ -5,6 +5,7 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 
 import java.util.List;

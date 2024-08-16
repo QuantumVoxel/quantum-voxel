@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.entity;
 
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.cs.ComponentSystem;
@@ -21,6 +21,8 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -564,7 +566,11 @@ public class Entity extends ComponentSystem implements CommandSender {
     }
 
     public BlockVec getBlockVec() {
-        return new BlockVec(this.x, this.y, this.z);
+        return new BlockVec(this.x, this.y, this.z, BlockVecSpace.WORLD);
+    }
+
+    public BlockVec getBlockVec(BlockVecSpace space) {
+        return new BlockVec(this.x, this.y, this.z, space);
     }
 
     public Vec2f getRotation() {

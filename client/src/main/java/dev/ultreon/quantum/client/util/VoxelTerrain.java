@@ -24,8 +24,8 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.input.GameCamera;
@@ -50,6 +50,10 @@ import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.noise.SimplexNoise;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -195,7 +199,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
             ClientChunkAccess key = node.key;
             ModelInstance value = node.value;
 
-            this.tmp.set(camera.getCamPos()).sub(key.getPos().vec3d());
+            this.tmp.set(camera.getCamPos()).sub(key.getVec().vec3d());
             value.transform.setTranslation((float) this.tmp.x, (float) this.tmp.y, (float) this.tmp.z);
         }
     }
@@ -256,7 +260,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
 
     @Override
     public ClientChunkAccess getChunkAt(@NotNull BlockVec pos) {
-        return getChunkAt(pos.x(), pos.y(), pos.z());
+        return getChunkAt(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     @Override
@@ -266,7 +270,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
 
     @Override
     public @Nullable ClientChunkAccess getChunk(int x, int z) {
-        return this.chunks.get(new ChunkVec(x, z));
+        return this.chunks.get(new ChunkVec(x, z, ChunkVecSpace.WORLD));
     }
 
     @Override
@@ -278,7 +282,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
         int chunkX = x >> 4;
         int chunkY = y >> 4;
         int chunkZ = z >> 4;
-        return new ChunkVec(chunkX, chunkY, chunkZ);
+        return new ChunkVec(chunkX, chunkY, chunkZ, ChunkVecSpace.WORLD);
     }
 
     @Override
@@ -297,7 +301,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public int getHighest(int x, int z) {
+    public int getHeight(int x, int z, HeightmapType type) {
         return 0;
     }
 
@@ -650,12 +654,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     private BlockVec localize(BlockVec pos) {
-        return new BlockVec(pos.x() & 0xf, pos.y() & 0xf, pos.z() & 0xf);
+        return pos.sectionLocal();
     }
 
     @Override
     public @NotNull BlockProperties get(int x, int y, int z) {
-        return get(new BlockVec(x, y, z));
+        return get(new BlockVec(x, y, z, BlockVecSpace.WORLD));
     }
 
     @Override

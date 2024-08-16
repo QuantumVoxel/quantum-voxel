@@ -16,7 +16,7 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.quantum.util.Vec2i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;

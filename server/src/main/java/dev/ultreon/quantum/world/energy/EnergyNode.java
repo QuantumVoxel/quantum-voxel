@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.energy;
 
 import com.google.common.collect.Iterators;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.CubicDirection;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;

@@ -1,7 +1,8 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.world.vec.BlockVec;
 
 public interface ChunkAccess extends ChunkReader {
     default void setFast(Vec3i pos, BlockProperties block) {
@@ -9,7 +10,7 @@ public interface ChunkAccess extends ChunkReader {
     }
 
     default void setFast(BlockVec pos, BlockProperties block) {
-        setFast(pos.x(), pos.y(), pos.z(), block);
+        setFast(pos.getIntX(), pos.getIntY(), pos.getIntZ(), block);
     }
 
     boolean setFast(int x, int y, int z, BlockProperties block);
@@ -19,7 +20,7 @@ public interface ChunkAccess extends ChunkReader {
     }
 
     default void set(BlockVec pos, BlockProperties block) {
-        set(pos.x(), pos.y(), pos.z(), block);
+        set(pos.getIntX(), pos.getIntY(), pos.getIntZ(), block);
     }
 
     boolean set(int x, int y, int z, BlockProperties block);

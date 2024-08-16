@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -8,6 +8,8 @@ import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.EntityHitResult;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.util.WorldRayCaster;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -2,8 +2,8 @@ package dev.ultreon.quantum.entity.player;
 
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.Entity;

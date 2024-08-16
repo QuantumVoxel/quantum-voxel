@@ -2,7 +2,7 @@ package dev.ultreon.quantum.block.entity;
 
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.Nullable;

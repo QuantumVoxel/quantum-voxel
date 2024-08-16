@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.resources.ResourceLoader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental

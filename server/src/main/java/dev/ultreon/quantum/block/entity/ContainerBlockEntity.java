@@ -3,7 +3,7 @@ package dev.ultreon.quantum.block.entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
 import dev.ultreon.quantum.world.capability.CapabilityType;

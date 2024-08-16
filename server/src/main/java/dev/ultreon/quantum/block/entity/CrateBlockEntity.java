@@ -3,7 +3,7 @@ package dev.ultreon.quantum.block.entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.menu.CrateMenu;
 import dev.ultreon.quantum.menu.MenuTypes;
-import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 

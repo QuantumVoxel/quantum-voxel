@@ -3,8 +3,8 @@ package dev.ultreon.quantum.world.gen;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.world.BuilderChunk;
+import dev.ultreon.quantum.world.HeightmapType;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 
@@ -58,7 +58,7 @@ public class Carver {
             }
         }
 
-        return chunk.getHighest(x, z, BlockMetaPredicate.WG_HEIGHT_CHK);
+        return chunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
     }
 
     private static BlockProperties solidBlock(int y) {

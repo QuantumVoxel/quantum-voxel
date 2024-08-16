@@ -1,7 +1,8 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.world.vec.BlockVec;
 
 public interface ChunkReader {
     BlockProperties getFast(int x, int y, int z);
@@ -10,10 +11,10 @@ public interface ChunkReader {
 
     Vec3i getOffset();
 
-    int getHighest(int x, int z);
+    int getHeight(int x, int z);
 
     default BlockProperties get(BlockVec localize) {
-        return get(localize.x(), localize.y(), localize.z());
+        return get(localize.getIntX(), localize.getIntY(), localize.getIntZ());
     }
 
     default BlockProperties get(Vec3i cpy) {
@@ -21,7 +22,7 @@ public interface ChunkReader {
     }
 
     default BlockProperties getFast(BlockVec localize) {
-        return getFast(localize.x(), localize.y(), localize.z());
+        return getFast(localize.getIntX(), localize.getIntY(), localize.getIntZ());
     }
 
     default BlockProperties getFast(Vec3i cpy) {

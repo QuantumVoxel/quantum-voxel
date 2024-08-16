@@ -7,9 +7,18 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.pipeline.JNoise;
 
+/**
+ * This class generates a terrain noise, which is used to generate terrain in a Chunk.
+ * It combines multiple {@link NoiseSource}s to create a terrain with more details.
+ */
 public class TerrainNoise implements NoiseSource {
     private final NoiseSource noise;
 
+    /**
+     * Creates a new terrain noise generator with the given seed.
+     *
+     * @param seed the seed for the generator
+     */
     public TerrainNoise(long seed) {
         noise = JNoise.newBuilder()
                 .fastSimplex(seed, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
@@ -87,21 +96,51 @@ public class TerrainNoise implements NoiseSource {
                 .scale(1 / 16f).build();
     }
 
+    /**
+     * Evaluates the noise at the given position.
+     *
+     * @param x the x-coordinate of the position
+     * @return the noise value at the given position
+     */
     @Override
     public double evaluateNoise(double x) {
         return noise.evaluateNoise(x);
     }
 
+    /**
+     * Evaluates the noise at the given 2D position.
+     *
+     * @param x the x-coordinate of the position
+     * @param y the y-coordinate of the position
+     * @return the noise value at the given position
+     */
     @Override
     public double evaluateNoise(double x, double y) {
         return noise.evaluateNoise(x, y);
     }
 
+    /**
+     * Evaluates the noise at the given 3D position.
+     *
+     * @param x the x-coordinate of the position
+     * @param y the y-coordinate of the position
+     * @param z the z-coordinate of the position
+     * @return the noise value at the given position
+     */
     @Override
     public double evaluateNoise(double x, double y, double z) {
         return noise.evaluateNoise(x, y, z);
     }
 
+    /**
+     * Evaluates the noise at the given 4D position.
+     *
+     * @param x the x-coordinate of the position
+     * @param y the y-coordinate of the position
+     * @param z the z-coordinate of the position
+     * @param w the w-coordinate of the position
+     * @return the noise value at the given position
+     */
     @Override
     public double evaluateNoise(double x, double y, double z, double w) {
         return noise.evaluateNoise(x, y, z, w);

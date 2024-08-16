@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.model.blockbench;
 
 import com.badlogic.gdx.math.Matrix4;
-import dev.ultreon.libs.commons.v0.vector.Vec3f;
+import dev.ultreon.quantum.util.Vec3f;
 
 import java.util.UUID;
 

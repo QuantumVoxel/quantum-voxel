@@ -1,10 +1,12 @@
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Objects;
 
@@ -14,9 +16,9 @@ public class EntityHitResult implements HitResult {
     // input
     protected Ray ray;
     protected float distanceMax = 5.0F;
-    public Vec3d position = new Vec3d();
-    protected Vec3d normal = new Vec3d();
-    protected Vec3i pos = new Vec3i();
+    public Vec position = new Vec();
+    protected Vec normal = new Vec();
+    protected BlockVec pos = new BlockVec(BlockVecSpace.WORLD);
     public Entity entity;
     public boolean collide;
     public double distance;
@@ -77,16 +79,16 @@ public class EntityHitResult implements HitResult {
     }
 
     @Override
-    public Vec3d getPosition() {
+    public Vec getVec() {
         return this.position;
     }
 
-    public Vec3d getNormal() {
+    public Vec getNormal() {
         return this.normal;
     }
 
     @Override
-    public Vec3i getPos() {
+    public BlockVec getBlockVec() {
         return this.pos;
     }
 
