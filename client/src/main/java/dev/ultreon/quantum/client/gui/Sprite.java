@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
@@ -13,10 +13,10 @@ public class Sprite {
     private final int height;
     private final Meta meta;
 
-    public Sprite(Identifier id) {
-        Identifier mappedId = id.mapPath(path -> "textures/" + path + ".png");
+    public Sprite(NamespaceID id) {
+        NamespaceID mappedId = id.mapPath(path -> "textures/" + path + ".png");
         this.handle = new ResourceFileHandle(mappedId);
-        Identifier mappedSpriteId = id.mapPath(path -> "textures/" + path + ".sprite.yml");
+        NamespaceID mappedSpriteId = id.mapPath(path -> "textures/" + path + ".sprite.yml");
         var spriteRes = new ResourceFileHandle(mappedSpriteId);
         this.texture = new Texture(handle);
         this.width = this.texture.getWidth();

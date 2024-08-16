@@ -2,17 +2,17 @@ package dev.ultreon.quantum.text.icon;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public abstract class FontIconMap {
-    private final Identifier id;
-    private final ObjectMap<String, Identifier> mapping = new ObjectMap<>();
+    private final NamespaceID id;
+    private final ObjectMap<String, NamespaceID> mapping = new ObjectMap<>();
 
-    protected FontIconMap(Identifier id) {
+    protected FontIconMap(NamespaceID id) {
         this.id = id;
     }
 
-    public Identifier get(String name) {
+    public NamespaceID get(String name) {
         return this.mapping.get(name);
     }
 
@@ -20,7 +20,7 @@ public abstract class FontIconMap {
         this.mapping.put(name, id.mapPath(v -> "textures/font_icon/" + v + "/" + name + ".png"));
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return Registries.FONT_ICON_MAP.id();
     }
 }

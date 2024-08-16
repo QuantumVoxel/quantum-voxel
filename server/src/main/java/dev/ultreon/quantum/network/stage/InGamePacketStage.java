@@ -35,6 +35,7 @@ public class InGamePacketStage extends PacketStage {
         this.addServerBound(C2SCraftRecipePacket::new);
         this.addServerBound(C2SDropItemPacket::new);
         this.addServerBound(C2SAttackPacket::new);
+        this.addServerBound(C2SRequestChunkLoadPacket::new);
 
         this.addClientBound(S2CKeepAlivePacket::new);
         this.addClientBound(S2CPingPacket::new);
@@ -67,5 +68,6 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CEntityPipeline::new);
         this.addClientBound(S2CPlayerAttackPacket::new);
         this.addClientBound(S2CSpawnParticlesPacket::new);
+        this.addClientBound(S2CChunkUnloadPacket::new);
     }
 }

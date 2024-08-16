@@ -3,14 +3,12 @@ package dev.ultreon.quantum.debug;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 
-import java.lang.management.ManagementFactory;
-import java.util.List;
-
 public class DebugFlags {
     private static boolean detectDebug() {
         GamePlatform gamePlatform = GamePlatform.get();
         return gamePlatform.detectDebug();
     }
+
 
     public static final boolean IS_RUNNING_IN_DEBUG = detectDebug();
 
@@ -24,6 +22,7 @@ public class DebugFlags {
     public static final DebugFlag PACKET_LOGGING = new DebugFlag(true);
     public static final DebugFlag ORE_FEATURE = new DebugFlag(false);
     public static final DebugFlag LOG_OUT_OF_BOUNDS = new DebugFlag(false);
+    public static final DebugFlag LOG_CHUNK_LOAD_FAILURE = new DebugFlag(true);
 
     static {
         if (IS_RUNNING_IN_DEBUG)

@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client.model.item;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import dev.ultreon.quantum.client.model.BakedModel;
-import dev.ultreon.quantum.util.Identifier;
 
 public class BakedItemModel extends BakedModel {
     private final ItemModel source;

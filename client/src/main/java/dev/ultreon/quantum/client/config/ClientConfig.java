@@ -5,7 +5,7 @@ import dev.ultreon.quantum.config.crafty.ConfigEntry;
 import dev.ultreon.quantum.config.crafty.ConfigInfo;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.config.crafty.Ranged;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 /**
  * This is the client configuration.
@@ -67,7 +67,7 @@ public class ClientConfig extends CraftyConfig {
     public static boolean enableDebugOverlay = false;
 
     @ConfigEntry(path = "generic.language", comment = "The language of the game. Use the ISO 639-1 code.")
-    public static Identifier language = new Identifier("en_us");
+    public static NamespaceID language = new NamespaceID("en_us");
 
     @ConfigEntry(path = "personalisation.diagonalFontShadow", comment = "Whether diagonal font shadows are enabled.")
     public static boolean diagonalFontShadow = false;

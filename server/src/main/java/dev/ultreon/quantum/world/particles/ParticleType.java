@@ -1,14 +1,14 @@
 package dev.ultreon.quantum.world.particles;
 
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class ParticleType {
     public ParticleType() {
 
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return Registries.PARTICLE_TYPES.getId(this);
     }
 

@@ -7,12 +7,10 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.vector.Vec2d;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -24,6 +22,8 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.gamerule.GameRules;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.Networker;
 import dev.ultreon.quantum.network.ServerStatusException;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -39,16 +39,15 @@ import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.CachedPlayer;
 import dev.ultreon.quantum.server.player.PermissionMap;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PollingExecutorService;
 import dev.ultreon.quantum.util.Shutdownable;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -102,13 +101,12 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private boolean sendingChunk;
     protected int maxPlayers = 10;
     private final Cache<String, CachedPlayer> cachedPlayers = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).build();
-    private final Map<Identifier, ? extends ServerWorld> worlds;
+    private final Map<NamespaceID, ? extends ServerWorld> worlds;
     private final GameRules gameRules = new GameRules();
     private final PermissionMap permissions = new PermissionMap();
     private final CommandSender consoleSender = new ConsoleCommandSender();
     private final RecipeManager recipeManager;
     private final PlayerManager playerManager = new PlayerManager(this);
-    private boolean initialChunksLoaded = false;
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -139,7 +137,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         // TODO: Make dimension registry.
         this.worlds = Map.of(
-                new Identifier("overworld"), this.world // Overworld dimension. TODO: Add more dimensions.
+                new NamespaceID("overworld"), this.world // Overworld dimension. TODO: Add more dimensions.
         );
 
         if (DebugFlags.INSPECTION_ENABLED.enabled()) {
@@ -452,19 +450,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             });
         }
 
-        // Tick chunk refresh time.
-        if (this.world != null && this.chunkRefresh-- <= 0) {
-            this.chunkRefresh = QuantumServer.seconds2ticks(0.5f);
-
-            // Refresh chunks.
-            ChunkRefresher refresher = new ChunkRefresher();
-            for (ServerPlayer player : this.players.values()) {
-                player.refreshChunks(refresher);
-            }
-            refresher.freeze();
-            world.doRefresh(refresher);
-        }
-
         // Poll the chunk network queue.
         this.profiler.section("chunkPackets", this::pollChunkPacket);
     }
@@ -704,18 +689,18 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     /**
      * Sends a chunk to all players that are within the render distance.
      *
-     * @param globalPos the global position of the chunk.
+     * @param globalVec the global position of the chunk.
      * @param chunk     the chunk to send.
      * @throws IOException if an I/O error occurs.
      */
-    public void sendChunk(ChunkPos globalPos, Chunk chunk) throws IOException {
+    public void sendChunk(ChunkVec globalVec, ServerChunk chunk) throws IOException {
         for (ServerPlayer player : this.players.values()) {
-            Vec3d chunkPos3D = globalPos.getChunkOrigin().add(World.CHUNK_SIZE / 2f, World.CHUNK_HEIGHT / 2f, World.CHUNK_SIZE / 2f);
-            Vec2d chunkPos2D = new Vec2d(chunkPos3D.x, chunkPos3D.z);
+            Vec3d ChunkVec3D = globalVec.getChunkOrigin().add(World.CHUNK_SIZE / 2f, World.CHUNK_HEIGHT / 2f, World.CHUNK_SIZE / 2f);
+            Vec2d ChunkVec2D = new Vec2d(ChunkVec3D.x, ChunkVec3D.z);
             Vec2d playerPos2D = new Vec2d(player.getX(), player.getZ());
-            double dst = chunkPos2D.dst(playerPos2D);
+            double dst = ChunkVec2D.dst(playerPos2D);
             if (dst < this.getRenderDistance() * World.CHUNK_SIZE) {
-                player.sendChunk(globalPos, chunk);
+                player.sendChunk(globalVec, chunk);
             }
         }
     }
@@ -748,8 +733,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param pos the chunk to find players in.
      * @return the players in the specified chunk.
      */
-    public Stream<ServerPlayer> getPlayersInChunk(ChunkPos pos) {
-        return this.players.values().stream().filter(player -> player.getChunkPos().equals(pos));
+    public Stream<ServerPlayer> getPlayersInChunk(ChunkVec pos) {
+        return this.players.values().stream().filter(player -> player.getChunkVec().equals(pos));
     }
 
     /**
@@ -809,7 +794,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     }
 
-    public void handleChunkLoadFailure(ChunkPos globalPos, String reason) {
+    public void handleChunkLoadFailure(ChunkVec globalVec, String reason) {
 
     }
 
@@ -825,7 +810,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return this.gameRules;
     }
 
-    public ServerWorld getWorld(Identifier name) {
+    public ServerWorld getWorld(NamespaceID name) {
         return this.worlds.get(name);
     }
 
@@ -861,14 +846,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public abstract void fatalCrash(Throwable throwable);
-
-    public void onInitialChunksLoaded() {
-        this.initialChunksLoaded = true;
-    }
-
-    public boolean isInitialChunksLoaded() {
-        return this.initialChunksLoaded;
-    }
 
     public PlayerManager getPlayerManager() {
         return this.playerManager;

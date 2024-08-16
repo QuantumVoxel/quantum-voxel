@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.item.Item;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class FlatItemModel implements ItemModel {
     private final Item item;
@@ -50,7 +50,7 @@ public class FlatItemModel implements ItemModel {
     }
 
     @Override
-    public Identifier resourceId() {
+    public NamespaceID resourceId() {
         return item.getId();
     }
 

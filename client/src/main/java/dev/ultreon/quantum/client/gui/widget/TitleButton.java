@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 
@@ -19,7 +19,7 @@ import static dev.ultreon.quantum.client.QuantumClient.id;
 public class TitleButton extends Button<TitleButton> {
     private final TextComponent text;
     private final ColorComponent textColor;
-    private Identifier icon;
+    private NamespaceID icon;
 
     protected TitleButton() {
         this(200);
@@ -90,7 +90,7 @@ public class TitleButton extends Button<TitleButton> {
         return this;
     }
 
-    public TitleButton icon(Identifier icon) {
+    public TitleButton icon(NamespaceID icon) {
         this.icon = icon;
         return this;
     }
@@ -139,7 +139,7 @@ public class TitleButton extends Button<TitleButton> {
         return this;
     }
 
-    public Identifier getIcon() {
+    public NamespaceID getIcon() {
         return icon;
     }
 }

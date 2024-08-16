@@ -2,8 +2,9 @@ package dev.ultreon.quantum.debug;
 
 import java.util.Objects;
 
+@SuppressWarnings("FieldMayBeFinal")
 public final class DebugFlag {
-    private final boolean enabled;
+    private boolean enabled;
 
     public DebugFlag(boolean enabled) {
         this.enabled = enabled;

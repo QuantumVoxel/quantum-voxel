@@ -1,6 +1,6 @@
 package dev.ultreon.xeox.loader;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Collection;
 
@@ -36,7 +36,7 @@ public class JSModInfo {
      * @param path the path
      * @return the Identifier
      */
-    public Identifier makeId(String path) {
-        return new Identifier(this.id, path);
+    public NamespaceID makeId(String path) {
+        return new NamespaceID(this.id, path);
     }
 }

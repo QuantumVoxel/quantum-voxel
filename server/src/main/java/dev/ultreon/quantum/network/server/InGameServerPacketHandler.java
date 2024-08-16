@@ -31,15 +31,15 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.TickTask;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class InGameServerPacketHandler implements ServerPacketHandler {
-    private static final Map<Identifier, NetworkChannel> CHANNEL = new HashMap<>();
+    private static final Map<NamespaceID, NetworkChannel> CHANNEL = new HashMap<>();
     private final QuantumServer server;
     private final ServerPlayer player;
     private final IConnection connection;
@@ -53,7 +53,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.context = new PacketContext(player, connection, Env.SERVER);
     }
 
-    public static NetworkChannel registerChannel(Identifier id) {
+    public static NetworkChannel registerChannel(NamespaceID id) {
         NetworkChannel channel = NetworkChannel.create(id);
         InGameServerPacketHandler.CHANNEL.put(id, channel);
         return channel;
@@ -62,6 +62,10 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     @Override
     public PacketDestination destination() {
         return null;
+    }
+
+    public void onRequestChunkLoad(ChunkVec pos) {
+        this.player.requestChunkLoad(pos);
     }
 
     @Override
@@ -98,7 +102,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         packet.handlePacket(() -> new ModPacketContext(channel, this.player, this.connection, Env.SERVER));
     }
 
-    public NetworkChannel getChannel(Identifier channelId) {
+    public NetworkChannel getChannel(NamespaceID channelId) {
         return InGameServerPacketHandler.CHANNEL.get(channelId);
     }
 
@@ -119,7 +123,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.server.submit(() -> player.handlePlayerMove(x, y, z));
     }
 
-    public void onChunkStatus(ServerPlayer player, ChunkPos pos, Chunk.Status status) {
+    public void onChunkStatus(ServerPlayer player, ChunkVec pos, Chunk.Status status) {
         player.onChunkStatus(pos, status);
     }
 
@@ -127,7 +131,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         // Do not need to do anything since it's a keep-alive packet.
     }
 
-    public void onBlockBreaking(BlockPos pos, C2SBlockBreakingPacket.BlockStatus status) {
+    public void onBlockBreaking(BlockVec pos, C2SBlockBreakingPacket.BlockStatus status) {
         this.server.submit(() -> {
             ServerWorld world = this.player.getWorld();
             BlockProperties block = world.get(pos);
@@ -157,11 +161,11 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         });
     }
 
-    public void onBlockBroken(BlockPos pos) {
+    public void onBlockBroken(BlockVec pos) {
         var world = this.player.getWorld();
-        var chunkPos = World.toChunkPos(pos);
+        var ChunkVec = World.toChunkVec(pos);
 
-        if (!this.player.isChunkActive(chunkPos)) {
+        if (!this.player.isChunkActive(ChunkVec)) {
             QuantumServer.LOGGER.warn("Player %s attempted to break block that is not loaded.", this.player.getName());
             return;
         }
@@ -170,7 +174,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick) {
 
-                QuantumServer.invoke(new TickTask(2, () -> world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockPos(pos.x(), pos.y(), pos.z()), world.get(pos)))));
+                QuantumServer.invoke(new TickTask(2, () -> world.sendAllTracking(pos.x(), pos.y(), pos.z(), new S2CBlockSetPacket(new BlockVec(pos.x(), pos.y(), pos.z()), world.get(pos)))));
                 return;
             }
 
@@ -231,7 +235,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.connection.send(new S2CPingPacket(time));
     }
 
-    public void onCraftRecipe(int typeId, Identifier recipeId) {
+    public void onCraftRecipe(int typeId, NamespaceID recipeId) {
         RecipeType<?> recipeType = Registries.RECIPE_TYPE.byId(typeId);
         Recipe recipe = RecipeManager.get().get(recipeId, recipeType);
         if (recipe == null) {
@@ -245,7 +249,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.player.dropItem();
     }
 
-    public void handleOpenMenu(Identifier id, BlockPos pos) {
+    public void handleOpenMenu(NamespaceID id, BlockVec pos) {
         MenuType<?> menuType = Registries.MENU_TYPE.get(id);
 
         this.server.execute(() -> {

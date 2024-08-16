@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.resources;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ResourceCategory {
-    private final Map<Identifier, StaticResource> resourceMap = new HashMap<>();
+    private final Map<NamespaceID, StaticResource> resourceMap = new HashMap<>();
     private final String name;
 
     public ResourceCategory(String name) {
@@ -17,27 +17,27 @@ public class ResourceCategory {
         return name;
     }
 
-    void set(Identifier entry, StaticResource resource) {
+    void set(NamespaceID entry, StaticResource resource) {
         this.resourceMap.put(entry, resource);
     }
 
-    public boolean has(Identifier entry) {
+    public boolean has(NamespaceID entry) {
         return this.resourceMap.containsKey(entry);
     }
 
-    public StaticResource get(Identifier entry) {
+    public StaticResource get(NamespaceID entry) {
         return this.resourceMap.get(entry);
     }
 
-    public Map<Identifier, StaticResource> mapEntries() {
+    public Map<NamespaceID, StaticResource> mapEntries() {
         return Collections.unmodifiableMap(this.resourceMap);
     }
 
-    public void forEach(BiConsumer<Identifier, StaticResource> consumer) {
+    public void forEach(BiConsumer<NamespaceID, StaticResource> consumer) {
         this.resourceMap.forEach(consumer);
     }
 
-    public Set<Identifier> entries() {
+    public Set<NamespaceID> entries() {
         return Collections.unmodifiableSet(this.resourceMap.keySet());
     }
 

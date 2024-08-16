@@ -2,7 +2,7 @@ package dev.ultreon.quantum.recipe;
 
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Objects;
 
@@ -26,7 +26,7 @@ public final class RecipeType<T extends Recipe> {
      * @return The registered recipe type
      */
     private static <T extends Recipe> RecipeType<T> register(String name, RecipeType<T> recipeType) {
-        Registries.RECIPE_TYPE.register(new Identifier(name), recipeType);
+        Registries.RECIPE_TYPE.register(new NamespaceID(name), recipeType);
         return recipeType;
     }
 
@@ -35,7 +35,7 @@ public final class RecipeType<T extends Recipe> {
      *
      * @return The identifier key
      */
-    public Identifier getKey() {
+    public NamespaceID getKey() {
         return Registries.RECIPE_TYPE.getId(this);
     }
 
@@ -55,7 +55,7 @@ public final class RecipeType<T extends Recipe> {
      * @param root The JSON object containing the recipe data
      * @return The deserialized recipe
      */
-    public T deserialize(Identifier id, Json5Object root) {
+    public T deserialize(NamespaceID id, Json5Object root) {
         return this.deserializer.deserialize(id, root);
     }
 
@@ -97,6 +97,6 @@ public final class RecipeType<T extends Recipe> {
          * @param root The JSON object containing the recipe data
          * @return The deserialized recipe
          */
-        T deserialize(Identifier id, Json5Object root);
+        T deserialize(NamespaceID id, Json5Object root);
     }
 }

@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.ClientRegistries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 
 public class RenderEffect {
@@ -13,7 +13,7 @@ public class RenderEffect {
     public static final RenderEffect WATER = RenderEffect.register("water", new RenderEffect());
 
     private static RenderEffect register(String name, RenderEffect renderType) {
-        ClientRegistries.RENDER_EFFECT.register(new Identifier(CommonConstants.NAMESPACE, name), renderType);
+        ClientRegistries.RENDER_EFFECT.register(new NamespaceID(CommonConstants.NAMESPACE, name), renderType);
         return renderType;
     }
 

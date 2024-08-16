@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.texture;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class GuiAtlasLoader {
     public static void load(PixmapPacker packer) {
@@ -59,8 +59,8 @@ public class GuiAtlasLoader {
         pack(packer, QuantumClient.id("popout_frame"));
     }
 
-    private static void pack(PixmapPacker packer, Identifier id) {
-        Identifier identifier = id.mapPath(path -> "textures/gui/" + path + ".png");
-        packer.pack(identifier.toString(), new Pixmap(QuantumClient.resource(identifier)));
+    private static void pack(PixmapPacker packer, NamespaceID id) {
+        NamespaceID namespaceID = id.mapPath(path -> "textures/gui/" + path + ".png");
+        packer.pack(namespaceID.toString(), new Pixmap(QuantumClient.resource(namespaceID)));
     }
 }

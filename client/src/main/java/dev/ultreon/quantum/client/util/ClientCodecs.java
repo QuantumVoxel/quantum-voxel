@@ -9,9 +9,7 @@ import com.mojang.serialization.codecs.KeyDispatchCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ultreon.quantum.client.GameTextureAttribute;
 import dev.ultreon.quantum.client.data.gen.provider.DepthFunc;
-import dev.ultreon.quantum.util.Identifier;
-
-import java.util.Objects;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class ClientCodecs {
     public static final MapCodec<FloatAttribute> ALPHA_TEST_ATTRIBUTE = RecordCodecBuilder.mapCodec(instance -> instance
@@ -29,14 +27,14 @@ public class ClientCodecs {
     public static final MapCodec<GameTextureAttribute> TEXTURE_ATTRIBUTE = RecordCodecBuilder.mapCodec(instance -> instance
             .group(
                     Codec.STRING.fieldOf("type").forGetter((GameTextureAttribute textureAttribute) -> Attribute.getAttributeAlias(textureAttribute.type)),
-                    Identifier.CODEC.fieldOf("atlas").forGetter(GameTextureAttribute::getAtlasId),
-                    Identifier.CODEC.fieldOf("texture").forGetter(GameTextureAttribute::getTextureId)
+                    NamespaceID.CODEC.fieldOf("atlas").forGetter(GameTextureAttribute::getAtlasId),
+                    NamespaceID.CODEC.fieldOf("texture").forGetter(GameTextureAttribute::getTextureId)
             )
             .apply(instance, GameTextureAttribute::new));
     public static final MapCodec<TextureAtlasAttribute> TEXTURE_ATLAS_ATTRIBUTE = RecordCodecBuilder.mapCodec(instance -> instance
             .group(
                     Codec.STRING.fieldOf("type").forGetter((TextureAtlasAttribute textureAttribute) -> Attribute.getAttributeAlias(textureAttribute.type)),
-                    Identifier.CODEC.fieldOf("atlas").forGetter(TextureAtlasAttribute::getAtlasId)
+                    NamespaceID.CODEC.fieldOf("atlas").forGetter(TextureAtlasAttribute::getAtlasId)
             )
             .apply(instance, TextureAtlasAttribute::new));
 
@@ -54,7 +52,7 @@ public class ClientCodecs {
     public static final MapCodec<GameCubemapAttribute> CUBEMAP_ATTRIBUTE = RecordCodecBuilder.mapCodec(instance -> instance
             .group(
                     Codec.STRING.fieldOf("type").forGetter((GameCubemapAttribute cubemapAttribute) -> Attribute.getAttributeAlias(cubemapAttribute.type)),
-                    Identifier.CODEC.fieldOf("atlas").forGetter(GameCubemapAttribute::getCubemapId)
+                    NamespaceID.CODEC.fieldOf("atlas").forGetter(GameCubemapAttribute::getCubemapId)
             )
             .apply(instance, GameCubemapAttribute::new));
 

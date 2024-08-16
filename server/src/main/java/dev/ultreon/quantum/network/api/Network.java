@@ -5,7 +5,7 @@ import dev.ultreon.quantum.network.api.packet.ClientEndpoint;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.api.packet.ServerEndpoint;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.NonExtendable
@@ -31,7 +31,7 @@ public abstract class Network {
 
     public final void init() {
         int id = 0;
-        this.channel = NetworkChannel.create(new Identifier(this.namespace(), this.channelName()));
+        this.channel = NetworkChannel.create(new NamespaceID(this.namespace(), this.channelName()));
 
         this.registerPackets(new PacketRegisterContext(this.channel, id));
     }
@@ -54,7 +54,7 @@ public abstract class Network {
 
     }
 
-    public final Identifier getId() {
-        return new Identifier(this.namespace(), this.channelName());
+    public final NamespaceID getId() {
+        return new NamespaceID(this.namespace(), this.channelName());
     }
 }

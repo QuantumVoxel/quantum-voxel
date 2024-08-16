@@ -1,13 +1,11 @@
 package dev.ultreon.quantum.entity;
 
-import dev.ultreon.quantum.cs.ComponentSystem;
-import dev.ultreon.quantum.world.*;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.vector.Vec2f;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.events.EntityEvents;
@@ -19,9 +17,11 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.text.Translations;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.BoundingBoxUtils;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -106,7 +106,7 @@ public class Entity extends ComponentSystem implements CommandSender {
      * @return the loaded entity
      */
     public static @NotNull Entity loadFrom(World world, MapType data) {
-        Identifier typeId = Identifier.parse(data.getString("type"));
+        NamespaceID typeId = NamespaceID.parse(data.getString("type"));
         EntityType<?> type = Registries.ENTITY_TYPE.get(typeId);
         Entity entity = type.create(world);
 
@@ -271,7 +271,7 @@ public class Entity extends ComponentSystem implements CommandSender {
     }
 
     public boolean isInWater() {
-        return this.world.get(this.getBlockPos()).isWater();
+        return this.world.get(this.getBlockVec()).isWater();
     }
 
     /**
@@ -563,8 +563,8 @@ public class Entity extends ComponentSystem implements CommandSender {
         this.oz = z;
     }
 
-    public BlockPos getBlockPos() {
-        return new BlockPos(this.x, this.y, this.z);
+    public BlockVec getBlockVec() {
+        return new BlockVec(this.x, this.y, this.z);
     }
 
     public Vec2f getRotation() {
@@ -680,15 +680,15 @@ public class Entity extends ComponentSystem implements CommandSender {
      */
     @Override
     public String getName() {
-        Identifier typeId = this.getType().getId();
+        NamespaceID typeId = this.getType().getId();
 
         // If the type ID is null, return a default null object translation
         if (typeId == null) return "NULL";
 
         // Generate a display name based on the entity's type ID
         return LanguageBootstrap.translate(String.format("%s.entity.%s.name", 
-                typeId.namespace(),
-                typeId.path().replace('/', '.')
+                typeId.getDomain(),
+                typeId.getPath().replace('/', '.')
         ));
     }
 
@@ -716,15 +716,15 @@ public class Entity extends ComponentSystem implements CommandSender {
         // Check if a custom name is set and return it if available
         if (this.customName != null) return this.customName;
 
-        Identifier typeId = this.getType().getId();
+        NamespaceID typeId = this.getType().getId();
 
         // If the type ID is null, return a default null object translation
         if (typeId == null) return Translations.NULL_OBJECT;
 
         // Generate a display name based on the entity's type ID
         return TextObject.translation(String.format("%s.entity.%s.name", 
-                typeId.namespace(),
-                typeId.path().replace('/', '.')
+                typeId.getDomain(),
+                typeId.getPath().replace('/', '.')
         ));
     }
 

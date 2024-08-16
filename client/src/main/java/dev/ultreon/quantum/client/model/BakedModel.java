@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 /**
  * Base class for all baked models.
@@ -20,7 +20,7 @@ public abstract class BakedModel {
     /**
      * The resource identifier.
      */
-    private final Identifier resourceId;
+    private final NamespaceID resourceId;
 
     /**
      * Creates a new baked model.
@@ -28,7 +28,7 @@ public abstract class BakedModel {
      * @param resourceId the resource identifier
      * @param model      the 3D model
      */
-    public BakedModel(Identifier resourceId, Model model) {
+    public BakedModel(NamespaceID resourceId, Model model) {
         this.resourceId = resourceId;
         this.model = model;
 
@@ -50,7 +50,7 @@ public abstract class BakedModel {
      *
      * @return the resource identifier
      */
-    public final Identifier resourceId() {
+    public final NamespaceID resourceId() {
         return resourceId;
     }
 }

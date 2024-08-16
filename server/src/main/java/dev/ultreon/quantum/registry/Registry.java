@@ -6,7 +6,7 @@ import dev.ultreon.quantum.LoadingContext;
 import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.tags.NamedTag;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,18 +16,18 @@ import java.util.stream.Collectors;
 import static dev.ultreon.quantum.registry.RegistryKey.ROOT;
 
 public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements RawIdMap<T> {
-    public static final Registry<Registry<?>> REGISTRY = new Registry<>(new Builder<>(new Identifier("registry")), ROOT);
+    public static final Registry<Registry<?>> REGISTRY = new Registry<>(new Builder<>(new NamespaceID("registry")), ROOT);
     private static final OrderedMap<RegistryKey<Registry<?>>, Registry<?>> REGISTRIES = new OrderedMap<>();
     private static Logger dumpLogger = (level, msg, t) -> {};
     private static boolean frozen;
     private final OrderedMap<RegistryKey<T>, T> keyMap = new OrderedMap<>();
     private final OrderedMap<T, RegistryKey<T>> valueMap = new OrderedMap<>();
     private final Class<T> type;
-    private final Identifier id;
+    private final NamespaceID id;
     private final boolean overrideAllowed;
     private final boolean syncDisabled;
     private final RegistryKey<Registry<T>> key;
-    private final Map<Identifier, NamedTag<T>> tags = new HashMap<>();
+    private final Map<NamespaceID, NamedTag<T>> tags = new HashMap<>();
 
     private Registry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {
         Preconditions.checkNotNull(key, "key");
@@ -69,7 +69,7 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
         Registry.dumpLogger = dumpLogger;
     }
 
-    public Identifier id() {
+    public NamespaceID id() {
         return this.id;
     }
 
@@ -79,18 +79,18 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
 
     @SafeVarargs
     @Deprecated
-    public static <T> Registry<T> create(Identifier id, @NotNull T... type) {
+    public static <T> Registry<T> create(NamespaceID id, @NotNull T... type) {
         return new Builder<>(id, type).build();
     }
 
     @SafeVarargs
-    public static <T> Builder<T> builder(Identifier id, T... typeGetter) {
+    public static <T> Builder<T> builder(NamespaceID id, T... typeGetter) {
         return new Builder<>(id, typeGetter);
     }
 
     @SafeVarargs
     public static <T> Builder<T> builder(String name, T... typeGetter) {
-        return new Builder<>(new Identifier(LoadingContext.get().namespace(), name), typeGetter);
+        return new Builder<>(new NamespaceID(LoadingContext.get().namespace(), name), typeGetter);
     }
 
     /**
@@ -100,7 +100,7 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
      * @return the element id of it.
      */
     @Nullable
-    public Identifier getId(T obj) {
+    public NamespaceID getId(T obj) {
         RegistryKey<T> registryKey = this.valueMap.get(obj);
         if (registryKey == null) return null;
         return registryKey.element();
@@ -117,17 +117,17 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
     }
 
     /**
-     * Returns the registered instance from the given {@link Identifier}
+     * Returns the registered instance from the given {@link NamespaceID}
      *
      * @param key the element id.
      * @return a registered instance of the type {@link T}.
      * @throws ClassCastException if the type is invalid.
      */
-    public T get(@Nullable Identifier key) {
+    public T get(@Nullable NamespaceID key) {
         return this.keyMap.get(RegistryKey.of(this.key, key));
     }
 
-    public boolean contains(Identifier rl) {
+    public boolean contains(NamespaceID rl) {
         return this.keyMap.containsKey(RegistryKey.of(this.key, rl));
     }
 
@@ -135,7 +135,7 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
         Registry.getDumpLogger().log("Registry dump: " + this.type.getSimpleName());
         for (Map.Entry<RegistryKey<T>, T> entry : this.entries()) {
             T object = entry.getValue();
-            Identifier rl = entry.getKey().element();
+            NamespaceID rl = entry.getKey().element();
 
             Registry.getDumpLogger().log("  (" + rl + ") -> " + object);
         }
@@ -147,7 +147,7 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
      * @param rl  the resource location.
      * @param val the register item value.
      */
-    public void register(Identifier rl, T val) {
+    public void register(NamespaceID rl, T val) {
         if (!this.type.isAssignableFrom(val.getClass()))
             throw new IllegalArgumentException("Not allowed type detected, got " + val.getClass() + " expected assignable to " + this.type);
 
@@ -171,7 +171,7 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
         return Collections.unmodifiableList(this.keyMap.valueList());
     }
 
-    public List<Identifier> ids() {
+    public List<NamespaceID> ids() {
         return this.keyMap.keyList().stream().map(RegistryKey::element).collect(Collectors.toList());
     }
 
@@ -257,16 +257,16 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
         return this.keyMap.get(key);
     }
 
-    public Optional<NamedTag<T>> getTag(Identifier identifier) {
-        NamedTag<T> tag = this.tags.get(identifier);
+    public Optional<NamedTag<T>> getTag(NamespaceID namespaceID) {
+        NamedTag<T> tag = this.tags.get(namespaceID);
         if (tag == null) return Optional.empty();
 
         return Optional.of(tag);
     }
 
-    public NamedTag<T> createTag(Identifier identifier) {
-        NamedTag<T> tag = new NamedTag<>(identifier, this);
-        this.tags.put(identifier, tag);
+    public NamedTag<T> createTag(NamespaceID namespaceID) {
+        NamedTag<T> tag = new NamedTag<>(namespaceID, this);
+        this.tags.put(namespaceID, tag);
 
         return tag;
     }
@@ -274,12 +274,12 @@ public class Registry<T> extends AbstractRegistry<RegistryKey<T>, T> implements 
     public static class Builder<T> {
 
         private final Class<T> type;
-        private final Identifier id;
+        private final NamespaceID id;
         private boolean allowOverride = false;
         private boolean doNotSync = false;
 
         @SuppressWarnings("unchecked")
-        public Builder(Identifier id, T... typeGetter) {
+        public Builder(NamespaceID id, T... typeGetter) {
             this.type = (Class<T>) typeGetter.getClass().getComponentType();
             this.id = id;
         }

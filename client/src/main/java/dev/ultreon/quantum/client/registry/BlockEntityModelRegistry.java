@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.client.InternalApi;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -14,14 +14,14 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class BlockEntityModelRegistry {
-    private static final Map<BlockEntityType<?>, Function<Identifier, BlockModel>> REGISTRY = new HashMap<>();
+    private static final Map<BlockEntityType<?>, Function<NamespaceID, BlockModel>> REGISTRY = new HashMap<>();
     private static final Map<BlockEntityType<?>, BlockModel> FINISHED_REGISTRY = new HashMap<>();
 
     private BlockEntityModelRegistry() {
 
     }
 
-    public static <T extends BlockEntity> void register(BlockEntityType<T> type, Function<Identifier, BlockModel> modelFactory) {
+    public static <T extends BlockEntity> void register(BlockEntityType<T> type, Function<NamespaceID, BlockModel> modelFactory) {
         REGISTRY.put(type, modelFactory);
     }
 

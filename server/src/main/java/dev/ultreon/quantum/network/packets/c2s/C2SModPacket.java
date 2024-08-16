@@ -6,10 +6,10 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class C2SModPacket extends Packet<InGameServerPacketHandler> {
-    private final Identifier channelId;
+    private final NamespaceID channelId;
     private final ModPacket<?> packet;
     private NetworkChannel channel;
 

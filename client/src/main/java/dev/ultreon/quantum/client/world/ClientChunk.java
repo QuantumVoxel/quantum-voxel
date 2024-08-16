@@ -33,7 +33,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
@@ -49,33 +50,33 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();
-    private final Map<BlockPos, BlockProperties> customRendered = new HashMap<>();
+    private final Map<BlockVec, BlockProperties> customRendered = new HashMap<>();
     public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
-    private final Map<BlockPos, ModelInstance> addedModels = new ConcurrentHashMap<>();
-    private final Map<BlockPos, ModelInstance> models = new ConcurrentHashMap<>();
-    private final Array<BlockPos> removedModels = new Array<>();
+    private final Map<BlockVec, ModelInstance> addedModels = new ConcurrentHashMap<>();
+    private final Map<BlockVec, ModelInstance> models = new ConcurrentHashMap<>();
+    private final Array<BlockVec> removedModels = new Array<>();
     public boolean visible;
     private ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
     private Stack<Integer> stack = new Stack<>();
 
     /**
-     * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
+     * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkVec, Storage, Storage, Map)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         this(world, pos, storage, biomeStorage, blockEntities);
     }
 
-    public ClientChunk(ClientWorld world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
         this.clientWorld = world;
         this.active = false;
 
-        blockEntities.forEach((blockPos, type) -> {
+        blockEntities.forEach((BlockVec, type) -> {
             if (type != null) {
-                this.setBlockEntity(blockPos, type.create(world, blockPos.offset(pos)));
+                this.setBlockEntity(BlockVec, type.create(world, BlockVec.offset(pos)));
             }
         });
 
@@ -184,7 +185,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
-        this.removedModels.add(new BlockPos(x, y, z));
+        this.removedModels.add(new BlockVec(x, y, z));
 
         boolean isBlockSet = super.setFast(x, y, z, block);
 
@@ -232,26 +233,26 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return null;
     }
 
-    public Map<BlockPos, BlockProperties> getCustomRendered() {
+    public Map<BlockVec, BlockProperties> getCustomRendered() {
         return this.customRendered;
     }
 
     @Override
-    protected void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
-        super.setBlockEntity(blockPos, blockEntity);
+    protected void setBlockEntity(BlockVec blockVec, BlockEntity blockEntity) {
+        super.setBlockEntity(blockVec, blockEntity);
 
-        System.out.println("blockPos = " + blockPos);
+        System.out.println("BlockVec = " + blockVec);
 
         BlockModel blockModel = BlockEntityModelRegistry.get(blockEntity.getType());
         if (blockModel != null) {
             blockModel.loadInto(blockEntity.pos(), this);
         } else {
-            QuantumClient.LOGGER.warn("No block entity model for " + blockEntity.getType().getId() + " at " + blockPos);
+            QuantumClient.LOGGER.warn("No block entity model for " + blockEntity.getType().getId() + " at " + blockVec);
         }
     }
 
     @CanIgnoreReturnValue
-    public ModelInstance addModel(BlockPos pos, ModelInstance instance) {
+    public ModelInstance addModel(BlockVec pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
             ModelInstance modelInstance1 = this.models.get(pos);
             RenderLayer.WORLD.destroy(modelInstance1);
@@ -261,7 +262,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public void renderModels(RenderLayer renderLayer) {
-        for (BlockPos pos : this.addedModels.keySet()) {
+        for (BlockVec pos : this.addedModels.keySet()) {
             ModelInstance model = this.addedModels.get(pos);
             model.userData = Shaders.MODEL_VIEW.get();
             this.addedModels.remove(pos);
@@ -269,12 +270,12 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             renderLayer.add(model);
         }
 
-        for (BlockPos pos : this.models.keySet()) {
+        for (BlockVec pos : this.models.keySet()) {
             ModelInstance inst = this.models.get(pos);
             inst.transform.setToTranslationAndScaling(renderOffset.x + pos.x(), renderOffset.y + pos.y(), renderOffset.z + pos.z(), 1 / 16f, 1 / 16f, 1 / 16f);
         }
 
-        for (BlockPos pos : this.removedModels) {
+        for (BlockVec pos : this.removedModels) {
             this.removedModels.removeValue(pos, false);
             ModelInstance model = this.models.remove(pos);
             if (model != null)
@@ -336,7 +337,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.lightMap.clear();
     }
 
-    public void setSunlight(BlockPos pos, int intensity) {
+    public void setSunlight(BlockVec pos, int intensity) {
         lightMap.setSunlight(pos.x(), pos.y(), pos.z(), intensity);
     }
 
@@ -370,7 +371,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         }
     }
 
-    public int getSunlight(BlockPos pos) {
+    public int getSunlight(BlockVec pos) {
         return lightMap.getSunlight(pos.x(), pos.y(), pos.z());
     }
 }

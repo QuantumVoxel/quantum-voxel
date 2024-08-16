@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.function.Supplier;
@@ -32,7 +32,7 @@ public class TitleWidget extends Widget {
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        Identifier texture = new Identifier("textures/gui/title.png");
+        NamespaceID texture = new NamespaceID("textures/gui/title.png");
 
         if (ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled()) {
 //            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);

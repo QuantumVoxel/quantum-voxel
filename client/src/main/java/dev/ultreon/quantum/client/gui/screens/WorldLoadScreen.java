@@ -7,6 +7,11 @@ import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Label;
+import dev.ultreon.quantum.client.util.VoxelTerrain;
+import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
@@ -14,8 +19,6 @@ import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.*;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.jetbrains.annotations.NotNull;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -33,6 +36,7 @@ public class WorldLoadScreen extends Screen {
     private ServerWorld world;
     private DeathScreen closeScreen;
     private boolean done = false;
+    private volatile boolean loggedIn;
 
     public WorldLoadScreen(WorldStorage storage) {
         super(TextObject.translation("quantum.screen.world_load"));
@@ -90,6 +94,10 @@ public class WorldLoadScreen extends Screen {
 
             this.world.setupSpawn();
 
+            while (!loggedIn) {
+                Thread.sleep(100);
+            }
+
             QuantumServer.invokeAndWait(this::loadWithinServer);
 
             this.message("Waiting for server to finalize...");
@@ -125,6 +133,20 @@ public class WorldLoadScreen extends Screen {
             if (chunksToLoad == -1) {
                 this.subTitleLabel.text().setRaw("Entering your world");
             } else if (chunksToLoad != 0) {
+                if (world.getChunksLoaded() == chunksToLoad) {
+                    this.done = true;
+
+                    if (this.client.world instanceof ClientWorld clientWorld) {
+                        this.client.worldRenderer = new WorldRenderer(clientWorld);
+                    } else if (this.client.world instanceof VoxelTerrain terrain) {
+                        this.client.worldRenderer = terrain;
+                    }
+
+                    this.client.renderWorld = true;
+                    this.client.showScreen(null);
+                    return;
+                }
+
 //                int ratio = world.getChunksLoaded() / chunksToLoad;
                 float ratio = (float) world.getChunksLoaded() / chunksToLoad;
                 String percent = (int) (100 * ratio) + "%";
@@ -174,19 +196,7 @@ public class WorldLoadScreen extends Screen {
         try {
             WorldLoadScreen.LOGGER.info("Loading spawn chunks...");
 
-            ChunkPos spawnChunk = World.toChunkPos(this.world.getSpawnPoint());
-//            int spawnChunkX = spawnChunk.x();
-//            int spawnChunkY = spawnChunk.y();
-//            int spawnChunkZ = spawnChunk.z();
-//
-//            for (int chunkX = spawnChunkX - 1; chunkX <= spawnChunkX + 1; chunkX++) {
-//                for (int chunkY = spawnChunkY - 1; chunkY <= spawnChunkY + 1; chunkY++) {
-//                    for (int chunkZ = spawnChunkZ - 1; chunkZ <= spawnChunkZ + 1; chunkZ++) {
-//                        this.world.loadChunkNow(spawnChunkX, spawnChunkY, spawnChunkZ);
-//                        this.message("Loading spawn chunk " + chunkX + ", " + chunkY + ", " + chunkZ);
-//                    }
-//                }
-//            }
+            ChunkVec spawnChunk = World.toChunkVec(this.world.getSpawnPoint());
 
             ChunkRefresher refresher = new ChunkRefresher();
             ServerPlayer.refreshChunks(refresher, this.client.integratedServer, this.world, spawnChunk,
@@ -212,7 +222,7 @@ public class WorldLoadScreen extends Screen {
         return false;
     }
 
-    public void done() {
-        this.done = true;
+    public void onLogin() {
+        this.loggedIn = true;
     }
 }

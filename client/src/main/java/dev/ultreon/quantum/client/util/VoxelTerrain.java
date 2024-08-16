@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_BOTTOM_COLOR;
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_TOP_COLOR;
 
@@ -81,7 +82,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     private final ObjectMap<ClientChunkAccess, ModelInstance> instances = new ObjectMap<>();
     private final Vec3d tmp = new Vec3d();
     private final IntMap<Entity> entities = new IntMap<>();
-    private final ObjectMap<ChunkPos, ClientChunkAccess> chunks = new ObjectMap<>();
+    private final ObjectMap<ChunkVec, ClientChunkAccess> chunks = new ObjectMap<>();
 
     public VoxelTerrain(GameCamera camera) {
         this.camera = camera;
@@ -164,7 +165,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
                 RenderLayer.WORLD.add(modelInstance);
 
                 this.instances.put(meshing, modelInstance);
-                this.chunks.put(toChunkPos(meshing.x, meshing.y, meshing.z), meshing);
+                this.chunks.put(toChunkVec(meshing.x, meshing.y, meshing.z), meshing);
             }
         }
     }
@@ -205,17 +206,17 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean unloadChunk(@NotNull ChunkPos chunkPos) {
+    public boolean unloadChunk(@NotNull ChunkVec chunkVec) {
         return false;
     }
 
     @Override
-    public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
+    public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos) {
         return false;
     }
 
     @Override
-    public boolean set(BlockPos pos, BlockProperties block) {
+    public boolean set(BlockVec pos, BlockProperties block) {
         return false;
     }
 
@@ -244,7 +245,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean set(BlockPos pos, BlockProperties block, int flags) {
+    public boolean set(BlockVec pos, BlockProperties block, int flags) {
         ChunkAccess chunk = getChunkAt(pos);
         if (chunk == null) {
             return false;
@@ -254,30 +255,30 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public ClientChunkAccess getChunkAt(@NotNull BlockPos pos) {
+    public ClientChunkAccess getChunkAt(@NotNull BlockVec pos) {
         return getChunkAt(pos.x(), pos.y(), pos.z());
     }
 
     @Override
-    public @Nullable ClientChunkAccess getChunk(ChunkPos pos) {
+    public @Nullable ClientChunkAccess getChunk(ChunkVec pos) {
         return this.chunks.get(pos);
     }
 
     @Override
     public @Nullable ClientChunkAccess getChunk(int x, int z) {
-        return this.chunks.get(new ChunkPos(x, z));
+        return this.chunks.get(new ChunkVec(x, z));
     }
 
     @Override
     public ClientChunkAccess getChunkAt(int x, int y, int z) {
-        return this.chunks.get(toChunkPos(x, y, z));
+        return this.chunks.get(toChunkVec(x, y, z));
     }
 
-    private ChunkPos toChunkPos(int x, int y, int z) {
+    private ChunkVec toChunkVec(int x, int y, int z) {
         int chunkX = x >> 4;
         int chunkY = y >> 4;
         int chunkZ = z >> 4;
-        return new ChunkPos(chunkX, chunkY, chunkZ);
+        return new ChunkVec(chunkX, chunkY, chunkZ);
     }
 
     @Override
@@ -286,7 +287,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean isOutOfWorldBounds(BlockPos pos) {
+    public boolean isOutOfWorldBounds(BlockVec pos) {
         return false;
     }
 
@@ -321,12 +322,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
+    public void setBlockEntity(BlockVec pos, BlockEntity blockEntity) {
 
     }
 
     @Override
-    public BlockEntity getBlockEntity(BlockPos pos) {
+    public BlockEntity getBlockEntity(BlockVec pos) {
         return null;
     }
 
@@ -356,7 +357,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
+    public boolean destroyBlock(BlockVec breaking, @Nullable Player breaker) {
         return false;
     }
 
@@ -411,7 +412,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public Biome getBiome(BlockPos pos) {
+    public Biome getBiome(BlockVec pos) {
         return null;
     }
 
@@ -465,22 +466,22 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public BreakResult continueBreaking(BlockPos breaking, float v, Player player) {
+    public BreakResult continueBreaking(BlockVec breaking, float v, Player player) {
         return null;
     }
 
     @Override
-    public void stopBreaking(BlockPos blockPos, Player player) {
+    public void stopBreaking(BlockVec blockVec, Player player) {
 
     }
 
     @Override
-    public void startBreaking(BlockPos blockPos, Player player) {
+    public void startBreaking(BlockVec blockVec, Player player) {
 
     }
 
     @Override
-    public float getBreakProgress(BlockPos blockPos) {
+    public float getBreakProgress(BlockVec blockVec) {
         return 0;
     }
 
@@ -495,12 +496,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean isSpawnChunk(ChunkPos pos) {
+    public boolean isSpawnChunk(ChunkVec pos) {
         return false;
     }
 
     @Override
-    public BlockPos getSpawnPoint() {
+    public BlockVec getSpawnPoint() {
         return null;
     }
 
@@ -615,6 +616,11 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
+    public boolean isLoaded(ChunkVec chunkVec) {
+        return false;
+    }
+
+    @Override
     public int getVisibleChunks() {
         return 0;
     }
@@ -625,17 +631,17 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean isAlwaysLoaded(ChunkPos pos) {
+    public boolean isAlwaysLoaded(ChunkVec pos) {
         return false;
     }
 
     @Override
-    public @NotNull List<ChunkPos> getChunksAround(Vec3d pos) {
+    public @NotNull List<ChunkVec> getChunksAround(Vec3d pos) {
         return List.of();
     }
 
     @Override
-    public @NotNull BlockProperties get(BlockPos pos) {
+    public @NotNull BlockProperties get(BlockVec pos) {
         ChunkAccess chunkAt = getChunkAt(pos);
         if (chunkAt == null) {
             return BlockProperties.AIR;
@@ -643,13 +649,13 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
         return chunkAt.get(localize(pos));
     }
 
-    private BlockPos localize(BlockPos pos) {
-        return new BlockPos(pos.x() & 0xf, pos.y() & 0xf, pos.z() & 0xf);
+    private BlockVec localize(BlockVec pos) {
+        return new BlockVec(pos.x() & 0xf, pos.y() & 0xf, pos.z() & 0xf);
     }
 
     @Override
     public @NotNull BlockProperties get(int x, int y, int z) {
-        return get(new BlockPos(x, y, z));
+        return get(new BlockVec(x, y, z));
     }
 
     @Override

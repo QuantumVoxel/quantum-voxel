@@ -7,21 +7,21 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.resources.ResourceLoader;
 import dev.ultreon.quantum.client.world.ClientChunk;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
 public class G3DModel implements BlockModel {
-    private final Identifier resource;
+    private final NamespaceID resource;
     private final ModelConfig config;
     private Model model;
 
-    public G3DModel(Identifier resource) {
+    public G3DModel(NamespaceID resource) {
         this(resource, new ModelConfig());
     }
 
-    public G3DModel(Identifier resource, ModelConfig config) {
+    public G3DModel(NamespaceID resource, ModelConfig config) {
         this.resource = resource;
         this.config = config;
     }
@@ -34,7 +34,7 @@ public class G3DModel implements BlockModel {
     }
 
     @Override
-    public Identifier resourceId() {
+    public NamespaceID resourceId() {
         return this.resource;
     }
 
@@ -44,7 +44,7 @@ public class G3DModel implements BlockModel {
     }
 
     @Override
-    public void loadInto(BlockPos pos, ClientChunk chunk) {
+    public void loadInto(BlockVec pos, ClientChunk chunk) {
         Model model = this.model;
         var instance = new ModelInstance(model);
         instance.transform.setToTranslationAndScaling(new Vector3(config.translation), new Vector3().add(config.scale));

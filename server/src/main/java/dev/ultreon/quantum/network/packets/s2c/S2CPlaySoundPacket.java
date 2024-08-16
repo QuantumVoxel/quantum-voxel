@@ -4,13 +4,13 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class S2CPlaySoundPacket extends Packet<InGameClientPacketHandler> {
-    private final Identifier sound;
+    private final NamespaceID sound;
     private final float volume;
 
-    public S2CPlaySoundPacket(Identifier sound, float volume) {
+    public S2CPlaySoundPacket(NamespaceID sound, float volume) {
         this.sound = sound;
         this.volume = volume;
     }

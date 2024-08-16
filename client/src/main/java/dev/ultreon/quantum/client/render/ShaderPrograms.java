@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.render;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.function.Supplier;
 
@@ -18,12 +18,12 @@ public class ShaderPrograms {
 
     private static Supplier<ShaderProgram> register(String name) {
         return QuantumClient.get().getShaderProgramManager().register(QuantumClient.id(name), () -> {
-            Identifier id = QuantumClient.id(name);
+            NamespaceID id = QuantumClient.id(name);
             return ShaderPrograms.createShader(id);
         });
     }
 
-    public static ShaderProgram createShader(Identifier id) {
+    public static ShaderProgram createShader(NamespaceID id) {
         if (!QuantumClient.isOnRenderThread()) return QuantumClient.invokeAndWait(() -> createShader(id));
 
         ResourceFileHandle vertexResource = new ResourceFileHandle(id.mapPath(s -> "shaders/" + s + ".vert"));

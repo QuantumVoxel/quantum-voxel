@@ -2,13 +2,15 @@ package dev.ultreon.quantum.client.item;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import dev.ultreon.quantum.block.state.BlockProperties;
@@ -26,8 +28,9 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -84,7 +87,7 @@ public class ItemRenderer implements Disposable {
             return;
         }
 
-        Identifier curKey = Registries.ITEM.getId(item);
+        NamespaceID curKey = Registries.ITEM.getId(item);
         if (curKey == null) {
             renderer.blitColor(RgbColor.WHITE);
             renderer.blit((TextureRegion) null, x, y, 16, 16);

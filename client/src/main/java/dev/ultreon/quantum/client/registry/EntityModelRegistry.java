@@ -13,7 +13,7 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,9 +24,9 @@ import java.util.Map;
 
 public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
     private final Map<EntityType<?>, EntityModel<?>> registry = new HashMap<>();
-    private final Map<EntityType<?>, Identifier> g3dRegistry = new HashMap<>();
-    private final Map<EntityType<?>, Identifier> gltfRegistry = new HashMap<>();
-    private final Map<EntityType<?>, Identifier> bbModelRegistry = new HashMap<>();
+    private final Map<EntityType<?>, NamespaceID> g3dRegistry = new HashMap<>();
+    private final Map<EntityType<?>, NamespaceID> gltfRegistry = new HashMap<>();
+    private final Map<EntityType<?>, NamespaceID> bbModelRegistry = new HashMap<>();
     private final Map<EntityType<?>, Model> finishedRegistry = new HashMap<>();
     final ModelLoader<ModelLoader.ModelParameters> modelLoader;
     private final QuantumClient client;
@@ -40,7 +40,7 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
         this.registry.put(entityType, model);
     }
 
-    public <T extends Entity> void registerG3d(EntityType<@NotNull T> entityType, Identifier id) {
+    public <T extends Entity> void registerG3d(EntityType<@NotNull T> entityType, NamespaceID id) {
         this.g3dRegistry.put(entityType, id);
     }
 
@@ -48,15 +48,15 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
      * @param entityType
      * @param id
      * @param <T>
-     * @deprecated Use {@link #registerBBModel(EntityType, Identifier)} or {@link #registerG3d(EntityType, Identifier)} instead.
+     * @deprecated Use {@link #registerBBModel(EntityType, NamespaceID)} or {@link #registerG3d(EntityType, NamespaceID)} instead.
      *             This method breaks models when having multiple in a scene and will be removed in the future.
      */
     @Deprecated(forRemoval = true)
-    public <T extends Entity> void registerGltf(EntityType<@NotNull T> entityType, Identifier id) {
+    public <T extends Entity> void registerGltf(EntityType<@NotNull T> entityType, NamespaceID id) {
         this.gltfRegistry.put(entityType, id);
     }
 
-    public <T extends Entity> void registerBBModel(EntityType<@NotNull T> player, Identifier player1) {
+    public <T extends Entity> void registerBBModel(EntityType<@NotNull T> player, NamespaceID player1) {
         this.bbModelRegistry.put(player, player1);
     }
 
@@ -87,9 +87,9 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
         this.registry.clear();
         this.finishedRegistry.clear();
 
-        for (Map.Entry<EntityType<?>, Identifier> e : this.g3dRegistry.entrySet()) {
-            Identifier id = e.getValue();
-            Model model = QuantumClient.invokeAndWait(() -> this.modelLoader.loadModel(new ResourceFileHandle(id.mapPath(path -> "models/entity/" + path + ".g3dj")),fileName -> client.getTextureManager().getTexture(new Identifier(fileName).mapPath(path -> {
+        for (Map.Entry<EntityType<?>, NamespaceID> e : this.g3dRegistry.entrySet()) {
+            NamespaceID id = e.getValue();
+            Model model = QuantumClient.invokeAndWait(() -> this.modelLoader.loadModel(new ResourceFileHandle(id.mapPath(path -> "models/entity/" + path + ".g3dj")),fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
                 if (path.startsWith("models/entity/")) {
                     path = path.substring("models/entity/".length());
                 }
@@ -98,8 +98,8 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
             this.finishedRegistry.put(e.getKey(), model);
         }
 
-        for (Map.Entry<EntityType<?>, Identifier> e : this.bbModelRegistry.entrySet()) {
-            Identifier id = e.getValue();
+        for (Map.Entry<EntityType<?>, NamespaceID> e : this.bbModelRegistry.entrySet()) {
+            NamespaceID id = e.getValue();
             Model model = blockBenchModel(id.mapPath(path -> "entity/" + path));
             this.finishedRegistry.put(e.getKey(), model);
         }
@@ -108,7 +108,7 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
         ClientRegistrationEvents.ENTITY_MODELS.factory().onRegister();
     }
 
-    private Model blockBenchModel(Identifier id) {
+    private Model blockBenchModel(NamespaceID id) {
         return new BBModelLoader(id.mapPath(path -> "models/" + path + ".bbmodel")).createModel();
     }
 

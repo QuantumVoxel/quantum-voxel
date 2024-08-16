@@ -23,7 +23,7 @@ import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.util.ClientCodecs;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,14 +36,14 @@ import java.util.function.Function;
 
 public class MaterialManager implements Manager<Material> {
     public static final Material DEFAULT_MATERIAL = new Material();
-    public static final @NotNull Identifier DEFAULT_ID = Identifier.parse("default");
+    public static final @NotNull NamespaceID DEFAULT_ID = NamespaceID.parse("default");
     private final Map<Block, Material> blockMaterialRegistry = new LinkedHashMap<>();
 
     private final ResourceManager resourceManager;
     private final TextureManager textureManager;
     private final CubemapManager cubemapManager;
 
-    private final Map<Identifier, Material> materials = new LinkedHashMap<>();
+    private final Map<NamespaceID, Material> materials = new LinkedHashMap<>();
 
     public MaterialManager(ResourceManager resourceManager, TextureManager textureManager, CubemapManager cubemapManager) {
         this.resourceManager = resourceManager;
@@ -79,16 +79,16 @@ public class MaterialManager implements Manager<Material> {
     public void reload(ReloadContext context) {
         this.materials.clear();
         DEFAULT_MATERIAL.id = "default";
-        this.register(Identifier.parse("default"), DEFAULT_MATERIAL);
+        this.register(NamespaceID.parse("default"), DEFAULT_MATERIAL);
     }
 
     @Override
-    public Material register(@NotNull Identifier id, @NotNull Material material) {
+    public Material register(@NotNull NamespaceID id, @NotNull Material material) {
         this.materials.put(id, material);
         return material;
     }
 
-    public @Nullable Material get(Identifier id) {
+    public @Nullable Material get(NamespaceID id) {
         if (id.equals(DEFAULT_ID)) {
             return DEFAULT_MATERIAL;
         }
@@ -143,7 +143,7 @@ public class MaterialManager implements Manager<Material> {
     }
 
     private Attribute loadCubemap(Json5Object attrObj, CubemapManager cubemapManager) {
-        @NotNull Identifier textureId = Identifier.parse(attrObj.getAsJson5Primitive("cubemap").getAsString());
+        @NotNull NamespaceID textureId = NamespaceID.parse(attrObj.getAsJson5Primitive("cubemap").getAsString());
         Cubemap cubemap = cubemapManager.get(textureId);
         if (cubemap == null) {
             return null;
@@ -208,7 +208,7 @@ public class MaterialManager implements Manager<Material> {
 
     private Attribute loadTexture(Json5Object attrObj, TextureManager textureManager) {
         String identifier = attrObj.getAsJson5Primitive("target").getAsString();
-        Identifier id = new Identifier(identifier).mapPath(path -> "textures/" + path + ".png");
+        NamespaceID id = new NamespaceID(identifier).mapPath(path -> "textures/" + path + ".png");
         Texture texture = textureManager.getTexture(id);
 
         String type = attrObj.getAsJson5Primitive("texture_type").getAsString();

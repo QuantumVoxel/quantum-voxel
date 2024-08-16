@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.entity;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,7 @@ public abstract class EntityType<T extends Entity> {
         return this.size;
     }
 
-    public @Nullable Identifier getId() {
+    public @Nullable NamespaceID getId() {
         return Registries.ENTITY_TYPE.getId(this);
     }
 

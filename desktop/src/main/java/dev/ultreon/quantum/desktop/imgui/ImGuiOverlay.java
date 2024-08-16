@@ -16,8 +16,8 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.ChunkVec;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
@@ -63,7 +63,7 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_CHUNK_DEBUGGER = new ImBoolean(false);
     private static final ImBoolean SHOW_PROFILER = new ImBoolean(false);
 
-    private static final ChunkPos RESET_CHUNK = new ChunkPos(17, 18);
+    private static final ChunkVec RESET_CHUNK = new ChunkVec(17, 18);
     protected static final String[] keys = {"A", "B", "C"};
     protected static final Double[] values = {0.1, 0.3, 0.6};
     private static final Vector3 TRANSLATE_TMP = new Vector3();
@@ -196,7 +196,7 @@ public class ImGuiOverlay {
             } else {
 
                 String s = modelViewerList[MODEL_VIEWER_LIST_INDEX.get()];
-                Identifier id = new Identifier(s);
+                NamespaceID id = new NamespaceID(s);
                 EntityType<?> entityType = Registries.ENTITY_TYPE.get(id);
                 if (entityType != null) {
                     Model model = QuantumClient.get().entityModelManager.getFinished(entityType);

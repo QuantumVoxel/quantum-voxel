@@ -2,15 +2,7 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
-import dev.ultreon.quantum.crash.ApplicationCrash;
-import dev.ultreon.quantum.crash.CrashCategory;
-import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.CommonConstants;
@@ -21,9 +13,16 @@ import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
 import dev.ultreon.quantum.client.model.model.Json5Model;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
 import dev.ultreon.quantum.client.texture.TextureManager;
+import dev.ultreon.quantum.crash.ApplicationCrash;
+import dev.ultreon.quantum.crash.CrashCategory;
+import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.resources.ReloadContext;
+import dev.ultreon.quantum.resources.ResourceManager;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Suppliers;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,17 +33,17 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     private static final BlockModelRegistry INSTANCE = new BlockModelRegistry();
     private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<CubeModel>>>> registry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
-    private final Set<Identifier> TEXTURES = new HashSet<>();
+    private final Set<NamespaceID> TEXTURES = new HashSet<>();
     private final Map<Block, List<Pair<Predicate<BlockProperties>, Supplier<BlockModel>>>> finishedRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private Block loadingBlock = null;
 
     public BlockModelRegistry() {
-        this.TEXTURES.add(new Identifier("misc/breaking1"));
-        this.TEXTURES.add(new Identifier("misc/breaking2"));
-        this.TEXTURES.add(new Identifier("misc/breaking3"));
-        this.TEXTURES.add(new Identifier("misc/breaking4"));
-        this.TEXTURES.add(new Identifier("misc/breaking5"));
-        this.TEXTURES.add(new Identifier("misc/breaking6"));
+        this.TEXTURES.add(new NamespaceID("misc/breaking1"));
+        this.TEXTURES.add(new NamespaceID("misc/breaking2"));
+        this.TEXTURES.add(new NamespaceID("misc/breaking3"));
+        this.TEXTURES.add(new NamespaceID("misc/breaking4"));
+        this.TEXTURES.add(new NamespaceID("misc/breaking5"));
+        this.TEXTURES.add(new NamespaceID("misc/breaking6"));
     }
 
     public static BlockModelRegistry get() {
@@ -73,14 +72,14 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public void registerDefault(Block block) {
-        Identifier key = Registries.BLOCK.getId(block);
+        NamespaceID key = Registries.BLOCK.getId(block);
         Preconditions.checkNotNull(key, "Block is not registered");
         this.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
     }
 
     public void registerDefault(Supplier<Block> block) {
         this.register(block, meta -> true, Suppliers.memoize(() -> {
-            Identifier key = Registries.BLOCK.getId(block.get());
+            NamespaceID key = Registries.BLOCK.getId(block.get());
             Preconditions.checkNotNull(key, "Block is not registered");
             return CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path));
         }));
@@ -94,13 +93,13 @@ public class BlockModelRegistry implements ContextAwareReloadable {
         final int breakStages = 6;
 
         for (int i = 0; i < breakStages; i++) {
-            Identifier texId = new Identifier("textures/misc/breaking" + (i + 1) + ".png");
+            NamespaceID texId = new NamespaceID("textures/misc/breaking" + (i + 1) + ".png");
             Pixmap tex = new Pixmap(QuantumClient.resource(texId));
             stitcher.add(texId, tex);
             tex.dispose();
         }
 
-        for (Identifier texture : this.TEXTURES) {
+        for (NamespaceID texture : this.TEXTURES) {
             FileHandle emissiveRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".emissive.png"));
             FileHandle normalRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".normal.png"));
             FileHandle specularRes = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".specular.png"));

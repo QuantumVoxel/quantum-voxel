@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.energy;
 
 import com.google.common.collect.Iterators;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.CubicDirection;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
@@ -72,13 +72,13 @@ public class EnergyNode implements Capability<EnergyConnection>, Iterable<Energy
 
     @Override
     public MapType load(World world, MapType data) {
-        this.self = new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("Self"))));
-        if (data.<MapType>contains("North")) this.north = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("North")))));
-        if (data.<MapType>contains("South")) this.south = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("South")))));
-        if (data.<MapType>contains("East")) this.east = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("East")))));
-        if (data.<MapType>contains("West")) this.west = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("West")))));
-        if (data.<MapType>contains("Up")) this.up = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("Up")))));
-        if (data.<MapType>contains("Down")) this.down = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockPos(data.getMap("Down")))));
+        this.self = new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("Self"))));
+        if (data.<MapType>contains("North")) this.north = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("North")))));
+        if (data.<MapType>contains("South")) this.south = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("South")))));
+        if (data.<MapType>contains("East")) this.east = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("East")))));
+        if (data.<MapType>contains("West")) this.west = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("West")))));
+        if (data.<MapType>contains("Up")) this.up = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("Up")))));
+        if (data.<MapType>contains("Down")) this.down = new EnergyNode(new EnergyConnection(world.getBlockEntity(new BlockVec(data.getMap("Down")))));
         return data;
     }
 

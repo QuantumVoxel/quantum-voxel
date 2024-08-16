@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.gen;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -58,7 +58,7 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public BlockProperties get(BlockPos localize) {
+    public BlockProperties get(BlockVec localize) {
         return get(localize.x(), localize.y(), localize.z());
     }
 

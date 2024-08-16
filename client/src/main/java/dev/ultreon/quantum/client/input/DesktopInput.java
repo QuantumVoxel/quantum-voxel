@@ -11,9 +11,9 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.JavascriptDebuggerScreen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
-import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
@@ -24,7 +24,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.EntityHitResult;
 import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
@@ -516,9 +516,9 @@ public class DesktopInput extends GameInput {
         // Get the position and metadata of the current and next blocks
         Vec3i pos = hitResult.getPos();
         if (hitResult instanceof BlockHitResult blockHitResult){
-            BlockProperties block = world.get(new BlockPos(pos));
+            BlockProperties block = world.get(new BlockVec(pos));
             Vec3i posNext = blockHitResult.getNext();
-            BlockProperties blockNext = world.get(new BlockPos(posNext));
+            BlockProperties blockNext = world.get(new BlockVec(posNext));
 
             // Check if the hit result is valid and the current block is not air
             if (!blockHitResult.isCollide() || block == null || block.isAir())
@@ -529,7 +529,7 @@ public class DesktopInput extends GameInput {
                 // Check for instant mine ability
                 if (player.abilities.instaMine) {
                     // Send a block break packet if instant mine is active
-                    this.client.connection.send(new C2SBlockBreakPacket(new BlockPos(blockHitResult.getPos())));
+                    this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getPos())));
                     return;
                 }
 

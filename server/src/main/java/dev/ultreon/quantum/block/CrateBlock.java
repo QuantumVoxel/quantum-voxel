@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.entity.BlockEntityTypes;
 import dev.ultreon.quantum.block.entity.CrateBlockEntity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
@@ -17,12 +17,12 @@ public class CrateBlock extends EntityBlock {
     }
 
     @Override
-    protected @NotNull BlockEntity createBlockEntity(World world, BlockPos pos) {
+    protected @NotNull BlockEntity createBlockEntity(World world, BlockVec pos) {
         return BlockEntityTypes.CRATE.create(world, pos);
     }
 
     @Override
-    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockPos pos) {
+    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
         super.use(world, player, item, pos);
 
         BlockEntity blockEntity = world.getBlockEntity(pos);

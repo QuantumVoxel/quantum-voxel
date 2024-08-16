@@ -5,7 +5,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.item.tool.ToolType;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.loot.RandomLoot;
 import org.apache.commons.lang3.IntegerRange;
 
@@ -45,7 +45,7 @@ public final class Blocks {
     public static final Block LIGHT = Blocks.register("light", new LightBlock(new Properties().hardness(0.5F).noCollision().usesCustomRender().effectiveTool(ToolType.PICKAXE)));
 
     private static <T extends Block> T register(String name, T block) {
-        Registries.BLOCK.register(new Identifier(name), block);
+        Registries.BLOCK.register(new NamespaceID(name), block);
         return block;
     }
 

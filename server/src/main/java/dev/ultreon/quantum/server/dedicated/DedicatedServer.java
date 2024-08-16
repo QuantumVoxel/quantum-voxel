@@ -9,7 +9,7 @@ import dev.ultreon.quantum.network.system.TcpNetworker;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.ServerLanguage;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +80,7 @@ public class DedicatedServer extends QuantumServer {
         }
 
         // Create and return a new ServerLanguage object
-        return new ServerLanguage(locale, languageMap, new Identifier("quantum"));
+        return new ServerLanguage(locale, languageMap, new NamespaceID("quantum"));
     }
 
     /**

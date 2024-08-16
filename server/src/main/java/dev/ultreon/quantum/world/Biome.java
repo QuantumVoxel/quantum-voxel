@@ -4,20 +4,20 @@ import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.world.gen.layer.GroundTerrainLayer;
-import dev.ultreon.quantum.world.gen.layer.SurfaceTerrainLayer;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.events.WorldLifecycleEvents;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
+import dev.ultreon.quantum.world.gen.layer.GroundTerrainLayer;
+import dev.ultreon.quantum.world.gen.layer.SurfaceTerrainLayer;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
+import dev.ultreon.ubo.types.MapType;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceFunction;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,12 +89,12 @@ public abstract class Biome {
         return mapType;
     }
 
-    private Identifier getId() {
+    private NamespaceID getId() {
         return Registries.BIOME.getId(this);
     }
 
     public static Biome load(MapType mapType) {
-        return Registries.BIOME.get(Identifier.tryParse(mapType.getString("id", "plains")));
+        return Registries.BIOME.get(NamespaceID.tryParse(mapType.getString("id", "plains")));
     }
 
     public boolean isOcean() {

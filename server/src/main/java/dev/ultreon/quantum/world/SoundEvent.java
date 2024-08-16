@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class SoundEvent {
@@ -17,7 +17,7 @@ public class SoundEvent {
         this.varyingPitch = varyingPitch;
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return Registries.SOUND_EVENT.getId(this);
     }
 

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
@@ -7,7 +8,6 @@ import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 
@@ -21,12 +21,12 @@ public final class BuilderChunk extends Chunk {
     private final ServerWorld.Region region;
     private final RNG rng;
 
-    public BuilderChunk(ServerWorld world, Thread thread, ChunkPos pos, ServerWorld.Region region) {
+    public BuilderChunk(ServerWorld world, Thread thread, ChunkVec pos, ServerWorld.Region region) {
         super(world, pos);
         this.world = world;
         this.thread = thread;
         this.region = region;
-        this.rng = new JavaRNG(this.world.getSeed() + (pos.x() ^ ((long) pos.z() << 4)) & 0x3FFFFFFF);
+        this.rng = new JavaRNG(this.world.getSeed() + (pos.getX() ^ ((long) pos.getZ() << 4)) & 0x3FFFFFFF);
         this.biomeData = new PaletteStorage<>(256, Biomes.PLAINS.create(this.world, world.getSeed()));
     }
 
@@ -91,7 +91,7 @@ public final class BuilderChunk extends Chunk {
 
     public ServerChunk build() {
         Storage<Biome> map = this.biomeData.map(Biomes.PLAINS, Biome.class, BiomeGenerator::getBiome);
-        return new ServerChunk(this.world, World.toLocalChunkPos(this.getPos()), this.storage, map, region);
+        return new ServerChunk(this.world, this.getPos(), this.storage, map, region);
     }
 
     public void setBiomeGenerator(int x, int z, BiomeGenerator generator) {

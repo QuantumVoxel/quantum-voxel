@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.events;
 
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
+import dev.ultreon.ubo.types.MapType;
 
 import java.util.List;
 
@@ -40,12 +40,12 @@ public class WorldEvents {
 
     @FunctionalInterface
     public interface ChunkLoaded {
-        void onChunkLoaded(World world, ChunkPos pos, Chunk chunk);
+        void onChunkLoaded(World world, ChunkVec pos, Chunk chunk);
     }
 
     @FunctionalInterface
     public interface ChunkUnloaded {
-        void onChunkUnloaded(World world, ChunkPos pos, Chunk chunk);
+        void onChunkUnloaded(World world, ChunkVec pos, Chunk chunk);
     }
 
     @FunctionalInterface

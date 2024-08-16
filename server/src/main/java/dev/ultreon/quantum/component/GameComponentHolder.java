@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.component;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +11,7 @@ public interface GameComponentHolder<T extends GameComponent<?>> {
         return Collections.unmodifiableCollection(this.componentRegistry().values());
     }
 
-    Map<Identifier, T> componentRegistry();
+    Map<NamespaceID, T> componentRegistry();
 
-    <T2 extends GameComponent<?>> T2 getComponent(Identifier id, T2[] typeGetter);
+    <T2 extends GameComponent<?>> T2 getComponent(NamespaceID id, T2[] typeGetter);
 }

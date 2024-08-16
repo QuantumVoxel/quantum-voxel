@@ -3,8 +3,8 @@ package dev.ultreon.quantum.block.entity;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.ubo.types.MapType;
 
@@ -13,9 +13,9 @@ import java.util.Objects;
 public abstract class BlockEntity implements CapabilityHolder {
     private final BlockEntityType<?> type;
     protected final World world;
-    protected final BlockPos pos;
+    protected final BlockVec pos;
 
-    public BlockEntity(BlockEntityType<?> type, World world, BlockPos pos) {
+    public BlockEntity(BlockEntityType<?> type, World world, BlockVec pos) {
         this.type = type;
         this.world = world;
         this.pos = pos;
@@ -33,7 +33,7 @@ public abstract class BlockEntity implements CapabilityHolder {
         return world;
     }
 
-    public BlockPos pos() {
+    public BlockVec pos() {
         return pos;
     }
 
@@ -41,8 +41,8 @@ public abstract class BlockEntity implements CapabilityHolder {
         return type;
     }
 
-    public static BlockEntity fullyLoad(World world, BlockPos pos, MapType mapType) {
-        Identifier type = Identifier.tryParse(mapType.getString("type"));
+    public static BlockEntity fullyLoad(World world, BlockVec pos, MapType mapType) {
+        NamespaceID type = NamespaceID.tryParse(mapType.getString("type"));
         BlockEntityType<?> value = Registries.BLOCK_ENTITY_TYPE.get(type);
         return value.load(world, pos, mapType);
     }

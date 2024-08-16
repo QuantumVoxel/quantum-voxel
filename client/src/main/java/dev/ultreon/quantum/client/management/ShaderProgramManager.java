@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,16 +14,16 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class ShaderProgramManager implements Manager<ShaderProgram> {
-    private final Map<Identifier, ShaderProgram> programs = new LinkedHashMap<>();
-    private final Map<Identifier, Supplier<ShaderProgram>> factories = new LinkedHashMap<>();
+    private final Map<NamespaceID, ShaderProgram> programs = new LinkedHashMap<>();
+    private final Map<NamespaceID, Supplier<ShaderProgram>> factories = new LinkedHashMap<>();
 
     @Override
-    public ShaderProgram register(@NotNull Identifier id, @NotNull ShaderProgram program) {
+    public ShaderProgram register(@NotNull NamespaceID id, @NotNull ShaderProgram program) {
         this.programs.put(id, program);
         return program;
     }
 
-    public Supplier<ShaderProgram> register(Identifier id, Supplier<ShaderProgram> factory) {
+    public Supplier<ShaderProgram> register(NamespaceID id, Supplier<ShaderProgram> factory) {
         Supplier<ShaderProgram> supplier = () -> {
             if (this.programs.containsKey(id))
                 return this.programs.get(id);
@@ -38,7 +38,7 @@ public class ShaderProgramManager implements Manager<ShaderProgram> {
     }
 
     @Override
-    public @Nullable ShaderProgram get(Identifier id) {
+    public @Nullable ShaderProgram get(NamespaceID id) {
         ShaderProgram program = this.programs.get(id);
 
         if (program != null)

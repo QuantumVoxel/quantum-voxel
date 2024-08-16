@@ -6,17 +6,17 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class S2COpenMenuPacket extends Packet<InGameClientPacketHandler> {
-    private final Identifier menuType;
+    private final NamespaceID menuType;
     private final List<ItemStack> items;
 
-    public S2COpenMenuPacket(Identifier menuType, Collection<ItemSlot> items) {
+    public S2COpenMenuPacket(NamespaceID menuType, Collection<ItemSlot> items) {
         this.menuType = menuType;
         this.items = items.stream().map(itemSlot -> {
             if (itemSlot == null) return ItemStack.empty();

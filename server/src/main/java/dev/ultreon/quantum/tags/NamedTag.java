@@ -8,7 +8,7 @@ import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class NamedTag<T> {
-    private final Identifier name;
+    private final NamespaceID name;
     private final Registry<T> registry;
     private final List<T> values;
     private boolean loaded;
 
-    public NamedTag(Identifier name, Registry<T> registry) {
+    public NamedTag(NamespaceID name, Registry<T> registry) {
         this.name = name;
         this.registry = registry;
         this.values = Lists.newArrayList();
@@ -48,7 +48,7 @@ public class NamedTag<T> {
 
             String element = elem.getAsString();
             if (!element.startsWith("#")) {
-                T e = registry.get(new Identifier(element));
+                T e = registry.get(new NamespaceID(element));
                 if (e == null) {
                     throw new IllegalArgumentException("Element not found: " + element + " for registry " + registry.id() + " in tag " + name);
                 }
@@ -56,9 +56,9 @@ public class NamedTag<T> {
                 continue;
             }
 
-            Optional<NamedTag<T>> tag = registry.getTag(new Identifier(element.substring(1)));
+            Optional<NamedTag<T>> tag = registry.getTag(new NamespaceID(element.substring(1)));
             values.addAll(tag.map(NamedTag::getValues).orElseGet(() -> {
-                NamedTag<T> namedTag = new NamedTag<>(new Identifier(element.substring(1)), registry);
+                NamedTag<T> namedTag = new NamedTag<>(new NamespaceID(element.substring(1)), registry);
                 namedTag.reload(context);
                 return namedTag.getValues();
             }));
@@ -67,7 +67,7 @@ public class NamedTag<T> {
         this.loaded = true;
     }
 
-    public Identifier getName() {
+    public NamespaceID getName() {
         return name;
     }
 

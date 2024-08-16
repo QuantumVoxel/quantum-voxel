@@ -1,10 +1,6 @@
 package dev.ultreon.quantum.block;
 
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.world.rng.JavaRNG;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
@@ -18,11 +14,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.ubo.DataWriter;
+import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
+import dev.ultreon.quantum.world.rng.JavaRNG;
+import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,9 +68,9 @@ public class Block implements DataWriter<MapType> {
         this.lightReduction = properties.lightReduction;
     }
 
-    public Identifier getId() {
-        Identifier key = Registries.BLOCK.getId(this);
-        return key == null ? new Identifier(CommonConstants.NAMESPACE, "air") : key;
+    public NamespaceID getId() {
+        NamespaceID key = Registries.BLOCK.getId(this);
+        return key == null ? new NamespaceID(CommonConstants.NAMESPACE, "air") : key;
     }
 
     public boolean isAir() {
@@ -115,13 +114,13 @@ public class Block implements DataWriter<MapType> {
     }
 
     public static Block load(MapType data) {
-        Identifier id = Identifier.tryParse(data.getString("id"));
+        NamespaceID id = NamespaceID.tryParse(data.getString("id"));
         if (id == null) return Blocks.AIR;
         Block block = Registries.BLOCK.get(id);
         return block == null ? Blocks.AIR : block;
     }
 
-    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockPos pos) {
+    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
         return UseResult.SKIP;
     }
 
@@ -135,8 +134,8 @@ public class Block implements DataWriter<MapType> {
 
     @NotNull
     public String getTranslationId() {
-        Identifier key = Registries.BLOCK.getId(this);
-        return key == null ? "quantum.block.air.name" : key.namespace() + ".block." + key.path() + ".name";
+        NamespaceID key = Registries.BLOCK.getId(this);
+        return key == null ? "quantum.block.air.name" : key.getDomain() + ".block." + key.getPath() + ".name";
     }
 
     public float getHardness() {
@@ -191,7 +190,7 @@ public class Block implements DataWriter<MapType> {
         return this.occlude;
     }
 
-    public void onPlace(World world, BlockPos pos, BlockProperties blockProperties) {
+    public void onPlace(World world, BlockVec pos, BlockProperties blockProperties) {
         // Used in implementations
     }
 
@@ -200,19 +199,19 @@ public class Block implements DataWriter<MapType> {
     }
 
     @Deprecated
-    public BlockProperties onPlacedBy(WorldAccess world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
+    public BlockProperties onPlacedBy(WorldAccess world, BlockVec blockVec, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
         return blockMeta;
     }
 
-    public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockPos at, UseItemContext context) {
+    public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockVec at, UseItemContext context) {
         return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), ((BlockHitResult) context.result()).getDirection());
     }
 
-    public void update(World serverWorld, BlockPos offset, BlockProperties meta) {
+    public void update(World serverWorld, BlockVec offset, BlockProperties meta) {
         this.onPlace(serverWorld, offset, meta);
     }
 
-    public boolean canBePlacedAt(WorldAccess world, BlockPos blockPos, Player player, ItemStack stack, CubicDirection direction) {
+    public boolean canBePlacedAt(WorldAccess world, BlockVec blockVec, Player player, ItemStack stack, CubicDirection direction) {
         return true;
     }
 
@@ -224,11 +223,11 @@ public class Block implements DataWriter<MapType> {
         return toolLevel;
     }
 
-    public void onDestroy(World world, BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+    public void onDestroy(World world, BlockVec breaking, BlockProperties blockProperties, Player breaker) {
 
     }
 
-    public Iterable<ItemStack> getDrops(BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+    public Iterable<ItemStack> getDrops(BlockVec breaking, BlockProperties blockProperties, Player breaker) {
         if (breaker == null) return this.lootGen.generate(new JavaRNG());
         return this.lootGen.generate(breaker.getRng());
     }

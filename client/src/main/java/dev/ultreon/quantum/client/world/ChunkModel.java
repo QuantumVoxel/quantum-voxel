@@ -8,19 +8,19 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.ChunkVec;
 
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
 public class ChunkModel implements RenderableProvider {
-    private final ChunkPos pos;
+    private final ChunkVec pos;
     private final ClientChunk chunk;
     private final Material material;
     private final Material transparentMaterial;
     private Model model = null;
     private ModelInstance modelInstance = null;
 
-    public ChunkModel(ChunkPos pos, ClientChunk chunk, WorldRenderer renderer) {
+    public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
         this.material = renderer.getMaterial();
         this.transparentMaterial = renderer.getTransparentMaterial();
         this.pos = pos;
@@ -47,7 +47,7 @@ public class ChunkModel implements RenderableProvider {
         chunk.whileLocked(() -> {
             if (modelInstance == null) {
                 ModelManager modelManager = ModelManager.INSTANCE;
-                ChunkPos pos = chunk.getPos();
+                ChunkVec pos = chunk.getPos();
                 ModelBuilder modelBuilder = new ModelBuilder();
                 MeshBuilder meshBuilder = new MeshBuilder();
                 modelBuilder.begin();
@@ -98,7 +98,7 @@ public class ChunkModel implements RenderableProvider {
         return build();
     }
 
-    public ChunkPos getPos() {
+    public ChunkVec getPos() {
         return pos;
     }
 

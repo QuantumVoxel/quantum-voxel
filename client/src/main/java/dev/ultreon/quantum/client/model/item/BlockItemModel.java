@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.function.Supplier;
 
@@ -21,7 +21,7 @@ public class BlockItemModel implements ItemModel {
     }
 
     @Override
-    public Identifier resourceId() {
+    public NamespaceID resourceId() {
         return this.blockModel.get().resourceId();
     }
 

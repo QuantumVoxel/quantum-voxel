@@ -9,7 +9,7 @@ import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.client.gui.widget.components.RangedValueComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Supplier;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 import static dev.ultreon.quantum.client.QuantumClient.id;
 
 public class Slider extends Widget {
-    private static final Identifier TEXTURE = id("textures/gui/slider.png");
+    private static final NamespaceID TEXTURE = id("textures/gui/slider.png");
     private final CallbackComponent<Slider> callback;
     private final RangedValueComponent value;
     private final TextComponent text;

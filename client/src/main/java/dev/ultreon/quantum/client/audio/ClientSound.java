@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.SoundEvent;
 
 public final class ClientSound {
@@ -15,10 +15,10 @@ public final class ClientSound {
     }
 
     public void register() {
-        this.sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", this.getId().namespace(), this.getId().path().replace(".", "/"))));
+        this.sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", this.getId().getDomain(), this.getId().getPath().replace(".", "/"))));
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return Registries.SOUND_EVENT.getId(this.event);
     }
 

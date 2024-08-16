@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.api.commands;
 
 import dev.ultreon.quantum.api.commands.selector.Selector;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharList;
 import org.jetbrains.annotations.NotNull;
@@ -436,9 +436,9 @@ public class CommandReader {
         return this.readRemaining();
     }
 
-    public Identifier readId() throws CommandParseException {
+    public NamespaceID readId() throws CommandParseException {
         String text = this.readString();
-        Identifier key = Identifier.tryParse(text);
+        NamespaceID key = NamespaceID.tryParse(text);
         if (key == null) {
             throw new CommandParseException("Invalid key: " + text);
         }

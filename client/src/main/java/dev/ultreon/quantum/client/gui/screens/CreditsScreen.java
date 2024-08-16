@@ -11,7 +11,7 @@ import dev.ultreon.quantum.client.gui.screens.tabs.TabbedUI;
 import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class CreditsScreen extends TabbedUI {
     public static final MutableText ASSETS_DESCRIPTION = TextObject.translation("quantum.gui.credits.assets.description").setBold(true);
-    private final Json5Object credits = client.getResourceManager().getResource(new Identifier("texts/credits.json5")).loadJson5().getAsJson5Object();
+    private final Json5Object credits = client.getResourceManager().getResource(new NamespaceID("texts/credits.json5")).loadJson5().getAsJson5Object();
 
     public CreditsScreen(Screen parent) {
         super(TextObject.translation("quantum.gui.credits.title"), parent);

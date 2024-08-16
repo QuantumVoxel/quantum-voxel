@@ -9,8 +9,7 @@ import dev.ultreon.quantum.client.gui.screens.WorldEditScreen;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.ApiStatus;
@@ -166,7 +165,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                 Texture picture = null;
                 if (world.exists("picture.png")) {
                     String replace = world.getSHA256Name();
-                    Identifier id = id("generated/worlds/" + replace + "/picture.png");
+                    NamespaceID id = id("generated/worlds/" + replace + "/picture.png");
                     if (client.getTextureManager().isTextureLoaded(id)) {
                         picture = client.getTextureManager().getTexture(id);
                     } else {

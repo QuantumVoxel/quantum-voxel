@@ -2,7 +2,7 @@ package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class MenuTypes {
     public static final MenuType<Inventory> INVENTORY = MenuTypes.register("inventory", (type, world, entity, pos) -> {
@@ -14,7 +14,7 @@ public class MenuTypes {
 
     private static <T extends ContainerMenu> MenuType<T> register(String name, MenuType.MenuBuilder<T> menuBuilder) {
         MenuType<T> menuType = new MenuType<>(menuBuilder);
-        Registries.MENU_TYPE.register(new Identifier(name), menuType);
+        Registries.MENU_TYPE.register(new NamespaceID(name), menuType);
         return menuType;
     }
 }

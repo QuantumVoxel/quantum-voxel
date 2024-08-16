@@ -7,8 +7,8 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class HotbarOverlay extends Overlay {
 
         int x = player.selected * 20;
         ItemStack selectedItem = player.getSelectedItem();
-        Identifier key = Registries.ITEM.getId(selectedItem.getItem());
+        NamespaceID key = Registries.ITEM.getId(selectedItem.getItem());
 
         var widgetsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/widgets.png"));
         renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90, leftY - 24, 180, 24, 0, 59);

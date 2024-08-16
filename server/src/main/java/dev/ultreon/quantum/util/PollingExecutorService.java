@@ -2,10 +2,10 @@ package dev.ultreon.quantum.util;
 
 import com.google.common.collect.Queues;
 import dev.ultreon.quantum.debug.profiler.Profiler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -93,7 +93,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(task.call());
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.completeExceptionally(throwable);
@@ -120,7 +120,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(result);
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.completeExceptionally(throwable);
@@ -147,7 +147,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(null);
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.completeExceptionally(throwable);
@@ -161,7 +161,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(null);
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 PollingExecutorService.LOGGER.error("Failed to run task:", throwable);

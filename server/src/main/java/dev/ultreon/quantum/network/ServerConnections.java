@@ -1,14 +1,14 @@
 package dev.ultreon.quantum.network;
 
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.s2c.S2CDisconnectPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.*;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -23,7 +23,7 @@ import java.util.*;
  * @see ServerTcpConnection
  */
 public class ServerConnections {
-    private static final Map<Identifier, NetworkChannel> CHANNELS = new HashMap<>();
+    private static final Map<NamespaceID, NetworkChannel> CHANNELS = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerConnections.class);
     private final QuantumServer server;
 
@@ -46,7 +46,7 @@ public class ServerConnections {
      * @param id the identifier of the channel
      * @return the new channel
      */
-    public static NetworkChannel registerChannel(Identifier id) {
+    public static NetworkChannel registerChannel(NamespaceID id) {
         NetworkChannel channel = NetworkChannel.create(id);
         ServerConnections.CHANNELS.put(id, channel);
         return channel;
@@ -64,11 +64,11 @@ public class ServerConnections {
     /**
      * Get a channel by its identifier.
      *
-     * @param identifier the identifier
+     * @param namespaceID the identifier
      * @return the channel or {@code null} if not found
      */
-    public static NetworkChannel getChannel(Identifier identifier) {
-        return ServerConnections.CHANNELS.get(identifier);
+    public static NetworkChannel getChannel(NamespaceID namespaceID) {
+        return ServerConnections.CHANNELS.get(namespaceID);
     }
 
     /**

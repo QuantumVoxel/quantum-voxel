@@ -15,13 +15,13 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 public interface WorldReader {
-    boolean isAlwaysLoaded(ChunkPos pos);
+    boolean isAlwaysLoaded(ChunkVec pos);
 
     @NotNull
-    List<ChunkPos> getChunksAround(Vec3d pos);
+    List<ChunkVec> getChunksAround(Vec3d pos);
 
     @NotNull
-    BlockProperties get(BlockPos pos);
+    BlockProperties get(BlockVec pos);
 
     @NotNull
     BlockProperties get(int x, int y, int z);

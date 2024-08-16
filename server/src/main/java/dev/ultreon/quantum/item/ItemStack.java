@@ -2,12 +2,12 @@ package dev.ultreon.quantum.item;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.ubo.types.MapType;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,7 +60,7 @@ public class ItemStack {
     }
 
     public static ItemStack load(MapType data) {
-        @Nullable Identifier id = Identifier.tryParse(data.getString("item"));
+        @Nullable NamespaceID id = NamespaceID.tryParse(data.getString("item"));
         if (id == null) return new ItemStack();
 
         Item item = Registries.ITEM.get(id);
@@ -74,7 +74,7 @@ public class ItemStack {
     }
 
     public static ItemStack deserialize(Json5Object asJson5Object) {
-        Item item = Registries.ITEM.get(Identifier.parse(asJson5Object.getAsJson5Object("item").getAsString()));
+        Item item = Registries.ITEM.get(NamespaceID.parse(asJson5Object.getAsJson5Object("item").getAsString()));
         if (item == null) return new ItemStack();
         Json5Primitive countJson = asJson5Object.getAsJson5Primitive("count");
         if (countJson == null) return new ItemStack(item);

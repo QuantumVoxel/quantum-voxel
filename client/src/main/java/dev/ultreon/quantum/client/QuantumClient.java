@@ -103,6 +103,8 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.js.JsLoader;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -118,7 +120,10 @@ import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.BreakResult;
+import dev.ultreon.quantum.world.SoundEvent;
+import dev.ultreon.quantum.world.WorldStorage;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -127,8 +132,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
@@ -136,7 +139,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
@@ -144,7 +146,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.badlogic.gdx.graphics.GL20.*;
+import static com.badlogic.gdx.graphics.GL20.GL_CULL_FACE;
 import static com.badlogic.gdx.math.MathUtils.ceil;
 import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
 
@@ -201,7 +203,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
     public int viewMode;
-    public Identifier fontId = id("quantium");
+    public NamespaceID fontId = id("quantium");
     public final ExecutorService executor = Executors.newFixedThreadPool(Math.min(Runtime.getRuntime().availableProcessors() / 2, 2), r -> {
         Thread thread = new Thread(CLIENT_GROUP, r);
         thread.setName("ClientTask");
@@ -234,7 +236,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 //    });
 
     // Useless asset manager
-    private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
+    private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(NamespaceID.parse(fileName)));
 
     // Window buttons
     private final ControlButton closeButton;
@@ -704,7 +706,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     void onReloadConfig() {
         if (ClientConfig.fullscreen) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
-        String[] split = ClientConfig.language.path().split("_");
+        String[] split = ClientConfig.language.getPath().split("_");
         if (split.length == 2) {
             LanguageManager.setCurrentLanguage(Locale.of(split[0], split[1]));
         } else {
@@ -855,7 +857,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Set mod icon overrides.
         ModIconOverrideRegistry.set("quantum", QuantumClient.id("icon.png"));
-        ModIconOverrideRegistry.set("gdx", new Identifier("gdx", "icon.png"));
+        ModIconOverrideRegistry.set("gdx", new NamespaceID("gdx", "icon.png"));
 
         // Invoke entry points for initialization.
         GamePlatform loader = GamePlatform.get();
@@ -931,8 +933,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      * @return A new instance of FileHandle for the specified resource.
      */
     @NewInstance
-    public static @NotNull FileHandle resource(Identifier id) {
-        return Gdx.files.internal("assets/" + id.namespace() + "/" + id.path());
+    public static @NotNull FileHandle resource(NamespaceID id) {
+        return Gdx.files.internal("assets/" + id.getDomain() + "/" + id.getPath());
     }
 
     /**
@@ -1038,8 +1040,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      * @param path the path to the resource.
      * @return the identifier for the given path.
      */
-    public static Identifier id(String path) {
-        return new Identifier(CommonConstants.NAMESPACE, path);
+    public static NamespaceID id(String path) {
+        return new NamespaceID(CommonConstants.NAMESPACE, path);
     }
 
     /**
@@ -1596,7 +1598,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         boolean maximized = window.isMaximized();
         int winXOff = maximized ? 18 : 0;
         int winHOff = maximized ? 22 : 0;
-        renderer.draw9PatchTexture(new Identifier("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
+        renderer.draw9PatchTexture(new NamespaceID("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
         renderer.textCenter("<bold>" + window.getTitle(), width / 2, 5);
 
         this.closeButton.x(width - 17 - winXOff * 2);
@@ -1767,7 +1769,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
 
         // Handle block breaking if relevant
-        BlockPos breaking = this.breaking != null ? new BlockPos(this.breaking) : null;
+        BlockVec breaking = this.breaking != null ? new BlockVec(this.breaking) : null;
         if (this.world != null && breaking != null) {
             HitResult hitResult = this.hitResult;
 
@@ -1785,7 +1787,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         ClientTickEvents.POST_GAME_TICK.factory().onGameTick(this);
     }
 
-    private void handleBlockBreaking(BlockPos breaking, BlockHitResult hitResult) {
+    private void handleBlockBreaking(BlockVec breaking, BlockHitResult hitResult) {
         @Nullable ClientWorldAccess world = this.world;
         if (world == null) return;
         if (!hitResult.getPos().equals(breaking.vec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
@@ -1816,7 +1818,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (this.breaking == null) return;
         if (player == null) return;
 
-        this.world.stopBreaking(new BlockPos(this.breaking), player);
+        this.world.stopBreaking(new BlockVec(this.breaking), player);
         BlockProperties block = hitResult.getBlockMeta();
 
         if (block == null || block.isAir()) {
@@ -1825,7 +1827,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         } else {
             this.breaking = hitResult.getPos();
             this.breakingBlock = block;
-            this.world.startBreaking(new BlockPos(hitResult.getPos()), player);
+            this.world.startBreaking(new BlockVec(hitResult.getPos()), player);
         }
     }
 
@@ -2163,8 +2165,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (this.world == null || player == null) return;
 
         // Stop and start breaking at the hit position for the player
-        this.world.stopBreaking(new BlockPos(blockHitResult.getPos()), player);
-        this.world.startBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.world.stopBreaking(new BlockVec(blockHitResult.getPos()), player);
+        this.world.startBreaking(new BlockVec(blockHitResult.getPos()), player);
 
         // Update the breaking position and block meta
         this.breaking = blockHitResult.getPos();
@@ -2192,7 +2194,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
 
         // If the block being hit is already broken, return
-        if (this.world.getBreakProgress(new BlockPos(blockHitResult.getPos())) >= 0.0F) {
+        if (this.world.getBreakProgress(new BlockVec(blockHitResult.getPos())) >= 0.0F) {
             return;
         }
 
@@ -2202,12 +2204,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
 
         if (this.breaking != null) {
-            this.world.stopBreaking(new BlockPos(this.breaking), player);
+            this.world.stopBreaking(new BlockVec(this.breaking), player);
             return;
         }
 
         // Start breaking the block and update the breaking position and block metadata
-        this.world.startBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.world.startBreaking(new BlockVec(blockHitResult.getPos()), player);
         this.breaking = blockHitResult.getPos();
         this.breakingBlock = blockHitResult.getBlockMeta();
     }
@@ -2224,7 +2226,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         if (this.world == null || player == null || this.breaking == null) return;
 
-        this.world.stopBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.world.stopBreaking(new BlockVec(blockHitResult.getPos()), player);
         this.breaking = null;
         this.breakingBlock = null;
     }
@@ -2233,7 +2235,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         Vec3i breaking = this.breaking;
         @Nullable ClientWorldAccess world = this.world;
         if (breaking == null || world == null) return -1;
-        return world.getBreakProgress(new BlockPos(breaking));
+        return world.getBreakProgress(new BlockVec(breaking));
     }
 
     private int calcMaxGuiScale() {

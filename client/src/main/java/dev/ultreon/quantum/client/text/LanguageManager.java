@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.text;
 
-import com.google.gson.Gson;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
@@ -8,7 +7,7 @@ import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -17,13 +16,13 @@ import java.util.*;
 
 public class LanguageManager {
     public static final LanguageManager INSTANCE = new LanguageManager();
-    public static final Registry<Language> REGISTRY = Registry.<Language>builder(new Identifier("language")).build();
+    public static final Registry<Language> REGISTRY = Registry.<Language>builder(new NamespaceID("language")).build();
     private static Locale currentLanguage;
     private final Map<Locale, Language> languages = new HashMap<>();
     private final Set<Locale> locales = new HashSet<>();
-    private final Set<Identifier> ids = new HashSet<>();
-    private final Map<Locale, Identifier> locale2id = new HashMap<>();
-    private final Map<Identifier, Locale> id2locale = new HashMap<>();
+    private final Set<NamespaceID> ids = new HashSet<>();
+    private final Map<Locale, NamespaceID> locale2id = new HashMap<>();
+    private final Map<NamespaceID, Locale> id2locale = new HashMap<>();
     private Logger logger = (level, message, t) -> {};
 
     private LanguageManager() {
@@ -38,10 +37,10 @@ public class LanguageManager {
         LanguageManager.currentLanguage = currentLanguage;
     }
 
-    public Language load(Locale locale, Identifier id, ResourceManager resourceManager) {
+    public Language load(Locale locale, NamespaceID id, ResourceManager resourceManager) {
         try {
             Json5 gson = CommonConstants.JSON5;
-            String newPath = "lang/" + id.path() + ".json";
+            String newPath = "lang/" + id.getPath() + ".json";
             List<byte[]> assets = resourceManager.getAllDataById(id.withPath(newPath));
             Map<String, String> languageMap = new HashMap<>();
             for (byte[] asset : assets) {
@@ -61,7 +60,7 @@ public class LanguageManager {
         }
     }
 
-    public Language load(Locale locale, Identifier id, Reader reader) {
+    public Language load(Locale locale, NamespaceID id, Reader reader) {
         Map<String, String> languageMap = new HashMap<>();
         this.loadFile(languageMap, CommonConstants.JSON5.parse(reader).getAsJson5Object());
         Language language = new Language(locale, languageMap, id);
@@ -74,7 +73,7 @@ public class LanguageManager {
         return this.languages.get(locale);
     }
 
-    public void register(Locale locale, Identifier id) {
+    public void register(Locale locale, NamespaceID id) {
         if (this.locales.contains(locale)) {
             this.getLogger().warn("Locale overridden: " + locale.getLanguage());
         }
@@ -88,11 +87,11 @@ public class LanguageManager {
         this.id2locale.put(id, locale);
     }
 
-    public Locale getLocale(Identifier id) {
+    public Locale getLocale(NamespaceID id) {
         return this.id2locale.get(id);
     }
 
-    public Identifier getLanguageID(Locale locale) {
+    public NamespaceID getLanguageID(Locale locale) {
         return this.locale2id.get(locale);
     }
 
@@ -110,7 +109,7 @@ public class LanguageManager {
         return new HashSet<>(this.locales);
     }
 
-    public Set<Identifier> getLanguageIDs() {
+    public Set<NamespaceID> getLanguageIDs() {
         return new HashSet<>(this.ids);
     }
 

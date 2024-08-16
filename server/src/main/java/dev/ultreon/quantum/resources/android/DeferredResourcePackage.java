@@ -2,7 +2,7 @@ package dev.ultreon.quantum.resources.android;
 
 import dev.ultreon.quantum.resources.ResourcePackage;
 import dev.ultreon.quantum.resources.StaticResource;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
@@ -19,21 +19,21 @@ public class DeferredResourcePackage extends ResourcePackage {
     }
 
     @Override
-    public boolean has(Identifier entry) {
+    public boolean has(NamespaceID entry) {
         return this.getUrl(entry) != null;
     }
 
-    private URL getUrl(Identifier entry) {
+    private URL getUrl(NamespaceID entry) {
         return this.ref.getResource(this.getPath(entry));
     }
 
     @NotNull
-    private String getPath(Identifier entry) {
-        return "/" + this.root + "/" + entry.namespace() + "/" + entry.path();
+    private String getPath(NamespaceID entry) {
+        return "/" + this.root + "/" + entry.getDomain() + "/" + entry.getPath();
     }
 
     @Override
-    public StaticResource get(Identifier entry) {
+    public StaticResource get(NamespaceID entry) {
         if (!this.has(entry)) return null;
         if (this.resources.containsKey(entry)) return this.resources.get(entry);
 

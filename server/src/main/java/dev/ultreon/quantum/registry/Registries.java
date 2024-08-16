@@ -9,7 +9,7 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.text.icon.FontIconMap;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.weather.Weather;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.SoundEvent;
@@ -41,7 +41,7 @@ public final class Registries {
     }
 
     @SafeVarargs
-    public static <T> Registry<T> create(Identifier id, T... typeGetter) {
+    public static <T> Registry<T> create(NamespaceID id, T... typeGetter) {
         Registry<T> registry = Registry.builder(id, typeGetter).build();
         Registries.REGISTRY.register(id, registry);
         return registry;

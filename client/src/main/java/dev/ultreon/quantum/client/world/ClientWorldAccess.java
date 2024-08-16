@@ -14,10 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 public interface ClientWorldAccess extends WorldAccess {
-    ClientChunkAccess getChunkAt(@NotNull BlockPos pos);
+    ClientChunkAccess getChunkAt(@NotNull BlockVec pos);
 
     @Override
-    @Nullable ClientChunkAccess getChunk(ChunkPos pos);
+    @Nullable ClientChunkAccess getChunk(ChunkVec pos);
 
     @Override
     @Nullable ClientChunkAccess getChunk(int x, int z);
@@ -30,13 +30,13 @@ public interface ClientWorldAccess extends WorldAccess {
 
     void fillCrashInfo(CrashLog crashLog);
 
-    BreakResult continueBreaking(BlockPos breaking, float v, Player player);
+    BreakResult continueBreaking(BlockVec breaking, float v, Player player);
 
-    void stopBreaking(BlockPos blockPos, Player player);
+    void stopBreaking(BlockVec blockVec, Player player);
 
-    void startBreaking(BlockPos blockPos, Player player);
+    void startBreaking(BlockVec blockVec, Player player);
 
-    float getBreakProgress(BlockPos blockPos);
+    float getBreakProgress(BlockVec blockVec);
 
     int getDaytime();
 
@@ -53,4 +53,6 @@ public interface ClientWorldAccess extends WorldAccess {
     int getSunlight(int x, int y, int z);
 
     float getGlobalSunlight();
+
+    boolean isLoaded(ChunkVec chunkVec);
 }

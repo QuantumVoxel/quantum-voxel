@@ -8,8 +8,8 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.api.FileIO;
 import dev.ultreon.quantum.events.api.Event;
-import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.ModLoadingContext;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -520,8 +520,8 @@ public abstract class CraftyConfig {
             return new Json5Number((float) value);
         } else if (type == double.class) {
             return new Json5Number((double) value);
-        } else if (type == Identifier.class) {
-            return new Json5String(((Identifier) value).toString());
+        } else if (type == NamespaceID.class) {
+            return new Json5String(((NamespaceID) value).toString());
         } else if (type == Json5Object.class) {
             return (Json5Object) value;
         } else if (type == Json5Array.class) {
@@ -669,10 +669,10 @@ public abstract class CraftyConfig {
         } else if (type == double.class && element instanceof Json5Number) {
             if (ranged != null) return parseNumber((Json5Number) element, ranged).doubleValue();
             return element.getAsDouble();
-        } else if (type == Identifier.class && element instanceof Json5String) {
-            Identifier identifier = Identifier.tryParse(element.getAsString());
-            if (identifier == null) throw new IllegalArgumentException("Invalid identifier: " + element.getAsString());
-            return identifier;
+        } else if (type == NamespaceID.class && element instanceof Json5String) {
+            NamespaceID namespaceID = NamespaceID.tryParse(element.getAsString());
+            if (namespaceID == null) throw new IllegalArgumentException("Invalid identifier: " + element.getAsString());
+            return namespaceID;
         } else if (type == Enum.class && element instanceof Json5String) {
             return Enum.valueOf((Class<Enum>) type, element.getAsString());
         } else if (type == Json5Element.class) {
@@ -832,7 +832,7 @@ public abstract class CraftyConfig {
             defaultsMap.put(configEntry.path(), new Json5String("00000000-0000-0000-0000-000000000000"));
         } else if (type == Enum.class) {
             throw new IllegalStateException("Enums require a default value to be set (field " + field.getName() + ")");
-        } else if (type == Identifier.class) {
+        } else if (type == NamespaceID.class) {
             throw new IllegalStateException("Identifiers require a default value to be set (field " + field.getName() + ")");
         } else {
             throw new IllegalStateException("Unsupported default type " + type);

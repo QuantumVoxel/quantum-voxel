@@ -15,7 +15,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Difficulty;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -137,20 +137,20 @@ public class TabCompleting {
     }
 
     public static List<String> blocks(List<String> list, String currentArgument) {
-        for (Identifier id : Registries.BLOCK.ids()) {
+        for (NamespaceID id : Registries.BLOCK.ids()) {
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
         return list;
     }
 
     public static List<String> items(List<String> list, String currentArgument) {
-        for (Identifier id : Registries.ITEM.ids()) {
+        for (NamespaceID id : Registries.ITEM.ids()) {
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
         return list;
     }
 
-    public static List<String> keys(String currentArgument, Collection<Identifier> keys) {
+    public static List<String> keys(String currentArgument, Collection<NamespaceID> keys) {
         List<String> list = new ArrayList<>();
         for (var key : keys) {
             TabCompleting.addIfStartsWith(list, key.toString(), currentArgument);
@@ -160,7 +160,7 @@ public class TabCompleting {
 
     public static List<String> worlds(List<String> list, String currentArgument) {
         for (World world : QuantumServer.get().getWorlds()) {
-            Identifier id = world.getDimension().getId();
+            NamespaceID id = world.getDimension().getId();
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
         return list;
@@ -362,12 +362,12 @@ public class TabCompleting {
         }
     }
 
-    public static void addIfStartsWith(@NotNull Collection<String> list, @NotNull Identifier id, @NotNull String startsWith) {
+    public static void addIfStartsWith(@NotNull Collection<String> list, @NotNull NamespaceID id, @NotNull String startsWith) {
         Preconditions.checkNotNull(list, "list");
         Preconditions.checkNotNull(id, "id");
         Preconditions.checkNotNull(startsWith, "startsWith");
 
-        if (id.path().startsWith(startsWith)) {
+        if (id.getPath().startsWith(startsWith)) {
             list.add(id.toString());
         } else {
             if (id.toString().startsWith(startsWith)) {

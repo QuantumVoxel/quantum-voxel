@@ -39,7 +39,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Deprecated
     public PaletteStorage(D defaultValue, int size) {
-        this(0, defaultValue);
+        this(size, defaultValue);
     }
 
     public PaletteStorage(D defaultValue, short[] palette, Array<D> data) {
@@ -279,11 +279,23 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     public short[] getPalette() {
-        return this.palette;
+        this.rwLock.readLock().lock();
+        try {
+            short[] palette = this.palette.clone();
+            this.rwLock.readLock().unlock();
+            return palette;
+        } finally {
+            this.rwLock.readLock().unlock();
+        }
     }
 
     public List<D> getData() {
-        return List.of(data.items);
+        this.rwLock.readLock().lock();
+        try {
+            return List.of(this.data.toArray());
+        } finally {
+            this.rwLock.readLock().unlock();
+        }
     }
 
     public void set(short[] palette, D[] data) {

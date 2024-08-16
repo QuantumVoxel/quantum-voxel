@@ -4,12 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
+import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
-import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
@@ -17,8 +18,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.world.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
@@ -188,16 +188,16 @@ public class GyroscopeInput extends GameInput {
         if (!(hitResult instanceof BlockHitResult hitResult1)) return false;
         Vec3i pos = hitResult1.getPos();
         if (world == null) return false;
-        BlockProperties block = world.get(new BlockPos(pos));
+        BlockProperties block = world.get(new BlockVec(pos));
         Vec3i posNext = hitResult1.getNext();
-        BlockProperties blockNext = world.get(new BlockPos(posNext));
+        BlockProperties blockNext = world.get(new BlockVec(posNext));
 
         if (!hitResult1.isCollide() || block == null || block.isAir())
             return false;
 
         if (button == Input.Buttons.LEFT) {
             if (player.abilities.instaMine) {
-                this.client.connection.send(new C2SBlockBreakPacket(new BlockPos(hitResult1.getPos())));
+                this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(hitResult1.getPos())));
                 return true;
             }
             this.client.startBreaking();

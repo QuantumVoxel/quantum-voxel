@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.client.gui.icon;
 
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public interface Icon {
-    Identifier id();
+    NamespaceID id();
 
     int width();
 

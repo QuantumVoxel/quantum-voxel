@@ -3,7 +3,7 @@ package dev.ultreon.quantum.world.gen.biome;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.gen.feature.*;
 import dev.ultreon.quantum.world.gen.layer.*;
@@ -203,7 +203,7 @@ public class Biomes {
             .build());
 
     private static Biome register(String name, Biome biome) {
-        Registries.BIOME.register(new Identifier(name), biome);
+        Registries.BIOME.register(new NamespaceID(name), biome);
         return biome;
     }
 

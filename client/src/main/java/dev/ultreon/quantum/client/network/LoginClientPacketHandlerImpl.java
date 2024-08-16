@@ -4,6 +4,7 @@ import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
+import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -45,6 +46,10 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
         if (this.client.integratedServer != null) this.client.setActivity(GameActivity.SINGLEPLAYER);
         else this.client.setActivity(GameActivity.MULTIPLAYER);
+
+        if (this.client.screen instanceof WorldLoadScreen worldLoadScreen) {
+            QuantumClient.invoke(worldLoadScreen::onLogin);
+        }
     }
 
     @Override

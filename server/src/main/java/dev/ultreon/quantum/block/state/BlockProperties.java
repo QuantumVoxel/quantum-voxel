@@ -1,22 +1,22 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.UnsafeApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.item.tool.ToolType;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.loot.LootGenerator;
+import dev.ultreon.ubo.types.MapType;
 import io.netty.handler.codec.DecoderException;
 
 import java.util.HashMap;
@@ -70,7 +70,7 @@ public class BlockProperties {
     }
 
     public static BlockProperties load(MapType data) {
-        Block block = Registries.BLOCK.get(Identifier.parse(data.getString("block")));
+        Block block = Registries.BLOCK.get(NamespaceID.parse(data.getString("block")));
         BlockProperties meta = block.createMeta();
         meta.entries.putAll(meta.loadEntries(data.getMap("entries", new MapType())));
 
@@ -141,7 +141,7 @@ public class BlockProperties {
 
     public MapType save() {
         MapType map = new MapType();
-        Identifier id = Registries.BLOCK.getId(block);
+        NamespaceID id = Registries.BLOCK.getId(block);
         if (id == null)
             throw new IllegalArgumentException("Block " + block + " isn't registered");
 
@@ -156,8 +156,8 @@ public class BlockProperties {
         return map;
     }
 
-    public void onPlace(ServerWorld serverWorld, BlockPos blockPos) {
-        this.block.onPlace(serverWorld, blockPos, this);
+    public void onPlace(ServerWorld serverWorld, BlockVec blockVec) {
+        this.block.onPlace(serverWorld, blockVec, this);
     }
 
     public boolean isWater() {
@@ -231,7 +231,7 @@ public class BlockProperties {
         return Objects.hash(block, entries);
     }
 
-    public void update(World serverWorld, BlockPos offset) {
+    public void update(World serverWorld, BlockVec offset) {
         this.block.update(serverWorld, offset, this);
     }
 
@@ -243,7 +243,7 @@ public class BlockProperties {
         return this.block == block;
     }
 
-    public void onDestroy(World world, BlockPos breaking, Player breaker) {
+    public void onDestroy(World world, BlockVec breaking, Player breaker) {
         this.block.onDestroy(world, breaking, this, breaker);
 
         if (!breaker.getWorld().isClientSide()) {

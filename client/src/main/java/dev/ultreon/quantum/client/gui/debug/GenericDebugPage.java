@@ -12,8 +12,7 @@ import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -50,27 +49,27 @@ public class GenericDebugPage implements DebugPage {
             Player player = client.player;
             if (player != null) {
                 context.left("Player");
-                BlockPos blockPosition = player.getBlockPos();
-                Vec3i sectionPos = context.block2sectionPos(blockPosition);
-                @Nullable ClientChunkAccess chunk = world.getChunkAt(blockPosition);
-                BlockPos localBlockPos = World.toLocalBlockPos(blockPosition);
+                BlockVec BlockVecition = player.getBlockVec();
+                Vec3i sectionPos = context.block2sectionPos(BlockVecition);
+                @Nullable ClientChunkAccess chunk = world.getChunkAt(BlockVecition);
+                BlockVec localBlockVec = World.toLocalBlockVec(BlockVecition);
 
                 context.left("XYZ", player.getPosition())
-                        .left("Block XYZ", blockPosition)
+                        .left("Block XYZ", BlockVecition)
                         .left("Chunk XYZ", sectionPos)
-                        .left("Biome", Registries.BIOME.getId(world.getBiome(blockPosition)));
+                        .left("Biome", Registries.BIOME.getId(world.getBiome(BlockVecition)));
                 if (chunk != null) {
-                    int sunlight = chunk.getSunlight(localBlockPos.vec());
-                    int blockLight = chunk.getBlockLight(localBlockPos.vec());
+                    int sunlight = chunk.getSunlight(localBlockVec.vec());
+                    int blockLight = chunk.getBlockLight(localBlockVec.vec());
 
                     context.left("Chunk Offset", chunk.getRenderOffset())
                             .left("Sunlight", sunlight)
                             .left("Block Light", blockLight);
                 }
-                context.left("Chunk Shown", world.getChunkAt(blockPosition) != null);
+                context.left("Chunk Shown", world.getChunkAt(BlockVecition) != null);
                 HitResult hitResult = client.hitResult;
                 if (hitResult != null)
-                    context.left("Break Progress", world.getBreakProgress(new BlockPos(hitResult.getPos())));
+                    context.left("Break Progress", world.getBreakProgress(new BlockVec(hitResult.getPos())));
                 context.left();
             }
 

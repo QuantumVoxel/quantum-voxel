@@ -10,7 +10,7 @@ import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.entity.Entity;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityModelInstance<T extends Entity> {
@@ -99,7 +99,7 @@ public class EntityModelInstance<T extends Entity> {
         }
     }
 
-    public void setTextures(Identifier textureLocation) {
+    public void setTextures(NamespaceID textureLocation) {
         TextureManager textureManager = QuantumClient.get().getTextureManager();
         TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(textureManager.getTexture(textureLocation));
         if (model != null) {

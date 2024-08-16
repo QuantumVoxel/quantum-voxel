@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui.widget.components;
 
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.widget.Widget;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class RangedValueComponent extends UIComponent {
     private int value;
@@ -32,7 +32,7 @@ public class RangedValueComponent extends UIComponent {
     }
 
     @Override
-    public void handleImGui(String path, Identifier key, Widget widget) {
+    public void handleImGui(String path, NamespaceID key, Widget widget) {
 //        ImGuiEx.slider("Value (" + key + ")", path, this.value, this.min(), this.max(), this::set);
     }
 }

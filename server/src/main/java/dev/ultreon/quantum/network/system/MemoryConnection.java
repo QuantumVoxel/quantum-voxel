@@ -45,7 +45,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         if (theirPacketData.getId(packet) < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
-        this.otherSide.receive(packet, null);
+        this.otherSide.queue(() -> this.otherSide.receive(packet, null));
     }
 
     @Override
@@ -75,12 +75,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             rx.incrementAndGet();
             ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
             rx.decrementAndGet();
-        } catch (Exception e) {
-            if (resultListener != null) {
+        } catch (Throwable e) {
+            if (resultListener != null)
                 resultListener.onFailure();
-            }
             CommonConstants.LOGGER.error("Failed to handle packet", e);
-
             return;
         }
 

@@ -33,7 +33,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.BlockHitResult;
 import dev.ultreon.quantum.util.HitResult;
 import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
 import it.unimi.dsi.fastutil.ints.Int2BooleanArrayMap;
@@ -317,7 +317,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         if (hitResult instanceof BlockHitResult blockHitResult) {
             Block block = blockHitResult.getBlock();
             if (block != null && !block.isAir()) {
-                UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockPos(result.getPos()));
+                UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockVec(result.getPos()));
 
                 if (blockResult == UseResult.DENY || blockResult == UseResult.ALLOW)
                     return blockResult;

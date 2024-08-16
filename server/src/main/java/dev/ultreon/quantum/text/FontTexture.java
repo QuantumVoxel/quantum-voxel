@@ -1,17 +1,17 @@
 package dev.ultreon.quantum.text;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class FontTexture {
     private final char c;
-    private final Identifier font;
+    private final NamespaceID font;
 
-    public FontTexture(char c, Identifier font) {
+    public FontTexture(char c, NamespaceID font) {
         this.c = c;
         this.font = font;
     }
 
-    public FontTexture(int id, Identifier font) {
+    public FontTexture(int id, NamespaceID font) {
         this((char) id, font);
     }
 
@@ -19,7 +19,7 @@ public class FontTexture {
         return this.c;
     }
 
-    public Identifier getFont() {
+    public NamespaceID getFont() {
         return this.font;
     }
 

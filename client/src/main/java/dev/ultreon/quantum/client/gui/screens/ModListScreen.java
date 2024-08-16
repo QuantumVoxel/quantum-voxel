@@ -20,8 +20,8 @@ import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipException;
 
 public class ModListScreen extends Screen {
-    private static final Identifier DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
+    private static final NamespaceID DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
     private SelectionList<Mod> list;
     private TextButton configButton;
     private TextButton backButton;
@@ -138,9 +138,9 @@ public class ModListScreen extends Screen {
     }
 
     private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size) {
-        Identifier iconId;
+        NamespaceID iconId;
         @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
-        Identifier overrideId = ModIconOverrideRegistry.get(metadata.getName());
+        NamespaceID overrideId = ModIconOverrideRegistry.get(metadata.getName());
         TextureManager textureManager = this.client.getTextureManager();
         if (overrideId != null) {
             textureManager.registerTexture(overrideId);

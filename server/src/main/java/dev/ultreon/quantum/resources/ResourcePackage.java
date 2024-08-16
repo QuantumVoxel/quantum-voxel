@@ -1,16 +1,16 @@
 package dev.ultreon.quantum.resources;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.io.Closeable;
 import java.util.*;
 
 public class ResourcePackage implements Closeable {
-    protected final Map<Identifier, StaticResource> resources;
+    protected final Map<NamespaceID, StaticResource> resources;
     protected final Map<String, ResourceCategory> categories;
     private boolean locked;
 
-    public ResourcePackage(Map<Identifier, StaticResource> resources, Map<String, ResourceCategory> categories) {
+    public ResourcePackage(Map<NamespaceID, StaticResource> resources, Map<String, ResourceCategory> categories) {
         this.resources = resources;
         this.categories = categories;
     }
@@ -20,19 +20,19 @@ public class ResourcePackage implements Closeable {
         this.categories = new HashMap<>();
     }
 
-    public boolean has(Identifier entry) {
+    public boolean has(NamespaceID entry) {
         return this.resources.containsKey(entry);
     }
 
-    public Set<Identifier> entries() {
+    public Set<NamespaceID> entries() {
         return this.resources.keySet();
     }
 
-    public StaticResource get(Identifier entry) {
+    public StaticResource get(NamespaceID entry) {
         return this.resources.get(entry);
     }
 
-    public Map<Identifier, StaticResource> mapEntries() {
+    public Map<NamespaceID, StaticResource> mapEntries() {
         return Collections.unmodifiableMap(this.resources);
     }
 

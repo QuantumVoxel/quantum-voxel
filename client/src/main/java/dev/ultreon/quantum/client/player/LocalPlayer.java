@@ -3,10 +3,12 @@ package dev.ultreon.quantum.client.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.libs.commons.v0.vector.Vec2i;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
@@ -20,11 +22,15 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.MenuType;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.event.SoundEvents;
+import dev.ultreon.quantum.world.ChunkVec;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
@@ -41,6 +47,8 @@ public class LocalPlayer extends ClientPlayer {
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
     private final Vec3d tmp = new Vec3d();
+    private ChunkVec lastChunkVec;
+    private Vec2i tmp2I = new Vec2i();
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -99,6 +107,29 @@ public class LocalPlayer extends ClientPlayer {
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
+
+        if (!this.getChunkVec().equals(this.lastChunkVec)) {
+            this.refreshChunks();
+            this.lastChunkVec = this.getChunkVec();
+        }
+    }
+
+    private void refreshChunks() {
+        if (!this.client.renderWorld) return;
+
+        IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
+        ChunkVec playerPos = this.getChunkVec();
+
+        if (connection == null) return;
+        int renderDistance = ClientConfig.renderDistance;
+        for (int x = -renderDistance; x <= renderDistance; x++) {
+            for (int z = -renderDistance; z <= renderDistance; z++) {
+                ChunkVec relativePos = new ChunkVec(playerPos.getX() + x, playerPos.getZ() + z);
+                if (this.tmp2I.set(x, z).dst(playerPos.getX(), playerPos.getZ()) <= renderDistance
+                        && !this.world.isLoaded(relativePos))
+                    connection.send(new C2SRequestChunkLoadPacket(relativePos));
+            }
+        }
     }
 
     /**
@@ -250,7 +281,7 @@ public class LocalPlayer extends ClientPlayer {
         } else if (openedBefore == null) {
             CommonConstants.LOGGER.warn("Opened server menu {} before opening any on client side", menuType);
             if (this.world instanceof ClientWorld clientWorld) {
-                openedBefore = menuType.create(clientWorld, this, this.getBlockPos());
+                openedBefore = menuType.create(clientWorld, this, this.getBlockVec());
             }
         }
         ContainerScreen screen = MenuRegistry.getScreen(openedBefore);

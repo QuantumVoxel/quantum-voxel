@@ -12,7 +12,7 @@ public interface ChunkReader {
 
     int getHighest(int x, int z);
 
-    default BlockProperties get(BlockPos localize) {
+    default BlockProperties get(BlockVec localize) {
         return get(localize.x(), localize.y(), localize.z());
     }
 
@@ -20,7 +20,7 @@ public interface ChunkReader {
         return get(cpy.x, cpy.y, cpy.z);
     }
 
-    default BlockProperties getFast(BlockPos localize) {
+    default BlockProperties getFast(BlockVec localize) {
         return getFast(localize.x(), localize.y(), localize.z());
     }
 

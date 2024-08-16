@@ -176,20 +176,20 @@ public enum CubicDirection {
         }
     }
 
-    public BlockPos getOffset() {
+    public BlockVec getOffset() {
         switch (this) {
             case UP:
-                return new BlockPos(0, 1, 0);
+                return new BlockVec(0, 1, 0);
             case DOWN:
-                return new BlockPos(0, -1, 0);
+                return new BlockVec(0, -1, 0);
             case WEST:
-                return new BlockPos(-1, 0, 0);
+                return new BlockVec(-1, 0, 0);
             case EAST:
-                return new BlockPos(1, 0, 0);
+                return new BlockVec(1, 0, 0);
             case NORTH:
-                return new BlockPos(0, 0, -1);
+                return new BlockVec(0, 0, -1);
             case SOUTH:
-                return new BlockPos(0, 0, 1);
+                return new BlockVec(0, 0, 1);
             default:
                 throw new IllegalArgumentException();
         }

@@ -16,7 +16,7 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -91,13 +91,13 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
             EntityRenderer<?> renderer = this.get(type);
             EntityModel<?> entityModel = this.modelManager.get(type);
 
-            Identifier key = e.getKey().element();
+            NamespaceID key = e.getKey().element();
             FileHandle handle = QuantumClient.resource(key.mapPath(path -> "models/entity/" + path + ".g3dj"));
 
             // Load and register the model if it exists
             if (handle.exists()) {
                 Model model = QuantumClient.invokeAndWait(() -> this.modelManager.modelLoader.loadModel(handle, fileName -> {
-                    String filePath = fileName.substring(("assets/" + key.namespace() + "/models/entity/").length());
+                    String filePath = fileName.substring(("assets/" + key.getDomain() + "/models/entity/").length());
                     return new Texture(QuantumClient.resource(key.mapPath(path -> "textures/entity/" + filePath)));
                 }));
                 if (model == null)

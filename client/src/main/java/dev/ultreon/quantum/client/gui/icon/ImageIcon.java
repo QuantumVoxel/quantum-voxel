@@ -1,21 +1,21 @@
 package dev.ultreon.quantum.client.gui.icon;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Objects;
 
 public final class ImageIcon implements Icon {
-    private final Identifier id;
+    private final NamespaceID id;
     private final int width;
     private final int height;
 
-    public ImageIcon(Identifier id, int width, int height) {
+    public ImageIcon(NamespaceID id, int width, int height) {
         this.id = id;
         this.width = width;
         this.height = height;
     }
 
-    public ImageIcon(Identifier id) {
+    public ImageIcon(NamespaceID id) {
         this(id, 16, 16);
     }
 
@@ -40,7 +40,7 @@ public final class ImageIcon implements Icon {
     }
 
     @Override
-    public Identifier id() {
+    public NamespaceID id() {
         return id;
     }
 

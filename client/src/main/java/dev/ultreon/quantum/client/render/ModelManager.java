@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class ModelManager {
     public static final ModelManager INSTANCE = new ModelManager();
     private final ModelBuilder builder = new ModelBuilder();
-    private final Map<Identifier, Model> models = new ConcurrentHashMap<>();
+    private final Map<NamespaceID, Model> models = new ConcurrentHashMap<>();
 
     private ModelManager() {
 
@@ -52,10 +52,10 @@ public class ModelManager {
         return builder.end();
     }
 
-    public Model loadModel(Identifier id) {
+    public Model loadModel(NamespaceID id) {
         QuantumClient client = QuantumClient.get();
         Model model = client.modelLoader.loadModel(new ResourceFileHandle(id.mapPath(s -> "models/" + s + ".g3dj")),
-                fileName -> client.getTextureManager().getTexture(new Identifier(fileName).mapPath(s -> {
+                fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(s -> {
                     if (fileName.startsWith("models/")) {
                         return "textures/" + fileName.substring("models/".length());
                     }
@@ -69,7 +69,7 @@ public class ModelManager {
         return model;
     }
 
-    public Model generateModel(Identifier id, Consumer<ModelBuilder> builder) {
+    public Model generateModel(NamespaceID id, Consumer<ModelBuilder> builder) {
         if (this.models.containsKey(id)) {
             QuantumClient.LOGGER.error("Model {} already exists, the model will be unloaded and regenerated.", id);
 //            this.unloadModel(id);
@@ -85,7 +85,7 @@ public class ModelManager {
         return model;
     }
 
-    public Model generateModel(Identifier id, Function<ModelBuilder, Model> builder) {
+    public Model generateModel(NamespaceID id, Function<ModelBuilder, Model> builder) {
         Model model = builder.apply(this.builder);
 
         this.models.put(id, model);
@@ -93,7 +93,7 @@ public class ModelManager {
         return model;
     }
 
-    public Model getModel(Identifier id) {
+    public Model getModel(NamespaceID id) {
         if (this.models.containsKey(id)) {
             return this.models.get(id);
         }
@@ -102,7 +102,7 @@ public class ModelManager {
     }
 
     @CanIgnoreReturnValue
-    public boolean unloadModel(Identifier id) {
+    public boolean unloadModel(NamespaceID id) {
         Model removed = this.models.remove(id);
         if (removed != null) {
             try {
@@ -117,21 +117,21 @@ public class ModelManager {
     }
 
     public void reload() {
-        Set<Identifier> identifiers = Set.copyOf(this.models.keySet());
+        Set<NamespaceID> namespaceIDS = Set.copyOf(this.models.keySet());
         this.models.clear();
 
-        for (Identifier id : identifiers) {
+        for (NamespaceID id : namespaceIDS) {
             this.loadModel(id);
         }
     }
 
     public void dispose() {
-        for (Identifier id : this.models.keySet()) {
+        for (NamespaceID id : this.models.keySet()) {
             unloadModel(id);
         }
     }
 
-    public void add(Identifier resourceId, Model model) {
+    public void add(NamespaceID resourceId, Model model) {
         this.models.put(resourceId, model);
     }
 }

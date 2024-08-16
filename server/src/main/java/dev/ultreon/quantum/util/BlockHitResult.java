@@ -7,7 +7,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.CubicDirection;
 
 import java.util.Objects;
@@ -57,15 +57,15 @@ public class BlockHitResult implements HitResult {
         this.distance = buffer.readDouble();
     }
 
-    public BlockHitResult(Ray ray, BlockPos blockPos, BlockProperties block) {
+    public BlockHitResult(Ray ray, BlockVec blockVec, BlockProperties block) {
         this.ray = ray;
         this.blockMeta = block;
         this.block = block.getBlock();
-        this.position.set(blockPos.vec().d());
+        this.position.set(blockVec.vec().d());
         this.setDirection(ray.getDirection());
         this.distanceMax = 5.0F;
-        this.pos.set(blockPos.vec());
-        this.next.set(blockPos.vec());
+        this.pos.set(blockVec.vec());
+        this.next.set(blockVec.vec());
         this.normal.set(0, 0, 0);
         this.collide = true;
         this.distance = 0.0D;

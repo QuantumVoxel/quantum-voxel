@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.icon;
 
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Objects;
 
@@ -22,7 +22,7 @@ public final class GenericIcon implements Icon {
     }
 
     @Override
-    public Identifier id() {
+    public NamespaceID id() {
         return QuantumClient.id("textures/gui/icons/generic.png");
     }
 

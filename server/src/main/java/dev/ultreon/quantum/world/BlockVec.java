@@ -11,7 +11,7 @@ import java.util.Objects;
  *
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  */
-public final class BlockPos {
+public final class BlockVec {
     private final int x;
     private final int y;
     private final int z;
@@ -21,7 +21,7 @@ public final class BlockPos {
      * @param y
      * @param z
      */
-    public BlockPos(int x, int y, int z) {
+    public BlockVec(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -34,14 +34,14 @@ public final class BlockPos {
      * @param y the y-coordinate.
      * @param z the z-coordinate.
      */
-    public BlockPos(double x, double y, double z) {
+    public BlockVec(double x, double y, double z) {
         this((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
     }
 
     /**
      * Creates a new block position at {@code 0,0,0}.
      */
-    public BlockPos() {
+    public BlockVec() {
         this(0, 0, 0);
     }
 
@@ -50,11 +50,11 @@ public final class BlockPos {
      *
      * @param vec the vector.
      */
-    public BlockPos(Vec3i vec) {
+    public BlockVec(Vec3i vec) {
         this(vec.x, vec.y, vec.z);
     }
 
-    public BlockPos(MapType data) {
+    public BlockVec(MapType data) {
         this(data.getInt("x"), data.getInt("y"), data.getInt("z"));
     }
 
@@ -67,8 +67,8 @@ public final class BlockPos {
      * @return The new block position.
      */
     @NewInstance
-    public BlockPos offset(int x, int y, int z) {
-        return new BlockPos(x, y, z);
+    public BlockVec offset(int x, int y, int z) {
+        return new BlockVec(x, y, z);
     }
 
     /**
@@ -88,32 +88,32 @@ public final class BlockPos {
     /**
      * @return The block position below the current position.
      */
-    public BlockPos below() {
+    public BlockVec below() {
         return this.offset(0, -1, 0);
     }
 
     /**
      * @return The block position above the current position.
      */
-    public BlockPos above() {
+    public BlockVec above() {
         return this.offset(0, -1, 0);
     }
 
-    public BlockPos offset(ChunkPos pos) {
-        return this.offset(pos.x() * World.CHUNK_SIZE, 0, pos.z() * World.CHUNK_SIZE);
+    public BlockVec offset(ChunkVec pos) {
+        return this.offset(pos.getX() * World.CHUNK_SIZE, 0, pos.getZ() * World.CHUNK_SIZE);
     }
 
-    public BlockPos offset(CubicDirection direction) {
+    public BlockVec offset(CubicDirection direction) {
         return this.offset(direction.getOffset());
     }
 
-    public BlockPos offset(CubicDirection direction, int distance) {
-        BlockPos offset = direction.getOffset();
+    public BlockVec offset(CubicDirection direction, int distance) {
+        BlockVec offset = direction.getOffset();
 
         return this.offset(offset.x * distance, offset.y * distance, offset.z * distance);
     }
 
-    private BlockPos offset(BlockPos offset) {
+    private BlockVec offset(BlockVec offset) {
         return this.offset(x + offset.x, y + offset.y, z + offset.z);
     }
 
@@ -133,7 +133,7 @@ public final class BlockPos {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (BlockPos) obj;
+        var that = (BlockVec) obj;
         return this.x == that.x &&
                this.y == that.y &&
                this.z == that.z;

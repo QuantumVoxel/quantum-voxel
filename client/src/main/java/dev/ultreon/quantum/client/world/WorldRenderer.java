@@ -53,9 +53,11 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.util.BlockHitResult;
+import dev.ultreon.quantum.util.DeprecationCheckException;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.ChunkVec;
 import dev.ultreon.quantum.world.World;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -78,8 +80,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private static final Vec3d TMp_3D_B = new Vec3d();
     public static final String OUTLINE_CURSOR_ID = CommonConstants.strId("outline_cursor");
     public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
-    public static final Identifier MOON_ID = id("generated/moon");
-    public static final Identifier SUN_ID = id("generated/sun");
+    public static final NamespaceID MOON_ID = id("generated/moon");
+    public static final NamespaceID SUN_ID = id("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
     private Material material;
     private Material transparentMaterial;
@@ -106,10 +108,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private long lastChunkBuild;
     private final Skybox skybox = new Skybox();
     private BlockHitResult lastHitResult;
-    private final Map<BlockPos, ModelInstance> breakingInstances = new HashMap<>();
-    private final Map<BlockPos, ModelInstance> blockInstances = new ConcurrentHashMap<>();
+    private final Map<BlockVec, ModelInstance> breakingInstances = new HashMap<>();
+    private final Map<BlockVec, ModelInstance> blockInstances = new ConcurrentHashMap<>();
     private final Array<ClientChunkAccess> removedChunks = new Array<ClientChunkAccess>();
-    private final Map<ChunkPos, ChunkModel> chunkModels = new ConcurrentHashMap<>();
+    private final Map<ChunkVec, ChunkModel> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Vector3 sunDirection = new Vector3();
 
@@ -161,7 +163,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         boundingBox.max.add(v);
 
         for (int i = 0; i < 6; i++) {
-            BakedCubeModel bakedCubeModel = BakedCubeModel.of(new Identifier("break_stage/stub_" + i), breakingTexRegions.get(i));
+            BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("break_stage/stub_" + i), breakingTexRegions.get(i));
             Model model = bakedCubeModel.getModel();
 
             this.breakingModels.add(model);
@@ -350,9 +352,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.loadedChunks = chunks.size();
         this.visibleChunks = 0;
 
-        // Create a new ChunkRenderRef and an array of ChunkPos.
+        // Create a new ChunkRenderRef and an array of ChunkVec.
         var ref = new ChunkRenderRef();
-        Array<ChunkPos> positions = new Array<>();
+        Array<ChunkVec> positions = new Array<>();
 
         // Collect the chunks to render.
         QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(batch, renderLayer, chunks, positions, player, ref));
@@ -419,7 +421,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         });
     }
 
-    private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkPos> positions, LocalPlayer player, ChunkRenderRef ref) {
+    private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
         for (ClientChunkAccess chunk : this.removedChunks.toArray(ClientChunkAccess.class)) {
             this.unload(chunk);
         }
@@ -565,12 +567,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         chunkModel.dispose();
 
-        Identifier id = createId(chunk.getPos());
+        NamespaceID id = createId(chunk.getPos());
         if (!ModelManager.INSTANCE.unloadModel(id)) {
             QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
         }
 
-        Map<BlockPos, BlockProperties> customRendered = chunk.getCustomRendered();
+        Map<BlockVec, BlockProperties> customRendered = chunk.getCustomRendered();
         for (var entry : blockInstances.entrySet()) {
             if (customRendered.containsKey(entry.getKey())) {
                 ModelInstance value = entry.getValue();
@@ -582,13 +584,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
 
-    private static @NotNull Identifier createId(ChunkPos pos) {
-        return id(("generated/chunk/" + pos.x() + "." + pos.z()).replace('-', '_'));
+    private static @NotNull NamespaceID createId(ChunkVec pos) {
+        return id(("generated/chunk/" + pos.getX() + "." + pos.getZ()).replace('-', '_'));
     }
 
     private void renderBlockModels(RenderLayer renderLayer, ClientChunk chunk) {
         for (var entry : chunk.getCustomRendered().entrySet()) {
-            BlockPos key = entry.getKey();
+            BlockVec key = entry.getKey();
             this.tmp.set(chunk.renderOffset);
             this.tmp.add(key.x(), key.y(), key.z());
 
@@ -615,9 +617,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private void renderBlockBreaking(RenderLayer renderLayer, ClientChunk chunk) {
-        Map<BlockPos, Float> breaking = chunk.getBreaking();
+        Map<BlockVec, Float> breaking = chunk.getBreaking();
         for (var entry : breaking.entrySet()) {
-            BlockPos key = entry.getKey();
+            BlockVec key = entry.getKey();
             this.tmp.set(chunk.renderOffset);
             this.tmp.add(key.x() + 1f, key.y(), key.z());
 
@@ -832,8 +834,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         });
     }
 
-    private void unload(ChunkPos chunkPos) {
-        ClientChunk clientChunk = this.world.getChunk(chunkPos);
+    private void unload(ChunkVec chunkVec) {
+        ClientChunk clientChunk = this.world.getChunk(chunkVec);
         if (clientChunk != null) this.unload(clientChunk);
     }
 

@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.batches.ParticleBatch;
 import com.badlogic.gdx.utils.Array;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.particles.ParticleType;
 
 public class ClientParticle {
@@ -23,12 +23,12 @@ public class ClientParticle {
     }
 
     public void load(Array<ParticleBatch<?>> batches) {
-        Identifier identifier = this.type.getId().mapPath(path -> "particles/" + path + ".pfx");
+        NamespaceID namespaceID = this.type.getId().mapPath(path -> "particles/" + path + ".pfx");
         var param = new ParticleEffectLoadParameter(batches);
 
         AssetManager assetManager = QuantumClient.get().getAssetManager();
-        assetManager.load(identifier.toString(), ParticleEffect.class, param);
-        this.particleEffect = QuantumClient.invokeAndWait(() -> assetManager.finishLoadingAsset(identifier.toString()));
+        assetManager.load(namespaceID.toString(), ParticleEffect.class, param);
+        this.particleEffect = QuantumClient.invokeAndWait(() -> assetManager.finishLoadingAsset(namespaceID.toString()));
 
         this.pool = new PFXPool(particleEffect);
     }

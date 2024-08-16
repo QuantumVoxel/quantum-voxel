@@ -13,9 +13,9 @@ import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
+import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import java.util.Objects;
 
 public class InventoryScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
-    private static final Identifier BACKGROUND = QuantumClient.id("textures/gui/container/inventory.png");
+    private static final NamespaceID BACKGROUND = QuantumClient.id("textures/gui/container/inventory.png");
     private final Inventory inventory;
     private PagedList<? extends CraftingRecipe> recipes;
     private List<? extends CraftingRecipe> currentPage;
@@ -108,7 +108,7 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     @Override
-    public Identifier getBackground() {
+    public NamespaceID getBackground() {
         return InventoryScreen.BACKGROUND;
     }
 
@@ -116,7 +116,7 @@ public class InventoryScreen extends ContainerScreen {
     protected void renderBackground(Renderer renderer) {
         super.renderBackground(renderer);
 
-        Identifier background = this.getBackground();
+        NamespaceID background = this.getBackground();
         renderer.blit(background, this.left() + this.backgroundWidth() + 1, this.getHeight() / 2f - 64, 104, 128, 0, 127);
     }
 

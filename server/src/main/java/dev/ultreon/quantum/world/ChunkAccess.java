@@ -8,7 +8,7 @@ public interface ChunkAccess extends ChunkReader {
         setFast(pos.x, pos.y, pos.z, block);
     }
 
-    default void setFast(BlockPos pos, BlockProperties block) {
+    default void setFast(BlockVec pos, BlockProperties block) {
         setFast(pos.x(), pos.y(), pos.z(), block);
     }
 
@@ -18,7 +18,7 @@ public interface ChunkAccess extends ChunkReader {
         set(pos.x, pos.y, pos.z, block);
     }
 
-    default void set(BlockPos pos, BlockProperties block) {
+    default void set(BlockVec pos, BlockProperties block) {
         set(pos.x(), pos.y(), pos.z(), block);
     }
 

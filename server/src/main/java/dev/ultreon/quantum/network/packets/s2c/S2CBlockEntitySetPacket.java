@@ -5,25 +5,25 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 
 public class S2CBlockEntitySetPacket extends Packet<InGameClientPacketHandler> {
-    private final BlockPos pos;
+    private final BlockVec pos;
     private final int blockEntityId;
 
-    public S2CBlockEntitySetPacket(BlockPos pos, int blockEntityId) {
+    public S2CBlockEntitySetPacket(BlockVec pos, int blockEntityId) {
         this.pos = pos;
         this.blockEntityId = blockEntityId;
     }
 
     public S2CBlockEntitySetPacket(PacketIO buffer) {
-        this.pos = buffer.readBlockPos();
+        this.pos = buffer.readBlockVec();
         this.blockEntityId = buffer.readVarInt();
     }
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeBlockPos(this.pos);
+        buffer.writeBlockVec(this.pos);
         buffer.writeVarInt(this.blockEntityId);
     }
 

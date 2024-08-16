@@ -4,7 +4,6 @@ import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.util.BlockMetaPredicate;
-import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;

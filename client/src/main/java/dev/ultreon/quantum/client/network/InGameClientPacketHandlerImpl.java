@@ -1,25 +1,26 @@
 package dev.ultreon.quantum.client.network;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import dev.ultreon.quantum.client.render.TerrainRenderer;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
+import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
-import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -44,11 +45,15 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.*;
-import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.GameMode;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.Chunk;
+import dev.ultreon.quantum.world.ChunkVec;
+import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -61,7 +66,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler {
     private final IConnection<ClientPacketHandler, ServerPacketHandler> connection;
-    private final Map<Identifier, NetworkChannel> channels = new HashMap<>();
+    private final Map<NamespaceID, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final QuantumClient client = QuantumClient.get();
     private long ping = 0;
@@ -72,7 +77,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         this.context = new PacketContext(null, connection, Env.CLIENT);
     }
 
-    public NetworkChannel registerChannel(Identifier id) {
+    public NetworkChannel registerChannel(NamespaceID id) {
         NetworkChannel networkChannel = NetworkChannel.create(id);
         this.channels.put(id, networkChannel);
         return networkChannel;
@@ -84,7 +89,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public NetworkChannel getChannel(Identifier channelId) {
+    public NetworkChannel getChannel(NamespaceID channelId) {
         return this.channels.get(channelId);
     }
 
@@ -120,10 +125,17 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onChunkData(ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public void onChunkData(ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         try {
             LocalPlayer player = this.client.player;
-            if (player == null/* || new Vec2d(pos.x(), pos.z()).dst(new Vec2d(player.getChunkPos().x(), player.getChunkPos().z())) > this.client.settings.renderDistance.getConfig()*/) {
+            if (player == null/* || new Vec2d(pos.x(), pos.z()).dst(new Vec2d(player.getChunkVec().x(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
+                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
+                return;
+            }
+
+            double dst = pos.dst(player.getChunkVec());
+            if (dst > ClientConfig.renderDistance) {
+                CommonConstants.LOGGER.warn("Skipping chunk {} because it's too far away: {}", pos, dst);
                 this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
                 return;
             }
@@ -159,7 +171,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onChunkCancel(ChunkPos pos) {
+    public void onChunkCancel(ChunkVec pos) {
         this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
     }
 
@@ -247,7 +259,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onPlaySound(Identifier sound, float volume) {
+    public void onPlaySound(NamespaceID sound, float volume) {
         this.client.playSound(Registries.SOUND_EVENT.get(sound), volume);
     }
 
@@ -270,7 +282,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onBlockSet(BlockPos pos, BlockProperties block) {
+    public void onBlockSet(BlockVec pos, BlockProperties block) {
 
     }
 
@@ -316,7 +328,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onOpenContainerMenu(Identifier menuTypeId, List<ItemStack> items) {
+    public void onOpenContainerMenu(NamespaceID menuTypeId, List<ItemStack> items) {
         var menuType = Registries.MENU_TYPE.get(menuTypeId);
         LocalPlayer player = this.client.player;
         if (player == null) return;
@@ -397,7 +409,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onBlockEntitySet(BlockPos pos, BlockEntityType<?> blockEntity) {
+    public void onBlockEntitySet(BlockVec pos, BlockEntityType<?> blockEntity) {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess worldAccess = client.world;
             if (worldAccess instanceof ClientWorld world) {
@@ -475,6 +487,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
         // TODO: Implement this
 //        world.spawnParticles(particleType, position, motion, count);
+    }
+
+    @Override
+    public void onChunkUnload(ChunkVec chunkVec) {
+        if (this.client.world != null)
+            this.client.world.unloadChunk(chunkVec);
+        else CommonConstants.LOGGER.error("Attempted to unload a chunk while the world wasn't loaded!");
     }
 
     @Override

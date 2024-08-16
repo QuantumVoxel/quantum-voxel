@@ -17,8 +17,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -37,8 +39,8 @@ import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.FlatStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.BlockVec;
+import dev.ultreon.quantum.world.ChunkVec;
 import dev.ultreon.quantum.world.HeightMap;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
@@ -472,7 +474,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public ModelInstance addModel(BlockPos blockPos, ModelInstance modelInstance) {
+    public ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance) {
         // TODO
         return modelInstance;
     }
@@ -518,8 +520,8 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public ChunkPos getPos() {
-        return new ChunkPos(x, y, z);
+    public ChunkVec getPos() {
+        return new ChunkVec(x, y, z);
     }
 
     @Override

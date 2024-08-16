@@ -7,7 +7,7 @@ import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.World;
 
 public class BlockEvents {
@@ -20,31 +20,31 @@ public class BlockEvents {
 
     @FunctionalInterface
     public interface SetBlock {
-        void onSetBlock(World world, BlockPos pos, BlockProperties block);
+        void onSetBlock(World world, BlockVec pos, BlockProperties block);
     }
 
     @FunctionalInterface
     public interface AttemptBlockPlacement {
-        EventResult onAttemptBlockPlacement(Player player, Block placed, BlockPos pos, ItemStack stack);
+        EventResult onAttemptBlockPlacement(Player player, Block placed, BlockVec pos, ItemStack stack);
     }
 
     @FunctionalInterface
     public interface BlockPlaced {
-        void onBlockPlaced(Player player, Block placed, BlockPos pos, ItemStack stack);
+        void onBlockPlaced(Player player, Block placed, BlockVec pos, ItemStack stack);
     }
 
     @FunctionalInterface
     public interface AttemptBlockRemoval {
-        EventResult onAttemptBlockRemoval(ServerPlayer player, BlockProperties removed, BlockPos pos, ItemStack stack);
+        EventResult onAttemptBlockRemoval(ServerPlayer player, BlockProperties removed, BlockVec pos, ItemStack stack);
     }
 
     @FunctionalInterface
     public interface BlockRemoved {
-        void onBlockRemoved(ServerPlayer player, BlockProperties removed, BlockPos pos, ItemStack stack);
+        void onBlockRemoved(ServerPlayer player, BlockProperties removed, BlockVec pos, ItemStack stack);
     }
 
     @FunctionalInterface
     public interface BreakBlock {
-        EventResult onBreakBlock(World player, BlockPos removed, BlockProperties pos, Player stack);
+        EventResult onBreakBlock(World player, BlockVec removed, BlockProperties pos, Player stack);
     }
 }

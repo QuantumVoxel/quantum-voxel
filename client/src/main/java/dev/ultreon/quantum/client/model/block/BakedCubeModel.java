@@ -12,11 +12,10 @@ import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.BakedModel;
-import dev.ultreon.quantum.client.model.blockbench.BBModelFace;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.texture.TextureManager;
-import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.util.LazyValue;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.CubicDirection;
 
@@ -39,21 +38,21 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final VertexInfo V_10 = new VertexInfo();
     private static final VertexInfo V_11 = new VertexInfo();
 
-    private BakedCubeModel(Identifier resourceId, TextureRegion all, Model model) {
+    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, Model model) {
         this(resourceId, all, all, all, all, all, all, model);
     }
 
-    private BakedCubeModel(Identifier resourceId, TextureRegion top, TextureRegion bottom,
+    private BakedCubeModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                            TextureRegion left, TextureRegion right,
                            TextureRegion front, TextureRegion back, Model model) {
         this(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(), model);
     }
 
-    private BakedCubeModel(Identifier resourceId, TextureRegion all, ModelProperties properties, Model model) {
+    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, ModelProperties properties, Model model) {
         this(resourceId, all, all, all, all, all, all, properties, model);
     }
 
-    private BakedCubeModel(Identifier resourceId, TextureRegion top, TextureRegion bottom,
+    private BakedCubeModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                            TextureRegion left, TextureRegion right,
                            TextureRegion front, TextureRegion back, ModelProperties properties, Model model) {
         super(resourceId, model);
@@ -72,35 +71,35 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
             return DEFAULT.get();
         }
 
-        BakedCubeModel bakedCubeModel = BakedCubeModel.of(new Identifier("block/default"), TextureManager.DEFAULT_TEX_REG);
+        BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("block/default"), TextureManager.DEFAULT_TEX_REG);
         DEFAULT.set(bakedCubeModel);
         return bakedCubeModel;
     }
 
-    public static BakedCubeModel of(Identifier resourceId, TextureRegion all) {
+    public static BakedCubeModel of(NamespaceID resourceId, TextureRegion all) {
         return new BakedCubeModel(resourceId, all, all, all, all, all, all, ModelProperties.builder().build(),
                 createModel(resourceId, all, all, all, all, all, all));
     }
 
-    public static BakedCubeModel of(Identifier resourceId, TextureRegion top, TextureRegion bottom,
+    public static BakedCubeModel of(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back) {
         return new BakedCubeModel(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(),
                 createModel(resourceId, top, bottom, left, right, front, back));
     }
 
-    public static BakedCubeModel of(Identifier resourceId, TextureRegion all, ModelProperties properties) {
+    public static BakedCubeModel of(NamespaceID resourceId, TextureRegion all, ModelProperties properties) {
         return new BakedCubeModel(resourceId, all, properties, createModel(resourceId, all, all, all, all, all, all));
     }
 
-    public static BakedCubeModel of(Identifier resourceId, TextureRegion top, TextureRegion bottom,
+    public static BakedCubeModel of(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back, ModelProperties properties) {
         return new BakedCubeModel(resourceId, top, bottom, left, right, front, back, properties,
                 createModel(resourceId, top, bottom, left, right, front, back));
     }
 
-    public static Model createModel(Identifier resourceId, TextureRegion top, TextureRegion bottom,
+    public static Model createModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back) {
         return ModelManager.INSTANCE.generateModel(resourceId, modelBuilder -> {
@@ -136,7 +135,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         return this.back;
     }
 
-    private static Mesh createMesh(Identifier resourceId, TextureRegion top, TextureRegion bottom, TextureRegion west, TextureRegion east, TextureRegion north, TextureRegion south) {
+    private static Mesh createMesh(NamespaceID resourceId, TextureRegion top, TextureRegion bottom, TextureRegion west, TextureRegion east, TextureRegion north, TextureRegion south) {
         MeshBuilder builder = new MeshBuilder();
         builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
         builder.setColor(Color.WHITE);

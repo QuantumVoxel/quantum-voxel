@@ -81,9 +81,9 @@ public class BiomeGenerator implements Disposable {
         for (ServerWorld.RecordedChange recordedChange : recordedChanges) {
             boolean isWithinChunkBounds = recordedChange.x() >= chunk.getOffset().x && recordedChange.x() < chunk.getOffset().x + World.CHUNK_SIZE
                     && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + World.CHUNK_SIZE;
-            BlockPos localBlockPos = World.toLocalBlockPos(recordedChange.x(), recordedChange.y(), recordedChange.z());
-            if (isWithinChunkBounds && localBlockPos.x() == x && localBlockPos.z() == z) {
-                chunk.set(World.toLocalBlockPos(recordedChange.x(), recordedChange.y(), recordedChange.z()).vec(), recordedChange.block());
+            BlockVec localBlockVec = World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z());
+            if (isWithinChunkBounds && localBlockVec.x() == x && localBlockVec.z() == z) {
+                chunk.set(World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z()).vec(), recordedChange.block());
                 if (WorldGenDebugContext.isActive()) {
                     System.out.println("[DEBUG CHUNK-HASH " + System.identityHashCode(chunk) + "] Setting recorded change in chunk at " + recordedChange.x() + ", " + recordedChange.y() + ", " + recordedChange.z() + " of type " + recordedChange.block());
                 }

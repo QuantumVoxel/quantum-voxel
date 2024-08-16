@@ -7,7 +7,7 @@ import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import imgui.ImGui;
 
 import java.util.List;
@@ -75,7 +75,7 @@ public class GuiEditor {
 
             // Properties
             var components = widget.componentRegistry();
-            for (Map.Entry<Identifier, UIComponent> component : components.entrySet()) {
+            for (Map.Entry<NamespaceID, UIComponent> component : components.entrySet()) {
                 component.getValue().handleImGui(path + "::" + component.getKey(), component.getKey(), widget);
             }
 

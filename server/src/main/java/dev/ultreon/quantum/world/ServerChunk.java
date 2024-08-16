@@ -1,17 +1,20 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.ubo.types.ByteArrayType;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.ubo.types.ShortArrayType;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.events.WorldEvents;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.s2c.S2CChunkDataPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
+import dev.ultreon.ubo.types.ByteArrayType;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.ubo.types.ShortArrayType;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -26,7 +29,9 @@ public final class ServerChunk extends Chunk {
     private boolean original = true;
     private boolean locked = false;
 
-    public ServerChunk(ServerWorld world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, ServerWorld.Region region) {
+    private final PlayerTracker tracker = new PlayerTracker();
+
+    public ServerChunk(ServerWorld world, ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, ServerWorld.Region region) {
         super(world, pos, storage, biomeStorage);
         this.world = world;
         this.region = region;
@@ -53,7 +58,7 @@ public final class ServerChunk extends Chunk {
         return result;
     }
 
-    public static ServerChunk load(ServerWorld world, ChunkPos pos, MapType chunkData, ServerWorld.Region region) {
+    public static ServerChunk load(ServerWorld world, ChunkVec pos, MapType chunkData, ServerWorld.Region region) {
         var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockProperties.AIR);
         var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS);
 
@@ -86,9 +91,9 @@ public final class ServerChunk extends Chunk {
             ListType<MapType> blockEntities = chunkData.getList("BlockEntities");
 
             for (MapType data : blockEntities.getValue()) {
-                BlockPos blockPos = new BlockPos(data.getInt("x"), data.getInt("y"), data.getInt("z"));
-                BlockEntity blockEntity = BlockEntity.fullyLoad(world, blockPos, data);
-                this.setBlockEntity(World.toLocalBlockPos(blockPos), blockEntity);
+                BlockVec blockVec = new BlockVec(data.getInt("x"), data.getInt("y"), data.getInt("z"));
+                BlockEntity blockEntity = BlockEntity.fullyLoad(world, blockVec, data);
+                this.setBlockEntity(World.toLocalBlockVec(blockVec), blockEntity);
             }
         }
 
@@ -96,15 +101,23 @@ public final class ServerChunk extends Chunk {
     }
 
     @Override
-    protected void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
+    protected void setBlockEntity(BlockVec blockVec, BlockEntity blockEntity) {
         if (!QuantumServer.isOnServerThread()) {
-            QuantumServer.invokeAndWait(() -> setBlockEntity(blockPos, blockEntity));
+            QuantumServer.invokeAndWait(() -> setBlockEntity(blockVec, blockEntity));
             return;
         }
 
         if (this.locked) return;
 
-        super.setBlockEntity(blockPos, blockEntity);
+        super.setBlockEntity(blockVec, blockEntity);
+    }
+
+    public void sendAllViewers(Packet<? extends ClientPacketHandler> packet) {
+        this.tracker.sendPacket(packet);
+    }
+
+    public boolean isBeingTracked() {
+        return this.tracker.isAnyoneTracking();
     }
 
     public MapType save() {
@@ -158,5 +171,13 @@ public final class ServerChunk extends Chunk {
 
     public boolean isOriginal() {
         return original;
+    }
+
+    public PlayerTracker getTracker() {
+        return this.tracker;
+    }
+
+    public void sendChunk() {
+        this.sendAllViewers(new S2CChunkDataPacket(this.getPos(), this.storage, this.biomeStorage, this.getBlockEntities()));
     }
 }

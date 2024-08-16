@@ -18,7 +18,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.libs.commons.v0.vector.Vec4i;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.font.Font;
@@ -27,8 +26,9 @@ import dev.ultreon.quantum.client.world.RenderablePool;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.FormattedText;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -394,7 +394,7 @@ public class Renderer implements Disposable {
      * @param x   the x coordinate
      * @param y   the y coordinate
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float)
      */
     @CanIgnoreReturnValue
     public Renderer blit(TextureRegion tex, float x, float y) {
@@ -414,7 +414,7 @@ public class Renderer implements Disposable {
      * @param width  the width
      * @param height the height
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float)
      */
     @CanIgnoreReturnValue
     public Renderer blit(TextureRegion tex, float x, float y, float width, float height) {
@@ -432,7 +432,7 @@ public class Renderer implements Disposable {
      * @param x   the x coordinate
      * @param y   the y coordinate
      * @return this
-     * @see #blit(Identifier, float, float, float, float)
+     * @see #blit(NamespaceID, float, float, float, float)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -451,7 +451,7 @@ public class Renderer implements Disposable {
      * @param y               the y coordinate
      * @param backgroundColor the background color to use
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, Color)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, Color)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -474,7 +474,7 @@ public class Renderer implements Disposable {
      * @param height          the height
      * @param backgroundColor the background color to use
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, Color)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, Color)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -496,7 +496,7 @@ public class Renderer implements Disposable {
      * @param v               the texture v coordinate of the region
      * @param backgroundColor the background color to use
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float, Color)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, Color)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -522,7 +522,7 @@ public class Renderer implements Disposable {
      * @param vHeight         the texture uv height
      * @param backgroundColor the background color to use
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float, int, int, Color)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int, Color)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -549,7 +549,7 @@ public class Renderer implements Disposable {
      * @param texHeight       the texture height
      * @param backgroundColor the background color to use
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float, int, int, Color)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int, Color)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -573,7 +573,7 @@ public class Renderer implements Disposable {
      * @param width  the width
      * @param height the height
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float)
+     * @see #blit(NamespaceID, float, float, float, float, float, float)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -593,7 +593,7 @@ public class Renderer implements Disposable {
      * @param u      the texture u coordinate of the region
      * @param v      the texture v coordinate of the region
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float)
+     * @see #blit(NamespaceID, float, float, float, float, float, float)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -615,7 +615,7 @@ public class Renderer implements Disposable {
      * @param uWidth  the texture uv width
      * @param vHeight the texture uv height
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -639,7 +639,7 @@ public class Renderer implements Disposable {
      * @param texWidth  the texture width
      * @param texHeight the texture height
      * @return this
-     * @see #blit(Identifier, float, float, float, float, float, float, float, float, int, int)
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int)
      */
     @ApiStatus.Internal
     @CanIgnoreReturnValue
@@ -663,7 +663,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, Color backgroundColor) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, Color backgroundColor) {
         this.blit(id, x, y, width, height, 0.0F, 0.0F, backgroundColor);
         return this;
     }
@@ -682,7 +682,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v, Color backgroundColor) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, Color backgroundColor) {
         Texture texture = this.textureManager.getTexture(id);
         this.blit(id, x, y, width, height, u, v, 256, 256, backgroundColor);
         return this;
@@ -704,7 +704,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, Color backgroundColor) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, Color backgroundColor) {
         Texture texture = this.textureManager.getTexture(id);
         this.blit(id, x, y, width, height, u, v, uWidth, vHeight, 256, 256, backgroundColor);
         return this;
@@ -721,7 +721,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height) {
         this.blit(id, x, y, width, height, 0.0F, 0.0F);
         return this;
     }
@@ -739,7 +739,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v) {
         this.blit(id, x, y, width, height, u, v, width, height);
         return this;
     }
@@ -759,7 +759,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight) {
         this.blit(id, x, y, width, height, u, v, uWidth, vHeight, 256, 256);
         return this;
     }
@@ -781,7 +781,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
         Texture tex = this.textureManager.getTexture(id);
         this.tmpUv.setTexture(tex);
@@ -808,7 +808,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     @CanIgnoreReturnValue
-    public Renderer blit(Identifier id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight, Color backgroundColor) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
@@ -2545,7 +2545,7 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer draw9PatchTexture(Identifier id, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int texWidth, int texHeight) {
+    public Renderer draw9PatchTexture(NamespaceID id, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int texWidth, int texHeight) {
         Texture texture = this.client.getTextureManager().getTexture(id);
 
         this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
@@ -2641,11 +2641,11 @@ public class Renderer implements Disposable {
         renderFrame(id("textures/gui/popout_frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
     }
 
-    public void renderFrame(@NotNull Identifier texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
+    public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
         renderFrame(texture, x, y, w, h, u, v, uvW, uvH, texWidth, texHeight, RgbColor.WHITE);
     }
 
-    public void renderFrame(@NotNull Identifier texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight, @NotNull Color color) {
+    public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight, @NotNull Color color) {
         Texture handle = this.client.getTextureManager().getTexture(texture);
 
         w = Math.max(w, uvW * 2);
@@ -2688,7 +2688,7 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
-    public void draw9Slice(Identifier texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int inset, int texWidth, int texHeight) {
+    public void draw9Slice(NamespaceID texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int inset, int texWidth, int texHeight) {
         this
                 // top
                 .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left

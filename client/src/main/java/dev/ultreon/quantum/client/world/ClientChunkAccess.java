@@ -6,9 +6,9 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.state.BlockProperties;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.BlockVec;
 import dev.ultreon.quantum.world.ChunkAccess;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.ChunkVec;
 
 public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
@@ -18,7 +18,7 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     float getBlockLightLevel(int x, int y, int z);
 
-    ChunkPos getPos();
+    ChunkVec getPos();
 
     boolean isInitialized();
 
@@ -34,7 +34,7 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     float getBrightness(int lightLevel);
 
-    ModelInstance addModel(BlockPos blockPos, ModelInstance modelInstance);
+    ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance);
 
     BlockProperties get(Vec3i tmp3i);
 

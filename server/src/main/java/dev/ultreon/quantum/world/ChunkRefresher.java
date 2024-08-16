@@ -5,17 +5,17 @@ import java.util.Collection;
 import java.util.List;
 
 public class ChunkRefresher {
-    protected final List<ChunkPos> toLoad = new ArrayList<>();
-    protected final List<ChunkPos> toUnload = new ArrayList<>();
+    protected final List<ChunkVec> toLoad = new ArrayList<>();
+    protected final List<ChunkVec> toUnload = new ArrayList<>();
     private boolean frozen = false;
 
     public ChunkRefresher() {
 
     }
 
-    public void addLoading(Collection<ChunkPos> toLoad) {
+    public void addLoading(Collection<ChunkVec> toLoad) {
         if (this.frozen) return;
-        for (ChunkPos pos : toLoad) {
+        for (ChunkVec pos : toLoad) {
             if (this.toLoad.contains(pos)) continue;
 
             this.toLoad.add(pos);
@@ -23,9 +23,9 @@ public class ChunkRefresher {
         }
     }
 
-    public void addUnloading(Collection<ChunkPos> toLoad) {
+    public void addUnloading(Collection<ChunkVec> toLoad) {
         if (this.frozen) return;
-        for (ChunkPos pos : toLoad) {
+        for (ChunkVec pos : toLoad) {
             if (this.toLoad.contains(pos)) continue;
 
             this.toUnload.add(pos);

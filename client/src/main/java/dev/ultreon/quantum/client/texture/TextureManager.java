@@ -16,8 +16,8 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class TextureManager implements Disposable {
-    private final Map<Identifier, Texture> textures = new HashMap<>();
+    private final Map<NamespaceID, Texture> textures = new HashMap<>();
 
     private final ResourceManager resourceManager;
 
@@ -45,7 +45,7 @@ public class TextureManager implements Disposable {
     }
 
     private boolean frozen = false;
-    private final BiMap<Identifier, TextureAtlas> atlasMap = HashBiMap.create();
+    private final BiMap<NamespaceID, TextureAtlas> atlasMap = HashBiMap.create();
 
     public TextureManager(ResourceManager resourceManager) {
         Preconditions.checkNotNull(resourceManager, "resourceManager");
@@ -92,7 +92,7 @@ public class TextureManager implements Disposable {
         return pixmap;
     }
 
-    public Texture getTexture(Identifier id, Texture fallback) {
+    public Texture getTexture(NamespaceID id, Texture fallback) {
         Preconditions.checkNotNull(id, "id");
 
         if (!QuantumClient.isOnRenderThread()) {
@@ -110,11 +110,11 @@ public class TextureManager implements Disposable {
     }
 
     @NotNull
-    public Texture getTexture(Identifier id) {
+    public Texture getTexture(NamespaceID id) {
         return this.getTexture(id, TextureManager.getDefaultTex());
     }
 
-    public boolean isTextureLoaded(Identifier id) {
+    public boolean isTextureLoaded(NamespaceID id) {
         if (this.frozen) return false;
 
         Preconditions.checkNotNull(id, "id");
@@ -125,7 +125,7 @@ public class TextureManager implements Disposable {
     @NotNull
     @NewInstance
     @CanIgnoreReturnValue
-    public Texture registerTexture(Identifier id) {
+    public Texture registerTexture(NamespaceID id) {
         if (this.frozen) return TextureManager.getDefaultTex();
 
         Preconditions.checkNotNull(id, "id");
@@ -154,7 +154,7 @@ public class TextureManager implements Disposable {
 
     @NewInstance
     @CanIgnoreReturnValue
-    public Texture registerTextureFB(Identifier id, Texture fallback) {
+    public Texture registerTextureFB(NamespaceID id, Texture fallback) {
         if (this.frozen) return fallback;
 
         Preconditions.checkNotNull(id, "id");
@@ -185,7 +185,7 @@ public class TextureManager implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Texture registerTexture(@NotNull Identifier id, @NotNull Texture texture) {
+    public Texture registerTexture(@NotNull NamespaceID id, @NotNull Texture texture) {
         if (this.frozen) return TextureManager.getDefaultTex();
 
         Preconditions.checkNotNull(id, "id");
@@ -228,11 +228,11 @@ public class TextureManager implements Disposable {
         return "<white>Size: <gray>" + this.textures.size() + " <gold><b>|</b> <white>Frozen: <gray>" + this.frozen;
     }
 
-    public Identifier getAtlasId(TextureAtlas atlas) {
+    public NamespaceID getAtlasId(TextureAtlas atlas) {
         return this.atlasMap.inverse().get(atlas);
     }
 
-    public TextureAtlas getAtlas(Identifier id) {
+    public TextureAtlas getAtlas(NamespaceID id) {
         return this.atlasMap.get(id);
     }
 }

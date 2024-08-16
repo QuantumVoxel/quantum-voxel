@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface WorldAccess extends Disposable, WorldReader {
-    boolean unloadChunk(@NotNull ChunkPos chunkPos);
+    boolean unloadChunk(@NotNull ChunkVec chunkVec);
 
-    boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos);
+    boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
 
-    boolean set(BlockPos pos, BlockProperties block);
+    boolean set(BlockVec pos, BlockProperties block);
 
     boolean set(int x, int y, int z, BlockProperties block);
 
@@ -38,9 +38,9 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean set(int x, int y, int z, BlockProperties block, int flags);
 
-    boolean set(BlockPos pos, BlockProperties block, int flags);
+    boolean set(BlockVec pos, BlockProperties block, int flags);
 
-    default void destroy(@NotNull BlockPos pos) {
+    default void destroy(@NotNull BlockVec pos) {
         destroy(pos.x(), pos.y(), pos.z());
     }
 
@@ -48,16 +48,16 @@ public interface WorldAccess extends Disposable, WorldReader {
         set(x, y, z, BlockProperties.AIR, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.DESTROY);
     }
 
-    ChunkAccess getChunkAt(@NotNull BlockPos pos);
+    ChunkAccess getChunkAt(@NotNull BlockVec pos);
 
     @Nullable
-    ChunkAccess getChunk(ChunkPos pos);
+    ChunkAccess getChunk(ChunkVec pos);
 
     ChunkAccess getChunk(int x, int z);
 
     ChunkAccess getChunkAt(int x, int y, int z);
 
-    boolean isOutOfWorldBounds(BlockPos pos);
+    boolean isOutOfWorldBounds(BlockVec pos);
 
     boolean isOutOfWorldBounds(int x, int y, int z);
 
@@ -71,9 +71,9 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     Collection<? extends ChunkAccess> getLoadedChunks();
 
-    void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
+    void setBlockEntity(BlockVec pos, BlockEntity blockEntity);
 
-    BlockEntity getBlockEntity(BlockPos pos);
+    BlockEntity getBlockEntity(BlockVec pos);
 
     void drop(ItemStack itemStack, Vec3d position);
 
@@ -85,7 +85,7 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
 
-    boolean destroyBlock(BlockPos breaking, @Nullable Player breaker);
+    boolean destroyBlock(BlockVec breaking, @Nullable Player breaker);
 
     int getBlockLight(int x, int y, int z);
 
@@ -123,7 +123,7 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean isServerSide();
 
-    Biome getBiome(BlockPos pos);
+    Biome getBiome(BlockVec pos);
 
     DimensionInfo getDimension();
 
@@ -145,21 +145,21 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     void despawn(Entity entity);
 
-    void startBreaking(BlockPos breaking, Player breaker);
+    void startBreaking(BlockVec breaking, Player breaker);
 
-    BreakResult continueBreaking(BlockPos breaking, float amount, Player breaker);
+    BreakResult continueBreaking(BlockVec breaking, float amount, Player breaker);
 
-    void stopBreaking(BlockPos breaking, Player breaker);
+    void stopBreaking(BlockVec breaking, Player breaker);
 
-    float getBreakProgress(BlockPos pos);
+    float getBreakProgress(BlockVec pos);
 
     long getSeed();
 
     void setSpawnPoint(int spawnX, int spawnZ);
 
-    boolean isSpawnChunk(ChunkPos pos);
+    boolean isSpawnChunk(ChunkVec pos);
 
-    BlockPos getSpawnPoint();
+    BlockVec getSpawnPoint();
 
     int getChunksLoaded();
 

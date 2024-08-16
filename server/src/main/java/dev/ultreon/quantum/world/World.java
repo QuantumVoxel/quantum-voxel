@@ -7,9 +7,6 @@ import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.ubo.types.LongType;
-import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
 import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
@@ -24,18 +21,20 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.BlockEvents;
 import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.ServerWorld.Region;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.ubo.types.LongType;
+import dev.ultreon.ubo.types.MapType;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
@@ -59,7 +58,7 @@ public abstract class World implements Disposable, WorldAccess {
     public static final int WORLD_HEIGHT = 256;
     public static final int WORLD_DEPTH = 0;
     public static final int REGION_SIZE = 32;
-    public static final Identifier OVERWORLD = new Identifier("overworld");
+    public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;
     public static final int REGION_DATA_VERSION = 0;
 
@@ -72,7 +71,7 @@ public abstract class World implements Disposable, WorldAccess {
     protected final IntMap<Entity> entitiesById = new IntMap<>();
     private int curId;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private final List<ChunkPos> alwaysLoaded = new ArrayList<>();
+    private final List<ChunkVec> alwaysLoaded = new ArrayList<>();
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors(), 1), r -> {
         Thread thread = new Thread(r);
         thread.setName("ChunkBuilder");
@@ -81,7 +80,7 @@ public abstract class World implements Disposable, WorldAccess {
     });
 
     boolean disposed;
-    private final Set<ChunkPos> invalidatedChunks = new LinkedHashSet<>();
+    private final Set<ChunkVec> invalidatedChunks = new LinkedHashSet<>();
     private final List<ContainerMenu> menus = new ArrayList<>();
     private final DimensionInfo info = DimensionInfo.OVERWORLD; // TODO WIP
     protected UUID uid = Utils.ZEROED_UUID;
@@ -101,24 +100,24 @@ public abstract class World implements Disposable, WorldAccess {
         this(seed == null ? new Random().nextLong() : seed.getValue());
     }
 
-    static List<ChunkPos> getChunksAround(World world, Vec3d pos) {
+    static List<ChunkVec> getChunksAround(World world, Vec3d pos) {
         int startX = (int) (pos.x - world.getRenderDistance() * World.CHUNK_SIZE);
         int startZ = (int) (pos.z - world.getRenderDistance() * World.CHUNK_SIZE);
         int endX = (int) (pos.x + world.getRenderDistance() * World.CHUNK_SIZE);
         int endZ = (int) (pos.z + world.getRenderDistance() * World.CHUNK_SIZE);
 
-        List<ChunkPos> toCreate = new ArrayList<>();
+        List<ChunkVec> toCreate = new ArrayList<>();
         for (int x = startX; x <= endX; x += World.CHUNK_SIZE) {
             for (int z = startZ; z <= endZ; z += World.CHUNK_SIZE) {
-                ChunkPos chunkPos = Utils.chunkPosFromBlockCoords(new Vec3d(x, 0, z));
-                toCreate.add(chunkPos);
+                ChunkVec chunkVec = Utils.ChunkVecFromBlockCoords(new Vec3d(x, 0, z));
+                toCreate.add(chunkVec);
                 if (x >= pos.x - World.CHUNK_SIZE
                     && x <= pos.x + World.CHUNK_SIZE
                     && z >= pos.z - World.CHUNK_SIZE
                     && z <= pos.z + World.CHUNK_SIZE) {
                     for (int y = -World.CHUNK_HEIGHT; y >= pos.y - World.CHUNK_HEIGHT * 2; y -= World.CHUNK_HEIGHT) {
-                        chunkPos = Utils.chunkPosFromBlockCoords(new Vec3d(x, y, z));
-                        toCreate.add(chunkPos);
+                        chunkVec = Utils.ChunkVecFromBlockCoords(new Vec3d(x, y, z));
+                        toCreate.add(chunkVec);
                     }
                 }
             }
@@ -127,47 +126,39 @@ public abstract class World implements Disposable, WorldAccess {
         return toCreate;
     }
 
-    public static ChunkPos blockToChunkPos(Vector3 pos) {
-        return new ChunkPos(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
+    public static ChunkVec blockToChunkVec(Vector3 pos) {
+        return new ChunkVec(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
     }
 
-    public static ChunkPos blockToChunkPos(Vec3d pos) {
-        return new ChunkPos(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
+    public static ChunkVec blockToChunkVec(Vec3d pos) {
+        return new ChunkVec(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
     }
 
-    public static ChunkPos blockToChunkPos(Vec3i pos) {
-        return new ChunkPos(Math.floorDiv(pos.x, World.CHUNK_SIZE), Math.floorDiv(pos.z, World.CHUNK_SIZE));
+    public static ChunkVec blockToChunkVec(Vec3i pos) {
+        return new ChunkVec(Math.floorDiv(pos.x, World.CHUNK_SIZE), Math.floorDiv(pos.z, World.CHUNK_SIZE));
     }
 
-    public static ChunkPos toChunkPos(BlockPos pos) {
-        return new ChunkPos(Math.floorDiv(pos.x(), World.CHUNK_SIZE), Math.floorDiv(pos.z(), World.CHUNK_SIZE));
+    public static ChunkVec toChunkVec(BlockVec pos) {
+        return new ChunkVec(Math.floorDiv(pos.x(), World.CHUNK_SIZE), Math.floorDiv(pos.z(), World.CHUNK_SIZE));
     }
 
-    public static ChunkPos toChunkPos(int x, int y, int z) {
-        return new ChunkPos(Math.floorDiv(x, World.CHUNK_SIZE), Math.floorDiv(z, World.CHUNK_SIZE));
-    }
-
-    public static Vec2i toChunkVec(BlockPos pos) {
-        return new Vec2i(Math.floorDiv(pos.x(), World.CHUNK_SIZE), Math.floorDiv(pos.z(), World.CHUNK_SIZE));
-    }
-
-    public static Vec2i toChunkVec(int x, int y, int z) {
-        return new Vec2i(Math.floorDiv(x, World.CHUNK_SIZE), Math.floorDiv(z, World.CHUNK_SIZE));
+    public static ChunkVec toChunkVec(int x, int y, int z) {
+        return new ChunkVec(Math.floorDiv(x, World.CHUNK_SIZE), Math.floorDiv(z, World.CHUNK_SIZE));
     }
 
     @Override
-    public @NotNull List<ChunkPos> getChunksAround(Vec3d pos) {
+    public @NotNull List<ChunkVec> getChunksAround(Vec3d pos) {
         int renderDistance = this.getRenderDistance();
         int startX = (int) (pos.x - renderDistance * World.CHUNK_SIZE);
         int startZ = (int) (pos.z - renderDistance * World.CHUNK_SIZE);
         int endX = (int) (pos.x + renderDistance * World.CHUNK_SIZE);
         int endZ = (int) (pos.z + renderDistance * World.CHUNK_SIZE);
 
-        List<ChunkPos> toCreate = new ArrayList<>();
+        List<ChunkVec> toCreate = new ArrayList<>();
         for (int x = startX; x <= endX; x += World.CHUNK_SIZE) {
             for (int z = startZ; z <= endZ; z += World.CHUNK_SIZE) {
-                ChunkPos chunkPos = Utils.chunkPosFromBlockCoords(new Vec3d(x, 0, z));
-                toCreate.add(chunkPos);
+                ChunkVec chunkVec = Utils.ChunkVecFromBlockCoords(new Vec3d(x, 0, z));
+                toCreate.add(chunkVec);
             }
         }
 
@@ -176,18 +167,18 @@ public abstract class World implements Disposable, WorldAccess {
 
     protected abstract int getRenderDistance();
 
-    protected boolean shouldStayLoaded(ChunkPos pos) {
+    protected boolean shouldStayLoaded(ChunkVec pos) {
 		return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
     }
 
     @Override
-    public boolean isAlwaysLoaded(ChunkPos pos) {
+    public boolean isAlwaysLoaded(ChunkVec pos) {
         return this.alwaysLoaded.contains(pos);
     }
 
     @Deprecated
-    private CompletableFuture<Boolean> unloadChunkAsync(ChunkPos chunkPos) {
-        return this.unloadChunkAsync(Objects.requireNonNull(this.getChunk(chunkPos), "Chunk not loaded: " + chunkPos));
+    private CompletableFuture<Boolean> unloadChunkAsync(ChunkVec chunkVec) {
+        return this.unloadChunkAsync(Objects.requireNonNull(this.getChunk(chunkVec), "Chunk not loaded: " + chunkVec));
     }
 
     @Deprecated
@@ -214,17 +205,17 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public boolean unloadChunk(@NotNull ChunkPos chunkPos) {
+    public boolean unloadChunk(@NotNull ChunkVec chunkVec) {
         this.checkThread();
 
-        Chunk chunk = this.getChunk(chunkPos);
+        Chunk chunk = this.getChunk(chunkVec);
         if (chunk == null) return true;
-        return this.unloadChunk(chunk, chunkPos);
+        return this.unloadChunk(chunk, chunkVec);
     }
 
     @Override
     @CanIgnoreReturnValue
-    public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos);
+    public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
 
     @Override
     public @NotNull EntityHitResult rayCastEntity(Ray ray) {
@@ -287,27 +278,27 @@ public abstract class World implements Disposable, WorldAccess {
     /**
      * Sets the block at the specified coordinates, with the given block type.
      *
-     * @param blockPos the position
+     * @param blockVec the position
      * @param state    the block state to set
      * @return true if the block was successfully set, false otherwise
      */
     @Override
-    public boolean set(BlockPos blockPos, BlockProperties state) {
-        return set(blockPos, state, BlockFlags.UPDATE | BlockFlags.SYNC);
+    public boolean set(BlockVec blockVec, BlockProperties state) {
+        return set(blockVec, state, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
 
     /**
      * Sets the block at the specified coordinates, with the given block type.
      *
-     * @param blockPos the position
+     * @param blockVec the position
      * @param state    the block state to set
      * @return true if the block was successfully set, false otherwise
      */
     @Override
-    public boolean set(BlockPos blockPos, BlockProperties state, int flags) {
+    public boolean set(BlockVec blockVec, BlockProperties state, int flags) {
         this.checkThread();
 
-        return this.set(blockPos.x(), blockPos.y(), blockPos.z(), state, flags);
+        return this.set(blockVec.x(), blockVec.y(), blockVec.z(), state, flags);
     }
 
     /**
@@ -331,7 +322,7 @@ public abstract class World implements Disposable, WorldAccess {
      * @return the block at the specified coordinates
      */
     @Override
-    public @NotNull BlockProperties get(BlockPos pos) {
+    public @NotNull BlockProperties get(BlockVec pos) {
         this.checkThread();
 
         return this.get(pos.x(), pos.y(), pos.z());
@@ -350,11 +341,11 @@ public abstract class World implements Disposable, WorldAccess {
         this.checkThread();
 
         Chunk chunkAt = this.getChunkAt(x, y, z);
-        BlockPos blockPos = new BlockPos(x, y, z);
+        BlockVec blockVec = new BlockVec(x, y, z);
         if (chunkAt == null) return Blocks.AIR.createMeta();
         if (!chunkAt.ready) return Blocks.AIR.createMeta();
 
-        BlockPos cp = World.toLocalBlockPos(x, y, z);
+        BlockVec cp = World.toLocalBlockVec(x, y, z);
         return chunkAt.getFast(cp.x(), cp.y(), cp.z());
     }
 
@@ -366,8 +357,8 @@ public abstract class World implements Disposable, WorldAccess {
      * @param pos the world space block position
      * @return the block position in chunk space
      */
-    public static BlockPos toLocalBlockPos(BlockPos pos) {
-        return World.toLocalBlockPos(pos.x(), pos.y(), pos.z());
+    public static BlockVec toLocalBlockVec(BlockVec pos) {
+        return World.toLocalBlockVec(pos.x(), pos.y(), pos.z());
     }
 
     /**
@@ -378,7 +369,7 @@ public abstract class World implements Disposable, WorldAccess {
      * @param z the z coordinate in world space
      * @return the block position in chunk space
      */
-    public static BlockPos toLocalBlockPos(int x, int y, int z) {
+    public static BlockVec toLocalBlockVec(int x, int y, int z) {
         int cx = x % World.CHUNK_SIZE;
         int cy = y % (World.CHUNK_HEIGHT + 1);
         int cz = z % World.CHUNK_SIZE;
@@ -386,7 +377,7 @@ public abstract class World implements Disposable, WorldAccess {
         if (cx < 0) cx += World.CHUNK_SIZE;
         if (cz < 0) cz += World.CHUNK_SIZE;
 
-        return new BlockPos(cx, cy, cz);
+        return new BlockVec(cx, cy, cz);
     }
 
     /**
@@ -398,7 +389,7 @@ public abstract class World implements Disposable, WorldAccess {
      * @param tmp a temporary vector to store the result
      * @return the block position in chunk space
      */
-    public static Vec3i toLocalBlockPos(int x, int y, int z, Vec3i tmp) {
+    public static Vec3i toLocalBlockVec(int x, int y, int z, Vec3i tmp) {
         tmp.x = x % World.CHUNK_SIZE;
         tmp.y = y % (World.CHUNK_HEIGHT + 1);
         tmp.z = z % World.CHUNK_SIZE;
@@ -416,14 +407,14 @@ public abstract class World implements Disposable, WorldAccess {
      * @param z the z coordinate in world space
      * @return the chunk position in region space
      */
-    public static ChunkPos toLocalChunkPos(int x, int z) {
+    public static ChunkVec toLocalChunkVec(int x, int z) {
         int cx = x % World.REGION_SIZE;
         int cz = z % World.REGION_SIZE;
 
         if (cx < 0) cx += World.REGION_SIZE;
         if (cz < 0) cz += World.REGION_SIZE;
 
-        return new ChunkPos(cx, cz);
+        return new ChunkVec(cx, cz);
     }
 
     /**
@@ -432,13 +423,13 @@ public abstract class World implements Disposable, WorldAccess {
      * @param pos the chunk position in world space
      * @return the chunk position in region space
      */
-    public static ChunkPos toLocalChunkPos(ChunkPos pos) {
-        return World.toLocalChunkPos(pos.x(), pos.z());
+    public static ChunkVec toLocalChunkVec(ChunkVec pos) {
+        return World.toLocalChunkVec(pos.getX(), pos.getZ());
     }
 
     @Override
     public Chunk getChunk(int x, int z) {
-        return this.getChunk(new ChunkPos(x, z));
+        return this.getChunk(new ChunkVec(x, z));
     }
 
     @Override
@@ -448,20 +439,20 @@ public abstract class World implements Disposable, WorldAccess {
 
         if (this.isOutOfWorldBounds(x, y, z)) return null;
 
-        ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-        return this.getChunk(chunkPos);
+        ChunkVec chunkVec = new ChunkVec(chunkX, chunkZ);
+        return this.getChunk(chunkVec);
     }
 
     @Override
-    public abstract @Nullable Chunk getChunk(ChunkPos pos);
+    public abstract @Nullable Chunk getChunk(ChunkVec pos);
 
     @Override
-    public Chunk getChunkAt(BlockPos pos) {
+    public Chunk getChunkAt(BlockVec pos) {
         return this.getChunkAt(pos.x(), pos.y(), pos.z());
     }
 
     @Override
-    public boolean isOutOfWorldBounds(BlockPos pos) {
+    public boolean isOutOfWorldBounds(BlockVec pos) {
         return pos.y() < World.WORLD_DEPTH || pos.y() >= World.WORLD_HEIGHT
                || pos.x() < -30000000 || pos.x() > 30000000
                || pos.z() < -30000000 || pos.z() > 30000000;
@@ -558,17 +549,17 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     @ApiStatus.Internal
     public void updateNeighbours(Chunk chunk) {
-        ChunkPos pos = chunk.getPos();
-        this.updateChunk(this.getChunk(new ChunkPos(pos.x() - 1, pos.z())));
-        this.updateChunk(this.getChunk(new ChunkPos(pos.x() + 1, pos.z())));
-        this.updateChunk(this.getChunk(new ChunkPos(pos.x(), pos.z() - 1)));
-        this.updateChunk(this.getChunk(new ChunkPos(pos.x(), pos.z() + 1)));
+        ChunkVec pos = chunk.getPos();
+        this.updateChunk(this.getChunk(new ChunkVec(pos.getX() - 1, pos.getZ())));
+        this.updateChunk(this.getChunk(new ChunkVec(pos.getX() + 1, pos.getZ())));
+        this.updateChunk(this.getChunk(new ChunkVec(pos.getX(), pos.getZ() - 1)));
+        this.updateChunk(this.getChunk(new ChunkVec(pos.getX(), pos.getZ() + 1)));
     }
 
     @Override
     @ApiStatus.Internal
     public void updateChunkAndNeighbours(Chunk chunk) {
-        ChunkPos pos = chunk.getPos();
+        ChunkVec pos = chunk.getPos();
         this.updateChunk(chunk);
         this.updateNeighbours(chunk);
     }
@@ -767,11 +758,11 @@ public abstract class World implements Disposable, WorldAccess {
      * @param breaker  the player breaking the block.
      */
     @Override
-    public void startBreaking(BlockPos breaking, Player breaker) {
+    public void startBreaking(BlockVec breaking, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return;
-        BlockPos localBlockPos = World.toLocalBlockPos(breaking);
-        chunk.startBreaking(localBlockPos.x(), localBlockPos.y(), localBlockPos.z());
+        BlockVec localBlockVec = World.toLocalBlockVec(breaking);
+        chunk.startBreaking(localBlockVec.x(), localBlockVec.y(), localBlockVec.z());
     }
 
     /**
@@ -783,15 +774,15 @@ public abstract class World implements Disposable, WorldAccess {
      * @return A {@link BreakResult} which indicates the current status of the block breaking.
      */
     @Override
-    public BreakResult continueBreaking(BlockPos breaking, float amount, Player breaker) {
+    public BreakResult continueBreaking(BlockVec breaking, float amount, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return BreakResult.FAILED;
-        BlockPos localBlockPos = World.toLocalBlockPos(breaking);
+        BlockVec localBlockVec = World.toLocalBlockVec(breaking);
         BlockProperties block = this.get(breaking);
 
         if (block.isAir()) return BreakResult.FAILED;
 
-        return chunk.continueBreaking(localBlockPos.x(), localBlockPos.y(), localBlockPos.z(), amount);
+        return chunk.continueBreaking(localBlockVec.x(), localBlockVec.y(), localBlockVec.z(), amount);
     }
 
     /**
@@ -801,11 +792,11 @@ public abstract class World implements Disposable, WorldAccess {
      * @param breaker  the player breaking the block.
      */
     @Override
-    public void stopBreaking(BlockPos breaking, Player breaker) {
+    public void stopBreaking(BlockVec breaking, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
         if (chunk == null) return;
-        BlockPos localBlockPos = World.toLocalBlockPos(breaking);
-        chunk.stopBreaking(localBlockPos.x(), localBlockPos.y(), localBlockPos.z());
+        BlockVec localBlockVec = World.toLocalBlockVec(breaking);
+        chunk.stopBreaking(localBlockVec.x(), localBlockVec.y(), localBlockVec.z());
     }
 
     /**
@@ -815,11 +806,11 @@ public abstract class World implements Disposable, WorldAccess {
      * @return The break progress of the block, or -1.0 if the block isn't being mined.
      */
     @Override
-    public float getBreakProgress(BlockPos pos) {
+    public float getBreakProgress(BlockVec pos) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return -1.0F;
-        BlockPos localBlockPos = World.toLocalBlockPos(pos);
-        return chunk.getBreakProgress(localBlockPos.x(), localBlockPos.y(), localBlockPos.z());
+        BlockVec localBlockVec = World.toLocalBlockVec(pos);
+        return chunk.getBreakProgress(localBlockVec.x(), localBlockVec.y(), localBlockVec.z());
     }
 
     /**
@@ -848,9 +839,9 @@ public abstract class World implements Disposable, WorldAccess {
      * @return {@code true} if the chunk is a spawn chunk, {@code false} otherwise
      */
     @Override
-    public boolean isSpawnChunk(ChunkPos pos) {
-        int x = pos.x() * 16;
-        int z = pos.z() * 16;
+    public boolean isSpawnChunk(ChunkVec pos) {
+        int x = pos.getX() * 16;
+        int z = pos.getZ() * 16;
 
         return this.spawnPoint.x - 1 <= x && this.spawnPoint.x + 1 >= x &&
                this.spawnPoint.z - 1 <= z && this.spawnPoint.z + 1 >= z;
@@ -862,13 +853,13 @@ public abstract class World implements Disposable, WorldAccess {
      * @return the spawn point
      */
     @Override
-    public BlockPos getSpawnPoint() {
+    public BlockVec getSpawnPoint() {
         int highest = this.getHighest(this.spawnX, this.spawnZ);
         int spawnY = 0;
         if (highest != Integer.MIN_VALUE)
             spawnY = highest;
 
-        return new BlockPos(this.spawnX, spawnY, this.spawnZ);
+        return new BlockVec(this.spawnX, spawnY, this.spawnZ);
     }
 
     @Override
@@ -922,11 +913,11 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public Biome getBiome(BlockPos pos) {
-        BlockPos localPos = World.toLocalBlockPos(pos);
+    public Biome getBiome(BlockVec pos) {
+        BlockVec localVec = World.toLocalBlockVec(pos);
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return null;
-        return chunk.getBiome(localPos.x(), localPos.z());
+        return chunk.getBiome(localVec.x(), localVec.z());
     }
 
     @Override
@@ -954,30 +945,30 @@ public abstract class World implements Disposable, WorldAccess {
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
-        BlockEvents.SET_BLOCK.factory().onSetBlock(this, new BlockPos(x, y, z), block);
+        BlockEvents.SET_BLOCK.factory().onSetBlock(this, new BlockVec(x, y, z), block);
 
         Chunk chunk = this.getChunkAt(x, y, z);
         if (chunk == null) return false;
 
-        BlockPos cp = World.toLocalBlockPos(x, y, z);
+        BlockVec cp = World.toLocalBlockVec(x, y, z);
         return chunk.set(cp.x(), cp.y(), cp.z(), block);
     }
 
     @Override
-    public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
+    public void setBlockEntity(BlockVec pos, BlockEntity blockEntity) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return;
 
-        chunk.setBlockEntity(World.toLocalBlockPos(pos), blockEntity);
+        chunk.setBlockEntity(World.toLocalBlockVec(pos), blockEntity);
     }
 
     @Override
-    public BlockEntity getBlockEntity(BlockPos pos) {
+    public BlockEntity getBlockEntity(BlockVec pos) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return null;
 
-        BlockPos localPos = World.toLocalBlockPos(pos);
-        return chunk.getBlockEntity(localPos.x(), localPos.y(), localPos.z());
+        BlockVec localVec = World.toLocalBlockVec(pos);
+        return chunk.getBlockEntity(localVec.x(), localVec.y(), localVec.z());
     }
 
     @Override
@@ -1011,7 +1002,7 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
+    public boolean destroyBlock(BlockVec breaking, @Nullable Player breaker) {
         BlockProperties blockProperties = get(breaking);
 
         if (breaker != null && BlockEvents.BREAK_BLOCK.factory().onBreakBlock(this, breaking, blockProperties, breaker).isCanceled()) {

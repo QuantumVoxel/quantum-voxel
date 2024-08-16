@@ -10,11 +10,10 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * An identifier for an object in the game.
- * The identifier consists of a namespace and a path.
+ * The identifier consists of a domain and a path.
  * This class is immutable and thread-safe.
  * <p>
  * Parsing / formatting example:
@@ -28,27 +27,27 @@ import java.util.stream.Collectors;
  * @since 0.1.0
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  */
-public final class Identifier {
-    public static final Codec<Identifier> CODEC = Codec.STRING.xmap(Identifier::parse, Identifier::toString);
-    private final @NotNull String namespace;
+public final class NamespaceID {
+    public static final Codec<NamespaceID> CODEC = Codec.STRING.xmap(NamespaceID::parse, NamespaceID::toString);
+    private final @NotNull String domain;
     private final @NotNull String path;
 
-    public Identifier(@NotNull String namespace, @NotNull String path) {
-        testNamespace(namespace);
+    public NamespaceID(@NotNull String domain, @NotNull String path) {
+        testDomain(domain);
         testPath(path);
 
-        this.namespace = namespace;
+        this.domain = domain;
         this.path = path;
     }
 
-    public Identifier(@NotNull String name) {
-        String[] split = name.split(":", 2);
+    public NamespaceID(@NotNull String namespace) {
+        String[] split = namespace.split(":", 2);
         if (split.length == 2) {
-            this.namespace = testNamespace(split[0]);
+            this.domain = testDomain(split[0]);
             this.path = testPath(split[1]);
         } else {
-            this.namespace = CommonConstants.NAMESPACE;
-            this.path = testPath(name);
+            this.domain = CommonConstants.NAMESPACE;
+            this.path = testPath(namespace);
         }
     }
 
@@ -60,9 +59,9 @@ public final class Identifier {
      */
     @NotNull
     @Contract("_ -> new")
-    public static Identifier parse(
+    public static NamespaceID parse(
             @NotNull String name) {
-        return new Identifier(name);
+        return new NamespaceID(name);
     }
 
     /**
@@ -73,13 +72,13 @@ public final class Identifier {
      */
     @Nullable
     @Contract("null -> null")
-    public static Identifier tryParse(@Nullable String name) {
+    public static NamespaceID tryParse(@Nullable String name) {
         // Return null if the name is null
         if (name == null) return null;
 
         try {
             // Try to create a new Identifier with the given name
-            return new Identifier(name);
+            return new NamespaceID(name);
         } catch (Exception e) {
             // Return null if an exception occurs during parsing
             return null;
@@ -87,19 +86,19 @@ public final class Identifier {
     }
 
     /**
-     * Validates the given location string against a specific pattern.
+     * Validates the given domain string against a specific pattern.
      *
-     * @param location The location string to be validated
-     * @return The validated location string
-     * @throws SyntaxException if the location string is invalid
+     * @param domain The domain string to be validated
+     * @return The validated domain string
+     * @throws SyntaxException if the domain string is invalid
      */
     @Contract("_ -> param1")
-    public static String testNamespace(String location) {
-        // Checks if the location matches the specified pattern
-        if (!Pattern.matches("([a-z\\d_]+)([.\\-][a-z\\-\\d_]+){0,16}", location)) {
-            throw new SyntaxException("Location is invalid: " + location);
+    public static String testDomain(String domain) {
+        // Checks if the domain matches the specified pattern
+        if (!Pattern.matches("([a-z\\d_]+)([.\\-][a-z\\-\\d_]+){0,16}", domain)) {
+            throw new SyntaxException("Domain is invalid: " + domain);
         }
-        return location;
+        return domain;
     }
 
     /**
@@ -138,44 +137,44 @@ public final class Identifier {
             return false;
         }
 
-        // Cast the object to Identifier type
-        Identifier that = (Identifier) o;
+        // Cast the object to "NamespaceID" type
+        NamespaceID that = (NamespaceID) o;
 
-        // Check if the namespaces and paths of the Identifiers are equal
-        return this.namespace.equals(that.namespace) && this.path.equals(that.path);
+        // Check if the domains and paths of the Identifiers are equal
+        return this.domain.equals(that.domain) && this.path.equals(that.path);
     }
 
     /**
      * This method calculates the hash code for the object.
-     * It combines the hash codes of the namespace and path fields.
+     * It combines the hash codes of the domain and path fields.
      *
      * @return the hash code of the object
      */
     @Override
     public int hashCode() {
         // Use Objects.hash() method to calculate the hash code
-        return Objects.hash(this.namespace, this.path);
+        return Objects.hash(this.domain, this.path);
     }
 
     /**
      * Returns a string representation of the object.
      *
-     * @return a string in the format "namespace:path"
+     * @return a string in the format "domain:path"
      */
     @NotNull
     @Override
     @Contract(pure = true)
     public String toString() {
-        return this.namespace + ":" + this.path;
+        return this.domain + ":" + this.path;
     }
 
     /**
-     * @return object location (the mod id / namespace).
+     * @return object location (the mod id / domain).
      */
     @NotNull
     @Contract(pure = true)
-    public String namespace() {
-        return this.namespace;
+    public String getDomain() {
+        return this.domain;
     }
 
     /**
@@ -183,19 +182,19 @@ public final class Identifier {
      */
     @NotNull
     @Contract(pure = true)
-    public String path() {
+    public String getPath() {
         return this.path;
     }
 
     /**
-     * Returns a new Identifier with the provided namespace.
+     * Returns a new Identifier with the provided domain.
      *
-     * @param namespace the new namespace to use
-     * @return a new Identifier with the updated namespace
+     * @param domain the new domain to use
+     * @return a new Identifier with the updated domain
      */
     @Contract("_ -> new")
-    public Identifier withNamespace(String namespace) {
-        return new Identifier(namespace, this.path);
+    public NamespaceID withDomain(String domain) {
+        return new NamespaceID(domain, this.path);
     }
 
     /**
@@ -205,19 +204,19 @@ public final class Identifier {
      * @return a new Identifier with the updated path
      */
     @Contract("_ -> new")
-    public Identifier withPath(String path) {
-        return new Identifier(this.namespace, path);
+    public NamespaceID withPath(String path) {
+        return new NamespaceID(this.domain, path);
     }
 
     /**
-     * Maps the location using the provided UnaryOperator.
+     * Maps the domain using the provided UnaryOperator.
      *
-     * @param location the UnaryOperator to map the location
-     * @return a new Identifier with the mapped location
+     * @param domain the UnaryOperator to map the domain
+     * @return a new Identifier with the mapped domain
      */
     @Contract("_ -> new")
-    public Identifier mapLocation(UnaryOperator<String> location) {
-        return new Identifier(location.apply(this.namespace), this.path);
+    public NamespaceID mapDomain(UnaryOperator<String> domain) {
+        return new NamespaceID(domain.apply(this.domain), this.path);
     }
 
     /**
@@ -227,61 +226,61 @@ public final class Identifier {
      * @return a new Identifier with the mapped path
      */
     @Contract("_ -> new")
-    public Identifier mapPath(UnaryOperator<String> path) {
-        return new Identifier(this.namespace, path.apply(this.path));
+    public NamespaceID mapPath(UnaryOperator<String> path) {
+        return new NamespaceID(this.domain, path.apply(this.path));
     }
 
     /**
-     * Maps both the path and location using the provided UnaryOperators.
+     * Maps both the path and domain using the provided UnaryOperators.
      *
-     * @param path the UnaryOperator to map the path
-     * @param location the UnaryOperator to map the location
-     * @return a new Identifier with the mapped path and location
+     * @param domain the UnaryOperator to map the domain
+     * @param path   the UnaryOperator to map the path
+     * @return a new Identifier with the mapped path and domain
      */
     @Contract("_, _ -> new")
-    public Identifier map(UnaryOperator<String> path, UnaryOperator<String> location) {
-        return new Identifier(location.apply(this.namespace), path.apply(this.path));
+    public NamespaceID map(UnaryOperator<String> domain, UnaryOperator<String> path) {
+        return new NamespaceID(domain.apply(this.domain), path.apply(this.path));
     }
 
     /**
-     * Reduce the namespace and path using the provided function.
+     * Reduce the domain and path using the provided function.
      *
-     * @param func the function to apply to the namespace and path
+     * @param reducer the function to apply to the domain and path
      * @param <T> the type of the result
-     * @return the result of applying the function to the namespace and path
+     * @return the result of applying the function to the domain and path
      */
-    public <T> T reduce(BiFunction<String, String, T> func) {
-        return func.apply(this.namespace, this.path);
+    public <T> T reduce(BiFunction<String, String, T> reducer) {
+        return reducer.apply(this.domain, this.path);
     }
 
     /**
-     * Returns the list representation of the namespace and path.
+     * Returns the list representation of the domain and path.
      *
-     * @return A list containing the namespace and path.
+     * @return A list containing the domain and path.
      */
     @NotNull
     @Unmodifiable
     @Contract(value = "-> new", pure = true)
     public List<String> toList() {
-        return Arrays.asList(this.namespace, this.path);
+        return Arrays.asList(this.domain, this.path);
     }
 
     /**
-     * Converts the namespace and path to an ArrayList of strings.
+     * Converts the domain and path to an ArrayList of strings.
      *
-     * @return ArrayList of strings containing the namespace and path.
+     * @return ArrayList of strings containing the domain and path.
      */
     @NotNull
     @Contract(" -> new")
     public ArrayList<String> toArrayList() {
-        // Create a new ArrayList to store the namespace and path
+        // Create a new ArrayList to store the domain and path
         ArrayList<String> list = new ArrayList<>();
 
-        // Add the namespace and path to the list
-        list.add(this.namespace);
+        // Add the domain and path to the list
+        list.add(this.domain);
         list.add(this.path);
 
-        // Return the list containing the namespace and path
+        // Return the list containing the domain and path
         return list;
     }
 
@@ -298,24 +297,24 @@ public final class Identifier {
     }
 
     /**
-     * Converts the namespace and path to a Pair of strings.
+     * Converts the domain and path to a Pair of strings.
      *
-     * @return a Pair of strings representing the namespace and path
+     * @return a Pair of strings representing the domain and path
      */
     @NotNull
     @Contract(value = " -> new", pure = true)
     public Pair<String, String> toPair() {
-        return new Pair<>(this.namespace, this.path);
+        return new Pair<>(this.domain, this.path);
     }
 
     /**
-     * Converts the namespace and path to an array of strings.
+     * Converts the domain and path to an array of strings.
      *
-     * @return an array of strings representing the namespace and path
+     * @return an array of strings representing the domain and path
      */
     @NotNull
     @Contract(value = " -> new", pure = true)
     public String[] toArray() {
-        return new String[]{this.namespace, this.path};
+        return new String[]{this.domain, this.path};
     }
 }
