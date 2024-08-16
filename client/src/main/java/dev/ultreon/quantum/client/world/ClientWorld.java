@@ -380,14 +380,14 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
         return new ClientChunk[]{
-                this.getChunk(chunk.getPos().getX() - 1, chunk.getPos().getZ() - 1),
-                this.getChunk(chunk.getPos().getX(), chunk.getPos().getZ() - 1),
-                this.getChunk(chunk.getPos().getX() + 1, chunk.getPos().getZ() - 1),
-                this.getChunk(chunk.getPos().getX() - 1, chunk.getPos().getZ()),
-                this.getChunk(chunk.getPos().getX() + 1, chunk.getPos().getZ()),
-                this.getChunk(chunk.getPos().getX() - 1, chunk.getPos().getZ() + 1),
-                this.getChunk(chunk.getPos().getX(), chunk.getPos().getZ() + 1),
-                this.getChunk(chunk.getPos().getX() + 1, chunk.getPos().getZ() + 1)
+                this.getChunk(chunk.getVec().getX() - 1, chunk.getVec().getZ() - 1),
+                this.getChunk(chunk.getVec().getX(), chunk.getVec().getZ() - 1),
+                this.getChunk(chunk.getVec().getX() + 1, chunk.getVec().getZ() - 1),
+                this.getChunk(chunk.getVec().getX() - 1, chunk.getVec().getZ()),
+                this.getChunk(chunk.getVec().getX() + 1, chunk.getVec().getZ()),
+                this.getChunk(chunk.getVec().getX() - 1, chunk.getVec().getZ() + 1),
+                this.getChunk(chunk.getVec().getX(), chunk.getVec().getZ() + 1),
+                this.getChunk(chunk.getVec().getX() + 1, chunk.getVec().getZ() + 1)
         };
     }
 

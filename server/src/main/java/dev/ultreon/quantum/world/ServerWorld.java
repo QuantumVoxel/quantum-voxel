@@ -153,7 +153,7 @@ public class ServerWorld extends World {
 
         if (!this.unloadChunk(pos, true)) World.LOGGER.warn("Failed to unload chunk at {}", pos);
 
-        WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getPos(), chunk);
+        WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getVec(), chunk);
         return true;
     }
 
@@ -651,7 +651,7 @@ public class ServerWorld extends World {
 
         // If the chunk is found, verify its position matches the expected position
         if (chunk != null) {
-            ChunkVec foundAt = chunk.getPos();
+            ChunkVec foundAt = chunk.getVec();
 
             // If the positions don't match, throw a validation error
             if (!foundAt.equals(pos)) {
@@ -1443,6 +1443,10 @@ public class ServerWorld extends World {
                 throw new Error(t);
             }
 
+            if (!ref.builtChunk.getVec().equals(globalVec)) {
+                throw new IllegalStateException("Built chunk has wrong position: " + ref.builtChunk.getVec());
+            }
+
             var players = this.world.getServer().getPlayersInChunk(globalVec);
             players.forEach(player -> {
                 try {
@@ -1503,6 +1507,10 @@ public class ServerWorld extends World {
                     }
                 });
 
+                if (!globalVec.equals(builtChunk.getVec())) {
+                    World.LOGGER.error(String.format("Failed to build chunk at {} as it was generated at {} instead of " + globalVec, globalVec, builtChunk.getVec()));
+                    throw new IllegalChunkStateException("Chunk generated at " + globalVec + " instead of " + builtChunk.getVec());
+                }
                 return builtChunk;
             }).exceptionallyAsync(e -> {
                 if (!(e instanceof CancellationException))
@@ -1534,6 +1542,10 @@ public class ServerWorld extends World {
             // Chunk isn't generating anymore.
             this.generatingChunks.remove(globalVec);
 
+            if (!builtChunk.getVec().equals(globalVec)) {
+                throw new IllegalChunkStateException("Chunk generated at " + globalVec + " instead of " + builtChunk.getVec());
+            }
+
             return builtChunk;
         }
 
@@ -1552,9 +1564,9 @@ public class ServerWorld extends World {
                 return this.generateChunk(globalVec);
             }
 
-            var loadedAt = loadedChunk.getPos();
+            var loadedAt = loadedChunk.getVec();
             if (!loadedAt.equals(globalVec)) {
-                throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", localVec, loadedAt));
+                throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", globalVec, loadedAt));
             }
 
             return CompletableFuture.completedFuture(loadedChunk);
@@ -1573,7 +1585,7 @@ public class ServerWorld extends World {
             @Nullable ServerChunk loadedChunk = this.getChunk(localVec);
             if (loadedChunk == null) return this.generateChunkNow(globalVec);
 
-            var loadedAt = loadedChunk.getPos();
+            var loadedAt = loadedChunk.getVec();
             if (!loadedAt.equals(globalVec)) {
                 throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", localVec, loadedAt));
             }
@@ -1656,7 +1668,7 @@ public class ServerWorld extends World {
                 if (idx >= World.REGION_SIZE * World.REGION_SIZE)
                     throw new IllegalArgumentException("Too many chunks in region!");
                 if (chunk.isOriginal()) continue;
-                var localChunkVec = World.toLocalChunkVec(chunk.getPos());
+                var localChunkVec = World.toLocalChunkVec(chunk.getVec());
                 mapType.put("c" + localChunkVec.getX() + ";" + localChunkVec.getZ(), chunk.save());
                 idx++;
             }

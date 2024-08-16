@@ -357,7 +357,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
 
     @Override
     public String toString() {
-        return "Chunk[x=" + this.getPos().getX() + ", z=" + this.getPos().getZ() + "]";
+        return "Chunk[x=" + this.getVec().getX() + ", z=" + this.getVec().getZ() + "]";
     }
 
     @Override
@@ -418,7 +418,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return this.active;
     }
 
-    public ChunkVec getPos() {
+    public ChunkVec getVec() {
         return this.pos;
     }
 

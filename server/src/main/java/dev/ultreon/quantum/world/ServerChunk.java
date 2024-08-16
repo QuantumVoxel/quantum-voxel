@@ -178,6 +178,6 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
-        this.sendAllViewers(new S2CChunkDataPacket(this.getPos(), this.storage, this.biomeStorage, this.getBlockEntities()));
+        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.storage, this.biomeStorage, this.getBlockEntities()));
     }
 }

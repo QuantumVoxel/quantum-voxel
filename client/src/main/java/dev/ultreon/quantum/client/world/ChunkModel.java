@@ -47,7 +47,7 @@ public class ChunkModel implements RenderableProvider {
         chunk.whileLocked(() -> {
             if (modelInstance == null) {
                 ModelManager modelManager = ModelManager.INSTANCE;
-                ChunkVec pos = chunk.getPos();
+                ChunkVec pos = chunk.getVec();
                 ModelBuilder modelBuilder = new ModelBuilder();
                 MeshBuilder meshBuilder = new MeshBuilder();
                 modelBuilder.begin();

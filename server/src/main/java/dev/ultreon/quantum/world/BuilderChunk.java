@@ -91,7 +91,7 @@ public final class BuilderChunk extends Chunk {
 
     public ServerChunk build() {
         Storage<Biome> map = this.biomeData.map(Biomes.PLAINS, Biome.class, BiomeGenerator::getBiome);
-        return new ServerChunk(this.world, this.getPos(), this.storage, map, region);
+        return new ServerChunk(this.world, this.getVec(), this.storage, map, region);
     }
 
     public void setBiomeGenerator(int x, int z, BiomeGenerator generator) {

@@ -573,7 +573,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             QuantumServer.LOGGER.warn(String.format("Player moved into a null chunk: %s", this.getName()));
             return;
         }
-        if (chunk.getTracker().isTracking(this)) {
+        if (!chunk.getTracker().isTracking(this)) {
             QuantumServer.LOGGER.warn(String.format("Player moved into an inactive chunk: %s", this.getName()));
             return;
         }

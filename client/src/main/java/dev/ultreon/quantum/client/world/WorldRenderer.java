@@ -110,7 +110,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private BlockHitResult lastHitResult;
     private final Map<BlockVec, ModelInstance> breakingInstances = new HashMap<>();
     private final Map<BlockVec, ModelInstance> blockInstances = new ConcurrentHashMap<>();
-    private final Array<ClientChunkAccess> removedChunks = new Array<ClientChunkAccess>();
     private final Map<ChunkVec, ChunkModel> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Vector3 sunDirection = new Vector3();
@@ -422,17 +421,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
-        for (ClientChunkAccess chunk : this.removedChunks.toArray(ClientChunkAccess.class)) {
-            this.unload(chunk);
-        }
-
         for (var chunk : chunks) {
-            if (positions.contains(chunk.getPos(), false)) {
-                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getPos());
+            if (positions.contains(chunk.getVec(), false)) {
+                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getVec());
                 continue;
             }
 
-            positions.add(chunk.getPos());
+            positions.add(chunk.getVec());
 
             if (!chunk.isReady()) continue;
             if (chunk.isDisposed()) {
@@ -450,7 +445,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 chunk.visible = true;
             }
 
-            ChunkModel model = this.chunkModels.get(chunk.getPos());
+            ChunkModel model = this.chunkModels.get(chunk.getVec());
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
                 if (client.screen instanceof WorldLoadScreen) continue;
                 if (ref.chunkRendered || !this.shouldBuildChunks()) continue;
@@ -462,18 +457,19 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                         this.lastChunkBuild = System.currentTimeMillis();
                         chunk.dirty = false;
                     } else {
-                        LOGGER.warn("Failed to rebuild chunk: {}", chunk.getPos());
+                        LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
                         continue;
                     }
                 } else {
-                    model = new ChunkModel(chunk.getPos(), chunk, this);
+                    CommonConstants.LOGGER.warn("Tried to rebuild a chunk that didn't exist: " + chunk.getVec());
+                    model = new ChunkModel(chunk.getVec(), chunk, this);
                     if (model.build()) {
                         ref.chunkRendered = true;
                         this.lastChunkBuild = System.currentTimeMillis();
                         chunk.dirty = false;
-                        this.chunkModels.put(chunk.getPos(), model);
+                        this.chunkModels.put(chunk.getVec(), model);
                     } else {
-                        LOGGER.warn("Failed to build chunk: {}", chunk.getPos());
+                        LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
                         continue;
                     }
                 }
@@ -483,15 +479,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             } else if (model == null) {
                 if (ref.chunkRendered || !this.shouldBuildChunks()) continue;
                 chunk.dirty = false;
-                model = new ChunkModel(chunk.getPos(), chunk, this);
+                model = new ChunkModel(chunk.getVec(), chunk, this);
                 if (model.build()) {
                     ref.chunkRendered = true;
                     this.lastChunkBuild = System.currentTimeMillis();
                     chunk.dirty = false;
                     chunk.initialized = true;
-                    this.chunkModels.put(chunk.getPos(), model);
+                    this.chunkModels.put(chunk.getVec(), model);
                 } else {
-                    LOGGER.warn("Failed to build chunk: {}", chunk.getPos());
+                    LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
                     continue;
                 }
             } else if (model.needsRebuild(world) && !(ref.chunkRendered || !this.shouldBuildChunks())) {
@@ -502,7 +498,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                     chunk.onUpdated();
                     chunk.initialized = true;
                 } else {
-                    LOGGER.warn("Failed to rebuild chunk: {}", chunk.getPos());
+                    LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
                 }
                 continue;
             }
@@ -554,20 +550,20 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             QuantumClient.LOGGER.warn("Chunk unloaded when loading game: ", new Throwable());
         }
 
-        ChunkModel chunkModel = chunkModels.remove(chunk.getPos());
+        ChunkModel chunkModel = chunkModels.remove(chunk.getVec());
         if (chunkModel == null) {
-            LOGGER.warn("Tried to unload a chunk that didn't exist: " + chunk.getPos());
+            LOGGER.warn("Tried to unload a chunk that didn't exist: " + chunk.getVec());
             return;
         }
         if (RenderLayer.WORLD.destroy(chunkModel.getModelInstance()))
-            throw new DeprecationCheckException("World render layer shouldn't have a chunk model instance: " + chunk.getPos());
+            throw new DeprecationCheckException("World render layer shouldn't have a chunk model instance: " + chunk.getVec());
         if (chunkModel.getChunk() != chunk)
-            throw new DeprecationCheckException("Model's chunk and chunk mismatch: " + chunk.getPos());
+            throw new DeprecationCheckException("Model's chunk and chunk mismatch: " + chunk.getVec());
 
 
         chunkModel.dispose();
 
-        NamespaceID id = createId(chunk.getPos());
+        NamespaceID id = createId(chunk.getVec());
         if (!ModelManager.INSTANCE.unloadModel(id)) {
             QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
         }
@@ -640,7 +636,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private boolean shouldBuildChunks() {
-        return this.lastChunkBuild < System.currentTimeMillis() - 100L;
+        return this.lastChunkBuild < System.currentTimeMillis() - 375L;
     }
 
     @Override
@@ -880,7 +876,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void remove(ClientChunkAccess clientChunk) {
-
+        this.unload(clientChunk.getPos());
     }
 
     @Override
@@ -896,7 +892,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void unload(ClientChunkAccess clientChunk) {
-        this.chunkModels.remove(clientChunk.getPos());
+        ChunkModel remove = this.chunkModels.remove(clientChunk.getPos());
+
+        if (remove != null) {
+            remove.dispose();
+        }
     }
 
     @Override

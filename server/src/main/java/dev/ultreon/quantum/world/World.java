@@ -185,7 +185,7 @@ public abstract class World implements Disposable, WorldAccess {
     @CanIgnoreReturnValue
     private CompletableFuture<Boolean> unloadChunkAsync(@NotNull Chunk chunk) {
         synchronized (chunk.lock) {
-            return CompletableFuture.supplyAsync(() -> this.unloadChunk(chunk, chunk.getPos()), this.executor).exceptionally(throwable -> {
+            return CompletableFuture.supplyAsync(() -> this.unloadChunk(chunk, chunk.getVec()), this.executor).exceptionally(throwable -> {
                 World.fail(throwable, "Failed to unload chunk:");
                 return false;
             });
@@ -543,13 +543,13 @@ public abstract class World implements Disposable, WorldAccess {
 
     @Override
     public boolean isChunkInvalidated(Chunk chunk) {
-        return this.invalidatedChunks.contains(chunk.getPos());
+        return this.invalidatedChunks.contains(chunk.getVec());
     }
 
     @Override
     @ApiStatus.Internal
     public void updateNeighbours(Chunk chunk) {
-        ChunkVec pos = chunk.getPos();
+        ChunkVec pos = chunk.getVec();
         this.updateChunk(this.getChunk(new ChunkVec(pos.getX() - 1, pos.getZ())));
         this.updateChunk(this.getChunk(new ChunkVec(pos.getX() + 1, pos.getZ())));
         this.updateChunk(this.getChunk(new ChunkVec(pos.getX(), pos.getZ() - 1)));
@@ -559,7 +559,7 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     @ApiStatus.Internal
     public void updateChunkAndNeighbours(Chunk chunk) {
-        ChunkVec pos = chunk.getPos();
+        ChunkVec pos = chunk.getVec();
         this.updateChunk(chunk);
         this.updateNeighbours(chunk);
     }
@@ -568,7 +568,7 @@ public abstract class World implements Disposable, WorldAccess {
     @ApiStatus.Internal
     public void updateChunk(@Nullable Chunk chunk) {
         if (chunk == null) return;
-        this.invalidatedChunks.add(chunk.getPos());
+        this.invalidatedChunks.add(chunk.getVec());
     }
 
     /**
@@ -874,7 +874,7 @@ public abstract class World implements Disposable, WorldAccess {
 
     @Override
     public void onChunkUpdated(Chunk chunk) {
-        this.invalidatedChunks.remove(chunk.getPos());
+        this.invalidatedChunks.remove(chunk.getVec());
     }
 
     /**
