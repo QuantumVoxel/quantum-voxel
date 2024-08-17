@@ -1,8 +1,7 @@
 package dev.ultreon.quantum.network.client;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.item.ItemStack;
@@ -18,10 +17,11 @@ import dev.ultreon.quantum.network.packets.s2c.S2CTimePacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.ubo.types.MapType;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onChunkCancel(ChunkVec pos);
 
-    void onChunkData(ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
+    void onChunkData(ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
 
     void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos);
 
@@ -53,7 +53,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onRemovePlayer(UUID u);
 
-    void onBlockSet(BlockVec pos, BlockProperties block);
+    void onBlockSet(BlockVec pos, BlockState block);
 
     void onMenuItemChanged(int index, ItemStack stack);
 

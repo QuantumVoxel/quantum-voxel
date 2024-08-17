@@ -8,11 +8,9 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -96,7 +94,7 @@ public class ServerWorld extends World {
 
         for (Biome value : Registries.BIOME.values()) {
             if (value.doesNotGenerate()) continue;
-            this.terrainGen.registerBiome(this, this.getSeed(), value, value.getTemperatureStart(), value.getTemperatureEnd(), value.getHumidityStart(), value.getHumidityEnd(), value.getHeightStart(), value.getHeightEnd(), value.isOcean());
+            this.terrainGen.registerBiome(this, this.getSeed(), value, value.getTemperatureStart(), value.getTemperatureEnd(), value.getHumidityStart(), value.getHumidityEnd(), value.getHeightStart(), value.getHeightEnd(), value.getHillinessStart(), value.getHillinessEnd(), value.isOcean());
         }
 
         this.terrainGen.create(this, this.seed);
@@ -182,11 +180,11 @@ public class ServerWorld extends World {
      * @param block the block type to set
      * @return true if the block was successfully set, false if setting the block failed
      * @see BlockFlags
-     * @deprecated due to block setting changes, use {@link #set(int, int, int, BlockProperties, int)} instead
+     * @deprecated due to block setting changes, use {@link #set(int, int, int, BlockState, int)} instead
      */
     @Override
     @Deprecated
-    public boolean set(int x, int y, int z, @NotNull BlockProperties block) {
+    public boolean set(int x, int y, int z, @NotNull BlockState block) {
         return set(x, y, z, block, BlockFlags.UPDATE | BlockFlags.SYNC);
     }
 
@@ -202,7 +200,7 @@ public class ServerWorld extends World {
      * @see BlockFlags
      */
     @Override
-    public boolean set(int x, int y, int z, @NotNull BlockProperties block,
+    public boolean set(int x, int y, int z, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         boolean isBlockSet = super.set(x, y, z, block, flags);
         BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
@@ -211,8 +209,8 @@ public class ServerWorld extends World {
         if (~(flags & BlockFlags.UPDATE) != 0) {
             for (CubicDirection direction : CubicDirection.values()) {
                 BlockVec offset = blockVec.offset(direction);
-                BlockProperties blockProperties = this.get(offset);
-                blockProperties.update(this, offset);
+                BlockState blockState = this.get(offset);
+                blockState.update(this, offset);
             }
         }
 
@@ -237,8 +235,8 @@ public class ServerWorld extends World {
 
     @Override
     public boolean destroyBlock(@NotNull BlockVec breaking, @Nullable Player breaker) {
-        BlockProperties blockProperties = get(breaking);
-        if (blockProperties.isAir()) {
+        BlockState blockState = get(breaking);
+        if (blockState.isAir()) {
             QuantumServer.LOGGER.warn("Tried to break air block at {}!", breaking);
             return false;
         }
@@ -249,7 +247,7 @@ public class ServerWorld extends World {
 
         boolean broken = super.destroyBlock(breaking, breaker);
         if (broken) {
-            LootGenerator lootGen = blockProperties.getLootGen();
+            LootGenerator lootGen = blockState.getLootGen();
             if (lootGen == null) return true;
             for (ItemStack item : lootGen.generate(breaker != null ? breaker.getRng() : new JavaRNG())) {
                 drop(item, breaking.vec().d().add(0.5));
@@ -258,7 +256,7 @@ public class ServerWorld extends World {
         return broken;
     }
 
-    private void sync(int x, int y, int z, BlockProperties block) {
+    private void sync(int x, int y, int z, BlockState block) {
         this.sendAllTracking(x, y, z, new S2CBlockSetPacket(new BlockVec(x, y, z, BlockVecSpace.WORLD), block));
     }
 
@@ -1125,7 +1123,7 @@ public class ServerWorld extends World {
         this.setSpawnPoint(spawnX, spawnZ);
     }
 
-    public void recordOutOfBounds(int x, int y, int z, BlockProperties block) {
+    public void recordOutOfBounds(int x, int y, int z, BlockState block) {
         if (!(QuantumServer.isOnServerThread())) {
             QuantumServer.invokeAndWait(() -> this.recordOutOfBounds(x, y, z, block));
             return;
@@ -1810,9 +1808,9 @@ public class ServerWorld extends World {
         private final int x;
         private final int y;
         private final int z;
-        private final BlockProperties block;
+        private final BlockState block;
 
-        public RecordedChange(int x, int y, int z, BlockProperties block) {
+        public RecordedChange(int x, int y, int z, BlockState block) {
             this.x = x;
             this.y = y;
             this.z = z;
@@ -1863,7 +1861,7 @@ public class ServerWorld extends World {
             return z;
         }
 
-        public BlockProperties block() {
+        public BlockState block() {
             return block;
         }
 

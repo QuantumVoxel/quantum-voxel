@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.block.entity;
 
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 
 import java.util.Objects;
@@ -25,7 +25,7 @@ public abstract class BlockEntity implements CapabilityHolder {
         return world.get(pos).getBlock();
     }
 
-    public BlockProperties getBlockMeta() {
+    public BlockState getBlockMeta() {
         return world.get(pos);
     }
 

@@ -1,9 +1,10 @@
 package dev.ultreon.quantum.world;
 
 import com.google.common.base.Preconditions;
+import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.events.WorldLifecycleEvents;
 import dev.ultreon.quantum.registry.Registries;
@@ -34,10 +35,21 @@ public abstract class Biome {
     private final boolean doesNotGenerate;
     private final float humidityStart;
     private final float humidityEnd;
-    private float heightStart;
-    private float heightEnd;
+    private final float heightStart;
+    private final float heightEnd;
+    private final float hillinessStart;
+    private final float hillinessEnd;
 
-    protected Biome(float temperatureStart, float temperatureEnd, boolean isOcean, boolean doesNotGenerate, float humidityStart, float humidityEnd, float heightStart, float heightEnd) {
+    protected Biome(float temperatureStart,
+                    float temperatureEnd,
+                    boolean isOcean,
+                    boolean doesNotGenerate,
+                    float humidityStart,
+                    float humidityEnd,
+                    float heightStart,
+                    float heightEnd,
+                    float hillinessStart,
+                    float hillinessEnd) {
         this.temperatureStart = temperatureStart;
         this.temperatureEnd = temperatureEnd;
         this.isOcean = isOcean;
@@ -46,6 +58,8 @@ public abstract class Biome {
         this.humidityEnd = humidityEnd;
         this.heightStart = heightStart;
         this.heightEnd = heightEnd;
+        this.hillinessStart = hillinessStart;
+        this.hillinessEnd = hillinessEnd;
     }
 
     public static Builder builder() {
@@ -55,6 +69,7 @@ public abstract class Biome {
     public final void buildLayers() {
         this.onBuildLayers(this.layers, this.features);
 
+        ModApi.getGlobalEventHandler().call(new BiomeLayersBuilt(this, this.layers, this.features));
         WorldLifecycleEvents.BIOME_LAYERS_BUILT.factory().onBiomeLayersBuilt(this, this.layers, this.features);
     }
 
@@ -109,16 +124,16 @@ public abstract class Biome {
         return this.isOcean;
     }
 
-    public boolean isTopBlock(BlockProperties currentBlock) {
+    public boolean isTopBlock(BlockState currentBlock) {
         if (currentBlock.getBlock() == Blocks.AIR) return true;
         return layers.stream().anyMatch(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer && layer.surfaceBlock == currentBlock.getBlock());
     }
 
-    public BlockProperties getTopMaterial() {
+    public BlockState getTopMaterial() {
         return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer ? layer.surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
     }
 
-    public BlockProperties getFillerMaterial() {
+    public BlockState getFillerMaterial() {
         return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
     }
 
@@ -138,6 +153,14 @@ public abstract class Biome {
         return this.heightEnd;
     }
 
+    public float getHillinessStart() {
+        return this.hillinessStart;
+    }
+
+    public float getHillinessEnd() {
+        return this.hillinessEnd;
+    }
+
     public static class Builder {
         @Nullable
         private NoiseConfig biomeNoise;
@@ -149,6 +172,8 @@ public abstract class Biome {
         private float humidityEnd = 2.0f;
         private float heightStart = -64f;
         private float heightEnd = 320f;
+        private float hillinessStart = -2.0f;
+        private float hillinessEnd = 2.0f;
         private boolean isOcean;
         private boolean doesNotGenerate;
 
@@ -175,21 +200,25 @@ public abstract class Biome {
             return this;
         }
 
+        @Deprecated
         public Builder temperatureStart(float temperatureStart) {
             this.temperatureStart = temperatureStart;
             return this;
         }
 
+        @Deprecated
         public Builder temperatureEnd(float temperatureEnd) {
             this.temperatureEnd = temperatureEnd;
             return this;
         }
 
+        @Deprecated
         public Builder humidityStart(float humidityStart) {
             this.humidityStart = humidityStart;
             return this;
         }
 
+        @Deprecated
         public Builder humidityEnd(float humidityEnd) {
             this.humidityEnd = humidityEnd;
             return this;
@@ -213,6 +242,12 @@ public abstract class Biome {
             return this;
         }
 
+        public Builder hillinessRange(float hillinessStart, float hillinessEnd) {
+            this.hillinessStart = hillinessStart;
+            this.hillinessEnd = hillinessEnd;
+            return this;
+        }
+
         public Builder ocean() {
             this.isOcean = true;
             return this;
@@ -224,7 +259,7 @@ public abstract class Biome {
             if (Float.isNaN(this.temperatureStart)) throw new IllegalArgumentException("Temperature start not set.");
             if (Float.isNaN(this.temperatureEnd)) throw new IllegalArgumentException("Temperature end not set.");
 
-            return new Biome(this.temperatureStart, this.temperatureEnd, this.isOcean, this.doesNotGenerate, this.humidityStart, this.humidityEnd, this.heightStart, this.heightEnd) {
+            return new Biome(this.temperatureStart, this.temperatureEnd, this.isOcean, this.doesNotGenerate, this.humidityStart, this.humidityEnd, this.heightStart, this.heightEnd, this.hillinessStart, this.hillinessEnd) {
                 @Override
                 protected void onBuildLayers(List<TerrainLayer> layerList, List<WorldGenFeature> featureList) {
                     layerList.addAll(Builder.this.layers);

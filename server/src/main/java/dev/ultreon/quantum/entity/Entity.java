@@ -1,24 +1,23 @@
 package dev.ultreon.quantum.entity;
 
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
 import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
-import dev.ultreon.quantum.events.EntityEvents;
-import dev.ultreon.quantum.events.api.ValueEventResult;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.text.Translations;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.BoundingBoxUtils;
-import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.Location;
+import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -45,7 +44,7 @@ import java.util.UUID;
  * @see World#spawn(Entity)
  * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
  */
-public class Entity extends ComponentSystem implements CommandSender {
+public abstract class Entity extends ComponentSystem implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected final WorldAccess world;
     protected double x;
@@ -317,19 +316,18 @@ public class Entity extends ComponentSystem implements CommandSender {
         }
 
         // Trigger an event to allow modification of the move
-        ValueEventResult<Vec3d> eventResult = EntityEvents.MOVE.factory().onEntityMove(this, deltaX, deltaY, deltaZ);
-        Vec3d modifiedValue = eventResult.getValue();
+        EntityMoveEvent event = new EntityMoveEvent(this, new Vec(deltaX, deltaY, deltaZ));
+        ModApi.getGlobalEventHandler().call(event);
+        Vec modifiedValue = event.getDelta();
+
+        if (event.isCanceled()) {
+            return this.isColliding;
+        }
 
         // If the event is canceled and a modified value is provided, update the deltas
-        if (eventResult.isCanceled()) {
-            if (modifiedValue != null) {
-                deltaX = modifiedValue.x;
-                deltaY = modifiedValue.y;
-                deltaZ = modifiedValue.z;
-            } else {
-                return this.isColliding;
-            }
-        }
+        deltaX = modifiedValue.x;
+        deltaY = modifiedValue.y;
+        deltaZ = modifiedValue.z;
 
         // Store the original deltas after potential modification
         double originalDeltaXModified = deltaX;
@@ -671,7 +669,7 @@ public class Entity extends ComponentSystem implements CommandSender {
     /**
      * Retrieves the location of the entity.
      *
-     * @return
+     * @return the location of the entity
      */
     @Override
     public @NotNull Location getLocation() {

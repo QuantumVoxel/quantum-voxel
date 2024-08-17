@@ -3,22 +3,21 @@ package dev.ultreon.quantum.server.dedicated;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.ModInit;
+import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.inspect.InspectionRoot;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.dedicated.gui.DedicatedServerGui;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.ApiStatus;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,6 +64,8 @@ public class Main {
             GamePlatform loader = GamePlatform.get();
             FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
             FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+
+            ModApi.init();
 
             LanguageBootstrap.bootstrap.set((path, args1) -> server != null ? server.handleTranslation(path, args1) : path);
 

@@ -39,37 +39,37 @@ import java.util.Objects;
  * @since 0.1.0
  */
 @SuppressWarnings("ClassCanBeRecord")
-public class BlockProperties {
-    public static final BlockProperties AIR = Blocks.AIR.createMeta();
-    public static final BlockProperties BARRIER = Blocks.BARRIER.createMeta();
+public class BlockState {
+    public static final BlockState AIR = Blocks.AIR.createMeta();
+    public static final BlockState BARRIER = Blocks.BARRIER.createMeta();
     private final @NotNull Block block;
     private final @NotNull Map<String, BlockDataEntry<?>> entries;
 
     /**
-     * Constructs a new {@link BlockProperties} object.
+     * Constructs a new {@link BlockState} object.
      *
      * @param block   the block associated with these properties
      * @param entries a map of property names to their corresponding values
      */
-    public BlockProperties(@NotNull Block block, @NotNull Map<String, BlockDataEntry<?>> entries) {
+    public BlockState(@NotNull Block block, @NotNull Map<String, BlockDataEntry<?>> entries) {
         this.block = block;
         this.entries = entries;
     }
 
     /**
-     * Reads a {@link BlockProperties} object from the given {@link PacketIO} buffer.
+     * Reads a {@link BlockState} object from the given {@link PacketIO} buffer.
      *
      * @param packetBuffer the buffer to read from
-     * @return the read {@link BlockProperties} object
+     * @return the read {@link BlockState} object
      * @throws DecoderException if the block with the given ID does not exist
      */
-    public static @NotNull BlockProperties read(@NotNull PacketIO packetBuffer) {
+    public static @NotNull BlockState read(@NotNull PacketIO packetBuffer) {
         int rawId = packetBuffer.readVarInt();
         Block block = Registries.BLOCK.byId(rawId);
         if (block == null)
             throw new DecoderException("Block " + rawId + " does not exist");
 
-        BlockProperties meta = block.createMeta();
+        BlockState meta = block.createMeta();
         meta.entries.putAll(meta.readEntries(packetBuffer));
 
         return meta;
@@ -106,14 +106,14 @@ public class BlockProperties {
     }
 
     /**
-     * Loads a {@link BlockProperties} object from the given {@link MapType}.
+     * Loads a {@link BlockState} object from the given {@link MapType}.
      *
      * @param data the data to load from
-     * @return the loaded {@link BlockProperties} object
+     * @return the loaded {@link BlockState} object
      */
-    public static BlockProperties load(MapType data) {
+    public static BlockState load(MapType data) {
         Block block = Registries.BLOCK.get(NamespaceID.parse(data.getString("block")));
-        BlockProperties meta = block.createMeta();
+        BlockState meta = block.createMeta();
         meta.entries.putAll(meta.loadEntries(data.getMap("entries", new MapType())));
 
         return meta;
@@ -128,9 +128,9 @@ public class BlockProperties {
     }
 
     /**
-     * Returns the {@link Block} associated with this {@link BlockProperties} object.
+     * Returns the {@link Block} associated with this {@link BlockState} object.
      *
-     * @return the {@link Block} associated with this {@link BlockProperties} object
+     * @return the {@link Block} associated with this {@link BlockState} object
      */
     public @NotNull Block getBlock() {
         return block;
@@ -138,12 +138,12 @@ public class BlockProperties {
 
 
     /**
-     * Returns an immutable {@link Map} containing the entries of this {@link BlockProperties} object.
+     * Returns an immutable {@link Map} containing the entries of this {@link BlockState} object.
      * The entries are represented as key-value pairs, where the key is a {@link String}
      * representing the name of the entry, and the value is a {@link BlockDataEntry} object
      * representing the value of the entry.
      *
-     * @return an immutable {@link Map} containing the entries of this {@link BlockProperties} object
+     * @return an immutable {@link Map} containing the entries of this {@link BlockState} object
      */
     public @NotNull Map<String, BlockDataEntry<?>> getEntries() {
         return Collections.unmodifiableMap(entries);
@@ -190,12 +190,12 @@ public class BlockProperties {
     }
 
     /**
-     * Creates a new {@link BlockProperties} instance with the specified entry set to the specified value.
+     * Creates a new {@link BlockState} instance with the specified entry set to the specified value.
      *
      * @param name  the name of the entry to set
      * @param value the value to set the entry to
      * @param <T>   the type of the entry
-     * @return a new {@link BlockProperties} instance with the specified entry set to the specified value
+     * @return a new {@link BlockState} instance with the specified entry set to the specified value
      * @throws IllegalArgumentException if the entry with the specified name does not exist, or if the entry
      *                                  is not of the specified type
      */
@@ -387,10 +387,10 @@ public class BlockProperties {
      * @param value the value of the entry
      * @return a new copy of this properties with the given entry overridden
      */
-    public <T> @NotNull BlockProperties withEntry(@NotNull String name, @NotNull BlockDataEntry<T> value) {
+    public <T> @NotNull BlockState withEntry(@NotNull String name, @NotNull BlockDataEntry<T> value) {
         HashMap<String, BlockDataEntry<?>> entries = new HashMap<>(this.entries);
         entries.put(name, value);
-        return new BlockProperties(block, entries);
+        return new BlockState(block, entries);
     }
 
     /**
@@ -401,10 +401,10 @@ public class BlockProperties {
      * @return a new copy of this properties with the given entry overridden
      */
     @SuppressWarnings("unchecked")
-    public <T> @NotNull BlockProperties withEntry(@NotNull String name, @NotNull T value) {
+    public <T> @NotNull BlockState withEntry(@NotNull String name, @NotNull T value) {
         HashMap<String, BlockDataEntry<?>> entries = new HashMap<>(this.entries);
         entries.put(name, entries.get(name).cast((Class<T>) value.getClass()).with(value));
-        return new BlockProperties(block, entries);
+        return new BlockState(block, entries);
     }
 
     /**
@@ -427,7 +427,7 @@ public class BlockProperties {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BlockProperties that = (BlockProperties) o;
+        BlockState that = (BlockState) o;
         return Objects.equals(block, that.block) && Objects.equals(entries, that.entries);
     }
 

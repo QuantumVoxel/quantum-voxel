@@ -1,21 +1,22 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.world.vec.ChunkVec;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class ChunkRefresher {
-    protected final List<ChunkVec> toLoad = new ArrayList<>();
-    protected final List<ChunkVec> toUnload = new ArrayList<>();
+    protected final @NotNull List<@NotNull ChunkVec> toLoad = new ArrayList<>();
+    protected final @NotNull List<@NotNull ChunkVec> toUnload = new ArrayList<>();
     private boolean frozen = false;
 
     public ChunkRefresher() {
 
     }
 
-    public void addLoading(Collection<ChunkVec> toLoad) {
+    public void addLoading(@NotNull Collection<@NotNull ChunkVec> toLoad) {
         if (this.frozen) return;
         for (ChunkVec pos : toLoad) {
             if (this.toLoad.contains(pos)) continue;
@@ -25,7 +26,7 @@ public class ChunkRefresher {
         }
     }
 
-    public void addUnloading(Collection<ChunkVec> toLoad) {
+    public void addUnloading(@NotNull Collection<@NotNull ChunkVec> toLoad) {
         if (this.frozen) return;
         for (ChunkVec pos : toLoad) {
             if (this.toLoad.contains(pos)) continue;

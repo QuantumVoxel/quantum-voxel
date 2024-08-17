@@ -4,13 +4,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
-import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.partial.PartialPacket;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -1143,11 +1142,11 @@ public class PacketIO {
         this.writeVarInt(value.ordinal());
     }
 
-    public BlockProperties readBlockMeta() {
-        return BlockProperties.read(this);
+    public BlockState readBlockMeta() {
+        return BlockState.read(this);
     }
 
-    public void writeBlockMeta(BlockProperties blockMeta) {
+    public void writeBlockMeta(BlockState blockMeta) {
         blockMeta.write(this);
     }
 

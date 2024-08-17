@@ -31,7 +31,7 @@ public class TerrainNoise implements NoiseSource {
                 ).combine(
                         JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 512f)
-                                .addModifier(result -> result * 64)
+                                .addModifier(result -> result * 8)
                                 .build(),
                         Combiner.ADD
                 ).combine(
@@ -43,15 +43,8 @@ public class TerrainNoise implements NoiseSource {
                 ).combine(
                         // Smaller island generation
                         JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                                .scale(1 / 256f)
-                                .addModifier(result -> result * 36)
-                                .build(),
-                        Combiner.ADD
-                ).combine(
-                        // Smaller island generation
-                        JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 1024f)
-                                .addModifier(result -> result * 12)
+                                .addModifier(result -> result * 10)
                                 .build(),
                         Combiner.ADD
                 ).combine(

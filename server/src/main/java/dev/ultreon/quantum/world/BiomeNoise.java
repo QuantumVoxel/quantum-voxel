@@ -5,7 +5,6 @@ import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
-import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
 
 public class BiomeNoise implements NoiseSource {
@@ -14,8 +13,14 @@ public class BiomeNoise implements NoiseSource {
     public BiomeNoise(long seed) {
         noise = JNoise.newBuilder()
                 .fastSimplex(seed, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                .octavate(2, 0.3, 2.0, FractalFunction.FBM, true)
-                .scale(1 / 1.5f).build();
+                .scale(0.65f)
+                .combine(JNoise.newBuilder()
+                                .fastSimplex(seed + 1, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
+                                .scale(2.0f)
+                                .build(),
+                        Combiner.ADD
+                )
+                .build();
     }
 
     @Override

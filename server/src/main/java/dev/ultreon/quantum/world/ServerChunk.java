@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.events.WorldEvents;
@@ -18,6 +18,7 @@ import dev.ultreon.ubo.types.ByteArrayType;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.ubo.types.ShortArrayType;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collection;
@@ -28,21 +29,28 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 @NotThreadSafe
 public final class ServerChunk extends Chunk {
-    private final ServerWorld world;
-    private final ServerWorld.Region region;
+    private final @NotNull ServerWorld world;
+    private final @NotNull ServerWorld.Region region;
     private boolean modified = false;
     private boolean original = true;
 
-    private final PlayerTracker tracker = new PlayerTracker();
+    private final @NotNull PlayerTracker tracker = new PlayerTracker();
 
-    public ServerChunk(ServerWorld world, ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, ServerWorld.Region region) {
+    public ServerChunk(@NotNull ServerWorld world,
+                       @NotNull ChunkVec pos,
+                       @NotNull Storage<BlockState> storage,
+                       @NotNull Storage<Biome> biomeStorage,
+                       @NotNull ServerWorld.Region region) {
         super(world, pos, storage, biomeStorage);
         this.world = world;
         this.region = region;
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x,
+                           int y,
+                           int z,
+                           @NotNull BlockState block) {
         if (!QuantumServer.isOnServerThread()) {
             throw new InvalidThreadException("Should be on server thread.");
         }
@@ -63,12 +71,15 @@ public final class ServerChunk extends Chunk {
         }
     }
 
-    public static ServerChunk load(ServerWorld world, ChunkVec pos, MapType chunkData, ServerWorld.Region region) {
-        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockProperties.AIR);
+    public static ServerChunk load(@NotNull ServerWorld world,
+                                   @NotNull ChunkVec pos,
+                                   @NotNull MapType chunkData,
+                                   @NotNull ServerWorld.Region region) {
+        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockState.AIR);
         var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS);
 
         MapType blockData = chunkData.getMap("Blocks");
-        storage.load(blockData, BlockProperties::load);
+        storage.load(blockData, BlockState::load);
 
         MapType biomeData = chunkData.getMap("Biomes");
         biomeStorage.load(biomeData, Biome::load);
@@ -78,7 +89,7 @@ public final class ServerChunk extends Chunk {
         return chunk;
     }
 
-    public void load(MapType chunkData) {
+    public void load(@NotNull MapType chunkData) {
         this.rwLock.writeLock().lock();
         try {
             MapType extra = chunkData.getMap("Extra", new MapType());
@@ -111,7 +122,8 @@ public final class ServerChunk extends Chunk {
     }
 
     @Override
-    protected void setBlockEntity(BlockVec blockVec, BlockEntity blockEntity) {
+    protected void setBlockEntity(@NotNull BlockVec blockVec,
+                                  @NotNull BlockEntity blockEntity) {
         if (!QuantumServer.isOnServerThread()) {
             QuantumServer.invokeAndWait(() -> setBlockEntity(blockVec, blockEntity));
             return;
@@ -125,7 +137,7 @@ public final class ServerChunk extends Chunk {
         }
     }
 
-    public void sendAllViewers(Packet<? extends ClientPacketHandler> packet) {
+    public void sendAllViewers(@NotNull Packet<? extends @NotNull ClientPacketHandler> packet) {
         this.tracker.sendPacket(packet);
     }
 
@@ -147,7 +159,7 @@ public final class ServerChunk extends Chunk {
         this.rwLock.readLock().lock();
         try {
 
-            this.storage.save(chunkData, BlockProperties::save);
+            this.storage.save(chunkData, BlockState::save);
             this.biomeStorage.save(biomeData, Biome::save);
 
             for (BlockEntity blockEntity : this.getBlockEntities()) {
@@ -177,7 +189,7 @@ public final class ServerChunk extends Chunk {
     }
 
     @Override
-    public ServerWorld getWorld() {
+    public @NotNull ServerWorld getWorld() {
         return this.world;
     }
 
@@ -189,7 +201,7 @@ public final class ServerChunk extends Chunk {
         return original;
     }
 
-    public PlayerTracker getTracker() {
+    public @NotNull PlayerTracker getTracker() {
         return this.tracker;
     }
 

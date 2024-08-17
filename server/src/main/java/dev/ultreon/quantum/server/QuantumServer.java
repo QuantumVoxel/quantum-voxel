@@ -8,10 +8,13 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
-import dev.ultreon.quantum.util.Vec2d;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
+import dev.ultreon.quantum.api.events.server.ServerStartedEvent;
+import dev.ultreon.quantum.api.events.server.ServerStartingEvent;
+import dev.ultreon.quantum.api.events.server.ServerStoppedEvent;
+import dev.ultreon.quantum.api.events.server.ServerStoppingEvent;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.DebugFlags;
@@ -30,19 +33,20 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CAddPlayerPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemovePlayerPacket;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.Recipes;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.server.events.ServerLifecycleEvents;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.CachedPlayer;
 import dev.ultreon.quantum.server.player.PermissionMap;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.PollingExecutorService;
-import dev.ultreon.quantum.util.Shutdownable;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.ServerChunk;
+import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
@@ -117,6 +121,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     protected QuantumServer(WorldStorage storage, Profiler profiler, InspectionNode<?> parentNode) {
         super(profiler);
+
+        ModApi.getGlobalEventHandler().call(new ServerStartingEvent(this));
 
         this.storage = storage;
 
@@ -271,9 +277,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @Override
     @ApiStatus.Internal
     public void run() {
-        // Send server starting event to mods.
-        ServerLifecycleEvents.SERVER_STARTING.factory().onServerStarting(this);
-
         // Calculate tick duration based on TPS.
         var tickCap = 1000.0 / (double) QuantumServer.TPS;
         var tickTime = 0d;
@@ -285,7 +288,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         Duration sleepDuration = Duration.ofMilliseconds(5);
         try {
             // Send server started event to mods.
-            ServerLifecycleEvents.SERVER_STARTED.factory().onServerStarted(this);
+            ModApi.getGlobalEventHandler().call(new ServerStartedEvent(this));
 
             //* Main-loop.
             while (this.running) {
@@ -333,6 +336,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             this.crash(t);
             this.close();
             return;
+        } finally {
+            // Send server stopped event to mods.
+            ModApi.getGlobalEventHandler().call(new ServerStoppingEvent(this));
         }
 
         // Close all connections.
@@ -368,7 +374,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         QuantumServer.instance = null;
 
         // Send event for server stopping to mods.
-        ServerLifecycleEvents.SERVER_STOPPED.factory().onServerStopped(this);
+        ModApi.getGlobalEventHandler().call(new ServerStoppedEvent(this));
 
         // Log server stopped event.
         QuantumServer.LOGGER.info("Server stopped.");
@@ -378,7 +384,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * Crashes the server thread, or the client if we are the integrated server.
      *
      * @param t the throwable that caused the crash.
-     * @return
+     * @return the crash log
      */
     public CrashLog crash(Throwable t) {
         // Create crash log.
@@ -397,14 +403,11 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @Blocking
     public void shutdown() {
         // Send event for server stopping.
-        ServerLifecycleEvents.SERVER_STOPPING.factory().onServerStopping(this);
-
         kickAllPlayers();
 
         // Set running flag to make server stop.
         this.running = false;
 
-        long startTime = System.currentTimeMillis();
         try {
             this.scheduler.shutdown();
             if (!this.scheduler.awaitTermination(60, TimeUnit.SECONDS) && !this.scheduler.isTerminated())
@@ -651,7 +654,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         // Send player to all other players within the render distance.
         var players = this.getPlayers()
                 .stream()
-                .collect(Collectors.toList());
+                .toList();
 
         for (ServerPlayer other : players) {
             if (other == player) continue;
@@ -762,7 +765,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return false;
     }
 
-    public boolean isDedicated() {
+    public final boolean isDedicated() {
         return !this.isIntegrated();
     }
 
@@ -771,7 +774,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return null;
     }
 
-    public ServerPlayer loadPlayer(String name, UUID uuid, IConnection connection) {
+    public ServerPlayer loadPlayer(String name, UUID uuid, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.world, uuid, name, connection);
         try {
             if (this.storage.exists(String.format("players/%s.ubo", name))) {
@@ -860,7 +863,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Experimental
     public final <T extends Entity> T getEntity(int id, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-        Entity entityById = this.worlds.values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getId() == id).findAny().orElse(null);;
+        Entity entityById = this.worlds.values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getId() == id).findAny().orElse(null);
 
         if (type.isInstance(entityById)) {
             return type.cast(entityById);

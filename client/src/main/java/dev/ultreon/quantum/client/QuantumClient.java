@@ -32,11 +32,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.api.ModApi;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.client.api.events.ClientTickEvents;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
@@ -119,10 +118,10 @@ import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -385,11 +384,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
 
     // Raycast and block breaking
-    public HitResult hitResult;
+    public Hit hit;
     private BlockVec breaking;
-    private BlockProperties breakingBlock;
+    private BlockState breakingBlock;
 
-    public BlockHitResult cursor;
+    public BlockHit cursor;
 
     // Public Flags
     public boolean renderWorld = false;
@@ -501,6 +500,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
+
+        ModApi.init();
 
         // Disable shader pedantic mode
         ShaderProgram.pedantic = false;
@@ -1363,9 +1364,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private void renderMain(Renderer renderer, float deltaTime) {
         Player player = this.player;
         if (player == null) {
-            this.hitResult = null;
+            this.hit = null;
         } else {
-            QuantumClient.PROFILER.section("playerRayCast", () -> this.hitResult = player.rayCast());
+            QuantumClient.PROFILER.section("playerRayCast", () -> this.hit = player.rayCast());
         }
 
         renderer.begin();
@@ -1770,9 +1771,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Handle block breaking if relevant
         BlockVec breaking = this.breaking != null ? new BlockVec(this.breaking) : null;
         if (this.world != null && breaking != null) {
-            HitResult hitResult = this.hitResult;
+            Hit hit = this.hit;
 
-            if (hitResult instanceof BlockHitResult blockHitResult) {
+            if (hit instanceof BlockHit blockHitResult) {
                 this.handleBlockBreaking(breaking, blockHitResult);
             }
         }
@@ -1786,7 +1787,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         ClientTickEvents.POST_GAME_TICK.factory().onGameTick(this);
     }
 
-    private void handleBlockBreaking(BlockVec breaking, BlockHitResult hitResult) {
+    private void handleBlockBreaking(BlockVec breaking, BlockHit hitResult) {
         @Nullable ClientWorldAccess world = this.world;
         if (world == null) return;
         if (!hitResult.getBlockVec().equals(breaking.vec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
@@ -1810,7 +1811,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
-    private void resetBreaking(BlockHitResult hitResult) {
+    private void resetBreaking(BlockHit hitResult) {
         LocalPlayer player = this.player;
 
         if (this.world == null) return;
@@ -1818,7 +1819,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (player == null) return;
 
         this.world.stopBreaking(new BlockVec(this.breaking), player);
-        BlockProperties block = hitResult.getBlockMeta();
+        BlockState block = hitResult.getBlockMeta();
 
         if (block == null || block.isAir()) {
             this.breaking = null;
@@ -2124,8 +2125,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.futures.add(future);
     }
 
-    public @NotNull BlockModel getBlockModel(BlockProperties block) {
-        List<Pair<Predicate<BlockProperties>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
+    public @NotNull BlockModel getBlockModel(BlockState block) {
+        List<Pair<Predicate<BlockState>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
 
         if (orDefault == null) {
             BlockModel blockModel = BlockModelRegistry.get().get(block);
@@ -2155,10 +2156,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
 
         // Retrieve the necessary variables
-        HitResult hitResult = this.hitResult;
+        Hit hit = this.hit;
         Player player = this.player;
 
-        if (!(hitResult instanceof BlockHitResult blockHitResult)) return;
+        if (!(hit instanceof BlockHit blockHitResult)) return;
 
         // Check for null conditions and return if any are true
         if (this.world == null || player == null) return;
@@ -2178,10 +2179,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */
     public void startBreaking() {
         // Get the hit result and player
-        HitResult hitResult = this.hitResult;
+        Hit hit = this.hit;
         LocalPlayer player = this.player;
 
-        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+        if (!(hit instanceof BlockHit blockHitResult)) {
             this.breaking = null;
             this.breakingBlock = null;
             return;
@@ -2214,10 +2215,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void stopBreaking() {
-        HitResult hitResult = this.hitResult;
+        Hit hit = this.hit;
         LocalPlayer player = this.player;
 
-        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+        if (!(hit instanceof BlockHit blockHitResult)) {
             this.breaking = null;
             this.breakingBlock = null;
             return;

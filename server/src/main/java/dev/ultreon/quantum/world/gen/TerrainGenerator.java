@@ -42,6 +42,7 @@ public class TerrainGenerator implements Disposable {
     private @Nullable BiomeNoise humidNoise = null;
     private @Nullable BiomeNoise tempNoise = null;
     private @Nullable BiomeNoise variationNoise = null;
+    private @Nullable HillinessNoise hillinessNoise = null;
 
     public TerrainGenerator(DomainWarping biomeDomain, DomainWarping layerDomain, NoiseConfig noiseConfig) {
         this.biomeDomain = biomeDomain;
@@ -59,18 +60,19 @@ public class TerrainGenerator implements Disposable {
         this.humidNoise = new BiomeNoise(world.getSeed() + 200);
         this.tempNoise = new BiomeNoise(world.getSeed() + 210);
         this.variationNoise = new BiomeNoise(world.getSeed() + 220);
+        this.hillinessNoise = new HillinessNoise(world.getSeed() + 230);
         this.carver = new Carver(biomeDomain, noise, world.getSeed() + 300);
     }
 
     @CanIgnoreReturnValue
     public BiomeData registerBiome(ServerWorld world, long seed, Biome biome, float temperatureStart, float temperatureEnd, float humidityStart, float humidityEnd, boolean isOcean) {
-        return registerBiome(world, seed, biome, temperatureStart, temperatureEnd, humidityStart, humidityEnd, 0.0F, 8.0F, isOcean);
+        return registerBiome(world, seed, biome, temperatureStart, temperatureEnd, humidityStart, humidityEnd, -64.0f, 320.0f, -2.0f, 2.0f, isOcean);
     }
 
     @CanIgnoreReturnValue
-    public BiomeData registerBiome(ServerWorld world, long seed, Biome biome, float temperatureStart, float temperatureEnd, float humidityStart, float humidityEnd, float heightStart, float heightEnd, boolean isOcean) {
+    public BiomeData registerBiome(ServerWorld world, long seed, Biome biome, float temperatureStart, float temperatureEnd, float humidityStart, float humidityEnd, float heightStart, float heightEnd, float hillinessStart, float hillinessEnd, boolean isOcean) {
         var generator = biome.create(world, seed);
-        var biomeData = new BiomeData(temperatureStart, temperatureEnd, humidityStart, humidityEnd, heightStart, heightEnd, isOcean, generator);
+        var biomeData = new BiomeData(temperatureStart, temperatureEnd, humidityStart, humidityEnd, heightStart, heightEnd, hillinessStart, hillinessEnd, isOcean, generator);
         this.biomeGenData.add(biomeData);
         return biomeData;
     }
@@ -92,9 +94,12 @@ public class TerrainGenerator implements Disposable {
     }
 
     private void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver, @NotNull Collection<ServerWorld.@NotNull RecordedChange> recordedChanges) {
+        if (this.hillinessNoise == null)
+            throw new IllegalStateException("Hilliness noise has not been initialized yet!");
         for (var x = 0; x < CHUNK_SIZE; x++) {
             for (var z = 0; z < CHUNK_SIZE; z++) {
-                int groundPos = carver.carve(chunk, x, z);
+                double hilliness = this.hillinessNoise.evaluateNoise(x, z) - 2.0f;
+                int groundPos = carver.carve(chunk, x, z, hilliness);
 
                 var index = this.findGenerator(new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);

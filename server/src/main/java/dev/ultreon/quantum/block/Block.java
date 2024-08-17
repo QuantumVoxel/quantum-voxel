@@ -2,7 +2,7 @@ package dev.ultreon.quantum.block;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -89,12 +89,12 @@ public class Block implements DataWriter<MapType> {
         return this.fluid;
     }
 
-    public BoundingBox getBoundingBox(int x, int y, int z, BlockProperties blockProperties) {
+    public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
         return new BoundingBox(new Vec3d(x, y, z), new Vec3d(x + 1, y + 1, z + 1));
     }
 
     @CanIgnoreReturnValue
-    public BoundingBox boundingBox(int x, int y, int z, BlockProperties blockProperties, BoundingBox box) {
+    public BoundingBox boundingBox(int x, int y, int z, BlockState blockState, BoundingBox box) {
         return box.set(box.min.set(x, y, z), box.max.set(x + 1, y + 1, z + 1));
     }
 
@@ -154,7 +154,7 @@ public class Block implements DataWriter<MapType> {
         return this.toolRequired;
     }
 
-    public @Nullable LootGenerator getLootGen(@NotNull BlockProperties blockProperties) {
+    public @Nullable LootGenerator getLootGen(@NotNull BlockState blockState) {
         return this.lootGen;
     }
 
@@ -189,19 +189,19 @@ public class Block implements DataWriter<MapType> {
         return this.occlude;
     }
 
-    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockProperties blockProperties) {
+    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockState blockState) {
         // Used in implementations
     }
 
-    public @NotNull BlockProperties createMeta() {
-        return new BlockProperties(this, Collections.emptyMap());
+    public @NotNull BlockState createMeta() {
+        return new BlockState(this, Collections.emptyMap());
     }
 
-    public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockVec at, UseItemContext context) {
+    public BlockState onPlacedBy(BlockState blockMeta, BlockVec at, UseItemContext context) {
         return blockMeta;
     }
 
-    public void update(@NotNull World serverWorld, @NotNull BlockVec offset, @NotNull BlockProperties meta) {
+    public void update(@NotNull World serverWorld, @NotNull BlockVec offset, @NotNull BlockState meta) {
         this.onPlace(serverWorld, offset, meta);
     }
 
@@ -209,7 +209,7 @@ public class Block implements DataWriter<MapType> {
         return true;
     }
 
-    public boolean canBeReplacedBy(@NotNull UseItemContext context, @NotNull BlockProperties blockProperties) {
+    public boolean canBeReplacedBy(@NotNull UseItemContext context, @NotNull BlockState blockState) {
         return true;
     }
 
@@ -217,20 +217,20 @@ public class Block implements DataWriter<MapType> {
         return toolLevel;
     }
 
-    public void onDestroy(@NotNull World world, @NotNull BlockVec breaking, @NotNull BlockProperties blockProperties, @Nullable Player breaker) {
+    public void onDestroy(@NotNull World world, @NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
 
     }
 
-    public Iterable<ItemStack> getDrops(@NotNull BlockVec breaking, @NotNull BlockProperties blockProperties, @Nullable Player breaker) {
+    public Iterable<ItemStack> getDrops(@NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
         if (breaker == null) return this.lootGen.generate(new JavaRNG());
         return this.lootGen.generate(breaker.getRng());
     }
 
-    public int getLight(@NotNull BlockProperties blockProperties) {
+    public int getLight(@NotNull BlockState blockState) {
         return 0;
     }
 
-    public int getLightReduction(@NotNull BlockProperties blockProperties) {
+    public int getLightReduction(@NotNull BlockState blockState) {
         if (isAir()) return 0;
         return lightReduction;
     }

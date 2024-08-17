@@ -30,18 +30,18 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pool;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.FlatStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
+import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.Heightmap;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.Heightmap;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
     public static final int TERRAIN_SIZE = 16;
@@ -55,7 +55,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     public TerrainNode parent;
     public TerrainNode[] children = new TerrainNode[8];
 
-    public FlatStorage<BlockProperties> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, BlockProperties.AIR);
+    public FlatStorage<BlockState> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, BlockState.AIR);
 
     public ModelInstance modelInstance;
     public Mesh mesh;
@@ -105,9 +105,9 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
 
     public Block getMaterial(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= TERRAIN_SIZE || y >= TERRAIN_SIZE || z >= TERRAIN_SIZE) return Blocks.AIR;
-        BlockProperties blockProperties = materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
-        if (blockProperties == null) return Blocks.AIR;
-        return blockProperties.getBlock();
+        BlockState blockState = materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
+        if (blockState == null) return Blocks.AIR;
+        return blockState.getBlock();
     }
 
     /**
@@ -480,7 +480,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public BlockProperties get(Vec3i tmp3i) {
+    public BlockState get(Vec3i tmp3i) {
         return materials.get(tmp3i.x + tmp3i.y * TERRAIN_SIZE + tmp3i.z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
@@ -535,22 +535,22 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
     }
 
     @Override
-    public BlockProperties getFast(int x, int y, int z) {
+    public BlockState getFast(int x, int y, int z) {
         return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
     @Override
-    public BlockProperties get(int x, int y, int z) {
+    public BlockState get(int x, int y, int z) {
         return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 

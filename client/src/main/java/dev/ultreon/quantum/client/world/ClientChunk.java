@@ -6,11 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
@@ -24,7 +23,11 @@ import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.Chunk;
+import dev.ultreon.quantum.world.LightSource;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.ApiStatus;
@@ -53,7 +56,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();
-    private final Map<BlockVec, BlockProperties> customRendered = new HashMap<>();
+    private final Map<BlockVec, BlockState> customRendered = new HashMap<>();
     public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
@@ -68,11 +71,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
      * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         this(world, pos, storage, biomeStorage, blockEntities);
     }
 
-    public ClientChunk(ClientWorld world, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
         this.clientWorld = world;
         this.active = false;
@@ -152,7 +155,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public @NotNull BlockProperties getFast(int x, int y, int z) {
+    public @NotNull BlockState getFast(int x, int y, int z) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -160,7 +163,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public void setFast(Vec3i pos, BlockProperties block) {
+    public void setFast(Vec3i pos, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -168,15 +171,14 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         return super.set(x, y, z, block);
     }
 
-    @Override
-    public void set(Vec3i pos, BlockProperties block) {
+    public void set(Vec3i pos, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -184,7 +186,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -213,7 +215,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public ClientWorldAccess getWorld() {
+    public @NotNull ClientWorld getWorld() {
         return this.clientWorld;
     }
 
@@ -236,7 +238,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return null;
     }
 
-    public Map<BlockVec, BlockProperties> getCustomRendered() {
+    public Map<BlockVec, BlockState> getCustomRendered() {
         return this.customRendered;
     }
 

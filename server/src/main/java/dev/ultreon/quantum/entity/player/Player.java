@@ -2,8 +2,6 @@ package dev.ultreon.quantum.entity.player;
 
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.Entity;
@@ -241,12 +239,12 @@ public abstract class Player extends LivingEntity {
         //    and will break client <-> server connection. DO NOT CALL SUPER HERE!
     }
 
-    public HitResult rayCast() {
+    public Hit rayCast() {
         Ray ray = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
         if (this.world.get(getBlockVec()).getBlock().hasCollider()) {
-            return new BlockHitResult(ray, getBlockVec(), world.get(getBlockVec()));
+            return new BlockHit(ray, getBlockVec(), world.get(getBlockVec()));
         }
-        EntityHitResult entityHitResult = this.world.rayCastEntity(ray);
+        EntityHit entityHitResult = this.world.rayCastEntity(ray);
         if (entityHitResult.isCollide()) return entityHitResult;
         Ray ray1 = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
         return this.world.rayCast(ray1);

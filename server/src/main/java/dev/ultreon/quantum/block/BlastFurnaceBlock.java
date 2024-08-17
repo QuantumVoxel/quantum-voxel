@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.world.CubicDirection;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
 public class BlastFurnaceBlock extends Block {
@@ -13,12 +13,12 @@ public class BlastFurnaceBlock extends Block {
     }
 
     @Override
-    public @NotNull BlockProperties createMeta() {
+    public @NotNull BlockState createMeta() {
         return super.createMeta().withEntry("lit", BlockDataEntry.of(false)).withEntry("facing", BlockDataEntry.ofEnum(CubicDirection.NORTH));
     }
 
     @Override
-    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockProperties blockProperties) {
-        super.onPlace(world, pos, blockProperties);
+    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockState blockState) {
+        super.onPlace(world, pos, blockState);
     }
 }

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network.packets.s2c;
 
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketContext;
@@ -11,10 +11,10 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.gen.biome.Biomes;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
     private final ChunkVec pos;
-    private final Storage<BlockProperties> storage;
+    private final Storage<BlockState> storage;
     private final Storage<Biome> biomeStorage;
     private final IntList blockEntityPositions = new IntArrayList();
     private final IntList blockEntities = new IntArrayList();
@@ -32,7 +32,7 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
 
     public S2CChunkDataPacket(PacketIO buffer) {
         this.pos = buffer.readChunkVec();
-        this.storage = new PaletteStorage<>(BlockProperties.AIR, buffer, PacketIO::readBlockMeta);
+        this.storage = new PaletteStorage<>(BlockState.AIR, buffer, PacketIO::readBlockMeta);
         this.biomeStorage = new PaletteStorage<>(Biomes.PLAINS, buffer, buf -> Registries.BIOME.byId(buf.readShort()));
 
         int blockEntityCount = buffer.readVarInt();
@@ -42,7 +42,7 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
         }
     }
 
-    public S2CChunkDataPacket(ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Collection<BlockEntity> blockEntities) {
+    public S2CChunkDataPacket(ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Collection<BlockEntity> blockEntities) {
         this.pos = pos;
         this.storage = storage;
         this.biomeStorage = biomeStorage;

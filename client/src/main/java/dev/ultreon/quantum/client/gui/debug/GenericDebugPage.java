@@ -1,8 +1,7 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
-import dev.ultreon.quantum.util.Vec3i;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -10,10 +9,11 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.Hit;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 public class GenericDebugPage implements DebugPage {
@@ -66,9 +66,9 @@ public class GenericDebugPage implements DebugPage {
                             .left("Block Light", blockLight);
                 }
                 context.left("Chunk Shown", world.getChunkAt(BlockVecition) != null);
-                HitResult hitResult = client.hitResult;
-                if (hitResult != null)
-                    context.left("Break Progress", world.getBreakProgress(new BlockVec(hitResult.getBlockVec())));
+                Hit hit = client.hit;
+                if (hit != null)
+                    context.left("Break Progress", world.getBreakProgress(new BlockVec(hit.getBlockVec())));
                 context.left();
             }
 
@@ -89,9 +89,9 @@ public class GenericDebugPage implements DebugPage {
                     .left();
         }
 
-        BlockHitResult cursor = client.cursor;
+        BlockHit cursor = client.cursor;
         if (cursor != null && cursor.isCollide()) {
-            BlockProperties block = cursor.getBlockMeta();
+            BlockState block = cursor.getBlockMeta();
             if (block != null && !block.isAir()) {
                 context.right("Block", block);
             }

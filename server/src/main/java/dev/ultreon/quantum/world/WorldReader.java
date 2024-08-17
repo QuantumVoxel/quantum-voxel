@@ -1,13 +1,9 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.EntityHitResult;
-import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.util.WorldRayCaster;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
@@ -23,25 +19,25 @@ public interface WorldReader {
     List<ChunkVec> getChunksAround(Vec3d pos);
 
     @NotNull
-    BlockProperties get(BlockVec pos);
+    BlockState get(BlockVec pos);
 
     @NotNull
-    BlockProperties get(int x, int y, int z);
+    BlockState get(int x, int y, int z);
 
     @NotNull
-    EntityHitResult rayCastEntity(Ray ray);
+    EntityHit rayCastEntity(Ray ray);
 
     @NotNull
-    EntityHitResult rayCastEntity(Ray ray, float distance);
+    EntityHit rayCastEntity(Ray ray, float distance);
 
     @NotNull
-    EntityHitResult rayCastEntity(Ray ray, float distance, Predicate<Entity> filter);
+    EntityHit rayCastEntity(Ray ray, float distance, Predicate<Entity> filter);
 
     @NotNull
-    EntityHitResult rayCastEntity(Ray ray, float distance, EntityType<?> type);
+    EntityHit rayCastEntity(Ray ray, float distance, EntityType<?> type);
 
     @NotNull
-    EntityHitResult rayCastEntity(Ray ray, float distance, Class<? extends Entity> type);
+    EntityHit rayCastEntity(Ray ray, float distance, Class<? extends Entity> type);
 
     /**
      * Casts a ray in the world and returns the result.
@@ -51,8 +47,8 @@ public interface WorldReader {
      * @return the result
      */
     @NotNull
-    default BlockHitResult rayCast(Ray ray, float distance) {
-        BlockHitResult hitResult = new BlockHitResult(ray, distance);
+    default BlockHit rayCast(Ray ray, float distance) {
+        BlockHit hitResult = new BlockHit(ray, distance);
         return WorldRayCaster.rayCast(hitResult, this);
     }
 

@@ -1,15 +1,13 @@
 package dev.ultreon.quantum.server.player;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.util.Vec2d;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.Command;
 import dev.ultreon.quantum.api.commands.CommandContext;
 import dev.ultreon.quantum.api.commands.TabCompleting;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -35,9 +33,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
@@ -665,9 +661,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().collect(Collectors.toList())));
     }
 
-    public UseResult useItem(BlockHitResult hitResult, ItemStack stack, ItemSlot slot) {
+    public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {
         UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack);
-        BlockHitResult result = (BlockHitResult) ctx.result();
+        BlockHit result = (BlockHit) ctx.result();
         if (result == null)
             return UseResult.SKIP;
 
@@ -695,7 +691,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param z     the z-coordinate
      * @param block the block to place
      */
-    public void placeBlock(int x, int y, int z, BlockProperties block) {
+    public void placeBlock(int x, int y, int z, BlockState block) {
         BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
         if (block == null || !this.world.isLoaded(blockVec)) return;
 

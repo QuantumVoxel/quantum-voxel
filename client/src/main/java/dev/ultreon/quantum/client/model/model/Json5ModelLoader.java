@@ -25,7 +25,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.item.Item;
@@ -110,7 +110,7 @@ public class Json5ModelLoader {
     private Table<String, BlockDataEntry<?>, Json5Model> loadOverrides(RegistryKey<Block> key, Json5Object overridesJson5) {
         Table<String, BlockDataEntry<?>, Json5Model> overrides = HashBasedTable.create();
         Block block = Registries.BLOCK.get(key);
-        BlockProperties meta = block.createMeta();
+        BlockState meta = block.createMeta();
         for (Map.Entry<String, Json5Element> entry : overridesJson5.entrySet()) {
             String keyName = entry.getKey();
             Json5Element overrideElem = entry.getValue();

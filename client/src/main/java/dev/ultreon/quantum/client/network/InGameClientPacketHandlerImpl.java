@@ -1,10 +1,9 @@
 package dev.ultreon.quantum.client.network;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
@@ -48,11 +47,12 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.Nullable;
 
@@ -125,7 +125,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onChunkData(ChunkVec pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public void onChunkData(ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         try {
             LocalPlayer player = this.client.player;
             if (player == null/* || new Vec2d(pos.x(), pos.z()).dst(new Vec2d(player.getChunkVec().x(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
@@ -282,7 +282,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onBlockSet(BlockVec pos, BlockProperties block) {
+    public void onBlockSet(BlockVec pos, BlockState block) {
 
     }
 

@@ -3,18 +3,13 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.util.WorldRayCaster;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -32,22 +27,22 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
 
-    boolean set(BlockVec pos, BlockProperties block);
+    boolean set(BlockVec pos, BlockState block);
 
-    boolean set(int x, int y, int z, BlockProperties block);
+    boolean set(int x, int y, int z, BlockState block);
 
     Array<Entity> getEntities();
 
-    boolean set(int x, int y, int z, BlockProperties block, int flags);
+    boolean set(int x, int y, int z, BlockState block, int flags);
 
-    boolean set(BlockVec pos, BlockProperties block, int flags);
+    boolean set(BlockVec pos, BlockState block, int flags);
 
     default void destroy(@NotNull BlockVec pos) {
         destroy(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     default void destroy(int x, int y, int z) {
-        set(x, y, z, BlockProperties.AIR, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.DESTROY);
+        set(x, y, z, BlockState.AIR, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.DESTROY);
     }
 
     ChunkAccess getChunkAt(@NotNull BlockVec pos);
@@ -69,11 +64,11 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     int getHeight(int x, int z, HeightmapType type);
 
-    void setColumn(int x, int z, BlockProperties block);
+    void setColumn(int x, int z, BlockState block);
 
-    void setColumn(int x, int z, int maxY, BlockProperties block);
+    void setColumn(int x, int z, int maxY, BlockState block);
 
-    CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockProperties block);
+    CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block);
 
     Collection<? extends ChunkAccess> getLoadedChunks();
 
@@ -107,8 +102,8 @@ public interface WorldAccess extends Disposable, WorldReader {
      * @return the result
      */
     @NotNull
-    default BlockHitResult rayCast(Ray ray) {
-        return WorldRayCaster.rayCast(new BlockHitResult(ray), this);
+    default BlockHit rayCast(Ray ray) {
+        return WorldRayCaster.rayCast(new BlockHit(ray), this);
     }
 
     void tick();

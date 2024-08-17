@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public record BiomeData(float temperatureStartThreshold, float temperatureEndThreshold, float humidityStartThreshold,
                         float humidityEndThreshold, float heightStartThreshold, float heightEndThreshold,
-                        boolean isOcean, BiomeGenerator biomeGen) {
+                        float hillinessStartThreshold, float hillinessEndThreshold, boolean isOcean, BiomeGenerator biomeGen) {
 
     @Override
     public String toString() {

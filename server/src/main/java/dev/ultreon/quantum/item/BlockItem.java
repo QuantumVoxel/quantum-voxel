@@ -1,19 +1,20 @@
 package dev.ultreon.quantum.item;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.api.ModApi;
+import dev.ultreon.quantum.api.events.block.BlockAttemptPlaceEvent;
+import dev.ultreon.quantum.api.events.block.BlockPlaceEvent;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.events.BlockEvents;
-import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.BlockHitResult;
+import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Suppliers;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BlockFlags;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -32,30 +33,28 @@ public class BlockItem extends Item {
     }
 
     @Override
-    public UseResult use(UseItemContext useItemContext) {
-        super.use(useItemContext);
+    public UseResult use(UseItemContext context) {
+        super.use(context);
 
-        var world = useItemContext.world();
-        var stack = useItemContext.stack();
-        BlockHitResult result = (BlockHitResult) useItemContext.result();
-        var pos = result.getBlockVec();
-        var next = result.getNext();
-        var direction = result.getDirection();
-        var player = useItemContext.player();
+        var world = context.world();
+        var stack = context.stack();
+        BlockHit hit = (BlockHit) context.result();
+        var pos = hit.getBlockVec();
+        var next = hit.getNext();
+        var direction = hit.getDirection();
+        var player = context.player();
 
         BlockVec blockVec = new BlockVec(next);
-        EventResult eventResult = BlockEvents.ATTEMPT_BLOCK_PLACEMENT.factory()
-                .onAttemptBlockPlacement(player, this.block.get(), blockVec, stack);
-
-        if (eventResult.isCanceled()) return UseResult.DENY;
+        if (ModApi.getGlobalEventHandler().call(new BlockAttemptPlaceEvent(context.world(), context.world().get(blockVec), blockVec, context.player(), hit)))
+            return UseResult.DENY;
 
         if (!block.get().canBePlacedAt(world, blockVec, player, stack, direction))
             return UseResult.DENY;
 
-        BlockProperties oldBlock = world.get(pos.x, pos.y, pos.z);
-        return oldBlock.isReplaceable() && oldBlock.canBeReplacedBy(useItemContext)
-                ? replaceBlock(world, pos, useItemContext)
-                : placeBlock(world, next, blockVec, useItemContext);
+        BlockState oldBlock = world.get(pos.x, pos.y, pos.z);
+        return oldBlock.isReplaceable() && oldBlock.canBeReplacedBy(context)
+                ? replaceBlock(world, pos, context)
+                : placeBlock(world, next, blockVec, context);
 
     }
 
@@ -64,14 +63,15 @@ public class BlockItem extends Item {
         if (world.intersectEntities(this.getBlock().getBoundingBox(next)))
             return UseResult.DENY;
 
+        BlockState state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
+        BlockState original = world.get(blockVec);
         if (world.isClientSide()) {
-            var state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
             world.set(blockVec, state, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.LIGHT);
         }
 
         Player player = useItemContext.player();
         ItemStack stack = useItemContext.stack();
-        BlockEvents.BLOCK_PLACED.factory().onBlockPlaced(player, this.block.get(), blockVec, stack);
+        ModApi.getGlobalEventHandler().call(new BlockPlaceEvent(world, original, state, blockVec));
 
         stack.shrink(1);
         return UseResult.ALLOW;
@@ -104,7 +104,7 @@ public class BlockItem extends Item {
         return this.block.get().getTranslationId();
     }
 
-    public BlockProperties createBlockMeta() {
+    public BlockState createBlockMeta() {
         return this.block.get().createMeta();
     }
 }

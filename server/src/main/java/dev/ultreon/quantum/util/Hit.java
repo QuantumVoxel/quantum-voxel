@@ -2,7 +2,7 @@ package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-public interface HitResult {
+public interface Hit {
     float getDistanceMax();
 
     Vec getVec();

@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -20,9 +20,9 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.EntityHitResult;
-import dev.ultreon.quantum.util.HitResult;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.EntityHit;
+import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
@@ -305,19 +305,19 @@ public class DesktopInput extends GameInput {
         @Nullable ClientWorldAccess world = this.client.world;
         if (world == null) return;
 
-        HitResult hitResult = this.client.hitResult;
-        if (hitResult == null) return;
+        Hit hit = this.client.hit;
+        if (hit == null) return;
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            this.doPlayerInteraction(Input.Buttons.LEFT, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.LEFT, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            this.doPlayerInteraction(Input.Buttons.RIGHT, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.RIGHT, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-            this.doPlayerInteraction(Input.Buttons.MIDDLE, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.MIDDLE, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.BACK)) {
-            this.doPlayerInteraction(Input.Buttons.BACK, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.BACK, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.FORWARD)) {
-            this.doPlayerInteraction(Input.Buttons.FORWARD, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.FORWARD, hit, world, player);
         }
 
     }
@@ -477,7 +477,7 @@ public class DesktopInput extends GameInput {
         Screen currentScreen = this.client.screen;
         @Nullable ClientWorldAccess world = this.client.world;
         Player player = this.client.player;
-        HitResult hitResult = this.client.hitResult;
+        Hit hit = this.client.hit;
 
         // Check if the cursor is not caught and there is a current screen
         if (!Gdx.input.isCursorCatched() && currentScreen != null) {
@@ -500,25 +500,25 @@ public class DesktopInput extends GameInput {
         }
 
         // Check if player and hit result are not null
-        return player != null && hitResult != null;
+        return player != null && hit != null;
     }
 
     /**
      * Handles player interaction with the game environment.
      *
      * @param button the input button pressed by the player
-     * @param hitResult the result of the player's hit test
+     * @param hit the result of the player's hit test
      * @param world the game world
      * @param player the player entity
      */
-    private void doPlayerInteraction(int button, HitResult hitResult, @Nullable ClientWorldAccess world, Player player) {
+    private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorldAccess world, Player player) {
         // Get the position and metadata of the current and next blocks
-        BlockVec pos = hitResult.getBlockVec();
-        if (hitResult instanceof BlockHitResult blockHitResult){
+        BlockVec pos = hit.getBlockVec();
+        if (hit instanceof BlockHit blockHitResult){
             assert world != null;
-            BlockProperties block = world.get(new BlockVec(pos));
+            BlockState block = world.get(new BlockVec(pos));
             BlockVec posNext = blockHitResult.getNext();
-            BlockProperties blockNext = world.get(posNext);
+            BlockState blockNext = world.get(posNext);
 
             // Check if the hit result is valid and the current block is not air
             if (!blockHitResult.isCollide() || block.isAir())
@@ -545,7 +545,7 @@ public class DesktopInput extends GameInput {
             if (button == Input.Buttons.RIGHT && blockNext.isAir()) {
                 this.useItem(player, world, blockHitResult);
             }
-        } else if (hitResult instanceof EntityHitResult entityHitResult) {
+        } else if (hit instanceof EntityHit entityHitResult) {
             if (!entityHitResult.isCollide()) {
                 return;
             }

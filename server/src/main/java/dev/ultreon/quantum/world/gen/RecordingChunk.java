@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.world.gen;
 
 import dev.ultreon.quantum.UnsafeApi;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.util.Vec3i;
-import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.BuilderChunk;
+import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Collection;
@@ -23,27 +23,42 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         this.deferredChanges.add(new ServerWorld.RecordedChange(x, y, z, block));
 
         return true;
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         this.deferredChanges.add(new ServerWorld.RecordedChange(x, y, z, block));
 
         return true;
+    }
+
+    @Override
+    public void set(BlockVec pos, BlockState block) {
+        this.deferredChanges.add(new ServerWorld.RecordedChange(pos.x, pos.y, pos.z, block));
+    }
+
+    @Override
+    public void setFast(Vec3i pos, BlockState block) {
+        this.deferredChanges.add(new ServerWorld.RecordedChange(pos.getIntX(), pos.getIntY(), pos.getIntZ(), block));
+    }
+
+    @Override
+    public void setFast(BlockVec pos, BlockState block) {
+        this.deferredChanges.add(new ServerWorld.RecordedChange(pos.x, pos.y, pos.z, block));
     }
 
     @Override
     @UnsafeApi
-    public BlockProperties getFast(int x, int y, int z) {
+    public BlockState getFast(int x, int y, int z) {
         return this.chunk.getFast(x, y, z);
     }
 
     @Override
-    public BlockProperties get(int x, int y, int z) {
+    public BlockState get(int x, int y, int z) {
         if (this.chunk.isOutOfBounds(x, y, z)) {
             ServerWorld world = this.chunk.getWorld();
             BlockVec pos = new BlockVec(x, y, z, BlockVecSpace.WORLD);
@@ -53,7 +68,7 @@ public class RecordingChunk implements ChunkAccess {
                 return chunk.get(pos.chunkLocal());
             }
 
-            return BlockProperties.BARRIER;
+            return BlockState.BARRIER;
         }
 
         return this.chunk.get(x, y, z);
@@ -74,7 +89,7 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public BlockProperties get(BlockVec localize) {
+    public BlockState get(BlockVec localize) {
         return get(localize.getIntX(), localize.getIntY(), localize.getIntZ());
     }
 

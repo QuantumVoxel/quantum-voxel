@@ -24,10 +24,8 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
@@ -43,10 +41,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.server.util.Utils;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.EntityHitResult;
-import dev.ultreon.quantum.util.Ray;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.noise.SimplexNoise;
 import dev.ultreon.quantum.world.particles.ParticleType;
@@ -67,6 +62,7 @@ import java.util.function.Predicate;
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_BOTTOM_COLOR;
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_TOP_COLOR;
 
+@SuppressWarnings({"GDXJavaUnsafeIterator", "GDXJavaStaticResource"})
 public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     private static final Environment ENVIRONMENT = new Environment();
     public Model PREFAB;
@@ -220,12 +216,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean set(BlockVec pos, BlockProperties block) {
+    public boolean set(BlockVec pos, BlockState block) {
         return false;
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         return false;
     }
 
@@ -235,7 +231,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block, int flags) {
+    public boolean set(int x, int y, int z, BlockState block, int flags) {
         ChunkAccess chunk = getChunkAt(x, y, z);
         if (chunk == null) {
             return false;
@@ -244,12 +240,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
         return true;
     }
 
-    private Vec3i localize(int x, int y, int z) {
-        return new Vec3i(x, y, z);
+    private BlockVec localize(int x, int y, int z) {
+        return new BlockVec(x, y, z, BlockVecSpace.WORLD);
     }
 
     @Override
-    public boolean set(BlockVec pos, BlockProperties block, int flags) {
+    public boolean set(BlockVec pos, BlockState block, int flags) {
         ChunkAccess chunk = getChunkAt(pos);
         if (chunk == null) {
             return false;
@@ -306,17 +302,17 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void setColumn(int x, int z, BlockProperties block) {
+    public void setColumn(int x, int z, BlockState block) {
 
     }
 
     @Override
-    public void setColumn(int x, int z, int maxY, BlockProperties block) {
+    public void setColumn(int x, int z, int maxY, BlockState block) {
 
     }
 
     @Override
-    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockProperties block) {
+    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block) {
         return null;
     }
 
@@ -645,10 +641,10 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public @NotNull BlockProperties get(BlockVec pos) {
+    public @NotNull BlockState get(BlockVec pos) {
         ChunkAccess chunkAt = getChunkAt(pos);
         if (chunkAt == null) {
-            return BlockProperties.AIR;
+            return BlockState.AIR;
         }
         return chunkAt.get(localize(pos));
     }
@@ -658,38 +654,38 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public @NotNull BlockProperties get(int x, int y, int z) {
+    public @NotNull BlockState get(int x, int y, int z) {
         return get(new BlockVec(x, y, z, BlockVecSpace.WORLD));
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, EntityType<?> type) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance, EntityType<?> type) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull BlockHitResult rayCast(Ray ray, float distance) {
-        return BlockHitResult.MISS;
+    public @NotNull BlockHit rayCast(Ray ray, float distance) {
+        return BlockHit.MISS;
     }
 
     @Override

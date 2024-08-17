@@ -1,8 +1,10 @@
 package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockProperties;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.world.ChunkReader;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldReader;
 
 import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
@@ -18,19 +20,19 @@ public class WorldRayCaster {
 	private static final Vec3d local = new Vec3d();
 	private static final BoundingBox box = new BoundingBox();
 
-	public static BlockHitResult rayCast(WorldReader map) {
-		return rayCast(new BlockHitResult(), map);
+	public static BlockHit rayCast(WorldReader map) {
+		return rayCast(new BlockHit(), map);
 	}
 
 	// sources : https://www.researchgate.net/publication/2611491_A_Fast_Voxel_Traversal_Algorithm_for_Ray_Tracing
 	// and https://www.gamedev.net/blogs/entry/2265248-voxel-traversal-algorithm-ray-casting/
-	public static BlockHitResult rayCast(BlockHitResult result, WorldReader world) {
+	public static BlockHit rayCast(BlockHit result, WorldReader world) {
 		return rayCast(result, world, BlockMetaPredicate.NON_FLUID);
 	}
 
 	// sources : https://www.researchgate.net/publication/2611491_A_Fast_Voxel_Traversal_Algorithm_for_Ray_Tracing
 	// and https://www.gamedev.net/blogs/entry/2265248-voxel-traversal-algorithm-ray-casting/
-	public static BlockHitResult rayCast(BlockHitResult result, WorldReader world, BlockMetaPredicate predicate) {
+	public static BlockHit rayCast(BlockHit result, WorldReader world, BlockMetaPredicate predicate) {
 		result.collide = false;
 
 		final Ray ray = result.ray;
@@ -80,13 +82,13 @@ public class WorldRayCaster {
 				continue;
 			}
 
-			BlockProperties blockProperties = chunk.get(loc.cpy());
-			if(blockProperties != null && !blockProperties.isAir() && predicate.test(blockProperties)) {
-				Block block = blockProperties.getBlock();
-				block.boundingBox(abs.x, abs.y, abs.z, blockProperties, box);
+			BlockState blockState = chunk.get(loc.cpy());
+			if(blockState != null && !blockState.isAir() && predicate.test(blockState)) {
+				Block block = blockState.getBlock();
+				block.boundingBox(abs.x, abs.y, abs.z, blockState, box);
 				box.update();
 
-				doIntersect(result, ray, blockProperties);
+				doIntersect(result, ray, blockState);
 
 				return result;
 			}
@@ -110,7 +112,7 @@ public class WorldRayCaster {
 		}
 	}
 
-	private static void doIntersect(BlockHitResult result, Ray ray, BlockProperties block) {
+	private static void doIntersect(BlockHit result, Ray ray, BlockState block) {
 		if(Intersector.intersectRayBounds(ray, box, intersection)){
 			double dst = intersection.dst(ray.origin);
 			result.collide = true;
@@ -125,7 +127,7 @@ public class WorldRayCaster {
 	}
 
 
-	private static void computeFace(BlockHitResult result) {
+	private static void computeFace(BlockHit result) {
 		// compute face
 		local.set(result.position)
 			.sub(result.vec.x,result.vec.y,result.vec.z)

@@ -4,12 +4,8 @@ import com.badlogic.gdx.utils.*;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec2d;
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.player.LocalPlayer;
@@ -23,8 +19,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakingPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SPlaceBlockPacket;
-import dev.ultreon.quantum.util.InvalidThreadException;
-import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -304,7 +299,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * @return True if the block was successfully set, false otherwise.
      */
     @Override
-    public boolean set(int x, int y, int z, @NotNull BlockProperties block, int flags) {
+    public boolean set(int x, int y, int z, @NotNull BlockState block, int flags) {
         // Check if we're on the main thread, if not invokeAndWait the method on the main thread
         if (!QuantumClient.isOnRenderThread()) {
             return QuantumClient.invokeAndWait(() -> this.set(x, y, z, block, flags));
@@ -340,8 +335,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             // Update the blocks in each direction of the block
             for (CubicDirection direction : CubicDirection.values()) {
                 BlockVec offset = blockVec.offset(direction);
-                BlockProperties blockProperties = this.get(offset);
-                blockProperties.update(this, offset);
+                BlockState blockState = this.get(offset);
+                blockState.update(this, offset);
             }
         }
 
@@ -350,12 +345,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public void destroy(@NotNull BlockVec pos) {
-        this.set(pos, BlockProperties.AIR);
+        this.set(pos, BlockState.AIR);
     }
 
     @Override
     public void destroy(int x, int y, int z) {
-        this.set(x, y, z, BlockProperties.AIR);
+        this.set(x, y, z, BlockState.AIR);
     }
 
     /**
@@ -555,8 +550,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private void newState(Queue<int[]> queue, int x, int y, int z, int intensity) {
         ClientChunk chunkAt = this.getChunkAt(x, y, z);
         if (chunkAt == null) return;
-        BlockProperties blockProperties = chunkAt.get(toLocalBlockVec(x, y, z, this.tmp));
-        int lightReduction = max(blockProperties.getLightReduction(), 1);
+        BlockState blockState = chunkAt.get(toLocalBlockVec(x, y, z, this.tmp));
+        int lightReduction = max(blockState.getLightReduction(), 1);
         queue.addLast(new int[]{x, y, z, intensity - lightReduction});
     }
 
@@ -760,7 +755,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 //        }
     }
 
-    private void sync(int x, int y, int z, BlockProperties block) {
+    private void sync(int x, int y, int z, BlockState block) {
         this.client.connection.send(new C2SPlaceBlockPacket(x, y, z, block));
     }
 

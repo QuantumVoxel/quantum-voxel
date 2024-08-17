@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
@@ -9,9 +9,9 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 
 public class S2CBlockSetPacket extends Packet<InGameClientPacketHandler> {
     private final BlockVec pos;
-    private final BlockProperties blockMeta;
+    private final BlockState blockMeta;
 
-    public S2CBlockSetPacket(BlockVec pos, BlockProperties blockMeta) {
+    public S2CBlockSetPacket(BlockVec pos, BlockState blockMeta) {
         this.pos = pos;
         this.blockMeta = blockMeta;
     }

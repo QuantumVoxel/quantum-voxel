@@ -3,16 +3,16 @@ package dev.ultreon.quantum.client.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.util.PlayerView;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
-import dev.ultreon.quantum.util.BlockHitResult;
+import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3f;
 
 /**
  * The camera used for the game.
@@ -29,7 +29,7 @@ public class GameCamera extends PerspectiveCamera {
     private InspectionNode<GameCamera> node;
     private Vector3 hitPosition;
     private Vec3d camPos;
-    private BlockHitResult hitResult;
+    private BlockHit hitResult;
     private LocalPlayer player;
     private float cameraBop;
     private boolean inverseBop;

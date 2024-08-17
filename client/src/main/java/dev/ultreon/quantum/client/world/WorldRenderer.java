@@ -22,14 +22,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DisposableContainer;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
@@ -53,12 +50,10 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.DeprecationCheckException;
-import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.World;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
@@ -107,7 +102,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final List<Disposable> disposables = new ArrayList<>();
     private long lastChunkBuild;
     private final Skybox skybox = new Skybox();
-    private BlockHitResult lastHitResult;
+    private BlockHit lastHitResult;
     private final Map<BlockVec, ModelInstance> breakingInstances = new HashMap<>();
     private final Map<BlockVec, ModelInstance> blockInstances = new ConcurrentHashMap<>();
     private final Map<ChunkVec, ChunkModel> chunkModels = new ConcurrentHashMap<>();
@@ -359,7 +354,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(batch, renderLayer, chunks, positions, player, ref));
 
         // Render the cursor.
-        BlockHitResult gameCursor = this.client.cursor;
+        BlockHit gameCursor = this.client.cursor;
         if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             QuantumClient.PROFILER.section("cursor", () -> {
                 // Block outline.
@@ -568,7 +563,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
         }
 
-        Map<BlockVec, BlockProperties> customRendered = chunk.getCustomRendered();
+        Map<BlockVec, BlockState> customRendered = chunk.getCustomRendered();
         for (var entry : blockInstances.entrySet()) {
             if (customRendered.containsKey(entry.getKey())) {
                 ModelInstance value = entry.getValue();
@@ -590,7 +585,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.tmp.set(chunk.renderOffset);
             this.tmp.add(key.getIntX(), key.getIntY(), key.getIntZ());
 
-            BlockProperties value = entry.getValue();
+            BlockState value = entry.getValue();
             BlockModel blockModel = BlockModelRegistry.get().get(value);
             if (!blockInstances.containsKey(key) && blockModel != null) {
                 Model model = blockModel.getModel();

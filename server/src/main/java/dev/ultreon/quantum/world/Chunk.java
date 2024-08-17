@@ -2,17 +2,17 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.ValidationError;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
@@ -41,27 +41,27 @@ import static dev.ultreon.quantum.world.World.*;
 @ApiStatus.NonExtendable
 public abstract class Chunk implements Disposable, ChunkAccess {
     public static final int VERTEX_SIZE = 6;
-    private final ChunkVec vec;
-    final Map<BlockVec, Float> breaking = new HashMap<>();
-    protected final Object lock = new Object();
+    protected static final int MAX_LIGHT_LEVEL = 15;
+    protected static final float[] lightLevelMap = new float[Chunk.MAX_LIGHT_LEVEL + 1];
+
+    private final @NotNull ChunkVec vec;
+    final @NotNull Map<BlockVec, Float> breaking = new HashMap<>();
+    protected final @NotNull Object lock = new Object();
     protected boolean active;
     protected boolean ready;
 
-    protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    protected final @NotNull ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
-    protected final Vec3i offset;
+    protected final @NotNull Vec3i offset;
 
     private boolean disposed;
-    private final World world;
+    private final @NotNull World world;
 
-    public final Storage<BlockProperties> storage;
-    protected final LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
-    protected final Heightmap motionBlockingHeightmap = new Heightmap(CHUNK_SIZE);
-    protected final Heightmap worldSurfaceHeightmap = new Heightmap(CHUNK_SIZE);
-    public final Storage<Biome> biomeStorage;
-
-    protected static final int MAX_LIGHT_LEVEL = 15;
-    protected static final float[] lightLevelMap = new float[Chunk.MAX_LIGHT_LEVEL + 1];
+    public final @NotNull Storage<BlockState> storage;
+    protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
+    protected final @NotNull Heightmap motionBlockingHeightmap = new Heightmap(CHUNK_SIZE);
+    protected final @NotNull Heightmap worldSurfaceHeightmap = new Heightmap(CHUNK_SIZE);
+    public final @NotNull Storage<Biome> biomeStorage;
 
     static {
         for (int i = 0; i <= Chunk.MAX_LIGHT_LEVEL; i++) {
@@ -76,15 +76,22 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @deprecated Use {@link #Chunk(World, ChunkVec)} instead@
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    protected Chunk(@NotNull World world, int size, int height, @NotNull ChunkVec vec) {
-        this(world, size, height, vec, new PaletteStorage<>(size * height * size, BlockProperties.AIR));
+    protected Chunk(@NotNull World world,
+                    int size,
+                    int height,
+                    @NotNull ChunkVec vec) {
+        this(world, size, height, vec, new PaletteStorage<>(size * height * size, BlockState.AIR));
     }
 
     /**
      * @deprecated Use {@link #Chunk(World, ChunkVec, Storage)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    protected Chunk(@NotNull World world, int size, int height, @NotNull ChunkVec vec, @NotNull Storage<BlockProperties> storage) {
+    protected Chunk(@NotNull World world,
+                    int size,
+                    int height,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage) {
         this(world, size, height, vec, storage, new PaletteStorage<>(256, Biomes.PLAINS));
     }
 
@@ -92,7 +99,12 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @deprecated Use {@link #Chunk(World, ChunkVec, Storage, Storage)} instead@
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    protected Chunk(@NotNull World world, int ignoredSize, int ignoredHeight, @NotNull ChunkVec vec, @NotNull Storage<BlockProperties> storage, @NotNull Storage<Biome> biomeStorage) {
+    protected Chunk(@NotNull World world,
+                    int ignoredSize,
+                    int ignoredHeight,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage,
+                    @NotNull Storage<Biome> biomeStorage) {
         this(world, vec, storage, biomeStorage);
     }
 
@@ -102,8 +114,9 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param world the world the chunk is in.
      * @param vec   the chunk position.
      */
-    protected Chunk(@NotNull World world, @NotNull ChunkVec vec) {
-        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockProperties.AIR));
+    protected Chunk(@NotNull World world,
+                    @NotNull ChunkVec vec) {
+        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockState.AIR));
     }
 
     /**
@@ -113,7 +126,9 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param vec     the chunk position.
      * @param storage the block storage.
      */
-    protected Chunk(@NotNull World world, @NotNull ChunkVec vec, @NotNull Storage<BlockProperties> storage) {
+    protected Chunk(@NotNull World world,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage) {
         this(world, vec, storage, new PaletteStorage<>(256, Biomes.PLAINS));
     }
 
@@ -125,7 +140,10 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param storage      the block storage.
      * @param biomeStorage the biome storage
      */
-    protected Chunk(@NotNull World world, @NotNull ChunkVec vec, @NotNull Storage<BlockProperties> storage, @NotNull Storage<Biome> biomeStorage) {
+    protected Chunk(@NotNull World world,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage,
+                    @NotNull Storage<Biome> biomeStorage) {
         this.world = world;
 
         this.offset = new Vec3i(vec.getIntX() * CHUNK_SIZE, WORLD_DEPTH, vec.getIntZ() * CHUNK_SIZE);
@@ -151,11 +169,11 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      *
      * @param data The input data.
      * @return The decoded block data.
-     * @deprecated Use {@link BlockProperties#load(MapType)} instead
+     * @deprecated Use {@link BlockState#load(MapType)} instead
      */
     @Deprecated
-    public static BlockProperties loadBlock(MapType data) {
-        return BlockProperties.load(data);
+    public static BlockState loadBlock(MapType data) {
+        return BlockState.load(data);
     }
 
     /**
@@ -165,7 +183,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public BlockProperties get(Vec3i pos) {
+    public BlockState get(Vec3i pos) {
         if (this.disposed) return Blocks.AIR.createMeta();
         return this.get(pos.x, pos.y, pos.z);
     }
@@ -177,7 +195,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public @NotNull BlockProperties get(BlockVec pos) {
+    public @NotNull BlockState get(BlockVec pos) {
         if (this.disposed) return Blocks.AIR.createMeta();
         return this.get(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
@@ -191,7 +209,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public @NotNull BlockProperties get(int x, int y, int z) {
+    public @NotNull BlockState get(int x, int y, int z) {
         if (this.isOutOfBounds(x, y, z)) throw new IllegalArgumentException("Coordinates out of bounds: " + x + ", " + y + ", " + z);
         this.rwLock.readLock().lock();
         try {
@@ -210,7 +228,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos the position of the block
      * @return the block at the given coordinates
      */
-    public BlockProperties getFast(Vec3i pos) {
+    public BlockState getFast(Vec3i pos) {
         return this.getFast(pos.x, pos.y, pos.z);
     }
 
@@ -225,13 +243,13 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public @NotNull BlockProperties getFast(int x, int y, int z) {
+    public @NotNull BlockState getFast(int x, int y, int z) {
         this.rwLock.readLock().lock();
         try {
             if (this.disposed) return Blocks.AIR.createMeta();
             int dataIdx = this.getIndex(x, y, z);
 
-            BlockProperties block = this.storage.get(dataIdx);
+            BlockState block = this.storage.get(dataIdx);
             return block == null ? Blocks.AIR.createMeta() : block;
         } finally {
             this.rwLock.readLock().unlock();
@@ -244,8 +262,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos   the position of the block
      * @param block the block to set
      */
-    @Override
-    public void set(Vec3i pos, BlockProperties block) {
+    public void set(Vec3i pos, BlockState block) {
         this.set(pos.x, pos.y, pos.z, block);
     }
 
@@ -259,7 +276,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return true if the block was successfully set, false if setting the block failed
      */
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         if (this.isOutOfBounds(x, y, z)) return false;
         return this.setFast(x, y, z, block);
     }
@@ -273,7 +290,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param block the block to set
      */
     @Override
-    public void setFast(Vec3i pos, BlockProperties block) {
+    public void setFast(Vec3i pos, BlockState block) {
         this.setFast(pos.x, pos.y, pos.z, block);
     }
 
@@ -289,7 +306,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return true if the block was successfully set, false if setting the block failed
      */
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         if (this.disposed) return false;
         this.rwLock.writeLock().lock();
         try {
@@ -410,7 +427,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         this.world.onChunkUpdated(this);
     }
 
-    public WorldAccess getWorld() {
+    public @NotNull World getWorld() {
         return this.world;
     }
 
@@ -418,7 +435,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return this.active;
     }
 
-    public ChunkVec getVec() {
+    public @NotNull ChunkVec getVec() {
         return this.vec;
     }
 

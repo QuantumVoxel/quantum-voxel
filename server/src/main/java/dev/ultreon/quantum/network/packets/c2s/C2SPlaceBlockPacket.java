@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.network.packets.c2s;
 
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -10,16 +10,16 @@ public class C2SPlaceBlockPacket extends Packet<InGameServerPacketHandler> {
     private final int x;
     private final int y;
     private final int z;
-    private final BlockProperties block;
+    private final BlockState block;
 
     public C2SPlaceBlockPacket(PacketIO buffer) {
         x = buffer.readVarInt();
         y = buffer.readVarInt();
         z = buffer.readVarInt();
-        block = BlockProperties.read(buffer);
+        block = BlockState.read(buffer);
     }
 
-    public C2SPlaceBlockPacket(int x, int y, int z, BlockProperties block) {
+    public C2SPlaceBlockPacket(int x, int y, int z, BlockState block) {
         this.x = x;
         this.y = y;
         this.z = z;

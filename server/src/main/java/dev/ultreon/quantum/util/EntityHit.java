@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.world.CubicDirection;
@@ -10,8 +8,8 @@ import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Objects;
 
-public class EntityHitResult implements HitResult {
-    public static final EntityHitResult MISS = new EntityHitResult();
+public class EntityHit implements Hit {
+    public static final EntityHit MISS = new EntityHit();
     protected CubicDirection direction;
     // input
     protected Ray ray;
@@ -23,23 +21,23 @@ public class EntityHitResult implements HitResult {
     public boolean collide;
     public double distance;
 
-    public EntityHitResult() {
+    public EntityHit() {
 
     }
 
-    public EntityHitResult(Ray ray) {
+    public EntityHit(Ray ray) {
         this.ray = ray;
         this.setDirection(ray.getDirection());
     }
 
-    public EntityHitResult(Ray ray, float distanceMax) {
+    public EntityHit(Ray ray, float distanceMax) {
         this.ray = ray;
         this.setDirection(ray.getDirection());
         this.distanceMax = distanceMax;
         this.distance = distanceMax;
     }
 
-    public EntityHitResult(PacketIO buffer) {
+    public EntityHit(PacketIO buffer) {
         this.ray = new Ray(buffer);
         this.setDirection(ray.getDirection());
         this.distanceMax = buffer.readFloat();
@@ -62,7 +60,7 @@ public class EntityHitResult implements HitResult {
         buffer.writeDouble(this.getDistance());
     }
 
-    public EntityHitResult setInput(Ray ray) {
+    public EntityHit setInput(Ray ray) {
         this.ray = ray;
         this.setDirection(ray.getDirection());
         return this;
@@ -110,7 +108,7 @@ public class EntityHitResult implements HitResult {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EntityHitResult hitResult = (EntityHitResult) o;
+        EntityHit hitResult = (EntityHit) o;
         return Float.compare(distanceMax, hitResult.distanceMax) == 0 && collide == hitResult.collide && Double.compare(getDistance(), hitResult.getDistance()) == 0 && getDirection() == hitResult.getDirection() && Objects.equals(ray, hitResult.ray) && Objects.equals(position, hitResult.position) && Objects.equals(normal, hitResult.normal) && Objects.equals(pos, hitResult.pos);
     }
 
