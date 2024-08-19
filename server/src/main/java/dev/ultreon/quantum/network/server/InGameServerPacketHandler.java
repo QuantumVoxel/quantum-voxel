@@ -132,6 +132,10 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.server.submit(() -> player.handlePlayerMove(x, y, z));
     }
 
+    public void onPlayerMoveAndRotate(ServerPlayer player, double x, double y, double z, float xHeadRot, float xRot, float yRot) {
+        this.server.submit(() -> player.handlePlayerMove(x, y, z, xHeadRot, xRot, yRot));
+    }
+
     public void onChunkStatus(ServerPlayer player, ChunkVec pos, Chunk.Status status) {
         player.onChunkStatus(pos, status);
     }

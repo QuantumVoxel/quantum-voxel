@@ -25,4 +25,15 @@ public class C2SPingPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onPing(this.time);
     }
+
+    public long getTime() {
+        return time;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SPingPacket{" +
+                "time=" + time +
+                '}';
+    }
 }

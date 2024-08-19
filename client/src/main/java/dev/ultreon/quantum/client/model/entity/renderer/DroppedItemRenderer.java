@@ -37,7 +37,7 @@ public class DroppedItemRenderer extends EntityRenderer<@NotNull DroppedItem> {
 
             instance.rotateY(rotation);
             instance.translate(0, translation - 1, 0);
-            instance.scale(-0.15f, -0.15f, -0.15f);
+            instance.scale(0.15f, 0.15f, 0.15f);
             instance.scale(scale.x, scale.y, scale.z);
             instance.translate(offset.x, offset.y, offset.z);
             instance.translate(0.5, 0, -0.5);

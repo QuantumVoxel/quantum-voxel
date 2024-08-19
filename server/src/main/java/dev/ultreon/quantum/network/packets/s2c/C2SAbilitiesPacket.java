@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
 import dev.ultreon.quantum.entity.player.PlayerAbilities;
-import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
@@ -52,5 +52,10 @@ public class C2SAbilitiesPacket extends Packet<InGameServerPacketHandler> implem
     @Override
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onAbilities(this);
+    }
+
+    @Override
+    public String toString() {
+        return "C2SAbilitiesPacket{flying=" + this.flying + '}';
     }
 }

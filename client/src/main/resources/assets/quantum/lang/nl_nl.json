@@ -220,5 +220,11 @@
   "quantum.damageSource.void.player": "%1$s is opgegeten door de void door %2$s",
   "quantum.damageSource.none": "%s is plots verdwenen",
   "quantum.damageSource.none.player": "%1$s is plots verdwenen door %2$s",
-  "quantum.damageSource.hunger": "%1$s is uitgehongerd"
+  "quantum.damageSource.hunger": "%1$s is uitgehongerd",
+  "quantum.screen.worldLoad.enteringWorld": "Je wereld binnen gaan",
+  "quantum.screen.worldLoad.enteringServer": "Verbinden met server",
+  "quantum.screen.worldLoad.loading": "Laden van wereld",
+  "quantum.screen.worldLoad.loadingFromServer": "Laden van de server wereld",
+  "quantum.screen.worldLoad.preparingChunks": "Voorbereiden voor chunks laden",
+  "quantum.screen.worldLoad.chunksLoading": "Laden %d van %d chunks (%s voltooid)"
 }

@@ -35,4 +35,21 @@ public class C2SOpenMenuPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.handleOpenMenu(id, pos);
     }
+
+    public NamespaceID getId() {
+        return id;
+    }
+
+    @Nullable
+    public BlockVec getPos() {
+        return pos;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SOpenMenuPacket{" +
+                "id=" + id +
+                ", pos=" + pos +
+                '}';
+    }
 }

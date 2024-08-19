@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.model.item;
 
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -26,8 +27,11 @@ public class FlatItemModel implements ItemModel {
     public void load(QuantumClient client) {
         ModelBuilder modelBuilder = new ModelBuilder();
         Material material = new Material(item.getId().toString());
-        material.set(TextureAttribute.createDiffuse(client.itemTextureAtlas.getTexture()));
-        material.set(TextureAttribute.createEmissive(client.itemTextureAtlas.getEmissiveTexture()));
+        Texture texture = client.itemTextureAtlas.getTexture();
+        Texture emissiveTexture = client.itemTextureAtlas.getEmissiveTexture();
+        if (texture != null) material.set(TextureAttribute.createDiffuse(texture));
+        if (emissiveTexture != null) material.set(TextureAttribute.createEmissive(emissiveTexture));
+
         material.set(IntAttribute.createCullFace(0));
 
         modelBuilder.begin();
@@ -40,10 +44,17 @@ public class FlatItemModel implements ItemModel {
 
         var v1 = new VertexInfo();
         item1.rect(
-                v1.setPos(0, 0, 0).setNor(0, 0, 1).setUV(0, 0),
-                v1.setPos(1, 0, 0).setNor(0, 0, 1).setUV(1, 0),
-                v1.setPos(1, 1, 0).setNor(0, 0, 1).setUV(1, 1),
-                v1.setPos(0, 1, 0).setNor(0, 0, 1).setUV(0, 1)
+                v1.setPos(0, 0, 0).setNor(1, 0, 0).setUV(0, 0),
+                v1.setPos(1, 0, 0).setNor(1, 0, 0).setUV(1, 0),
+                v1.setPos(1, 1, 0).setNor(1, 0, 0).setUV(1, 1),
+                v1.setPos(0, 1, 0).setNor(1, 0, 0).setUV(0, 1)
+        );
+
+        item1.rect(
+                v1.setPos(1, 1, 0).setNor(1, 0, 0).setUV(1, 1),
+                v1.setPos(0, 1, 0).setNor(1, 0, 0).setUV(0, 1),
+                v1.setPos(0, 0, 0).setNor(1, 0, 0).setUV(0, 0),
+                v1.setPos(1, 0, 0).setNor(1, 0, 0).setUV(1, 0)
         );
 
         QuantumClient.invokeAndWait(() -> this.model = modelBuilder.end());

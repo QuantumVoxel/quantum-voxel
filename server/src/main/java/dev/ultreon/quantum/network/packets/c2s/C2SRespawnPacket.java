@@ -23,4 +23,9 @@ public class C2SRespawnPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onRespawn();
     }
+
+    @Override
+    public String toString() {
+        return "C2SRespawnPacket";
+    }
 }

@@ -3,8 +3,8 @@ package dev.ultreon.quantum.world.gen;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BuilderChunk;
-import dev.ultreon.quantum.world.HeightmapType;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 
@@ -24,13 +24,14 @@ public class Carver {
     }
 
     public int carve(BuilderChunk chunk, int x, int z, double hilliness) {
-        int groundPos = (int) ((this.getSurfaceHeightNoise(chunk.getOffset().x + x, chunk.getOffset().z + z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
-        for (int y = chunk.getOffset().y + 1; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
+        Vec3i offset = chunk.getOffset();
+        int groundPos = (int) ((this.getSurfaceHeightNoise(offset.x + x, offset.z + z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
+        for (int y = offset.y + 1; y < offset.y + CHUNK_HEIGHT; y++) {
             if (y <= groundPos) {
                 if (y <= World.SEA_LEVEL) {
                     if (y < groundPos - 7) {
                         boolean cave;
-                        double v1 = caveNoise.evaluateNoise(chunk.getOffset().x + x, y, chunk.getOffset().z + z);
+                        double v1 = caveNoise.evaluateNoise(offset.x + x, y, offset.z + z);
                         cave = v1 > 0.0;
                         chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
                     } else {
@@ -38,7 +39,7 @@ public class Carver {
                     }
                 } else {
                     boolean cave;
-                    double v1 = caveNoise.evaluateNoise(chunk.getOffset().x + x, y, chunk.getOffset().z + z);
+                    double v1 = caveNoise.evaluateNoise(offset.x + x, y, offset.z + z);
                     cave = v1 > 0.0;
                     chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
                 }
@@ -47,7 +48,7 @@ public class Carver {
             }
         }
 
-        return chunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
+        return groundPos;
     }
 
     private static BlockState solidBlock(int y) {

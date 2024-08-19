@@ -18,6 +18,7 @@ public class InGamePacketStage extends PacketStage {
         this.addServerBound(C2SModPacket::new);
         this.addServerBound(C2SRespawnPacket::new);
         this.addServerBound(C2SPlayerMovePacket::new);
+        this.addServerBound(C2SPlayerMoveAndRotatePacket::new);
         this.addServerBound(C2SChunkStatusPacket::new);
         this.addServerBound(C2SMenuTakeItemPacket::new);
         this.addServerBound(C2SBlockBreakingPacket::new);

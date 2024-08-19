@@ -577,9 +577,49 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
 
+        this.x = x;
+        this.y = y;
+        this.z = z;
+
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
+        this.velocityX = x - this.ox;
+        this.velocityY = y - this.oy;
+        this.velocityZ = z - this.oz;
+    }
+
+    /**
+     * Handles player movement from the client.
+     *
+     * @param x the x-coordinate received from the client
+     * @param y the y-coordinate received from the client
+     * @param z the z-coordinate received from the client
+     */
+    public void handlePlayerMove(double x, double y, double z, float xHeadRot, float xRot, float yRot) {
+        ChunkVec chunkVec = World.toChunkVec((int) x, (int) y, (int) z);
+        ServerChunk chunk = this.world.getChunk(chunkVec);
+        if (chunk == null) {
+            QuantumServer.LOGGER.warn(String.format("Player moved into a null chunk: %s", this.getName()));
+            return;
+        }
+        if (!chunk.getTracker().isTracking(this)) {
+            QuantumServer.LOGGER.warn(String.format("Player moved into an inactive chunk: %s", this.getName()));
+            return;
+        }
+
+        this.x = x;
+        this.y = y;
+        this.z = z;
+
+        this.xHeadRot = xHeadRot;
+        this.xRot = xRot;
+        this.yRot = yRot;
+
+        this.ox = this.x;
+        this.oy = this.y;
+        this.oz = this.z;
+
         this.velocityX = x - this.ox;
         this.velocityY = y - this.oy;
         this.velocityZ = z - this.oz;

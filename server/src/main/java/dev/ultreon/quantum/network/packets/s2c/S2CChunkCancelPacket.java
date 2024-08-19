@@ -26,4 +26,13 @@ public class S2CChunkCancelPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onChunkCancel(this.pos);
     }
+
+    public ChunkVec getPos() {
+        return pos;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CChunkCancelPacket{pos=" + this.pos + '}';
+    }
 }

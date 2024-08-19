@@ -35,4 +35,20 @@ public class S2CTimePacket extends Packet<InGameClientPacketHandler> {
         ADD,
         SUB
     }
+
+    public int getTime() {
+        return time;
+    }
+
+    public Operation getOperation() {
+        return operation;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CTimePacket{" +
+                "operation=" + operation +
+                ", time=" + time +
+                '}';
+    }
 }

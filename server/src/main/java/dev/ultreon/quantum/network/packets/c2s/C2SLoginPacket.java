@@ -25,4 +25,8 @@ public class C2SLoginPacket extends Packet<LoginServerPacketHandler> {
     public void handle(PacketContext ctx, LoginServerPacketHandler handler) {
         handler.onPlayerLogin(this.name);
     }
+
+    public String getName() {
+        return name;
+    }
 }

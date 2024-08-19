@@ -37,12 +37,14 @@ public final class Blocks {
     public static final Block CRATE = Blocks.register("crate", new CrateBlock(new Properties().hardness(2.0F).effectiveTool(ToolType.AXE).usesCustomRender().dropsItems(Items.CRATE)));
     public static final Block CRAFTING_BENCH = Blocks.register("crafting_bench", new Block(new Properties().hardness(3.0F).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
     public static final Block TALL_GRASS = Blocks.register("tall_grass", new Block(new Properties().noOcclude().replaceable().transparent().noCollision().usesCustomRender().dropsItems(new RandomLoot(new RandomLoot.ChanceLootEntry(0.4f, Items.GRASS_FIBRE)))));
-    public static final Block CACTUS = Blocks.register("cactus", new CactusBlock(new Properties().noOcclude().replaceable().usesCustomRender().dropsItems(Items.CACTUS)));
+    public static final Block CACTUS = Blocks.register("cactus", new CactusBlock(new Properties().noOcclude().usesCustomRender().dropsItems(Items.CACTUS)));
     public static final Block META_SWITCH_TEST = Blocks.register("meta_switch_test", new MetaSwitchTestBlock());
     public static final Block BLAST_FURNACE = Blocks.register("blast_furnace", new BlastFurnaceBlock(new Properties().hardness(12.0F).effectiveTool(ToolType.PICKAXE).requiresTool().dropsItems(Items.BLAST_FURNACE)));
     public static final Block IRON_ORE = Blocks.register("iron_ore", new Block(new Properties().hardness(3.0F).effectiveTool(ToolType.PICKAXE).toolRequirement(ToolLevel.STONE).requiresTool().dropsItems(Items.IRON_ORE)));
     public static final Block SNOWY_GRASS_BLOCK = Blocks.register("snowy_grass_block", new Block(new Properties().hardness(3F).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT, Items.SNOW_BALL)));
     public static final Block LIGHT = Blocks.register("light", new LightBlock(new Properties().hardness(0.5F).noCollision().usesCustomRender().effectiveTool(ToolType.PICKAXE)));
+    public static final Block ICE = Blocks.register("ice", new Block(new Properties().hardness(0.5F).lightReduction(4).effectiveTool(ToolType.PICKAXE)));
+    public static final Block SNOW_BLOCK = Blocks.register("snow_block", new Block(new Properties().hardness(0.5F).effectiveTool(ToolType.PICKAXE)));
 
     private static <T extends Block> T register(String name, T block) {
         Registries.BLOCK.register(new NamespaceID(name), block);

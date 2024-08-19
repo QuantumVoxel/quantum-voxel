@@ -16,6 +16,7 @@ import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.player.Player;
@@ -168,6 +169,11 @@ public class DesktopInput extends GameInput {
         if (DesktopInput.isCtrlDown() && GamePlatform.get().isDevEnvironment()) {
             if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
                 this.client.showScreen(new JavascriptDebuggerScreen());
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
+                TerrainRenderer worldRenderer = this.client.worldRenderer;
+                if (worldRenderer != null) {
+                    worldRenderer.reloadChunks();
+                }
             }
         }
 
@@ -518,7 +524,6 @@ public class DesktopInput extends GameInput {
             assert world != null;
             BlockState block = world.get(new BlockVec(pos));
             BlockVec posNext = blockHitResult.getNext();
-            BlockState blockNext = world.get(posNext);
 
             // Check if the hit result is valid and the current block is not air
             if (!blockHitResult.isCollide() || block.isAir())
@@ -542,7 +547,7 @@ public class DesktopInput extends GameInput {
             }
 
             // Handle right button input for using items on the next block
-            if (button == Input.Buttons.RIGHT && blockNext.isAir()) {
+            if (button == Input.Buttons.RIGHT) {
                 this.useItem(player, world, blockHitResult);
             }
         } else if (hit instanceof EntityHit entityHitResult) {

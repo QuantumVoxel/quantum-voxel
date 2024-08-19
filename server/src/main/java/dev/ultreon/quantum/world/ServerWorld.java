@@ -217,6 +217,36 @@ public class ServerWorld extends World {
         return isBlockSet;
     }
 
+    /**
+     * Sets the block at the given position.
+     *
+     * @param pos   the coordinates of the block in world space
+     * @param block the block type to set
+     * @param flags the flags to use when setting the block. Values are defined in {@link BlockFlags}
+     * @return true if the block was successfully set, false if setting the block failed
+     * @see BlockFlags
+     */
+    @Override
+    public boolean set(BlockVec pos, @NotNull BlockState block,
+                       @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
+        int x = pos.getIntX();
+        int y = pos.getIntY();
+        int z = pos.getIntZ();
+        boolean isBlockSet = super.set(pos, block, flags);
+        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        block.onPlace(this, blockVec);
+        if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
+        if (~(flags & BlockFlags.UPDATE) != 0) {
+            for (CubicDirection direction : CubicDirection.values()) {
+                BlockVec offset = blockVec.offset(direction);
+                BlockState blockState = this.get(offset);
+                blockState.update(this, offset);
+            }
+        }
+
+        return isBlockSet;
+    }
+
     @Override
     public void setBlockEntity(@NotNull BlockVec pos, @NotNull BlockEntity blockEntity) {
         super.setBlockEntity(pos, blockEntity);
@@ -357,6 +387,16 @@ public class ServerWorld extends World {
                     throw new IllegalChunkStateException("Chunk is already active.");
                 }
 
+                if (region.getChunk(localVec) != serverChunk)
+                    throw new IllegalChunkStateException("Chunk is not loaded.");
+
+                ServerChunk chunk1 = this.getChunk(globalVec);
+                if (chunk1 == null) {
+                    throw new IllegalChunkStateException("Chunk not properly loaded.");
+                }
+                if (chunk1 != serverChunk)
+                    throw new IllegalChunkStateException("Chunk is loaded at a different location: " + serverChunk.getVec() + " expected " + globalVec);
+
                 // Trigger chunk loaded event and track chunk loads
                 WorldEvents.CHUNK_LOADED.factory().onChunkLoaded(this, globalVec, serverChunk);
                 ValueTracker.setChunkLoads(ValueTracker.getChunkLoads() + 1);
@@ -377,6 +417,7 @@ public class ServerWorld extends World {
      * @return The loaded chunk or null if loading failed.
      */
     @Blocking
+    @Deprecated
     @SuppressWarnings("UnusedReturnValue")
     private @Nullable Chunk loadChunkNow(ChunkVec pos) {
         // Ensure the method is called on the correct thread
@@ -394,6 +435,7 @@ public class ServerWorld extends World {
      * @return The loaded chunk or null if loading failed.
      */
     @Blocking
+    @Deprecated
     public @Nullable Chunk loadChunkNow(int x, int z) {
         // Ensure the method is called on the correct thread
         this.checkThread();
@@ -411,6 +453,7 @@ public class ServerWorld extends World {
      * @return The loaded chunk or null if failed to load.
      */
     @Blocking
+    @Deprecated
     public @Nullable ServerChunk loadChunkNow(int x, int z, boolean overwrite) {
         // Ensure the method is called on the correct thread
         this.checkThread();
@@ -654,7 +697,7 @@ public class ServerWorld extends World {
         if (region == null) return null;
 
         // Get the chunk from the region
-        var chunk = region.getChunk(globalVec);
+        var chunk = region.getChunk(globalVec.regionLocal());
 
         // If the chunk is found, verify its position matches the expected position
         if (chunk != null) {
@@ -1489,8 +1532,7 @@ public class ServerWorld extends World {
                     throw e;
                 } catch (Throwable e) {
                     QuantumServer.LOGGER.error(String.format("Failed to build chunk at %s:", globalVec), e);
-                    world.server.crash(e);
-                    throw new Error(e);
+                    throw e;
                 }
             }, this.world.executor).thenApplyAsync(builtChunk -> QuantumServer.invoke(() -> {
                 var players = this.world.getServer().getPlayersInChunk(globalVec);
@@ -1521,6 +1563,7 @@ public class ServerWorld extends World {
 
         @CheckReturnValue
         private @NotNull ServerChunk buildChunk(ChunkVec globalVec) {
+            if (globalVec.getSpace() != ChunkVecSpace.WORLD) throw new IllegalArgumentException("Chunk vector must be in world space");
             var chunk = new BuilderChunk(this.world, Thread.currentThread(), globalVec, this);
 
             // Generate terrain using the terrain generator.
@@ -1758,11 +1801,12 @@ public class ServerWorld extends World {
                 // Load server chunk.
                 MapType map = read.getMap(key);
                 if (map == null) continue;
-                var chunk = ServerChunk.load(world, localChunkVec, map, region);
-                chunkMap.put(localChunkVec, chunk);
+                ChunkVec globalVec = localChunkVec.worldSpace(new RegionVec(x, z));
+                var chunk = ServerChunk.load(world, globalVec, map, region);
+                chunkMap.put(globalVec, chunk);
             }
 
-            // Chceck if region already exists, if so, then throw an error.
+            // Check if region already exists, if so, then throw an error.
             var oldRegion = this.regions.get(regionPos);
             if (oldRegion != null) {
                 throw new OverwriteError(String.format("Tried to overwrite region %s", regionPos));

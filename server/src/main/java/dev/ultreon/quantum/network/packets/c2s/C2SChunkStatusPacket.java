@@ -32,4 +32,20 @@ public class C2SChunkStatusPacket extends Packet<InGameServerPacketHandler> {
         assert ctx.getPlayer() != null;
         handler.onChunkStatus(ctx.getPlayer(), this.pos, this.status);
     }
+
+    public ChunkVec getPos() {
+        return this.pos;
+    }
+
+    public Chunk.Status getStatus() {
+        return this.status;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SChunkStatusPacket{" +
+                "pos=" + this.pos +
+                ", status=" + this.status +
+                '}';
+    }
 }

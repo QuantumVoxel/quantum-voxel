@@ -147,12 +147,14 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         if (this.space == ChunkVecSpace.REGION) return this;
 
         int rx = this.x % REGION_SIZE;
+        int ry = this.y % REGION_SIZE;
         int rz = this.z % REGION_SIZE;
 
         if (rx < 0) rx += REGION_SIZE;
+        if (ry < 0) ry += REGION_SIZE;
         if (rz < 0) rz += REGION_SIZE;
 
-        return new ChunkVec(rx, this.y, rz, ChunkVecSpace.REGION);
+        return new ChunkVec(rx, ry, rz, ChunkVecSpace.REGION);
     }
 
     /**
@@ -208,8 +210,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         int rx = this.x / REGION_SIZE;
         int rz = this.z / REGION_SIZE;
 
-        if (this.x < 0) rx--;
-        if (this.z < 0) rz--;
+        if (this.x < 0 && this.x % REGION_SIZE != 0) rx--;
+        if (this.z < 0 && this.z % REGION_SIZE != 0) rz--;
 
         return new RegionVec(rx, 0, rz);
     }
@@ -263,9 +265,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
                 int rx = this.x * CHUNK_SIZE;
                 int rz = this.z * CHUNK_SIZE;
 
-                if (this.x < 0) rx -= CHUNK_SIZE;
-                if (this.z < 0) rz -= CHUNK_SIZE;
-
                 rx = rx % (REGION_SIZE * CHUNK_SIZE);
                 rz = rz % (REGION_SIZE * CHUNK_SIZE);
 
@@ -277,9 +276,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
             case WORLD -> {
                 int cx = this.x * CHUNK_SIZE;
                 int cz = this.z * CHUNK_SIZE;
-
-                if (this.x < 0) cx -= CHUNK_SIZE;
-                if (this.z < 0) cz -= CHUNK_SIZE;
 
                 yield new BlockVec(cx + x, y, cz + z, BlockVecSpace.WORLD);
             }
@@ -340,19 +336,23 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return The chunk position in region space.
      */
     public ChunkVec regionSpace() {
-        if (this.x >= 0 && this.z >= 0 && this.x < REGION_SIZE && this.z < REGION_SIZE) {
-            return new ChunkVec(this.x, this.y, this.z);
+        if (this.x >= 0 && this.z >= 0 && this.y >= 0 && this.y < REGION_SIZE && this.x < REGION_SIZE && this.z < REGION_SIZE) {
+            return new ChunkVec(this.x, this.y, this.z, ChunkVecSpace.REGION);
         }
 
         int rx = this.x < 0
                 ? (this.x * REGION_SIZE + x - REGION_SIZE) % REGION_SIZE + REGION_SIZE
                 : (this.x * REGION_SIZE + x) % REGION_SIZE;
 
+        int ry = this.y < 0
+                ? (this.y * REGION_SIZE + y - REGION_SIZE) % REGION_SIZE + REGION_SIZE
+                : (this.y * REGION_SIZE + y) % REGION_SIZE;
+
         int rz = this.z < 0
                 ? (this.z * REGION_SIZE + z - REGION_SIZE) % REGION_SIZE + REGION_SIZE
                 : (this.z * REGION_SIZE + z) % REGION_SIZE;
 
-        return new ChunkVec(rx, this.y, rz, ChunkVecSpace.REGION);
+        return new ChunkVec(rx, ry, rz, ChunkVecSpace.REGION);
     }
 
     /**

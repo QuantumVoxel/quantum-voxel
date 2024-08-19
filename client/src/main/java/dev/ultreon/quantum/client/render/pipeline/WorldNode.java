@@ -21,7 +21,7 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
-import static com.badlogic.gdx.graphics.GL30.*;
+import static com.badlogic.gdx.graphics.GL30.GL_DEPTH_COMPONENT24;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 
 public class WorldNode extends WorldRenderNode {
@@ -49,7 +49,7 @@ public class WorldNode extends WorldRenderNode {
         });
         for (Entity entity : toSort) {
             if (entity instanceof LocalPlayer) continue;
-            worldRenderer.collectEntity(entity, RenderLayer.WORLD);
+            worldRenderer.collectEntity(entity, modelBatch);
         }
 
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();

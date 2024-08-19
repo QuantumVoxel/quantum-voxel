@@ -74,7 +74,7 @@ public final class GlobalEventHandler {
      * Calls all registered listeners for the provided event.
      * <p>
      * The event is passed to each listener, and if any of the listeners cancel the event (by setting {@code true} in
-     * the {@link Event#setCanceled(boolean)} method), the calling process is interrupted and the method
+     * the {@link Cancelable#setCanceled(boolean)} method), the calling process is interrupted and the method
      * returns {@code true}. If all listeners successfully process the event without cancellation, the method
      * returns {@code false}.
      *

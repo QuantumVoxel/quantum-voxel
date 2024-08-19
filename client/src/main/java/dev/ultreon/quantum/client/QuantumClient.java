@@ -783,7 +783,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (QuantumClient.isPackaged()) QuantumClient.LOGGER.warn("Running in the JPackage environment.");
         QuantumClient.LOGGER.debug("Java Version: {}", System.getProperty("java.version"));
         QuantumClient.LOGGER.debug("Java Vendor: {}", System.getProperty("java.vendor"));
-        QuantumClient.LOGGER.debug("Operating System: {} {} ({})", new Object[]{System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")});
+        QuantumClient.LOGGER.debug("Operating System: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
     }
 
     public static String[] getIcons() {
@@ -1790,7 +1790,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private void handleBlockBreaking(BlockVec breaking, BlockHit hitResult) {
         @Nullable ClientWorldAccess world = this.world;
         if (world == null) return;
-        if (!hitResult.getBlockVec().equals(breaking.vec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
+        if (!hitResult.getBlockVec().equals(breaking.asBlockVec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
             this.resetBreaking(hitResult);
         } else {
             float efficiency = 1.0F;

@@ -26,4 +26,15 @@ public class S2CChunkUnloadPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onChunkUnload(this.chunkVec);
     }
+
+    public ChunkVec getChunkVec() {
+        return chunkVec;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CChunkUnloadPacket{" +
+                "chunkVec=" + chunkVec +
+                '}';
+    }
 }

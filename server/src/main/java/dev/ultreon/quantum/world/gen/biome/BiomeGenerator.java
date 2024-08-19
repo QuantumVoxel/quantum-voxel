@@ -13,6 +13,7 @@ import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -45,7 +46,7 @@ public class BiomeGenerator implements Disposable {
 
         BiomeGenerator.setRecordedChanges(chunk, x, z, recordedChanges);
 
-        BiomeGenerator.updateLightMap(chunk, x, z, lightMap);
+//        BiomeGenerator.updateLightMap(chunk, x, z, lightMap); // TODO
         chunk.set(x, chunk.getOffset().y, z, Blocks.VOIDGUARD.createMeta());
     }
 
@@ -81,7 +82,7 @@ public class BiomeGenerator implements Disposable {
                     && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + World.CHUNK_SIZE;
             BlockVec localBlockVec = World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z());
             if (isWithinChunkBounds && localBlockVec.getIntX() == x && localBlockVec.getIntZ() == z) {
-                chunk.set(World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z()).vec(), recordedChange.block());
+                chunk.set(new BlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z(), BlockVecSpace.WORLD).chunkLocal().vec(), recordedChange.block());
                 if (WorldGenDebugContext.isActive()) {
                     System.out.println("[DEBUG CHUNK-HASH " + System.identityHashCode(chunk) + "] Setting recorded change in chunk at " + recordedChange.x() + ", " + recordedChange.y() + ", " + recordedChange.z() + " of type " + recordedChange.block());
                 }

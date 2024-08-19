@@ -25,4 +25,13 @@ public class S2CRemoveEntityPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onRemoveEntity(this.id);
     }
+
+    public int getId() {
+        return this.id;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CRemoveEntityPacket(id=" + this.id + ")";
+    }
 }

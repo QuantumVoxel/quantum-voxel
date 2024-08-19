@@ -38,4 +38,30 @@ public class C2SPlaceBlockPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onPlaceBlock(x, y, z, block);
     }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getZ() {
+        return z;
+    }
+
+    public BlockState getBlock() {
+        return block;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SPlaceBlockPacket{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                ", block=" + block +
+                '}';
+    }
 }

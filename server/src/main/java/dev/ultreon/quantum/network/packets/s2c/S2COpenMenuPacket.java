@@ -40,4 +40,17 @@ public class S2COpenMenuPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onOpenContainerMenu(this.menuType, this.items);
     }
+
+    public NamespaceID getMenuType() {
+        return menuType;
+    }
+
+    public List<ItemStack> getItems() {
+        return items;
+    }
+
+    @Override
+    public String toString() {
+        return "S2COpenMenuPacket{menuType=" + this.menuType + ", items=" + this.items + '}';
+    }
 }

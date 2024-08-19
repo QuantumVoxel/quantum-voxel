@@ -20,7 +20,6 @@ public class BlockHit implements Hit {
     protected Vec position = new Vec();
     protected Vec normal = new Vec();
     protected BlockVec vec = new BlockVec(BlockVecSpace.WORLD);
-    protected BlockVec next = new BlockVec(BlockVecSpace.WORLD);
     protected BlockState blockMeta = BlockState.AIR;
     protected Block block = Blocks.AIR;
     protected boolean collide;
@@ -49,7 +48,6 @@ public class BlockHit implements Hit {
         this.position.set(buffer.readVec3d());
         this.normal.set(buffer.readVec3d());
         this.vec.set(buffer.readVec3i());
-        this.next.set(buffer.readVec3i());
         this.blockMeta = buffer.readBlockMeta();
         this.block = Registries.BLOCK.byId(buffer.readVarInt());
         this.collide = buffer.readBoolean();
@@ -64,7 +62,6 @@ public class BlockHit implements Hit {
         this.setDirection(ray.getDirection());
         this.distanceMax = 5.0F;
         this.vec.set(blockVec.vec());
-        this.next.set(blockVec.vec());
         this.normal.set(0, 0, 0);
         this.collide = true;
         this.distance = 0.0D;
@@ -76,7 +73,6 @@ public class BlockHit implements Hit {
         buffer.writeVec3d(this.position);
         buffer.writeVec3d(this.normal);
         buffer.writeVec3i(this.vec);
-        buffer.writeVec3i(this.next);
         buffer.writeBlockMeta(this.getBlockMeta());
         buffer.writeVarInt(Registries.BLOCK.getRawId(this.getBlock()));
         buffer.writeBoolean(this.collide);
@@ -114,7 +110,7 @@ public class BlockHit implements Hit {
     }
 
     public BlockVec getNext() {
-        return this.next;
+        return this.vec.cpy().add((int) this.normal.x, (int) this.normal.y, (int) this.normal.z);
     }
 
     public BlockState getBlockMeta() {
@@ -140,12 +136,12 @@ public class BlockHit implements Hit {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BlockHit hitResult = (BlockHit) o;
-        return Float.compare(distanceMax, hitResult.distanceMax) == 0 && collide == hitResult.collide && Double.compare(getDistance(), hitResult.getDistance()) == 0 && getDirection() == hitResult.getDirection() && Objects.equals(ray, hitResult.ray) && Objects.equals(position, hitResult.position) && Objects.equals(normal, hitResult.normal) && Objects.equals(vec, hitResult.vec) && Objects.equals(next, hitResult.next) && Objects.equals(getBlockMeta(), hitResult.getBlockMeta()) && Objects.equals(getBlock(), hitResult.getBlock());
+        return Float.compare(distanceMax, hitResult.distanceMax) == 0 && collide == hitResult.collide && Double.compare(getDistance(), hitResult.getDistance()) == 0 && getDirection() == hitResult.getDirection() && Objects.equals(ray, hitResult.ray) && Objects.equals(position, hitResult.position) && Objects.equals(normal, hitResult.normal) && Objects.equals(vec, hitResult.vec) && Objects.equals(getBlockMeta(), hitResult.getBlockMeta()) && Objects.equals(getBlock(), hitResult.getBlock());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDirection(), ray, distanceMax, position, normal, vec, next, getBlockMeta(), getBlock(), collide, getDistance());
+        return Objects.hash(getDirection(), ray, distanceMax, position, normal, vec, getBlockMeta(), getBlock(), collide, getDistance());
     }
 
     public CubicDirection getDirection() {

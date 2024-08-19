@@ -30,4 +30,20 @@ public class S2CInventoryItemChangedPacket extends Packet<InGameClientPacketHand
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onInventoryItemChanged(this.index, this.stack);
     }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public ItemStack getStack() {
+        return stack;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CInventoryItemChangedPacket{" +
+                "index=" + index +
+                ", stack=" + stack +
+                '}';
+    }
 }

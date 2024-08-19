@@ -32,4 +32,12 @@ public class C2SCraftRecipePacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onCraftRecipe(this.typeId, this.recipeId);
     }
+
+    public int getTypeId() {
+        return this.typeId;
+    }
+
+    public NamespaceID getRecipeId() {
+        return this.recipeId;
+    }
 }

@@ -23,4 +23,9 @@ public class C2SKeepAlivePacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onKeepAlive();
     }
+
+    @Override
+    public String toString() {
+        return "C2SKeepAlivePacket";
+    }
 }

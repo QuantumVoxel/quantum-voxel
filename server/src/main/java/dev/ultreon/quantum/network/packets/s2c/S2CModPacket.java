@@ -37,4 +37,24 @@ public class S2CModPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onModPacket(this.channel, this.packet);
     }
+
+    public ModPacket<?> getPacket() {
+        return packet;
+    }
+
+    public NetworkChannel getChannel() {
+        return channel;
+    }
+
+    public NamespaceID getChannelId() {
+        return channelId;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CModPacket{" +
+                "channelId=" + channelId +
+                ", packet=" + packet +
+                '}';
+    }
 }

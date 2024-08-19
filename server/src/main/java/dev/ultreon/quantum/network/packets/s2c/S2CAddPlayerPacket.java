@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -36,5 +36,26 @@ public class S2CAddPlayerPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onAddPlayer(this.uuid, this.name, this.position);
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Vec3d getPosition() {
+        return position;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CAddPlayerPacket{" +
+                "uuid=" + uuid +
+                ", name='" + name + '\'' +
+                ", position=" + position +
+                '}';
     }
 }

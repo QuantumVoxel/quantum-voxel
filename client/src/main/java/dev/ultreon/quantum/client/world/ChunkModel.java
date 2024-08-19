@@ -38,7 +38,6 @@ public class ChunkModel implements RenderableProvider {
     public boolean build() {
         if (model != null || modelInstance != null) return false;
         model = generateModel();
-        modelInstance = new ModelInstance(model);
         return true;
     }
 
@@ -108,7 +107,7 @@ public class ChunkModel implements RenderableProvider {
 
     @Override
     public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
-        if (modelInstance == null) return;
+        if (modelInstance == null || model == null) return;
         modelInstance.getRenderables(array, pool);
         for (int i = 0; i < array.size; i++) {
             Renderable renderable = array.get(i);

@@ -45,4 +45,12 @@ public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
     public DamageSource getSource() {
         return this.source;
     }
+
+    @Override
+    public String toString() {
+        return "S2CPlayerHurtPacket{" +
+                "damage=" + this.damage +
+                ", source=" + this.source +
+                '}';
+    }
 }

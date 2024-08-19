@@ -201,7 +201,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void collectEntity(Entity entity, RenderLayer renderLayer) {
+    public void collectEntity(Entity entity, ModelBatch batch) {
 
     }
 
@@ -621,8 +621,18 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
+    public void onBlockSet(BlockVec pos, BlockState block) {
+
+    }
+
+    @Override
     public int getVisibleChunks() {
         return 0;
+    }
+
+    @Override
+    public void reloadChunks() {
+
     }
 
     @Override

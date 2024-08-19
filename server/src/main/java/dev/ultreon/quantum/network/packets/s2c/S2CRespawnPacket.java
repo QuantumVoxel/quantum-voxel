@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.util.Vec3d;
 
 public class S2CRespawnPacket extends Packet<InGameClientPacketHandler> {
     private final Vec3d pos;
@@ -25,5 +25,16 @@ public class S2CRespawnPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onRespawn(this.pos);
+    }
+
+    public Vec3d getPos() {
+        return this.pos;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CRespawnPacket{" +
+                "pos=" + pos +
+                '}';
     }
 }

@@ -18,7 +18,9 @@ import java.util.Objects;
  */
 @SuppressWarnings("unused")
 public class Vec3d implements Externalizable, Cloneable {
-    public double x, y, z;
+    public double x;
+    public double y;
+    public double z;
 
     public Vec3d(double x, double y, double z) {
         this.x = x;

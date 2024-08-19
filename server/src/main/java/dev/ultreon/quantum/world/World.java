@@ -415,13 +415,12 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public Chunk getChunkAt(int x, int y, int z) {
-        int chunkX = Math.floorDiv(x, World.CHUNK_SIZE);
-        int chunkZ = Math.floorDiv(z, World.CHUNK_SIZE);
+    public @Nullable Chunk getChunkAt(int x, int y, int z) {
+        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
 
         if (this.isOutOfWorldBounds(x, y, z)) return null;
 
-        ChunkVec chunkVec = new ChunkVec(chunkX, chunkZ, ChunkVecSpace.WORLD);
+        ChunkVec chunkVec = blockVec.chunk();
         return this.getChunk(chunkVec);
     }
 
@@ -429,7 +428,7 @@ public abstract class World implements Disposable, WorldAccess {
     public abstract @Nullable Chunk getChunk(ChunkVec pos);
 
     @Override
-    public Chunk getChunkAt(BlockVec pos) {
+    public @Nullable Chunk getChunkAt(BlockVec pos) {
         return this.getChunkAt(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 

@@ -52,33 +52,29 @@ public class TreeFeature extends WorldGenFeature {
 
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[Start " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height);
+                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
             if (trunkHeight + height + 1 > CHUNK_HEIGHT) {
                 if (WorldGenDebugContext.isActive()) {
-                    System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height);
+                    System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
                 }
                 return false;
             }
 
             // Check if there is enough space
-            for (int y = height; y < height + trunkHeight; y++) {
-                for (int xOffset = -1; xOffset <= 1; xOffset++) {
-                    for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                        if (!chunk.get(x + xOffset, y, z + zOffset).isAir()){
-                            if (WorldGenDebugContext.isActive()) {
-                                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
-                            }
-                            return false;
-                        }
+            for (int y = height + 1; y < height + trunkHeight; y++) {
+                if (!chunk.get(x, y, z).isAir()) {
+                    if (WorldGenDebugContext.isActive()) {
+                        System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
                     }
+                    return false;
                 }
             }
 
 
-            for (int y = height; y < height + trunkHeight; y++) {
+            for (int y = height + 1; y < height + trunkHeight; y++) {
                 chunk.set(x, y, z, this.trunk.createMeta());
             }
 

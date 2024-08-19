@@ -32,4 +32,17 @@ public class S2CPingPacket extends Packet<ClientPacketHandler> {
             inGameHandler.onPing(this.serverTime, this.time);
         }
     }
+
+    public long getServerTime() {
+        return this.serverTime;
+    }
+
+    public long getTime() {
+        return this.time;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CPingPacket{serverTime=" + this.serverTime + ", time=" + this.time + '}';
+    }
 }

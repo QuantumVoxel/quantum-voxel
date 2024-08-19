@@ -29,4 +29,12 @@ public class C2SMenuTakeItemPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onTakeItem(this.index, this.rightClick);
     }
+
+    public int getIndex() {
+        return this.index;
+    }
+
+    public boolean isRightClick() {
+        return this.rightClick;
+    }
 }

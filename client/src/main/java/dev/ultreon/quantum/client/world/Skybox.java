@@ -1,13 +1,21 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Pool;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.util.InvalidThreadException;
 
-import static dev.ultreon.quantum.util.RgbColor.rgba;
-
-public class Skybox {
+public class Skybox implements RenderableProvider, Disposable {
+    public static final Color NULL_COLOR = new Color(0, 0, 0, 0);
     private final static int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
 
     public Color topColor = new Color();
@@ -16,82 +24,100 @@ public class Skybox {
 
     public Color posZColor = new Color();
     public Color negZColor = new Color();
+    public Model model;
+    public ModelInstance modelInstance;
+    private final Color tmp = new Color();
 
     public void update(int daytime, float deltaTime) {
-        topColor.set(timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR));
-        midColor.set(timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR));
-        bottomColor.set(posYMix(QuantumClient.get().player, deltaTime, timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR), ClientWorld.VOID_COLOR));
+        timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR, topColor);
+        timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, midColor);
+        if (QuantumClient.get().player != null) {
+            timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, tmp);
+            posYMix(QuantumClient.get().player, deltaTime, tmp, ClientWorld.VOID_COLOR, bottomColor);
+        } else {
+            timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, bottomColor);
+        }
 
-        posZColor.set(sunRiseSetMix(daytime, ClientWorld.SUN_RISE_COLOR, null));
-        negZColor.set(sunRiseSetMix(daytime, null, ClientWorld.SUN_RISE_COLOR));
+        sunRiseSetMix(daytime, ClientWorld.SUN_RISE_COLOR, null, posZColor);
+        sunRiseSetMix(daytime, null, ClientWorld.SUN_RISE_COLOR, negZColor);
     }
 
-    private Color posYMix(LocalPlayer player, float deltaTime, Color color, RgbColor voidColor) {
+    private Color posYMix(LocalPlayer player, float deltaTime, Color color, Color voidColor, Color output) {
         int start = ClientWorld.VOID_Y_START;
         int end = ClientWorld.VOID_Y_END;
 
         if (player.getPosition(deltaTime).y < start) {
-            return voidColor.toGdx();
+            return voidColor;
         } else if (player.getPosition(deltaTime).y >= end) {
             return ClientWorld.mixColors(
-                    voidColor, RgbColor.gdx(color),
-                    (player.getPosition(deltaTime).y - start) / (float) (end - start)).toGdx();
+                    voidColor, color, output,
+                    (player.getPosition(deltaTime).y - start) / (float) (end - start));
         } else {
             return color;
         }
     }
 
-    private static Color timeMix(int daytime, RgbColor dayTopColor, RgbColor nightTopColor) {
+    private static Color timeMix(int daytime, Color dayColor, Color nightColor, Color output) {
         if (daytime < Skybox.riseSetDuration / 2) {
             return ClientWorld.mixColors(
-                    dayTopColor, nightTopColor,
-                    0.5f + daytime / (float) Skybox.riseSetDuration).toGdx();
+                    dayColor, nightColor, output,
+                    0.5f + daytime / (float) Skybox.riseSetDuration);
         } else if (daytime <= ClientWorld.DAY_CYCLE / 2 - Skybox.riseSetDuration / 2) {
-            return dayTopColor.toGdx();
+            return output.set(dayColor);
         } else if (daytime <= ClientWorld.DAY_CYCLE / 2 + Skybox.riseSetDuration / 2) {
             return ClientWorld.mixColors(
-                    nightTopColor, dayTopColor,
-                    (daytime - ((double) ClientWorld.DAY_CYCLE / 2 - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration).toGdx();
+                    nightColor, dayColor, output,
+                    (daytime - ((double) ClientWorld.DAY_CYCLE / 2 - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration);
         } else if (daytime <= ClientWorld.DAY_CYCLE - Skybox.riseSetDuration / 2) {
-            return nightTopColor.toGdx();
+            return output.set(nightColor);
         } else {
             return ClientWorld.mixColors(
-                    dayTopColor, nightTopColor,
-                    (daytime - (ClientWorld.DAY_CYCLE - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration).toGdx();
+                    dayColor, nightColor, output,
+                    (daytime - (ClientWorld.DAY_CYCLE - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration);
         }
     }
 
-    private static Color sunRiseSetMix(int daytime, RgbColor sunRiseColor, RgbColor sunSetColor) {
-        final var nullColor = rgba(0x00000000);
+    private static Color sunRiseSetMix(int daytime, Color sunRiseColor, Color sunSetColor, Color output) {
+        if (sunRiseColor == null)
+            sunRiseColor = NULL_COLOR;
 
-        if (sunRiseColor == null) {
-            sunRiseColor = rgba(0x00000000);
-        }
+        if (sunSetColor == null)
+            sunSetColor = NULL_COLOR;
 
-        if (sunSetColor == null) {
-            sunSetColor = rgba(0x00000000);
-        }
+        if (daytime < Skybox.riseSetDuration / 2)
+            return ClientWorld.mixColors(NULL_COLOR, sunRiseColor, output, 0.5f + daytime / (float) Skybox.riseSetDuration);
+        else if (daytime <= ClientWorld.DAY_CYCLE / 2 - Skybox.riseSetDuration / 2)
+            return output.set(NULL_COLOR);
+        else if (daytime <= ClientWorld.DAY_CYCLE / 2)
+            return ClientWorld.mixColors(sunSetColor, NULL_COLOR, output, (daytime - ((double) ClientWorld.DAY_CYCLE / 2)) / Skybox.riseSetDuration);
+        else if (daytime <= ClientWorld.DAY_CYCLE / 2 + Skybox.riseSetDuration / 2)
+            return ClientWorld.mixColors(NULL_COLOR, sunSetColor, output, (daytime - ((double) ClientWorld.DAY_CYCLE / 2 - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration);
+        else if (daytime <= ClientWorld.DAY_CYCLE - Skybox.riseSetDuration / 2)
+            return output.set(NULL_COLOR);
+        else
+            return ClientWorld.mixColors(sunRiseColor, NULL_COLOR, output, (daytime - (ClientWorld.DAY_CYCLE - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration);
+    }
 
-        if (daytime < Skybox.riseSetDuration / 2) {
-            return ClientWorld.mixColors(
-                    nullColor, sunRiseColor,
-                    0.5f + daytime / (float) Skybox.riseSetDuration).toGdx();
-        } else if (daytime <= ClientWorld.DAY_CYCLE / 2 - Skybox.riseSetDuration / 2) {
-            return nullColor.toGdx();
-        } else if (daytime <= ClientWorld.DAY_CYCLE / 2) {
-            return ClientWorld.mixColors(
-                    sunSetColor, nullColor,
-                    (daytime - ((double) ClientWorld.DAY_CYCLE / 2)) / Skybox.riseSetDuration).toGdx();
-        } else if (daytime <= ClientWorld.DAY_CYCLE / 2 + Skybox.riseSetDuration / 2) {
-            return ClientWorld.mixColors(
-                    nullColor, sunSetColor,
-                    (daytime - ((double) ClientWorld.DAY_CYCLE / 2 - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration).toGdx();
-        } else if (daytime <= ClientWorld.DAY_CYCLE - Skybox.riseSetDuration / 2) {
-            return nullColor.toGdx();
-        } else {
-            return ClientWorld.mixColors(
-                    sunRiseColor, nullColor,
-                    (daytime - (ClientWorld.DAY_CYCLE - (float) Skybox.riseSetDuration / 2)) / Skybox.riseSetDuration).toGdx();
+    @Override
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+        if (modelInstance == null || model == null) return;
+        modelInstance.getRenderables(renderables, pool);
+
+        for (int i = 0; i < renderables.size; i++) {
+            Renderable renderable = renderables.get(i);
+            renderable.userData = Shaders.SKYBOX.get();
         }
+    }
+
+    @Override
+    public void dispose() {
+        if (!QuantumClient.isOnRenderThread())
+            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
+
+        Model model = this.model;
+        this.model = null;
+        this.modelInstance = null;
+        if (model != null)
+            model.dispose();
     }
 }

@@ -3,8 +3,6 @@ package dev.ultreon.quantum.client.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec2i;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -30,10 +28,13 @@ import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.event.SoundEvents;
-import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,16 +68,22 @@ public class LocalPlayer extends ClientPlayer {
         // Determine if the player is jumping based on input
         this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched() || GameInput.isControllerButtonDown(ControllerButton.A));
 
+
+        var connection = this.client.connection;
+        if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
+            if (connection != null) {
+                connection.send(new C2SPlayerMoveAndRotatePacket(this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot));
+            }
+        }
         // Call the superclass tick method
         super.tick();
 
         // Send a packet when the selected item changes
         if (this.selected != this.oldSelected) {
-            if (this.client.connection != null)
-                this.client.connection.send(new C2SHotbarIndexPacket(this.selected));
+            if (connection != null)
+                connection.send(new C2SHotbarIndexPacket(this.selected));
             this.oldSelected = this.selected;
         }
-
 
         // Handle player movement if there is a significant change in position
         if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
@@ -100,8 +107,13 @@ public class LocalPlayer extends ClientPlayer {
      */
     private void handleMove() {
         // Send the player's new coordinates to the server
-        if (this.client.connection != null)
-            this.client.connection.send(new C2SPlayerMovePacket(this.x, this.y, this.z));
+        if (this.client.connection != null) {
+            if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
+                this.client.connection.send(new C2SPlayerMoveAndRotatePacket(this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot));
+            } else {
+                this.client.connection.send(new C2SPlayerMovePacket(this.x, this.y, this.z));
+            }
+        }
 
         // Update the old coordinates to the current ones
         this.ox = this.x;
@@ -118,14 +130,14 @@ public class LocalPlayer extends ClientPlayer {
         if (!this.client.renderWorld) return;
 
         IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
-        ChunkVec playerPos = this.getChunkVec();
+        ChunkVec chunkVec = this.getChunkVec();
 
         if (connection == null) return;
         int renderDistance = ClientConfig.renderDistance;
         for (int x = -renderDistance; x <= renderDistance; x++) {
             for (int z = -renderDistance; z <= renderDistance; z++) {
-                ChunkVec relativePos = new ChunkVec(playerPos.getIntX() + x, playerPos.getIntZ() + z);
-                if (this.tmp2I.set(x, z).dst(playerPos.getIntX(), playerPos.getIntZ()) <= renderDistance
+                ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
+                if (this.tmp2I.set(x, z).dst(chunkVec.getIntX(), chunkVec.getIntZ()) <= renderDistance
                         && !this.world.isLoaded(relativePos))
                     connection.send(new C2SRequestChunkLoadPacket(relativePos));
             }

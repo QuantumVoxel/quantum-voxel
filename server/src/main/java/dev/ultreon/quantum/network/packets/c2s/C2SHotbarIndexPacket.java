@@ -25,4 +25,15 @@ public class C2SHotbarIndexPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onHotbarIndex(this.hotbarIdx);
     }
+
+    public int getHotbarIndex() {
+        return this.hotbarIdx;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SHotbarIndexPacket{" +
+                "hotbarIdx=" + hotbarIdx +
+                '}';
+    }
 }

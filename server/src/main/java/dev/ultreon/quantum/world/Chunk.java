@@ -17,6 +17,7 @@ import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +53,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
 
     protected final @NotNull ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
-    protected final @NotNull Vec3i offset;
+    protected final @NotNull BlockVec offset;
 
     private boolean disposed;
     private final @NotNull World world;
@@ -146,7 +147,10 @@ public abstract class Chunk implements Disposable, ChunkAccess {
                     @NotNull Storage<Biome> biomeStorage) {
         this.world = world;
 
-        this.offset = new Vec3i(vec.getIntX() * CHUNK_SIZE, WORLD_DEPTH, vec.getIntZ() * CHUNK_SIZE);
+        if (vec.getSpace() != ChunkVecSpace.WORLD)
+            throw new IllegalArgumentException("ChunkVec must be in world space");
+
+        this.offset = new BlockVec(vec.getIntX() * CHUNK_SIZE, WORLD_DEPTH, vec.getIntZ() * CHUNK_SIZE, BlockVecSpace.WORLD);
 
         this.vec = vec;
         this.storage = storage;
@@ -378,7 +382,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     }
 
     @Override
-    public Vec3i getOffset() {
+    public BlockVec getOffset() {
         return this.offset.cpy();
     }
 

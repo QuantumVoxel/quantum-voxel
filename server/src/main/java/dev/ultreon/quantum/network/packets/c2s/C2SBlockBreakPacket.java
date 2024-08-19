@@ -26,4 +26,15 @@ public class C2SBlockBreakPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onBlockBroken(this.pos);
     }
+
+    public BlockVec getPos() {
+        return this.pos;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SBlockBreakPacket{" +
+                "pos=" + pos +
+                '}';
+    }
 }

@@ -20,7 +20,6 @@ import dev.ultreon.quantum.world.gen.biome.BiomeData;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
@@ -98,7 +97,7 @@ public class TerrainGenerator implements Disposable {
             throw new IllegalStateException("Hilliness noise has not been initialized yet!");
         for (var x = 0; x < CHUNK_SIZE; x++) {
             for (var z = 0; z < CHUNK_SIZE; z++) {
-                double hilliness = this.hillinessNoise.evaluateNoise(x, z) - 2.0f;
+                double hilliness = this.hillinessNoise.evaluateNoise(chunk.getOffset().x + x, chunk.getOffset().z + z) - 2.0f;
                 int groundPos = carver.carve(chunk, x, z, hilliness);
 
                 var index = this.findGenerator(new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z), groundPos);
@@ -125,9 +124,8 @@ public class TerrainGenerator implements Disposable {
     private static void generateFeatures(BuilderChunk builderChunk, RecordingChunk recordingChunk) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                BlockVec globBlockVec = builderChunk.getVec().blockInWorldSpace(x, 0, z);
                 int height = builderChunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
-                builderChunk.getBiomeGenerator(x, z).generateTerrainFeatures(recordingChunk, globBlockVec.x, globBlockVec.z, height);
+                builderChunk.getBiomeGenerator(x, z).generateTerrainFeatures(recordingChunk, x, z, height);
             }
         }
     }
@@ -196,22 +194,22 @@ public class TerrainGenerator implements Disposable {
     private BiomeGenerator selectGenerator(int height, double humid, double temp, double variation) {
         BiomeGenerator biomeGen = null;
 
-        if (variation < -1.0f || variation > 1.0f) {
+        if (variation < -2.0 || variation > 2.0) {
             CommonConstants.LOGGER.warn("Invalid variation: " + variation);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
-        if (temp < -2.0f || temp > 2.0f) {
+        if (temp < -2.0 || temp > 2.0) {
             CommonConstants.LOGGER.warn("Invalid temperature: " + temp);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
-        if (humid < -2.0f || humid > 2.0f) {
+        if (humid < -2.0 || humid > 2.0) {
             CommonConstants.LOGGER.warn("Invalid humidity: " + humid);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
-        if (height < -64 || height > 320) {
+        if (height < -64.0 || height > 320.0) {
             CommonConstants.LOGGER.warn("Invalid height: " + height);
             return this.biomeGenData.getFirst().biomeGen();
         }

@@ -27,4 +27,15 @@ public class S2CLoginAcceptedPacket extends Packet<LoginClientPacketHandler> {
     public void handle(PacketContext ctx, LoginClientPacketHandler handler) {
         handler.onLoginAccepted(this.uuid);
     }
+
+    public UUID getUuid() {
+        return this.uuid;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CLoginAcceptedPacket{" +
+                "uuid=" + uuid +
+                '}';
+    }
 }

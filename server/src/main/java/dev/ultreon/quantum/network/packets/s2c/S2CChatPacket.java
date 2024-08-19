@@ -26,4 +26,13 @@ public class S2CChatPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onChatReceived(this.message);
     }
+
+    public TextObject getMessage() {
+        return this.message;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CChatPacket{message=" + this.message + '}';
+    }
 }

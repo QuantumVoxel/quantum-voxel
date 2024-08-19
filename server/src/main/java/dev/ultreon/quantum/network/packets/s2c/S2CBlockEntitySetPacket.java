@@ -31,4 +31,20 @@ public class S2CBlockEntitySetPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onBlockEntitySet(this.pos, Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntityId));
     }
+
+    public BlockVec getPos() {
+        return this.pos;
+    }
+
+    public int getBlockEntityId() {
+        return this.blockEntityId;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CBlockEntitySetPacket{" +
+                "pos=" + pos +
+                ", blockEntityId=" + blockEntityId +
+                '}';
+    }
 }

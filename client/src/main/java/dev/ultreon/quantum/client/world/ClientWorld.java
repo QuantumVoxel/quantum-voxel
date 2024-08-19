@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.*;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -51,12 +52,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     //                                                                           off.get().set(f(1 - 1 / size.get().x * size.get().x * 2 / 87), 1)
     public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
     public static Rot SKYBOX_ROTATION = deg(-60);
-    public static RgbColor DAY_TOP_COLOR = RgbColor.rgb(0x7fb0fe);
-    public static RgbColor DAY_BOTTOM_COLOR = RgbColor.rgb(0xc1d3f1);
-    public static RgbColor NIGHT_TOP_COLOR = RgbColor.rgb(0x01010b);
-    public static RgbColor NIGHT_BOTTOM_COLOR = RgbColor.rgb(0x0a0c16);
-    public static RgbColor SUN_RISE_COLOR = RgbColor.rgb(0xff3000);
-    public static RgbColor VOID_COLOR = RgbColor.rgb(0x0a0a0a);
+    public static Color DAY_TOP_COLOR = new Color(0x7fb0feff);
+    public static Color DAY_BOTTOM_COLOR = new Color(0xc1d3f1ff);
+    public static Color NIGHT_TOP_COLOR = new Color(0x01010bff);
+    public static Color NIGHT_BOTTOM_COLOR = new Color(0x0a0c16ff);
+    public static Color SUN_RISE_COLOR = new Color(0xff3000ff);
+    public static Color VOID_COLOR = new Color(0x0a0a0aff);
     public static int VOID_Y_START = 20;
     public static int VOID_Y_END = 0;
     @NotNull
@@ -151,7 +152,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     @Override
-    public ClientChunk getChunkAt(@NotNull BlockVec pos) {
+    public @Nullable ClientChunk getChunkAt(@NotNull BlockVec pos) {
         return (ClientChunk) super.getChunkAt(pos);
     }
 
@@ -343,6 +344,58 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         return isBlockSet;
     }
 
+    /**
+     * Sets the block at the specified position to the given block properties.
+     *
+     * @param pos The coordinates of the block position.
+     * @param block The block properties to set.
+     * @param flags Flags indicating how the block should be set.
+     * @return True if the block was successfully set, false otherwise.
+     */
+    @Override
+    public boolean set(@NotNull BlockVec pos, @NotNull BlockState block, int flags) {
+        // Check if we're on the main thread, if not invokeAndWait the method on the main thread
+        if (!QuantumClient.isOnRenderThread()) {
+            return QuantumClient.invokeAndWait(() -> this.set(pos, block, flags));
+        }
+
+        // Set the block and get the result
+        boolean isBlockSet = super.set(pos, block, flags);
+
+        // Get the chunk containing the block
+        ClientChunk chunk = this.getChunkAt(pos);
+
+        // If the chunk exists, set the light source
+        if (chunk != null) {
+            chunk.setLightSource(pos.chunkLocal(), block.getLight());
+        }
+
+        // If the SYNC flag is set, sync the block
+        if ((flags & BlockFlags.SYNC) != 0) {
+            this.sync(pos.x, pos.y, pos.z, block);
+        }
+
+        // If the LIGHT flag is set and the chunk exists, update the light chunks
+        if ((flags & BlockFlags.LIGHT) != 0 && chunk != null && isBlockSet) {
+            this.updateLightChunks(chunk);
+        }
+
+        // If the UPDATE flag is set and the chunk exists, update the chunk and its neighbors
+        if ((flags & BlockFlags.UPDATE) != 0 && chunk != null && isBlockSet) {
+            chunk.set(pos.chunkLocal(), block);
+            this.updateChunkAndNeighbours(chunk);
+
+            // Update the blocks in each direction of the block
+            for (CubicDirection direction : CubicDirection.values()) {
+                BlockVec offset = pos.offset(direction);
+                BlockState blockState = this.get(offset);
+                blockState.update(this, offset);
+            }
+        }
+
+        return isBlockSet;
+    }
+
     @Override
     public void destroy(@NotNull BlockVec pos) {
         this.set(pos, BlockState.AIR);
@@ -359,26 +412,26 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * @param chunk The chunk for which to update the light.
      */
     private void updateLightChunks(ClientChunk chunk) {
-        // Get the neighboring chunks of the current chunk
-        ClientChunk[] neighbourChunks = this.getNeighbourChunks(chunk);
-
-        // Clear light in the current chunk
-        chunk.clearLight();
-
-        // Clear light in each neighboring chunk
-        for (ClientChunk neighbourChunk : neighbourChunks) {
-            if (neighbourChunk != null)
-                neighbourChunk.clearLight();
-        }
-
-        // Update light in the current chunk
-        this.updateLightChunk(chunk);
-
-        // Update light in each neighboring chunk
-        for (ClientChunk neighbourChunk : neighbourChunks) {
-            if (neighbourChunk != null)
-                this.updateLightChunk(neighbourChunk);
-        }
+//        // Get the neighboring chunks of the current chunk
+//        ClientChunk[] neighbourChunks = this.getNeighbourChunks(chunk);
+//
+//        // Clear light in the current chunk
+//        chunk.clearLight();
+//
+//        // Clear light in each neighboring chunk
+//        for (ClientChunk neighbourChunk : neighbourChunks) {
+//            if (neighbourChunk != null)
+//                neighbourChunk.clearLight();
+//        }
+//
+//        // Update light in the current chunk
+//        this.updateLightChunk(chunk);
+//
+//        // Update light in each neighboring chunk
+//        for (ClientChunk neighbourChunk : neighbourChunks) {
+//            if (neighbourChunk != null)
+//                this.updateLightChunk(neighbourChunk);
+//        }
     }
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
@@ -896,25 +949,34 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         return this.chunks.containsKey(chunkVec);
     }
 
+    @Override
+    public void onBlockSet(BlockVec pos, BlockState block) {
+        @Nullable ClientChunk chunkAt = this.getChunkAt(pos);
+        if (chunkAt == null) return;
+        chunkAt.set(pos.chunkLocal(), block);
+
+        this.updateChunkAndNeighbours(chunkAt);
+    }
+
     @Deprecated
-    public RgbColor getSkyColor() {
+    public Color getSkyColor(Color output) {
         @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
-        if (worldRenderer == null) return RgbColor.BLACK;
-        return RgbColor.gdx(worldRenderer.getSkybox().topColor);
+        if (worldRenderer == null) return output.set(Color.BLACK);
+        return output.set(worldRenderer.getSkybox().topColor);
     }
 
     public int getDaytime() {
         return this.time % DAY_CYCLE;
     }
 
-    static RgbColor mixColors(RgbColor color1, RgbColor color2, double percent) {
+    static Color mixColors(Color color1, Color color2, Color output, double percent) {
         percent = Mth.clamp(percent, 0.0, 1.0);
         double inversePercent = 1.0 - percent;
-        int redPart = (int) (color1.getRed() * percent + color2.getRed() * inversePercent);
-        int greenPart = (int) (color1.getGreen() * percent + color2.getGreen() * inversePercent);
-        int bluePart = (int) (color1.getBlue() * percent + color2.getBlue() * inversePercent);
-        int alphaPart = (int) (color1.getAlpha() * percent + color2.getAlpha() * inversePercent);
-        return RgbColor.rgba(redPart, greenPart, bluePart, alphaPart);
+        int redPart = (int) (color1.r * percent + color2.r * inversePercent);
+        int greenPart = (int) (color1.g * percent + color2.g * inversePercent);
+        int bluePart = (int) (color1.b * percent + color2.b * inversePercent);
+        int alphaPart = (int) (color1.a * percent + color2.a * inversePercent);
+        return output.set(redPart, greenPart, bluePart, alphaPart);
     }
 
     @Override

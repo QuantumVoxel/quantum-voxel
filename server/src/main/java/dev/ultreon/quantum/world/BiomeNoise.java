@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world;
 
-import de.articdive.jnoise.core.api.functions.Combiner;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
@@ -13,13 +12,8 @@ public class BiomeNoise implements NoiseSource {
     public BiomeNoise(long seed) {
         noise = JNoise.newBuilder()
                 .fastSimplex(seed, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                .scale(0.65f)
-                .combine(JNoise.newBuilder()
-                                .fastSimplex(seed + 1, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
-                                .scale(2.0f)
-                                .build(),
-                        Combiner.ADD
-                )
+                .scale(0.01f)
+                .addModifier(v -> v)
                 .build();
     }
 

@@ -8,7 +8,9 @@ import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
 import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
+import dev.ultreon.quantum.network.packets.s2c.S2CPlayerPositionPacket;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
@@ -561,6 +563,14 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         this.ox = x;
         this.oy = y;
         this.oz = z;
+
+        if (this.world instanceof ServerWorld serverWorld) {
+            if (this instanceof ServerPlayer serverPlayer) {
+                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition()), serverPlayer);
+            } else {
+                serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
+            }
+        }
     }
 
     public BlockVec getBlockVec() {
@@ -592,6 +602,14 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
     public void setRotation(Vec2f position) {
         this.xRot = position.x;
         this.yRot = Mth.clamp(position.y, -90, 90);
+
+        if (this.world instanceof ServerWorld serverWorld) {
+            if (this instanceof ServerPlayer serverPlayer) {
+                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), getRotation()), serverPlayer);
+            } else {
+                serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
+            }
+        }
     }
 
     public Vec3d getVelocity() {

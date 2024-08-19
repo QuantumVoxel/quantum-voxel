@@ -41,4 +41,20 @@ public class C2SModPacket extends Packet<InGameServerPacketHandler> {
     public NetworkChannel getChannel() {
         return this.channel;
     }
+
+    public ModPacket<?> getPacket() {
+        return this.packet;
+    }
+
+    public NamespaceID getChannelId() {
+        return this.channelId;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SModPacket{" +
+                "channelId=" + channelId +
+                ", packet=" + packet +
+                '}';
+    }
 }

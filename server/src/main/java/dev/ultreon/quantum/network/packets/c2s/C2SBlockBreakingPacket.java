@@ -37,4 +37,17 @@ public class C2SBlockBreakingPacket extends Packet<InGameServerPacketHandler> {
         STOP,
         BROKEN
     }
+
+    public BlockVec getPos() {
+        return pos;
+    }
+
+    public BlockStatus getStatus() {
+        return status;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SBlockBreakingPacket{pos=" + this.pos + ", status=" + this.status + '}';
+    }
 }

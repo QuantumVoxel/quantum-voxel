@@ -26,4 +26,8 @@ public class C2SRequestChunkLoadPacket extends Packet<InGameServerPacketHandler>
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onRequestChunkLoad(pos);
     }
+
+    public ChunkVec getPos() {
+        return pos;
+    }
 }

@@ -3,6 +3,7 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
@@ -125,7 +126,7 @@ public final class BuilderChunk extends Chunk {
             // Get from the world
             int globX = this.getVec().x * CHUNK_SIZE + x;
             int globZ = this.getVec().z * CHUNK_SIZE + z;
-            return this.world.getHeight(globX, globZ);
+            return QuantumServer.invokeAndWait(() -> this.world.getHeight(globX, globZ));
         }
         return super.getHeight(x, z, HeightmapType.WORLD_SURFACE);
     }

@@ -1,12 +1,15 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.world.BreakResult;
+import dev.ultreon.quantum.world.Chunk;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
@@ -56,4 +59,6 @@ public interface ClientWorldAccess extends WorldAccess {
     float getGlobalSunlight();
 
     boolean isLoaded(dev.ultreon.quantum.world.vec.ChunkVec chunkVec);
+
+    void onBlockSet(BlockVec pos, BlockState block);
 }

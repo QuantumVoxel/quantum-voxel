@@ -10,7 +10,8 @@ import org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
 /**
  * Represents a block position in the world.
@@ -339,83 +340,83 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public SectionVec add(int x, int y, int z) {
-        return new SectionVec(this.x + x, this.y + y, this.z + z);
+    public BlockVec add(int x, int y, int z) {
+        return new BlockVec(this.x + x, this.y + y, this.z + z);
     }
 
     @Override
-    public SectionVec add(Vec3i vec) {
-        return new SectionVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
+    public BlockVec add(Vec3i vec) {
+        return new BlockVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
     }
 
-    public SectionVec add(SectionVec vec) {
-        return new SectionVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
-    }
-
-    @Override
-    public SectionVec sub(int x, int y, int z) {
-        return new SectionVec(this.x - x, this.y - y, this.z - z);
+    public BlockVec add(BlockVec vec) {
+        return new BlockVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
     }
 
     @Override
-    public SectionVec sub(Vec3i vec) {
-        return new SectionVec(this.x - vec.x, this.y - vec.y, this.z - vec.z);
-    }
-
-    public SectionVec sub(SectionVec vec) {
-        return new SectionVec(this.x - vec.x, this.y - vec.y, this.z - vec.z);
+    public BlockVec sub(int x, int y, int z) {
+        return new BlockVec(this.x - x, this.y - y, this.z - z);
     }
 
     @Override
-    public SectionVec mul(int x, int y, int z) {
-        return new SectionVec(this.x * x, this.y * y, this.z * z);
+    public BlockVec sub(Vec3i vec) {
+        return new BlockVec(this.x - vec.x, this.y - vec.y, this.z - vec.z);
+    }
+
+    public BlockVec sub(BlockVec vec) {
+        return new BlockVec(this.x - vec.x, this.y - vec.y, this.z - vec.z);
     }
 
     @Override
-    public SectionVec mul(Vec3i vec) {
-        return new SectionVec(this.x * vec.x, this.y * vec.y, this.z * vec.z);
-    }
-
-    public SectionVec mul(SectionVec vec) {
-        return new SectionVec(this.x * vec.x, this.y * vec.y, this.z * vec.z);
+    public BlockVec mul(int x, int y, int z) {
+        return new BlockVec(this.x * x, this.y * y, this.z * z);
     }
 
     @Override
-    public SectionVec div(int x, int y, int z) {
-        return new SectionVec(this.x / x, this.y / y, this.z / z);
+    public BlockVec mul(Vec3i vec) {
+        return new BlockVec(this.x * vec.x, this.y * vec.y, this.z * vec.z);
+    }
+
+    public BlockVec mul(BlockVec vec) {
+        return new BlockVec(this.x * vec.x, this.y * vec.y, this.z * vec.z);
     }
 
     @Override
-    public SectionVec div(Vec3i vec) {
-        return new SectionVec(this.x / vec.x, this.y / vec.y, this.z / vec.z);
-    }
-
-    public SectionVec div(SectionVec vec) {
-        return new SectionVec(this.x / vec.x, this.y / vec.y, this.z / vec.z);
+    public BlockVec div(int x, int y, int z) {
+        return new BlockVec(this.x / x, this.y / y, this.z / z);
     }
 
     @Override
-    public SectionVec mod(int x, int y, int z) {
-        return new SectionVec(this.x % x, this.y % y, this.z % z);
+    public BlockVec div(Vec3i vec) {
+        return new BlockVec(this.x / vec.x, this.y / vec.y, this.z / vec.z);
+    }
+
+    public BlockVec div(BlockVec vec) {
+        return new BlockVec(this.x / vec.x, this.y / vec.y, this.z / vec.z);
     }
 
     @Override
-    public SectionVec mod(Vec3i vec) {
-        return new SectionVec(this.x % vec.x, this.y % vec.y, this.z % vec.z);
-    }
-
-    public SectionVec mod(SectionVec vec) {
-        return new SectionVec(this.x % vec.x, this.y % vec.y, this.z % vec.z);
+    public BlockVec mod(int x, int y, int z) {
+        return new BlockVec(this.x % x, this.y % y, this.z % z);
     }
 
     @Override
-    public SectionVec abs() {
-        return new SectionVec(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
+    public BlockVec mod(Vec3i vec) {
+        return new BlockVec(this.x % vec.x, this.y % vec.y, this.z % vec.z);
+    }
+
+    public BlockVec mod(BlockVec vec) {
+        return new BlockVec(this.x % vec.x, this.y % vec.y, this.z % vec.z);
     }
 
     @Override
-    public SectionVec neg() {
-        return new SectionVec(-this.x, -this.y, -this.z);
+    public BlockVec abs() {
+        return new BlockVec(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
+    }
+
+    @Override
+    public BlockVec neg() {
+        return new BlockVec(-this.x, -this.y, -this.z);
     }
 
     @Override

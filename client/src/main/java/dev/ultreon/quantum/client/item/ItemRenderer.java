@@ -187,7 +187,7 @@ public class ItemRenderer implements Disposable {
         ItemModel itemModel = models.get(stack.getItem());
         if (itemModel == null) {
             ModelInstance modelInstance = new ModelInstance(BakedCubeModel.defaultModel().getModel());
-            modelInstance.userData = new BlockItemModel(() -> BakedCubeModel.defaultModel());
+            modelInstance.userData = new BlockItemModel(BakedCubeModel::defaultModel);
             return modelInstance;
         }
         ModelInstance modelInstance = new ModelInstance(itemModel.getModel());

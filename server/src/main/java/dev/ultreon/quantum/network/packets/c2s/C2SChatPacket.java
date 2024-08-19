@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network.packets.c2s;
 
-import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.server.player.ServerPlayer;
@@ -28,5 +28,14 @@ public class C2SChatPacket extends Packet<InGameServerPacketHandler> {
         ServerPlayer player = ctx.getPlayer();
         if (player == null) throw new DecoderException("Player is null!");
         player.onMessageSent(this.message);
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SChatPacket{message=" + this.message + '}';
     }
 }

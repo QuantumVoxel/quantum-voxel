@@ -86,4 +86,24 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
 
         handler.onChunkData(this.pos, this.storage, this.biomeStorage, blockEntities);
     }
+
+    public ChunkVec pos() {
+        return this.pos;
+    }
+
+    public Storage<BlockState> storage() {
+        return this.storage;
+    }
+
+    public Storage<Biome> biomeStorage() {
+        return this.biomeStorage;
+    }
+
+    public IntList blockEntityPositions() {
+        return this.blockEntityPositions;
+    }
+
+    public IntList blockEntities() {
+        return this.blockEntities;
+    }
 }

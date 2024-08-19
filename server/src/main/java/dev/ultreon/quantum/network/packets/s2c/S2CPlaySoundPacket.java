@@ -30,4 +30,17 @@ public class S2CPlaySoundPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onPlaySound(this.sound, this.volume);
     }
+
+    public NamespaceID getSound() {
+        return this.sound;
+    }
+
+    public float getVolume() {
+        return this.volume;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CPlaySoundPacket{sound=" + this.sound + ", volume=" + this.volume + "}";
+    }
 }

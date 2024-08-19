@@ -33,16 +33,13 @@ public class TextureAtlas implements Disposable {
 
     public TextureRegion get(NamespaceID id, TextureAtlasType type) {
         if (id == null) return null;
-        TextureRegion textureRegion = (switch (type) {
+        return (switch (type) {
             case DIFFUSE -> this.atlas;
             case EMISSIVE -> this.emissiveAtlas;
             case NORMAL -> this.normalAtlas;
             case SPECULAR -> this.specularAtlas;
             case REFLECTIVE -> this.reflectiveAtlas;
         }).findRegion(id.toString());
-        if (textureRegion == null) return null;
-        textureRegion.flip(false, true);
-        return textureRegion;
     }
 
     public TextureRegion getEmissive(NamespaceID id) {

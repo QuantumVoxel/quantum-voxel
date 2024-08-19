@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
@@ -15,6 +14,7 @@ import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.shader.GameShaders;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintStream;
@@ -66,7 +66,7 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
             stream.println("Shader Hash Code: " + shader.hashCode());
             stream.println("Shader Classname: " + shader.getClass().getName());
             stream.println("Shader Superclass Classname: " + shader.getClass().getSuperclass().getName());
-            stream.println("Shader String: " + shader.toString());
+            stream.println("Shader String: " + shader);
         }
     }
 
@@ -84,9 +84,15 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
         });
         System.out.println("toSort = " + toSort);
         for (Entity entity : toSort) {
-            QuantumClient.PROFILER.section("(Entity #" + entity.getId() + ")", () -> batch.render((output, pool) -> worldRenderer.collectEntity(entity, RenderLayer.WORLD)));
+            QuantumClient.PROFILER.section("(Entity #" + entity.getId() + ")", () -> batch.render((output, pool) -> {
+                if (worldRenderer != null) {
+                    worldRenderer.collectEntity(entity, batch);
+                }
+            }));
         }
 
-        batch.render(RenderLayer.WORLD::finish, worldRenderer.getEnvironment());
+        if (worldRenderer != null) {
+            batch.render(RenderLayer.WORLD::finish, worldRenderer.getEnvironment());
+        }
     }
 }

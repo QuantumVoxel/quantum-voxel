@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -90,7 +91,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final ClientWorld world;
     private final QuantumClient client = QuantumClient.get();
 
-    private ModelInstance skyboxInstance = null;
     private ModelInstance cursor = null;
     private ModelInstance sun = null;
     private ModelInstance moon = null;
@@ -166,21 +166,20 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     private void setupDynamicSkybox() {
         ModelManager modelManager = ModelManager.INSTANCE;
-        Model model = modelManager.generateModel(id("generated/skybox"), modelBuilder -> {
-            Material material = new Material();
-            material.id = id("generated/skybox_material").toString();
-            material.set(ColorAttribute.createDiffuse(0, 1, 0, 1));
-            material.set(new BlendingAttribute());
-            material.set(new DepthTestAttribute(GL_LEQUAL, true));
-            material.set(IntAttribute.createCullFace(0));
+        ModelBuilder modelBuilder = new ModelBuilder();
+        Material material = new Material();
+        material.id = id("generated/skybox_material").toString();
+        material.set(ColorAttribute.createDiffuse(0, 1, 0, 1));
+        material.set(new BlendingAttribute());
+        material.set(new DepthTestAttribute(GL_LEQUAL, true));
+        material.set(IntAttribute.createCullFace(0));
 
-            return modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
-        });
+        this.skybox.model = modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 
         RenderLayer background = RenderLayer.BACKGROUND;
-        ModelInstance modelInstance = background.create(model, 0, 0, 0);
+        ModelInstance modelInstance = background.create(this.skybox.model, 0, 0, 0);
         modelInstance.userData = Shaders.SKYBOX.get();
-        this.skyboxInstance = modelInstance;
+        this.skybox.modelInstance = modelInstance;
     }
 
     private void setupMaterials(Texture blockTex, Texture emissiveBlockTex) {
@@ -403,14 +402,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 return;
             }
 
-            this.collectEntity(localPlayer, renderLayer);
+            this.collectEntity(localPlayer, batch);
         });
 
         QuantumClient.PROFILER.section("players", () -> {
             MultiplayerData multiplayerData = this.client.getMultiplayerData();
             if (multiplayerData == null) return;
             for (var remotePlayer : multiplayerData.getRemotePlayers()) {
-                QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> this.collectEntity(remotePlayer, renderLayer));
+                QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> this.collectEntity(remotePlayer, batch));
             }
         });
     }
@@ -442,35 +441,34 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             ChunkModel model = this.chunkModels.get(chunk.getVec());
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
-                if (client.screen instanceof WorldLoadScreen) continue;
-                if (ref.chunkRendered || !this.shouldBuildChunks()) continue;
+                if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || !this.shouldBuildChunks())) {
+                    chunk.dirty = false;
+                    if (model != null) {
+                        if (model.rebuild()) {
+                            ref.chunkRendered = true;
+                            this.lastChunkBuild = System.currentTimeMillis();
+                            chunk.dirty = false;
+                        } else {
+                            LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
+                            continue;
+                        }
+                    } else {
+                        CommonConstants.LOGGER.warn("Tried to rebuild a chunk that didn't exist: " + chunk.getVec());
+                        model = new ChunkModel(chunk.getVec(), chunk, this);
+                        if (model.build()) {
+                            ref.chunkRendered = true;
+                            this.lastChunkBuild = System.currentTimeMillis();
+                            chunk.dirty = false;
+                            this.chunkModels.put(chunk.getVec(), model);
+                        } else {
+                            LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
+                            continue;
+                        }
+                    }
 
-                chunk.dirty = false;
-                if (model != null) {
-                    if (model.rebuild()) {
-                        ref.chunkRendered = true;
-                        this.lastChunkBuild = System.currentTimeMillis();
-                        chunk.dirty = false;
-                    } else {
-                        LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
-                        continue;
-                    }
-                } else {
-                    CommonConstants.LOGGER.warn("Tried to rebuild a chunk that didn't exist: " + chunk.getVec());
-                    model = new ChunkModel(chunk.getVec(), chunk, this);
-                    if (model.build()) {
-                        ref.chunkRendered = true;
-                        this.lastChunkBuild = System.currentTimeMillis();
-                        chunk.dirty = false;
-                        this.chunkModels.put(chunk.getVec(), model);
-                    } else {
-                        LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
-                        continue;
-                    }
+                    chunk.onUpdated();
+                    chunk.initialized = true;
                 }
-
-                chunk.onUpdated();
-                chunk.initialized = true;
             } else if (model == null) {
                 if (ref.chunkRendered || !this.shouldBuildChunks()) continue;
                 chunk.dirty = false;
@@ -501,10 +499,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.renderBlockBreaking(renderLayer, chunk);
             this.renderBlockModels(renderLayer, chunk);
 
-            model.getModelInstance().transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-
-            if (model.getModelInstance() != null)
+            if (model != null) {
+                model.getModelInstance().transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
                 batch.render(model);
+            }
 
             chunk.renderModels(renderLayer);
 
@@ -635,7 +633,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
-    public void collectEntity(Entity entity, RenderLayer renderLayer) {
+    public void collectEntity(Entity entity, ModelBatch batch) {
         try {
             @Nullable QVModel model = this.qvModels.get(entity.getId());
             LocalPlayer player = QuantumClient.get().player;
@@ -643,7 +641,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64
                 || entity instanceof Player && ((Player) entity).isSpectator()) {
                 if (model != null)
-                    renderLayer.deactivate(model.getInstance());
+                    return;
                 return;
             }
 
@@ -661,13 +659,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 }
                 this.modelInstances.put(entity.getId(), model.getInstance());
                 this.qvModels.put(entity.getId(), model);
-                renderLayer.add(model);
             }
 
-            renderLayer.activate(model.getInstance());
-
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
-            WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(renderLayer, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
+            WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(batch, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
             renderer.animate(instance, context);
             renderer.render(instance, context);
         } catch (Exception e) {
@@ -717,6 +712,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
+    public void reloadChunks() {
+        for (var entry : List.copyOf(chunkModels.entrySet())) {
+            unload(entry.getValue().getChunk());
+        }
+        this.chunkModels.clear();
+        this.visibleChunks = 0;
+        this.loadedChunks = 0;
+    }
+
+    @Override
     public int getLoadedChunksCount() {
         return this.loadedChunks;
     }
@@ -742,7 +747,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public void dispose() {
         this.disposed = true;
 
-        RenderLayer.BACKGROUND.destroy(this.skyboxInstance);
+        Model skybox = this.skybox.model;
+        this.skybox.model = null;
+        this.skybox.modelInstance = null;
+        skybox.dispose();
+
         ModelManager.INSTANCE.unloadModel(id("generated/skybox"));
 
         for (var entry : chunkModels.entrySet()) {

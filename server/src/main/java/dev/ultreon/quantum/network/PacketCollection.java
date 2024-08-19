@@ -101,7 +101,8 @@ public class PacketCollection<H extends PacketHandler> {
         Preconditions.checkNotNull(packet, "packet");
 
         Integer id = this.packet2id.get(packet.getClass());
-        if (id == null) throw new PacketException("Unknown packet: " + packet.getClass());
+        if (id == null)
+            throw new PacketException("Unknown packet: " + packet.getClass());
         return id;
     }
 }

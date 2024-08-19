@@ -2,28 +2,28 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.util.VoxelTerrain;
 import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
-import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import org.apache.commons.collections4.set.ListOrderedSet;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Objects;
 
 public class WorldLoadScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldLoadScreen.class);
@@ -38,6 +38,7 @@ public class WorldLoadScreen extends Screen {
     private DeathScreen closeScreen;
     private boolean done = false;
     private volatile boolean loggedIn;
+    private int chunksToLoadCount;
 
     public WorldLoadScreen(WorldStorage storage) {
         super(TextObject.translation("quantum.screen.world_load"));
@@ -80,6 +81,7 @@ public class WorldLoadScreen extends Screen {
         return super.onClose(next);
     }
 
+    @SuppressWarnings("BusyWait")
     public void run() {
         try {
             assert this.world != null;
@@ -99,7 +101,24 @@ public class WorldLoadScreen extends Screen {
                 Thread.sleep(100);
             }
 
-            QuantumServer.invokeAndWait(this::loadWithinServer);
+            ChunkVec chunkVec = Objects.requireNonNull(this.client.player, "Player is null").getChunkVec();
+            int chunks = 0;
+            for (int x = -world.getRenderDistance(); x <= world.getRenderDistance(); x++) {
+                for (int z = -world.getRenderDistance(); z <= world.getRenderDistance(); z++) {
+                    ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
+                    this.client.connection.send(new C2SRequestChunkLoadPacket(relativePos));
+                    chunks++;
+
+                    if (chunks % 10 == 0) {
+                        // Wait half a second to avoid spamming
+                        Thread.sleep(500);
+                    }
+                }
+            }
+
+            this.chunksToLoadCount = chunks;
+
+            this.client.connection.send(new C2SRequestChunkLoadPacket(chunkVec));
 
             this.message("Waiting for server to finalize...");
         } catch (Exception throwable) {
@@ -130,16 +149,22 @@ public class WorldLoadScreen extends Screen {
 
         ServerWorld world = this.world;
         if (world != null) {
-            int chunksToLoad = world.getChunksToLoad();
+            int chunksToLoad = chunksToLoadCount;
             if (chunksToLoad == -1) {
-                this.subTitleLabel.text().setRaw("Entering your world");
+                this.subTitleLabel.text().set(TextObject.translation(this.client.integratedServer == null ? "quantum.screen.worldLoad.enteringWorld" : "quantum.screen.worldLoad.enteringServer"));
             } else if (chunksToLoad != 0) {
+                ClientWorldAccess worldAccess = this.client.world;
+                if (worldAccess == null) {
+                    this.titleLabel.text().set(TextObject.translation(this.client.integratedServer == null ? "quantum.screen.worldLoad.loading" : "quantum.screen.worldLoad.loadingFromServer"));
+                    this.subTitleLabel.text().set(TextObject.translation("quantum.screen.worldLoad.preparingChunks"));
+                    return;
+                }
                 if (world.getChunksLoaded() == chunksToLoad) {
                     this.done = true;
 
-                    if (this.client.world instanceof ClientWorld clientWorld) {
+                    if (worldAccess instanceof ClientWorld clientWorld) {
                         this.client.worldRenderer = new WorldRenderer(clientWorld);
-                    } else if (this.client.world instanceof VoxelTerrain terrain) {
+                    } else if (worldAccess instanceof VoxelTerrain terrain) {
                         this.client.worldRenderer = terrain;
                     }
 
@@ -148,11 +173,10 @@ public class WorldLoadScreen extends Screen {
                     return;
                 }
 
-//                int ratio = world.getChunksLoaded() / chunksToLoad;
                 float ratio = (float) world.getChunksLoaded() / chunksToLoad;
                 String percent = (int) (100 * ratio) + "%";
                 ratio = Mth.clamp(ratio, 0, 1);
-                this.subTitleLabel.text().setRaw(String.format("Loaded %d of %d chunks (%s complete)", world.getChunksLoaded(), chunksToLoad, percent));
+                this.subTitleLabel.text().set(TextObject.translation("quantum.screen.worldLoad.chunksLoading", world.getChunksLoaded(), chunksToLoad, percent));
 
                 if (this.nextLog <= System.currentTimeMillis()) {
                     this.nextLog = System.currentTimeMillis() + 2000;
@@ -196,21 +220,6 @@ public class WorldLoadScreen extends Screen {
     private void loadWithinServer() {
         try {
             WorldLoadScreen.LOGGER.info("Loading spawn chunks...");
-
-            ChunkVec spawnChunk = this.world.getSpawnPoint().chunk();
-
-            ChunkRefresher refresher = new ChunkRefresher();
-            ServerPlayer.refreshChunks(refresher, this.client.integratedServer, this.world, spawnChunk,
-                    ListOrderedSet.listOrderedSet(this.world.getChunksAround(this.world.getSpawnPoint().vec().d().add(0.5, 0, 0.5))
-                            .stream()
-                            .sorted((o1, o2) -> {
-                                Vec3d vec1 = o1.getChunkOrigin();
-                                Vec3d vec2 = o2.getChunkOrigin();
-                                Vec3d origin = this.world.getSpawnPoint().vec().d();
-                                return Double.compare(vec1.dst(origin), vec2.dst(origin));
-                            }).collect(() -> new ArrayList<>(), ArrayList::add, ArrayList::addAll)), new ListOrderedSet<>());
-            refresher.freeze();
-            this.world.doRefresh(refresher);
 
             this.message("Spawn chunks loaded!");
         } catch (Exception t) {

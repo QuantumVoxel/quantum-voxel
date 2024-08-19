@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.model;
 
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.world.WorldAccess;
 
 
@@ -19,7 +19,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
     /**
      * The render layer where the entities being rendered will be rendered.
      */
-    private final RenderLayer renderLayer;
+    private final ModelBatch modelBatch;
 
     /**
      * The holder of the entities being rendered.
@@ -44,14 +44,14 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
     /**
      * Constructs a new WorldRenderContextImpl.
      *
-     * @param renderLayer The render layer where the entities being rendered will be rendered.
+     * @param modelBatch The render layer where the entities being rendered will be rendered.
      * @param holder The holder of the entities being rendered.
      * @param world The world being rendered.
      * @param worldScale The scale of the world being rendered.
      * @param cameraPos The position of the camera.
      */
-    public WorldRenderContextImpl(RenderLayer renderLayer, T holder, WorldAccess world, float worldScale, Vec3d cameraPos) {
-        this.renderLayer = renderLayer;
+    public WorldRenderContextImpl(ModelBatch modelBatch, T holder, WorldAccess world, float worldScale, Vec3d cameraPos) {
+        this.modelBatch = modelBatch;
         this.holder = holder;
         this.world = world;
         this.worldScale = worldScale;
@@ -94,7 +94,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
      *
      * @return The render layer where the entities being rendered will be rendered.
      */
-    public RenderLayer getRenderLayer() {
-        return renderLayer;
+    public ModelBatch getModelBatch() {
+        return modelBatch;
     }
 }
