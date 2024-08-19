@@ -32,8 +32,7 @@ public class Skybox implements RenderableProvider, Disposable {
         timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR, topColor);
         timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, midColor);
         if (QuantumClient.get().player != null) {
-            timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, tmp);
-            posYMix(QuantumClient.get().player, deltaTime, tmp, ClientWorld.VOID_COLOR, bottomColor);
+            timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, bottomColor);
         } else {
             timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, bottomColor);
         }

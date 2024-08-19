@@ -19,6 +19,8 @@ public interface TerrainRenderer extends Disposable {
 
     void free(ClientChunkAccess chunk);
 
+    void renderBackground(ModelBatch batch, float deltaTime);
+
     void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime);
 
     void collectEntity(Entity entity, ModelBatch batch);

@@ -181,6 +181,11 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
+    public void renderBackground(ModelBatch batch, float deltaTime) {
+        batch.render(this.skybox);
+    }
+
+    @Override
     public void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime) {
         if (renderLayer != RenderLayer.WORLD) {
             return;
