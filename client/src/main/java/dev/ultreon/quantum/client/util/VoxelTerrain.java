@@ -86,8 +86,8 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
 
     public VoxelTerrain(GameCamera camera) {
         this.camera = camera;
-        this.skybox.topColor.set(DAY_TOP_COLOR.toGdx());
-        this.skybox.bottomColor.set(DAY_BOTTOM_COLOR.toGdx());
+        this.skybox.topColor.set(DAY_TOP_COLOR);
+        this.skybox.bottomColor.set(DAY_BOTTOM_COLOR);
     }
 
     public void create() {

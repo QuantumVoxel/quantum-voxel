@@ -52,12 +52,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     //                                                                           off.get().set(f(1 - 1 / size.get().x * size.get().x * 2 / 87), 1)
     public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
     public static Rot SKYBOX_ROTATION = deg(-60);
-    public static Color DAY_TOP_COLOR = new Color(0x7fb0feff);
-    public static Color DAY_BOTTOM_COLOR = new Color(0xc1d3f1ff);
-    public static Color NIGHT_TOP_COLOR = new Color(0x01010bff);
-    public static Color NIGHT_BOTTOM_COLOR = new Color(0x0a0c16ff);
-    public static Color SUN_RISE_COLOR = new Color(0xff3000ff);
-    public static Color VOID_COLOR = new Color(0x0a0a0aff);
+    public static final Color DAY_TOP_COLOR = new Color(0x7fb0feff);
+    public static final Color DAY_BOTTOM_COLOR = new Color(0xc1d3f1ff);
+    public static final Color NIGHT_TOP_COLOR = new Color(0x01010bff);
+    public static final Color NIGHT_BOTTOM_COLOR = new Color(0x0a0c16ff);
+    public static final Color SUN_RISE_COLOR = new Color(0xff3000ff);
+    public static final Color VOID_COLOR = new Color(0x0a0a0aff);
     public static int VOID_Y_START = 20;
     public static int VOID_Y_END = 0;
     @NotNull

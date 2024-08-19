@@ -125,10 +125,10 @@ dependencies {
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 
-    implementation(api("org.graalvm.polyglot:polyglot:23.1.2"))
-    implementation(api("org.graalvm.polyglot:python:23.1.2"))
-    implementation(api("org.graalvm.polyglot:js:23.1.2"))
-    implementation(api("org.graalvm.llvm:llvm-api:23.1.2"))
+    implementation(api("org.graalvm.polyglot:polyglot:24.+"))
+    implementation(api("org.graalvm.polyglot:python:24.+"))
+    implementation(api("org.graalvm.polyglot:js:24.+"))
+    implementation(api("org.graalvm.llvm:llvm-api:24.+"))
 
     implementation(api("com.mojang:datafixerupper:8.0.16"))
 
