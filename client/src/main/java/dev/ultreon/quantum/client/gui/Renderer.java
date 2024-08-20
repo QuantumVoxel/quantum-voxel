@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.Disposable;
 import com.crashinvaders.vfx.VfxManager;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import dev.ultreon.quantum.util.Vec4i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -29,6 +28,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.Vec4i;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -2799,7 +2799,7 @@ public class Renderer implements Disposable {
                       }
                      \s
                       // Gamma correction
-                      float Gamma = 1.1;
+                      float Gamma = 1.0;
                       color.rgba = pow(color.rgba, vec4(1.0/Gamma));
                                \s
                       // Output to screen

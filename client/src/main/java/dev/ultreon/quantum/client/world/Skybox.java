@@ -27,6 +27,7 @@ public class Skybox implements RenderableProvider, Disposable {
     public Model model;
     public ModelInstance modelInstance;
     private final Color tmp = new Color();
+    public static boolean debug = false;
 
     public void update(int daytime, float deltaTime) {
         timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR, topColor);

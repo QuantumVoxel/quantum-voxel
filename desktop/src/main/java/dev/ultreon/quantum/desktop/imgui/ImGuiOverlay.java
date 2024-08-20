@@ -8,15 +8,16 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.client.world.Skybox;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -296,7 +297,7 @@ public class ImGuiOverlay {
                 ImGui.menuItem("Player Editor", "Ctrl+P", ImGuiOverlay.SHOW_PLAYER_UTILS);
                 ImGui.menuItem("Gui Editor", "Ctrl+G", ImGuiOverlay.SHOW_GUI_UTILS);
                 ImGui.menuItem("Shader Editor", "", ImGuiOverlay.SHOW_SHADER_EDITOR);
-                ImGui.menuItem("Skybox Editor", "", ImGuiOverlay.SHOW_SKYBOX_EDITOR);
+                ImGui.menuItem("Skybox Editor (Deprecated)", "", ImGuiOverlay.SHOW_SKYBOX_EDITOR);
                 ImGui.endMenu();
             }
             if (ImGui.beginMenu("View")) {
@@ -363,6 +364,7 @@ public class ImGuiOverlay {
                 ImGuiEx.editColor3Gdx("NightTopColor", "Shader::SkyBox::NightTopColor", () -> ClientWorld.NIGHT_TOP_COLOR);
                 ImGuiEx.editColor3Gdx("NightBottomColor", "Shader::SkyBox::NightBottomColor", () -> ClientWorld.NIGHT_BOTTOM_COLOR);
                 ImGuiEx.editColor3Gdx("SunRiseSetColor", "Shader::SkyBox::SunRiseSetColor", () -> ClientWorld.SUN_RISE_COLOR);
+                ImGuiEx.editBool("Debug", "Shader::SkyBox::Debug", () -> Skybox.debug, b -> Skybox.debug = b);
                 ImGuiEx.editFloat("Rotation", "Shader::SkyBox::Rotation", ClientWorld.SKYBOX_ROTATION::getDegrees, ImGuiOverlay::setSkyboxRot);
                 ImGui.treePop();
             }
@@ -385,12 +387,13 @@ public class ImGuiOverlay {
     private static void showSkyboxEditor() {
         ImGui.setNextWindowSize(400, 200, ImGuiCond.Once);
         ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
-        if (ImGui.begin("Skybox Editor", ImGuiOverlay.getDefaultFlags())) {
+        if (ImGui.begin("Skybox Editor (Deprecated)", ImGuiOverlay.getDefaultFlags())) {
             ImGuiEx.editColor3Gdx("DayTopColor", "Shader::SkyBox::DayTopColor", () -> ClientWorld.DAY_TOP_COLOR);
             ImGuiEx.editColor3Gdx("DayBottomColor", "Shader::SkyBox::DayBottomColor", () -> ClientWorld.DAY_BOTTOM_COLOR);
             ImGuiEx.editColor3Gdx("NightTopColor", "Shader::SkyBox::NightTopColor", () -> ClientWorld.NIGHT_TOP_COLOR);
             ImGuiEx.editColor3Gdx("NightBottomColor", "Shader::SkyBox::NightBottomColor", () -> ClientWorld.NIGHT_BOTTOM_COLOR);
             ImGuiEx.editColor3Gdx("SunRiseSetColor", "Shader::SkyBox::SunRiseSetColor", () -> ClientWorld.SUN_RISE_COLOR);
+            ImGuiEx.editBool("Debug", "Shader::SkyBox::Debug", () -> Skybox.debug, b -> Skybox.debug = b);
             ImGuiEx.editFloat("Rotation", "Shader::SkyBox::Rotation", ClientWorld.SKYBOX_ROTATION::getDegrees, ImGuiOverlay::setSkyboxRot);
             ImGui.end();
         }

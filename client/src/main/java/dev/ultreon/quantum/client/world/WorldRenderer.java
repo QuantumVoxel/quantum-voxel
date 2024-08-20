@@ -365,31 +365,32 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
 
                 // Render the outline.
-                if (lastHitResult == null || !this.lastHitResult.equals(gameCursor)) {
-                    this.lastHitResult = gameCursor;
+                if (lastHitResult != null && this.lastHitResult.equals(gameCursor))
+                    return;
 
-                    if (this.cursor != null) {
-                        RenderLayer.WORLD.destroy(this.cursor);
-                        ModelManager.INSTANCE.unloadModel(id("generated/selection_outline"));
-                    }
+                this.lastHitResult = gameCursor;
 
-                    Model model = ModelManager.INSTANCE.generateModel(id("generated/selection_outline"), modelBuilder -> {
-                        Material material = new Material();
-                        material.id = id("generated/selection_outline_material").toString();
-                        material.set(ColorAttribute.createDiffuse(0, 0, 0, 1f));
-                        material.set(new BlendingAttribute(1.0f));
-                        material.set(IntAttribute.createCullFace(GL_BACK));
-
-                        var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
-                        var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
-                        var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
-
-                        WorldRenderer.buildOutlineBox(sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
-                    });
-
-                    this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-                    this.cursor.userData = Shaders.OUTLINE.get();
+                if (this.cursor != null) {
+                    RenderLayer.WORLD.destroy(this.cursor);
+                    ModelManager.INSTANCE.unloadModel(id("generated/selection_outline"));
                 }
+
+                Model model = ModelManager.INSTANCE.generateModel(id("generated/selection_outline"), modelBuilder -> {
+                    Material material = new Material();
+                    material.id = id("generated/selection_outline_material").toString();
+                    material.set(ColorAttribute.createDiffuse(0, 0, 0, 1f));
+                    material.set(new BlendingAttribute(1.0f));
+                    material.set(IntAttribute.createCullFace(GL_BACK));
+
+                    var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
+                    var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
+                    var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
+
+                    WorldRenderer.buildOutlineBox(sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
+                });
+
+                this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+                this.cursor.userData = Shaders.OUTLINE.get();
             });
 
             if (this.cursor != null) {
@@ -584,7 +585,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private void renderBlockBreaking(ModelBatch batch, ClientChunk chunk) {
-        for (var entry : this.breakingInstances.entrySet()) {
+        for (var entry : chunk.getBreaking().entrySet()) {
             BlockVec pos = entry.getKey();
 
             Model breakingMesh = this.breakingModels.get(Math.round(Mth.clamp(1.0f * 5, 0, 5)));
@@ -598,7 +599,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private boolean shouldIgnoreRebuild() {
-        return this.lastChunkBuild >= System.currentTimeMillis() - 375L;
+        return this.lastChunkBuild >= System.currentTimeMillis() - 10L;
     }
 
     @Override

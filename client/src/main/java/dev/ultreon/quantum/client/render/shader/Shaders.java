@@ -8,8 +8,8 @@ import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.shaders.provider.ModelShaders;
-import dev.ultreon.quantum.client.shaders.provider.SkyboxShaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
+import dev.ultreon.quantum.client.shaders.provider.SkyboxShaders;
 
 import static dev.ultreon.quantum.client.QuantumClient.get;
 import static dev.ultreon.quantum.client.QuantumClient.id;
@@ -30,6 +30,10 @@ public class Shaders {
     public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaders(
             new ResourceFileHandle(id("shaders/skybox.vert")),
             new ResourceFileHandle(id("shaders/skybox.frag"))
+    ));
+    public static final Supplier<DefaultShaderProvider> SKYBOX_DEBUG = Shaders.register("skybox_debug", () -> new SkyboxShaders(
+            new ResourceFileHandle(id("shaders/skybox.vert")),
+            new ResourceFileHandle(id("shaders/skybox_debug.frag"))
     ));
     public static final Supplier<ModelShaders> MODEL_VIEW = Shaders.register("model_view", () -> new ModelShaders(
             new ResourceFileHandle(id("shaders/model.vert")),

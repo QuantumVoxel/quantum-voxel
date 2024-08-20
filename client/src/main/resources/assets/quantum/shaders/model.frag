@@ -125,8 +125,7 @@ void main() {
     vec3 light = vec3(u_globalSunlight);
 
     vec3 emissive;
-    if (depth > lodThreshold) emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
-    else emissive = vec3(0.0);
+    emissive = vec3(0.0);
     diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
 
     vec3 depthIn3Channels;

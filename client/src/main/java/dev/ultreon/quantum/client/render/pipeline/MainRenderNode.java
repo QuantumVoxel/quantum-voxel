@@ -61,9 +61,7 @@ public class MainRenderNode extends RenderNode {
                 render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
             });
         } else {
-            this.client.renderer.blurred(0, ClientConfig.blurRadius * 0, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
-            });
+            render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
         }
 
         // Disable blending and end rendering
