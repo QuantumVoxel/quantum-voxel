@@ -647,6 +647,11 @@ tasks.register<Exec>("runClient") {
             -Dfabric.dli.env=CLIENT
             -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
             -Dfabric.development=true
+            -Dlog4j2.formatMsgNoLookups=true
+            -Dfabric.log.disableAnsi=false
+            -Dfabric.skipMcProvider=true
+            -Dfabric.zipfs.use_temp_file=false
+            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
             -cp
             $classpath
             net.fabricmc.devlaunchinjector.Main
@@ -682,6 +687,11 @@ tasks.register<Exec>("runClientAlt") {
             -Dfabric.dli.env=CLIENT
             -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
             -Dfabric.development=true
+            -Dlog4j2.formatMsgNoLookups=true
+            -Dfabric.log.disableAnsi=false
+            -Dfabric.skipMcProvider=true
+            -Dfabric.zipfs.use_temp_file=false
+            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
             -cp
             $classpath
             net.fabricmc.devlaunchinjector.Main
@@ -719,6 +729,11 @@ tasks.register<Exec>("runDataGenClient") {
             -Dfabric.dli.env=CLIENT
             -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
             -Dfabric.development=true
+            -Dlog4j2.formatMsgNoLookups=true
+            -Dfabric.log.disableAnsi=false
+            -Dfabric.skipMcProvider=true
+            -Dfabric.zipfs.use_temp_file=false
+            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
             -Dquantum.datagen=true
             -Dquantum.datagen.path=${project(":client").projectDir}/src/main/datagen
             -cp
@@ -758,6 +773,11 @@ tasks.register<Exec>("runDataGenServer") {
             -Dfabric.dli.env=SERVER
             -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer
             -Dfabric.development=true
+            -Dlog4j2.formatMsgNoLookups=true
+            -Dfabric.log.disableAnsi=false
+            -Dfabric.skipMcProvider=true
+            -Dfabric.zipfs.use_temp_file=false
+            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
             -Dquantum.datagen=true
             -Dquantum.datagen.path=${project(":server").projectDir}/src/main/datagen
             -cp
@@ -793,8 +813,14 @@ tasks.register<Exec>("runServer") {
             -Xmx4g
             -Xms4g
             -Dfabric.dli.env=SERVER
+            -Dfabric.dli.config=
             -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer
             -Dfabric.development=true
+            -Dlog4j2.formatMsgNoLookups=true
+            -Dfabric.log.disableAnsi=false
+            -Dfabric.skipMcProvider=true
+            -Dfabric.zipfs.use_temp_file=false
+            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
             -cp
             $classpath
             net.fabricmc.devlaunchinjector.Main
