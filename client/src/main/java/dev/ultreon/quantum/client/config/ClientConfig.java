@@ -164,4 +164,10 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "personalisation.blurEnabled", comment = "Whether the blur effect in menu backgrounds should be enabled. (Performance intense)")
     public static boolean blurEnabled = true;
+
+    @ConfigEntry(path = "network.keepAliveTime", comment = "The time in milliseconds between keep alive packets sent to the server.\nNote that the value is in milliseconds.")
+    public static int networkKeepAliveTime = 10000;
+
+    @ConfigEntry(path = "network.timeout", comment = "The time in milliseconds between keep alive packets sent to the server.\nNote that the value is in milliseconds.")
+    public static int networkTimeout = 30000;
 }

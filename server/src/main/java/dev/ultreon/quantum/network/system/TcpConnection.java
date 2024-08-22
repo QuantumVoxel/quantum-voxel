@@ -1,29 +1,29 @@
 package dev.ultreon.quantum.network.system;
 
 import com.badlogic.gdx.utils.Pool;
+import com.esotericsoftware.kryonet.*;
+import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.s2c.S2CKeepAlivePacket;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.Env;
 import org.jetbrains.annotations.Nullable;
-import org.tukaani.xz.LZMA2Options;
-import org.tukaani.xz.LZMAOutputStream;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.channels.ClosedChannelException;
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 
-public abstract class Connection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler>, Closeable {
+public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> extends Listener implements IConnection<OurHandler, TheirHandler>, Closeable {
     public static final Pool<Long> sequencePool = new Pool<>() {
         private long next = 0;
 
@@ -32,11 +32,10 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
             return next++;
         }
     };
-    private final Socket socket;
-    private final Executor executor;
-    private final Queue<Packet<? extends TheirHandler>> packetQueue = new SynchronousQueue<>();
-    private final Thread receiverThread;
+    private final Queue<Packet<? extends TheirHandler>> packetQueue = Queues.synchronizedQueue(new ArrayDeque<>());
     private final Thread senderThread;
+    private final com.esotericsoftware.kryonet.Connection connection;
+    private final Executor executor;
     private boolean compressed;
     private PacketData<OurHandler> ourPacketData;
     private PacketData<TheirHandler> theirPacketData;
@@ -44,19 +43,11 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
     private boolean readOnly;
     protected long ping = 0;
 
-    protected Connection(Socket socket, Executor executor) {
-        this.socket = socket;
+    public TcpConnection(com.esotericsoftware.kryonet.Connection connection, Executor executor) {
+        this.connection = connection;
         this.executor = executor;
 
-        receiverThread = new Thread(() -> {
-            try {
-                this.run();
-            } catch (ClosedChannelException | ClosedConnectionException e) {
-                // Ignored
-            } catch (IOException e) {
-                this.disconnect("Connection interrupted!");
-            }
-        });
+        connection.addListener(this);
 
         senderThread = new Thread(() -> {
             try {
@@ -67,6 +58,8 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
                 this.disconnect("Connection interrupted!");
             }
         });
+
+        senderThread.setDaemon(true);
     }
 
     public static void handleReply(long sequenceId) {
@@ -74,46 +67,16 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
     }
 
     private void sender() throws IOException {
-        while (!socket.isClosed() && isRunning()) {
+        while (connection.isConnected() && isRunning()) {
             Packet<?> packet = packetQueue.poll();
+            if (isReadOnly()) return;
             if (packet != null) {
-                PacketIO packetBuffer = this.createPacketBuffer(packet);
-                theirPacketData.encode(packet, packetBuffer);
-
-                packetBuffer.flush();
+                this.connection.sendTCP(packet);
             }
         }
-    }
-
-    protected PacketIO createPacketBuffer(Packet<?> packet) throws IOException {
-        PacketIO packetBuffer;
-        OutputStream output;
-        if (this.isCompressed()) {
-            OutputStream outputStream = this.getSocket().getOutputStream();
-
-            output = new LZMAOutputStream(outputStream, new LZMA2Options(), -1);
-        } else {
-            output = this.getSocket().getOutputStream();
-        }
-
-        packetBuffer = new PacketIO(null, output);
-        packet.toBytes(packetBuffer);
-        return packetBuffer;
     }
 
     protected abstract boolean isRunning();
-
-    @SuppressWarnings("unchecked")
-    private void run() throws IOException {
-        while (!socket.isClosed() && isRunning()) {
-            PacketIO io = new PacketIO(this.socket.getInputStream(), null);
-            Packet<?> decode = ourPacketData.decode(io.readVarInt(), io);
-
-            if (decode != null) {
-                iLuvGenerics((Packet<OurHandler>) decode, getPlayer());
-            }
-        }
-    }
 
     protected abstract ServerPlayer getPlayer();
 
@@ -129,7 +92,7 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
         if (theirPacketData.getId(packet) < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
-        this.packetQueue.offer(packet);
+        this.packetQueue.add(packet);
     }
 
     @Override
@@ -140,7 +103,10 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
 
-        this.send(packet);
+        this.packetQueue.add(packet);
+        if (resultListener != null) {
+            resultListener.onSuccess();
+        }
     }
 
     public void setCompressed(boolean compressed) {
@@ -152,25 +118,47 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
         return compressed;
     }
 
-    public Socket getSocket() {
-        return socket;
-    }
-
     @Override
     public void disconnect(String message) {
         this.send(this.getDisconnectPacket(message));
 
         try {
-            socket.close();
-        } catch (ClosedChannelException e) {
-            // Ignored
-        } catch (IOException e) {
+            connection.close();
+        } catch (KryoNetException e) {
             Result<Void> voidResult = this.on3rdPartyDisconnect(e.getMessage());
             if (voidResult.isFailure())
                 e.addSuppressed(voidResult.getFailure());
 
             QuantumServer.LOGGER.error("Failed to close socket", e);
         }
+    }
+
+    @Override
+    public Result<Void> on3rdPartyDisconnect(String message) {
+        return Result.ok();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void received(com.esotericsoftware.kryonet.Connection connection, Object object) {
+        super.received(connection, object);
+
+        try {
+            if (object instanceof Packet) {
+                iLuvGenerics((Packet<OurHandler>) object, getPlayer());
+            } else if (object instanceof FrameworkMessage.KeepAlive) {
+                connection.sendTCP(new FrameworkMessage.KeepAlive());
+            } else {
+                connection.close();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to handle packet", e);
+        }
+    }
+
+    @Override
+    public void disconnected(Connection connection) {
+        this.on3rdPartyDisconnect("Connection closed!");
     }
 
     protected abstract Packet<TheirHandler> getDisconnectPacket(String message);
@@ -182,7 +170,6 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
     
     @Override
     public void start() {
-        receiverThread.start();
         senderThread.start();
     }
 
@@ -196,7 +183,7 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
 
     @Override
     public boolean isConnected() {
-        return !socket.isClosed();
+        return connection.isConnected();
     }
 
     @Override
@@ -210,7 +197,7 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
 
     @Override
     public void close() throws IOException {
-        socket.close();
+        connection.close();
     }
 
     @Override
@@ -228,7 +215,16 @@ public abstract class Connection<OurHandler extends PacketHandler, TheirHandler 
         return ping;
     }
 
+    @Override
+    public void onPing(long ping) {
+
+    }
+
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    protected com.esotericsoftware.kryonet.Connection getConnection() {
+        return connection;
     }
 }

@@ -180,33 +180,43 @@ public class Renderer implements Disposable {
         return this;
     }
 
+
+    @CanIgnoreReturnValue
+    public Renderer setColor(com.badlogic.gdx.graphics.Color c) {
+        if (c == null) return this;
+        if (this.font != null)
+            this.font.setColor(c);
+        this.shapes.setColor(c);
+        return this;
+    }
+
     @CanIgnoreReturnValue
     public Renderer setColor(int r, int g, int b) {
-        this.setColor(RgbColor.rgb(r, g, b));
+        this.setColor(this.tmpC.set(r / 255f, g / 255f, b / 255f, 1f));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(float r, float g, float b) {
-        this.setColor(RgbColor.rgb(r, g, b));
+        this.setColor(this.tmpC.set(r, g, b, 1f));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(int r, int g, int b, int a) {
-        this.setColor(RgbColor.rgba(r, g, b, a));
+        this.setColor(this.tmpC.set(r / 255f, g / 255f, b / 255f, a / 255f));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(float r, float g, float b, float a) {
-        this.setColor(RgbColor.rgba(r, g, b, a));
+        this.setColor(this.tmpC.set(r, g, b, a));
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer setColor(int argb) {
-        this.setColor(RgbColor.argb(argb));
+        this.setColor(this.tmpC.set((argb >> 16 & 0xFF) / 255f, (argb >> 8 & 0xFF) / 255f, (argb & 0xFF) / 255f, (argb >> 24 & 0xFF) / 255f));
         return this;
     }
 
@@ -2507,6 +2517,7 @@ public class Renderer implements Disposable {
         return Objects.requireNonNull(this.globalTranslation.peek()).cpy();
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer fill(int x, int y, int width, int height, Color rgb) {
         this.setColor(rgb);
@@ -2514,8 +2525,23 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     public Renderer box(int x, int y, int width, int height, Color rgb) {
+        this.setColor(rgb);
+        this.rectLine(x, y, width, height);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
+    public Renderer fill(int x, int y, int width, int height, com.badlogic.gdx.graphics.Color rgb) {
+        this.setColor(rgb);
+        this.rect(x, y, width, height);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
+    public Renderer box(int x, int y, int width, int height, com.badlogic.gdx.graphics.Color rgb) {
         this.setColor(rgb);
         this.rectLine(x, y, width, height);
         return this;

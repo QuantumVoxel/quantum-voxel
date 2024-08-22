@@ -3,7 +3,6 @@ package dev.ultreon.quantum;
 import dev.ultreon.quantum.log.Logger;
 
 public class StdoutLogger implements Logger {
-
     @Override
     public void debug(String s) {
         System.out.printf("[DEBUG] %s%n", s);

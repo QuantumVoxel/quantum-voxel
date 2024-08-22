@@ -2,13 +2,8 @@ package dev.ultreon.quantum;
 
 import java.util.Objects;
 
-public final class LoadingContext {
+public record LoadingContext(String namespace) {
     private static final ThreadLocal<LoadingContext> currentContext = new ThreadLocal<>();
-    private final String namespace;
-
-    public LoadingContext(String namespace) {
-        this.namespace = namespace;
-    }
 
     public static LoadingContext get() {
         if (currentContext.get() == null) throw new IllegalStateException("Not in a loading context!");
@@ -21,21 +16,12 @@ public final class LoadingContext {
         LoadingContext.currentContext.remove();
     }
 
-    public String namespace() {
-        return namespace;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (LoadingContext) obj;
         return Objects.equals(this.namespace, that.namespace);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(namespace);
     }
 
     @Override

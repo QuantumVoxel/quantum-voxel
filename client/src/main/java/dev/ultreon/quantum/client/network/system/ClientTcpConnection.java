@@ -1,35 +1,61 @@
 package dev.ultreon.quantum.client.network.system;
 
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
 import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SDisconnectPacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.stage.LoginPacketStage;
 import dev.ultreon.quantum.network.stage.PacketStage;
-import dev.ultreon.quantum.network.system.Connection;
+import dev.ultreon.quantum.network.stage.PacketStages;
+import dev.ultreon.quantum.network.system.PacketIOSerializerFactory;
+import dev.ultreon.quantum.network.system.TcpConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
 import java.io.IOException;
-import java.net.Socket;
 
-public class ClientTcpConnection extends Connection<ClientPacketHandler, ServerPacketHandler> {
+public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, ServerPacketHandler> {
     private final QuantumClient client;
 
-    private ClientTcpConnection(Socket socket, QuantumClient client) {
-        super(socket, client);
+    private ClientTcpConnection(Client kryoClient, QuantumClient client) {
+        super(kryoClient, client);
+
         this.client = client;
     }
     
     public static Result<ClientTcpConnection> connectToServer(String address, int port) {
         try {
-            return Result.ok(new ClientTcpConnection(new Socket(address, port), QuantumClient.get()));
+            Client kryoClient = new Client(2 * 1024 * 1024, 2 * 1024 * 1024);
+            kryoClient.setKeepAliveTCP(ClientConfig.networkKeepAliveTime);
+            kryoClient.setName("Quantum:Multiplayer");
+            kryoClient.getKryo().setReferences(false);
+            kryoClient.getKryo().setRegistrationRequired(false);
+            kryoClient.getKryo().setDefaultSerializer(new PacketIOSerializerFactory());
+            kryoClient.start();
+            ClientTcpConnection connection = new ClientTcpConnection(kryoClient, QuantumClient.get());
+            connection.moveTo(PacketStages.LOGIN, new LoginClientPacketHandlerImpl(connection));
+            kryoClient.connect(ClientConfig.networkTimeout, address, port);
+            return Result.ok(connection);
         } catch (IOException e) {
             return Result.failure(e);
         }
     }
-    
+
+    @Override
+    public void connected(Connection connection) {
+        super.connected(connection);
+
+        this.start();
+    }
+
     public static Result<ClientMemoryConnection> connectToLocalServer() {
         return Result.ok(new ClientMemoryConnection(QuantumClient.get()));
     }
@@ -54,7 +80,7 @@ public class ClientTcpConnection extends Connection<ClientPacketHandler, ServerP
         try {
             this.close();
         } catch (Exception e) {
-            if (!this.getSocket().isClosed()) {
+            if (this.isConnected()) {
                 QuantumClient.LOGGER.error("Failed to close connection", e);
             }
         }

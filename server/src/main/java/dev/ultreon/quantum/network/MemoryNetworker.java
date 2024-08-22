@@ -3,6 +3,7 @@ package dev.ultreon.quantum.network;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.network.system.MemoryConnection;
 import dev.ultreon.quantum.network.system.ServerMemoryConnection;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -30,12 +31,12 @@ public class MemoryNetworker implements Networker {
     }
 
     @Override
-    public List<ServerMemoryConnection> getConnections() {
+    public List<? extends IConnection<ServerPacketHandler, ClientPacketHandler>> getConnections() {
         var conn = this.connection;
         if (conn == null) {
             return Collections.emptyList();
         }
-        return List.of(conn);
+        return Collections.singletonList(conn);
     }
 
     @Override

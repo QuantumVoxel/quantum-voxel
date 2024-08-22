@@ -113,6 +113,7 @@ public class Result<T> {
     }
 
     public T unwrap() {
+        if (this.failure != null) throw new NoSuchElementException("The failure is not present.", this.failure.throwable);
         if (this.ok == null) throw new NoSuchElementException("The value is not present.");
         return this.ok.value;
     }

@@ -10,7 +10,7 @@ import dev.ultreon.quantum.util.Env;
 /**
  * Class responsible for initializing configuration entry points.
  */
-public class CommonLoader {
+public final class CommonLoader {
 
     /**
      * Initialize configuration entry points.

@@ -114,7 +114,7 @@ public class MainRenderNode extends RenderNode {
 
     private void drawDiffuse(Texture diffuseTexture) {
         this.client.spriteBatch.setShader(null);
-        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        if (diffuseTexture != null) this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override

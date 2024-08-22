@@ -569,7 +569,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         ChunkVec chunkVec = World.toChunkVec((int) x, (int) y, (int) z);
         ServerChunk chunk = this.world.getChunk(chunkVec);
         if (chunk == null) {
-            QuantumServer.LOGGER.warn(String.format("Player moved into a null chunk: %s", this.getName()));
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
@@ -600,7 +599,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         ChunkVec chunkVec = World.toChunkVec((int) x, (int) y, (int) z);
         ServerChunk chunk = this.world.getChunk(chunkVec);
         if (chunk == null) {
-            QuantumServer.LOGGER.warn(String.format("Player moved into a null chunk: %s", this.getName()));
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
@@ -760,19 +758,21 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         // Get or load the chunk.
         synchronized (this.chunkTracker) {
             if (!this.chunkTracker.isTracking(pos)) {
-                this.chunkTracker.startTracking(pos);
-                this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
-                    receivedChunk.getTracker().startTracking(this);
-                    receivedChunk.sendChunk();
+                QuantumServer.invoke(() -> {
+                    this.chunkTracker.startTracking(pos);
+                    this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
+                        receivedChunk.getTracker().startTracking(this);
+                        receivedChunk.sendChunk();
 
-                    CommonConstants.LOGGER.debug("Loaded chunk {}", pos);
-                }).exceptionally(throwable -> {
-                    this.chunkTracker.stopTracking(pos);
-                    this.sendPacket(new S2CChunkUnloadPacket(pos));
+                        CommonConstants.LOGGER.debug("Loaded chunk {}", pos);
+                    }).exceptionally(throwable -> {
+                        this.chunkTracker.stopTracking(pos);
+                        this.sendPacket(new S2CChunkUnloadPacket(pos));
 
-                    CommonConstants.LOGGER.error("Failed to load chunk {}", pos, throwable);
+                        CommonConstants.LOGGER.error("Failed to load chunk {}", pos, throwable);
 
-                    return null;
+                        return null;
+                    });
                 });
             }
         }

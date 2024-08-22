@@ -87,27 +87,28 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
         if (this.server.getPlayer(uuid) != null) {
             this.connection.disconnect("Player " + name + " is already in the server.");
+            IConnection.LOGGER.info("%s left the server because they are already in the server.", name);
             return;
         }
 
         if (this.server.getPlayerCount() >= this.server.getMaxPlayers()) {
             this.connection.disconnect("The server is full.");
+            IConnection.LOGGER.info("%s left the server because the server is full.", name);
             return;
         }
 
         final var player = this.server.loadPlayer(name, uuid, this.connection);
         this.connection.setPlayer(player);
 
-        IConnection.LOGGER.info("%s joined the server.", name);
+        IConnection.LOGGER.info("{} joined the server.", name);
 
+        BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> this.server.getWorld().getSpawnPoint());
 
-        this.connection.send(new S2CLoginAcceptedPacket(uuid), PacketListener.onEither(() -> {
+        this.connection.send(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()), PacketListener.onEither(() -> {
             this.server.placePlayer(player);
             this.connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(this.server, player, this.connection));
 
             PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
-
-            BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> this.server.getWorld().getSpawnPoint());
 
             if (!player.isSpawned()) {
                 player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), this.connection);

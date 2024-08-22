@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
@@ -16,6 +17,8 @@ import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.js.JsLang;
+import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
+import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.python.PyLang;
@@ -86,6 +89,9 @@ public class DesktopLauncher {
                 return List.of();
             }
         };
+
+        Log.setLogger(KyroSlf4jLogger.INSTANCE);
+        com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
 
         CrashHandler.addHandler(crashLog -> {
             try {

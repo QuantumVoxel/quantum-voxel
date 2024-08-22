@@ -85,7 +85,7 @@ public class PacketIO {
 
     public String readString(int max) {
         if (max < 0) throw new IllegalArgumentException(CommonConstants.EX_INVALID_DATA);
-        int len = this.readVarInt();
+        int len = this.readShort();
         if (len > max) throw new PacketOverflowException("string", len, max);
         byte[] bytes = new byte[len];
         this.readBytes0(bytes);
@@ -97,7 +97,7 @@ public class PacketIO {
         if (max < 0) throw new IllegalArgumentException(CommonConstants.EX_INVALID_DATA);
         byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > max) throw new PacketOverflowException("string", bytes.length, max);
-        this.writeVarInt(bytes.length);
+        this.writeShort(bytes.length);
         this.writeBytes0(bytes);
         return this;
     }
@@ -502,17 +502,21 @@ public class PacketIO {
 
     public ChunkVec readChunkVec() {
         int x = this.readInt();
+        int y = this.readInt();
         int z = this.readInt();
         ChunkVecSpace space = this.readEnum(ChunkVecSpace.WORLD);
 
-        return new ChunkVec(x, z, space);
+        return new ChunkVec(x, y, z, space);
     }
 
     @CanIgnoreReturnValue
     public PacketIO writeChunkVec(ChunkVec pos) {
         try {
             this.output.writeInt(pos.getIntX());
+            this.output.writeInt(pos.getIntY());
             this.output.writeInt(pos.getIntZ());
+
+            this.writeEnum(pos.getSpace());
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -1135,11 +1139,11 @@ public class PacketIO {
     }
 
     public <T extends Enum<T>> T readEnum(T fallback) {
-        return EnumUtils.byOrdinal(this.readVarInt(), fallback);
+        return EnumUtils.byOrdinal(this.readByte(), fallback);
     }
 
     public void writeEnum(Enum<?> value) {
-        this.writeVarInt(value.ordinal());
+        this.writeByte(value.ordinal());
     }
 
     public BlockState readBlockMeta() {

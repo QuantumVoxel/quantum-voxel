@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.server.dedicated;
 
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
@@ -10,8 +11,11 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.inspect.InspectionRoot;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
+import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.dedicated.gui.DedicatedServerGui;
+import dev.ultreon.quantum.server.dedicated.http.ServerHttpSite;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -35,10 +39,12 @@ import java.util.concurrent.TimeUnit;
  */
 @ApiStatus.Internal
 public class Main {
+    static final ServerPlatform SERVER_PLATFORM = new ServerPlatform();
+
     private static final Logger LOGGER = LoggerFactory.getLogger("ServerMain");
-    private static final Object WAITER = new Object();
     private static DedicatedServer server;
     private static ServerLoader serverLoader;
+    static ServerHttpSite site;
 
     /**
      * Main entry point for the server.
@@ -52,18 +58,24 @@ public class Main {
     @ApiStatus.Internal
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), () -> {
-                try {
-                    run();
-                } catch (Exception e) {
-                    throw new AssertionError(e);
-                }
-            });
+            Log.setLogger(KyroSlf4jLogger.INSTANCE);
+            com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
+
+            ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), Main::initConfig);
 
             // Invoke FabricMC entrypoint for dedicated server.
-            GamePlatform loader = GamePlatform.get();
             FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
             FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+
+            Thread httpThread = new Thread(() -> {
+                try {
+                    Main.site = new ServerHttpSite();
+                } catch (IOException e) {
+                    CommonConstants.LOGGER.error("Failed to start HTTP server", e);
+                }
+            });
+            httpThread.setDaemon(true);
+            httpThread.start();
 
             ModApi.init();
 
@@ -172,6 +184,14 @@ public class Main {
             thread.join();
         } else {
             serverConfig.load();
+        }
+    }
+
+    private static void initConfig() {
+        try {
+            run();
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize config", e);
         }
     }
 }

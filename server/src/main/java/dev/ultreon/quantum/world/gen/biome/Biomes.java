@@ -240,6 +240,18 @@ public class Biomes {
 //            .feature(new PatchFeature(NoiseConfigs.PATCH, Blocks.SANDSTONE, 0.1f, 4))
             .build());
 
+    public static final Biome BEACH = Biomes.register("beach", Biome.builder()
+            .noise(NoiseConfigs.GENERIC_NOISE)
+            .domainWarping(seed -> new DomainWarping(QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_X.create(seed)), QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_Y.create(seed))))
+            .temperatureRange(-2.0f, 2.0f)
+            .humidityRange(-2.0f, 2.0f)
+            .heightRange(60.0f, 65.5f)
+            .layer(new AirTerrainLayer())
+            .layer(new UndergroundTerrainLayer(Blocks.STONE, 3))
+            .layer(new SurfaceTerrainLayer(Blocks.SAND, 3))
+            .layer(new WaterTerrainLayer(64))
+            .build());
+
     public static final Biome MOUNTAINS = Biomes.register("mountains", Biome.builder()
             .noise(NoiseConfigs.GENERIC_NOISE)
             .domainWarping(seed -> new DomainWarping(QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_X.create(seed)), QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_Y.create(seed))))

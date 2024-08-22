@@ -1,7 +1,5 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum;
 
-import dev.ultreon.quantum.Mod;
-import dev.ultreon.quantum.ModOrigin;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.Person;

@@ -493,7 +493,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onChunkUnload(ChunkVec chunkVec) {
         if (this.client.world != null)
-            this.client.world.unloadChunk(chunkVec);
+            QuantumClient.invoke(() -> this.client.world.unloadChunk(chunkVec));
         else CommonConstants.LOGGER.error("Attempted to unload a chunk while the world wasn't loaded!");
     }
 

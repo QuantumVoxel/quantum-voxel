@@ -234,5 +234,15 @@ public class WorldLoadScreen extends Screen {
 
     public void onLogin() {
         this.loggedIn = true;
+        this.done = true;
+
+        this.client.renderWorld = true;
+        ClientWorldAccess world1 = this.client.world;
+        if (world1 instanceof ClientWorld clientWorld) {
+            this.client.worldRenderer = new WorldRenderer(clientWorld);
+        } else {
+            throw new IllegalStateException("Unexpected world type: " + (world1 == null ? null : world1.getClass().getName()));
+        }
+        this.client.showScreen(null);
     }
 }

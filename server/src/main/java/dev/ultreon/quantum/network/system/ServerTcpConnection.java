@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.network.system;
 
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Server;
 import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -11,15 +13,18 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
 import java.io.IOException;
-import java.net.Socket;
 
-public class ServerTcpConnection extends Connection<ServerPacketHandler, ClientPacketHandler> {
+public class ServerTcpConnection extends TcpConnection<ServerPacketHandler, ClientPacketHandler> {
+    private final Server kryoServer;
     private final QuantumServer server;
     private ServerPlayer player;
 
-    public ServerTcpConnection(Socket accepted, QuantumServer server) {
-        super(accepted, server);
+    public ServerTcpConnection(Connection connection, Server kryoServer, QuantumServer server) {
+        super(connection, server);
+        this.kryoServer = kryoServer;
         this.server = server;
+
+        this.start();
     }
 
     @Override
@@ -55,7 +60,7 @@ public class ServerTcpConnection extends Connection<ServerPacketHandler, ClientP
     public ServerPlayer getPlayer() {
         ServerPlayer player = this.player;
         if (player == null)
-            player = server.getPlayerManager().bySocket(this.getSocket());
+            player = server.getPlayerManager().byConnection(this.getConnection());
 
         return player;
     }

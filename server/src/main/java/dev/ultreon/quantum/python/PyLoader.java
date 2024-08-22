@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.python;
 
 import com.google.gson.Gson;
+import dev.ultreon.quantum.FabricMod;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.LangLoader;
 import dev.ultreon.quantum.graal.GraalLanguages;
@@ -178,5 +179,13 @@ public class PyLoader implements LangLoader {
 
     public Collection<PyMod> getMods() {
         return Collections.unmodifiableCollection(mods.values());
+    }
+
+    public boolean isModLoaded(String id) {
+        return mods.containsKey(id);
+    }
+
+    public PyMod getMod(String id) {
+        return mods.get(id);
     }
 }

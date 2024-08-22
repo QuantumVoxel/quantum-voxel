@@ -10,6 +10,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class DisconnectedScreen extends Screen {
@@ -27,6 +28,20 @@ public class DisconnectedScreen extends Screen {
         builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"), 150)
                 .position(() -> new Position(this.size.width / 2 - 75, this.size.height / 2 - 10))
                 .callback(caller -> this.client.showScreen(wasMultiplayer ? new MultiplayerScreen() : new TitleScreen())));
+
+        try {
+            // Make sure the connection is closed
+            this.client.connection.close();
+            this.client.connection = null;
+        } catch (IOException ignored) {
+            this.client.connection = null;
+        }
+
+        if (this.client.worldRenderer != null) this.client.worldRenderer.dispose();
+        if (this.client.world != null) this.client.world.dispose();
+        this.client.player = null;
+        this.client.worldRenderer = null;
+        this.client.world = null;
     }
 
     @Override

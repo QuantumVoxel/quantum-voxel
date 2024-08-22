@@ -59,7 +59,7 @@ public class LanguageScreen extends Screen {
             return;
         }
 
-        String text = locale.getDisplayLanguage(Locale.of("en")) + " (" + locale.getDisplayCountry(new Locale("en")) + ")";
+        String text = locale.getDisplayLanguage(Locale.of("en")) + " (" + locale.getDisplayCountry(Locale.of("en")) + ")";
         text += " - " + locale.getDisplayLanguage(locale) + " (" + locale.getDisplayCountry(locale) + ")";
 
         renderer.textCenter(text, this.list.getX() + this.list.getWidth() / 2f, y + 4f);

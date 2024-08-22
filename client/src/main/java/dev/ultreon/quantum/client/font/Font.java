@@ -194,6 +194,11 @@ public class Font implements Disposable {
         Font.UNIFONT.setColor(gdx);
     }
 
+    public void setColor(com.badlogic.gdx.graphics.Color color) {
+        this.bitmapFont.setColor(color);
+        Font.UNIFONT.setColor(color);
+    }
+
     public int width(TextObject text) {
         float width = 0;
 

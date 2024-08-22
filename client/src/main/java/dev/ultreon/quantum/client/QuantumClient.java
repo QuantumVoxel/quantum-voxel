@@ -110,6 +110,7 @@ import dev.ultreon.quantum.network.packets.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.network.system.MemoryConnection;
 import dev.ultreon.quantum.python.PyLoader;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
@@ -141,6 +142,7 @@ import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -2312,7 +2314,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         this.integratedServer.start();
 
-        mem.setOtherSide(((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
+        mem.setOtherSide((MemoryConnection<ServerPacketHandler, ClientPacketHandler>) ((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
 
         // Initialize (memory) connection.
         this.multiplayerData = new MultiplayerData(this);
@@ -2320,7 +2322,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void connectToServer(String host, int port) {
-        this.connection = ClientTcpConnection.connectToServer(host, port).unwrap();
+        this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {
+            this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e.getMessage(), true));
+            return null;
+        }).getValueOrNull();
+
+        if (this.connection == null) return;
 
         // Initialize remote connection.
         this.multiplayerData = new MultiplayerData(this);
