@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <link rel="prefetch" href="/">
+    <link rel="prefetch" href="/login">
+    <link rel="prefetch" href="/dashboard">
+    <link rel="prefetch" href="/stats">
+    <link rel="prefetch" href="/console">
+    <link rel="prefetch" href="/tools">
+    <link rel="prefetch" href="/settings">
+
+    <script src="assets/js/api.js"></script>
+
+    <style>
+        /* dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --sidepanel-bg: #ff4000;
+                --sidepanel-header-bg: #ff4000;
+                --sidepanel-border-color: #f03a2d;
+                --sidepanel-text-color: #e6dfde;
+                --sidepanel-text-hover-color: #f8f9fc;
+                --sidepanel-text-active-color: #495057;
+                --sidepanel-button-bg: #fff0;
+                --sidepanel-button-hover-bg: #fff2;
+                --sidepanel-button-active-bg: #ffff;
+
+                --content-bg: #202020;
+                --content-text-color: #e6dfde;
+            }
+        }
+
+        /* light mode */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --sidepanel-bg: #ff4000;
+                --sidepanel-header-bg: #ff4000;
+                --sidepanel-border-color: #f03a2d;
+                --sidepanel-text-color: #e6dfde;
+                --sidepanel-text-hover-color: #f8f9fc;
+                --sidepanel-text-active-color: #495057;
+                --sidepanel-button-bg: #fff0;
+                --sidepanel-button-hover-bg: #fff2;
+                --sidepanel-button-active-bg: #ffff;
+
+                --content-bg: #ffffff;
+                --content-text-color: #212529;
+            }
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .sidepanel {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 250px;
+            color: var(--sidepanel-text-color);
+            text-decoration: none;
+            box-shadow: inset -48px 0 32px -32px #0008;
+            background-color: var(--sidepanel-bg);
+            overflow-x: hidden;
+            overflow-y: auto;
+            border-right: 1px solid var(--sidepanel-border-color);
+            z-index: 1;
+        }
+
+        .sidepanel a {
+            color: var(--sidepanel-text-color);
+            padding: 8px;
+            text-decoration: none;
+
+            border-radius: 8px;
+            display: block;
+
+            width: 100%;
+        }
+
+        .sidepanel a:hover {
+            color: var(--sidepanel-text-color);
+            text-decoration: none;
+
+            background-color: var(--sidepanel-button-hover-bg);
+        }
+
+        .sidepanel ul {
+            padding: 0;
+        }
+
+        .sidepanel li {
+            list-style-type: none;
+            padding: 8px;
+            margin: 2px 0;
+            /* add margin to the top and bottom of the link */
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .fa {
+            display: inline-block;
+            width: 30px;
+        }
+        .bg-accent {
+            background-color: var(--sidepanel-header-bg);
+        }
+        .bg-hover {
+            background-color: var(--sidepanel-button-hover-bg);
+        }
+        .bg-accent .nav-link.active {
+            background-color: var(--sidepanel-button-active-bg);
+            color: var(--sidepanel-text-active-color);
+        }
+        .content {
+            width: 100vw;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+
+            display: block;
+
+            padding: 0;
+        }
+
+        .content .container {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            max-width: calc(100% - 280px);
+        }
+
+        .sidebar {
+            box-shadow: 0 0 32px 0 #0008;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-primary">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/.0/js/bootstrap.bundle.min.js"></script>
+
+    <div id="layoutDashboard">
+        <div id="layoutDashboard_content">
+            <main>
+                <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-accent sidebar" style="width: 280px; height: 100vh; position: fixed;">
+                    <p
+                        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                        <svg class="bi me-2" width="40" height="32">
+                            <use xlink:href="#bootstrap"></use>
+                        </svg>
+                        <span class="fs-4">Quantum Server</span>
+                    </p>
+                    <hr>
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a href="/" class="nav-link%%HOME_ACTIVE%%" aria-current="page">
+                                <i class="fa fa-home"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/stats" class="nav-link%%STATS_ACTIVE%%">
+                                <i class="fa fa-chart-bar"></i>
+                                Statistics
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/console" class="nav-link%%CONSOLE_ACTIVE%%">
+                                <i class="fa fa-terminal"></i>
+                                Console
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tools" class="nav-link%%TOOLS_ACTIVE%%">
+                                <i class="fa fa-tools"></i>
+                                Tools
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/settings" class="nav-link%%SETTINGS_ACTIVE%%">
+                                <i class="fa fa-cog"></i>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr>
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                            id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://github.com/XyperCode.png" alt="" width="32" height="32" style="margin-right: 8px;"
+                                class="rounded-circle me-2">
+                            <strong>XyperCode</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">Sign out</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <div class="container">
+                        %%CONTENT%%
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>
