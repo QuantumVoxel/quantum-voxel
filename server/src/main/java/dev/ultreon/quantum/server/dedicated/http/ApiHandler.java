@@ -5,13 +5,11 @@ import com.google.gson.JsonParseException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.api.commands.CommandSpecValues;
 import net.fabricmc.loader.api.FabricLoader;
 import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,7 +17,6 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -36,7 +33,7 @@ public class ApiHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestURI().getPath().startsWith("/api/")) {
-            exchange.sendResponseHeaders(404, 0);
+            exchange.sendResponseHeaders(HttpCodes.NOT_FOUND, 0);
             return;
         }
 
@@ -48,7 +45,7 @@ public class ApiHandler implements HttpHandler {
                 case "ping" -> {
                     if (args.length == 1) {
                         exchange.getResponseBody().write("pong".getBytes());
-                        exchange.sendResponseHeaders(200, 0);
+                        exchange.sendResponseHeaders(HttpCodes.OK, 0);
                         exchange.close();
                         return;
                     }
@@ -56,7 +53,7 @@ public class ApiHandler implements HttpHandler {
                 case "version" -> {
                     if (args.length == 1) {
                         exchange.getResponseBody().write(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getMetadata().getVersion().getFriendlyString().getBytes());
-                        exchange.sendResponseHeaders(200, 0);
+                        exchange.sendResponseHeaders(HttpCodes.OK, 0);
                         exchange.close();
                         return;
                     }
@@ -72,10 +69,10 @@ public class ApiHandler implements HttpHandler {
                     if (args.length == 1) {
                         Path path = Paths.get("logs/debug.log");
                         if (Files.notExists(path)) {
-                            exchange.sendResponseHeaders(404, 0);
+                            exchange.sendResponseHeaders(HttpCodes.NOT_FOUND, 0);
                             return;
                         }
-                        exchange.sendResponseHeaders(200, 0);
+                        exchange.sendResponseHeaders(HttpCodes.OK, 0);
                         try (var is = Files.newInputStream(path, StandardOpenOption.READ)) {
                             is.transferTo(exchange.getResponseBody());
                         }
@@ -84,7 +81,7 @@ public class ApiHandler implements HttpHandler {
                     }
                 }
                 default -> {
-                    exchange.sendResponseHeaders(404, 0);
+                    exchange.sendResponseHeaders(HttpCodes.NOT_FOUND, 0);
                     return;
                 }
             }
@@ -94,7 +91,7 @@ public class ApiHandler implements HttpHandler {
             return;
         }
 
-        exchange.sendResponseHeaders(404, 0);
+        exchange.sendResponseHeaders(HttpCodes.NOT_FOUND, 0);
     }
 
     private boolean evalLogoutApi(HttpExchange exchange) throws IOException {
@@ -102,15 +99,13 @@ public class ApiHandler implements HttpHandler {
             // Logout
             for (String cookie : exchange.getRequestHeaders().get("Cookie")) {
                 if (cookie.contains("token=")) {
-                    tokens.remove(cookie.indexOf("token=") + 6);
-                    exchange.sendResponseHeaders(200, 0);
-                    return true;
-                } else {
-                    exchange.sendResponseHeaders(404, 0);
+                    int i = cookie.indexOf("token=") + 6;
+                    tokens.remove(cookie.substring(i, cookie.indexOf(";", i)));
+                    exchange.sendResponseHeaders(HttpCodes.OK, 0);
                     return true;
                 }
             }
-            exchange.sendResponseHeaders(300, 0);
+            exchange.sendResponseHeaders(HttpCodes.TEMPORARY_REDIRECT, 0);
             return true;
         }
         return false;
@@ -118,7 +113,7 @@ public class ApiHandler implements HttpHandler {
 
     private boolean evalLoginApi(HttpExchange exchange) throws IOException {
         if (isAuthenticated(exchange)) {
-            exchange.sendResponseHeaders(404, 0);
+            exchange.sendResponseHeaders(HttpCodes.NOT_FOUND, 0);
             return true;
         }
 
@@ -140,7 +135,7 @@ public class ApiHandler implements HttpHandler {
                 return true;
             }
             boolean loggedIn = login(username, password);
-            exchange.sendResponseHeaders(loggedIn ? 200 : 401, 0);
+            exchange.sendResponseHeaders(loggedIn ? HttpCodes.OK : 401, 0);
 
             if (loggedIn) {
                 exchange.getResponseBody().write(json("{\n" +

@@ -26,6 +26,7 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
         send(packet, null);
     }
 
+    @Deprecated
     @CanIgnoreReturnValue
     void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener);
 

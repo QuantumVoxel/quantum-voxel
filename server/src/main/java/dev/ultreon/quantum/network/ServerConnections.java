@@ -129,9 +129,9 @@ public class ServerConnections {
                         }
 
                         ServerConnections.LOGGER.warn("Failed to handle packet:", e);
-                        IConnection<ServerPacketHandler, ClientPacketHandler> finalConnection = connection;
                         String message = "Server failed to tick the connection";
-                        connection.send(new S2CDisconnectPacket<>(message), PacketListener.onEither(() -> finalConnection.disconnect(message)));
+                        connection.send(new S2CDisconnectPacket<>(message));
+                        connection.disconnect(message);
                         connection.setReadOnly();
                     }
                 } else {

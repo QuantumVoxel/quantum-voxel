@@ -1,24 +1,32 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.world.vec.ChunkVec;
+import kotlin.Lazy;
+import kotlin.LazyKt;
 
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
 public class ChunkModel implements RenderableProvider {
+    private static final Lazy<Model> gizmo = LazyKt.lazy(ChunkModel::createBorderGizmo);
+    private static final Color CHUNK_GIZMO_COLOR = new Color(0.0f, 1.0f, 0.0f, 1.0f);
     private final ChunkVec pos;
     private final ClientChunk chunk;
     private final Material material;
     private final Material transparentMaterial;
     private Model model = null;
     private ModelInstance modelInstance = null;
+    private ModelInstance gizmoInstance = null;
 
     public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
         this.material = renderer.getMaterial();
@@ -43,6 +51,8 @@ public class ChunkModel implements RenderableProvider {
 
     private Model generateModel() {
         chunk.immediateRebuild = false;
+        this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
+
         chunk.whileLocked(() -> {
             if (modelInstance == null) {
                 ModelManager modelManager = ModelManager.INSTANCE;
@@ -85,6 +95,24 @@ public class ChunkModel implements RenderableProvider {
         return model;
     }
 
+    private static Model createBorderGizmo() {
+        ModelBuilder modelBuilder = new ModelBuilder();
+        MeshBuilder meshBuilder = new MeshBuilder();
+        modelBuilder.begin();
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+
+        Vector3 start = new Vector3();
+        Vector3 end = new Vector3();
+
+        meshBuilder.line(start.set(0, -64, 0), CHUNK_GIZMO_COLOR, end.set(0, 320, 0), CHUNK_GIZMO_COLOR);
+        meshBuilder.line(start.set(16, -64, 0), CHUNK_GIZMO_COLOR, end.set(0, 320, 0), CHUNK_GIZMO_COLOR);
+        meshBuilder.line(start.set(16, -64, 0), CHUNK_GIZMO_COLOR, end.set(16, 320, 0), CHUNK_GIZMO_COLOR);
+        meshBuilder.line(start.set(0, -64, 0), CHUNK_GIZMO_COLOR, end.set(16, 320, 0), CHUNK_GIZMO_COLOR);
+
+        meshBuilder.end();
+        return modelBuilder.end();
+    }
+
     public void unload() {
         model.dispose();
         model = null;
@@ -113,15 +141,19 @@ public class ChunkModel implements RenderableProvider {
             Renderable renderable = array.get(i);
             renderable.userData = chunk;
         }
+
+        if (gizmoInstance != null && GamePlatform.get().areChunkBordersVisible()) {
+            gizmoInstance.transform = modelInstance.transform;
+            gizmoInstance.getRenderables(array, pool);
+        }
     }
 
     public void dispose() {
         Model model = this.model;
-        this.modelInstance = null;
-        this.model = null;
-
-        if (model != null)
-            model.dispose();
+        if (modelInstance != null) this.modelInstance = null;
+        if (model != null) this.model = null;
+        if (gizmoInstance != null) gizmoInstance = null;
+        if (model != null) model.dispose();
     }
 
     public boolean needsRebuild(ClientWorld world) {

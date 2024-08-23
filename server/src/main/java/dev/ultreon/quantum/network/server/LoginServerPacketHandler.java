@@ -104,19 +104,19 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
         BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> this.server.getWorld().getSpawnPoint());
 
-        this.connection.send(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()), PacketListener.onEither(() -> {
-            this.server.placePlayer(player);
-            this.connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(this.server, player, this.connection));
+        this.connection.send(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));
 
-            PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
+        this.server.placePlayer(player);
+        this.connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(this.server, player, this.connection));
 
-            if (!player.isSpawned()) {
-                player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), this.connection);
-                player.setInitialItems();
-            }
+        PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
 
-            PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);
-        }));
+        if (!player.isSpawned()) {
+            player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), this.connection);
+            player.setInitialItems();
+        }
+
+        PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);
     }
 
     @Override

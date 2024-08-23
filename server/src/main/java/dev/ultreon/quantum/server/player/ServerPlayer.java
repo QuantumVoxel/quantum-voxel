@@ -433,7 +433,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void sendChunk(@NotNull ChunkVec vec, @NotNull ServerChunk chunk) {
         if (this.sendingChunk) return;
 
-        this.connection.send(new S2CChunkDataPacket(vec, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()), PacketListener.onEither(() -> this.sendingChunk = false));
+        this.connection.send(new S2CChunkDataPacket(vec, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()));
+        this.sendingChunk = false;
     }
 
     /**

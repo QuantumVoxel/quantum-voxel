@@ -96,6 +96,7 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     }
 
     @Override
+    @Deprecated
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
         if (this.readOnly)
             throw new ReadOnlyConnectionException();
@@ -104,9 +105,6 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
 
 
         this.packetQueue.add(packet);
-        if (resultListener != null) {
-            resultListener.onSuccess();
-        }
     }
 
     public void setCompressed(boolean compressed) {
