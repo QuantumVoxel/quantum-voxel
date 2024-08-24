@@ -159,6 +159,13 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
+    public void setPosition(double x, double y, double z) {
+        x = Mth.clamp(x, -30000000, 30000000);
+        z = Mth.clamp(z, -30000000, 30000000);
+        super.setPosition(x, y, z);
+    }
+
+    @Override
     public @NotNull TextObject getDisplayName() {
         return TextObject.literal(this.name);
     }

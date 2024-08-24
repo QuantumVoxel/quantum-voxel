@@ -157,8 +157,8 @@ public final class WorldStorage {
      * @return {@code true} if the region file exists, {@code false} otherwise.
      * @throws IOException if an I/O error occurs.
      */
-    public boolean regionExists(int x, int z) throws IOException {
-        return this.exists("regions/" + x + "." + z + ".ubo");
+    public boolean regionExists(int x, int y, int z) throws IOException {
+        return this.exists("regions/" + x + "." + y + "." + z + ".ubo");
     }
 
     /**
@@ -168,8 +168,8 @@ public final class WorldStorage {
      * @param z the z coordinate of the region.
      * @return the region file.
      */
-    public File regionFile(int x, int z) {
-        return this.directory.resolve("regions/" + x + "." + z + ".ubo").toFile();
+    public File regionFile(int x, int y, int z) {
+        return this.directory.resolve("regions/" + x + "." + y + "." + z + ".ubo").toFile();
     }
 
     /**
@@ -197,7 +197,7 @@ public final class WorldStorage {
      * @return the region file.
      */
     public File regionFile(RegionVec pos) {
-        return this.regionFile(pos.getIntX(), pos.getIntZ());
+        return this.regionFile(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     /**

@@ -16,14 +16,13 @@ import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 
 public class GreedyMesher implements Mesher {
 
-    private static final int CHUNK_WIDTH = 16;
-    private static final int CHUNK_HEIGHT = 256;
-
-    private static final int CHUNK_SIZE = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT;
+    private static final int CHUNK_WIDTH = World.CHUNK_SIZE;
+    private static final int CHUNK_HEIGHT = World.CHUNK_SIZE;
 
     private static final int SOUTH = 0;
     private static final int NORTH = 1;

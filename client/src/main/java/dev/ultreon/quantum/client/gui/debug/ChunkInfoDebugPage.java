@@ -2,15 +2,18 @@ package dev.ultreon.quantum.client.gui.debug;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
+import dev.ultreon.quantum.client.world.ClientChunkInfo;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkInfoDebugPage implements DebugPage {
     @Override
     public void render(DebugPageContext context) {
-        context.left("Chunk Info");
+        context.left("Generic Chunk Info");
 
         QuantumClient client = context.client();
 
@@ -31,7 +34,16 @@ public class ChunkInfoDebugPage implements DebugPage {
         context.left("X", chunkVec.getIntX());
         context.left("Z", chunkVec.getIntZ());
 
-        context.left("Heightmap", chunk.getHeight(chunkVec.getIntX(), chunkVec.getIntZ()));
+        BlockVec blockVec = player.getBlockVec().chunkLocal();
+        context.left("Heightmap", chunk.getHeight(blockVec.x, blockVec.z));
         context.left("Render Offset", chunk.getRenderOffset());
+
+        if (chunk instanceof ClientChunk clientChunk) {
+            ClientChunkInfo info = clientChunk.info;
+
+            context.left();
+            context.left("Chunk Load Info");
+            context.left("Load duration", info.loadDuration + "ms");
+        }
     }
 }

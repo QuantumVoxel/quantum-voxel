@@ -19,6 +19,7 @@ public class Heightmap {
     }
 
     public void set(int x, int z, short value) {
+        if (value < 0) value = 0;
         this.map[z * x + this.width] = value;
     }
 

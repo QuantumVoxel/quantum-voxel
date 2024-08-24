@@ -3,10 +3,8 @@ package dev.ultreon.quantum.util;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.world.ChunkReader;
-import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldReader;
 
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 @SuppressWarnings("UnqualifiedStaticUsage")
@@ -73,11 +71,8 @@ public class WorldRayCaster {
 
             loc.set(abs).sub(chunk.getOffset().x, chunk.getOffset().y, chunk.getOffset().z);
 
-            if (loc.y >= World.WORLD_HEIGHT && dir.y >= 0) return result;
-            if (loc.y < 0 && dir.y < 0) return result;
-
             if (loc.x < 0 || loc.y < 0 || loc.z < 0 ||
-                    loc.x >= CHUNK_SIZE || loc.y >= CHUNK_HEIGHT || loc.z >= CHUNK_SIZE) {
+                    loc.x >= CHUNK_SIZE || loc.y >= CHUNK_SIZE || loc.z >= CHUNK_SIZE) {
                 chunk = null;
                 continue;
             }

@@ -49,6 +49,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     }
 
     @Override
+    @Deprecated
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
         if (otherSide == null || this.readOnly) {
             throw new ReadOnlyConnectionException();

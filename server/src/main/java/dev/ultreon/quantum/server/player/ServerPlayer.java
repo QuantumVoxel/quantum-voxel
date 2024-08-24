@@ -21,7 +21,6 @@ import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.ItemSlot;
-import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -56,6 +55,7 @@ import java.util.stream.Collectors;
  * @see QuantumServer#getCachedPlayer(String)
  */
 public class ServerPlayer extends Player implements CacheablePlayer {
+    private final Vec3d tmp3d$1 = new Vec3d();
     public IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private final ServerWorld world;
     public int hotbarIdx;
@@ -333,12 +333,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param status the status of the chunk
      */
     public void onChunkStatus(@NotNull ChunkVec vec, Chunk.Status status) {
-        // Handle the chunk status accordingly
-        if (vec.dst(this.getChunkVec()) > this.server.getRenderDistance()) {
-            this.sendPacket(new S2CChunkUnloadPacket(vec));
-            return;
-        }
-
         switch (status) {
             case FAILED -> this.handleFailedChunk(vec);
             case SKIP, UNLOADED -> {
@@ -362,8 +356,19 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     private void handleClientLoadChunk(@NotNull ChunkVec vec) {
-        this.setPosition(this.ox, this.oy, this.oz);
-        if (DebugFlags.LOG_POSITION_RESET_ON_CHUNK_LOAD.enabled())
+        // Handle the chunk status accordingly
+        if (vec.dst(this.getChunkVec()) > this.server.getRenderDistance()) {
+            this.sendPacket(new S2CChunkUnloadPacket(vec));
+            return;
+        }
+
+        if (tmp3d$1.set(this.ox, this.oy, this.oz).dst(this.getPosition()) > 5) {
+            this.teleportTo(this.ox, this.oy, this.oz);
+            this.sendMessage("<red>You moved to quickly!");
+            return;
+        }
+
+        if (DebugFlags.LOG_POSITION_RESET_ON_CHUNK_LOAD.isEnabled())
             Chat.sendInfo(this, "Position reset on chunk load.");
 
         ServerChunk chunk = this.world.getChunk(vec);
@@ -374,7 +379,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     private void handleFailedChunk(@NotNull ChunkVec vec) {
-        if (DebugFlags.LOG_CHUNK_LOAD_FAILURE.enabled())
+        if (DebugFlags.LOG_CHUNK_LOAD_FAILURE.isEnabled())
             Chat.sendInfo(this, "Failed to load chunk " + vec);
 
         ServerChunk chunk = this.world.getChunk(vec);
@@ -758,24 +763,26 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void requestChunkLoad(ChunkVec pos) {
         // Get or load the chunk.
         synchronized (this.chunkTracker) {
-            if (!this.chunkTracker.isTracking(pos)) {
-                QuantumServer.invoke(() -> {
+            QuantumServer.invoke(() -> {
+                if (!this.chunkTracker.isTracking(pos))
                     this.chunkTracker.startTracking(pos);
-                    this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
-                        receivedChunk.getTracker().startTracking(this);
-                        receivedChunk.sendChunk();
 
-                        CommonConstants.LOGGER.debug("Loaded chunk {}", pos);
-                    }).exceptionally(throwable -> {
-                        this.chunkTracker.stopTracking(pos);
-                        this.sendPacket(new S2CChunkUnloadPacket(pos));
+                this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
+                    if (receivedChunk == null) {
+                        throw new IllegalStateException("Chunk was not loaded.");
+                    }
 
-                        CommonConstants.LOGGER.error("Failed to load chunk {}", pos, throwable);
+                    receivedChunk.getTracker().startTracking(this);
+                    receivedChunk.sendChunk();
+                }).exceptionally(throwable -> {
+                    this.chunkTracker.stopTracking(pos);
+                    this.sendPacket(new S2CChunkUnloadPacket(pos));
 
-                        return null;
-                    });
+                    CommonConstants.LOGGER.error("Failed to load chunk {} due to exception", pos, throwable);
+
+                    return null;
                 });
-            }
+            });
         }
     }
 }

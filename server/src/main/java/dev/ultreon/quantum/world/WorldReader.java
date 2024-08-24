@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -16,7 +17,7 @@ public interface WorldReader {
     boolean isAlwaysLoaded(ChunkVec pos);
 
     @NotNull
-    List<ChunkVec> getChunksAround(Vec3d pos);
+    List<ChunkVec> getChunksAround(BlockVec pos);
 
     @NotNull
     BlockState get(BlockVec pos);

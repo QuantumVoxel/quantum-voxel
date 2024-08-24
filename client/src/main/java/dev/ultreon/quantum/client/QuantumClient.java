@@ -644,7 +644,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);
 
         // Create inspection nodes for libGdx and graphics
-        if (DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             InspectionNode<Application> libGdxNode = this.inspection.createNode("libGdx", value -> Gdx.app);
             InspectionNode<Graphics> graphicsNode = libGdxNode.createNode("graphics", Application::getGraphics);
 

@@ -20,13 +20,12 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.Collection;
 import java.util.List;
 
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public class BiomeGenerator implements Disposable {
     private final World world;
     private final List<TerrainLayer> layers;
     private final List<WorldGenFeature> features;
-    public static final boolean USE_DOMAIN_WARPING = true;
     @UnknownNullability
     public TreeGenerator treeGenerator;
     private final Biome biome;
@@ -40,22 +39,21 @@ public class BiomeGenerator implements Disposable {
     }
 
     public void processColumn(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
-        LightMap lightMap = chunk.getLightMap();
+//        LightMap lightMap = chunk.getLightMap();
 
         this.generateTerrainLayers(chunk, x, z, y);
 
-        BiomeGenerator.setRecordedChanges(chunk, x, z, recordedChanges);
+        BiomeGenerator.setRecordedChanges(chunk, x, chunk.getOffset().y, z, recordedChanges);
 
 //        BiomeGenerator.updateLightMap(chunk, x, z, lightMap); // TODO
-        chunk.set(x, chunk.getOffset().y, z, Blocks.VOIDGUARD.createMeta());
     }
 
-    private static void updateLightMap(BuilderChunk chunk, int x, int z, LightMap lightMap) {
-        int highest = chunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
-        for (int y = chunk.getOffset().y; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
-            lightMap.setSunlight(x, y, z, y >= highest ? 15 : 7);
-        }
-    }
+//    private static void updateLightMap(BuilderChunk chunk, int x, int z, LightMap lightMap) {
+//        int highest = chunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
+//        for (int y = chunk.getOffset().y; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
+//            lightMap.setSunlight(x, y, z, y >= highest ? 15 : 7);
+//        }
+//    }
 
     public void generateTerrainFeatures(RecordingChunk chunk, int x, int z, int groundPos) {
         for (var feature : this.features) {
@@ -65,23 +63,28 @@ public class BiomeGenerator implements Disposable {
 
     private void generateTerrainLayers(BuilderChunk chunk, int x, int z, int groundPos) {
         RNG rng = chunk.getRNG();
-        for (int y = chunk.getOffset().y + 1; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
+        if (chunk.getVec().y > 256 / CHUNK_SIZE)
+            return;
+
+        BlockVec offset = chunk.getOffset();
+        for (int y = 0; y < CHUNK_SIZE; y++) {
             if (chunk.get(x, y, z).isAir()) continue;
 
             for (var layer : this.layers) {
-                if (layer.handle(this.world, chunk, rng, x, y, z, groundPos)) {
+                if (layer.handle(this.world, chunk, rng, offset.x + x, offset.y + y, offset.z + z, groundPos)) {
                     break;
                 }
             }
         }
     }
 
-    private static void setRecordedChanges(BuilderChunk chunk, int x, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
+    private static void setRecordedChanges(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
         for (ServerWorld.RecordedChange recordedChange : recordedChanges) {
-            boolean isWithinChunkBounds = recordedChange.x() >= chunk.getOffset().x && recordedChange.x() < chunk.getOffset().x + World.CHUNK_SIZE
-                    && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + World.CHUNK_SIZE;
+            boolean isWithinChunkBounds = recordedChange.x() >= chunk.getOffset().x && recordedChange.x() < chunk.getOffset().x + CHUNK_SIZE
+                    && recordedChange.y() >= chunk.getOffset().y && recordedChange.y() < chunk.getOffset().y + CHUNK_SIZE
+                    && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + CHUNK_SIZE;
             BlockVec localBlockVec = World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z());
-            if (isWithinChunkBounds && localBlockVec.getIntX() == x && localBlockVec.getIntZ() == z) {
+            if (isWithinChunkBounds && localBlockVec.getIntX() == x && localBlockVec.getIntY() == y && localBlockVec.getIntZ() == z) {
                 chunk.set(new BlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z(), BlockVecSpace.WORLD).chunkLocal().vec(), recordedChange.block());
                 if (WorldGenDebugContext.isActive()) {
                     System.out.println("[DEBUG CHUNK-HASH " + System.identityHashCode(chunk) + "] Setting recorded change in chunk at " + recordedChange.x() + ", " + recordedChange.y() + ", " + recordedChange.z() + " of type " + recordedChange.block());

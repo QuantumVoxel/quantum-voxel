@@ -1,34 +1,37 @@
 package dev.ultreon.quantum.world.vec;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ChunkVecTest {
 
     @Test
     void offset() {
         ChunkVec vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
-        ChunkVec offset = vec.offset(0, 0);
+        ChunkVec offset = vec.offset(0, 0, 0);
         assertEquals(vec, offset);
 
         vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
-        offset = vec.offset(1, 2);
+        offset = vec.offset(1, 2, 3);
         assertEquals(1, offset.getX());
         assertEquals(2, offset.getZ());
 
         vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
-        offset = vec.offset(-1, -2);
+        offset = vec.offset(-1, -2, -3);
         assertEquals(-1, offset.getX());
         assertEquals(-2, offset.getZ());
 
         vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
-        offset = vec.offset(0, -1);
+        offset = vec.offset(0, -1, 0);
         assertEquals(0, offset.getX());
-        assertEquals(-1, offset.getZ());
+        assertEquals(-1, offset.getY());
+        assertEquals(0, offset.getZ());
 
         vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
-        offset = vec.offset(0, 1);
+        offset = vec.offset(0, 0, -1);
         assertEquals(0, offset.getX());
         assertEquals(1, offset.getZ());
     }
@@ -108,6 +111,12 @@ class ChunkVecTest {
         assertEquals(1, region.getZ());
 
         vec = new ChunkVec(-33, 33, -33, ChunkVecSpace.WORLD);
+        region = vec.regionLocal();
+        assertEquals(31, region.getX());
+        assertEquals(1, region.getY());
+        assertEquals(31, region.getZ());
+
+        vec = new ChunkVec(-1, 33, -1, ChunkVecSpace.WORLD);
         region = vec.regionLocal();
         assertEquals(31, region.getX());
         assertEquals(1, region.getY());
@@ -292,6 +301,61 @@ class ChunkVecTest {
 
     @Test
     void worldSpace() {
+        ChunkVec vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        ChunkVec block = vec.worldSpace(new RegionVec(0, 0, 0));
+        assertEquals(0, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(0, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(1, 0, 0));
+        assertEquals(32, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(0, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(0, 1, 0));
+        assertEquals(0, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(0, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(0, 0, 1));
+        assertEquals(0, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(32, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(1, 1, 1));
+        assertEquals(32, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(32, block.getZ());
+
+        // Negative
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(-1, 0, 0));
+        assertEquals(-32, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(0, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(0, -1, 0));
+        assertEquals(0, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(0, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(0, 0, -1));
+        assertEquals(0, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(-32, block.getZ());
+
+        vec = new ChunkVec(0, 0, 0, ChunkVecSpace.REGION);
+        block = vec.worldSpace(new RegionVec(-1, -1, -1));
+        assertEquals(-32, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(-32, block.getZ());
     }
 
     @Test
@@ -376,10 +440,27 @@ class ChunkVecTest {
         assertEquals(0, region.getY());
         assertEquals(-1, region.getZ());
 
-        vec = new ChunkVec(-1, -1, -1, ChunkVecSpace.WORLD);
+        vec = new ChunkVec(-33, -1, -33, ChunkVecSpace.WORLD);
         region = vec.region();
-        assertEquals(-1, region.getX());
+        assertEquals(-2, region.getX());
         assertEquals(0, region.getY());
-        assertEquals(-1, region.getZ());
+        assertEquals(-2, region.getZ());
+    }
+
+    @Test
+    void blockAt() {
+        var ref = new Object() {
+            ChunkVec vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
+        };
+        BlockVec block = ref.vec.blockAt(0, 0, 0);
+        assertEquals(0, block.getX());
+        assertEquals(0, block.getY());
+        assertEquals(0, block.getZ());
+
+        ref.vec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
+        block = ref.vec.blockAt(1, 2, 3);
+        assertEquals(1, block.getX());
+        assertEquals(2, block.getY());
+        assertEquals(3, block.getZ());
     }
 }

@@ -15,6 +15,7 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
 
+import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
 public class ChunkModel implements RenderableProvider {
@@ -99,7 +100,7 @@ public class ChunkModel implements RenderableProvider {
         ModelBuilder modelBuilder = new ModelBuilder();
         MeshBuilder meshBuilder = new MeshBuilder();
         modelBuilder.begin();
-        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_LINES);
 
         Vector3 start = new Vector3();
         Vector3 end = new Vector3();

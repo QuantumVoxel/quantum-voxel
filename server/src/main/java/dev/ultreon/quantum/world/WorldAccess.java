@@ -50,7 +50,7 @@ public interface WorldAccess extends Disposable, WorldReader {
     @Nullable
     ChunkAccess getChunk(ChunkVec pos);
 
-    ChunkAccess getChunk(int x, int z);
+    ChunkAccess getChunk(int x, int y, int z);
 
     ChunkAccess getChunkAt(int x, int y, int z);
 
@@ -63,6 +63,8 @@ public interface WorldAccess extends Disposable, WorldReader {
     }
 
     int getHeight(int x, int z, HeightmapType type);
+
+    Heightmap heightMapAt(int x, int z, HeightmapType type);
 
     void setColumn(int x, int z, BlockState block);
 

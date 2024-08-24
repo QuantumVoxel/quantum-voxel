@@ -81,6 +81,13 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @Deprecated(since = "0.1.0", forRemoval = true)
     public static final String NAMESPACE = "quantum";
     private static final ThreadGroup GROUP = new ThreadGroup("QuantumServer");
+    private static final ThreadGroup WORLD_GEN_GROUP = new ThreadGroup("WorldGen");
+    public static final ThreadFactory WORLD_GEN_THREAD_FACTORY = r -> {
+        Thread thread1 = new Thread(WORLD_GEN_GROUP, r);
+        thread1.setDaemon(true);
+        thread1.setPriority(3);
+        return thread1;
+    };
     //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
@@ -147,7 +154,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                 new NamespaceID("overworld"), this.world // Overworld dimension. TODO: Add more dimensions.
         );
 
-        if (DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.node = parentNode.createNode("server", () -> this);
             this.playersNode = this.node.createNode("players", this.players::values);
             this.node.createNode("world", () -> this.world);
@@ -647,7 +654,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.players.put(player.getUuid(), player);
         this.cachedPlayers.put(player.getName(), new CachedPlayer(player.getUuid(), player.getName()));
 
-        if (DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.playersNode.createNode(player.getName(), () -> player);
         }
 
@@ -701,7 +708,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     public void sendChunk(ChunkVec globalVec, ServerChunk chunk) throws IOException {
         for (ServerPlayer player : this.players.values()) {
-            Vec3d ChunkVec3D = globalVec.getChunkOrigin().add(World.CHUNK_SIZE / 2f, World.CHUNK_HEIGHT / 2f, World.CHUNK_SIZE / 2f);
+            Vec3d ChunkVec3D = globalVec.getChunkOrigin().add(World.CHUNK_SIZE / 2f, World.CHUNK_SIZE / 2f, World.CHUNK_SIZE / 2f);
             Vec2d ChunkVec2D = new Vec2d(ChunkVec3D.x, ChunkVec3D.z);
             Vec2d playerPos2D = new Vec2d(player.getX(), player.getZ());
             double dst = ChunkVec2D.dst(playerPos2D);

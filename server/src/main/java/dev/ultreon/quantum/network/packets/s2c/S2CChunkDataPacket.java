@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -78,9 +79,9 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
         Map<BlockVec, BlockEntityType<?>> blockEntities = new HashMap<>();
         int i = 0;
         for (Integer blkEntityVec : this.blockEntityPositions) {
-            int x = (blkEntityVec >> 20) & 0xF;
-            int y = (blkEntityVec >> 4) & 0xFFFF;
-            int z = blkEntityVec & 0xF;
+            int x = (blkEntityVec >> 16) & 0xFF;
+            int y = (blkEntityVec >> 8) & 0xFF;
+            int z = blkEntityVec & 0xFF;
             blockEntities.put(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntities.getInt(i)));
         }
 

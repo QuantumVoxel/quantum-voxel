@@ -21,6 +21,7 @@ import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
@@ -59,7 +60,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     private final @NotNull World world;
 
     public final @NotNull Storage<BlockState> storage;
-    protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
+    protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
     protected final @NotNull Heightmap motionBlockingHeightmap = new Heightmap(CHUNK_SIZE);
     protected final @NotNull Heightmap worldSurfaceHeightmap = new Heightmap(CHUNK_SIZE);
     public final @NotNull Storage<Biome> biomeStorage;
@@ -93,7 +94,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
                     int height,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, size, height, vec, storage, new PaletteStorage<>(256, Biomes.PLAINS));
+        this(world, size, height, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS));
     }
 
     /**
@@ -117,7 +118,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec) {
-        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockState.AIR));
+        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockState.AIR));
     }
 
     /**
@@ -130,7 +131,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, vec, storage, new PaletteStorage<>(256, Biomes.PLAINS));
+        this(world, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS));
     }
 
     /**
@@ -150,7 +151,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         if (vec.getSpace() != ChunkVecSpace.WORLD)
             throw new IllegalArgumentException("ChunkVec must be in world space");
 
-        this.offset = new BlockVec(vec.getIntX() * CHUNK_SIZE, WORLD_DEPTH, vec.getIntZ() * CHUNK_SIZE, BlockVecSpace.WORLD);
+        this.offset = new BlockVec(vec.getIntX() * CHUNK_SIZE, vec.getIntY() * CHUNK_SIZE, vec.getIntZ() * CHUNK_SIZE, BlockVecSpace.WORLD);
 
         this.vec = vec;
         this.storage = storage;
@@ -334,8 +335,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     }
 
     private int getIndex(int x, int y, int z) {
-        if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE) {
-            return z * (CHUNK_SIZE * CHUNK_HEIGHT) + y * CHUNK_SIZE + x;
+        if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
+            return z * (CHUNK_SIZE * CHUNK_SIZE) + y * CHUNK_SIZE + x;
         }
         return -1; // Out of bounds
     }
@@ -349,7 +350,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return true if the coordinates are out of bounds
      */
     public boolean isOutOfBounds(int x, int y, int z) {
-        return x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE;
+        return x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE;
     }
 
     /**
@@ -378,7 +379,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
 
     @Override
     public String toString() {
-        return "Chunk[x=" + this.getVec().getIntX() + ", z=" + this.getVec().getIntZ() + "]";
+        return "Chunk[x=" + this.getVec().getIntX() + ", y=" + this.getVec().getIntY() + ", z=" + this.getVec().getIntZ() + "]";
     }
 
     @Override
@@ -477,13 +478,13 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z The z position.
      * @return The found position.
      */
-    public int ascend(int x, int y, int z) {
-        for (; y < CHUNK_HEIGHT; y++) {
+    public @Nullable Integer ascend(int x, int y, int z) {
+        for (; y < y + 256; y++) {
             if (this.getFast(x, y, z).isAir()) {
                 return y;
             }
         }
-        return CHUNK_HEIGHT;
+        return null;
     }
 
     /**
@@ -495,15 +496,15 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param height The height of the space.
      * @return The found position.
      */
-    public int ascend(int x, int y, int z, int height) {
-        for (; y < CHUNK_HEIGHT; y++) {
+    public @Nullable Integer ascend(int x, int y, int z, int height) {
+        for (; y < y + height; y++) {
             if (!this.getFast(x, y, z).isAir()) continue;
 
             for (int i = 0; i < height; i++) {
                 if (this.getFast(x, y + i, z).isAir()) return y;
             }
         }
-        return CHUNK_HEIGHT;
+        return null;
     }
 
     protected int toFlatIndex(int x, int z) {

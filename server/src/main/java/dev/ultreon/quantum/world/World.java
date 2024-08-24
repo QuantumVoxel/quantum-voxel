@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.world;
 
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
@@ -60,9 +60,6 @@ import java.util.stream.Stream;
 @ParametersAreNonnullByDefault
 public abstract class World implements Disposable, WorldAccess {
     public static final int CHUNK_SIZE = 16;
-    public static final int CHUNK_HEIGHT = 256;
-    public static final int WORLD_HEIGHT = 256;
-    public static final int WORLD_DEPTH = 0;
     public static final int REGION_SIZE = 32;
     public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;
@@ -79,24 +76,21 @@ public abstract class World implements Disposable, WorldAccess {
     private int curId;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final List<ChunkVec> alwaysLoaded = new ArrayList<>();
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors(), 1), r -> {
-        Thread thread = new Thread(r);
-        thread.setName("ChunkBuilder");
-        thread.setDaemon(true);
-        return thread;
-    });
+    final Executor executor = Executors.newFixedThreadPool(4, QuantumServer.WORLD_GEN_THREAD_FACTORY);
 
     boolean disposed;
-    private final Set<ChunkVec> invalidatedChunks = new LinkedHashSet<>();
+    private final Set<ChunkVec> invalidatedChunks = Collections.synchronizedSet(new LinkedHashSet<>());
     private final List<ContainerMenu> menus = new ArrayList<>();
     private final DimensionInfo info = DimensionInfo.OVERWORLD; // TODO WIP
     protected UUID uid = Utils.ZEROED_UUID;
     protected int spawnX;
     protected int spawnZ;
+    private final Map<ChunkVec, Heightmap> motionBlockingHeightMaps = new HashMap<>();
+    private final Map<ChunkVec, Heightmap> worldSurfaceHeightMaps = new HashMap<>();
 
     protected World() {
-        // Shh, the original seed was 512.S
-        this(512/*new Random().nextLong()*/);
+        // Shh, the original seed was 512.
+        this(new Random().nextLong());
     }
 
     protected World(long seed) {
@@ -107,70 +101,28 @@ public abstract class World implements Disposable, WorldAccess {
         this(seed == null ? new Random().nextLong() : seed.getValue());
     }
 
-    static List<ChunkVec> getChunksAround(World world, Vec3d pos) {
-        int startX = (int) (pos.x - world.getRenderDistance() * World.CHUNK_SIZE);
-        int startZ = (int) (pos.z - world.getRenderDistance() * World.CHUNK_SIZE);
-        int endX = (int) (pos.x + world.getRenderDistance() * World.CHUNK_SIZE);
-        int endZ = (int) (pos.z + world.getRenderDistance() * World.CHUNK_SIZE);
-
-        List<ChunkVec> toCreate = new ArrayList<>();
-        for (int x = startX; x <= endX; x += World.CHUNK_SIZE) {
-            for (int z = startZ; z <= endZ; z += World.CHUNK_SIZE) {
-                ChunkVec chunkVec = new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk();
-                toCreate.add(chunkVec);
-                if (x >= pos.x - World.CHUNK_SIZE
-                    && x <= pos.x + World.CHUNK_SIZE
-                    && z >= pos.z - World.CHUNK_SIZE
-                    && z <= pos.z + World.CHUNK_SIZE) {
-                    for (int y = -World.CHUNK_HEIGHT; y >= pos.y - World.CHUNK_HEIGHT * 2; y -= World.CHUNK_HEIGHT) {
-                        chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
-                        toCreate.add(chunkVec);
-                    }
-                }
-            }
-        }
-
-        return toCreate;
-    }
-
     @Deprecated
-    public static ChunkVec blockToChunkVec(Vector3 pos) {
-        return new ChunkVec(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
-    }
-
-    @Deprecated
-    public static ChunkVec blockToChunkVec(Vec3d pos) {
-        return new ChunkVec(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
-    }
-
-    @Deprecated
-    public static ChunkVec blockToChunkVec(Vec3i pos) {
-        return new ChunkVec(Math.floorDiv(pos.x, World.CHUNK_SIZE), Math.floorDiv(pos.z, World.CHUNK_SIZE));
-    }
-
-    @Deprecated
-    public static ChunkVec toChunkVec(BlockVec pos) {
-        return new ChunkVec(Math.floorDiv(pos.getIntX(), World.CHUNK_SIZE), Math.floorDiv(pos.getIntZ(), World.CHUNK_SIZE));
-    }
-
     public static ChunkVec toChunkVec(int x, int y, int z) {
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
-        return blockVec.chunk();
+        return new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
     }
 
     @Override
-    public @NotNull List<ChunkVec> getChunksAround(Vec3d pos) {
+    public @NotNull List<ChunkVec> getChunksAround(BlockVec pos) {
         int renderDistance = this.getRenderDistance();
-        int startX = (int) (pos.x - renderDistance * World.CHUNK_SIZE);
-        int startZ = (int) (pos.z - renderDistance * World.CHUNK_SIZE);
-        int endX = (int) (pos.x + renderDistance * World.CHUNK_SIZE);
-        int endZ = (int) (pos.z + renderDistance * World.CHUNK_SIZE);
+        int startX = pos.x - renderDistance * World.CHUNK_SIZE;
+        int startY = pos.y - renderDistance * World.CHUNK_SIZE;
+        int startZ = pos.z - renderDistance * World.CHUNK_SIZE;
+        int endX = pos.x + renderDistance * World.CHUNK_SIZE;
+        int endY = pos.y + renderDistance * World.CHUNK_SIZE;
+        int endZ = pos.z + renderDistance * World.CHUNK_SIZE;
 
         List<ChunkVec> toCreate = new ArrayList<>();
         for (int x = startX; x <= endX; x += World.CHUNK_SIZE) {
-            for (int z = startZ; z <= endZ; z += World.CHUNK_SIZE) {
-                ChunkVec chunkVec = new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk();
-                toCreate.add(chunkVec);
+            for (int y = startY; y <= endY; y += World.CHUNK_SIZE) {
+                for (int z = startZ; z <= endZ; z += World.CHUNK_SIZE) {
+                    ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
+                    toCreate.add(chunkVec);
+                }
             }
         }
 
@@ -180,7 +132,7 @@ public abstract class World implements Disposable, WorldAccess {
     protected abstract int getRenderDistance();
 
     protected boolean shouldStayLoaded(ChunkVec pos) {
-		return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
+        return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
     }
 
     @Override
@@ -394,8 +346,8 @@ public abstract class World implements Disposable, WorldAccess {
      * @param z the z coordinate in world space
      * @return the chunk position in region space
      */
-    public static ChunkVec toLocalChunkVec(int x, int z) {
-        ChunkVec worldSpace = new ChunkVec(x, z, ChunkVecSpace.WORLD);
+    public static ChunkVec toLocalChunkVec(int x, int y, int z) {
+        ChunkVec worldSpace = new ChunkVec(x, y, z, ChunkVecSpace.WORLD);
         return worldSpace.regionLocal();
     }
 
@@ -410,8 +362,8 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public Chunk getChunk(int x, int z) {
-        return this.getChunk(new ChunkVec(x, z, ChunkVecSpace.WORLD));
+    public Chunk getChunk(int x, int y, int z) {
+        return this.getChunk(new ChunkVec(x, y, z, ChunkVecSpace.WORLD));
     }
 
     @Override
@@ -434,14 +386,14 @@ public abstract class World implements Disposable, WorldAccess {
 
     @Override
     public boolean isOutOfWorldBounds(BlockVec pos) {
-        return pos.getIntY() < World.WORLD_DEPTH || pos.getIntY() >= World.WORLD_HEIGHT
+        return pos.getIntY() < -30000000 || pos.getIntY() > 30000000
                || pos.getIntX() < -30000000 || pos.getIntX() > 30000000
                || pos.getIntZ() < -30000000 || pos.getIntZ() > 30000000;
     }
 
     @Override
     public boolean isOutOfWorldBounds(int x, int y, int z) {
-        return y < World.WORLD_DEPTH || y >= World.WORLD_HEIGHT - 1
+        return y < -30000000 || y > 30000000
                || x < -30000000 || x > 30000000
                || z < -30000000 || z > 30000000;
     }
@@ -456,22 +408,26 @@ public abstract class World implements Disposable, WorldAccess {
      */
     @Override
     public int getHeight(int x, int z, HeightmapType type) {
-        Chunk chunkAt = this.getChunkAt(x, 0, z);
-        if (chunkAt == null) return Integer.MIN_VALUE;
-
-        // FIXME: Optimize by using a heightmap.
-        for (int y = World.CHUNK_HEIGHT - 1; y > 0; y--) {
-            if (!this.get(x, y, z).isAir()) return y + 1;
-        }
-        return 0;
+        BlockVec blockVec = new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunkLocal();
+        return this.heightMapAt(x, z, type).get(blockVec.x, blockVec.z);
     }
 
     @Override
+    public Heightmap heightMapAt(int x, int z, HeightmapType type) {
+        return switch (type) {
+            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CHUNK_SIZE));
+            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CHUNK_SIZE));
+        };
+    }
+
+    @Override
+    @Deprecated
     public void setColumn(int x, int z, BlockState block) {
-        this.setColumn(x, z, World.CHUNK_HEIGHT, block);
+        this.setColumn(x, z, 256, block);
     }
 
     @Override
+    @Deprecated
     public void setColumn(int x, int z, int maxY, BlockState block) {
         if (this.getChunkAt(x, maxY, z) == null) return;
 
@@ -533,10 +489,15 @@ public abstract class World implements Disposable, WorldAccess {
     public void updateNeighbours(Chunk chunk) {
         ChunkVec pos = chunk.getVec();
         if (pos.getSpace() != ChunkVecSpace.WORLD) throw new IllegalArgumentException("Chunk must be in world space");
-        this.updateChunk(this.getChunk(pos.offset(-1, 0)));
-        this.updateChunk(this.getChunk(pos.offset(+1, 0)));
-        this.updateChunk(this.getChunk(pos.offset(0, -1)));
-        this.updateChunk(this.getChunk(pos.offset(0, +1)));
+        this.updateChunk(this.getChunk(pos.offset(-1, -1, 0)));
+        this.updateChunk(this.getChunk(pos.offset(+1, -1, 0)));
+        this.updateChunk(this.getChunk(pos.offset(0, -1, -1)));
+        this.updateChunk(this.getChunk(pos.offset(0, -1, +1)));
+
+        this.updateChunk(this.getChunk(pos.offset(-1, +1, 0)));
+        this.updateChunk(this.getChunk(pos.offset(+1, +1, 0)));
+        this.updateChunk(this.getChunk(pos.offset(0, +1, -1)));
+        this.updateChunk(this.getChunk(pos.offset(0, +1, +1)));
     }
 
     @Override
@@ -581,7 +542,7 @@ public abstract class World implements Disposable, WorldAccess {
     /**
      * Spawns an entity with the given spawn data.
      *
-     * @param entity The entity to spawn
+     * @param entity    The entity to spawn
      * @param spawnData The data for spawning the entity
      * @return The spawned entity
      */
@@ -685,13 +646,6 @@ public abstract class World implements Disposable, WorldAccess {
     @ApiStatus.Internal
     public void dispose() {
         this.disposed = true;
-        this.executor.shutdown();
-        try {
-            if (!this.executor.awaitTermination(60, TimeUnit.SECONDS))
-                throw new RuntimeException("Chunk builders executor failed to shutdown in time.");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**

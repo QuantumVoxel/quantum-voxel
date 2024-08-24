@@ -90,7 +90,7 @@ public class IntegratedServer extends QuantumServer {
         }
 
         // Create a debug node for host player if inspection is enabled
-        if (DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.node.createNode("host", () -> this.host);
         }
     }

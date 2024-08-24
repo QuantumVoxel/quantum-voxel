@@ -152,7 +152,6 @@ public class PollingExecutorService implements ExecutorService {
                 }
                 future.completeExceptionally(throwable);
             }
-            futures.remove(future);
             return future;
         }
         this.execute(() -> {

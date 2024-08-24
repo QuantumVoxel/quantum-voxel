@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world.vec;
 
 import dev.ultreon.quantum.util.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;
@@ -27,15 +28,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @param z The z coordinate.
      */
     @Deprecated
-    public ChunkVec(int x, int z) {
-        this(x, z, ChunkVecSpace.WORLD);
-    }
-
-    /**
-     * @param x The x coordinate.
-     * @param z The z coordinate.
-     */
-    @Deprecated
     public ChunkVec(int x, int y, int z) {
         this(x, y, z, ChunkVecSpace.WORLD);
     }
@@ -52,12 +44,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         this.space = space;
     }
 
-    public ChunkVec(int x, int z, ChunkVecSpace space) {
-        this(x, 0, z, space);
-    }
-
     public ChunkVec(ChunkVecSpace space) {
-        this(0, 0, space);
+        this(0, 0, 0, space);
     }
 
     /**
@@ -77,14 +65,14 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return The parsed chunk position, or {@code null} if the string cannot be parsed.
      */
     @Nullable
-    public static RegionVec parse(String s) {
+    public static ChunkVec parse(String s) {
         String[] split = s.split(",", 3);
         if (split.length == 2) {
             Integer x = ChunkVec.parseInt(split[0]);
             Integer z = ChunkVec.parseInt(split[1]);
             if (x == null) return null;
             if (z == null) return null;
-            return new RegionVec(x, 0, z);
+            return new ChunkVec(x, 0, z);
         } else if (split.length == 3) {
             Integer x = ChunkVec.parseInt(split[0]);
             Integer y = ChunkVec.parseInt(split[1]);
@@ -92,7 +80,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
             if (x == null) return null;
             if (y == null) return null;
             if (z == null) return null;
-            return new RegionVec(x, y, z);
+            return new ChunkVec(x, y, z);
         }
         return null;
     }
@@ -110,7 +98,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return The origin of the chunk.
      */
     public Vec3d getChunkOrigin() {
-        return new Vec3d(this.x * CHUNK_SIZE, WORLD_DEPTH, this.z * CHUNK_SIZE);
+        return new Vec3d(this.x * CHUNK_SIZE, this.y * CHUNK_SIZE, this.z * CHUNK_SIZE);
     }
 
     /**
@@ -120,8 +108,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return the comparison result.
      */
     @Override
-    public int compareTo(ChunkVec chunkVec) {
-        double dst = new Vec2d(this.x, this.z).dst(chunkVec.x, chunkVec.z);
+    public int compareTo(@NotNull ChunkVec chunkVec) {
+        double dst = this.dst(chunkVec);
         return dst == 0 ? 0 : dst < 0 ? -1 : 1;
     }
 
@@ -134,7 +122,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         return new Vec3d(this.x, this.y, this.z);
     }
 
-    public ChunkVec offset(int x, int z) {
+    public ChunkVec offset(int x, int y, int z) {
         return new ChunkVec(this.x + x, this.y + y, this.z + z);
     }
 
@@ -168,12 +156,14 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         else {
             // Convert world space to region space
             int rx = this.x % REGION_SIZE;
+            int ry = this.y % REGION_SIZE;
             int rz = this.z % REGION_SIZE;
 
             if (rx < 0) rx += REGION_SIZE;
+            if (ry < 0) ry += REGION_SIZE;
             if (rz < 0) rz += REGION_SIZE;
 
-            return new ChunkVec(rx, this.y, rz, space);
+            return new ChunkVec(rx, ry, rz, space);
         }
     }
 
@@ -188,7 +178,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChunkVec chunkVec = (ChunkVec) o;
-        return x == chunkVec.x && z == chunkVec.z;
+        return x == chunkVec.x && y == chunkVec.y && z == chunkVec.z;
     }
 
     /**
@@ -198,7 +188,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     @Override
     public int hashCode() {
-        return Objects.hash(x, z);
+        return Objects.hash(x, y, z);
     }
 
     /**
@@ -208,12 +198,14 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     public RegionVec region() {
         int rx = this.x / REGION_SIZE;
+        int ry = this.y / REGION_SIZE;
         int rz = this.z / REGION_SIZE;
 
         if (this.x < 0 && this.x % REGION_SIZE != 0) rx--;
+        if (this.y < 0 && this.y % REGION_SIZE != 0) ry--;
         if (this.z < 0 && this.z % REGION_SIZE != 0) rz--;
 
-        return new RegionVec(rx, 0, rz);
+        return new RegionVec(rx, ry, rz);
     }
 
     /**
@@ -223,12 +215,14 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     public BlockVec start() {
         int cx = this.x * CHUNK_SIZE;
+        int cy = this.y * CHUNK_SIZE;
         int cz = this.z * CHUNK_SIZE;
 
         if (this.x < 0) cx -= CHUNK_SIZE;
+        if (this.y < 0) cy -= CHUNK_SIZE;
         if (this.z < 0) cz -= CHUNK_SIZE;
 
-        return new BlockVec(cx, this.y, cz, this.space.block());
+        return new BlockVec(cx, cy, cz, this.space.block());
     }
 
     /**
@@ -238,12 +232,14 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     public BlockVec end() {
         int cx = this.x * CHUNK_SIZE;
+        int cy = this.y * CHUNK_SIZE;
         int cz = this.z * CHUNK_SIZE;
 
         if (this.x < 0) cx += CHUNK_SIZE;
+        if (this.y < 0) cy += CHUNK_SIZE;
         if (this.z < 0) cz += CHUNK_SIZE;
 
-        return new BlockVec(cx + CHUNK_SIZE - 1, this.y + CHUNK_HEIGHT - 1, cz + CHUNK_SIZE - 1, this.space.block());
+        return new BlockVec(cx + CHUNK_SIZE - 1, cy + CHUNK_SIZE - 1, cz + CHUNK_SIZE - 1, this.space.block());
     }
 
     /**
@@ -263,21 +259,25 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
                     throw new IllegalArgumentException("Region cannot be null when converting from region space");
 
                 int rx = this.x * CHUNK_SIZE;
+                int ry = this.y * CHUNK_SIZE;
                 int rz = this.z * CHUNK_SIZE;
 
                 rx = rx % (REGION_SIZE * CHUNK_SIZE);
+                ry = ry % (REGION_SIZE * CHUNK_SIZE);
                 rz = rz % (REGION_SIZE * CHUNK_SIZE);
 
                 rx += region.x * REGION_SIZE * CHUNK_SIZE;
+                ry += region.y * REGION_SIZE * CHUNK_SIZE;
                 rz += region.z * REGION_SIZE * CHUNK_SIZE;
 
-                yield new BlockVec(rx + x, y, rz + z, BlockVecSpace.WORLD);
+                yield new BlockVec(rx + x, ry + y, rz + z, BlockVecSpace.WORLD);
             }
             case WORLD -> {
                 int cx = this.x * CHUNK_SIZE;
+                int cy = this.y * CHUNK_SIZE;
                 int cz = this.z * CHUNK_SIZE;
 
-                yield new BlockVec(cx + x, y, cz + z, BlockVecSpace.WORLD);
+                yield new BlockVec(cx + x, cy + y, cz + z, BlockVecSpace.WORLD);
             }
         };
     }
@@ -362,7 +362,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return The chunk position in world space.
      */
     public ChunkVec worldSpace(RegionVec region) {
-        return new ChunkVec(region.x * REGION_SIZE + this.x, this.y, region.z * REGION_SIZE + this.z, ChunkVecSpace.WORLD);
+        return new ChunkVec(region.x * REGION_SIZE + this.x, region.y * REGION_SIZE + this.y, region.z * REGION_SIZE + this.z, ChunkVecSpace.WORLD);
     }
 
     /**

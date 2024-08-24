@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world.vec;
 
 import dev.ultreon.quantum.world.CubicDirection;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
@@ -8,7 +9,7 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BlockVecTest {
-
+    @DisplayName("Method offset(x, y, z)")
     @Test
     void offset() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -106,6 +107,7 @@ class BlockVecTest {
         assertEquals(2 * (REGION_SIZE * CHUNK_SIZE), offset.getZ());
     }
 
+    @DisplayName("Method below()")
     @Test
     void below() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -127,6 +129,7 @@ class BlockVecTest {
         assertEquals(0, below.getZ());
     }
 
+    @DisplayName("Method above()")
     @Test
     void above() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -148,6 +151,7 @@ class BlockVecTest {
         assertEquals(0, above.getZ());
     }
 
+    @DisplayName("Method dst(vec)")
     @Test
     void dst() {
         BlockVec vecStart = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -173,6 +177,7 @@ class BlockVecTest {
         assertEquals(10, vecStart.dst(vecEnd));
     }
 
+    @DisplayName("Method chunk()")
     @Test
     void chunk() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -221,6 +226,7 @@ class BlockVecTest {
         assertEquals(-2, chunk.getZ());
     }
 
+    @DisplayName("Method toSpace(space)")
     @Test
     void toSpace() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -298,6 +304,7 @@ class BlockVecTest {
         assertEquals(511, vecRegion.getZ());
     }
 
+    @DisplayName("Method chunkLocal()")
     @Test
     void chunkLocal() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -371,6 +378,7 @@ class BlockVecTest {
         assertEquals(0, chunk.getZ());
     }
 
+    @DisplayName("Method sectionLocal()")
     @Test
     void sectionLocal() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -444,6 +452,7 @@ class BlockVecTest {
         assertEquals(0, section.getZ());
     }
 
+    @DisplayName("Method regionLocal()")
     @Test
     void regionLocal() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -538,6 +547,7 @@ class BlockVecTest {
         assertEquals(0, region.getZ());
     }
 
+    @DisplayName("Method local(space)")
     @Test
     void local() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
@@ -703,6 +713,7 @@ class BlockVecTest {
         assertEquals(0, local.getZ());
     }
 
+    @DisplayName("Method region()")
     @Test
     void region() {
         BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);

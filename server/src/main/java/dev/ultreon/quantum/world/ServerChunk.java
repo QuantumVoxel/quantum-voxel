@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
@@ -9,7 +10,6 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CChunkDataPacket;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
@@ -24,7 +24,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collection;
 import java.util.List;
 
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 @NotThreadSafe
@@ -51,10 +50,6 @@ public final class ServerChunk extends Chunk {
                            int y,
                            int z,
                            @NotNull BlockState block) {
-        if (!QuantumServer.isOnServerThread()) {
-            throw new InvalidThreadException("Should be on server thread.");
-        }
-
         this.rwLock.writeLock().lock();
         try {
             this.region.markDirty();
@@ -75,7 +70,7 @@ public final class ServerChunk extends Chunk {
                                    @NotNull ChunkVec pos,
                                    @NotNull MapType chunkData,
                                    @NotNull ServerWorld.Region region) {
-        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE, BlockState.AIR);
+        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockState.AIR);
         var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS);
 
         MapType blockData = chunkData.getMap("Blocks");

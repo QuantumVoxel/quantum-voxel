@@ -270,8 +270,8 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public @Nullable ClientChunkAccess getChunk(int x, int z) {
-        return this.chunks.get(new ChunkVec(x, z, ChunkVecSpace.WORLD));
+    public @Nullable ClientChunkAccess getChunk(int x, int y, int z) {
+        return this.chunks.get(new ChunkVec(x, y, z, ChunkVecSpace.WORLD));
     }
 
     @Override
@@ -304,6 +304,11 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     @Override
     public int getHeight(int x, int z, HeightmapType type) {
         return 0;
+    }
+
+    @Override
+    public Heightmap heightMapAt(int x, int z, HeightmapType type) {
+        return null;
     }
 
     @Override
@@ -651,7 +656,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public @NotNull List<ChunkVec> getChunksAround(Vec3d pos) {
+    public @NotNull List<ChunkVec> getChunksAround(BlockVec pos) {
         return List.of();
     }
 

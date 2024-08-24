@@ -36,12 +36,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
 import static dev.ultreon.quantum.client.util.ExtKt.deg;
 import static java.lang.Math.max;
 
+@SuppressWarnings("GDXJavaUnsafeIterator")
 public final class ClientWorld extends World implements Disposable, ClientWorldAccess {
     public static final int DAY_CYCLE = 24000;
     public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
@@ -62,9 +64,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public static int VOID_Y_END = 0;
     @NotNull
     private final QuantumClient client;
-    private final Map<ChunkVec, ClientChunk> chunks = new HashMap<>();
+    private final Map<ChunkVec, ClientChunk> chunks = new ConcurrentHashMap<>();
     private int chunkRefresh;
-    private ChunkVec oldChunkVec = new ChunkVec(0, 0, ChunkVecSpace.WORLD);
+    private ChunkVec oldChunkVec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
     private int time = 0;
     private int totalChunks;
     private final Vec3i tmp = new Vec3i();
@@ -95,15 +97,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      */
     @Override
     public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos) {
-        // Check if the current thread is the main thread
-        if (!QuantumClient.isOnRenderThread()) {
-            // If not, invoke the unloadChunk method on the main thread and return the result
-            return QuantumClient.invokeAndWait(() -> this.unloadChunk(chunk, pos));
-        }
-
-        if (!(chunk instanceof ClientChunk clientChunk)) {
+        if (!(chunk instanceof ClientChunk clientChunk))
             throw new IllegalArgumentException("Chunk must be a ClientChunk");
-        }
 
         // Check if the chunk should stay loaded
         if (shouldStayLoaded(pos)) {
@@ -111,28 +106,34 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             return false;
         }
 
-        // Try to remove the chunk from the chunks map
-        ClientChunk removedChunk = this.chunks.remove(pos);
-        boolean removed = removedChunk != null;
-        if (removed) {
-            // If the chunk was removed, decrement the total number of chunks
-            TerrainRenderer worldRenderer = this.client.worldRenderer;
-            if (worldRenderer != null) worldRenderer.unload(clientChunk);
-            if (removedChunk != chunk) {
-                LOGGER.warn("Removed chunk mismatch: {} != {}", removedChunk, chunk);
+        // Try to remove the chunk from the chunk map
+        this.rwLock.writeLock().lock();
+        try {
+            ClientChunk removedChunk = this.chunks.remove(pos);
+            boolean removed = removedChunk != null;
+            if (removed) {
+                // If the chunk was removed, decrement the total number of chunks
+                TerrainRenderer worldRenderer = this.client.worldRenderer;
+                if (worldRenderer != null)
+                    QuantumClient.invoke(() -> worldRenderer.unload(clientChunk));
+
+                if (removedChunk != chunk)
+                    LOGGER.warn("Removed chunk mismatch: {} != {}", removedChunk, chunk);
+
+                this.totalChunks--;
             }
 
-            this.totalChunks--;
+            // Return true if the chunk was removed, false otherwise
+            return removed;
+        } finally {
+            this.rwLock.writeLock().unlock();
         }
-
-        // Return true if the chunk was removed, false otherwise
-        return removed;
     }
 
     @Override
     protected void checkThread() {
-        if (!QuantumClient.isOnRenderThread())
-            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
+//        if (!QuantumClient.isOnRenderThread())
+//            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
     }
 
     @Override
@@ -147,8 +148,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     @Override
-    public ClientChunk getChunk(int x, int z) {
-        return (ClientChunk) super.getChunk(x, z);
+    public ClientChunk getChunk(int x, int y, int z) {
+        return (ClientChunk) super.getChunk(x, y, z);
     }
 
     @Override
@@ -163,14 +164,11 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public Collection<ClientChunk> getLoadedChunks() {
-        this.checkThread();
-
         return this.chunks.values();
     }
 
     @Override
     public boolean isChunkInvalidated(@NotNull Chunk chunk) {
-        this.checkThread();
         return super.isChunkInvalidated(chunk);
     }
 
@@ -253,9 +251,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      */
     @Override
     public void onChunkUpdated(@NotNull Chunk chunk) {
-        // Check the current thread
-        this.checkThread();
-
         super.onChunkUpdated(chunk);
     }
 
@@ -436,14 +431,34 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
         return new ClientChunk[]{
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1)
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() + 1),
+
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1),
+
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() - 1),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ()),
+                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() + 1),
+                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() + 1)
         };
     }
 
@@ -463,11 +478,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public void setInitialSunlight(int startX, int startZ) {
         Queue<int[]> queue = new Queue<>();
 
-        Chunk chunk = getChunkAt(startX, 0, startZ);
+        int startY = 256;
+        Chunk chunk = getChunkAt(startX, startY, startZ);
         if (chunk == null) return;
 
         // Start from the top of the world and move downward
-        for (int y = WORLD_HEIGHT - 1; y >= 0; y--) {
+        for (int y = chunk.getOffset().y - 1; y >= 0; y--) {
             BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
             int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
@@ -515,7 +531,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     private void propagateSunlight(Queue<int[]> queue, int x, int y, int z, int intensity, int reduction) {
-        if (y >= 0 && y < WORLD_HEIGHT && reduction < 15 && getSunlight(x, y, z) < intensity) {
+        if (y >= 0 && y < 256 && reduction < 15 && getSunlight(x, y, z) < intensity) {
             int i = intensity - reduction;
             if (i < 0) return;
             setSunlight(x, y, z, intensity);
@@ -567,9 +583,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             int y = current[1];
             int z = current[2];
             int intensity = current[3];
-
-            // Skip if the current position is out of bounds
-            if (y < 0 || y >= WORLD_HEIGHT) continue;
 
             // If the current block light is less than the intensity, update the block light
             if (getBlockLight(x, y, z) < intensity) {
@@ -634,10 +647,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         neighbors[1] = getBlockLightData(data.pos.x - 1, data.pos.y, data.pos.z);
 
         // Top / bottom neighbor
-        if (data.pos.y + 1 < WORLD_HEIGHT)
-            neighbors[2] = getBlockLightData(data.pos.x, data.pos.y + 1, data.pos.z);
-        if (data.pos.y - 1 >= 0)
-            neighbors[3] = getBlockLightData(data.pos.x, data.pos.y - 1, data.pos.z);
+        neighbors[2] = getBlockLightData(data.pos.x, data.pos.y + 1, data.pos.z);
+        neighbors[3] = getBlockLightData(data.pos.x, data.pos.y - 1, data.pos.z);
 
         // Front / back neighbor
         neighbors[4] = getBlockLightData(data.pos.x, data.pos.y, data.pos.z + 1);
@@ -699,7 +710,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     private void updateSunlight(int blockX, int blockY, int blockZ, boolean isAdded) {
-        if (blockY < 0 || blockY >= WORLD_HEIGHT) return;
+        if (blockY >= 256) return;
 
         Queue<int[]> queue = new Queue<>();
 
@@ -712,7 +723,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             for (int y = blockY; y >= 0; y--) {
                 int reduction = getReduction(blockX, y, blockZ);
                 if (reduction < 15) {
-                    int newLight = (y == WORLD_HEIGHT - 1) ? 15 : getSunlight(blockX, y + 1, blockZ) - reduction;
+                    int newLight = getSunlight(blockX, y + 1, blockZ) - reduction;
                     setSunlight(blockX, y, blockZ, newLight);
                     queue.addLast(new int[]{blockX, y, blockZ, newLight});
                 } else {
@@ -743,7 +754,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             }
 
             // Update sunlight for the block above if it is transparent and within world height limits
-            if (y < WORLD_HEIGHT - 1 && reduction < 15) {
+            if (y < 256 - 1 && reduction < 15) {
                 updateNeighborSunlight(queue, x, y + 1, z, currentLight, reduction);
             }
         }
@@ -761,7 +772,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      */
     private void updateNeighborSunlight(Queue<int[]> queue, int x, int y, int z, int currentLight, int reduction) {
         // Check if the block is within the world height limits
-        if (y >= 0 && y < WORLD_HEIGHT) {
+        if (y >= 0 && y < 256) {
             // Get the current sunlight of the neighboring block
             int neighborLight = getSunlight(x, y, z);
 
@@ -820,7 +831,13 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      */
     public void loadChunk(ChunkVec pos, ClientChunk data) {
         // Get the current chunk at the given position
-        var chunk = QuantumClient.invokeAndWait(() -> this.chunks.get(pos));
+        this.rwLock.readLock().lock();
+        ClientChunk chunk;
+        try {
+            chunk = this.chunks.get(pos);
+        } finally {
+            this.rwLock.readLock().unlock();
+        }
 
         // If the chunk doesn't exist, set it to the new data
         if (chunk == null) {
@@ -829,6 +846,11 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             // If the chunk already exists, log a warning and return
             World.LOGGER.warn("Duplicate chunk packet detected! Chunk {}", pos);
             unloadChunk(chunk, pos);
+
+            LocalPlayer player = this.client.player;
+            if (player != null)
+                player.pendingChunks.remove(pos);
+
             return;
         }
 
@@ -842,28 +864,29 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         // Calculate the distance between the chunk and the player
-        if (new Vec2d(pos.getIntX(), pos.getIntZ()).dst(new Vec2d(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ())) > ClientConfig.renderDistance) {
-            // If the distance is greater than the render distance, send a skip chunk status packet and return
-            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
-            return;
-        }
+        this.rwLock.writeLock().lock();
+        try {
+            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance) {
+                player.pendingChunks.remove(pos);
 
-        // Set the final chunk to the chunk variable
-        ClientChunk finalChunk = chunk;
-
-        // Run the chunk loading logic on the client thread
-        QuantumClient.invoke(() -> {
-            synchronized (this) {
-                // Add the chunk to the map of chunks
-                this.chunks.put(pos, finalChunk);
-                // Increment the total number of chunks
-                this.totalChunks++;
-                // Mark the chunk as ready
-                finalChunk.ready();
+                // If the distance is greater than the render distance, send a skip chunk status packet and return
+                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
+                return;
             }
+
+            player.pendingChunks.remove(pos);
+
+            // Add the chunk to the map of chunks
+            this.chunks.put(pos, chunk);
+            // Increment the total number of chunks
+            this.totalChunks++;
+            // Mark the chunk as ready
+            chunk.ready();
             // Send a success chunk status packet
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
-        });
+        } finally {
+            this.rwLock.writeLock().unlock();
+        }
     }
 
     /**

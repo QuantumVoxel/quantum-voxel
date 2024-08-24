@@ -8,7 +8,8 @@ import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static java.lang.Math.min;
 
 public class Carver {
     static final int HAS_CAVES_FLAG = 129;
@@ -25,13 +26,15 @@ public class Carver {
 
     public int carve(BuilderChunk chunk, int x, int z, double hilliness) {
         Vec3i offset = chunk.getOffset();
-        int groundPos = (int) ((this.getSurfaceHeightNoise(offset.x + x, offset.z + z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
-        for (int y = offset.y + 1; y < offset.y + CHUNK_HEIGHT; y++) {
+        int groundPos = (int) ((this.getSurfaceHeightNoise(x, z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
+        int height = groundPos;
+        if (height < 0) height = 0;
+        for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
             if (y <= groundPos) {
                 if (y <= World.SEA_LEVEL) {
                     if (y < groundPos - 7) {
                         boolean cave;
-                        double v1 = caveNoise.evaluateNoise(offset.x + x, y, offset.z + z);
+                        double v1 = caveNoise.evaluateNoise(x, y, z);
                         cave = v1 > 0.0;
                         chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
                     } else {
@@ -39,9 +42,10 @@ public class Carver {
                     }
                 } else {
                     boolean cave;
-                    double v1 = caveNoise.evaluateNoise(offset.x + x, y, offset.z + z);
+                    double v1 = caveNoise.evaluateNoise(x, y, z);
                     cave = v1 > 0.0;
                     chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
+                    height = min(height, y - 1);
                 }
             } else {
                 chunk.set(x, y, z, Blocks.AIR.createMeta());

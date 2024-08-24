@@ -478,8 +478,9 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
     /**
      * @return true if the entity is in the void, false otherwise.
      */
+    @Deprecated
     public boolean isInVoid() {
-        return this.y < World.WORLD_DEPTH - 64;
+        return false;
     }
 
     public BoundingBox getBoundingBox() {

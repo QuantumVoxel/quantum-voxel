@@ -347,7 +347,7 @@ public class DesktopInput extends GameInput {
      */
     private void handleInspectKey() {
         // Check if debug utilities are enabled and inspection is enabled
-        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             // Toggle the inspection mode
             this.client.inspection.setInspecting(!this.client.inspection.isInspecting());
         }

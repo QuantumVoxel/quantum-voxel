@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.network.server;
 
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockAttemptBreakEvent;
 import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;

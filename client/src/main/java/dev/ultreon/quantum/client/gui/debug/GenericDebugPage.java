@@ -48,15 +48,15 @@ public class GenericDebugPage implements DebugPage {
             Player player = client.player;
             if (player != null) {
                 context.left("Player");
-                BlockVec BlockVecition = player.getBlockVec();
-                Vec3i sectionPos = context.block2sectionPos(BlockVecition);
-                @Nullable ClientChunkAccess chunk = world.getChunkAt(BlockVecition);
-                BlockVec localBlockVec = BlockVecition.chunkLocal();
+                BlockVec blockVec = player.getBlockVec();
+                Vec3i sectionPos = context.block2sectionPos(blockVec);
+                @Nullable ClientChunkAccess chunk = world.getChunkAt(blockVec);
+                BlockVec localBlockVec = blockVec.chunkLocal();
 
                 context.left("XYZ", player.getPosition())
-                        .left("Block XYZ", BlockVecition)
+                        .left("Block XYZ", blockVec)
                         .left("Chunk XYZ", sectionPos)
-                        .left("Biome", Registries.BIOME.getId(world.getBiome(BlockVecition)));
+                        .left("Biome", Registries.BIOME.getId(world.getBiome(blockVec)));
                 if (chunk != null) {
                     int sunlight = chunk.getSunlight(localBlockVec.vec());
                     int blockLight = chunk.getBlockLight(localBlockVec.vec());
@@ -65,7 +65,7 @@ public class GenericDebugPage implements DebugPage {
                             .left("Sunlight", sunlight)
                             .left("Block Light", blockLight);
                 }
-                context.left("Chunk Shown", world.getChunkAt(BlockVecition) != null);
+                context.left("Chunk Shown", world.getChunkAt(blockVec) != null);
                 Hit hit = client.hit;
                 if (hit != null)
                     context.left("Break Progress", world.getBreakProgress(new BlockVec(hit.getBlockVec())));

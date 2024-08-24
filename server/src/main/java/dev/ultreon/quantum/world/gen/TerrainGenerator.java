@@ -20,7 +20,7 @@ import dev.ultreon.quantum.world.gen.biome.BiomeData;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
-import org.apache.commons.collections4.set.ListOrderedSet;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -95,12 +95,13 @@ public class TerrainGenerator implements Disposable {
     private void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver, @NotNull Collection<ServerWorld.@NotNull RecordedChange> recordedChanges) {
         if (this.hillinessNoise == null)
             throw new IllegalStateException("Hilliness noise has not been initialized yet!");
+        BlockVec offset = chunk.getOffset();
         for (var x = 0; x < CHUNK_SIZE; x++) {
             for (var z = 0; z < CHUNK_SIZE; z++) {
-                double hilliness = this.hillinessNoise.evaluateNoise(chunk.getOffset().x + x, chunk.getOffset().z + z) - 2.0f;
-                int groundPos = carver.carve(chunk, x, z, hilliness);
+                double hilliness = this.hillinessNoise.evaluateNoise(offset.x + x, offset.z + z) - 2.0f;
+                int groundPos = carver.carve(chunk, offset.x + x, offset.z + z, hilliness);
 
-                var index = this.findGenerator(new Vec3i(chunk.getOffset().x + x, 0, chunk.getOffset().z + z), groundPos);
+                var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
                 index.biomeGenerator.processColumn(chunk, x, groundPos, z, recordedChanges);
             }
@@ -113,7 +114,7 @@ public class TerrainGenerator implements Disposable {
                 CommonConstants.LOGGER.info("Recorded change: " + change);
             }
 
-            if (DebugFlags.LOG_OUT_OF_BOUNDS.enabled() && (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE)) {
+            if (DebugFlags.LOG_OUT_OF_BOUNDS.isEnabled() && (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE)) {
                 QuantumServer.LOGGER.warn("Recorded change out of bounds: {}", change);
             }
 
@@ -137,36 +138,6 @@ public class TerrainGenerator implements Disposable {
                 chunk.getBiomeGenerator(x, z).generateStructureFeatures(recordingChunk, x, highest, z);
             }
         }
-    }
-
-    public void buildBiomeCenters(BuilderChunk chunk) {
-        var biomeCenters = this.evalBiomeCenters(chunk.getOffset());
-
-        for (var biomeCenter : biomeCenters) {
-            var domainWarpingOffset = this.biomeDomain.generateDomainOffsetInt(biomeCenter.x, biomeCenter.z);
-            biomeCenter.add(new Vec3i(domainWarpingOffset.x, 0, domainWarpingOffset.y));
-        }
-        chunk.setBiomeCenters(biomeCenters);
-    }
-
-    private List<Vec3i> evalBiomeCenters(Vec3i pos) {
-        int len = CHUNK_SIZE;
-
-        Vec3i origin = new Vec3i(Math.round((float) pos.x) / len, 0, Math.round((float) pos.z));
-        var centers = new ListOrderedSet<Vec3i>();
-
-        centers.add(origin);
-
-        for (var dir : Neighbour8Direction.values()) {
-            var offXZ = dir.vec();
-
-            centers.add(new Vec3i(origin.x + offXZ.x * len, 0, origin.z + offXZ.y * len));
-            centers.add(new Vec3i(origin.x + offXZ.x * len, 0, origin.z + offXZ.y * 2 * len));
-            centers.add(new Vec3i(origin.x + offXZ.x * 2 * len, 0, origin.z + offXZ.y * len));
-            centers.add(new Vec3i(origin.x + offXZ.x * 2 * len, 0, origin.z + offXZ.y * 2 * len));
-        }
-
-        return centers.asList();
     }
 
     private BiomeGenerator.Index findGenerator(Vec3i offset, int height) {

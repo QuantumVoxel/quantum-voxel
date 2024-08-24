@@ -24,7 +24,7 @@ public interface ClientWorldAccess extends WorldAccess {
     @Nullable ClientChunkAccess getChunk(dev.ultreon.quantum.world.vec.ChunkVec pos);
 
     @Override
-    @Nullable ClientChunkAccess getChunk(int x, int z);
+    @Nullable ClientChunkAccess getChunk(int x, int y, int z);
 
     ClientChunkAccess getChunkAt(int x, int y, int z);
 

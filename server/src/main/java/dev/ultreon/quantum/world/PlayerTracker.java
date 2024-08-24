@@ -7,19 +7,19 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PlayerTracker implements Audience {
-    private final List<ServerPlayer> players = new ArrayList<>();
+    private final Set<ServerPlayer> players = new HashSet<>();
 
     public void startTracking(ServerPlayer player) {
         this.players.add(player);
-        CommonConstants.LOGGER.info("Tracking player '{}'...", player.getName());
     }
 
     public void stopTracking(ServerPlayer player) {
         this.players.remove(player);
-        CommonConstants.LOGGER.info("Stopped tracking player '{}'...", player.getName());
     }
 
     public boolean isTracking(ServerPlayer player) {

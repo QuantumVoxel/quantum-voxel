@@ -64,7 +64,7 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_CHUNK_DEBUGGER = new ImBoolean(false);
     private static final ImBoolean SHOW_PROFILER = new ImBoolean(false);
 
-    private static final ChunkVec RESET_CHUNK = new ChunkVec(17, 18);
+    private static final ChunkVec RESET_CHUNK = new ChunkVec(17, 4, 18);
     protected static final String[] keys = {"A", "B", "C"};
     protected static final Double[] values = {0.1, 0.3, 0.6};
     private static final Vector3 TRANSLATE_TMP = new Vector3();

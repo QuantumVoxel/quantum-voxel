@@ -1,10 +1,7 @@
 package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
-import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.vec.RegionVec;
+import dev.ultreon.quantum.world.vec.*;
 
 public interface Point {
     double getX();
@@ -34,11 +31,11 @@ public interface Point {
     }
 
     default ChunkVec chunk() {
-        return new ChunkVec(getIntX() / World.CHUNK_SIZE, getIntY() / World.CHUNK_HEIGHT, getIntZ() / World.CHUNK_SIZE);
+        return new ChunkVec(getIntX() / World.CHUNK_SIZE, getIntY() / World.CHUNK_SIZE, getIntZ() / World.CHUNK_SIZE, ChunkVecSpace.WORLD);
     }
 
     default RegionVec region() {
-        return new RegionVec(getIntX() / World.CHUNK_SIZE / World.REGION_SIZE, getIntZ() / World.CHUNK_SIZE / World.REGION_SIZE);
+        return new RegionVec(getIntX() / World.CHUNK_SIZE / World.REGION_SIZE, getIntY() / World.CHUNK_SIZE / World.REGION_SIZE, getIntZ() / World.CHUNK_SIZE / World.REGION_SIZE);
     }
 
     default Point offset(int x, int y, int z) {
@@ -49,20 +46,12 @@ public interface Point {
         return offset(vec.x, vec.y, vec.z);
     }
 
-    default Point offset(Vec2i vec) {
-        return offset(vec.x, 0, vec.y);
-    }
-
-    default Point offset(int x, int z) {
-        return offset(x, 0, z);
-    }
-
     default Point offset(ChunkVec vec) {
-        return offset(vec.x * World.CHUNK_SIZE, vec.y * World.CHUNK_HEIGHT, vec.z * World.CHUNK_SIZE);
+        return offset(vec.x * World.CHUNK_SIZE, vec.y * World.CHUNK_SIZE, vec.z * World.CHUNK_SIZE);
     }
 
     default Point offset(RegionVec vec) {
-        return offset(vec.x * World.CHUNK_SIZE * World.REGION_SIZE, vec.z * World.CHUNK_SIZE * World.REGION_SIZE);
+        return offset(vec.x * World.CHUNK_SIZE * World.REGION_SIZE, vec.y * World.CHUNK_SIZE * World.REGION_SIZE, vec.z * World.CHUNK_SIZE * World.REGION_SIZE);
     }
 
     double dst(Point point);

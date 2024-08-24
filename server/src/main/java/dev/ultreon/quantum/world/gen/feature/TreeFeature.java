@@ -13,8 +13,6 @@ import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.NotNull;
 
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
-
 public class TreeFeature extends WorldGenFeature {
     private final NoiseConfig noiseConfig;
     private final Block trunk;
@@ -56,12 +54,6 @@ public class TreeFeature extends WorldGenFeature {
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
-            if (trunkHeight + height + 1 > CHUNK_HEIGHT) {
-                if (WorldGenDebugContext.isActive()) {
-                    System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
-                }
-                return false;
-            }
 
             // Check if there is enough space
             for (int y = height + 1; y < height + trunkHeight; y++) {

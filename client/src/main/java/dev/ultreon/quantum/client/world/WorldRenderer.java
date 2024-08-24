@@ -65,7 +65,6 @@ import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.*;
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public final class WorldRenderer implements DisposableContainer, TerrainRenderer {
@@ -83,7 +82,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private Environment environment;
     private int visibleChunks;
     private int loadedChunks;
-    private static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE);
+    private static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
     private static final Vector3 HALF_CHUNK_DIMENSIONS = WorldRenderer.CHUNK_DIMENSIONS.cpy().scl(0.5f);
 
     private final ClientWorld world;
@@ -456,7 +455,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                             continue;
                         }
                     } else {
-                        CommonConstants.LOGGER.warn("Tried to rebuild a chunk that didn't exist: " + chunk.getVec());
                         model = new ChunkModel(chunk.getVec(), chunk, this);
                         if (model.build()) {
                             ref.chunkRendered = true;
@@ -537,9 +535,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         chunkModel.dispose();
 
         NamespaceID id = createId(chunk.getVec());
-        if (!ModelManager.INSTANCE.unloadModel(id)) {
-            QuantumClient.LOGGER.warn("Didn't find chunk model {} to dispose, possibly it didn't exist, or got moved out.", id);
-        }
 
         Map<BlockVec, BlockState> customRendered = chunk.getCustomRendered();
         for (var entry : blockInstances.entrySet()) {
@@ -599,7 +594,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private boolean shouldIgnoreRebuild() {
-        return this.lastChunkBuild >= System.currentTimeMillis() - 10L;
+        return false;
     }
 
     @Override
@@ -659,8 +654,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private static List<ClientChunk> chunksInViewSorted(Collection<ClientChunk> chunks, Player player) {
         List<ClientChunk> list = new ArrayList<>(chunks);
         list = list.stream().sorted((o1, o2) -> {
-            Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CHUNK_SIZE, o1.getOffset().y + (float) CHUNK_HEIGHT, o1.getOffset().z + (float) CHUNK_SIZE);
-            Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CHUNK_SIZE, o2.getOffset().y + (float) CHUNK_HEIGHT, o2.getOffset().z + (float) CHUNK_SIZE);
+            Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CHUNK_SIZE, o1.getOffset().y + (float) CHUNK_SIZE, o1.getOffset().z + (float) CHUNK_SIZE);
+            Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CHUNK_SIZE, o2.getOffset().y + (float) CHUNK_SIZE, o2.getOffset().z + (float) CHUNK_SIZE);
             return Double.compare(mid1.dst(player.getPosition()), mid2.dst(player.getPosition()));
         }).collect(Collectors.toList());
         return list;

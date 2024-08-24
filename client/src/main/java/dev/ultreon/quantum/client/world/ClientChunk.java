@@ -39,12 +39,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public final class ClientChunk extends Chunk implements ClientChunkAccess {
-    public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
-
     private static final int[] dx = {-1, 0, 1, 0, 0, 0};
     private static final int[] dy = {0, -1, 0, 1, 0, 0};
     private static final int[] dz = {0, 0, 0, 0, -1, 1};
@@ -64,8 +61,9 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final Map<BlockVec, ModelInstance> models = new ConcurrentHashMap<>();
     private final Array<BlockVec> removedModels = new Array<>();
     public boolean visible;
-    private ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
-    private Stack<Integer> stack = new Stack<>();
+    private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
+    private final Stack<Integer> stack = new Stack<>();
+    public final ClientChunkInfo info = new ClientChunkInfo();
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
@@ -90,7 +88,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     private int index(int x, int y, int z) {
-        return (z * CHUNK_HEIGHT + y) * CHUNK_SIZE + x;
+        return (z * CHUNK_SIZE + y) * CHUNK_SIZE + x;
     }
 
     @Override
@@ -225,9 +223,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     void ready() {
-        if (!QuantumClient.isOnRenderThread()) {
-            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-        }
         this.ready = true;
         this.clientWorld.updateChunkAndNeighbours(this);
 
@@ -359,13 +354,13 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
             lightMap.setBlockLight(idx, newValue);
             int x = idx % CHUNK_SIZE;
-            int y = (idx / CHUNK_SIZE) % CHUNK_HEIGHT;
-            int z = idx / (CHUNK_SIZE * CHUNK_HEIGHT);
+            int y = (idx / CHUNK_SIZE) % CHUNK_SIZE;
+            int z = idx / (CHUNK_SIZE * CHUNK_SIZE);
             for (int i = 0; i < 6; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
                 int nz = z + dz[i];
-                if (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_HEIGHT && nz >= 0 && nz < CHUNK_SIZE) {
+                if (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_SIZE && nz >= 0 && nz < CHUNK_SIZE) {
                     int lightReduction = get(nx, ny, nz).getLightReduction();
                     if (lightReduction == 0) continue;
                     if (lightMap.getSunlight(nx, ny, nz) > lightReduction) continue;

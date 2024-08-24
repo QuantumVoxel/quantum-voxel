@@ -32,7 +32,7 @@ public final class BuilderChunk extends Chunk {
         this.thread = thread;
         this.region = region;
         this.rng = new JavaRNG(this.world.getSeed() + (pos.getIntX() ^ ((long) pos.getIntZ() << 4)) & 0x3FFFFFFF);
-        this.biomeData = new PaletteStorage<>(256, Biomes.PLAINS.create(this.world, world.getSeed()));
+        this.biomeData = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS.create(this.world, world.getSeed()));
     }
 
     @Override
@@ -43,6 +43,9 @@ public final class BuilderChunk extends Chunk {
 
     public void set(Vec3i pos, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
+        pos.x -= this.offset.x;
+        pos.y -= this.offset.y;
+        pos.z -= this.offset.z;
         if (this.isOutOfBounds(pos.x, pos.y, pos.z)) {
             this.world.recordOutOfBounds(this.offset.x + pos.x, this.offset.y + pos.y, this.offset.z + pos.z, block);
             return;
@@ -53,6 +56,9 @@ public final class BuilderChunk extends Chunk {
     @Override
     public boolean set(int x, int y, int z, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
+        x -= this.offset.x;
+        y -= this.offset.y;
+        z -= this.offset.z;
         if (this.isOutOfBounds(x, y, z)) {
             this.world.recordOutOfBounds(this.offset.x + x, this.offset.y + y, this.offset.z + z, block);
             return false;
@@ -63,20 +69,12 @@ public final class BuilderChunk extends Chunk {
     @Override
     public void setFast(Vec3i pos, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
-        if (this.isOutOfBounds(pos.x, pos.y, pos.z)) {
-            this.world.recordOutOfBounds(this.offset.x + pos.x, this.offset.y + pos.y, this.offset.z + pos.z, block);
-            return;
-        }
         super.setFast(pos, block);
     }
 
     @Override
     public boolean setFast(int x, int y, int z, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
-        if (this.isOutOfBounds(x, y, z)) {
-            this.world.recordOutOfBounds(this.offset.x + x, this.offset.y + y, this.offset.z + z, block);
-            return false;
-        }
         return super.setFast(x, y, z, block);
     }
 
@@ -121,25 +119,15 @@ public final class BuilderChunk extends Chunk {
     }
 
     @Override
+    @Deprecated
     public int getHeight(int x, int z) {
-        if (isOutOfBounds(x, 0, z)) {
-            // Get from the world
-            int globX = this.getVec().x * CHUNK_SIZE + x;
-            int globZ = this.getVec().z * CHUNK_SIZE + z;
-            return QuantumServer.invokeAndWait(() -> this.world.getHeight(globX, globZ));
-        }
-        return super.getHeight(x, z, HeightmapType.WORLD_SURFACE);
+        return world.getHeight(x, z);
     }
 
     @Override
+    @Deprecated
     public int getHeight(int x, int z, HeightmapType type) {
-        if (isOutOfBounds(x, 0, z)) {
-            // Get from the world
-            int globX = this.getVec().x * CHUNK_SIZE + x;
-            int globZ = this.getVec().z * CHUNK_SIZE + z;
-            return this.world.getHeight(globX, globZ, type);
-        }
-        return super.getHeight(x, z, type);
+        return world.getHeight(x, z, type);
     }
 
     public RNG getRNG() {

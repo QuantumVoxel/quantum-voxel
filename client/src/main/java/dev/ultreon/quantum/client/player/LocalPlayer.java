@@ -12,6 +12,7 @@ import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.util.ControllerButton;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
@@ -38,8 +39,9 @@ import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 public class LocalPlayer extends ClientPlayer {
     private final QuantumClient client = QuantumClient.get();
@@ -49,7 +51,10 @@ public class LocalPlayer extends ClientPlayer {
     private double lastWalkSound;
     private final Vec3d tmp = new Vec3d();
     private ChunkVec lastChunkVec;
-    private Vec2i tmp2I = new Vec2i();
+    private final Vec2i tmp2I = new Vec2i();
+    private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
+    private long lastRefresh;
+    public final Set<ChunkVec> pendingChunks = new HashSet<>();
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -86,18 +91,26 @@ public class LocalPlayer extends ClientPlayer {
         }
 
         // Handle player movement if there is a significant change in position
-        if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
-            double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
-            if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime()) {
-                this.client.playSound(SoundEvents.WALK, 1.0F);
-                this.lastWalkSound = this.client.getGameTime();
-            }
-            this.handleMove();
+        if (this.world.getChunk(this.getChunkVec()) == null && !this.isSpectator()) {
+            this.x = this.ox;
+            this.y = this.oy;
+            this.z = this.oz;
+
+            this.refreshChunks();
         } else {
-            // Update previous position if no significant change
-            this.ox = this.x;
-            this.oy = this.y;
-            this.oz = this.z;
+            if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
+                double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
+                if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime() && !this.isSpectator()) {
+                    this.client.playSound(SoundEvents.WALK, 1.0F);
+                    this.lastWalkSound = this.client.getGameTime();
+                }
+                this.handleMove();
+            } else {
+                // Update previous position if no significant change
+                this.ox = this.x;
+                this.oy = this.y;
+                this.oz = this.z;
+            }
         }
     }
 
@@ -120,28 +133,67 @@ public class LocalPlayer extends ClientPlayer {
         this.oy = this.y;
         this.oz = this.z;
 
-        if (!this.getChunkVec().equals(this.lastChunkVec)) {
-            this.refreshChunks();
-            this.lastChunkVec = this.getChunkVec();
-        }
+        this.refreshChunks();
+        this.lastChunkVec = this.getChunkVec();
     }
 
     private void refreshChunks() {
         if (!this.client.renderWorld) return;
+        if (lastRefresh + 1000 > System.currentTimeMillis()) return;
+        lastRefresh = System.currentTimeMillis();
 
         IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
         ChunkVec chunkVec = this.getChunkVec();
 
         if (connection == null) return;
         int renderDistance = ClientConfig.renderDistance;
-        for (int x = -renderDistance; x <= renderDistance; x++) {
-            for (int z = -renderDistance; z <= renderDistance; z++) {
-                ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
-                if (this.tmp2I.set(x, z).dst(chunkVec.getIntX(), chunkVec.getIntZ()) <= renderDistance
-                        && !this.world.isLoaded(relativePos))
-                    connection.send(new C2SRequestChunkLoadPacket(relativePos));
+
+        for (ClientChunkAccess chunk : this.world.getLoadedChunks()) {
+            if (chunk.getVec().dst(chunkVec) > renderDistance) {
+                this.unloadChunk(chunk);
             }
         }
+
+        Set<ChunkVec> chunksToLoad = this.chunksToLoad;
+        chunksToLoad.clear();
+        ChunkVec chunkPos = this.getChunkVec();
+        for (int x = -renderDistance; x <= renderDistance; x++) {
+            for (int y = -renderDistance; y <= renderDistance; y++) {
+                for (int z = -renderDistance; z <= renderDistance; z++) {
+                    ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
+                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null) continue;
+                    if (chunkPos.dst(relativePos) <= renderDistance && !this.world.isLoaded(relativePos)) {
+                        chunksToLoad.add(relativePos);
+                    }
+                }
+            }
+        }
+
+        if (!this.chunksToLoad.isEmpty()) {
+            Stream<ChunkVec> sorted = chunksToLoad.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
+            sorted.forEachOrdered(toLoad -> {
+                connection.send(new C2SRequestChunkLoadPacket(toLoad));
+                this.pendingChunks.add(toLoad);
+            });
+        }
+    }
+
+    @Override
+    public void setPosition(@NotNull Vec3d position) {
+        super.setPosition(position);
+
+        this.refreshChunks();
+    }
+
+    @Override
+    public void setPosition(double x, double y, double z) {
+        super.setPosition(x, y, z);
+
+        this.refreshChunks();
+    }
+
+    private void unloadChunk(ClientChunkAccess chunk) {
+        this.world.unloadChunk(chunk.getVec());
     }
 
     /**
