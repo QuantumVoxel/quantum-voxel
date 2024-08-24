@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
@@ -42,7 +41,10 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
@@ -67,7 +69,7 @@ public abstract class World implements Disposable, WorldAccess {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(World.class);
 
-    protected final Vec3i spawnPoint = new Vec3i();
+    protected final BlockVec spawnPoint = new BlockVec();
     protected final long seed;
     protected ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private int renderedChunks;
@@ -85,8 +87,8 @@ public abstract class World implements Disposable, WorldAccess {
     protected UUID uid = Utils.ZEROED_UUID;
     protected int spawnX;
     protected int spawnZ;
-    private final Map<ChunkVec, Heightmap> motionBlockingHeightMaps = new HashMap<>();
-    private final Map<ChunkVec, Heightmap> worldSurfaceHeightMaps = new HashMap<>();
+    private final Map<ChunkVec, Heightmap> motionBlockingHeightMaps = new ConcurrentHashMap<>();
+    private final Map<ChunkVec, Heightmap> worldSurfaceHeightMaps = new ConcurrentHashMap<>();
 
     protected World() {
         // Shh, the original seed was 512.
@@ -138,34 +140,6 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     public boolean isAlwaysLoaded(ChunkVec pos) {
         return this.alwaysLoaded.contains(pos);
-    }
-
-    @Deprecated
-    private CompletableFuture<Boolean> unloadChunkAsync(ChunkVec chunkVec) {
-        return this.unloadChunkAsync(Objects.requireNonNull(this.getChunk(chunkVec), "Chunk not loaded: " + chunkVec));
-    }
-
-    @Deprecated
-    @CanIgnoreReturnValue
-    private CompletableFuture<Boolean> unloadChunkAsync(@NotNull Chunk chunk) {
-        synchronized (chunk.lock) {
-            return CompletableFuture.supplyAsync(() -> this.unloadChunk(chunk, chunk.getVec()), this.executor).exceptionally(throwable -> {
-                World.fail(throwable, "Failed to unload chunk:");
-                return false;
-            });
-        }
-    }
-
-    protected static void fail(Throwable throwable, String msg) {
-        if (throwable instanceof CompletionException e && throwable.getCause() instanceof Error) {
-            Error error = (Error) e.getCause();
-            QuantumServer.get().crash(throwable);
-        }
-        if (throwable instanceof Error error) {
-            QuantumServer.get().crash(throwable);
-        }
-
-        World.LOGGER.error(msg, throwable);
     }
 
     @Override
@@ -300,17 +274,6 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     protected abstract void checkThread();
-
-    /**
-     * Converts a block position to a chunk space block position.
-     *
-     * @param pos the world space block position
-     * @return the block position in chunk space
-     */
-    @Deprecated
-    public static BlockVec toLocalBlockVec(BlockVec pos) {
-        return World.toLocalBlockVec(pos.getIntX(), pos.getIntY(), pos.getIntZ());
-    }
 
     /**
      * Converts a block position to a chunk space block position.

@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static dev.ultreon.libs.commons.v0.Mth.lerp;
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 /**
  * Represents a chunk in the world.
@@ -653,7 +653,6 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     public enum Status {
         SUCCESS,
-        SKIP,
         UNLOADED,
         FAILED
     }

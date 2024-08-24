@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
@@ -25,15 +24,18 @@ import java.util.Collection;
 import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static java.lang.System.currentTimeMillis;
 
 @NotThreadSafe
 public final class ServerChunk extends Chunk {
     private final @NotNull ServerWorld world;
     private final @NotNull ServerWorld.Region region;
+    public final ChunkBuildInfo info = new ChunkBuildInfo();
     private boolean modified = false;
     private boolean original = true;
 
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
+    private long lastTracked = currentTimeMillis();
 
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
@@ -201,16 +203,18 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
-        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.storage, this.biomeStorage, this.getBlockEntities()));
+        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage, this.biomeStorage, this.getBlockEntities()));
     }
 
     public void tick() {
         this.rwLock.readLock().lock();
         Collection<BlockEntity> blockEntities;
         try {
-            if (!isBeingTracked()) {
+            if (!isBeingTracked() && lastTracked + 1000L < System.currentTimeMillis()) {
                 this.world.unloadChunk(this, this.getVec());
                 return;
+            } else {
+                lastTracked = System.currentTimeMillis();
             }
 
             blockEntities = List.copyOf(this.getBlockEntities());

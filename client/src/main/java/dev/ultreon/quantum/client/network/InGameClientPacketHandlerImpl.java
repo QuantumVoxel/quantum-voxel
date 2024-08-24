@@ -47,6 +47,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.Chunk;
+import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -60,7 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler {
     private final IConnection<ClientPacketHandler, ServerPacketHandler> connection;
@@ -123,17 +123,17 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onChunkData(ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         try {
             LocalPlayer player = this.client.player;
             if (player == null/* || new Vec2d(pos.x(), pos.z()).dst(new Vec2d(player.getChunkVec().x(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
+                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                 return;
             }
 
             double dst = pos.dst(player.getChunkVec());
             if (dst > ClientConfig.renderDistance) {
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
+                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                 return;
             }
 
@@ -163,7 +163,12 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 });
 
                 ClientChunk data = ref.data;
-                if (data != null) data.info.loadDuration = l;
+                if (data != null) {
+                    data.info.loadDuration = l;
+                    data.info.build = info;
+
+                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
+                }
             } catch (Throwable throwable) {
                 this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                 QuantumClient.LOGGER.error("Failed to load chunk:", throwable);

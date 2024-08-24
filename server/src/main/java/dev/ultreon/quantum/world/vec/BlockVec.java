@@ -63,6 +63,14 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         this(BlockVecSpace.WORLD);
     }
 
+    @Override
+    public BlockVec set(Vec3i vec) {
+        this.x = vec.x;
+        this.y = vec.y;
+        this.z = vec.z;
+        return this;
+    }
+
     /**
      * Creates a new block position from a {@link Vec3i vector}.
      *

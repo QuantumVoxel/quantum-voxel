@@ -20,6 +20,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -42,7 +43,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onChunkCancel(ChunkVec pos);
 
-    void onChunkData(ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
+    void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
 
     void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, Vec2f rotation);
 

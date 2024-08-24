@@ -3,6 +3,8 @@ package dev.ultreon.quantum.client.gui.debug;
 import com.badlogic.gdx.graphics.Mesh;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
+import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -89,11 +91,32 @@ public class GenericDebugPage implements DebugPage {
                     .left();
         }
 
+        // Chunk
+        LocalPlayer localPlayer = client.player;
+        if (world != null && localPlayer != null) {
+            ClientChunkAccess chunkAccess = world.getChunk(localPlayer.getChunkVec());
+            if (chunkAccess instanceof ClientChunk chunk) {
+                context.right();
+                context.right("Chunk");
+                context.right("Pos", chunk.getVec());
+
+                context.right();
+                context.right("Chunk Info");
+                context.right("Client Load Time", chunk.info.loadDuration);
+                context.right("Server Build Time", chunk.info.build.buildDuration);
+            }
+        }
+
+        // Cursor
         BlockHit cursor = client.cursor;
         if (cursor != null && cursor.isCollide()) {
             BlockState block = cursor.getBlockMeta();
             if (block != null && !block.isAir()) {
-                context.right("Block", block);
+                context.right();
+                context.right("Cursor");
+                context.right("Block", block.getBlock().getId());
+                context.right("Pos", cursor.getBlockVec());
+                context.right("Next", cursor.getNext());
             }
         }
     }

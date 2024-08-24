@@ -11,11 +11,10 @@ import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 public class DisconnectedScreen extends Screen {
     private final String message;
-    private boolean wasMultiplayer;
+    private final boolean wasMultiplayer;
 
     public DisconnectedScreen(String message, boolean wasMultiplayer) {
         super(TextObject.translation("quantum.screen.message.disconnected"));
@@ -33,7 +32,7 @@ public class DisconnectedScreen extends Screen {
             // Make sure the connection is closed
             this.client.connection.close();
             this.client.connection = null;
-        } catch (IOException ignored) {
+        } catch (IOException|NullPointerException ignored) {
             this.client.connection = null;
         }
 

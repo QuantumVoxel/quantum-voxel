@@ -5,8 +5,11 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BuilderChunk;
+import dev.ultreon.quantum.world.HeightmapType;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 import static java.lang.Math.min;
@@ -51,6 +54,9 @@ public class Carver {
                 chunk.set(x, y, z, Blocks.AIR.createMeta());
             }
         }
+
+        BlockVec vec = new BlockVec(x, height, z, BlockVecSpace.WORLD).chunkLocal();
+        chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE).set(vec.x, vec.z, (short) height);
 
         return groundPos;
     }

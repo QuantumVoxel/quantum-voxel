@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.*;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -33,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -430,36 +428,25 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
-        return new ClientChunk[]{
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ() + 1),
+        ClientChunk[] neighbourChunks = new ClientChunk[26];
+        ChunkVec vec = chunk.getVec();
 
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1),
+        int index = 0;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (x == 0 && y == 0 && z == 0) continue;
 
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() - 1),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ()),
-                this.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() + 1),
-                this.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntZ() + 1, chunk.getVec().getIntZ() + 1)
-        };
+                    int chunkX = vec.x + x;
+                    int chunkY = vec.y + y;
+                    int chunkZ = vec.z + z;
+
+                    neighbourChunks[index++] = this.getChunk(chunkX, chunkY, chunkZ);
+                }
+            }
+        }
+
+        return neighbourChunks;
     }
 
     private void updateLightChunk(ClientChunk chunk) {
@@ -846,11 +833,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             // If the chunk already exists, log a warning and return
             World.LOGGER.warn("Duplicate chunk packet detected! Chunk {}", pos);
             unloadChunk(chunk, pos);
-
-            LocalPlayer player = this.client.player;
-            if (player != null)
-                player.pendingChunks.remove(pos);
-
             return;
         }
 
@@ -870,7 +852,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
                 player.pendingChunks.remove(pos);
 
                 // If the distance is greater than the render distance, send a skip chunk status packet and return
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SKIP));
+                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                 return;
             }
 
@@ -979,13 +961,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         chunkAt.set(pos.chunkLocal(), block);
 
         this.updateChunkAndNeighbours(chunkAt);
-    }
-
-    @Deprecated
-    public Color getSkyColor(Color output) {
-        @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
-        if (worldRenderer == null) return output.set(Color.BLACK);
-        return output.set(worldRenderer.getSkybox().topColor);
     }
 
     public int getDaytime() {

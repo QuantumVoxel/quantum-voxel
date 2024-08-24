@@ -8,7 +8,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -41,8 +40,6 @@ import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.LongType;
 import dev.ultreon.ubo.types.MapType;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import kotlin.system.TimingKt;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.intellij.lang.annotations.MagicConstant;
@@ -300,7 +297,7 @@ public class ServerWorld extends World {
         for (var player : this.server.getPlayers()) {
             if (player.getWorld() != this) continue;
 
-            if (player.isChunkActive(World.toChunkVec(x, y, z))) {
+            if (player.isChunkActive(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk())) {
                 player.connection.send(packet);
             }
         }
@@ -312,7 +309,7 @@ public class ServerWorld extends World {
 
             if (player.getWorld() != this) continue;
 
-            if (player.isChunkActive(World.toChunkVec(x, y, z))) {
+            if (player.isChunkActive(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk())) {
                 player.connection.send(packet);
             }
         }
@@ -530,6 +527,8 @@ public class ServerWorld extends World {
 
         var poll = this.tasks.poll();
         if (poll != null) poll.run();
+
+        this.regionStorage.tick();
 
         this.pollChunkQueues();
     }
@@ -774,7 +773,7 @@ public class ServerWorld extends World {
     @Override
     @Blocking
     public BlockVec getSpawnPoint() {
-        ChunkVec chunkVec = World.toChunkVec(this.spawnX, this.spawnY, this.spawnZ);
+        ChunkVec chunkVec = new BlockVec(spawnX, spawnY, spawnZ, BlockVecSpace.WORLD).chunk();
         Chunk chunk = this.getChunk(chunkVec);
         if (chunk == null) {
             chunk = this.loadChunkNow(chunkVec);
@@ -1286,7 +1285,7 @@ public class ServerWorld extends World {
         public String lastPlayedIn = QuantumServer.get().getGameVersion();
         public boolean saving;
         public boolean dirtyWhileSaving;
-        private Map<ChunkVec, ServerChunk> chunks = Object2ObjectMaps.synchronize(new Object2ObjectArrayMap<>());
+        private Map<ChunkVec, ServerChunk> chunks = new ConcurrentHashMap<>();
         private boolean disposed = false;
         private final ServerWorld world;
         private final List<ChunkVec> generatingChunks = new CopyOnWriteArrayList<>();
@@ -1563,7 +1562,7 @@ public class ServerWorld extends World {
                         return null;
                     });
 
-                    World.LOGGER.info(String.format("Built chunk at %s in %dms.", globalVec, l));
+                    ref.builtChunk.info.buildDuration = l;
 
                     return ref.builtChunk;
                 } catch (CancellationException | RejectedExecutionException e) {
@@ -1743,7 +1742,7 @@ public class ServerWorld extends World {
     public static class RegionStorage {
         private final Map<RegionVec, Region> regions = new ConcurrentHashMap<>();
         private int chunkCount;
-        private ReadWriteLock rwLock = new ReentrantReadWriteLock();
+        private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
         /**
          * Saves a region to an output stream.
@@ -1790,6 +1789,15 @@ public class ServerWorld extends World {
                 }
             } finally {
                 region.rwLock.readLock().unlock();
+            }
+        }
+
+        public void tick() {
+            this.rwLock.writeLock().lock();
+            try {
+                this.regions.values().forEach(Region::tick);
+            } finally {
+                this.rwLock.writeLock().unlock();
             }
         }
 

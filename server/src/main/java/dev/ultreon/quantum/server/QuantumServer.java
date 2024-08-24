@@ -42,8 +42,9 @@ import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.CachedPlayer;
 import dev.ultreon.quantum.server.player.PermissionMap;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.ServerChunk;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.PollingExecutorService;
+import dev.ultreon.quantum.util.Shutdownable;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldStorage;
@@ -697,25 +698,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     public Collection<ServerPlayer> getPlayers() {
         return this.players.values();
-    }
-
-    /**
-     * Sends a chunk to all players that are within the render distance.
-     *
-     * @param globalVec the global position of the chunk.
-     * @param chunk     the chunk to send.
-     * @throws IOException if an I/O error occurs.
-     */
-    public void sendChunk(ChunkVec globalVec, ServerChunk chunk) throws IOException {
-        for (ServerPlayer player : this.players.values()) {
-            Vec3d ChunkVec3D = globalVec.getChunkOrigin().add(World.CHUNK_SIZE / 2f, World.CHUNK_SIZE / 2f, World.CHUNK_SIZE / 2f);
-            Vec2d ChunkVec2D = new Vec2d(ChunkVec3D.x, ChunkVec3D.z);
-            Vec2d playerPos2D = new Vec2d(player.getX(), player.getZ());
-            double dst = ChunkVec2D.dst(playerPos2D);
-            if (dst < this.getRenderDistance() * World.CHUNK_SIZE) {
-                player.sendChunk(globalVec, chunk);
-            }
-        }
     }
 
     /**

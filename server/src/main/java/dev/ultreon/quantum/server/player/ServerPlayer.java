@@ -32,18 +32,19 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.GameMode;
+import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import org.apache.commons.collections4.set.ListOrderedSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -335,7 +336,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void onChunkStatus(@NotNull ChunkVec vec, Chunk.Status status) {
         switch (status) {
             case FAILED -> this.handleFailedChunk(vec);
-            case SKIP, UNLOADED -> {
+            case UNLOADED -> {
                 ServerChunk chunk = this.world.getChunk(vec);
                 if (chunk != null) {
                     chunk.getTracker().stopTracking(this);
@@ -386,47 +387,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         if (chunk != null) {
             chunk.getTracker().stopTracking(this);
             this.chunkTracker.stopTracking(vec);
+
+            this.connection.send(new S2CChunkUnloadPacket(vec));
         }
-    }
-
-    /**
-     * Refreshes chunks around a specified chunk position.
-     * <p>
-     * NOTE: Internal API.
-     *
-     * @param refresher The ChunkRefresher object.
-     * @param server    The QuantumServer object.
-     * @param world     The ServerWorld object.
-     * @param chunkVec  The central ChunkVec to compare against.
-     * @param toLoad    Set of ChunkVec to load, sorted based on distance from player position.
-     * @param toUnload  Set of ChunkVec to unload.
-     */
-    @ApiStatus.Internal
-    public static void refreshChunks(ChunkRefresher refresher, QuantumServer server, ServerWorld world, ChunkVec chunkVec, ListOrderedSet<ChunkVec> toLoad, ListOrderedSet<ChunkVec> toUnload) {
-        // Sort the chunks to load based on distance from player position.
-        List<ChunkVec> load = toLoad.stream().sorted((o1, o2) -> {
-            Vec2d playerPos = new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ());
-            Vec2d cPos1 = new Vec2d(o1.getIntX(), o1.getIntZ());
-            Vec2d cPos2 = new Vec2d(o2.getIntX(), o2.getIntZ());
-
-            return Double.compare(cPos1.dst(playerPos), cPos2.dst(playerPos));
-        }).collect(Collectors.toList());
-
-        // Load each chunk in the sorted order.
-        for (ChunkVec loadingChunk : load) {
-            ServerChunk chunk = world.getChunk(loadingChunk);
-            if (chunk != null) {
-                try {
-                    server.sendChunk(loadingChunk, chunk);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        // Add all loading/unloading chunks to the refresher.
-        refresher.addLoading(load);
-        refresher.addUnloading(toUnload);
     }
 
     /**
@@ -438,7 +401,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void sendChunk(@NotNull ChunkVec vec, @NotNull ServerChunk chunk) {
         if (this.sendingChunk) return;
 
-        this.connection.send(new S2CChunkDataPacket(vec, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()));
+        this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()));
         this.sendingChunk = false;
     }
 
@@ -572,7 +535,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param z the z-coordinate received from the client
      */
     public void handlePlayerMove(double x, double y, double z) {
-        ChunkVec chunkVec = World.toChunkVec((int) x, (int) y, (int) z);
+        ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
         ServerChunk chunk = this.world.getChunk(chunkVec);
         if (chunk == null) {
             return;
@@ -602,7 +565,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param z the z-coordinate received from the client
      */
     public void handlePlayerMove(double x, double y, double z, float xHeadRot, float xRot, float yRot) {
-        ChunkVec chunkVec = World.toChunkVec((int) x, (int) y, (int) z);
+        ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
         ServerChunk chunk = this.world.getChunk(chunkVec);
         if (chunk == null) {
             return;
@@ -764,12 +727,17 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         // Get or load the chunk.
         synchronized (this.chunkTracker) {
             QuantumServer.invoke(() -> {
-                if (!this.chunkTracker.isTracking(pos))
+                if (!this.chunkTracker.isTracking(pos)) {
                     this.chunkTracker.startTracking(pos);
+                } else {
+                    @Nullable ServerChunk chunk = this.world.getChunk(pos);
+                    if (chunk != null) chunk.sendChunk();
+                    else return;
+                }
 
                 this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
                     if (receivedChunk == null) {
-                        throw new IllegalStateException("Chunk was not loaded.");
+                        return;
                     }
 
                     receivedChunk.getTracker().startTracking(this);
