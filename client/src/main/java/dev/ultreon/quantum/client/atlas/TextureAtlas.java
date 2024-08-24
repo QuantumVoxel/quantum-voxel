@@ -4,22 +4,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.client.util.TextureOffset;
-import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.util.Identifier;
-
-import java.util.Map;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class TextureAtlas implements Disposable {
     private final TextureStitcher stitcher;
-    private final Identifier id;
+    private final NamespaceID id;
     private final com.badlogic.gdx.graphics.g2d.TextureAtlas atlas;
     private final com.badlogic.gdx.graphics.g2d.TextureAtlas emissiveAtlas;
     private final com.badlogic.gdx.graphics.g2d.TextureAtlas normalAtlas;
     private final com.badlogic.gdx.graphics.g2d.TextureAtlas specularAtlas;
     private final com.badlogic.gdx.graphics.g2d.TextureAtlas reflectiveAtlas;
 
-    public TextureAtlas(TextureStitcher stitcher, Identifier atlasId, PixmapPacker diffusePacker, PixmapPacker emissivePacker, PixmapPacker normalPacker, PixmapPacker specularPacker, PixmapPacker reflectivePacker) {
+    public TextureAtlas(TextureStitcher stitcher, NamespaceID atlasId, PixmapPacker diffusePacker, PixmapPacker emissivePacker, PixmapPacker normalPacker, PixmapPacker specularPacker, PixmapPacker reflectivePacker) {
         this.stitcher = stitcher;
         this.id = atlasId;
         this.atlas = diffusePacker.generateTextureAtlas(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, false);
@@ -31,25 +27,22 @@ public class TextureAtlas implements Disposable {
         this.stitcher.dispose();
     }
 
-    public TextureRegion get(Identifier id) {
+    public TextureRegion get(NamespaceID id) {
         return get(id, TextureAtlasType.DIFFUSE);
     }
 
-    public TextureRegion get(Identifier id, TextureAtlasType type) {
+    public TextureRegion get(NamespaceID id, TextureAtlasType type) {
         if (id == null) return null;
-        TextureRegion textureRegion = (switch (type) {
+        return (switch (type) {
             case DIFFUSE -> this.atlas;
             case EMISSIVE -> this.emissiveAtlas;
             case NORMAL -> this.normalAtlas;
             case SPECULAR -> this.specularAtlas;
             case REFLECTIVE -> this.reflectiveAtlas;
         }).findRegion(id.toString());
-        if (textureRegion == null) return null;
-        textureRegion.flip(false, true);
-        return textureRegion;
     }
 
-    public TextureRegion getEmissive(Identifier id) {
+    public TextureRegion getEmissive(NamespaceID id) {
         if (id == null) return null;
         TextureRegion textureRegion = this.emissiveAtlas.findRegion(id.toString());
         textureRegion.flip(false, true);

@@ -2,29 +2,34 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.BlockMetaPredicate;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.ValidationError;
-import dev.ultreon.quantum.world.gen.TreeData;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.types.MapType;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static dev.ultreon.libs.commons.v0.Mth.lerp;
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 /**
  * Represents a chunk in the world.
@@ -38,36 +43,27 @@ import static dev.ultreon.quantum.world.World.*;
 @ApiStatus.NonExtendable
 public abstract class Chunk implements Disposable, ChunkAccess {
     public static final int VERTEX_SIZE = 6;
-    private final ChunkPos pos;
-    final Map<BlockPos, Float> breaking = new HashMap<>();
-    protected final Object lock = new Object();
+    protected static final int MAX_LIGHT_LEVEL = 15;
+    protected static final float[] lightLevelMap = new float[Chunk.MAX_LIGHT_LEVEL + 1];
+
+    private final @NotNull ChunkVec vec;
+    final @NotNull Map<BlockVec, Float> breaking = new HashMap<>();
+    protected final @NotNull Object lock = new Object();
     protected boolean active;
     protected boolean ready;
 
-    /**
-     * @deprecated Use {@link World#CHUNK_SIZE} instead
-     */
-    @Deprecated(since = "0.1.0", forRemoval = true)
-    public final int size = CHUNK_SIZE;
-    /**
-     * @deprecated Use {@link World#CHUNK_HEIGHT} instead
-     */
-    @Deprecated(since = "0.1.0", forRemoval = true)
-    public final int height = CHUNK_HEIGHT;
-    protected final Vec3i offset;
-    @MonotonicNonNull
-    @ApiStatus.Internal
-    public TreeData treeData;
+    protected final @NotNull ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+    protected final @NotNull BlockVec offset;
+
     private boolean disposed;
-    private final World world;
+    private final @NotNull World world;
 
-    public final Storage<BlockProperties> storage;
-    protected final LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE);
-    protected final HeightMap heightMap = new HeightMap(CHUNK_SIZE);
-    public final Storage<Biome> biomeStorage;
-
-    protected static final int MAX_LIGHT_LEVEL = 15;
-    protected static final float[] lightLevelMap = new float[Chunk.MAX_LIGHT_LEVEL + 1];
+    public final @NotNull Storage<BlockState> storage;
+    protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
+    protected final @NotNull Heightmap motionBlockingHeightmap = new Heightmap(CHUNK_SIZE);
+    protected final @NotNull Heightmap worldSurfaceHeightmap = new Heightmap(CHUNK_SIZE);
+    public final @NotNull Storage<Biome> biomeStorage;
 
     static {
         for (int i = 0; i <= Chunk.MAX_LIGHT_LEVEL; i++) {
@@ -76,67 +72,88 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         }
     }
 
-    private final Map<BlockPos, BlockEntity> blockEntities = new HashMap<>();
+    private final Map<BlockVec, BlockEntity> blockEntities = new HashMap<>();
 
     /**
-     * @deprecated Use {@link #Chunk(World, ChunkPos)} instead@
+     * @deprecated Use {@link #Chunk(World, ChunkVec)} instead@
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    protected Chunk(World world, int size, int height, ChunkPos pos) {
-        this(world, size, height, pos, new PaletteStorage<>(BlockProperties.AIR, size * height * size));
+    protected Chunk(@NotNull World world,
+                    int size,
+                    int height,
+                    @NotNull ChunkVec vec) {
+        this(world, size, height, vec, new PaletteStorage<>(size * height * size, BlockState.AIR));
     }
 
     /**
-     * @deprecated Use {@link #Chunk(World, ChunkPos, Storage)} instead
+     * @deprecated Use {@link #Chunk(World, ChunkVec, Storage)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    protected Chunk(World world, int size, int height, ChunkPos pos, Storage<BlockProperties> storage) {
-        this(world, size, height, pos, storage, new PaletteStorage<>(Biomes.PLAINS, 256));
+    protected Chunk(@NotNull World world,
+                    int size,
+                    int height,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage) {
+        this(world, size, height, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS));
     }
 
     /**
-     * @deprecated Use {@link #Chunk(World, ChunkPos, Storage, Storage)} instead@
+     * @deprecated Use {@link #Chunk(World, ChunkVec, Storage, Storage)} instead@
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    protected Chunk(World world, int ignoredSize, int ignoredHeight, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage) {
-        this(world, pos, storage, biomeStorage);
+    protected Chunk(@NotNull World world,
+                    int ignoredSize,
+                    int ignoredHeight,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage,
+                    @NotNull Storage<Biome> biomeStorage) {
+        this(world, vec, storage, biomeStorage);
     }
 
     /**
      * Creates a new chunk.
      *
      * @param world the world the chunk is in.
-     * @param pos   the chunk position.
+     * @param vec   the chunk position.
      */
-    protected Chunk(World world, ChunkPos pos) {
-        this(world, pos, new PaletteStorage<>(BlockProperties.AIR, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE));
+    protected Chunk(@NotNull World world,
+                    @NotNull ChunkVec vec) {
+        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockState.AIR));
     }
 
     /**
      * Creates a new chunk.
      *
      * @param world   the world the chunk is in.
-     * @param pos     the chunk position.
+     * @param vec     the chunk position.
      * @param storage the block storage.
      */
-    protected Chunk(World world, ChunkPos pos, Storage<BlockProperties> storage) {
-        this(world, pos, storage, new PaletteStorage<>(Biomes.PLAINS, 256));
+    protected Chunk(@NotNull World world,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage) {
+        this(world, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS));
     }
 
     /**
      * Creates a new chunk.
      *
      * @param world        the world the chunk is in.
-     * @param pos          the chunk position.
+     * @param vec          the chunk position.
      * @param storage      the block storage.
      * @param biomeStorage the biome storage
      */
-    protected Chunk(World world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage) {
+    protected Chunk(@NotNull World world,
+                    @NotNull ChunkVec vec,
+                    @NotNull Storage<BlockState> storage,
+                    @NotNull Storage<Biome> biomeStorage) {
         this.world = world;
 
-        this.offset = new Vec3i(pos.x() * CHUNK_SIZE, WORLD_DEPTH, pos.z() * CHUNK_SIZE);
+        if (vec.getSpace() != ChunkVecSpace.WORLD)
+            throw new IllegalArgumentException("ChunkVec must be in world space");
 
-        this.pos = pos;
+        this.offset = new BlockVec(vec.getIntX() * CHUNK_SIZE, vec.getIntY() * CHUNK_SIZE, vec.getIntZ() * CHUNK_SIZE, BlockVecSpace.WORLD);
+
+        this.vec = vec;
         this.storage = storage;
         this.biomeStorage = biomeStorage;
     }
@@ -157,11 +174,11 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      *
      * @param data The input data.
      * @return The decoded block data.
-     * @deprecated Use {@link BlockProperties#load(MapType)} instead
+     * @deprecated Use {@link BlockState#load(MapType)} instead
      */
     @Deprecated
-    public static BlockProperties loadBlock(MapType data) {
-        return BlockProperties.load(data);
+    public static BlockState loadBlock(MapType data) {
+        return BlockState.load(data);
     }
 
     /**
@@ -171,7 +188,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public BlockProperties get(Vec3i pos) {
+    public BlockState get(Vec3i pos) {
         if (this.disposed) return Blocks.AIR.createMeta();
         return this.get(pos.x, pos.y, pos.z);
     }
@@ -183,9 +200,9 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public BlockProperties get(BlockPos pos) {
+    public @NotNull BlockState get(BlockVec pos) {
         if (this.disposed) return Blocks.AIR.createMeta();
-        return this.get(pos.x(), pos.y(), pos.z());
+        return this.get(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     /**
@@ -197,10 +214,15 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public BlockProperties get(int x, int y, int z) {
-        if (this.disposed) return Blocks.AIR.createMeta();
-        if (this.isOutOfBounds(x, y, z)) return Blocks.AIR.createMeta();
-        return this.getFast(x, y, z);
+    public @NotNull BlockState get(int x, int y, int z) {
+        if (this.isOutOfBounds(x, y, z)) throw new IllegalArgumentException("Coordinates out of bounds: " + x + ", " + y + ", " + z);
+        this.rwLock.readLock().lock();
+        try {
+            if (this.disposed) return Blocks.AIR.createMeta();
+            return this.getFast(x, y, z);
+        } finally {
+            this.rwLock.readLock().unlock();
+        }
     }
 
     /**
@@ -211,7 +233,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos the position of the block
      * @return the block at the given coordinates
      */
-    public BlockProperties getFast(Vec3i pos) {
+    public BlockState getFast(Vec3i pos) {
         return this.getFast(pos.x, pos.y, pos.z);
     }
 
@@ -226,12 +248,17 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return the block at the given coordinates
      */
     @Override
-    public BlockProperties getFast(int x, int y, int z) {
-        if (this.disposed) return Blocks.AIR.createMeta();
-        int dataIdx = this.getIndex(x, y, z);
+    public @NotNull BlockState getFast(int x, int y, int z) {
+        this.rwLock.readLock().lock();
+        try {
+            if (this.disposed) return Blocks.AIR.createMeta();
+            int dataIdx = this.getIndex(x, y, z);
 
-        BlockProperties block = this.storage.get(dataIdx);
-        return block == null ? Blocks.AIR.createMeta() : block;
+            BlockState block = this.storage.get(dataIdx);
+            return block == null ? Blocks.AIR.createMeta() : block;
+        } finally {
+            this.rwLock.readLock().unlock();
+        }
     }
 
     /**
@@ -240,8 +267,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param pos   the position of the block
      * @param block the block to set
      */
-    @Override
-    public void set(Vec3i pos, BlockProperties block) {
+    public void set(Vec3i pos, BlockState block) {
         this.set(pos.x, pos.y, pos.z, block);
     }
 
@@ -255,7 +281,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return true if the block was successfully set, false if setting the block failed
      */
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         if (this.isOutOfBounds(x, y, z)) return false;
         return this.setFast(x, y, z, block);
     }
@@ -269,7 +295,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param block the block to set
      */
     @Override
-    public void setFast(Vec3i pos, BlockProperties block) {
+    public void setFast(Vec3i pos, BlockState block) {
         this.setFast(pos.x, pos.y, pos.z, block);
     }
 
@@ -285,35 +311,32 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return true if the block was successfully set, false if setting the block failed
      */
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         if (this.disposed) return false;
-        int index = this.getIndex(x, y, z);
+        this.rwLock.writeLock().lock();
+        try {
+            int index = this.getIndex(x, y, z);
 
-        this.breaking.remove(new BlockPos(x, y, z));
-        this.storage.set(index, block);
+            this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+            this.storage.set(index, block);
 
-        if (this.heightMap.get(x, z) < y && !block.isAir()) {
-            this.heightMap.set(x, z, (short) y);
-        } else if (this.heightMap.get(x, z) == y && block.isAir()) {
-            int curY;
-            for (curY = y; curY >= 0; curY--) {
-                if (!this.getFast(x, curY, z).isAir()) {
-                    this.heightMap.set(x, z, (short) (curY + 1));
-                    break;
-                }
+            int oldHeight = this.worldSurfaceHeightmap.get(x, z);
+            if (y > oldHeight && !block.isAir()) this.worldSurfaceHeightmap.set(x, z, (short) y);
+            else if (y < oldHeight && block.isAir()) for (int cy = oldHeight; cy > y; cy--) {
+                if (getFast(x, cy, z).isAir()) continue;
+                this.worldSurfaceHeightmap.set(x, z, (short) cy);
+                break;
             }
-
-            if (curY < 0) {
-                this.heightMap.set(x, z, (short) 0);
-            }
+        } finally {
+            this.rwLock.writeLock().unlock();
         }
 
         return true;
     }
 
     private int getIndex(int x, int y, int z) {
-        if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE) {
-            return z * (CHUNK_SIZE * CHUNK_HEIGHT) + y * CHUNK_SIZE + x;
+        if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
+            return z * (CHUNK_SIZE * CHUNK_SIZE) + y * CHUNK_SIZE + x;
         }
         return -1; // Out of bounds
     }
@@ -326,8 +349,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z the z coordinate
      * @return true if the coordinates are out of bounds
      */
-    protected boolean isOutOfBounds(int x, int y, int z) {
-        return x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE;
+    public boolean isOutOfBounds(int x, int y, int z) {
+        return x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE;
     }
 
     /**
@@ -340,7 +363,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     @Override
     public void dispose() {
-        synchronized (this.lock) {
+        this.rwLock.writeLock().lock();
+        try {
             if (this.disposed) throw new ValidationError("Chunk is already disposed");
             this.disposed = true;
             this.ready = false;
@@ -348,21 +372,23 @@ public abstract class Chunk implements Disposable, ChunkAccess {
             if (this.storage instanceof Disposable disposable) {
                 disposable.dispose();
             }
+        } finally {
+            this.rwLock.writeLock().unlock();
         }
     }
 
     @Override
     public String toString() {
-        return "Chunk[x=" + this.getPos().x() + ", z=" + this.getPos().z() + "]";
+        return "Chunk[x=" + this.getVec().getIntX() + ", y=" + this.getVec().getIntY() + ", z=" + this.getVec().getIntZ() + "]";
     }
 
     @Override
-    public Vec3i getOffset() {
+    public BlockVec getOffset() {
         return this.offset.cpy();
     }
 
     float getBreakProgress(float x, float y, float z) {
-        BlockPos pos = new BlockPos((int) x, (int) y, (int) z);
+        BlockVec pos = new BlockVec((int) x, (int) y, (int) z, BlockVecSpace.CHUNK);
         Float v = this.breaking.get(pos);
         if (v != null) {
             return v;
@@ -371,15 +397,15 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     }
 
     public void startBreaking(int x, int y, int z) {
-        this.breaking.put(new BlockPos(x, y, z), 0.0F);
+        this.breaking.put(new BlockVec(x, y, z, BlockVecSpace.CHUNK), 0.0F);
     }
 
     public void stopBreaking(int x, int y, int z) {
-        this.breaking.remove(new BlockPos(x, y, z));
+        this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
     }
 
     public BreakResult continueBreaking(int x, int y, int z, float amount) {
-        BlockPos pos = new BlockPos(x, y, z);
+        BlockVec pos = new BlockVec(x, y, z, BlockVecSpace.CHUNK);
         Float v = this.breaking.computeIfPresent(pos, (pos1, cur) -> Mth.clamp(cur + amount, 0, 1));
         if (v != null && v == 1.0F) {
             this.breaking.remove(pos);
@@ -388,7 +414,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return BreakResult.CONTINUE;
     }
 
-    public Map<BlockPos, Float> getBreaking() {
+    public Map<BlockVec, Float> getBreaking() {
         return Collections.unmodifiableMap(this.breaking);
     }
 
@@ -406,7 +432,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         this.world.onChunkUpdated(this);
     }
 
-    public WorldAccess getWorld() {
+    public @NotNull World getWorld() {
         return this.world;
     }
 
@@ -414,8 +440,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return this.active;
     }
 
-    public ChunkPos getPos() {
-        return this.pos;
+    public @NotNull ChunkVec getVec() {
+        return this.vec;
     }
 
     /**
@@ -426,14 +452,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return The highest block Y coordinate.
      */
     @Override
-    public int getHighest(int x, int z) {
-//        return this.heightMap.get(x, z);
-        for (int y = CHUNK_HEIGHT - 1; y >= 1; y--) {
-            if (!this.getFast(x, y, z).isAir()) {
-                return y;
-            }
-        }
-        return 64;
+    public int getHeight(int x, int z) {
+        return this.worldSurfaceHeightmap.get(x, z);
     }
 
     /**
@@ -443,14 +463,11 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z the z coordinate
      * @return The highest block Y coordinate.
      */
-    public int getHighest(int x, int z, BlockMetaPredicate blockPredicate) {
-//        return this.heightMap.get(x, z);
-        for (int y = CHUNK_HEIGHT - 1; y >= 1; y--) {
-            if (!blockPredicate.test(this.getFast(x, y, z))) {
-                return y;
-            }
-        }
-        return 64;
+    public int getHeight(int x, int z, HeightmapType type) {
+        return switch (type) {
+            case MOTION_BLOCKING -> this.motionBlockingHeightmap.get(x, z);
+            case WORLD_SURFACE -> this.worldSurfaceHeightmap.get(x, z);
+        };
     }
 
     /**
@@ -461,13 +478,13 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z The z position.
      * @return The found position.
      */
-    public int ascend(int x, int y, int z) {
-        for (; y < CHUNK_HEIGHT; y++) {
+    public @Nullable Integer ascend(int x, int y, int z) {
+        for (; y < y + 256; y++) {
             if (this.getFast(x, y, z).isAir()) {
                 return y;
             }
         }
-        return CHUNK_HEIGHT;
+        return null;
     }
 
     /**
@@ -479,21 +496,15 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param height The height of the space.
      * @return The found position.
      */
-    public int ascend(int x, int y, int z, int height) {
-        for (; y < CHUNK_HEIGHT; y++) {
+    public @Nullable Integer ascend(int x, int y, int z, int height) {
+        for (; y < y + height; y++) {
             if (!this.getFast(x, y, z).isAir()) continue;
 
             for (int i = 0; i < height; i++) {
                 if (this.getFast(x, y + i, z).isAir()) return y;
             }
         }
-        return CHUNK_HEIGHT;
-    }
-
-    public void setTreeData(TreeData treeData) {
-        if (this.treeData != null) return;
-
-        this.treeData = treeData;
+        return null;
     }
 
     protected int toFlatIndex(int x, int z) {
@@ -536,12 +547,12 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
         Chunk chunk = (Chunk) o;
-        return Objects.equals(this.pos, chunk.pos);
+        return Objects.equals(this.vec, chunk.vec);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.pos);
+        return Objects.hash(this.vec);
     }
 
     /**
@@ -563,11 +574,11 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     /**
      * Get the sunlight level at the given position.
      *
-     * @param localBlockPos the position in the chunk
+     * @param localBlockVec the position in the chunk
      * @return the sunlight level at the given position between 0 and 15
      */
-    public int getSunlight(Vec3i localBlockPos) {
-        return this.getSunlight(localBlockPos.x, localBlockPos.y, localBlockPos.z);
+    public int getSunlight(Vec3i localBlockVec) {
+        return this.getSunlight(localBlockVec.x, localBlockVec.y, localBlockVec.z);
     }
 
     /**
@@ -589,12 +600,12 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     /**
      * Get the block light level at the given position.
      *
-     * @param localBlockPos the position in the chunk
+     * @param localBlockVec the position in the chunk
      * @return the block light level at the given position
      * @throws PosOutOfBoundsException if the position is out of bounds
      */
-    public int getBlockLight(Vec3i localBlockPos) {
-        return this.getBlockLight(localBlockPos.x, localBlockPos.y, localBlockPos.z);
+    public int getBlockLight(Vec3i localBlockVec) {
+        return this.getBlockLight(localBlockVec.x, localBlockVec.y, localBlockVec.z);
     }
 
     /**
@@ -611,8 +622,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         return Chunk.lightLevelMap[lightLevel];
     }
 
-    protected void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
-        this.blockEntities.put(blockPos, blockEntity);
+    protected void setBlockEntity(BlockVec blockVec, BlockEntity blockEntity) {
+        this.blockEntities.put(blockVec, blockEntity);
     }
 
     public Collection<BlockEntity> getBlockEntities() {
@@ -620,19 +631,19 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
-        return this.blockEntities.get(new BlockPos(x, y, z));
+        return this.blockEntities.get(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
     }
 
-    public BlockEntity getBlockEntity(Vec3i localBlockPos) {
-        return this.getBlockEntity(localBlockPos.x, localBlockPos.y, localBlockPos.z);
+    public BlockEntity getBlockEntity(Vec3i localBlockVec) {
+        return this.getBlockEntity(localBlockVec.x, localBlockVec.y, localBlockVec.z);
     }
 
-    public BlockEntity getBlockEntity(BlockPos blockPos) {
-        return this.blockEntities.get(blockPos);
+    public BlockEntity getBlockEntity(BlockVec blockVec) {
+        return this.blockEntities.get(blockVec);
     }
 
-    public void removeBlockEntity(BlockPos blockPos) {
-        this.blockEntities.remove(blockPos);
+    public void removeBlockEntity(BlockVec blockVec) {
+        this.blockEntities.remove(blockVec);
     }
 
     /**
@@ -642,7 +653,6 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     public enum Status {
         SUCCESS,
-        SKIP,
         UNLOADED,
         FAILED
     }

@@ -5,13 +5,13 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.CrateMenu;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.List;
 
 public class CrateScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
-    private static final Identifier BACKGROUND = QuantumClient.id("textures/gui/container/crate.png");
+    private static final NamespaceID BACKGROUND = QuantumClient.id("textures/gui/container/crate.png");
     private final CrateMenu menu;
 
     public CrateScreen(CrateMenu menu, TextObject title) {
@@ -30,7 +30,7 @@ public class CrateScreen extends ContainerScreen {
     }
 
     @Override
-    public Identifier getBackground() {
+    public NamespaceID getBackground() {
         return CrateScreen.BACKGROUND;
     }
 

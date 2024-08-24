@@ -2,10 +2,10 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import dev.ultreon.libs.datetime.v0.Duration;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
+import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
@@ -44,7 +44,7 @@ import dev.ultreon.quantum.python.PyLoader;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Task;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
@@ -88,7 +88,6 @@ class QuantumClientLoader implements Runnable {
         Gdx.app.setApplicationLogger(new GdxSlf4jLogger());
 
         client.configDir = QuantumClient.createDir("config/");
-        client.garbageCollector = new GarbageCollector();
 
         QuantumClient.createDir("screenshots/");
         QuantumClient.createDir("game-crashes/");
@@ -278,7 +277,7 @@ class QuantumClientLoader implements Runnable {
     }
 
     private void loadLanguages(QuantumClient client) {
-        var internal = QuantumClient.resource(new Identifier("languages.json5"));
+        var internal = QuantumClient.resource(new NamespaceID("languages.json5"));
         Json5Element parse = CommonConstants.JSON5.parse(internal.reader());
         Json5Object asJson5Object = parse.getAsJson5Object();
 
@@ -306,8 +305,8 @@ class QuantumClientLoader implements Runnable {
         LanguageRegistry.doRegistration(id -> registerLanguage(id, client));
     }
 
-    private void registerLanguage(Identifier id, QuantumClient quantumClient) {
-        var s = id.path().split("_", 2);
+    private void registerLanguage(NamespaceID id, QuantumClient quantumClient) {
+        var s = id.getPath().split("_", 2);
         var locale = s.length == 1 ? Locale.of(s[0]) : Locale.of(s[0], s[1]);
         LanguageManager.INSTANCE.register(locale, id);
         LanguageManager.INSTANCE.load(locale, id, quantumClient.getResourceManager());

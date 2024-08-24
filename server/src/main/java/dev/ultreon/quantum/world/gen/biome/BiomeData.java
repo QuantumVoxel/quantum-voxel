@@ -2,22 +2,9 @@ package dev.ultreon.quantum.world.gen.biome;
 
 import java.util.Objects;
 
-public final class BiomeData {
-    private final float temperatureStartThreshold;
-    private final float temperatureEndThreshold;
-    private final float humidityStartThreshold;
-    private final float humidityEndThreshold;
-    private final boolean isOcean;
-    private final BiomeGenerator biomeGen;
-
-    public BiomeData(float temperatureStartThreshold, float temperatureEndThreshold, float humidityStartThreshold, float humidityEndThreshold, boolean isOcean, BiomeGenerator biomeGen) {
-        this.temperatureStartThreshold = temperatureStartThreshold;
-        this.temperatureEndThreshold = temperatureEndThreshold;
-        this.humidityStartThreshold = humidityStartThreshold;
-        this.humidityEndThreshold = humidityEndThreshold;
-        this.isOcean = isOcean;
-        this.biomeGen = biomeGen;
-    }
+public record BiomeData(float temperatureStartThreshold, float temperatureEndThreshold, float humidityStartThreshold,
+                        float humidityEndThreshold, float heightStartThreshold, float heightEndThreshold,
+                        float hillinessStartThreshold, float hillinessEndThreshold, boolean isOcean, BiomeGenerator biomeGen) {
 
     @Override
     public String toString() {
@@ -26,30 +13,6 @@ public final class BiomeData {
                ", temperatureEndThreshold=" + this.temperatureEndThreshold +
                ", biomeGen=" + this.biomeGen +
                '}';
-    }
-
-    public float temperatureStartThreshold() {
-        return temperatureStartThreshold;
-    }
-
-    public float temperatureEndThreshold() {
-        return temperatureEndThreshold;
-    }
-
-    public float humidityStartThreshold() {
-        return humidityStartThreshold;
-    }
-
-    public float humidityEndThreshold() {
-        return humidityEndThreshold;
-    }
-
-    public boolean isOcean() {
-        return isOcean;
-    }
-
-    public BiomeGenerator biomeGen() {
-        return biomeGen;
     }
 
     @Override
@@ -68,4 +31,11 @@ public final class BiomeData {
         return Objects.hash(temperatureStartThreshold, temperatureEndThreshold, isOcean, biomeGen);
     }
 
+    public double variationStartThreshold() {
+        return -1.0f;
+    }
+
+    public double variationEndThreshold() {
+        return 1.0f;
+    }
 }

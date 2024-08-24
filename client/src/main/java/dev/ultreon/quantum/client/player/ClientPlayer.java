@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.player;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -9,7 +8,7 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SCommandPacket;
 import dev.ultreon.quantum.util.MathHelper;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ClientPlayer extends Player {
@@ -22,9 +21,9 @@ public abstract class ClientPlayer extends Player {
     private float xRot0;
     private float yRot0;
     private float xHeadRot0;
-    private float oXRot;
-    private float oYRot;
-    private float oXHeadRot;
+    float oXRot;
+    float oYRot;
+    float oXHeadRot;
 
     protected ClientPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world) {
         super(entityType, world, QuantumClient.get().getUser().name());

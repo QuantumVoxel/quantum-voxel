@@ -6,7 +6,7 @@ import dev.ultreon.quantum.api.commands.TabCompleting;
 import dev.ultreon.quantum.api.commands.error.*;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
 
@@ -53,11 +53,11 @@ public class WorldBaseSelector extends BaseSelector<World> {
             }
         } else if (this.getKey() == SelectorKey.NAME) {
             String name = this.getStringValue();
-            Identifier identifier = Identifier.tryParse(name);
-            if (identifier == null) {
+            NamespaceID namespaceID = NamespaceID.tryParse(name);
+            if (namespaceID == null) {
                 return new Result<>(null, new InvalidKeyError(name));
             }
-            target = QuantumServer.get().getWorld(identifier);
+            target = QuantumServer.get().getWorld(namespaceID);
             if (target == null) {
                 return new Result<>(null, new NotFoundError("world " + name));
             }

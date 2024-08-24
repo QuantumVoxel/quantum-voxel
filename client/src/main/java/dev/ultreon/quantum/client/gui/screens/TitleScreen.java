@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.Gdx;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.CameraPlayer;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -105,7 +105,7 @@ public class TitleScreen extends Screen {
     }
 
     private void quitGame(TitleButton caller) {
-        Gdx.app.exit();
+        this.client.tryShutdown();
     }
 
     private void openSingleplayer(TitleButton caller) {

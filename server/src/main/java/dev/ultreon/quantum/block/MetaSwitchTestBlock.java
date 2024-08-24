@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
-import dev.ultreon.quantum.world.BlockPos;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
 public class MetaSwitchTestBlock extends Block {
@@ -15,8 +15,8 @@ public class MetaSwitchTestBlock extends Block {
     }
 
     @Override
-    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockPos pos) {
-        BlockProperties metadata = world.get(pos);
+    public @NotNull UseResult use(@NotNull WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
+        BlockState metadata = world.get(pos);
         BlockDataEntry<Boolean> test = metadata.getProperty("on");
         metadata = metadata.withEntry("on", test.map(b -> !b));
 
@@ -26,7 +26,7 @@ public class MetaSwitchTestBlock extends Block {
     }
 
     @Override
-    public BlockProperties createMeta() {
+    public @NotNull BlockState createMeta() {
         return super.createMeta().withEntry("on", BlockDataEntry.of(false));
     }
 }

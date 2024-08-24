@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.command;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.entity.Entity;

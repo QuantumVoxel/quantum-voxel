@@ -18,6 +18,7 @@ package dev.ultreon.gameprovider.quantum;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.impl.game.LibClassifier.LibraryType;
+import org.intellij.lang.annotations.Language;
 
 enum GameLibrary implements LibraryType {
     QUANTUM_VXL_CLIENT("dev/ultreon/quantum/desktop/DesktopLauncher.class"),

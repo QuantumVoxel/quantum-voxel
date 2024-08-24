@@ -1,131 +1,89 @@
 package dev.ultreon.quantum.network.system;
 
-import com.google.common.collect.Lists;
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
+import com.esotericsoftware.kryonet.*;
 import dev.ultreon.quantum.network.Networker;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.QuantumServer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Collections;
-import java.util.List;
+import java.net.InetSocketAddress;
+import java.util.*;
 
-public class TcpNetworker implements ConnectionReceiver, Networker {
+public class TcpNetworker extends Listener implements Networker {
     private final QuantumServer server;
-    private final ServerSocket serverSocket;
-    private final ServerThread thread;
-    private final List<ServerTcpConnection> connections = Lists.newArrayList();
+    private final Map<Connection, ServerTcpConnection> connections = new HashMap<>();
+    private final Server kryoServer;
 
     public TcpNetworker(QuantumServer server, @Nullable InetAddress host, int port) throws IOException {
         this.server = server;
-        this.thread = new ServerThread(host, port);
-        this.serverSocket = new ServerSocket(port, 1, host);
 
-        this.thread.start();
+        this.kryoServer = new Server(2 * 1024 * 1024, 2 * 1024 * 1024);
+        this.kryoServer.addListener(this);
+        this.kryoServer.getKryo().setReferences(false);
+        this.kryoServer.getKryo().setRegistrationRequired(false);
+        this.kryoServer.getKryo().setDefaultSerializer(new PacketIOSerializerFactory());
+
+        this.kryoServer.bind(new InetSocketAddress(host, port), null);
+
+        this.kryoServer.start();
+    }
+
+    @Override
+    public void connected(Connection connection) {
+        super.connected(connection);
+
+        if (this.connections.containsKey(connection)) return;
+
+        connection.setName("QuantumConn:" + connection.getRemoteAddressTCP().getAddress());
+
+        ServerTcpConnection conn = new ServerTcpConnection(connection, this.kryoServer, this.server);
+        conn.moveTo(PacketStages.LOGIN, new LoginServerPacketHandler(this.server, conn));
+        this.connections.put(connection, conn);
+    }
+
+    @Override
+    public void received(Connection connection, Object object) {
+        super.received(connection, object);
+    }
+
+    @Override
+    public void disconnected(Connection connection) {
+        super.disconnected(connection);
+
+        this.connections.remove(connection);
     }
 
     @Override
     public void close() throws IOException {
-        this.thread.shutdown();
-        this.serverSocket.close();
-    }
+        for (ServerTcpConnection connection : this.connections.values()) {
+            connection.disconnect("Server shutting down");
+        }
 
-    public void join() throws InterruptedException {
-        this.thread.join();
-    }
-
-    @Override
-    public Socket accept() throws IOException {
-        return this.serverSocket.accept();
+        this.kryoServer.close();
     }
 
     @Override
     public boolean isRunning() {
-        return this.thread.isRunning();
+        return this.kryoServer.getUpdateThread().isAlive();
     }
 
     @Override
-    public List<ServerTcpConnection> getConnections() {
-        return Collections.unmodifiableList(this.connections);
+    public List<? extends IConnection<ServerPacketHandler, ClientPacketHandler>> getConnections() {
+        return this.connections.values().stream().map((c) -> (IConnection<ServerPacketHandler, ClientPacketHandler>) c).toList();
     }
 
     @Override
     public void tick() {
-        for (ServerTcpConnection connection : this.connections) {
+        for (ServerTcpConnection connection : this.connections.values()) {
             connection.tick();
         }
     }
 
-    private class ServerThread extends Thread {
-        private final InetAddress host;
-        private final int port;
-        private boolean running;
-
-        public ServerThread(@Nullable InetAddress host, int port) {
-            super("ServerThread");
-            this.host = host;
-            this.port = port;
-        }
-
-        @Override
-        public void run() {
-            // Server network thread loop.
-            running = true;
-
-            TcpNetworker networker = TcpNetworker.this;
-            while (running) {
-                ServerTcpConnection connection = null;
-                try(Socket accepted = networker.accept()) {
-                    connection = new ServerTcpConnection(accepted, server);
-                    this.connect(connection);
-                } catch (IOException e) {
-                    if (connection != null) {
-                        try {
-                            connection.close();
-                        } catch (IOException ex) {
-                            e.addSuppressed(ex);
-                        }
-                    }
-
-                    QuantumServer.LOGGER.error("Failed to accept connection.", e);
-                }
-            }
-        }
-
-        private void connect(ServerTcpConnection connection) {
-            connections.add(connection);
-            connection.start();
-        }
-
-        private void disconnect(ServerTcpConnection connection) {
-            if (connections.contains(connection)) {
-                connections.remove(connection);
-                connection.disconnect("Disconnected");
-                try {
-                    connection.close();
-                } catch (IOException e) {
-                    QuantumServer.LOGGER.error("Failed to close connection.", e);
-                }
-            }
-        }
-
-        public void shutdown() {
-            // Server network thread shutdown.
-            this.running = false;
-            this.interrupt();
-        }
-        public boolean isRunning() {
-            return running;
-        }
-
-        public InetAddress getHost() {
-            return host;
-        }
-
-        public int getPort() {
-            return port;
-        }
-    }
 }

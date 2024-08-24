@@ -1,7 +1,9 @@
 package dev.ultreon.quantum.server.dedicated;
 
-public interface DedicatedServerModInit {
-    String ENTRYPOINT_KEY = "server-init";
+import net.fabricmc.api.DedicatedServerModInitializer;
+
+public interface DedicatedServerModInit extends DedicatedServerModInitializer {
+    String ENTRYPOINT_KEY = "server";
 
     void onInitialize();
 }

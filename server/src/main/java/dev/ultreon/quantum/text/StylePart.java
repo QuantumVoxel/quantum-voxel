@@ -2,14 +2,14 @@ package dev.ultreon.quantum.text;
 
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public record StylePart(
         String text,
         int style,
         int color,
         byte scale,
-        Identifier font
+        NamespaceID font
 ) implements TextPart {
     public static final int BOLD = 1;
     public static final int ITALIC = 2;

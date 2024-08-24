@@ -2,8 +2,8 @@ package dev.ultreon.quantum.item;
 
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextStyle;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 public final class ItemRarity {
@@ -18,12 +18,12 @@ public final class ItemRarity {
     private final RgbColor color;
     private final String name;
 
-    public ItemRarity(ColorCode color, Identifier name) {
+    public ItemRarity(ColorCode color, NamespaceID name) {
         this.color = RgbColor.rgb(color.getColor());
         this.name = name.toString();
     }
 
-    public ItemRarity(RgbColor color, Identifier name) {
+    public ItemRarity(RgbColor color, NamespaceID name) {
         this.color = color;
         this.name = name.toString();
     }

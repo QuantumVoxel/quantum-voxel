@@ -2,7 +2,7 @@ package dev.ultreon.quantum.command;
 
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
-import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.world.Location;
 import org.jetbrains.annotations.Nullable;
 
 public class WhereAmICommand extends Command {
@@ -14,8 +14,8 @@ public class WhereAmICommand extends Command {
 
     @DefineCommand
     public @Nullable CommandResult executeCoordsInWorld(CommandSender sender, CommandContext commandContext, String alias) {
-        if (!(sender instanceof Entity entity)) return this.needEntity();
-
-        return this.infoMessage(String.format("You are at %s", entity.getBlockPos()));
+        Location location = sender.getLocation();
+        if (location == null) return this.errorMessage("Failed to get location");
+        return this.infoMessage(String.format("You are at %s", location.getBlockVec()));
     }
 }

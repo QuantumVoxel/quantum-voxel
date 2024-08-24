@@ -17,8 +17,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -28,37 +30,37 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pool;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.collection.FlatStorage;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
-import dev.ultreon.quantum.world.HeightMap;
+import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.Heightmap;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
     public static final int TERRAIN_SIZE = 16;
 
     static int nodes = 0;
 
-    public final int size;
-    public final int x, y, z;
-    public final int idx;
+    public int size;
+    public int x, y, z;
+    public int idx;
 
-    public final TerrainNode parent;
-    public final TerrainNode[] children = new TerrainNode[8];
+    public TerrainNode parent;
+    public TerrainNode[] children = new TerrainNode[8];
 
-    public final FlatStorage<BlockProperties> materials = new FlatStorage<>(BlockProperties.AIR, TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE);
+    public FlatStorage<BlockState> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, BlockState.AIR);
 
-    private ModelInstance modelInstance;
-    private Mesh mesh;
-    private boolean generated = false;
-    private boolean meshBuilt = false;
+    public ModelInstance modelInstance;
+    public Mesh mesh;
+    public boolean generated = false;
+    public boolean meshBuilt = false;
 
     private final Object obj = new Object();
 
@@ -66,7 +68,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     private final Array<Color> colors = new Array<>();
     private final Array<Short> indices = new Array<>();
     private final Array<Vector3> normals = new Array<>();
-    private final HeightMap heightMap = new HeightMap(TERRAIN_SIZE);
+    private final Heightmap heightMap = new Heightmap(TERRAIN_SIZE);
     private final ClientWorldAccess voxelWorld;
     private boolean disposed = false;
 
@@ -103,9 +105,9 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
 
     public Block getMaterial(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= TERRAIN_SIZE || y >= TERRAIN_SIZE || z >= TERRAIN_SIZE) return Blocks.AIR;
-        BlockProperties blockProperties = materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
-        if (blockProperties == null) return Blocks.AIR;
-        return blockProperties.getBlock();
+        BlockState blockState = materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
+        if (blockState == null) return Blocks.AIR;
+        return blockState.getBlock();
     }
 
     /**
@@ -467,23 +469,18 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public Model getModel() {
-        return modelInstance.model;
-    }
-
-    @Override
     public float getBrightness(int lightLevel) {
         return 1;
     }
 
     @Override
-    public ModelInstance addModel(BlockPos blockPos, ModelInstance modelInstance) {
+    public ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance) {
         // TODO
         return modelInstance;
     }
 
     @Override
-    public BlockProperties get(Vec3i tmp3i) {
+    public BlockState get(Vec3i tmp3i) {
         return materials.get(tmp3i.x + tmp3i.y * TERRAIN_SIZE + tmp3i.z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
@@ -523,8 +520,8 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public ChunkPos getPos() {
-        return new ChunkPos(x, y, z);
+    public ChunkVec getVec() {
+        return new ChunkVec(x, y, z);
     }
 
     @Override
@@ -538,22 +535,22 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
     }
 
     @Override
-    public BlockProperties getFast(int x, int y, int z) {
+    public BlockState getFast(int x, int y, int z) {
         return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
     @Override
-    public BlockProperties get(int x, int y, int z) {
+    public BlockState get(int x, int y, int z) {
         return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
@@ -563,7 +560,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public int getHighest(int x, int z) {
+    public int getHeight(int x, int z) {
         return heightMap.get(x, z);
     }
 

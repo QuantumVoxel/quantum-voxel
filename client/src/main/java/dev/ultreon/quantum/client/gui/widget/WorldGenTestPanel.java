@@ -5,14 +5,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.input.DesktopInput;
-import dev.ultreon.quantum.client.input.GameInput;
-import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.TerrainNoise;
 import dev.ultreon.quantum.world.gen.CaveNoiseGenerator;
+import dev.ultreon.quantum.world.gen.HillinessNoise;
 
 import java.util.Random;
 
 public class WorldGenTestPanel extends Rectangle {
+    private final HillinessNoise hillinessNoise;
     private TerrainNoise terrainNoise;
     private CaveNoiseGenerator caveNoise;
     private int terrainX = 0;
@@ -24,12 +24,14 @@ public class WorldGenTestPanel extends Rectangle {
         super(0, 0, 0, 255);
 
         this.terrainNoise = new TerrainNoise(new Random(0).nextLong());
-        this.caveNoise = new CaveNoiseGenerator(new Random(0).nextLong());
+        this.caveNoise = new CaveNoiseGenerator(new Random(10).nextLong());
+        this.hillinessNoise = new HillinessNoise(new Random(20).nextLong());
         revalidateImage();
     }
 
     @Override
     protected void renderBackground(Renderer renderer, float deltaTime) {
+
     }
 
     @Override
@@ -65,7 +67,7 @@ public class WorldGenTestPanel extends Rectangle {
         terrain.setColor(0, 0, 0, 0);
         terrain.drawRectangle(0, 0, terrain.getWidth(), terrain.getHeight());
         for (int i = 0; i < size.width; i++) {
-            int height = (int) terrainNoise.evaluateNoise(i + terrainX);
+            int height = (int) ((terrainNoise.evaluateNoise(i + terrainX) - 64) * (hillinessNoise.evaluateNoise(i + terrainX) / 4.0f + 0.5f)) + 64;
 //            renderer.line(pos.x + i, size.height, pos.x + i, size.height - height, RgbColor.rgb(height <= 64 ? 0x0055aa : 0x55aa55));
 
             for (int y = 0; y < 256; y++) {
@@ -113,10 +115,6 @@ public class WorldGenTestPanel extends Rectangle {
         }
 
         terrainTex.draw(terrain, 0, 0);
-    }
-
-    private double evaluateNoise(int x, int y) {
-        return 0;
     }
 
     @Override

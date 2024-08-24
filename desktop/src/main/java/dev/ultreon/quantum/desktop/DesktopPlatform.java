@@ -5,8 +5,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.desktop.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.log.Logger;
@@ -162,7 +162,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void locateResources() {try {
-        URL resource = QuantumClient.class.getResource("/.ucraft-resources");
+        URL resource = QuantumClient.class.getResource("/.quantum-resources");
         if (resource == null) {
             throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
         }

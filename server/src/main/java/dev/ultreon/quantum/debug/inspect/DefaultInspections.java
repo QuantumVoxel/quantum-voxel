@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.debug.inspect;
 
-import dev.ultreon.ubo.types.*;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.tuple.Quadruple;
 import dev.ultreon.libs.commons.v0.tuple.Quintuple;
@@ -18,6 +17,7 @@ import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.ubo.types.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -25,7 +25,7 @@ import java.util.Map;
 public class DefaultInspections {
     public static void register() {
         InspectionRoot.registerAutoFill(Entity.class, node -> {
-            node.create("position", Entity::getBlockPos);
+            node.create("position", Entity::getBlockVec);
             node.create("isInVoid", Entity::isInVoid);
             node.create("health", Entity::getSize);
             node.create("isAffectedByFluid", Entity::isAffectedByFluid);

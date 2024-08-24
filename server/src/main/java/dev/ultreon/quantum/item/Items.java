@@ -8,7 +8,7 @@ import dev.ultreon.quantum.item.tool.AxeItem;
 import dev.ultreon.quantum.item.tool.PickaxeItem;
 import dev.ultreon.quantum.item.tool.ShovelItem;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class Items {
     public static final Item AIR = Items.register("air", new Item(new Properties()));
@@ -47,7 +47,7 @@ public class Items {
     public static final BlockItem LIGHT = Items.register("light", new BlockItem(new Properties(), () -> Blocks.LIGHT));
 
     private static <T extends Item> T register(String name, T block) {
-        Registries.ITEM.register(new Identifier(name), block);
+        Registries.ITEM.register(new NamespaceID(name), block);
         return block;
     }
 

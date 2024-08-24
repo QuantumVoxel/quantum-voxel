@@ -32,15 +32,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.api.ModApi;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.client.api.events.ClientTickEvents;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
+import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.audio.ClientSound;
@@ -76,6 +75,7 @@ import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
+import dev.ultreon.quantum.client.rpc.RpcHandler;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.sound.ClientSoundRegistry;
 import dev.ultreon.quantum.client.text.Language;
@@ -101,6 +101,8 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.js.JsLoader;
+import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -108,6 +110,7 @@ import dev.ultreon.quantum.network.packets.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.network.system.MemoryConnection;
 import dev.ultreon.quantum.python.PyLoader;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
@@ -116,15 +119,18 @@ import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.*;
-import kotlin.OptIn;
+import dev.ultreon.quantum.world.BreakResult;
+import dev.ultreon.quantum.world.SoundEvent;
+import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
@@ -132,15 +138,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.badlogic.gdx.graphics.GL20.*;
+import static com.badlogic.gdx.graphics.GL20.GL_CULL_FACE;
 import static com.badlogic.gdx.math.MathUtils.ceil;
 import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
 
@@ -152,7 +158,7 @@ import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
  * @since <i>Always :smirk:</i>
  */
 @SuppressWarnings("UnusedReturnValue")
-public class QuantumClient extends PollingExecutorService implements DeferredDisposable {
+public non-sealed class QuantumClient extends PollingExecutorService implements DeferredDisposable, DesktopMain {
     // Public constants
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumClient");
     public static final Gson GSON = new GsonBuilder().disableJdkUnsafe().setPrettyPrinting().create();
@@ -177,6 +183,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     // Zero, what else could it be? :thinking:
     private static final GridPoint2 ZERO = new GridPoint2();
+    private static final ThreadGroup CLIENT_GROUP = new ThreadGroup("RenderGroup");
 
     // Client instance
     @UnknownNullability
@@ -184,7 +191,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private static QuantumClient instance;
 
     // Arguments
-    private static ArgParser arguments = new ArgParser();
+    private static final ArgParser arguments = new ArgParser();
 
     // Crash handling
     private static boolean crashing;
@@ -196,7 +203,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
     public int viewMode;
-    public Identifier fontId = id("quantium");
+    public NamespaceID fontId = id("quantium");
+    public final ExecutorService executor = Executors.newFixedThreadPool(Math.min(Runtime.getRuntime().availableProcessors() / 2, 2), r -> {
+        Thread thread = new Thread(CLIENT_GROUP, r);
+        thread.setName("ClientTask");
+        thread.setDaemon(true);
+        return thread;
+    });
+    public final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(Math.min(Runtime.getRuntime().availableProcessors() / 2, 2), r -> {
+        Thread thread = new Thread(CLIENT_GROUP, r);
+        thread.setName("ClientScheduleTask");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -217,7 +236,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //    });
 
     // Useless asset manager
-    private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(Identifier.parse(fileName)));
+    private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(NamespaceID.parse(fileName)));
 
     // Window buttons
     private final ControlButton closeButton;
@@ -249,12 +268,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     public ServerData serverData;
     private MultiplayerData multiplayerData;
-    public ExecutorService chunkLoadingExecutor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 1), r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("ChunkLoadingExecutor");
-        return thread;
-    });
 
     // Local user
     private final User user;
@@ -305,7 +318,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
     // Font stuff
-    public boolean forceUnicode = false;
     public Font font;
     public final Font newFont;
     @UnknownNullability
@@ -333,7 +345,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private float guiScale = this.calcMaxGuiScale();
 
     // Notifications
-    public NotifyManager notifications = new NotifyManager(this);
+    public Notifications notifications = new Notifications(this);
 
     // Input
     public GameInput input;
@@ -374,11 +386,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public final ClientSoundRegistry soundRegistry = new ClientSoundRegistry();
 
     // Raycast and block breaking
-    public HitResult hitResult;
-    private Vec3i breaking;
-    private BlockProperties breakingBlock;
+    public Hit hit;
+    private BlockVec breaking;
+    private BlockState breakingBlock;
 
-    public BlockHitResult cursor;
+    public BlockHit cursor;
 
     // Public Flags
     public boolean renderWorld = false;
@@ -395,14 +407,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     // Advanced Shadows
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
-
-    // Scheduler
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("QVoxelClientScheduler");
-        return thread;
-    });
 
     // Window stuff
     @Nullable
@@ -461,6 +465,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Vector2[] touchPosStart = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchMovedScl = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchMoved = new Vector2[Gdx.input.getMaxPointers()];
+    private boolean shuttingDown = false;
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -472,7 +477,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     // Misc
-    GarbageCollector garbageCollector;
     GameEnvironment gameEnv;
 
     boolean loading = true;
@@ -499,26 +503,27 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
 
+        ModApi.init();
+
         // Disable shader pedantic mode
         ShaderProgram.pedantic = false;
 
         // Add a shutdown hook to gracefully shut down the server
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                if (this.integratedServer != null) {
-                    this.integratedServer.shutdown();
-                }
-            } catch (Exception e) {
-                QuantumClient.LOGGER.error("Failed to shutdown server", e);
-            }
+            this.shutdown();
 
             QuantumClient.LOGGER.info("Shutting down game!");
             QuantumClient.instance = null;
         }));
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        }));
         // Log the booting of the game
         QuantumClient.LOGGER.info("Booting game!");
         QuantumClient.instance = this;
+
+        FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
+        FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 
         // Initialize the unifont and font
         this.font = new Font(id("quantium"), true);
@@ -537,7 +542,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.shaderProviderManager = new ShaderProviderManager();
         this.shaderProgramManager = new ShaderProgramManager();
 
-        // Locate resources by finding the ".ucraft-resources" file using Class.getResource() and using the parent file.
+        // Locate resources by finding the ".quantum-resources" file using Class.getResource() and using the parent file.
         GamePlatform.get().locateResources();
 
         // Set the language bootstrap
@@ -567,6 +572,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Create a new user
         this.user = new User("Player" + MathUtils.random(100, 999));
+
+        RpcHandler.enable();
 
         // Initialize ImGui if necessary
         this.imGui = !isMac && !SharedLibraryLoader.isAndroid && !SharedLibraryLoader.isARM && !SharedLibraryLoader.isIos;
@@ -637,7 +644,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);
 
         // Create inspection nodes for libGdx and graphics
-        if (DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             InspectionNode<Application> libGdxNode = this.inspection.createNode("libGdx", value -> Gdx.app);
             InspectionNode<Graphics> graphicsNode = libGdxNode.createNode("graphics", Application::getGraphics);
 
@@ -665,21 +672,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     /**
      * Returns an instance of IClipboard.
-     * If the game platform is macOS, a NullClipboard is returned.
-     * Otherwise, a GameClipboard is returned.
+     * If the game platform is macOS, a {@link NullClipboard} is returned.
+     * Otherwise, a {@link DefaultClipboard} is returned.
      *
      * @return An instance of IClipboard.
      */
     private IClipboard createClipboard() {
-//        // Check if the game platform is macOS
-//        if (GamePlatform.get().isMacOSX()) {
-//            // If it is, return a NullClipboard
-//            return new NullClipboard();
-//        }
-//
-//        // Otherwise, return a GameClipboard
-//        return new GameClipboard(Toolkit.getDefaultToolkit().getSystemClipboard());
-        return new NullClipboard();
+        // Check if the game platform is macOS
+        if (GamePlatform.get().isMacOSX()) {
+            // If it is, return a NullClipboard
+            return new NullClipboard();
+        }
+
+        // Otherwise, return a DefaultClipboard
+        return new DefaultClipboard();
     }
 
     /**
@@ -702,7 +708,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     void onReloadConfig() {
         if (ClientConfig.fullscreen) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
-        String[] split = ClientConfig.language.path().split("_");
+        String[] split = ClientConfig.language.getPath().split("_");
         if (split.length == 2) {
             LanguageManager.setCurrentLanguage(Locale.of(split[0], split[1]));
         } else {
@@ -720,18 +726,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         this.camera.fov = ClientConfig.fov;
-
-        // TODO: Add support for Discord RPC
-        notifications.addOnce(UUID.fromString("b26c6826-1086-4b34-a5f2-5172e65bb55f"), Notification.builder("Missing Feature", "Discord RPC is not implemented yet!").build());
-//            RpcHandler.disable();
-//        if (ClientConfig.hideRPC) {
-//        } else {
-//            RpcHandler.enable();
-//            if (this.activity != null) {
-//                this.setActivity(this.activity);
-//                RpcHandler.setActivity(this.activity);
-//            }
-//        }
 
         // Cancel vibration if it is not enabled
         if (!ClientConfig.vibration) {
@@ -787,40 +781,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return this.screenshotFuture;
     }
 
-    /**
-     * Launches the game.
-     * <p style="color:red;"><b>Note: This method should not be called.</b></p>
-     *
-     * @param argv the arguments to pass to the game
-     */
-    @ApiStatus.Internal
-    public static void main(String[] argv) {
-        try {
-            QuantumClient.arguments = new ArgParser(argv);
-
-            QuantumClient.launch(argv);
-        } catch (Exception | OutOfMemoryError e) {
-            CrashHandler.handleCrash(new CrashLog("Launch failed", e).createCrash().getCrashLog());
-        }
-    }
-
-    /**
-     * <h2 style="color:red;"><b>Note: This method should not be called.</b></h2>
-     * Launches the game.
-     * This method gets invoked dynamically by the FabricMC game provider.
-     *
-     * @param argv the arguments to pass to the game
-     */
-    @SuppressWarnings("unused")
-    @OptIn(markerClass = InternalApi.class)
-    private static void launch(String[] argv) {
-    }
-
     public static void logDebug() {
         if (QuantumClient.isPackaged()) QuantumClient.LOGGER.warn("Running in the JPackage environment.");
         QuantumClient.LOGGER.debug("Java Version: {}", System.getProperty("java.version"));
         QuantumClient.LOGGER.debug("Java Vendor: {}", System.getProperty("java.vendor"));
-        QuantumClient.LOGGER.debug("Operating System: {} {} ({})", new Object[]{System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")});
+        QuantumClient.LOGGER.debug("Operating System: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
     }
 
     public static String[] getIcons() {
@@ -840,23 +805,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         return icons;
     }
-
-//    public static Image getIconImage() {
-//        try {
-//            BufferedImage read;
-//            if (isMac) {
-//                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
-//            } else {
-//                read = ImageIO.read(Objects.requireNonNull(QuantumClient.class.getResource("/icons/icon_1024.png")));
-//            }
-//            if (read == null) {
-//                throw new RuntimeException("Failed to load icon image");
-//            }
-//            return read;
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     /**
      * Check whether the application is packaged using JPackage.
@@ -911,12 +859,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Set mod icon overrides.
         ModIconOverrideRegistry.set("quantum", QuantumClient.id("icon.png"));
-        ModIconOverrideRegistry.set("gdx", new Identifier("gdx", "icon.png"));
+        ModIconOverrideRegistry.set("gdx", new NamespaceID("gdx", "icon.png"));
 
         // Invoke entry points for initialization.
         GamePlatform loader = GamePlatform.get();
         loader.invokeEntrypoint(ModInit.ENTRYPOINT_KEY, ModInit.class, ModInit::onInitialize);
-        loader.invokeEntrypoint(ClientModInit.ENTRYPOINT_KEY, ClientModInit.class, ClientModInit::onInitializeClient);
 
         CommonLoader.initConfigEntrypoints(GamePlatform.get());
     }
@@ -988,8 +935,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return A new instance of FileHandle for the specified resource.
      */
     @NewInstance
-    public static @NotNull FileHandle resource(Identifier id) {
-        return Gdx.files.internal("assets/" + id.namespace() + "/" + id.path());
+    public static @NotNull FileHandle resource(NamespaceID id) {
+        return Gdx.files.internal("assets/" + id.getDomain() + "/" + id.getPath());
     }
 
     /**
@@ -1095,8 +1042,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param path the path to the resource.
      * @return the identifier for the given path.
      */
-    public static Identifier id(String path) {
-        return new Identifier(CommonConstants.NAMESPACE, path);
+    public static NamespaceID id(String path) {
+        return new NamespaceID(CommonConstants.NAMESPACE, path);
     }
 
     /**
@@ -1171,8 +1118,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (next == null && this.world == null)
             next = new TitleScreen();
 
-        if (next == null)
+        if (next == null) {
+            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return cur == null || this.closeScreen(cur);
+        }
 
         // Call open event.
         var openResult = ScreenEvents.OPEN.factory().onOpenScreen(next);
@@ -1184,18 +1134,17 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (cur != null && this.closeScreen(next, cur))
             return false; // Close was canceled
-        if (next == null)
+        if (next == null) {
+            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return false; // The next screen is null, canceling.
+        }
 
         this.screen = next;
         this.screen.init(this.getScaledWidth(), this.getScaledHeight());
         DesktopInput.setCursorCaught(false);
 
-        if (this.screen == null) {
-            this.setWindowTitle(TextObject.literal("Playing in a world!"));
-        } else {
-            this.setWindowTitle(this.screen.getTitle());
-        }
+        this.setWindowTitle(this.screen.getTitle());
 
         return true;
     }
@@ -1378,7 +1327,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.updateActivity();
 
-        this.poll();
+        this.pollAll();
 
         QuantumClient.PROFILER.section("client-tick", this::tryClientTick);
 
@@ -1417,9 +1366,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void renderMain(Renderer renderer, float deltaTime) {
         Player player = this.player;
         if (player == null) {
-            this.hitResult = null;
+            this.hit = null;
         } else {
-            QuantumClient.PROFILER.section("playerRayCast", () -> this.hitResult = player.rayCast());
+            QuantumClient.PROFILER.section("playerRayCast", () -> this.hit = player.rayCast());
         }
 
         renderer.begin();
@@ -1609,8 +1558,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.activity != this.oldActivity) {
             this.oldActivity = this.activity;
 
-            notifications.addOnce(UUID.fromString("35c2d972-6699-4cf6-86d3-1f2daaedfc47"), Notification.builder("Missing Feature", "Game activity updates are not implemented yet!").build());
-//            RpcHandler.setActivity(this.activity);
+            RpcHandler.newActivity(this.activity);
         }
     }
 
@@ -1652,7 +1600,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         boolean maximized = window.isMaximized();
         int winXOff = maximized ? 18 : 0;
         int winHOff = maximized ? 22 : 0;
-        renderer.draw9PatchTexture(new Identifier("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
+        renderer.draw9PatchTexture(new NamespaceID("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
         renderer.textCenter("<bold>" + window.getTitle(), width / 2, 5);
 
         this.closeButton.x(width - 17 - winXOff * 2);
@@ -1729,9 +1677,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             CrashHandler.handleCrash(crashLog);
             String string = crashLog.toString();
             LOGGER.error("Dumping crash report...\n" + string);
-            Gdx.app.exit();
+
+            if (instance != null) instance.shutdown();
+            System.exit(1);
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
+
+            if (instance != null) instance.shutdown();
             System.exit(1);
         }
     }
@@ -1819,11 +1771,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         // Handle block breaking if relevant
-        BlockPos breaking = this.breaking != null ? new BlockPos(this.breaking) : null;
+        BlockVec breaking = this.breaking != null ? new BlockVec(this.breaking) : null;
         if (this.world != null && breaking != null) {
-            HitResult hitResult = this.hitResult;
+            Hit hit = this.hit;
 
-            if (hitResult instanceof BlockHitResult blockHitResult) {
+            if (hit instanceof BlockHit blockHitResult) {
                 this.handleBlockBreaking(breaking, blockHitResult);
             }
         }
@@ -1837,16 +1789,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         ClientTickEvents.POST_GAME_TICK.factory().onGameTick(this);
     }
 
-    private void handleBlockBreaking(BlockPos breaking, BlockHitResult hitResult) {
+    private void handleBlockBreaking(BlockVec breaking, BlockHit hitResult) {
         @Nullable ClientWorldAccess world = this.world;
         if (world == null) return;
-        if (!hitResult.getPos().equals(breaking.vec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
+        if (!hitResult.getBlockVec().equals(breaking.asBlockVec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
             this.resetBreaking(hitResult);
         } else {
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
-            if (item instanceof ToolItem toolItem && this.breakingBlock.getEffectiveTool() == ((ToolItem) item).getToolType()) {
+            if (item instanceof ToolItem toolItem && this.breakingBlock.getEffectiveTool() == toolItem.getToolType()) {
                 efficiency = toolItem.getEfficiency();
             }
 
@@ -1861,23 +1813,23 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
     }
 
-    private void resetBreaking(BlockHitResult hitResult) {
+    private void resetBreaking(BlockHit hitResult) {
         LocalPlayer player = this.player;
 
         if (this.world == null) return;
         if (this.breaking == null) return;
         if (player == null) return;
 
-        this.world.stopBreaking(new BlockPos(this.breaking), player);
-        BlockProperties block = hitResult.getBlockMeta();
+        this.world.stopBreaking(new BlockVec(this.breaking), player);
+        BlockState block = hitResult.getBlockMeta();
 
         if (block == null || block.isAir()) {
             this.breaking = null;
             this.breakingBlock = null;
         } else {
-            this.breaking = hitResult.getPos();
+            this.breaking = hitResult.getBlockVec();
             this.breakingBlock = block;
-            this.world.startBreaking(new BlockPos(hitResult.getPos()), player);
+            this.world.startBreaking(new BlockVec(hitResult.getBlockVec()), player);
         }
     }
 
@@ -1960,9 +1912,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.unifont);
                 QuantumClient.cleanUp(this.font);
                 QuantumClient.cleanUp(this.fontManager);
-                if (this.chunkLoadingExecutor != null) this.chunkLoadingExecutor.shutdownNow();
 
-                QuantumClient.cleanUp(this.garbageCollector);
                 QuantumClient.cleanUp(this.world);
                 QuantumClient.cleanUp(this.profiler);
 
@@ -2134,26 +2084,32 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public boolean tryShutdown() {
+        if (WindowEvents.WINDOW_CLOSE_REQUESTED.factory().onWindowCloseRequested(this.window).isCanceled()) {
+            return false;
+        }
+
         ClientLifecycleEvents.WINDOW_CLOSED.factory().onWindowClose();
 
         if (ClientConfig.showClosePrompt && this.screen != null) {
             this.screen.showDialog(new DialogBuilder(this.screen).message(TextObject.literal("Are you sure you want to close the game?")).button(UITranslations.YES, () -> {
                 if (this.world != null) {
-                    this.exitWorldAndThen(() -> Gdx.app.exit());
+                    this.exitWorldAndThen(this::shutdown);
                     return;
                 }
 
-                Gdx.app.exit();
+                this.shutdown();
             }));
             return false;
         }
 
         if (this.world != null) {
-            this.exitWorldAndThen(() -> Gdx.app.exit());
+            this.exitWorldAndThen(this::shutdown);
             return false;
         }
 
-        return true;
+        CompletableFuture.runAsync(this::shutdown);
+
+        return false;
     }
 
     public boolean filesDropped(String[] files) {
@@ -2171,8 +2127,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.futures.add(future);
     }
 
-    public @NotNull BlockModel getBlockModel(BlockProperties block) {
-        List<Pair<Predicate<BlockProperties>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
+    public @NotNull BlockModel getBlockModel(BlockState block) {
+        List<Pair<Predicate<BlockState>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
 
         if (orDefault == null) {
             BlockModel blockModel = BlockModelRegistry.get().get(block);
@@ -2202,20 +2158,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         // Retrieve the necessary variables
-        HitResult hitResult = this.hitResult;
+        Hit hit = this.hit;
         Player player = this.player;
 
-        if (!(hitResult instanceof BlockHitResult blockHitResult)) return;
+        if (!(hit instanceof BlockHit blockHitResult)) return;
 
         // Check for null conditions and return if any are true
         if (this.world == null || player == null) return;
 
         // Stop and start breaking at the hit position for the player
-        this.world.stopBreaking(new BlockPos(blockHitResult.getPos()), player);
-        this.world.startBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.world.stopBreaking(new BlockVec(blockHitResult.getBlockVec()), player);
+        this.world.startBreaking(new BlockVec(blockHitResult.getBlockVec()), player);
 
         // Update the breaking position and block meta
-        this.breaking = blockHitResult.getPos();
+        this.breaking = blockHitResult.getBlockVec();
         this.breakingBlock = blockHitResult.getBlockMeta();
     }
 
@@ -2225,10 +2181,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public void startBreaking() {
         // Get the hit result and player
-        HitResult hitResult = this.hitResult;
+        Hit hit = this.hit;
         LocalPlayer player = this.player;
 
-        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+        if (!(hit instanceof BlockHit blockHitResult)) {
             this.breaking = null;
             this.breakingBlock = null;
             return;
@@ -2240,7 +2196,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         // If the block being hit is already broken, return
-        if (this.world.getBreakProgress(new BlockPos(blockHitResult.getPos())) >= 0.0F) {
+        if (this.world.getBreakProgress(new BlockVec(blockHitResult.getBlockVec())) >= 0.0F) {
             return;
         }
 
@@ -2250,21 +2206,21 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         if (this.breaking != null) {
-            this.world.stopBreaking(new BlockPos(this.breaking), player);
+            this.world.stopBreaking(new BlockVec(this.breaking), player);
             return;
         }
 
         // Start breaking the block and update the breaking position and block metadata
-        this.world.startBreaking(new BlockPos(blockHitResult.getPos()), player);
-        this.breaking = blockHitResult.getPos();
+        this.world.startBreaking(new BlockVec(blockHitResult.getBlockVec()), player);
+        this.breaking = blockHitResult.getBlockVec();
         this.breakingBlock = blockHitResult.getBlockMeta();
     }
 
     public void stopBreaking() {
-        HitResult hitResult = this.hitResult;
+        Hit hit = this.hit;
         LocalPlayer player = this.player;
 
-        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+        if (!(hit instanceof BlockHit blockHitResult)) {
             this.breaking = null;
             this.breakingBlock = null;
             return;
@@ -2272,16 +2228,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (this.world == null || player == null || this.breaking == null) return;
 
-        this.world.stopBreaking(new BlockPos(blockHitResult.getPos()), player);
+        this.world.stopBreaking(new BlockVec(blockHitResult.getBlockVec()), player);
         this.breaking = null;
         this.breakingBlock = null;
     }
 
     public float getBreakProgress() {
-        Vec3i breaking = this.breaking;
+        BlockVec breaking = this.breaking;
         @Nullable ClientWorldAccess world = this.world;
         if (breaking == null || world == null) return -1;
-        return world.getBreakProgress(new BlockPos(breaking));
+        return world.getBreakProgress(new BlockVec(breaking));
     }
 
     private int calcMaxGuiScale() {
@@ -2358,7 +2314,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.integratedServer.start();
 
-        mem.setOtherSide(((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
+        mem.setOtherSide((MemoryConnection<ServerPacketHandler, ClientPacketHandler>) ((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
 
         // Initialize (memory) connection.
         this.multiplayerData = new MultiplayerData(this);
@@ -2366,7 +2322,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public void connectToServer(String host, int port) {
-        this.connection = ClientTcpConnection.connectToServer(host, port).unwrap();
+        this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {
+            this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e.getMessage(), true));
+            return null;
+        }).getValueOrNull();
+
+        if (this.connection == null) return;
 
         // Initialize remote connection.
         this.multiplayerData = new MultiplayerData(this);
@@ -2664,6 +2625,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return false;
     }
 
+    /**
+     * Sets the title of the game window.
+     *
+     * @param title The title of the game window. If null or blank, the default title will be used.
+     */
     public void setWindowTitle(TextObject title) {
         String text = title == null ? null : title.getText();
         if (text != null && !text.isBlank()) {
@@ -2673,7 +2639,70 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.window.setTitle(String.format("Quantum Voxel %s", QuantumClient.getGameVersion().split("\\+")[0]));
     }
 
+    /**
+     * Returns the current game time in seconds.
+     *
+     * @return The current game time in seconds.
+     */
     public double getGameTime() {
         return System.currentTimeMillis() / 1000.0;
+    }
+
+    /**
+     * Schedules a task to be executed repeatedly at a fixed rate.
+     *
+     * @param func        The task to be executed.
+     * @param initialDelay The time to delay first execution.
+     * @param interval    The period between successive executions.
+     * @param unit        The time unit of the initialDelay and interval parameters.
+     * @return A ScheduledFuture representing pending completion of the task, and whose {@code get()} method will return null upon completion.
+     */
+    public ScheduledFuture<?> scheduleRepeat(Runnable func, int initialDelay, int interval, TimeUnit unit) {
+        return this.scheduler.scheduleAtFixedRate(func, initialDelay, interval, unit);
+    }
+
+    @SuppressWarnings("BusyWait")
+    @Override
+    public synchronized void shutdown() {
+        try {
+            if (this.shuttingDown) return;
+            this.shuttingDown = true;
+            super.shutdown();
+
+            LOGGER.info("Shutting down executor service");
+            executor.shutdown();
+
+            LOGGER.info("Shutting down scheduler");
+            scheduler.shutdown();
+
+            while (!executor.isTerminated() || !scheduler.isTerminated()) {
+                if (this.screen instanceof ShutdownScreen shutdownScreen) {
+                    shutdownScreen.setMessage("Waiting for executor services to terminate");
+                }
+                LOGGER.info("Waiting for executor services to terminate");
+                Thread.sleep(1000);
+            }
+
+            if (this.integratedServer != null) {
+                this.integratedServer.shutdown();
+
+                while (!this.integratedServer.isShutdown()) {
+                    if (this.screen instanceof ShutdownScreen shutdownScreen) {
+                        shutdownScreen.setMessage("Waiting for server to terminate");
+                    }
+                    LOGGER.info("Waiting for server to terminate");
+                    Thread.sleep(1000);
+                }
+            }
+
+            CommonConstants.LOGGER.info("Shutting down RPC handler");
+            RpcHandler.disable();
+        } catch (Exception e) {
+            QuantumClient.LOGGER.error("Failed to shutdown background tasks", e);
+            Runtime.getRuntime().halt(1); // Forcefully terminate the process
+        }
+
+        LOGGER.info("Shutting down Quantum Client");
+        Gdx.app.exit();
     }
 }

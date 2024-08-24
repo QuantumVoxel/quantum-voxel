@@ -4,7 +4,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.food.FoodData;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.UseResult;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
@@ -44,11 +44,11 @@ public class Item {
 
     @NotNull
     public String getTranslationId() {
-        Identifier id = this.getId();
-        return id == null ? "quantum.item.air.name" : id.namespace() + ".item." + id.path() + ".name";
+        NamespaceID id = this.getId();
+        return id == null ? "quantum.item.air.name" : id.getDomain() + ".item." + id.getPath() + ".name";
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return Registries.ITEM.getId(this);
     }
 

@@ -5,12 +5,12 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.entity.Entity;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3f;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityModelInstance<T extends Entity> {
@@ -96,10 +96,12 @@ public class EntityModelInstance<T extends Entity> {
             instance.transform.setTranslation(tmp);
 
             instance.calculateTransforms();
+
+            ctx.getModelBatch().render(instance);
         }
     }
 
-    public void setTextures(Identifier textureLocation) {
+    public void setTextures(NamespaceID textureLocation) {
         TextureManager textureManager = QuantumClient.get().getTextureManager();
         TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(textureManager.getTexture(textureLocation));
         if (model != null) {

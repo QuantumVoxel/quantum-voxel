@@ -28,4 +28,15 @@ public class S2CRemovePlayerPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onRemovePlayer(this.uuid);
     }
+
+    public UUID getUuid() {
+        return this.uuid;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CRemovePlayerPacket{" +
+                "uuid=" + uuid +
+                '}';
+    }
 }

@@ -27,6 +27,7 @@ import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,13 +1,8 @@
 package dev.ultreon.quantum.block;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.world.rng.JavaRNG;
-import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -18,10 +13,15 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.ubo.DataWriter;
 import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
+import dev.ultreon.quantum.world.rng.JavaRNG;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,9 +68,9 @@ public class Block implements DataWriter<MapType> {
         this.lightReduction = properties.lightReduction;
     }
 
-    public Identifier getId() {
-        Identifier key = Registries.BLOCK.getId(this);
-        return key == null ? new Identifier(CommonConstants.NAMESPACE, "air") : key;
+    public NamespaceID getId() {
+        NamespaceID key = Registries.BLOCK.getId(this);
+        return key == null ? new NamespaceID(CommonConstants.NAMESPACE, "air") : key;
     }
 
     public boolean isAir() {
@@ -89,12 +89,12 @@ public class Block implements DataWriter<MapType> {
         return this.fluid;
     }
 
-    public BoundingBox getBoundingBox(int x, int y, int z, BlockProperties blockProperties) {
+    public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
         return new BoundingBox(new Vec3d(x, y, z), new Vec3d(x + 1, y + 1, z + 1));
     }
 
     @CanIgnoreReturnValue
-    public BoundingBox boundingBox(int x, int y, int z, BlockProperties blockProperties, BoundingBox box) {
+    public BoundingBox boundingBox(int x, int y, int z, BlockState blockState, BoundingBox box) {
         return box.set(box.min.set(x, y, z), box.max.set(x + 1, y + 1, z + 1));
     }
 
@@ -113,18 +113,18 @@ public class Block implements DataWriter<MapType> {
         return data;
     }
 
-    public static Block load(MapType data) {
-        Identifier id = Identifier.tryParse(data.getString("id"));
+    public static @NotNull Block load(@NotNull MapType data) {
+        NamespaceID id = NamespaceID.tryParse(data.getString("id"));
         if (id == null) return Blocks.AIR;
         Block block = Registries.BLOCK.get(id);
         return block == null ? Blocks.AIR : block;
     }
 
-    public UseResult use(WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockPos pos) {
+    public @NotNull UseResult use(@NotNull WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
         return UseResult.SKIP;
     }
 
-    public void write(PacketIO buffer) {
+    public final void write(@NotNull PacketIO buffer) {
         buffer.writeId(this.getId());
     }
 
@@ -134,8 +134,8 @@ public class Block implements DataWriter<MapType> {
 
     @NotNull
     public String getTranslationId() {
-        Identifier key = Registries.BLOCK.getId(this);
-        return key == null ? "quantum.block.air.name" : key.namespace() + ".block." + key.path() + ".name";
+        NamespaceID key = Registries.BLOCK.getId(this);
+        return key == null ? "quantum.block.air.name" : key.getDomain() + ".block." + key.getPath() + ".name";
     }
 
     public float getHardness() {
@@ -146,8 +146,7 @@ public class Block implements DataWriter<MapType> {
         return Float.isInfinite(this.hardness);
     }
 
-    @Nullable
-    public ToolType getEffectiveTool() {
+    public @Nullable ToolType getEffectiveTool() {
         return this.effectiveTool;
     }
 
@@ -155,15 +154,15 @@ public class Block implements DataWriter<MapType> {
         return this.toolRequired;
     }
 
-    public LootGenerator getLootGen(BlockProperties blockProperties) {
+    public @Nullable LootGenerator getLootGen(@NotNull BlockState blockState) {
         return this.lootGen;
     }
 
     @Override
     public String toString() {
         return "Block{" +
-                "id=" + this.getId() +
-                '}';
+               "id=" + this.getId() +
+               '}';
     }
 
     public boolean doesOcclude() {
@@ -186,36 +185,31 @@ public class Block implements DataWriter<MapType> {
         return this.replaceable;
     }
 
-    public boolean shouldOcclude(CubicDirection face, Chunk chunk, int x, int y, int z) {
+    public boolean shouldOcclude(@NotNull CubicDirection face, @NotNull Chunk chunk, int x, int y, int z) {
         return this.occlude;
     }
 
-    public void onPlace(World world, BlockPos pos, BlockProperties blockProperties) {
+    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockState blockState) {
         // Used in implementations
     }
 
-    public BlockProperties createMeta() {
-        return new BlockProperties(this, Collections.emptyMap());
+    public @NotNull BlockState createMeta() {
+        return new BlockState(this, Collections.emptyMap());
     }
 
-    @Deprecated
-    public BlockProperties onPlacedBy(WorldAccess world, BlockPos blockPos, BlockProperties blockMeta, Player player, ItemStack stack, CubicDirection direction) {
+    public BlockState onPlacedBy(BlockState blockMeta, BlockVec at, UseItemContext context) {
         return blockMeta;
     }
 
-    public BlockProperties onPlacedBy(BlockProperties blockMeta, BlockPos at, UseItemContext context) {
-        return onPlacedBy(context.world(), at, blockMeta, context.player(), context.stack(), ((BlockHitResult) context.result()).getDirection());
-    }
-
-    public void update(World serverWorld, BlockPos offset, BlockProperties meta) {
+    public void update(@NotNull World serverWorld, @NotNull BlockVec offset, @NotNull BlockState meta) {
         this.onPlace(serverWorld, offset, meta);
     }
 
-    public boolean canBePlacedAt(WorldAccess world, BlockPos blockPos, Player player, ItemStack stack, CubicDirection direction) {
+    public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable CubicDirection direction) {
         return true;
     }
 
-    public boolean canBeReplacedBy(UseItemContext context, BlockProperties blockProperties) {
+    public boolean canBeReplacedBy(@NotNull UseItemContext context, @NotNull BlockState blockState) {
         return true;
     }
 
@@ -223,20 +217,20 @@ public class Block implements DataWriter<MapType> {
         return toolLevel;
     }
 
-    public void onDestroy(World world, BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+    public void onDestroy(@NotNull World world, @NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
 
     }
 
-    public Iterable<ItemStack> getDrops(BlockPos breaking, BlockProperties blockProperties, Player breaker) {
+    public Iterable<ItemStack> getDrops(@NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
         if (breaker == null) return this.lootGen.generate(new JavaRNG());
         return this.lootGen.generate(breaker.getRng());
     }
 
-    public int getLight(BlockProperties blockProperties) {
+    public int getLight(@NotNull BlockState blockState) {
         return 0;
     }
 
-    public int getLightReduction(BlockProperties blockProperties) {
+    public int getLightReduction(@NotNull BlockState blockState) {
         if (isAir()) return 0;
         return lightReduction;
     }
@@ -273,7 +267,7 @@ public class Block implements DataWriter<MapType> {
             return this;
         }
 
-        public @This Properties effectiveTool(ToolType toolType) {
+        public @This Properties effectiveTool(@Nullable ToolType toolType) {
             this.effectiveTool = toolType;
             return this;
         }
@@ -288,17 +282,17 @@ public class Block implements DataWriter<MapType> {
             return this;
         }
 
-        public @This Properties dropsItems(ItemStack...  drops) {
+        public @This Properties dropsItems(@NotNull ItemStack @NotNull ... drops) {
             this.loot = new ConstantLoot(drops);
             return this;
         }
 
-        public @This Properties dropsItems(Item...  drops) {
+        public @This Properties dropsItems(@NotNull Item @NotNull ... drops) {
             this.loot = new ConstantLoot(Arrays.stream(drops).map(Item::defaultStack).collect(Collectors.toList()));
             return this;
         }
 
-        public @This Properties dropsItems(LootGenerator drops) {
+        public @This Properties dropsItems(@Nullable LootGenerator drops) {
             this.loot = drops;
             return this;
         }
@@ -349,7 +343,7 @@ public class Block implements DataWriter<MapType> {
             return this;
         }
 
-        public Properties toolRequirement(ToolLevel toolLevel) {
+        public Properties toolRequirement(@NotNull ToolLevel toolLevel) {
             this.requiresTool();
             this.toolLevel = toolLevel;
             return this;

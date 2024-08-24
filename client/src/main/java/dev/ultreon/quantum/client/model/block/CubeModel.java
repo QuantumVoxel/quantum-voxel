@@ -7,7 +7,7 @@ import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,18 +17,18 @@ import java.util.Set;
 import static dev.ultreon.quantum.client.QuantumClient.isOnRenderThread;
 
 public final class CubeModel {
-    private final Identifier top;
-    private final Identifier bottom;
-    private final Identifier left;
-    private final Identifier right;
-    private final Identifier front;
-    private final Identifier back;
+    private final NamespaceID top;
+    private final NamespaceID bottom;
+    private final NamespaceID left;
+    private final NamespaceID right;
+    private final NamespaceID front;
+    private final NamespaceID back;
     private final ModelProperties properties;
-    private Identifier resourceId;
+    private NamespaceID resourceId;
 
-    private CubeModel(Identifier resourceId, Identifier top, Identifier bottom,
-                      Identifier left, Identifier right,
-                      Identifier front, Identifier back, ModelProperties properties) {
+    private CubeModel(NamespaceID resourceId, NamespaceID top, NamespaceID bottom,
+                      NamespaceID left, NamespaceID right,
+                      NamespaceID front, NamespaceID back, ModelProperties properties) {
         this.resourceId = resourceId;
         this.top = top;
         this.bottom = bottom;
@@ -39,47 +39,47 @@ public final class CubeModel {
         this.properties = properties;
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier all) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID all) {
         return CubeModel.of(resourceId, all, all, all);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID side) {
         return CubeModel.of(resourceId, top, bottom, side, side, side, side);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID side, NamespaceID front) {
         return CubeModel.of(resourceId, top, bottom, side, side, front, side);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front, Identifier back) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID side, NamespaceID front, NamespaceID back) {
         return CubeModel.of(resourceId, top, bottom, side, side, front, back);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier left, Identifier right, Identifier front, Identifier back) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID left, NamespaceID right, NamespaceID front, NamespaceID back) {
         return new CubeModel(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build());
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier all, ModelProperties properties) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID all, ModelProperties properties) {
         return CubeModel.of(resourceId, all, all, all, properties);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, ModelProperties properties) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID side, ModelProperties properties) {
         return CubeModel.of(resourceId, top, bottom, side, side, side, side, properties);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front, ModelProperties properties) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID side, NamespaceID front, ModelProperties properties) {
         return CubeModel.of(resourceId, top, bottom, side, side, front, side, properties);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier side, Identifier front, Identifier back, ModelProperties properties) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID side, NamespaceID front, NamespaceID back, ModelProperties properties) {
         return CubeModel.of(resourceId, top, bottom, side, side, front, back, properties);
     }
 
-    public static CubeModel of(Identifier resourceId, Identifier top, Identifier bottom, Identifier left, Identifier right, Identifier front, Identifier back, ModelProperties properties) {
+    public static CubeModel of(NamespaceID resourceId, NamespaceID top, NamespaceID bottom, NamespaceID left, NamespaceID right, NamespaceID front, NamespaceID back, ModelProperties properties) {
         return new CubeModel(resourceId, top, bottom, left, right, front, back, properties);
     }
 
-    public BakedCubeModel bake(Identifier resourceId, TextureAtlas texture) {
+    public BakedCubeModel bake(NamespaceID resourceId, TextureAtlas texture) {
         if (!isOnRenderThread()) return QuantumClient.invokeAndWait(() -> this.bake(resourceId, texture));
         try {
             TextureRegion topTex = texture.get(this.top);
@@ -162,7 +162,7 @@ public final class CubeModel {
     }
 
     @NotNull
-    private CrashLog createCrash(Identifier resourceId, RuntimeException e) {
+    private CrashLog createCrash(NamespaceID resourceId, RuntimeException e) {
         CrashLog crashLog = new CrashLog("Failed to bake cube model", e);
         CrashCategory bakingModel = new CrashCategory("Baking Model");
         bakingModel.add("ID", resourceId);
@@ -179,27 +179,27 @@ public final class CubeModel {
         return crashLog;
     }
 
-    public Identifier top() {
+    public NamespaceID top() {
         return top;
     }
 
-    public Identifier bottom() {
+    public NamespaceID bottom() {
         return bottom;
     }
 
-    public Identifier left() {
+    public NamespaceID left() {
         return left;
     }
 
-    public Identifier right() {
+    public NamespaceID right() {
         return right;
     }
 
-    public Identifier front() {
+    public NamespaceID front() {
         return front;
     }
 
-    public Identifier back() {
+    public NamespaceID back() {
         return back;
     }
 
@@ -232,11 +232,11 @@ public final class CubeModel {
                 "back=" + back + ']';
     }
 
-    public Set<Identifier> all() {
+    public Set<NamespaceID> all() {
         return new ReferenceArraySet<>(new Object[]{top, bottom, left, right, front, back});
     }
 
-    public Identifier resourceId() {
+    public NamespaceID resourceId() {
         return resourceId;
     }
 }

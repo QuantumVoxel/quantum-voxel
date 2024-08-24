@@ -2,7 +2,7 @@ package dev.ultreon.quantum.text;
 
 import com.badlogic.gdx.utils.Array;
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
@@ -92,11 +92,11 @@ public abstract class MutableText extends TextObject {
         this.style.size(size);
     }
 
-    public Identifier getFont() {
+    public NamespaceID getFont() {
         return this.style.getFont();
     }
 
-    public MutableText setFont(Identifier font) {
+    public MutableText setFont(NamespaceID font) {
         this.style.font(font);
         return this;
     }

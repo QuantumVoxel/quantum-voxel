@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.uri;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
@@ -26,7 +26,7 @@ public class ResourceUrlHandler extends URLStreamHandlerProvider {
             protected URLConnection openConnection(URL u) {
                 String location = u.getHost();
                 String path = u.getPath();
-                Identifier identifier = new Identifier(location, path);
+                NamespaceID namespaceID = new NamespaceID(location, path);
                 QuantumClient quantumClient = QuantumClient.get();
                 return new URLConnection(u) {
                     private ResourceManager resourceManager;
@@ -42,10 +42,10 @@ public class ResourceUrlHandler extends URLStreamHandlerProvider {
                         if (this.resourceManager == null)
                             throw new IOException("Connection opened before game initialization");
 
-                        @Nullable Resource resource = this.resourceManager.getResource(identifier);
+                        @Nullable Resource resource = this.resourceManager.getResource(namespaceID);
 
                         if (resource == null)
-                            throw new FileNotFoundException("Resource not found: " + identifier);
+                            throw new FileNotFoundException("Resource not found: " + namespaceID);
 
                         InputStream stream = resource.openStream();
 

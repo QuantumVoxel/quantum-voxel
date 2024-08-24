@@ -9,7 +9,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.events.ResourceEvent;
 import dev.ultreon.quantum.resources.android.DeferredResourcePackage;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,13 +38,13 @@ public class ResourceManager implements Closeable {
         return true;
     }
 
-    public InputStream openResourceStream(Identifier entry) throws IOException {
+    public InputStream openResourceStream(NamespaceID entry) throws IOException {
         @Nullable Resource resource = this.getResource(entry);
         return resource == null ? null : resource.openStream();
     }
 
     @Nullable
-    public Resource getResource(Identifier entry) {
+    public Resource getResource(NamespaceID entry) {
         for (ResourcePackage resourcePackage : this.resourcePackages) {
             if (resourcePackage.has(entry)) {
                 return resourcePackage.get(entry);
@@ -101,7 +101,7 @@ public class ResourceManager implements Closeable {
 
         try {
             // Prepare (entry -> resource) mappings
-            Map<Identifier, StaticResource> map = new HashMap<>();
+            Map<NamespaceID, StaticResource> map = new HashMap<>();
 
             // Resource categories
             Map<String, ResourceCategory> categories = new HashMap<>();
@@ -143,9 +143,9 @@ public class ResourceManager implements Closeable {
                             String s = relative.toString().replaceAll("\\\\", "/");
 
                             // Create resource entry/
-                            Identifier entry;
+                            NamespaceID entry;
                             try {
-                                entry = new Identifier(namespace, s);
+                                entry = new NamespaceID(namespace, s);
                             } catch (SyntaxException e) {
                                 logger.error("Invalid resource identifier:", e);
                                 continue;
@@ -155,7 +155,7 @@ public class ResourceManager implements Closeable {
                             ThrowingSupplier<InputStream, IOException> sup = () -> Files.newInputStream(asset.toPath());
                             StaticResource resource = new StaticResource(entry, sup);
 
-                            String path = entry.path();
+                            String path = entry.getPath();
                             String[] split = path.split("/");
                             String category = split[0];
                             if (split.length > 1) {
@@ -178,7 +178,7 @@ public class ResourceManager implements Closeable {
     private void importFilePackage(ZipInputStream stream, String filePath) throws IOException {
         // Check for .jar files.
         // Prepare (entry -> resource) mappings.
-        Map<Identifier, StaticResource> map = new HashMap<>();
+        Map<NamespaceID, StaticResource> map = new HashMap<>();
 
         // Resource categories
         Map<String, ResourceCategory> categories = new HashMap<>();
@@ -213,7 +213,7 @@ public class ResourceManager implements Closeable {
         ResourceEvent.IMPORTED.factory().onImported(pkg);
     }
 
-    private void addEntry(Map<Identifier, StaticResource> map, Map<String, ResourceCategory> categories, String name, ThrowingSupplier<InputStream, IOException> sup) {
+    private void addEntry(Map<NamespaceID, StaticResource> map, Map<String, ResourceCategory> categories, String name, ThrowingSupplier<InputStream, IOException> sup) {
         String[] splitPath = name.split("/", 3);
 
         if (splitPath.length >= 3) {
@@ -223,7 +223,7 @@ public class ResourceManager implements Closeable {
                 String path = splitPath[2];
 
                 // Entry
-                Identifier entry = new Identifier(namespace, path);
+                NamespaceID entry = new NamespaceID(namespace, path);
 
                 // Resource
                 StaticResource resource = new StaticResource(entry, sup);
@@ -250,9 +250,9 @@ public class ResourceManager implements Closeable {
     public List<byte[]> getAllDataByPath(@NotNull String path) {
         List<byte[]> data = new ArrayList<>();
         for (ResourcePackage resourcePackage : this.resourcePackages) {
-            Map<Identifier, StaticResource> identifierResourceMap = resourcePackage.mapEntries();
-            for (Map.Entry<Identifier, StaticResource> entry : identifierResourceMap.entrySet()) {
-                if (entry.getKey().path().equals(path)) {
+            Map<NamespaceID, StaticResource> identifierResourceMap = resourcePackage.mapEntries();
+            for (Map.Entry<NamespaceID, StaticResource> entry : identifierResourceMap.entrySet()) {
+                if (entry.getKey().getPath().equals(path)) {
                     byte[] bytes = entry.getValue().loadOrGet();
                     if (bytes == null) continue;
 
@@ -265,7 +265,7 @@ public class ResourceManager implements Closeable {
     }
 
     @NotNull
-    public List<byte[]> getAllDataById(@NotNull Identifier id) {
+    public List<byte[]> getAllDataById(@NotNull NamespaceID id) {
         List<byte[]> data = new ArrayList<>();
         for (ResourcePackage resourcePackage : this.resourcePackages) {
             if (resourcePackage.has(id)) {

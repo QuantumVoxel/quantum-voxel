@@ -21,7 +21,6 @@ public class OutlineShader extends DefaultShader {
         public final static Uniform u_resolution = new Uniform("u_resolution");
     }
 
-
     public static class Setters extends DefaultShader.Setters {
         public final static Setter resolution = new LocalSetter() {
             @Override

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.server.dedicated;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.inspect.InspectionRoot;
@@ -9,7 +10,7 @@ import dev.ultreon.quantum.network.system.TcpNetworker;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.ServerLanguage;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -31,8 +32,11 @@ import java.util.Map;
  */
 @SuppressWarnings("GDXJavaStaticResource")
 public class DedicatedServer extends QuantumServer {
+    public static final ServerPlatform PLATFORM = Main.SERVER_PLATFORM;
+    
     private static final WorldStorage STORAGE = new WorldStorage(Paths.get("world"));
     private static final Profiler PROFILER = new Profiler();
+    private static DedicatedServer instance;
     private final ServerLanguage language = createServerLanguage();
 
     /**
@@ -46,7 +50,16 @@ public class DedicatedServer extends QuantumServer {
     public DedicatedServer(String host, int port, InspectionRoot<Main> inspection) throws IOException {
         super(DedicatedServer.STORAGE, DedicatedServer.PROFILER, inspection);
 
+        DedicatedServer.instance = this;
+
         this.networker = new TcpNetworker(this, InetAddress.getByName(host), port);
+
+        GamePlatform.get().locateResources();
+        GamePlatform.get().locateModResources();
+    }
+
+    public static DedicatedServer get() {
+        return instance;
     }
 
     /**
@@ -57,7 +70,7 @@ public class DedicatedServer extends QuantumServer {
     @NotNull
     private ServerLanguage createServerLanguage() {
         // Specify the locale
-        Locale locale = new Locale("en", "us");
+        Locale locale = Locale.of("en", "us");
 
         // Load the language resource from the file system
         InputStream resourceAsStream = getClass().getResourceAsStream("/assets/quantum/languages/main.json");
@@ -80,13 +93,13 @@ public class DedicatedServer extends QuantumServer {
         }
 
         // Create and return a new ServerLanguage object
-        return new ServerLanguage(locale, languageMap, new Identifier("quantum"));
+        return new ServerLanguage(locale, languageMap, new NamespaceID("quantum"));
     }
 
     /**
      * Constructor for the DedicatedServer class.
      *
-     * @param inspection the InspectionRoot object for main inspection
+     * @param inspection the InspectionRoot object for the main inspection
      * @throws UnknownHostException if the hostname is unknown
      */
     DedicatedServer(InspectionRoot<Main> inspection) throws IOException {

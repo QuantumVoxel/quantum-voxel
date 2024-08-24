@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import com.badlogic.gdx.Gdx;
 import dev.ultreon.libs.datetime.v0.DateTime;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.GenericIcon;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
@@ -19,7 +19,6 @@ import dev.ultreon.quantum.world.WorldStorage;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 
 public class WorldCreationScreen extends Screen {
     private static final WordGenerator WORD_GEN = new WordGenerator(new WordGenerator.Config().minSize(4).maxSize(6).named());
@@ -75,7 +74,7 @@ public class WorldCreationScreen extends Screen {
 
     private void createWorld(TextButton caller) {
         String folderName = WorldStorage.createFolderName();
-        WorldStorage storage = new WorldStorage(Gdx.files.external("worlds").child(folderName).file());
+        WorldStorage storage = new WorldStorage(QuantumClient.data("worlds").child(folderName).file());
 
         try {
             if (storage.exists(".")) {

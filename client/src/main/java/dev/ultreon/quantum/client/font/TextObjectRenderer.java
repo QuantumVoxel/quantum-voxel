@@ -6,10 +6,13 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.text.*;
+import dev.ultreon.quantum.text.FontIconPart;
+import dev.ultreon.quantum.text.StylePart;
+import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.text.TextPart;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Color;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 
 import static dev.ultreon.quantum.client.font.Font.UNIFONT;
@@ -43,16 +46,16 @@ public class TextObjectRenderer {
         FontIconMap iconMap = fontIcon.map();
         String iconName = fontIcon.icon();
 
-        Identifier identifier = iconMap.get(iconName);
-        Texture texture = QuantumClient.get().getTextureManager().getTexture(identifier);
+        NamespaceID namespaceID = iconMap.get(iconName);
+        Texture texture = QuantumClient.get().getTextureManager().getTexture(namespaceID);
         if (shadow) {
             float shadowX = currentX;
             if (ClientConfig.diagonalFontShadow) shadowX += 1;
             renderer.setBlitColor(RgbColor.WHITE.darker().darker());
-            renderer.blit(identifier, shadowX, currentY + 2 + (lineHeight - texture.getHeight()), texture.getWidth(), texture.getHeight(), 0, 0, texture.getWidth(), texture.getHeight(), texture.getWidth(), texture.getHeight());
+            renderer.blit(namespaceID, shadowX, currentY + 2 + (lineHeight - texture.getHeight()), texture.getWidth(), texture.getHeight(), 0, 0, texture.getWidth(), texture.getHeight(), texture.getWidth(), texture.getHeight());
             renderer.setBlitColor(RgbColor.WHITE);
         }
-        renderer.blit(identifier, currentX, currentY + 1 + (lineHeight - texture.getHeight()), texture.getWidth(), texture.getHeight(), 0, 0, texture.getWidth(), texture.getHeight(), texture.getWidth(), texture.getHeight());
+        renderer.blit(namespaceID, currentX, currentY + 1 + (lineHeight - texture.getHeight()), texture.getWidth(), texture.getHeight(), 0, 0, texture.getWidth(), texture.getHeight(), texture.getWidth(), texture.getHeight());
 
         currentX += texture.getWidth();
 

@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.screens.container;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.math.MathUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -15,16 +14,13 @@ import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.c2s.C2SMenuTakeItemPacket;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.OptionalInt;
-
-import static com.google.common.primitives.Ints.max;
 
 public abstract class ContainerScreen extends Screen {
     private final int maxSlots;
@@ -64,7 +60,7 @@ public abstract class ContainerScreen extends Screen {
     public abstract int backgroundWidth();
     public abstract int backgroundHeight();
 
-    public abstract Identifier getBackground();
+    public abstract NamespaceID getBackground();
 
     @Override
     protected void renderBackground(Renderer renderer) {

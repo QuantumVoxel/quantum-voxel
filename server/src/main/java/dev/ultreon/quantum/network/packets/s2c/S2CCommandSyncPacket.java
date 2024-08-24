@@ -27,4 +27,15 @@ public class S2CCommandSyncPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
 
     }
+
+    public List<String> getCommands() {
+        return commands;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CCommandSyncPacket{" +
+                "commands=" + commands +
+                '}';
+    }
 }

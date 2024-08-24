@@ -54,6 +54,7 @@ dependencies {
     implementation api("com.formdev:flatlaf:3.2.1")
     implementation api("org.jetbrains:annotations:24.0.0")
 
+    implementation api(project(":gameprovider"))
     implementation api(project(":mixinprovider"))
 
     annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
@@ -72,13 +73,34 @@ dependencies {
     implementation api("dev.ultreon.corelibs:functions-v0:$corelibs_version")
     implementation api("dev.ultreon:ubo:$ultreon_data_version")
 
-    // Apache Log4J
+    // Quantum Fabric Loader
+    implementation api("dev.ultreon.quantum:fabric-loader:$fabric_version")
+    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+
+    // KryoNet
+    implementation api("com.esotericsoftware.kryo:kryo5:5.5.0")
+    implementation api("com.esotericsoftware:kryonet:2.22.0-RC1")
+
+    // Apache Commons
     implementation api("org.apache.commons:commons-lang3:3.13.0")
     implementation api("org.apache.commons:commons-collections4:$commons_collections4_version")
+    runtimeOnly api("org.apache.logging.log4j:log4j-api:$log4j_version")
+    runtimeOnly api("org.apache.logging.log4j:log4j-core:$log4j_version")
+    runtimeOnly api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
+
+    // Apache Arrow
+    implementation api("org.apache.arrow:arrow-vector:16.1.0")
+
+    // Tukaani XZ
     implementation api("org.tukaani:xz:$tukaani_xz_version")
+
+    // SwingBits
     implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
+
+    // Netty
     implementation api("io.netty:netty-all:$netty_version")
 
+    // LibGDX
     implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
     runtimeOnly "com.badlogicgames.gdx:gdx-backend-headless:$gdx_version"
 
@@ -112,10 +134,12 @@ dependencies {
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 
-    implementation(api("org.graalvm.polyglot:polyglot:23.1.2"))
-    implementation(api("org.graalvm.polyglot:python:23.1.2"))
-    implementation(api("org.graalvm.polyglot:js:23.1.2"))
-    implementation(api("org.graalvm.llvm:llvm-api:23.1.2"))
+    implementation(api("org.graalvm.polyglot:polyglot:24.+"))
+    implementation(api("org.graalvm.polyglot:python:24.+"))
+    implementation(api("org.graalvm.polyglot:js:24.+"))
+    implementation(api("org.graalvm.llvm:llvm-api:24.+"))
+
+    implementation(api("com.mojang:datafixerupper:8.0.16"))
 
     implementation(api("com.mojang:datafixerupper:8.0.16"))
 
@@ -153,6 +177,17 @@ jar {
 
     zip64 true
     duplicatesStrategy INCLUDE
+}
+
+test {
+    useJUnitPlatform()
+
+    // If the runClient task is executed, set the environment variable for RUNNING to true
+    afterEvaluate {
+        if (rootProject.gradle.taskGraph.hasTask(":runClient")) {
+            environment("RUNNING", "true")
+        }
+    }
 }
 
 //noinspection ConfigurationAvoidance

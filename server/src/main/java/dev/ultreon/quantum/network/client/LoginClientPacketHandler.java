@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.network.client;
 
-import java.util.UUID;
+import dev.ultreon.quantum.network.packets.s2c.S2CLoginAcceptedPacket;
 
 public interface LoginClientPacketHandler extends ClientPacketHandler {
 
-    void onLoginAccepted(UUID uuid);
+    void onLoginAccepted(S2CLoginAcceptedPacket uuid);
 }

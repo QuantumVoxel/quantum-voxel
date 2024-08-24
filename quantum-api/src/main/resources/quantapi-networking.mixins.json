@@ -1,0 +1,6 @@
+{
+  "package": "dev.ultreon.quantapi.networking.impl.mixin",
+  "mixins": [
+    "InGamePacketStageMixin"
+  ]
+}

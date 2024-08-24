@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.network.packets.c2s;
 
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 
@@ -30,5 +30,14 @@ public class C2SDisconnectPacket<T extends ServerPacketHandler> extends Packet<T
     public void handle(PacketContext packetContext, T handler) {
         CommonConstants.LOGGER.info("Client disconnected: %s", this.message);
         handler.onDisconnect(this.message);
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SDisconnectPacket{message=" + this.message + '}';
     }
 }

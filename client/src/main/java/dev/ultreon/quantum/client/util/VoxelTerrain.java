@@ -18,15 +18,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
@@ -42,13 +41,14 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.server.util.Utils;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.EntityHitResult;
-import dev.ultreon.quantum.util.Ray;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.noise.SimplexNoise;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,9 +62,9 @@ import java.util.function.Predicate;
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_BOTTOM_COLOR;
 import static dev.ultreon.quantum.client.world.ClientWorld.DAY_TOP_COLOR;
 
+@SuppressWarnings({"GDXJavaUnsafeIterator", "GDXJavaStaticResource"})
 public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     private static final Environment ENVIRONMENT = new Environment();
-
     public Model PREFAB;
     public TerrainNode root;
 
@@ -82,12 +82,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     private final ObjectMap<ClientChunkAccess, ModelInstance> instances = new ObjectMap<>();
     private final Vec3d tmp = new Vec3d();
     private final IntMap<Entity> entities = new IntMap<>();
-    private final ObjectMap<ChunkPos, ClientChunkAccess> chunks = new ObjectMap<>();
+    private final ObjectMap<ChunkVec, ClientChunkAccess> chunks = new ObjectMap<>();
 
     public VoxelTerrain(GameCamera camera) {
         this.camera = camera;
-        this.skybox.topColor.set(DAY_TOP_COLOR.toGdx());
-        this.skybox.bottomColor.set(DAY_BOTTOM_COLOR.toGdx());
+        this.skybox.topColor.set(DAY_TOP_COLOR);
+        this.skybox.bottomColor.set(DAY_BOTTOM_COLOR);
     }
 
     public void create() {
@@ -165,7 +165,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
                 RenderLayer.WORLD.add(modelInstance);
 
                 this.instances.put(meshing, modelInstance);
-                this.chunks.put(toChunkPos(meshing.x, meshing.y, meshing.z), meshing);
+                this.chunks.put(toChunkVec(meshing.x, meshing.y, meshing.z), meshing);
             }
         }
     }
@@ -181,7 +181,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void render(RenderLayer renderLayer, float deltaTime) {
+    public void renderBackground(ModelBatch batch, float deltaTime) {
+        batch.render(this.skybox);
+    }
+
+    @Override
+    public void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime) {
         if (renderLayer != RenderLayer.WORLD) {
             return;
         }
@@ -195,33 +200,33 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
             ClientChunkAccess key = node.key;
             ModelInstance value = node.value;
 
-            this.tmp.set(camera.getCamPos()).sub(key.getPos().vec3d());
+            this.tmp.set(camera.getCamPos()).sub(key.getVec().vec3d());
             value.transform.setTranslation((float) this.tmp.x, (float) this.tmp.y, (float) this.tmp.z);
         }
     }
 
     @Override
-    public void collectEntity(Entity entity, RenderLayer renderLayer) {
+    public void collectEntity(Entity entity, ModelBatch batch) {
 
     }
 
     @Override
-    public boolean unloadChunk(@NotNull ChunkPos chunkPos) {
+    public boolean unloadChunk(@NotNull ChunkVec chunkVec) {
         return false;
     }
 
     @Override
-    public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos) {
+    public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos) {
         return false;
     }
 
     @Override
-    public boolean set(BlockPos pos, BlockProperties block) {
+    public boolean set(BlockVec pos, BlockState block) {
         return false;
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         return false;
     }
 
@@ -231,7 +236,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block, int flags) {
+    public boolean set(int x, int y, int z, BlockState block, int flags) {
         ChunkAccess chunk = getChunkAt(x, y, z);
         if (chunk == null) {
             return false;
@@ -240,12 +245,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
         return true;
     }
 
-    private Vec3i localize(int x, int y, int z) {
-        return new Vec3i(x, y, z);
+    private BlockVec localize(int x, int y, int z) {
+        return new BlockVec(x, y, z, BlockVecSpace.WORLD);
     }
 
     @Override
-    public boolean set(BlockPos pos, BlockProperties block, int flags) {
+    public boolean set(BlockVec pos, BlockState block, int flags) {
         ChunkAccess chunk = getChunkAt(pos);
         if (chunk == null) {
             return false;
@@ -255,30 +260,30 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public ClientChunkAccess getChunkAt(@NotNull BlockPos pos) {
-        return getChunkAt(pos.x(), pos.y(), pos.z());
+    public ClientChunkAccess getChunkAt(@NotNull BlockVec pos) {
+        return getChunkAt(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     @Override
-    public @Nullable ClientChunkAccess getChunk(ChunkPos pos) {
+    public @Nullable ClientChunkAccess getChunk(ChunkVec pos) {
         return this.chunks.get(pos);
     }
 
     @Override
-    public @Nullable ClientChunkAccess getChunk(int x, int z) {
-        return this.chunks.get(new ChunkPos(x, z));
+    public @Nullable ClientChunkAccess getChunk(int x, int y, int z) {
+        return this.chunks.get(new ChunkVec(x, y, z, ChunkVecSpace.WORLD));
     }
 
     @Override
     public ClientChunkAccess getChunkAt(int x, int y, int z) {
-        return this.chunks.get(toChunkPos(x, y, z));
+        return this.chunks.get(toChunkVec(x, y, z));
     }
 
-    private ChunkPos toChunkPos(int x, int y, int z) {
+    private ChunkVec toChunkVec(int x, int y, int z) {
         int chunkX = x >> 4;
         int chunkY = y >> 4;
         int chunkZ = z >> 4;
-        return new ChunkPos(chunkX, chunkY, chunkZ);
+        return new ChunkVec(chunkX, chunkY, chunkZ, ChunkVecSpace.WORLD);
     }
 
     @Override
@@ -287,7 +292,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean isOutOfWorldBounds(BlockPos pos) {
+    public boolean isOutOfWorldBounds(BlockVec pos) {
         return false;
     }
 
@@ -297,22 +302,27 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public int getHighest(int x, int z) {
+    public int getHeight(int x, int z, HeightmapType type) {
         return 0;
     }
 
     @Override
-    public void setColumn(int x, int z, BlockProperties block) {
+    public Heightmap heightMapAt(int x, int z, HeightmapType type) {
+        return null;
+    }
+
+    @Override
+    public void setColumn(int x, int z, BlockState block) {
 
     }
 
     @Override
-    public void setColumn(int x, int z, int maxY, BlockProperties block) {
+    public void setColumn(int x, int z, int maxY, BlockState block) {
 
     }
 
     @Override
-    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockProperties block) {
+    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block) {
         return null;
     }
 
@@ -322,12 +332,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
+    public void setBlockEntity(BlockVec pos, BlockEntity blockEntity) {
 
     }
 
     @Override
-    public BlockEntity getBlockEntity(BlockPos pos) {
+    public BlockEntity getBlockEntity(BlockVec pos) {
         return null;
     }
 
@@ -357,7 +367,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean destroyBlock(BlockPos breaking, @Nullable Player breaker) {
+    public boolean destroyBlock(BlockVec breaking, @Nullable Player breaker) {
         return false;
     }
 
@@ -412,7 +422,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public Biome getBiome(BlockPos pos) {
+    public Biome getBiome(BlockVec pos) {
         return null;
     }
 
@@ -466,22 +476,22 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public BreakResult continueBreaking(BlockPos breaking, float v, Player player) {
+    public BreakResult continueBreaking(BlockVec breaking, float v, Player player) {
         return null;
     }
 
     @Override
-    public void stopBreaking(BlockPos blockPos, Player player) {
+    public void stopBreaking(BlockVec blockVec, Player player) {
 
     }
 
     @Override
-    public void startBreaking(BlockPos blockPos, Player player) {
+    public void startBreaking(BlockVec blockVec, Player player) {
 
     }
 
     @Override
-    public float getBreakProgress(BlockPos blockPos) {
+    public float getBreakProgress(BlockVec blockVec) {
         return 0;
     }
 
@@ -496,12 +506,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean isSpawnChunk(ChunkPos pos) {
+    public boolean isSpawnChunk(ChunkVec pos) {
         return false;
     }
 
     @Override
-    public BlockPos getSpawnPoint() {
+    public BlockVec getSpawnPoint() {
         return null;
     }
 
@@ -616,8 +626,23 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
+    public boolean isLoaded(ChunkVec chunkVec) {
+        return false;
+    }
+
+    @Override
+    public void onBlockSet(BlockVec pos, BlockState block) {
+
+    }
+
+    @Override
     public int getVisibleChunks() {
         return 0;
+    }
+
+    @Override
+    public void reloadChunks() {
+
     }
 
     @Override
@@ -626,61 +651,61 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public boolean isAlwaysLoaded(ChunkPos pos) {
+    public boolean isAlwaysLoaded(ChunkVec pos) {
         return false;
     }
 
     @Override
-    public @NotNull List<ChunkPos> getChunksAround(Vec3d pos) {
+    public @NotNull List<ChunkVec> getChunksAround(BlockVec pos) {
         return List.of();
     }
 
     @Override
-    public @NotNull BlockProperties get(BlockPos pos) {
+    public @NotNull BlockState get(BlockVec pos) {
         ChunkAccess chunkAt = getChunkAt(pos);
         if (chunkAt == null) {
-            return BlockProperties.AIR;
+            return BlockState.AIR;
         }
         return chunkAt.get(localize(pos));
     }
 
-    private BlockPos localize(BlockPos pos) {
-        return new BlockPos(pos.x() & 0xf, pos.y() & 0xf, pos.z() & 0xf);
+    private BlockVec localize(BlockVec pos) {
+        return pos.sectionLocal();
     }
 
     @Override
-    public @NotNull BlockProperties get(int x, int y, int z) {
-        return get(new BlockPos(x, y, z));
+    public @NotNull BlockState get(int x, int y, int z) {
+        return get(new BlockVec(x, y, z, BlockVecSpace.WORLD));
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, EntityType<?> type) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance, EntityType<?> type) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull EntityHitResult rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
-        return EntityHitResult.MISS;
+    public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Class<? extends Entity> type) {
+        return EntityHit.MISS;
     }
 
     @Override
-    public @NotNull BlockHitResult rayCast(Ray ray, float distance) {
-        return BlockHitResult.MISS;
+    public @NotNull BlockHit rayCast(Ray ray, float distance) {
+        return BlockHit.MISS;
     }
 
     @Override

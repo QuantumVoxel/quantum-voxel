@@ -1,25 +1,28 @@
 package dev.ultreon.quantum.entity;
 
 import com.google.common.collect.Lists;
-import dev.ultreon.quantum.cs.ComponentSystem;
-import dev.ultreon.quantum.world.*;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.api.ModApi;
+import dev.ultreon.quantum.api.events.entity.LivingEntityDeathEvent;
 import dev.ultreon.quantum.entity.ai.Navigator;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.events.EntityEvents;
 import dev.ultreon.quantum.events.api.ValueEventResult;
 import dev.ultreon.quantum.item.food.AppliedEffect;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
-import dev.ultreon.quantum.server.util.Utils;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.SoundEvent;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class LivingEntity extends Entity {
+public abstract class LivingEntity extends Entity {
     public boolean walking;
     public boolean inverseAnim;
     public float walkAnim;
@@ -116,7 +119,7 @@ public class LivingEntity extends Entity {
             this.health = 0;
 
             // Trigger entity death event if not already dead and the event is not canceled
-            if (!this.isDead && !EntityEvents.DEATH.factory().onEntityDeath(this, DamageSource.NOTHING).isCanceled()) {
+            if (!this.isDead && !ModApi.getGlobalEventHandler().call(new LivingEntityDeathEvent(this, lastDamageSource))) {
                 this.isDead = true;
                 this.onDeath(DamageSource.NOTHING);
             }
@@ -333,8 +336,8 @@ public class LivingEntity extends Entity {
      *
      * @return the chunk position
      */
-    public ChunkPos getChunkPos() {
-        return Utils.toChunkPos(this.getBlockPos());
+    public ChunkVec getChunkVec() {
+        return this.getBlockVec().chunk();
     }
 
     /**

@@ -1,17 +1,15 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
@@ -25,8 +23,15 @@ import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.Chunk;
+import dev.ultreon.quantum.world.LightSource;
+import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -34,11 +39,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public final class ClientChunk extends Chunk implements ClientChunkAccess {
-    public static final RenderablePool RENDERABLE_POOL = new RenderablePool();
-
     private static final int[] dx = {-1, 0, 1, 0, 0, 0};
     private static final int[] dy = {0, -1, 0, 1, 0, 0};
     private static final int[] dz = {0, 0, 0, 0, -1, 1};
@@ -47,39 +50,37 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
 
-    public Model model;
-    public ModelInstance modelInstance;
-
     public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();
-    private final Map<BlockPos, BlockProperties> customRendered = new HashMap<>();
+    private final Map<BlockVec, BlockState> customRendered = new HashMap<>();
     public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
-    private final Map<BlockPos, ModelInstance> addedModels = new ConcurrentHashMap<>();
-    private final Map<BlockPos, ModelInstance> models = new ConcurrentHashMap<>();
-    private final Array<BlockPos> removedModels = new Array<>();
+    private final Map<BlockVec, ModelInstance> addedModels = new ConcurrentHashMap<>();
+    private final Map<BlockVec, ModelInstance> models = new ConcurrentHashMap<>();
+    private final Array<BlockVec> removedModels = new Array<>();
     public boolean visible;
-    private ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
-    private Stack<Integer> stack = new Stack<>();
+    private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
+    private final Stack<Integer> stack = new Stack<>();
+    public final ClientChunkInfo info = new ClientChunkInfo();
 
     /**
-     * @deprecated Use {@link #ClientChunk(ClientWorld, ChunkPos, Storage, Storage, Map)} instead
+     * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         this(world, pos, storage, biomeStorage, blockEntities);
     }
 
-    public ClientChunk(ClientWorld world, ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
         this.clientWorld = world;
         this.active = false;
 
-        blockEntities.forEach((blockPos, type) -> {
+        blockEntities.forEach((BlockVec, type) -> {
             if (type != null) {
-                this.setBlockEntity(blockPos, type.create(world, blockPos.offset(pos)));
+                this.setBlockEntity(BlockVec, type.create(world, BlockVec.offset(pos)));
             }
         });
 
@@ -87,7 +88,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     private int index(int x, int y, int z) {
-        return (z * CHUNK_HEIGHT + y) * CHUNK_SIZE + x;
+        return (z * CHUNK_SIZE + y) * CHUNK_SIZE + x;
     }
 
     @Override
@@ -130,11 +131,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public ModelInstance getModelInstance() {
-        return this.modelInstance;
-    }
-
-    @Override
     public void dispose() {
         if (!QuantumClient.isOnRenderThread()) {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
@@ -145,21 +141,21 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             super.dispose();
 
             @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
-            if (this.model != null && this.modelInstance != null) {
-                if (worldRenderer != null) {
-                    worldRenderer.unload(this);
-                }
+            if (worldRenderer != null) {
+                worldRenderer.unload(this);
             }
 
             this.tmp.setZero();
             this.tmp1.setZero();
 
-            this.client.connection.send(new C2SChunkStatusPacket(this.getPos(), Chunk.Status.UNLOADED));
+            if (this.client.connection != null) {
+                this.client.connection.send(new C2SChunkStatusPacket(this.getVec(), Chunk.Status.UNLOADED));
+            }
         }
     }
 
     @Override
-    public BlockProperties getFast(int x, int y, int z) {
+    public @NotNull BlockState getFast(int x, int y, int z) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -167,7 +163,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public void setFast(Vec3i pos, BlockProperties block) {
+    public void setFast(Vec3i pos, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -175,15 +171,14 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockProperties block) {
+    public boolean set(int x, int y, int z, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
         return super.set(x, y, z, block);
     }
 
-    @Override
-    public void set(Vec3i pos, BlockProperties block) {
+    public void set(Vec3i pos, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -191,11 +186,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockProperties block) {
+    public boolean setFast(int x, int y, int z, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
-        this.removedModels.add(new BlockPos(x, y, z));
+        this.removedModels.add(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
 
         boolean isBlockSet = super.setFast(x, y, z, block);
 
@@ -220,7 +215,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public ClientWorldAccess getWorld() {
+    public @NotNull ClientWorld getWorld() {
         return this.clientWorld;
     }
 
@@ -229,15 +224,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return renderOffset;
     }
 
-    @Override
-    public Model getModel() {
-        return model;
-    }
-
     void ready() {
-        if (!QuantumClient.isOnRenderThread()) {
-            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-        }
         this.ready = true;
         this.clientWorld.updateChunkAndNeighbours(this);
 
@@ -248,26 +235,26 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return null;
     }
 
-    public Map<BlockPos, BlockProperties> getCustomRendered() {
+    public Map<BlockVec, BlockState> getCustomRendered() {
         return this.customRendered;
     }
 
     @Override
-    protected void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
-        super.setBlockEntity(blockPos, blockEntity);
+    protected void setBlockEntity(BlockVec blockVec, BlockEntity blockEntity) {
+        super.setBlockEntity(blockVec, blockEntity);
 
-        System.out.println("blockPos = " + blockPos);
+        System.out.println("BlockVec = " + blockVec);
 
         BlockModel blockModel = BlockEntityModelRegistry.get(blockEntity.getType());
         if (blockModel != null) {
             blockModel.loadInto(blockEntity.pos(), this);
         } else {
-            QuantumClient.LOGGER.warn("No block entity model for " + blockEntity.getType().getId() + " at " + blockPos);
+            QuantumClient.LOGGER.warn("No block entity model for " + blockEntity.getType().getId() + " at " + blockVec);
         }
     }
 
     @CanIgnoreReturnValue
-    public ModelInstance addModel(BlockPos pos, ModelInstance instance) {
+    public ModelInstance addModel(BlockVec pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
             ModelInstance modelInstance1 = this.models.get(pos);
             RenderLayer.WORLD.destroy(modelInstance1);
@@ -277,7 +264,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public void renderModels(RenderLayer renderLayer) {
-        for (BlockPos pos : this.addedModels.keySet()) {
+        for (BlockVec pos : this.addedModels.keySet()) {
             ModelInstance model = this.addedModels.get(pos);
             model.userData = Shaders.MODEL_VIEW.get();
             this.addedModels.remove(pos);
@@ -285,12 +272,12 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             renderLayer.add(model);
         }
 
-        for (BlockPos pos : this.models.keySet()) {
+        for (BlockVec pos : this.models.keySet()) {
             ModelInstance inst = this.models.get(pos);
-            inst.transform.setToTranslationAndScaling(renderOffset.x + pos.x(), renderOffset.y + pos.y(), renderOffset.z + pos.z(), 1 / 16f, 1 / 16f, 1 / 16f);
+            inst.transform.setToTranslationAndScaling(renderOffset.x + pos.getIntX(), renderOffset.y + pos.getIntY(), renderOffset.z + pos.getIntZ(), 1 / 16f, 1 / 16f, 1 / 16f);
         }
 
-        for (BlockPos pos : this.removedModels) {
+        for (BlockVec pos : this.removedModels) {
             this.removedModels.removeValue(pos, false);
             ModelInstance model = this.models.remove(pos);
             if (model != null)
@@ -352,8 +339,8 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.lightMap.clear();
     }
 
-    public void setSunlight(BlockPos pos, int intensity) {
-        lightMap.setSunlight(pos.x(), pos.y(), pos.z(), intensity);
+    public void setSunlight(BlockVec pos, int intensity) {
+        lightMap.setSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ(), intensity);
     }
 
     public void floodFill(int startX, int startY, int startZ, byte newValue) {
@@ -369,13 +356,13 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
             lightMap.setBlockLight(idx, newValue);
             int x = idx % CHUNK_SIZE;
-            int y = (idx / CHUNK_SIZE) % CHUNK_HEIGHT;
-            int z = idx / (CHUNK_SIZE * CHUNK_HEIGHT);
+            int y = (idx / CHUNK_SIZE) % CHUNK_SIZE;
+            int z = idx / (CHUNK_SIZE * CHUNK_SIZE);
             for (int i = 0; i < 6; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
                 int nz = z + dz[i];
-                if (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_HEIGHT && nz >= 0 && nz < CHUNK_SIZE) {
+                if (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_SIZE && nz >= 0 && nz < CHUNK_SIZE) {
                     int lightReduction = get(nx, ny, nz).getLightReduction();
                     if (lightReduction == 0) continue;
                     if (lightMap.getSunlight(nx, ny, nz) > lightReduction) continue;
@@ -386,7 +373,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         }
     }
 
-    public int getSunlight(BlockPos pos) {
-        return lightMap.getSunlight(pos.x(), pos.y(), pos.z());
+    public int getSunlight(BlockVec pos) {
+        return lightMap.getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 }

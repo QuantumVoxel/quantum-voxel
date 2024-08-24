@@ -3,7 +3,7 @@ package dev.ultreon.quantum.block.entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
 import dev.ultreon.quantum.world.capability.CapabilityType;
@@ -19,7 +19,7 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     private final ItemStack[] items;
     private T menu;
 
-    public ContainerBlockEntity(BlockEntityType<?> type, World world, BlockPos pos, int itemCapacity) {
+    public ContainerBlockEntity(BlockEntityType<?> type, World world, BlockVec pos, int itemCapacity) {
         super(type, world, pos);
 
         this.items = new ItemStack[itemCapacity];

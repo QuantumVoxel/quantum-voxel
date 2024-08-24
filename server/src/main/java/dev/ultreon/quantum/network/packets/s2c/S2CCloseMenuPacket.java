@@ -23,4 +23,9 @@ public class S2CCloseMenuPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onCloseContainerMenu();
     }
+
+    @Override
+    public String toString() {
+        return "S2CCloseMenuPacket";
+    }
 }

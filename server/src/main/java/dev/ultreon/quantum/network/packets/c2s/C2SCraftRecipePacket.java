@@ -1,16 +1,16 @@
 package dev.ultreon.quantum.network.packets.c2s;
 
-import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeType;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class C2SCraftRecipePacket extends Packet<InGameServerPacketHandler> {
     private final int typeId;
-    private final Identifier recipeId;
+    private final NamespaceID recipeId;
 
     public C2SCraftRecipePacket(RecipeType type, Recipe recipe) {
         this.typeId = type.getId();
@@ -31,5 +31,13 @@ public class C2SCraftRecipePacket extends Packet<InGameServerPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onCraftRecipe(this.typeId, this.recipeId);
+    }
+
+    public int getTypeId() {
+        return this.typeId;
+    }
+
+    public NamespaceID getRecipeId() {
+        return this.recipeId;
     }
 }

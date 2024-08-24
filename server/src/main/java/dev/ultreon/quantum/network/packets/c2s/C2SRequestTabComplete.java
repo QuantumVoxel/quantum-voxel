@@ -29,4 +29,15 @@ public class C2SRequestTabComplete extends Packet<InGameServerPacketHandler> {
             player.tabComplete(this.input);
         }
     }
+
+    public String getInput() {
+        return input;
+    }
+
+    @Override
+    public String toString() {
+        return "C2SRequestTabComplete{" +
+                "input='" + input + '\'' +
+                '}';
+    }
 }

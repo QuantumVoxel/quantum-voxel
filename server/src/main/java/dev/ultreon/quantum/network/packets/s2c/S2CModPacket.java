@@ -6,10 +6,10 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class S2CModPacket extends Packet<InGameClientPacketHandler> {
-    private final Identifier channelId;
+    private final NamespaceID channelId;
     private final ModPacket<?> packet;
     private final NetworkChannel channel;
 
@@ -36,5 +36,25 @@ public class S2CModPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onModPacket(this.channel, this.packet);
+    }
+
+    public ModPacket<?> getPacket() {
+        return packet;
+    }
+
+    public NetworkChannel getChannel() {
+        return channel;
+    }
+
+    public NamespaceID getChannelId() {
+        return channelId;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CModPacket{" +
+                "channelId=" + channelId +
+                ", packet=" + packet +
+                '}';
     }
 }

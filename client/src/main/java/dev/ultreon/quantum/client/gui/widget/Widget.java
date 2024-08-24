@@ -4,15 +4,11 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.font.Font;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.Position;
-import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.Size;
-import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
 import dev.ultreon.quantum.component.GameComponent;
 import dev.ultreon.quantum.component.GameComponentHolder;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +39,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     protected final QuantumClient client = QuantumClient.get();
     protected Font font = this.client.font;
     private final List<RevalidateListener> revalidateListeners = new ArrayList<>();
-    private final Map<Identifier, UIComponent> components = new HashMap<>();
+    private final Map<NamespaceID, UIComponent> components = new HashMap<>();
 
     protected Widget(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         this.preferredSize.set(width, height);
@@ -55,18 +51,18 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     @CheckReturnValue
-    protected final <C extends UIComponent> C register(Identifier id, C component) {
+    protected final <C extends UIComponent> C register(NamespaceID id, C component) {
         this.components.put(id, component);
         return component;
     }
 
     @Override
-    public Map<Identifier, UIComponent> componentRegistry() {
+    public Map<NamespaceID, UIComponent> componentRegistry() {
         return Collections.unmodifiableMap(this.components);
     }
 
     @Override
-    public <T extends GameComponent<?>> T getComponent(Identifier id, T... typeGetter) {
+    public <T extends GameComponent<?>> T getComponent(NamespaceID id, T... typeGetter) {
         UIComponent component = this.components.get(id);
         if (component == null) throw new IllegalArgumentException("Component not found: " + id);
         if (!component.getClass().isAssignableFrom(typeGetter.getClass().getComponentType()))
@@ -76,7 +72,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     @SafeVarargs
-    public final <T extends GameComponent<?>> void withComponent(Identifier id, Consumer<T> consumer, T... typeGetter) {
+    public final <T extends GameComponent<?>> void withComponent(NamespaceID id, Consumer<T> consumer, T... typeGetter) {
         UIComponent uiComponent = this.getComponent(id);
         if (uiComponent == null) throw new IllegalArgumentException("Component not found: " + id);
     }

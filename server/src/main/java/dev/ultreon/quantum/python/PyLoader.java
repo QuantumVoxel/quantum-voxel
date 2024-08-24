@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.python;
 
 import com.google.gson.Gson;
+import dev.ultreon.quantum.FabricMod;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.LangLoader;
 import dev.ultreon.quantum.graal.GraalLanguages;
@@ -18,8 +19,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.zip.ZipFile;
 
-import static dev.ultreon.quantum.js.JsLoader.IO_ACCESS;
-
 public class PyLoader implements LangLoader {
     private static final PyLoader INSTANCE = new PyLoader();
     private static final Logger LOGGER = LoggerFactory.getLogger(PyLoader.class);
@@ -29,82 +28,15 @@ public class PyLoader implements LangLoader {
 
     @SuppressWarnings({"PyUnresolvedReferences", "PyInterpreter", "PyClassHasNoInit", "PyPep8Naming"})
     @Language("python")
-    private static final String INTEROP_CALL = """
-            # from polyglot import interop_behavior
-            # \s
-            # # Interop behaviors for string
-            # @interop_behavior(str)
-            # class StringInteropBehavior:
-            #     @staticmethod
-            #     def isString(_):
-            #         return True
-            # \s
-            # # Interop behaviors for all integer subtypes
-            # @interop_behavior(int)
-            # class IntInteropBehavior:
-            #     @staticmethod
-            #     def isNumber(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def fitsInByte(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def asByte(v):
-            #         return int(v) & 0xFF  # Ensure it fits in a byte
-            # \s
-            #     @staticmethod
-            #     def fitsInShort(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def asShort(v):
-            #         return int(v) & 0xFFFF  # Ensure it fits in a short
-            # \s
-            #     @staticmethod
-            #     def fitsInInt(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def asInt(v):
-            #         return int(v)
-            # \s
-            #     @staticmethod
-            #     def fitsInLong(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def asLong(v):
-            #         return int(v)
-            # \s
-            # # Interop behaviors for all float subtypes
-            # @interop_behavior(float)
-            # class FloatInteropBehavior:
-            #     @staticmethod
-            #     def isNumber(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def fitsInFloat(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def asFloat(v):
-            #         return float(v)
-            # \s
-            #     @staticmethod
-            #     def fitsInDouble(_):
-            #         return True
-            # \s
-            #     @staticmethod
-            #     def asDouble(v):
-            #         return float(v)
-            # \s
-            # \s
+    private static final String INTEROP_CHECK = """
+            import org.slf4j.Logger as Slf4jLogger
+            import org.slf4j.LoggerFactory as Slf4jLoggerFactory
+            
+            LOGGER = Slf4jLoggerFactory.getLogger(__name__)
             
             if __name__ == '__main__':
-                print('WIP!')
+                LOGGER.info('Hello from Python!')
+            
             """;
 
     public static PyLoader getInstance() {
@@ -121,7 +53,10 @@ public class PyLoader implements LangLoader {
             Files.createDirectories(path.resolve("python"));
         }
 
-        Value python = GraalLanguages.context.parse("python", INTEROP_CALL);
+        Value python = GraalLanguages.context.parse("python", INTEROP_CHECK);
+        if (!python.canExecute()) {
+            throw new IOException("Failed to execute python interop check script");
+        }
         python.executeVoid();
 
         LOGGER.debug("Loading Python mods from " + path);
@@ -244,5 +179,13 @@ public class PyLoader implements LangLoader {
 
     public Collection<PyMod> getMods() {
         return Collections.unmodifiableCollection(mods.values());
+    }
+
+    public boolean isModLoaded(String id) {
+        return mods.containsKey(id);
+    }
+
+    public PyMod getMod(String id) {
+        return mods.get(id);
     }
 }

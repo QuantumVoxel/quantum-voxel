@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.UBJsonReader;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.model.ModelType;
 import dev.ultreon.quantum.resources.Resource;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import static org.jetbrains.annotations.ApiStatus.Experimental;
 import static org.jetbrains.annotations.ApiStatus.Internal;
@@ -26,11 +26,11 @@ public class ResourceLoader {
      * @param resource the static resource to load a model from.
      * @return the loaded model.
      */
-    public static Model loadG3D(Identifier resource) {
+    public static Model loadG3D(NamespaceID resource) {
         FileHandle file = QuantumClient.resource(resource.mapPath(path -> "models/" + path));
 
         TextureProvider textureProvider = fileName -> {
-            String s = "assets/" + resource.namespace() + "/models";
+            String s = "assets/" + resource.getDomain() + "/models";
             if (fileName.startsWith(s)) {
                 String filePath = fileName.substring(s.length() + 1);
                 return new Texture(QuantumClient.resource(resource.mapPath(path -> "textures/" + filePath)));
@@ -38,8 +38,8 @@ public class ResourceLoader {
             return new Texture(QuantumClient.resource(resource.withPath("textures/" + fileName)).path());
         };
 
-        if (resource.path().endsWith(".g3dj")) return g3djLoader.loadModel(file, textureProvider);
-        else if (resource.path().endsWith(".g3db")) return g3dbLoader.loadModel(file, textureProvider);
+        if (resource.getPath().endsWith(".g3dj")) return g3djLoader.loadModel(file, textureProvider);
+        else if (resource.getPath().endsWith(".g3db")) return g3dbLoader.loadModel(file, textureProvider);
         throw new GdxRuntimeException("Unsupported G3D model type: " + file.extension());
     }
 

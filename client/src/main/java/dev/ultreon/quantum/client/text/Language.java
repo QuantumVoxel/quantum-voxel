@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.text;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Locale;
 import java.util.Map;
@@ -8,9 +8,9 @@ import java.util.Map;
 public class Language {
     private final Locale locale;
     private final Map<String, String> languageMap;
-    private final Identifier id;
+    private final NamespaceID id;
 
-    public Language(Locale locale, Map<String, String> languageMap, Identifier id) {
+    public Language(Locale locale, Map<String, String> languageMap, NamespaceID id) {
         this.locale = locale;
         this.languageMap = languageMap;
         this.id = id;
@@ -25,7 +25,7 @@ public class Language {
         return this.locale;
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return this.id;
     }
 
@@ -37,7 +37,7 @@ public class Language {
     }
 
     private static String translateFallback(String path, Object[] args) {
-        Language english = LanguageManager.INSTANCE.get(new Locale("en", "us"));
+        Language english = LanguageManager.INSTANCE.get(Locale.of("en", "us"));
         if (english == null) {
             throw new IllegalStateException("English language not loaded");
         }

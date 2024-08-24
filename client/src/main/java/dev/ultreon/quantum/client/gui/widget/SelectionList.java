@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.*;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
@@ -322,7 +322,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
             ItemRenderer<T> itemRenderer = this.list.itemRenderer;
             if (itemRenderer != null && renderer.pushScissors(this.bounds)) {
 
-                Identifier texture = id("textures/gui/list.png");
+                NamespaceID texture = id("textures/gui/list.png");
                 renderer.draw9Slice(texture, this.pos.x, this.pos.y, this.size.width, this.size.height, 0, 0, 15, 15, 5, 256, 256);
                 if (selected) {
                     renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.WHITE.withAlpha(0x20));

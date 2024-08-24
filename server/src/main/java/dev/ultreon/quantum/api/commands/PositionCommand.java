@@ -3,7 +3,7 @@ package dev.ultreon.quantum.api.commands;
 import dev.ultreon.quantum.api.commands.error.NotFoundError;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.entity.Entity;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
@@ -27,21 +27,21 @@ public class PositionCommand extends Command {
         if (!positions.world.equals(world)) {
             positions.reset(world);
         }
-        BlockPos firstLoc = positions.first;
+        BlockVec firstLoc = positions.first;
         String firstStr = "null";
         if (firstLoc != null) {
-            firstStr = firstLoc.x() + "," + firstLoc.y() + "," + firstLoc.z();
+            firstStr = firstLoc.getIntX() + "," + firstLoc.getIntY() + "," + firstLoc.getIntZ();
         }
-        BlockPos secondLoc = positions.second;
+        BlockVec secondLoc = positions.second;
         String secondStr = null;
         if (secondLoc != null) {
-            secondStr = secondLoc.x() + "," + secondLoc.y() + "," + secondLoc.z();
+            secondStr = secondLoc.getIntX() + "," + secondLoc.getIntY() + "," + secondLoc.getIntZ();
         }
         if (firstLoc != null) {
             if (secondLoc != null) {
-                int ax = Math.abs(firstLoc.x() - secondLoc.x()) + 1;
-                int ay = Math.abs(firstLoc.y() - secondLoc.y()) + 1;
-                int az = Math.abs(firstLoc.z() - secondLoc.z()) + 1;
+                int ax = Math.abs(firstLoc.getIntX() - secondLoc.getIntX()) + 1;
+                int ay = Math.abs(firstLoc.getIntY() - secondLoc.getIntY()) + 1;
+                int az = Math.abs(firstLoc.getIntZ() - secondLoc.getIntZ()) + 1;
                 int size = ax * ay * az;
                 return this.editModeMessage("Current region is " + firstStr + " to " + secondStr + " (" + size + " blocks)");
             }
@@ -65,19 +65,19 @@ public class PositionCommand extends Command {
             positions.reset(world);
         }
         Location loc = sender.getLocation();
-        positions.second = loc.getBlockPos();
+        positions.second = loc.getBlockVec();
         return this.editModeMessage("Second position set to " + loc.x + "," + loc.y + "," + loc.z);
     }
 
     public static class PositionSelection {
         private World world = null;
-        private BlockPos first = null;
-        private BlockPos second = null;
+        private BlockVec first = null;
+        private BlockVec second = null;
 
         public int getSize() {
-            int adx = Math.abs(this.first.x() - this.second.x()) + 1;
-            int ady = Math.abs(this.first.y() - this.second.y()) + 1;
-            int adz = Math.abs(this.first.z() - this.second.z()) + 1;
+            int adx = Math.abs(this.first.getIntX() - this.second.getIntX()) + 1;
+            int ady = Math.abs(this.first.getIntY() - this.second.getIntY()) + 1;
+            int adz = Math.abs(this.first.getIntZ() - this.second.getIntZ()) + 1;
             return adx * ady * adz;
         }
 

@@ -26,4 +26,13 @@ public class S2CMenuCursorPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onMenuCursorChanged(this.cursor);
     }
+
+    public ItemStack getCursor() {
+        return this.cursor;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CMenuCursorPacket{cursor=" + this.cursor + "}";
+    }
 }

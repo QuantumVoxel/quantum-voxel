@@ -2,7 +2,7 @@ package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ public abstract class ItemContainerMenu extends EntityContainerMenu {
      * @param pos    the position where the menu is opened.
      * @param size   the number of slots.
      */
-    protected ItemContainerMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @NotNull Entity owner, ItemStack holder, @Nullable BlockPos pos, int size) {
+    protected ItemContainerMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @NotNull Entity owner, ItemStack holder, @Nullable BlockVec pos, int size) {
         super(type, world, entity, owner, pos, size);
         this.holder = holder;
     }

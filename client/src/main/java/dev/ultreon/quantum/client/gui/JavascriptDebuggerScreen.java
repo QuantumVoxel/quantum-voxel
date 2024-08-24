@@ -96,9 +96,33 @@ public class JavascriptDebuggerScreen extends Screen {
             String value = jsInput.getValue();
             try {
                 Value js = CTX.eval("js", value);
-                Object hostObject = js.asHostObject();
+                if (js.isHostObject()) {
+                    Object hostObject = js.asHostObject();
+                    this.output = hostObject.toString();
+                } else if (js.isNumber()) {
+                    this.output = js.asDouble() + "";
+                } else if (js.isBoolean()) {
+                    this.output = js.asBoolean() + "";
+                } else if (js.isString()) {
+                    this.output = js.asString();
+                } else if (js.isNull()) {
+                    this.output = "null";
+                } else if (js.isDate()) {
+                    this.output = js.asDate().toString();
+                } else if (js.isDuration()) {
+                    this.output = js.asDuration().toString();
+                } else if (js.isException()) {
+                    this.output = js.asProxyObject().toString();
+                } else if (js.isHostObject()) {
+                    this.output = js.asHostObject().toString();
+                } else if (js.isProxyObject()) {
+                    this.output = js.asProxyObject().toString();
+                } else if (js.isIterator()) {
+                    this.output = js.asProxyObject().toString();
+                } else {
+                    this.output = "Invalid JS result";
+                }
 
-                this.output = hostObject.toString();
             } catch (Throwable e) {
                 this.output = e.toString();
             }

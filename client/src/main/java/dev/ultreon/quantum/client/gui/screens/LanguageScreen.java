@@ -36,6 +36,7 @@ public class LanguageScreen extends Screen {
         this.list = builder.add(new SelectionList<Locale>(21).bounds(() -> new Bounds(this.size.width / 2 - 200, 50, 400, this.size.height - 90)))
                 .selectable(true)
                 .entries(locales)
+                .drawBackground(true)
                 .itemRenderer(this::renderItem)
                 .callback(this::setLanguage);
 
@@ -58,7 +59,7 @@ public class LanguageScreen extends Screen {
             return;
         }
 
-        String text = locale.getDisplayLanguage(new Locale("en")) + " (" + locale.getDisplayCountry(new Locale("en")) + ")";
+        String text = locale.getDisplayLanguage(Locale.of("en")) + " (" + locale.getDisplayCountry(Locale.of("en")) + ")";
         text += " - " + locale.getDisplayLanguage(locale) + " (" + locale.getDisplayCountry(locale) + ")";
 
         renderer.textCenter(text, this.list.getX() + this.list.getWidth() / 2f, y + 4f);

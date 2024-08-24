@@ -17,7 +17,7 @@ public class SimpleDebugPage implements DebugPage {
                 .left("Ping", (connection != null ? connection.getPing() : "N/A") + "ms");
 
         if (player != null) {
-            context.left("Position", player.getBlockPos());
+            context.left("Position", player.getBlockVec());
         }
     }
 }

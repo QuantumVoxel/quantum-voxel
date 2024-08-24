@@ -17,10 +17,11 @@ import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
+import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipException;
 
 public class ModListScreen extends Screen {
-    private static final Identifier DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
+    private static final NamespaceID DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
     private SelectionList<Mod> list;
     private TextButton configButton;
     private TextButton backButton;
@@ -100,23 +101,20 @@ public class ModListScreen extends Screen {
     private void onImportXeox(TextButton textButton) {
         GamePlatform.get().openImportDialog().ifFailure(throwable -> {
             QuantumClient.invoke(() -> {
-                if (throwable instanceof ZipException) {
-                    this.showDialog(new DialogBuilder(this)
+                switch (throwable) {
+                    case ZipException zipException -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Invalid Xeox mod file.\nXeox only supports .zip files!"))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                } else if (throwable instanceof IOException) {
-                    this.showDialog(new DialogBuilder(this)
+                    case IOException ioException -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                } else if (throwable instanceof RuntimeException) {
-                    this.showDialog(new DialogBuilder(this)
+                    case RuntimeException runtimeException -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                } else {
-                    this.showDialog(new DialogBuilder(this)
+                    case null, default -> this.showDialog(new DialogBuilder(this)
                             .title(TextObject.literal("Import Failed"))
                             .message(TextObject.literal("Failed to import Xeox mod file!\nInternal error!"))
                             .button(UITranslations.OK, () -> this.client.showScreen(this)));
@@ -140,9 +138,9 @@ public class ModListScreen extends Screen {
     }
 
     private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size) {
-        Identifier iconId;
+        NamespaceID iconId;
         @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
-        Identifier overrideId = ModIconOverrideRegistry.get(metadata.getName());
+        NamespaceID overrideId = ModIconOverrideRegistry.get(metadata.getName());
         TextureManager textureManager = this.client.getTextureManager();
         if (overrideId != null) {
             textureManager.registerTexture(overrideId);
@@ -196,7 +194,8 @@ public class ModListScreen extends Screen {
             renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor)).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 
             y += 84;
-            renderer.textMultiline("<gray>" + selected.getDescription(), x, y, RgbColor.rgb(0x808080));
+            String description = selected.getDescription();
+            renderer.textMultiline(description != null ? description : "No description", x, y, ColorCode.GRAY);
         }
     }
 

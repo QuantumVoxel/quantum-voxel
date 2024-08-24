@@ -1,20 +1,20 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Objects;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class DimensionInfo {
-    public static final DimensionInfo OVERWORLD = new DimensionInfo(new Identifier("overworld"));
-    private final Identifier id;
+    public static final DimensionInfo OVERWORLD = new DimensionInfo(new NamespaceID("overworld"));
+    private final NamespaceID id;
 
-    public DimensionInfo(Identifier id) {
+    public DimensionInfo(NamespaceID id) {
         this.id = id;
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return this.id;
     }
 
@@ -32,6 +32,6 @@ public class DimensionInfo {
     }
 
     public TextObject getName() {
-        return TextObject.translation(this.id.namespace() + ".dimension." + this.id.path().replace('/', '.'));
+        return TextObject.translation(this.id.getDomain() + ".dimension." + this.id.getPath().replace('/', '.'));
     }
 }

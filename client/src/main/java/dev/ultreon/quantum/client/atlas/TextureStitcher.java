@@ -6,19 +6,19 @@ import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import static dev.ultreon.quantum.client.QuantumClient.isOnRenderThread;
 
 public class TextureStitcher implements Disposable {
-    private final Identifier atlasId;
+    private final NamespaceID atlasId;
     private final PixmapPacker diffusePacker = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
     private final PixmapPacker emissivePacker = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
     private final PixmapPacker normalPacker = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
     private final PixmapPacker specularPacker = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
     private final PixmapPacker reflectivePacker = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
 
-    public TextureStitcher(Identifier atlasId) {
+    public TextureStitcher(NamespaceID atlasId) {
         this.atlasId = atlasId;
 
         diffusePacker.setPackToTexture(true);
@@ -28,15 +28,15 @@ public class TextureStitcher implements Disposable {
         reflectivePacker.setPackToTexture(true);
     }
 
-    public void add(Identifier id, Pixmap diffuse) {
+    public void add(NamespaceID id, Pixmap diffuse) {
         add(id, diffuse, null, null, null, null);
     }
 
-    public void add(Identifier id, Pixmap diffuse, Pixmap emissive) {
+    public void add(NamespaceID id, Pixmap diffuse, Pixmap emissive) {
         add(id, diffuse, emissive, null, null, null);
     }
 
-    public void add(Identifier id, Pixmap diffuse, Pixmap emissive, Pixmap normal, Pixmap specular, Pixmap reflective) {
+    public void add(NamespaceID id, Pixmap diffuse, Pixmap emissive, Pixmap normal, Pixmap specular, Pixmap reflective) {
         if (diffuse == null && emissive == null && normal == null && specular == null && reflective == null) throw new IllegalArgumentException("No textures provided");
         if (diffusePacker.getRect(id.toString()) != null) return;
         diffusePacker.pack(id.toString(), diffuse);
@@ -69,7 +69,7 @@ public class TextureStitcher implements Disposable {
         this.reflectivePacker.dispose();
     }
 
-    public void add(Identifier texture) {
+    public void add(NamespaceID texture) {
         FileHandle diffuse = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".png"));
         FileHandle emissive = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".emissive.png"));
         FileHandle normal = QuantumClient.resource(texture.mapPath(path -> "textures/" + path + ".normal.png"));

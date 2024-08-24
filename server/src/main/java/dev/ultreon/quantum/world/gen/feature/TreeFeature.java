@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.gen.feature;
 
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -12,10 +12,6 @@ import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Random;
-
-import static dev.ultreon.quantum.world.World.CHUNK_HEIGHT;
 
 public class TreeFeature extends WorldGenFeature {
     private final NoiseConfig noiseConfig;
@@ -47,40 +43,30 @@ public class TreeFeature extends WorldGenFeature {
         this.random.setSeed(seed);
         this.random.setSeed(this.random.nextLong());
 
-        BlockProperties blockProperties = chunk.get(x, height - 1, z);
-        if (!blockProperties.is(Blocks.GRASS_BLOCK) && !blockProperties.is(Blocks.SNOWY_GRASS_BLOCK)) {
+        BlockState blockState = chunk.get(x, height - 1, z);
+        if (!blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.SNOWY_GRASS_BLOCK)) {
             return false;
         }
 
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[Start " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height);
+                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
-            if (trunkHeight + height + 1 > CHUNK_HEIGHT) {
-                if (WorldGenDebugContext.isActive()) {
-                    System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height);
-                }
-                return false;
-            }
 
             // Check if there is enough space
-            for (int y = height; y < height + trunkHeight; y++) {
-                for (int xOffset = -1; xOffset <= 1; xOffset++) {
-                    for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                        if (!chunk.get(x + xOffset, y, z + zOffset).isAir()){
-                            if (WorldGenDebugContext.isActive()) {
-                                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
-                            }
-                            return false;
-                        }
+            for (int y = height + 1; y < height + trunkHeight; y++) {
+                if (!chunk.get(x, y, z).isAir()) {
+                    if (WorldGenDebugContext.isActive()) {
+                        System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
                     }
+                    return false;
                 }
             }
 
 
-            for (int y = height; y < height + trunkHeight; y++) {
+            for (int y = height + 1; y < height + trunkHeight; y++) {
                 chunk.set(x, y, z, this.trunk.createMeta());
             }
 

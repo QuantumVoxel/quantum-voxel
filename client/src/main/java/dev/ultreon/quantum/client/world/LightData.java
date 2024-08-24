@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3i;
 
 public class LightData {
     Vec3i pos = new Vec3i();

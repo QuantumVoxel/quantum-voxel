@@ -3,13 +3,12 @@ package dev.ultreon.quantum.client.gui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
-@ApiStatus.Experimental
 public abstract class Screen extends UIContainer<Screen> {
+    private static final Color BACKGOUND_OVERLAY = new Color(0, 0, 0, 0.25f);
+    private static final Color DIALOG_BACKGROUND = new Color(0, 0, 0, 0.45f);
     protected @Nullable TextObject title;
     public Screen parentScreen;
     public Widget directHovered;
@@ -71,7 +71,7 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.popMatrix();
 
             if (this.dialog != null) {
-                renderer.fill(0, 0, this.size.width, this.size.height + this.titleWidget.getHeight(), RgbColor.BLACK.withAlpha(0x70));
+                renderer.fill(0, 0, this.size.width, this.size.height + this.titleWidget.getHeight(), DIALOG_BACKGROUND);
                 this.dialog.render(renderer, mouseX, mouseY, deltaTime);
             }
 
@@ -112,12 +112,6 @@ public abstract class Screen extends UIContainer<Screen> {
     public final void init(int width, int height) {
         this.setSize(width, height);
         GuiBuilder builder = new GuiBuilder(this);
-        if (this.title != null || parentScreen != null) {
-//            TitleWidget titleWidget = builder.title(TextObject.nullToEmpty(this.title));
-//            if (parentScreen != null) titleWidget.parent(parentScreen);
-//
-//            this.size.height -= titleWidget.getHeight();
-        }
         this.build(builder);
         this.revalidate();
     }
@@ -161,9 +155,10 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clearColor(0, 0, 0, 1);
             renderer.clear();
             int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-            renderer.fill(0, 0, this.size.width, this.size.height, RgbColor.BLACK);
             renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, -extraHeight, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
             renderer.flush();
+
+            renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, BACKGOUND_OVERLAY);
         }
     }
 
@@ -174,7 +169,7 @@ public abstract class Screen extends UIContainer<Screen> {
      */
     protected void renderTransparentBackground(Renderer renderer) {
         int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-        renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, RgbColor.argb(0x40000000));
+        renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, BACKGOUND_OVERLAY);
     }
 
     /**
@@ -198,6 +193,7 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     @Override
+    @ApiStatus.Experimental
     public Path path() {
         UIContainer<?> screen = this.parentScreen;
         if (screen == null) screen = UIContainer.ROOT;

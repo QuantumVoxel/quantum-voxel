@@ -53,7 +53,7 @@ public class OreFeature extends WorldGenFeature {
 
             chunk.set(x + xOffset, y, z + zOffset, this.ore.createMeta());
 
-            if (DebugFlags.ORE_FEATURE.enabled()) {
+            if (DebugFlags.ORE_FEATURE.isEnabled()) {
                 QuantumServer.LOGGER.warn("Generating ore feature at: " + (x + chunk.getOffset().x) + ", " + (y + chunk.getOffset().y) + ", " + (z + chunk.getOffset().z));
             }
 

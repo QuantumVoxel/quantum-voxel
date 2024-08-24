@@ -7,13 +7,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
     private final Object @NotNull [] args;
-    private String translated = null;
     private boolean initialized = false;
 
     TranslationText(@NotNull String path, Object @NotNull ... args) {
@@ -45,12 +43,7 @@ public class TranslationText extends MutableText {
 
     @Override
     public @NotNull String createString() {
-        String translated = getTranslated();
-        if (!Objects.equals(this.translated, translated)) {
-            this.translated = translated;
-            this.initFormat();
-        }
-        return this.translated;
+        return this.getTranslated();
     }
 
     private void initFormat() {
@@ -60,21 +53,12 @@ public class TranslationText extends MutableText {
     }
 
     private String getTranslated() {
-        String translate = LanguageBootstrap.translate(this.path, this.args);
-        if (translate == null) translate = this.path;
-        return translate;
+        return LanguageBootstrap.translate(this.path, this.args);
     }
 
     @Override
     public @NotNull String getText() {
-        Object @NotNull [] objects = this.args;
-        for (int i = 0, objectsLength = objects.length; i < objectsLength; i++) {
-            Object arg = objects[i];
-            if (arg instanceof TextObject textObject) {
-                objects[i] = textObject.createString();
-            }
-        }
-        return getTranslated();
+        return this.getTranslated() + this.extras.stream().map(TextObject::getText).reduce("", (a, b) -> a + b);
     }
 
     @Override

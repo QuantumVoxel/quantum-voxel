@@ -79,7 +79,7 @@ public class DebugRegistration {
         InspectionRoot.registerFormatter(IntegratedServer.class, element -> "integratedServer");
         InspectionRoot.registerFormatter(ClientWorld.class, element -> "clientWorld");
         InspectionRoot.registerFormatter(ClientPlayer.class, element -> "clientPlayer[" + element.getUuid() + "]");
-        InspectionRoot.registerFormatter(ClientChunk.class, element -> "clientChunk[" + element.getPos() + "]");
+        InspectionRoot.registerFormatter(ClientChunk.class, element -> "clientChunk[" + element.getVec() + "]");
         InspectionRoot.registerFormatter(ChunkMesh.class, element -> "chunkMesh[" + element.meshPart.mesh.getVertexSize() + "]");
         InspectionRoot.registerFormatter(Mesh.class, element -> "mesh[" + element.getVertexSize() + "]");
         InspectionRoot.registerFormatter(MeshPart.class, element -> "meshPart[" + element.mesh.getVertexSize() + "]");

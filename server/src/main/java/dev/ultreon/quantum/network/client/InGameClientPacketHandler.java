@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.network.client;
 
-import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.item.ItemStack;
@@ -18,11 +16,15 @@ import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTimePacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.ubo.types.MapType;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ import java.util.UUID;
 public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onModPacket(NetworkChannel channel, ModPacket<?> packet);
 
-    NetworkChannel getChannel(Identifier channelId);
+    NetworkChannel getChannel(NamespaceID channelId);
 
     void onPlayerHealth(float newHealth);
 
@@ -39,21 +41,21 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onPlayerSetPos(Vec3d pos);
 
-    void onChunkCancel(ChunkPos pos);
+    void onChunkCancel(ChunkVec pos);
 
-    void onChunkData(ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Map<BlockPos, BlockEntityType<?>> blockEntities);
+    void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
 
-    void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos);
+    void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, Vec2f rotation);
 
     void onKeepAlive();
 
-    void onPlaySound(Identifier sound, float volume);
+    void onPlaySound(NamespaceID sound, float volume);
 
     void onAddPlayer(UUID uuid, String name, Vec3d position);
 
     void onRemovePlayer(UUID u);
 
-    void onBlockSet(BlockPos pos, BlockProperties block);
+    void onBlockSet(BlockVec pos, BlockState block);
 
     void onMenuItemChanged(int index, ItemStack stack);
 
@@ -61,7 +63,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onMenuCursorChanged(ItemStack cursor);
 
-    void onOpenContainerMenu(Identifier menuType, List<ItemStack> items);
+    void onOpenContainerMenu(NamespaceID menuType, List<ItemStack> items);
 
     void onAddPermission(AddPermissionPacket packet);
 
@@ -81,7 +83,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onGamemode(GameMode gamemode);
 
-    void onBlockEntitySet(BlockPos pos, BlockEntityType<?> blockEntity);
+    void onBlockEntitySet(BlockVec pos, BlockEntityType<?> blockEntity);
 
     void onTimeChange(PacketContext ctx, S2CTimePacket.Operation operation, int time);
 
@@ -96,4 +98,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onPlayerAttack(int playerId, int entityId);
 
     void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
+
+    void onChunkUnload(ChunkVec chunkVec);
 }

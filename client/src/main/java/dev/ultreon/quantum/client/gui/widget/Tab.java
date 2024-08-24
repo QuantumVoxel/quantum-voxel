@@ -8,14 +8,14 @@ import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabContent;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabbedUI;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Tab extends Button<Tab> {
-    private static final Identifier TEXTURE = new Identifier("textures/gui/tabs.png");
+    private static final NamespaceID TEXTURE = new NamespaceID("textures/gui/tabs.png");
     private final TabbedUI parent;
     private final boolean bottom;
     private final int index;
@@ -23,7 +23,7 @@ public class Tab extends Button<Tab> {
     public boolean enabled = true;
     public boolean visible = true;
     boolean selected = false;
-    private Identifier icon;
+    private NamespaceID icon;
     private TabContent content;
     private TextObject title;
 
@@ -112,7 +112,7 @@ public class Tab extends Button<Tab> {
         }
     }
 
-    public Tab icon(Identifier icon) {
+    public Tab icon(NamespaceID icon) {
         this.icon = icon;
         return this;
     }

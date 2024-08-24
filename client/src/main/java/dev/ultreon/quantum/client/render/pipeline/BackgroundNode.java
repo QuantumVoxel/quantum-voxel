@@ -1,20 +1,20 @@
 package dev.ultreon.quantum.client.render.pipeline;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 public class BackgroundNode extends RenderPipeline.RenderNode {
@@ -26,7 +26,7 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
         LocalPlayer localPlayer = this.client.player;
 
         if (world != null && worldRenderer != null && this.client.renderWorld && localPlayer != null) {
-            this.renderWorldOnce(worldRenderer, world, localPlayer.getPosition(client.partialTick), batch);
+            worldRenderer.renderBackground(batch, Gdx.graphics.getDeltaTime());
         }
     }
 
@@ -45,9 +45,6 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
     }
 
     private void renderWorldOnce(@Nullable TerrainRenderer worldRenderer, @Nullable ClientWorldAccess world, Vec3d position, ModelBatch batch) {
-        if (worldRenderer != null) {
-            worldRenderer.updateBackground();
-        }
-        batch.render(RenderLayer.BACKGROUND::finish);
+
     }
 }

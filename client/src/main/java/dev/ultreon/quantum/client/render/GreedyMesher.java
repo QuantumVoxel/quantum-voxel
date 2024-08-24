@@ -1,28 +1,28 @@
 package dev.ultreon.quantum.client.render;
 
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.world.ClientChunk;
-import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 
 public class GreedyMesher implements Mesher {
 
-    private static final int CHUNK_WIDTH = 16;
-    private static final int CHUNK_HEIGHT = 256;
-
-    private static final int CHUNK_SIZE = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT;
+    private static final int CHUNK_WIDTH = World.CHUNK_SIZE;
+    private static final int CHUNK_HEIGHT = World.CHUNK_SIZE;
 
     private static final int SOUTH = 0;
     private static final int NORTH = 1;
@@ -129,7 +129,7 @@ public class GreedyMesher implements Mesher {
                                     }
                                 }
 
-                                if (!mask[n].blockProperties.isTransparent()) {
+                                if (!mask[n].blockState.isTransparent()) {
 
                                     x[u] = i;
                                     x[v] = j;
@@ -153,7 +153,7 @@ public class GreedyMesher implements Mesher {
                                             mask[n],
                                             backFace);
 
-                                    builder.part("greedy_" + (quadId++), builtQuad, GL20.GL_TRIANGLES, materialManager.getMaterialFor(mask[n].blockProperties.getBlock()));
+                                    builder.part("greedy_" + (quadId++), builtQuad, GL20.GL_TRIANGLES, materialManager.getMaterialFor(mask[n].blockState.getBlock()));
                                 }
 
                                 for (l = 0; l < h; ++l) {
@@ -187,8 +187,8 @@ public class GreedyMesher implements Mesher {
         return Block;
     }
 
-    private Quad createFace(BlockProperties blockProperties, int side) {
-        return new Quad(blockProperties, side);
+    private Quad createFace(BlockState blockState, int side) {
+        return new Quad(blockState, side);
     }
 
     private CubicDirection toDirection(int side) {
@@ -254,16 +254,16 @@ public class GreedyMesher implements Mesher {
     }
 
     private class Quad {
-        public final BlockProperties blockProperties;
+        public final BlockState blockState;
         public int side;
 
-        public Quad(BlockProperties blockProperties, int side) {
-            this.blockProperties = blockProperties;
+        public Quad(BlockState blockState, int side) {
+            this.blockState = blockState;
             this.side = side;
         }
 
-        public BlockProperties getBlockProperties() {
-            return blockProperties;
+        public BlockState getBlockProperties() {
+            return blockState;
         }
 
         public int getSide() {

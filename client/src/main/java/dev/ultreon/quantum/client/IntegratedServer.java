@@ -1,15 +1,10 @@
 package dev.ultreon.quantum.client;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import dev.ultreon.quantum.client.util.VoxelTerrain;
-import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Notification;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
-import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
@@ -17,8 +12,9 @@ import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerSetPosPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -94,7 +90,7 @@ public class IntegratedServer extends QuantumServer {
         }
 
         // Create a debug node for host player if inspection is enabled
-        if (DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.node.createNode("host", () -> this.host);
         }
     }
@@ -286,10 +282,10 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
-    public void handleChunkLoadFailure(ChunkPos globalPos, String reason) {
-        super.handleChunkLoadFailure(globalPos, reason);
+    public void handleChunkLoadFailure(ChunkVec globalVec, String reason) {
+        super.handleChunkLoadFailure(globalVec, reason);
 
-        this.client.notifications.add(Notification.builder("Failed to load: " + globalPos.toString(), reason)
+        this.client.notifications.add(Notification.builder("Failed to load: " + globalVec.toString(), reason)
                 .subText("Chunk Loader")
                 .icon(MessageIcon.WARNING)
                 .build());
@@ -298,40 +294,6 @@ public class IntegratedServer extends QuantumServer {
     @Override
     public void fatalCrash(Throwable throwable) {
         QuantumClient.crash(throwable);
-    }
-
-    /**
-     * This method is called when the initial chunks are loaded.
-     * It performs the necessary setup for rendering the world and
-     * handling the WorldLoadScreen.
-     */
-    @Override
-    public void onInitialChunksLoaded() {
-        // Call the parent method to ensure the initial chunks are loaded
-        super.onInitialChunksLoaded();
-
-        // Invoke the setup code on the QuantumClient's event thread
-        QuantumClient.invoke(() -> {
-            // Create a new WorldRenderer instance with the current world
-            if (this.client.world instanceof ClientWorld clientWorld) {
-                this.client.worldRenderer = new WorldRenderer(clientWorld);
-            } else if (this.client.world instanceof VoxelTerrain terrain) {
-                this.client.worldRenderer = terrain;
-
-            }
-
-            // Set the renderWorld flag to true to enable world rendering
-            this.client.renderWorld = true;
-
-            // Check if the current screen is an instance of WorldLoadScreen
-            if (this.client.screen instanceof WorldLoadScreen loadScreen) {
-                // If it is, call the done() method to complete the loading process
-                loadScreen.done();
-
-                // Show the null screen to reset the screen after loading
-                this.client.showScreen(null);
-            }
-        });
     }
 
     public QuantumClient getClient() {

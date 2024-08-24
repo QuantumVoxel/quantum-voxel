@@ -1,7 +1,8 @@
 package dev.ultreon.quantum.desktop.imgui;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
-import dev.ultreon.libs.commons.v0.vector.*;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.libs.functions.v0.consumer.*;
 import dev.ultreon.libs.functions.v0.consumer.IntConsumer;
 import dev.ultreon.libs.functions.v0.supplier.FloatSupplier;
@@ -175,6 +176,23 @@ public class ImGuiEx {
         }
     }
 
+    public static void editColor3Gdx(String color, String s, Supplier<@NotNull Color> getter) {
+        ImGui.text(color);
+        ImGui.sameLine();
+        try {
+            @NotNull com.badlogic.gdx.graphics.Color c = getter.get();
+            float[] floats = {c.r, c.g, c.b, 1f};
+            if (ImGui.colorEdit3("##" + s, floats)) {
+                c.r = floats[0];
+                c.g = floats[1];
+                c.b = floats[2];
+                c.a = 1f;
+            }
+        } catch (Exception e) {
+            ImGui.text(String.valueOf(e));
+        }
+    }
+
     public static void editColor4(String color, String s, Supplier<RgbColor> getter, Consumer<RgbColor> setter) {
         ImGui.text(color);
         ImGui.sameLine();
@@ -183,6 +201,23 @@ public class ImGuiEx {
             float[] floats = {c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f};
             if (ImGui.colorEdit4("##" + s, floats)) {
                 setter.accept(new RgbColor(floats[0], floats[1], floats[2], floats[3]));
+            }
+        } catch (Exception e) {
+            ImGui.text(String.valueOf(e));
+        }
+    }
+
+    public static void editColor4Gdx(String color, String s, Supplier<Color> getter) {
+        ImGui.text(color);
+        ImGui.sameLine();
+        try {
+            @NotNull com.badlogic.gdx.graphics.Color c = getter.get();
+            float[] floats = {c.r, c.g, c.b, c.a};
+            if (ImGui.colorEdit4("##" + s, floats)) {
+                c.r = floats[0];
+                c.g = floats[1];
+                c.b = floats[2];
+                c.a = floats[3];
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
@@ -264,7 +299,7 @@ public class ImGuiEx {
         ImGui.sameLine();
         try {
             Vec3i v = getter.get();
-            int[] vec = {v.getX(), v.getY(), v.getZ()};
+            int[] vec = {v.getIntX(), v.getIntY(), v.getIntZ()};
             if (ImGui.inputInt3("##" + strId, vec)) {
                 setter.accept(new Vec3i(vec[0], vec[1], vec[2]));
             }

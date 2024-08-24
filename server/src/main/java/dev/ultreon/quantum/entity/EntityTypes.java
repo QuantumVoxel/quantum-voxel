@@ -2,7 +2,7 @@ package dev.ultreon.quantum.entity;
 
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class EntityTypes {
     public static final EntityType<Player> PLAYER = EntityTypes.register("player", new EntityType.Builder<Player>().size(0.4f, 1.8f).factory((entityType, world) -> {
@@ -14,7 +14,7 @@ public class EntityTypes {
 
     private static <T extends Entity> EntityType<T> register(String name, EntityType.Builder<T> builder) {
         EntityType<T> entityType = builder.build();
-        Registries.ENTITY_TYPE.register(new Identifier(name), entityType);
+        Registries.ENTITY_TYPE.register(new NamespaceID(name), entityType);
         return entityType;
     }
 

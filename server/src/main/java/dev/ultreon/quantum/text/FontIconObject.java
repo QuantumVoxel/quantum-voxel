@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.text.icon.IconMap;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class FontIconObject extends MutableText {
 
     public static FontIconObject deserialize(MapType data) {
         String id = data.getString("id");
-        Identifier iconMapId = Identifier.tryParse(data.getString("iconMap"));
+        NamespaceID iconMapId = NamespaceID.tryParse(data.getString("iconMap"));
         FontIconMap iconMap = iconMapId == null
                 ? IconMap.INSTANCE
                 : Registries.FONT_ICON_MAP.get(iconMapId);

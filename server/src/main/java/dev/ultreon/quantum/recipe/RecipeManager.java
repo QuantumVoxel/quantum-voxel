@@ -10,7 +10,7 @@ import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.resources.StaticResource;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +50,7 @@ public class RecipeManager {
     }
 
     private static Recipe loadRecipe(StaticResource resource) {
-        Identifier id = resource.id();
+        NamespaceID id = resource.id();
         Json5Element json5Element = resource.readJson5();
 
         if (json5Element == null) {
@@ -72,7 +72,7 @@ public class RecipeManager {
         }
 
         String type = typeElement.getAsJson5Primitive().getAsString();
-        Identifier recipeTypeId = new Identifier(type);
+        NamespaceID recipeTypeId = new NamespaceID(type);
 
         RecipeType<?> recipeType = Registries.RECIPE_TYPE.get(recipeTypeId);
         if (recipeType == null) {
@@ -83,7 +83,7 @@ public class RecipeManager {
         return recipeType.deserialize(id, root);
     }
 
-    public <T extends Recipe> void register(Identifier id, T recipe) {
+    public <T extends Recipe> void register(NamespaceID id, T recipe) {
         RecipeType<?> type = recipe.getType();
         if (this.registryMap.containsKey(type)) {
             this.registryMap.get(type).register(id, recipe);
@@ -96,7 +96,7 @@ public class RecipeManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Recipe> @Nullable T get(Identifier id, RecipeType<T> type) {
+    public <T extends Recipe> @Nullable T get(NamespaceID id, RecipeType<T> type) {
         return (T) this.registryMap.get(type).get(id);
     }
 
@@ -114,7 +114,7 @@ public class RecipeManager {
         return (Collection<T>) Collections.unmodifiableCollection(this.registryMap.get(type).values());
     }
 
-    public Identifier getKey(RecipeType<?> type, Recipe recipe) {
+    public NamespaceID getKey(RecipeType<?> type, Recipe recipe) {
         return this.registryMap.get(type).getKey(recipe);
     }
 

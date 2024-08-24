@@ -1,27 +1,30 @@
 package dev.ultreon.quantum.entity;
 
-import dev.ultreon.quantum.cs.ComponentSystem;
-import dev.ultreon.quantum.world.*;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
+import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
-import dev.ultreon.quantum.events.EntityEvents;
-import dev.ultreon.quantum.events.api.ValueEventResult;
+import dev.ultreon.quantum.network.packets.s2c.S2CPlayerPositionPacket;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.text.Translations;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.BoundingBoxUtils;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.Location;
+import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +46,7 @@ import java.util.UUID;
  * @see World#spawn(Entity)
  * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
  */
-public class Entity extends ComponentSystem implements CommandSender {
+public abstract class Entity extends ComponentSystem implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected final WorldAccess world;
     protected double x;
@@ -106,7 +109,7 @@ public class Entity extends ComponentSystem implements CommandSender {
      * @return the loaded entity
      */
     public static @NotNull Entity loadFrom(World world, MapType data) {
-        Identifier typeId = Identifier.parse(data.getString("type"));
+        NamespaceID typeId = NamespaceID.parse(data.getString("type"));
         EntityType<?> type = Registries.ENTITY_TYPE.get(typeId);
         Entity entity = type.create(world);
 
@@ -271,7 +274,7 @@ public class Entity extends ComponentSystem implements CommandSender {
     }
 
     public boolean isInWater() {
-        return this.world.get(this.getBlockPos()).isWater();
+        return this.world.get(this.getBlockVec()).isWater();
     }
 
     /**
@@ -315,19 +318,18 @@ public class Entity extends ComponentSystem implements CommandSender {
         }
 
         // Trigger an event to allow modification of the move
-        ValueEventResult<Vec3d> eventResult = EntityEvents.MOVE.factory().onEntityMove(this, deltaX, deltaY, deltaZ);
-        Vec3d modifiedValue = eventResult.getValue();
+        EntityMoveEvent event = new EntityMoveEvent(this, new Vec(deltaX, deltaY, deltaZ));
+        ModApi.getGlobalEventHandler().call(event);
+        Vec modifiedValue = event.getDelta();
+
+        if (event.isCanceled()) {
+            return this.isColliding;
+        }
 
         // If the event is canceled and a modified value is provided, update the deltas
-        if (eventResult.isCanceled()) {
-            if (modifiedValue != null) {
-                deltaX = modifiedValue.x;
-                deltaY = modifiedValue.y;
-                deltaZ = modifiedValue.z;
-            } else {
-                return this.isColliding;
-            }
-        }
+        deltaX = modifiedValue.x;
+        deltaY = modifiedValue.y;
+        deltaZ = modifiedValue.z;
 
         // Store the original deltas after potential modification
         double originalDeltaXModified = deltaX;
@@ -476,8 +478,9 @@ public class Entity extends ComponentSystem implements CommandSender {
     /**
      * @return true if the entity is in the void, false otherwise.
      */
+    @Deprecated
     public boolean isInVoid() {
-        return this.y < World.WORLD_DEPTH - 64;
+        return false;
     }
 
     public BoundingBox getBoundingBox() {
@@ -561,10 +564,22 @@ public class Entity extends ComponentSystem implements CommandSender {
         this.ox = x;
         this.oy = y;
         this.oz = z;
+
+        if (this.world instanceof ServerWorld serverWorld) {
+            if (this instanceof ServerPlayer serverPlayer) {
+                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition()), serverPlayer);
+            } else {
+                serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
+            }
+        }
     }
 
-    public BlockPos getBlockPos() {
-        return new BlockPos(this.x, this.y, this.z);
+    public BlockVec getBlockVec() {
+        return new BlockVec(this.x, this.y, this.z, BlockVecSpace.WORLD);
+    }
+
+    public BlockVec getBlockVec(BlockVecSpace space) {
+        return new BlockVec(this.x, this.y, this.z, space);
     }
 
     public Vec2f getRotation() {
@@ -588,6 +603,14 @@ public class Entity extends ComponentSystem implements CommandSender {
     public void setRotation(Vec2f position) {
         this.xRot = position.x;
         this.yRot = Mth.clamp(position.y, -90, 90);
+
+        if (this.world instanceof ServerWorld serverWorld) {
+            if (this instanceof ServerPlayer serverPlayer) {
+                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), getRotation()), serverPlayer);
+            } else {
+                serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
+            }
+        }
     }
 
     public Vec3d getVelocity() {
@@ -665,7 +688,7 @@ public class Entity extends ComponentSystem implements CommandSender {
     /**
      * Retrieves the location of the entity.
      *
-     * @return
+     * @return the location of the entity
      */
     @Override
     public @NotNull Location getLocation() {
@@ -680,15 +703,15 @@ public class Entity extends ComponentSystem implements CommandSender {
      */
     @Override
     public String getName() {
-        Identifier typeId = this.getType().getId();
+        NamespaceID typeId = this.getType().getId();
 
         // If the type ID is null, return a default null object translation
         if (typeId == null) return "NULL";
 
         // Generate a display name based on the entity's type ID
         return LanguageBootstrap.translate(String.format("%s.entity.%s.name", 
-                typeId.namespace(),
-                typeId.path().replace('/', '.')
+                typeId.getDomain(),
+                typeId.getPath().replace('/', '.')
         ));
     }
 
@@ -716,15 +739,15 @@ public class Entity extends ComponentSystem implements CommandSender {
         // Check if a custom name is set and return it if available
         if (this.customName != null) return this.customName;
 
-        Identifier typeId = this.getType().getId();
+        NamespaceID typeId = this.getType().getId();
 
         // If the type ID is null, return a default null object translation
         if (typeId == null) return Translations.NULL_OBJECT;
 
         // Generate a display name based on the entity's type ID
         return TextObject.translation(String.format("%s.entity.%s.name", 
-                typeId.namespace(),
-                typeId.path().replace('/', '.')
+                typeId.getDomain(),
+                typeId.getPath().replace('/', '.')
         ));
     }
 

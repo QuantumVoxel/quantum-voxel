@@ -4,7 +4,7 @@ import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.CrateBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public class CrateMenu extends BlockContainerMenu {
      * @param entity the entity that opened the menu.
      * @param pos    the position where the menu is opened.
      */
-    public CrateMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockPos pos) {
+    public CrateMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos) {
         this(type, world, entity, CrateMenu.getBlockEntity(world, pos), pos);
     }
 
@@ -34,7 +34,7 @@ public class CrateMenu extends BlockContainerMenu {
      * @param pos   the position of the CrateBlockEntity
      * @return the CrateBlockEntity at the specified position, or null if not found
      */
-    private static CrateBlockEntity getBlockEntity(@NotNull World world, @Nullable BlockPos pos) {
+    private static CrateBlockEntity getBlockEntity(@NotNull World world, @Nullable BlockVec pos) {
         if (pos == null) return null;
         BlockEntity blockEntity1 = world.getBlockEntity(pos);
         if (!(blockEntity1 instanceof CrateBlockEntity crate)) return null;
@@ -49,7 +49,7 @@ public class CrateMenu extends BlockContainerMenu {
      * @param entity the entity that opened the menu.
      * @param pos    the position where the menu is opened.
      */
-    public CrateMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable CrateBlockEntity blockEntity, @Nullable BlockPos pos) {
+    public CrateMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable CrateBlockEntity blockEntity, @Nullable BlockVec pos) {
         super(type, world, entity, blockEntity, pos, 63);
 
         this.blockEntity = blockEntity;

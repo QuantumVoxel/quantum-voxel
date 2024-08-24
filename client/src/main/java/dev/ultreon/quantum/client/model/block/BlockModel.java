@@ -2,13 +2,12 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.client.model.model.Json5Model;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.resources.LoadableResource;
 import dev.ultreon.quantum.client.world.ClientChunk;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.vec.BlockVec;
 
 @SuppressWarnings("unused")
 public interface BlockModel extends LoadableResource {
@@ -21,7 +20,7 @@ public interface BlockModel extends LoadableResource {
         // Do nothing
     }
 
-    default void loadInto(BlockPos pos, ClientChunk chunk) {
+    default void loadInto(BlockVec pos, ClientChunk chunk) {
         // Do nothing
     }
 
@@ -31,7 +30,7 @@ public interface BlockModel extends LoadableResource {
         ModelManager.INSTANCE.unloadModel(resourceId());
     }
 
-    Identifier resourceId();
+    NamespaceID resourceId();
 
     default Vector3 getItemScale() {
         return new Vector3(0.0625f, 0.0625f, 0.0625f);

@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.world.gen.noise;
 
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
+import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public final class NoiseConfigs {
     public static final NoiseConfig EMPTY = NoiseConfigs.register("empty",
@@ -57,7 +57,7 @@ public final class NoiseConfigs {
             new NoiseConfig(1f, 3, new Vec2f(867470, 115558), 930208, 0.5f, 2.0f, 1f, 2, 0));
 
     private static <T extends NoiseConfig> T register(String name, T settings) {
-        Registries.NOISE_SETTINGS.register(new Identifier(CommonConstants.NAMESPACE, name), settings);
+        Registries.NOISE_SETTINGS.register(new NamespaceID(CommonConstants.NAMESPACE, name), settings);
         return settings;
     }
 

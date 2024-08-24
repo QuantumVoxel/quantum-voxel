@@ -1,20 +1,27 @@
 package dev.ultreon.quantum.server.dedicated;
 
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.ModInit;
+import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.inspect.InspectionRoot;
-import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.dedicated.gui.DedicatedServerGui;
-import dev.ultreon.quantum.text.LanguageBootstrap;
-import dev.ultreon.quantum.util.ModLoadingContext;
-import org.jetbrains.annotations.ApiStatus;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
+import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
+import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.server.dedicated.gui.DedicatedServerGui;
+import dev.ultreon.quantum.server.dedicated.http.ServerHttpSite;
+import dev.ultreon.quantum.text.LanguageBootstrap;
+import dev.ultreon.quantum.util.ModLoadingContext;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,10 +39,12 @@ import java.util.concurrent.TimeUnit;
  */
 @ApiStatus.Internal
 public class Main {
+    static final ServerPlatform SERVER_PLATFORM = new ServerPlatform();
+
     private static final Logger LOGGER = LoggerFactory.getLogger("ServerMain");
-    private static final Object WAITER = new Object();
     private static DedicatedServer server;
     private static ServerLoader serverLoader;
+    static ServerHttpSite site;
 
     /**
      * Main entry point for the server.
@@ -49,18 +58,26 @@ public class Main {
     @ApiStatus.Internal
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), () -> {
-                try {
-                    run();
-                } catch (Exception e) {
-                    throw new AssertionError(e);
-                }
-            });
+            Log.setLogger(KyroSlf4jLogger.INSTANCE);
+            com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
+
+            ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), Main::initConfig);
 
             // Invoke FabricMC entrypoint for dedicated server.
-            GamePlatform loader = GamePlatform.get();
-            loader.invokeEntrypoint(ModInit.ENTRYPOINT_KEY, ModInit.class, ModInit::onInitialize);
-            loader.invokeEntrypoint(DedicatedServerModInit.ENTRYPOINT_KEY, DedicatedServerModInit.class, DedicatedServerModInit::onInitialize);
+            FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
+            FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+
+            Thread httpThread = new Thread(() -> {
+                try {
+                    Main.site = new ServerHttpSite();
+                } catch (IOException e) {
+                    CommonConstants.LOGGER.error("Failed to start HTTP server", e);
+                }
+            });
+            httpThread.setDaemon(true);
+            httpThread.start();
+
+            ModApi.init();
 
             LanguageBootstrap.bootstrap.set((path, args1) -> server != null ? server.handleTranslation(path, args1) : path);
 
@@ -157,6 +174,8 @@ public class Main {
             Main.LOGGER.info("We will wait 10 seconds so you would be able to stop the server for configuration.");
 
             Thread thread = new Thread(Main::waitForKey);
+            thread.setDaemon(true);
+            thread.setName("WaitForKey");
             thread.start();
 
             Duration.ofSeconds(10).sleep();
@@ -165,6 +184,14 @@ public class Main {
             thread.join();
         } else {
             serverConfig.load();
+        }
+    }
+
+    private static void initConfig() {
+        try {
+            run();
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize config", e);
         }
     }
 }

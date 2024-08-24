@@ -1,0 +1,37 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-9">
+            <h1>%%SERVER_NAME%%</h1>
+            <p>%%SERVER_DESCRIPTION%%</p>
+
+            <h2>Server Status</h2>
+            <div class="accordion" id="serverStatusAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="serverStatus">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#serverStatusAccordionCollapse" aria-expanded="true"
+                            aria-controls="serverStatusAccordionCollapse">
+                            Server Status
+                        </button>
+                    </h2>
+                    <div id="serverStatusAccordionCollapse" class="accordion-collapse collapse show"
+                        aria-labelledby="serverStatus">
+                        <div class="accordion-body">
+                            %%SERVER_STATUS%%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="p">
+                <h2>Server Actions</h2>
+                <ul class="list-group">
+                    <li class="list-group-item"><a href="/console">Open Console</a></li>
+                    <li class="list-group-item"><a href="/config">Configure Server</a></li>
+                    <li class="list-group-item"><a href="/backup">Backup Server</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -48,10 +48,6 @@ java {
     withSourcesJar()
 }
 
-repositories {
-    mavenCentral()
-}
-
 configurations {
     shadow {
         transitive = false
@@ -74,6 +70,8 @@ dependencies {
     api("dev.ultreon.corelibs:text-v0:$corelibs_version")
     api("dev.ultreon.corelibs:translations-v1:$corelibs_version")
     api("dev.ultreon:ubo:$ultreon_data_version")
+
+    api("com.jagrosh:DiscordIPC:+")
 
     // LibGDX
     api("com.badlogicgames.gdx:gdx:$gdx_version")
@@ -116,6 +114,9 @@ dependencies {
 
     // json.org API
     api('org.json:json:20231013')
+
+    // OSHI
+    api("com.github.oshi:oshi-core:6.6.1")
 }
 
 processResources {
@@ -178,14 +179,16 @@ tasks.register('copyJar', Copy) {
 
 publishing {
     repositories {
-        maven {
-            url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
-            }
-            authentication {
-                header(HttpHeaderAuthentication)
+        if (hasProperty("gitLabPrivateToken")) {
+            maven {
+                url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
+                credentials(HttpHeaderCredentials) {
+                    name = "Private-Token"
+                    value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
             }
         }
     }
@@ -197,4 +200,7 @@ test {
 
 compileJava {
     options.encoding = "UTF-8"
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }

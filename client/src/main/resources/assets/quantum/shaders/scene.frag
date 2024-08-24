@@ -151,8 +151,8 @@ void main() {
 //    }
 
     vec3 light = vec3(u_globalSunlight);
-    light *= sunLight * 2 - 0.4;
-    light += (blockLight.rgb - (light * blockLight.rgb));
+//    light *= sunLight * 2 - 0.4;
+//    light += (blockLight.rgb - (light * blockLight.rgb));
 
     vec3 emissive;
     if (depth > lodThreshold) emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;

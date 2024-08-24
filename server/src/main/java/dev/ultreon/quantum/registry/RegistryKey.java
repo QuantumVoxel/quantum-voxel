@@ -1,20 +1,20 @@
 package dev.ultreon.quantum.registry;
 
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Objects;
 
 public final class RegistryKey<T> {
-    public static final RegistryKey<Registry<Registry<?>>> ROOT = new RegistryKey<>(null, new Identifier("root"));
+    public static final RegistryKey<Registry<Registry<?>>> ROOT = new RegistryKey<>(null, new NamespaceID("root"));
     private final RegistryKey<Registry<T>> parent;
-    private final Identifier element;
+    private final NamespaceID element;
 
-    public RegistryKey(RegistryKey<Registry<T>> parent, Identifier element) {
+    public RegistryKey(RegistryKey<Registry<T>> parent, NamespaceID element) {
         this.parent = parent;
         this.element = element;
     }
 
-    public static <T> RegistryKey<T> of(RegistryKey<Registry<T>> parent, Identifier element) {
+    public static <T> RegistryKey<T> of(RegistryKey<Registry<T>> parent, NamespaceID element) {
         if (element == null) throw new IllegalArgumentException("Element ID cannot be null");
         return new RegistryKey<>(parent, element);
     }
@@ -25,7 +25,7 @@ public final class RegistryKey<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Registry<?>> RegistryKey<T> registry(Identifier id) {
+    public static <T extends Registry<?>> RegistryKey<T> registry(NamespaceID id) {
         return (RegistryKey<T>) new RegistryKey<>(ROOT, id);
     }
 
@@ -53,7 +53,7 @@ public final class RegistryKey<T> {
         return parent;
     }
 
-    public Identifier element() {
+    public NamespaceID element() {
         return element;
     }
 

@@ -1,21 +1,22 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
+import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.Hit;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 public class GenericDebugPage implements DebugPage {
@@ -50,27 +51,27 @@ public class GenericDebugPage implements DebugPage {
             Player player = client.player;
             if (player != null) {
                 context.left("Player");
-                BlockPos blockPosition = player.getBlockPos();
-                Vec3i sectionPos = context.block2sectionPos(blockPosition);
-                @Nullable ClientChunkAccess chunk = world.getChunkAt(blockPosition);
-                BlockPos localBlockPos = World.toLocalBlockPos(blockPosition);
+                BlockVec blockVec = player.getBlockVec();
+                Vec3i sectionPos = context.block2sectionPos(blockVec);
+                @Nullable ClientChunkAccess chunk = world.getChunkAt(blockVec);
+                BlockVec localBlockVec = blockVec.chunkLocal();
 
                 context.left("XYZ", player.getPosition())
-                        .left("Block XYZ", blockPosition)
+                        .left("Block XYZ", blockVec)
                         .left("Chunk XYZ", sectionPos)
-                        .left("Biome", Registries.BIOME.getId(world.getBiome(blockPosition)));
+                        .left("Biome", Registries.BIOME.getId(world.getBiome(blockVec)));
                 if (chunk != null) {
-                    int sunlight = chunk.getSunlight(localBlockPos.vec());
-                    int blockLight = chunk.getBlockLight(localBlockPos.vec());
+                    int sunlight = chunk.getSunlight(localBlockVec.vec());
+                    int blockLight = chunk.getBlockLight(localBlockVec.vec());
 
                     context.left("Chunk Offset", chunk.getRenderOffset())
                             .left("Sunlight", sunlight)
                             .left("Block Light", blockLight);
                 }
-                context.left("Chunk Shown", world.getChunkAt(blockPosition) != null);
-                HitResult hitResult = client.hitResult;
-                if (hitResult != null)
-                    context.left("Break Progress", world.getBreakProgress(new BlockPos(hitResult.getPos())));
+                context.left("Chunk Shown", world.getChunkAt(blockVec) != null);
+                Hit hit = client.hit;
+                if (hit != null)
+                    context.left("Break Progress", world.getBreakProgress(new BlockVec(hit.getBlockVec())));
                 context.left();
             }
 
@@ -91,11 +92,40 @@ public class GenericDebugPage implements DebugPage {
                     .left();
         }
 
-        BlockHitResult cursor = client.cursor;
+        // Queues
+        context.left();
+        context.left("Executor Sizes");
+        context.left("Client Queue", QuantumClient.get().getQueueSize());
+        if (integratedServer != null) {
+            context.left("Server Queue", integratedServer.getQueueSize());
+        }
+
+        // Chunk
+        LocalPlayer localPlayer = client.player;
+        if (world != null && localPlayer != null) {
+            ClientChunkAccess chunkAccess = world.getChunk(localPlayer.getChunkVec());
+            if (chunkAccess instanceof ClientChunk chunk) {
+                context.right();
+                context.right("Chunk");
+                context.right("Pos", chunk.getVec());
+
+                context.right();
+                context.right("Chunk Info");
+                context.right("Client Load Time", chunk.info.loadDuration);
+                context.right("Server Build Time", chunk.info.build.buildDuration);
+            }
+        }
+
+        // Cursor
+        BlockHit cursor = client.cursor;
         if (cursor != null && cursor.isCollide()) {
-            BlockProperties block = cursor.getBlockMeta();
+            BlockState block = cursor.getBlockMeta();
             if (block != null && !block.isAir()) {
-                context.right("Block", block);
+                context.right();
+                context.right("Cursor");
+                context.right("Block", block.getBlock().getId());
+                context.right("Pos", cursor.getBlockVec());
+                context.right("Next", cursor.getNext());
             }
         }
     }

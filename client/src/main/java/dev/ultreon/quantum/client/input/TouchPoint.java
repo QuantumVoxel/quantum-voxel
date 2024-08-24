@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.input;
 
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.quantum.util.Vec2i;
 
 import java.util.Objects;
 

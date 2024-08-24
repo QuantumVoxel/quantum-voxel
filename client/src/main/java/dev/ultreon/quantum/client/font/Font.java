@@ -6,17 +6,15 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.text.*;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.Color;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,19 +26,19 @@ public class Font implements Disposable {
     public static final Font DEFAULT = new Font(id("default"));
     @SuppressWarnings("GDXJavaStaticResource")
     static final BitmapFont UNIFONT = QuantumClient.get().unifont;
-    static final Map<Identifier, Font> registry = new LinkedHashMap<>();
+    static final Map<NamespaceID, Font> registry = new LinkedHashMap<>();
     BitmapFont bitmapFont;
     public int lineHeight;
     private final boolean special;
-    private final Identifier id;
+    private final NamespaceID id;
     private final com.badlogic.gdx.graphics.Color color = new com.badlogic.gdx.graphics.Color();
     private GlyphLayout glyphLayout = new GlyphLayout();
 
-    public Font(Identifier id) {
+    public Font(NamespaceID id) {
         this(id, false);
     }
 
-    public Font(Identifier id, boolean special) {
+    public Font(NamespaceID id, boolean special) {
         this.id = id;
         this.special = special;
 
@@ -196,13 +194,18 @@ public class Font implements Disposable {
         Font.UNIFONT.setColor(gdx);
     }
 
+    public void setColor(com.badlogic.gdx.graphics.Color color) {
+        this.bitmapFont.setColor(color);
+        Font.UNIFONT.setColor(color);
+    }
+
     public int width(TextObject text) {
         float width = 0;
 
         for (TextPart child : text.bake()) {
             if (child instanceof FontIconPart part) {
                 FontIconMap iconMap = part.map();
-                Identifier icon = iconMap.get(part.icon());
+                NamespaceID icon = iconMap.get(part.icon());
                 if (icon != null) {
                     TextureManager textureManager = QuantumClient.get().getTextureManager();
                     Texture texture = textureManager.getTexture(icon, null);

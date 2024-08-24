@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "uc_networking",
+  "name": "Ultracraft Networking",
+  "version": "0.1.0",
+  "environment": "*",
+  "description": "Improved networking API for Ultracraft",
+  "contact": {
+    "homepage": "https://xypercode.github.io",
+    "issues": "https://github.com/Ultreon/ultracraft-networking/issues",
+    "sources": "https://github.com/Ultreon/ultracraft-networking"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/uc_networking/icon.png",
+  "authors": [
+    "XyperCode"
+  ],
+  "mixins": [
+    "ultracraft-networking.mixins.json"
+  ],
+  "depends": {
+    "ultracraft": "0.1.0"
+  },
+  "entrypoints": {
+    "init": [
+      "dev.ultreon.quantapi.networking.impl.UcNetworkingMod"
+    ],
+    "uc_networking:init": [
+      "com.ultreon.craftmods.networking.test.TestNetworkEntry"
+    ]
+  }
+}

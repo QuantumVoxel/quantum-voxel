@@ -25,7 +25,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.item.Item;
@@ -35,7 +35,7 @@ import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Axis;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.CubicDirection;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,20 +57,20 @@ public class Json5ModelLoader {
     }
 
     public Json5Model load(Block block) throws IOException {
-        Identifier identifier = block.getId().mapPath(path -> "models/blocks/" + path + ".json5");
-        Resource resource = this.resourceManager.getResource(identifier);
+        NamespaceID namespaceID = block.getId().mapPath(path -> "models/blocks/" + path + ".json5");
+        Resource resource = this.resourceManager.getResource(namespaceID);
         if (resource == null)
             return null;
-        QuantumClient.LOGGER.debug("Loading block model: {}", identifier);
+        QuantumClient.LOGGER.debug("Loading block model: {}", namespaceID);
         return this.load(Registries.BLOCK.getKey(block), JSON5.parse(resource.openReader()));
     }
 
     public Json5Model load(Item item) throws IOException {
-        Identifier identifier = item.getId().mapPath(path -> "models/items/" + path + ".json5");
-        Resource resource = this.resourceManager.getResource(identifier);
+        NamespaceID namespaceID = item.getId().mapPath(path -> "models/items/" + path + ".json5");
+        Resource resource = this.resourceManager.getResource(namespaceID);
         if (resource == null)
             return null;
-        QuantumClient.LOGGER.debug("Loading item model: {}", identifier);
+        QuantumClient.LOGGER.debug("Loading item model: {}", namespaceID);
         return this.load(Registries.ITEM.getKey(item), JSON5.parse(resource.openReader()));
     }
 
@@ -82,7 +82,7 @@ public class Json5ModelLoader {
 
         Json5Object root = modelData.getAsJson5Object();
         Json5Object textures = root.getAsJson5Object("textures");
-        Map<String, Identifier> textureElements = loadTextures(textures);
+        Map<String, NamespaceID> textureElements = loadTextures(textures);
 
 //        GridPoint2 textureSize = loadVec2i(root.getAsJson5Array("texture_size"), new GridPoint2(16, 16));
         GridPoint2 textureSize = new GridPoint2(16, 16);
@@ -110,7 +110,7 @@ public class Json5ModelLoader {
     private Table<String, BlockDataEntry<?>, Json5Model> loadOverrides(RegistryKey<Block> key, Json5Object overridesJson5) {
         Table<String, BlockDataEntry<?>, Json5Model> overrides = HashBasedTable.create();
         Block block = Registries.BLOCK.get(key);
-        BlockProperties meta = block.createMeta();
+        BlockState meta = block.createMeta();
         for (Map.Entry<String, Json5Element> entry : overridesJson5.entrySet()) {
             String keyName = entry.getKey();
             Json5Element overrideElem = entry.getValue();
@@ -186,20 +186,20 @@ public class Json5ModelLoader {
         return faceElems;
     }
 
-    private Map<String, Identifier> loadTextures(Json5Object textures) {
-        Map<String, Identifier> textureElements = new HashMap<>();
+    private Map<String, NamespaceID> loadTextures(Json5Object textures) {
+        Map<String, NamespaceID> textureElements = new HashMap<>();
 
         for (var entry : textures.entrySet()) {
             String name = entry.getKey();
             String stringId = entry.getValue().getAsString();
-            Identifier id = Identifier.parse(stringId).mapPath(path -> "textures/" + path + ".png");
+            NamespaceID id = NamespaceID.parse(stringId).mapPath(path -> "textures/" + path + ".png");
             textureElements.put(name, id);
         }
 
         return textureElements;
     }
 
-    public BlockModel load(RegistryKey<?> key, Identifier id) {
+    public BlockModel load(RegistryKey<?> key, NamespaceID id) {
         Resource resource = this.resourceManager.getResource(id.mapPath(path -> "models/" + path + ".json5"));
         if (resource != null) {
             return this.load(key, resource.loadJson5());
@@ -360,7 +360,7 @@ public class Json5ModelLoader {
                 this.to = to;
             }
 
-            public void bake(int idx, ModelBuilder modelBuilder, Map<String, Identifier> textureElements) {
+            public void bake(int idx, ModelBuilder modelBuilder, Map<String, NamespaceID> textureElements) {
                 Vector3 from = this.from();
                 Vector3 to = this.to();
 
@@ -376,11 +376,11 @@ public class Json5ModelLoader {
                     CubicDirection cubicDirection = entry.getKey();
                     FaceElement faceElement = entry.getValue();
                     String texRef = faceElement.texture;
-                    Identifier texture;
+                    NamespaceID texture;
 
-                    if (texRef.equals("#missing")) texture = new Identifier("textures/block/error.png");
+                    if (texRef.equals("#missing")) texture = new NamespaceID("textures/block/error.png");
                     else if (texRef.startsWith("#")) texture = textureElements.get(texRef.substring(1));
-                    else texture = Identifier.parse(texRef).mapPath(path -> "textures/" + path + ".png");
+                    else texture = NamespaceID.parse(texRef).mapPath(path -> "textures/" + path + ".png");
 
                     meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
                     v00.setCol(Color.WHITE);

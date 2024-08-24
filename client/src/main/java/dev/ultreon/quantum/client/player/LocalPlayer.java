@@ -3,15 +3,16 @@ package dev.ultreon.quantum.client.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.util.ControllerButton;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
+import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
@@ -20,19 +21,27 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.MenuType;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.event.SoundEvents;
+import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 public class LocalPlayer extends ClientPlayer {
     private final QuantumClient client = QuantumClient.get();
@@ -41,6 +50,11 @@ public class LocalPlayer extends ClientPlayer {
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
     private final Vec3d tmp = new Vec3d();
+    private ChunkVec lastChunkVec;
+    private final Vec2i tmp2I = new Vec2i();
+    private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
+    private long lastRefresh;
+    public final Set<ChunkVec> pendingChunks = new HashSet<>();
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -59,30 +73,44 @@ public class LocalPlayer extends ClientPlayer {
         // Determine if the player is jumping based on input
         this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched() || GameInput.isControllerButtonDown(ControllerButton.A));
 
+
+        var connection = this.client.connection;
+        if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
+            if (connection != null) {
+                connection.send(new C2SPlayerMoveAndRotatePacket(this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot));
+            }
+        }
         // Call the superclass tick method
         super.tick();
 
         // Send a packet when the selected item changes
         if (this.selected != this.oldSelected) {
-            if (this.client.connection != null)
-                this.client.connection.send(new C2SHotbarIndexPacket(this.selected));
+            if (connection != null)
+                connection.send(new C2SHotbarIndexPacket(this.selected));
             this.oldSelected = this.selected;
         }
 
-
         // Handle player movement if there is a significant change in position
-        if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
-            double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
-            if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime()) {
-                this.client.playSound(SoundEvents.WALK, 1.0F);
-                this.lastWalkSound = this.client.getGameTime();
-            }
-            this.handleMove();
+        if (this.world.getChunk(this.getChunkVec()) == null && !this.isSpectator()) {
+            this.x = this.ox;
+            this.y = this.oy;
+            this.z = this.oz;
+
+            this.refreshChunks();
         } else {
-            // Update previous position if no significant change
-            this.ox = this.x;
-            this.oy = this.y;
-            this.oz = this.z;
+            if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
+                double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
+                if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime() && !this.isSpectator()) {
+                    this.client.playSound(SoundEvents.WALK, 1.0F);
+                    this.lastWalkSound = this.client.getGameTime();
+                }
+                this.handleMove();
+            } else {
+                // Update previous position if no significant change
+                this.ox = this.x;
+                this.oy = this.y;
+                this.oz = this.z;
+            }
         }
     }
 
@@ -92,13 +120,80 @@ public class LocalPlayer extends ClientPlayer {
      */
     private void handleMove() {
         // Send the player's new coordinates to the server
-        if (this.client.connection != null)
-            this.client.connection.send(new C2SPlayerMovePacket(this.x, this.y, this.z));
+        if (this.client.connection != null) {
+            if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
+                this.client.connection.send(new C2SPlayerMoveAndRotatePacket(this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot));
+            } else {
+                this.client.connection.send(new C2SPlayerMovePacket(this.x, this.y, this.z));
+            }
+        }
 
         // Update the old coordinates to the current ones
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
+
+        this.refreshChunks();
+        this.lastChunkVec = this.getChunkVec();
+    }
+
+    private void refreshChunks() {
+        if (!this.client.renderWorld) return;
+        if (lastRefresh + 1000 > System.currentTimeMillis()) return;
+        lastRefresh = System.currentTimeMillis();
+
+        IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
+        ChunkVec chunkVec = this.getChunkVec();
+
+        if (connection == null) return;
+        int renderDistance = ClientConfig.renderDistance;
+
+        for (ClientChunkAccess chunk : this.world.getLoadedChunks()) {
+            if (chunk.getVec().dst(chunkVec) > renderDistance) {
+                this.unloadChunk(chunk);
+            }
+        }
+
+        Set<ChunkVec> chunksToLoad = this.chunksToLoad;
+        chunksToLoad.clear();
+        ChunkVec chunkPos = this.getChunkVec();
+        for (int x = -renderDistance; x <= renderDistance; x++) {
+            for (int y = -renderDistance; y <= renderDistance; y++) {
+                for (int z = -renderDistance; z <= renderDistance; z++) {
+                    ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
+                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null) continue;
+                    if (chunkPos.dst(relativePos) <= renderDistance && !this.world.isLoaded(relativePos)) {
+                        chunksToLoad.add(relativePos);
+                    }
+                }
+            }
+        }
+
+        if (!this.chunksToLoad.isEmpty()) {
+            Stream<ChunkVec> sorted = chunksToLoad.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
+            sorted.forEachOrdered(toLoad -> {
+                connection.send(new C2SRequestChunkLoadPacket(toLoad));
+                this.pendingChunks.add(toLoad);
+            });
+        }
+    }
+
+    @Override
+    public void setPosition(@NotNull Vec3d position) {
+        super.setPosition(position);
+
+        this.refreshChunks();
+    }
+
+    @Override
+    public void setPosition(double x, double y, double z) {
+        super.setPosition(x, y, z);
+
+        this.refreshChunks();
+    }
+
+    private void unloadChunk(ClientChunkAccess chunk) {
+        this.world.unloadChunk(chunk.getVec());
     }
 
     /**
@@ -250,7 +345,7 @@ public class LocalPlayer extends ClientPlayer {
         } else if (openedBefore == null) {
             CommonConstants.LOGGER.warn("Opened server menu {} before opening any on client side", menuType);
             if (this.world instanceof ClientWorld clientWorld) {
-                openedBefore = menuType.create(clientWorld, this, this.getBlockPos());
+                openedBefore = menuType.create(clientWorld, this, this.getBlockVec());
             }
         }
         ContainerScreen screen = MenuRegistry.getScreen(openedBefore);

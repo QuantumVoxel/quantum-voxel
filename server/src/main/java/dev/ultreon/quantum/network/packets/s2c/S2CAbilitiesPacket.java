@@ -65,4 +65,15 @@ public class S2CAbilitiesPacket extends Packet<InGameClientPacketHandler> implem
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onAbilities(this);
     }
+
+    @Override
+    public String toString() {
+        return "S2CAbilitiesPacket{" +
+                "flying=" + flying +
+                ", allowFlight=" + allowFlight +
+                ", instaMine=" + instaMine +
+                ", invincible=" + invincible +
+                ", bitSet=" + bitSet +
+                '}';
+    }
 }

@@ -23,4 +23,9 @@ public class C2SOpenInventoryPacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onOpenInventory();
     }
+
+    @Override
+    public String toString() {
+        return "C2SOpenInventoryPacket";
+    }
 }

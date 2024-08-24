@@ -253,6 +253,14 @@ public class JsLoader implements LangLoader {
         return paths.get(jsMod.getName());
     }
 
+    public boolean isModLoaded(String id) {
+        return mods.containsKey(id);
+    }
+
+    public JsMod getMod(String id) {
+        return mods.get(id);
+    }
+
     private static class JavascriptModuleFS implements FileSystem {
         private final FileSystem delegate = FileSystem.newDefaultFileSystem();
 

@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,23 +14,23 @@ import java.util.List;
 import java.util.Map;
 
 public class ShaderProviderManager implements Manager<ShaderProvider> {
-    private final Map<Identifier, ShaderProvider> shaders = new LinkedHashMap<>();
-    private final LinkedHashMap<Identifier, Supplier<? extends ShaderProvider>> shaderProviderFactories = new LinkedHashMap<>();
+    private final Map<NamespaceID, ShaderProvider> shaders = new LinkedHashMap<>();
+    private final LinkedHashMap<NamespaceID, Supplier<? extends ShaderProvider>> shaderProviderFactories = new LinkedHashMap<>();
 
     @Override
-    public ShaderProvider register(@NotNull Identifier id, @NotNull ShaderProvider shaderProvider) {
+    public ShaderProvider register(@NotNull NamespaceID id, @NotNull ShaderProvider shaderProvider) {
         this.shaders.put(id, shaderProvider);
         return shaderProvider;
     }
     
-    public <T extends ShaderProvider> Supplier<T> register(@NotNull Identifier id, @NotNull Supplier<T> factory) {
+    public <T extends ShaderProvider> Supplier<T> register(@NotNull NamespaceID id, @NotNull Supplier<T> factory) {
         Supplier<T> memoize = create(id, factory);
         this.shaderProviderFactories.put(id, memoize);
         return memoize;
     }
 
     @SafeVarargs
-    private <T extends ShaderProvider> Supplier<T> create(Identifier id, Supplier<T> create, T... typeGetter) {
+    private <T extends ShaderProvider> Supplier<T> create(NamespaceID id, Supplier<T> create, T... typeGetter) {
         @SuppressWarnings("unchecked") Class<T> clazz = (Class<T>) typeGetter.getClass().getComponentType();
         return () -> {
             if (this.shaders.containsKey(id)) {
@@ -46,7 +46,7 @@ public class ShaderProviderManager implements Manager<ShaderProvider> {
     }
 
     @Override
-    public @Nullable ShaderProvider get(Identifier id) {
+    public @Nullable ShaderProvider get(NamespaceID id) {
         ShaderProvider shaderProvider = this.shaders.get(id);
 
         if (shaderProvider == null) {

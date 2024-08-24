@@ -28,4 +28,15 @@ public class S2CTabCompletePacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onTabCompleteResult(this.options.toArray(new String[0]));
     }
+
+    public List<String> getOptions() {
+        return this.options;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CTabCompletePacket{" +
+                "options=" + options +
+                '}';
+    }
 }

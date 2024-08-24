@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
-import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.network.PacketContext;
@@ -9,6 +7,8 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.ubo.types.MapType;
 
 public class S2CAddEntityPacket extends Packet<InGameClientPacketHandler> {
     private final int id;
@@ -45,5 +45,31 @@ public class S2CAddEntityPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onAddEntity(this.id, this.type, this.position, this.pipeline);
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public EntityType<?> getType() {
+        return this.type;
+    }
+
+    public Vec3d getPosition() {
+        return this.position;
+    }
+
+    public MapType getPipeline() {
+        return this.pipeline;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CAddEntityPacket{" +
+                "id=" + id +
+                ", type=" + type +
+                ", position=" + position +
+                ", pipeline=" + pipeline +
+                '}';
     }
 }

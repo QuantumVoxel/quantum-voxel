@@ -2,19 +2,20 @@ package dev.ultreon.quantum.network;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.partial.PartialPacket;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.ubo.DataTypeRegistry;
 import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.libs.commons.v0.tuple.Pair;
-import dev.ultreon.libs.commons.v0.util.EnumUtils;
-import dev.ultreon.libs.commons.v0.vector.*;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -30,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class PacketIO {
@@ -75,7 +75,7 @@ public class PacketIO {
     public final List<ByteBuf> validate(List<PartialPacket> parts) throws PacketIntegrityException {
         List<ByteBuf> bufs = new ArrayList<>();
         int dataOffsetCheck = 0;
-        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).collect(Collectors.toList())) {
+        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).toList()) {
             if (dataOffsetCheck != partialPacket.dataOffset()) throw new PacketIntegrityException("Packet data offset mismatch. Expected " + dataOffsetCheck + " but got " + partialPacket.dataOffset());
             bufs.add(partialPacket.data());
             dataOffsetCheck += partialPacket.data().readableBytes();
@@ -85,7 +85,7 @@ public class PacketIO {
 
     public String readString(int max) {
         if (max < 0) throw new IllegalArgumentException(CommonConstants.EX_INVALID_DATA);
-        int len = this.readVarInt();
+        int len = this.readShort();
         if (len > max) throw new PacketOverflowException("string", len, max);
         byte[] bytes = new byte[len];
         this.readBytes0(bytes);
@@ -97,7 +97,7 @@ public class PacketIO {
         if (max < 0) throw new IllegalArgumentException(CommonConstants.EX_INVALID_DATA);
         byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > max) throw new PacketOverflowException("string", bytes.length, max);
-        this.writeVarInt(bytes.length);
+        this.writeShort(bytes.length);
         this.writeBytes0(bytes);
         return this;
     }
@@ -126,15 +126,15 @@ public class PacketIO {
         this.writeBytes0(array);
     }
 
-    public Identifier readId() {
+    public NamespaceID readId() {
         var location = this.readString(100);
         var path = this.readString(200);
-        return new Identifier(location, path);
+        return new NamespaceID(location, path);
     }
 
-    public void writeId(Identifier id) {
-        this.writeUTF(id.namespace(), 100);
-        this.writeUTF(id.path(), 200);
+    public void writeId(NamespaceID id) {
+        this.writeUTF(id.getDomain(), 100);
+        this.writeUTF(id.getPath(), 200);
     }
 
     public byte readByte() {
@@ -483,38 +483,40 @@ public class PacketIO {
         }
     }
 
-    public BlockPos readBlockPos() {
+    public BlockVec readBlockVec() {
         int x = this.readInt();
         int y = this.readInt();
         int z = this.readInt();
 
-        return new BlockPos(x, y, z);
+        return new BlockVec(x, y, z, this.readEnum(BlockVecSpace.WORLD));
     }
 
     @CanIgnoreReturnValue
-    public PacketIO writeBlockPos(BlockPos pos) {
-        try {
-            this.output.writeInt(pos.x());
-            this.output.writeInt(pos.y());
-            this.output.writeInt(pos.z());
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+    public PacketIO writeBlockVec(BlockVec pos) {
+        this.writeInt(pos.getIntX());
+        this.writeInt(pos.getIntY());
+        this.writeInt(pos.getIntZ());
+        this.writeEnum(pos.getSpace());
         return this;
     }
 
-    public ChunkPos readChunkPos() {
+    public ChunkVec readChunkVec() {
         int x = this.readInt();
+        int y = this.readInt();
         int z = this.readInt();
+        ChunkVecSpace space = this.readEnum(ChunkVecSpace.WORLD);
 
-        return new ChunkPos(x, z);
+        return new ChunkVec(x, y, z, space);
     }
 
     @CanIgnoreReturnValue
-    public PacketIO writeChunkPos(ChunkPos pos) {
+    public PacketIO writeChunkVec(ChunkVec pos) {
         try {
-            this.output.writeInt(pos.x());
-            this.output.writeInt(pos.z());
+            this.output.writeInt(pos.getIntX());
+            this.output.writeInt(pos.getIntY());
+            this.output.writeInt(pos.getIntZ());
+
+            this.writeEnum(pos.getSpace());
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -1137,14 +1139,18 @@ public class PacketIO {
     }
 
     public <T extends Enum<T>> T readEnum(T fallback) {
-        return EnumUtils.byOrdinal(this.readVarInt(), fallback);
+        return EnumUtils.byOrdinal(this.readByte(), fallback);
     }
 
-    public BlockProperties readBlockMeta() {
-        return BlockProperties.read(this);
+    public void writeEnum(Enum<?> value) {
+        this.writeByte(value.ordinal());
     }
 
-    public void writeBlockMeta(BlockProperties blockMeta) {
+    public BlockState readBlockMeta() {
+        return BlockState.read(this);
+    }
+
+    public void writeBlockMeta(BlockState blockMeta) {
         blockMeta.write(this);
     }
 

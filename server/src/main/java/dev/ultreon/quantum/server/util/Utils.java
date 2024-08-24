@@ -1,11 +1,10 @@
 package dev.ultreon.quantum.server.util;
 
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -23,17 +22,8 @@ public class Utils {
         return object;
     }
 
-    public static ChunkPos chunkPosFromBlockCoords(Vec3d pos) {
-        return new ChunkPos(Math.floorDiv((int) pos.x, World.CHUNK_SIZE), Math.floorDiv((int) pos.z, World.CHUNK_SIZE));
-    }
-
-    @Deprecated
-    public static ChunkPos chunkPosFromBlockCoords(Vec3i pos) {
-        return new ChunkPos(Math.floorDiv(pos.x, World.CHUNK_SIZE), Math.floorDiv(pos.z, World.CHUNK_SIZE));
-    }
-
-    public static ChunkPos toChunkPos(BlockPos pos) {
-        return new ChunkPos(Math.floorDiv(pos.x(), World.CHUNK_SIZE), Math.floorDiv(pos.z(), World.CHUNK_SIZE));
+    public static ChunkVec ChunkVecFromBlockCoords(Vec3d pos) {
+        return new BlockVec((int)pos.x, (int)pos.y, (int)pos.z, BlockVecSpace.CHUNK).chunk();
     }
 
     public static int normalizeToInt(byte b) {

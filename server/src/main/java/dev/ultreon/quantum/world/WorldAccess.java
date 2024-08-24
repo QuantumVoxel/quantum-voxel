@@ -3,19 +3,16 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.util.WorldRayCaster;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -26,54 +23,60 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface WorldAccess extends Disposable, WorldReader {
-    boolean unloadChunk(@NotNull ChunkPos chunkPos);
+    boolean unloadChunk(@NotNull ChunkVec chunkVec);
 
-    boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkPos pos);
+    boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
 
-    boolean set(BlockPos pos, BlockProperties block);
+    boolean set(BlockVec pos, BlockState block);
 
-    boolean set(int x, int y, int z, BlockProperties block);
+    boolean set(int x, int y, int z, BlockState block);
 
     Array<Entity> getEntities();
 
-    boolean set(int x, int y, int z, BlockProperties block, int flags);
+    boolean set(int x, int y, int z, BlockState block, int flags);
 
-    boolean set(BlockPos pos, BlockProperties block, int flags);
+    boolean set(BlockVec pos, BlockState block, int flags);
 
-    default void destroy(@NotNull BlockPos pos) {
-        destroy(pos.x(), pos.y(), pos.z());
+    default void destroy(@NotNull BlockVec pos) {
+        destroy(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     default void destroy(int x, int y, int z) {
-        set(x, y, z, BlockProperties.AIR, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.DESTROY);
+        set(x, y, z, BlockState.AIR, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.DESTROY);
     }
 
-    ChunkAccess getChunkAt(@NotNull BlockPos pos);
+    ChunkAccess getChunkAt(@NotNull BlockVec pos);
 
     @Nullable
-    ChunkAccess getChunk(ChunkPos pos);
+    ChunkAccess getChunk(ChunkVec pos);
 
-    ChunkAccess getChunk(int x, int z);
+    ChunkAccess getChunk(int x, int y, int z);
 
     ChunkAccess getChunkAt(int x, int y, int z);
 
-    boolean isOutOfWorldBounds(BlockPos pos);
+    boolean isOutOfWorldBounds(BlockVec pos);
 
     boolean isOutOfWorldBounds(int x, int y, int z);
 
-    int getHighest(int x, int z);
+    default int getHeight(int x, int z) {
+        return getHeight(x, z, HeightmapType.WORLD_SURFACE);
+    }
 
-    void setColumn(int x, int z, BlockProperties block);
+    int getHeight(int x, int z, HeightmapType type);
 
-    void setColumn(int x, int z, int maxY, BlockProperties block);
+    Heightmap heightMapAt(int x, int z, HeightmapType type);
 
-    CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockProperties block);
+    void setColumn(int x, int z, BlockState block);
+
+    void setColumn(int x, int z, int maxY, BlockState block);
+
+    CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block);
 
     Collection<? extends ChunkAccess> getLoadedChunks();
 
-    void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
+    void setBlockEntity(BlockVec pos, BlockEntity blockEntity);
 
-    BlockEntity getBlockEntity(BlockPos pos);
+    BlockEntity getBlockEntity(BlockVec pos);
 
     void drop(ItemStack itemStack, Vec3d position);
 
@@ -85,7 +88,7 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
 
-    boolean destroyBlock(BlockPos breaking, @Nullable Player breaker);
+    boolean destroyBlock(BlockVec breaking, @Nullable Player breaker);
 
     int getBlockLight(int x, int y, int z);
 
@@ -101,8 +104,8 @@ public interface WorldAccess extends Disposable, WorldReader {
      * @return the result
      */
     @NotNull
-    default BlockHitResult rayCast(Ray ray) {
-        return WorldRayCaster.rayCast(new BlockHitResult(ray), this);
+    default BlockHit rayCast(Ray ray) {
+        return WorldRayCaster.rayCast(new BlockHit(ray), this);
     }
 
     void tick();
@@ -123,7 +126,7 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean isServerSide();
 
-    Biome getBiome(BlockPos pos);
+    Biome getBiome(BlockVec pos);
 
     DimensionInfo getDimension();
 
@@ -145,21 +148,21 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     void despawn(Entity entity);
 
-    void startBreaking(BlockPos breaking, Player breaker);
+    void startBreaking(BlockVec breaking, Player breaker);
 
-    BreakResult continueBreaking(BlockPos breaking, float amount, Player breaker);
+    BreakResult continueBreaking(BlockVec breaking, float amount, Player breaker);
 
-    void stopBreaking(BlockPos breaking, Player breaker);
+    void stopBreaking(BlockVec breaking, Player breaker);
 
-    float getBreakProgress(BlockPos pos);
+    float getBreakProgress(BlockVec pos);
 
     long getSeed();
 
     void setSpawnPoint(int spawnX, int spawnZ);
 
-    boolean isSpawnChunk(ChunkPos pos);
+    boolean isSpawnChunk(ChunkVec pos);
 
-    BlockPos getSpawnPoint();
+    BlockVec getSpawnPoint();
 
     int getChunksLoaded();
 

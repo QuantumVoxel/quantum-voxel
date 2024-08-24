@@ -10,15 +10,15 @@ import com.badlogic.gdx.math.Vector3;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3f;
-import dev.ultreon.libs.commons.v0.vector.Vec4f;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec3f;
+import dev.ultreon.quantum.util.Vec4f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.ModelImporter;
 import dev.ultreon.quantum.client.model.blockbench.anim.*;
 import dev.ultreon.quantum.resources.Resource;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.world.CubicDirection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,17 +39,17 @@ public class BBModelLoader implements ModelImporter {
     private final Vec3f visibleBox;
     private final Vec2f resolution;
     private final List<BBModelElement> elements;
-    private final Identifier id;
+    private final NamespaceID id;
     private final BBModelOutliner outliner;
     private final List<BBAnimation> animations;
     private final List<BBTexture> textures;
     private Model model;
 
-    public BBModelLoader(Identifier id) {
+    public BBModelLoader(NamespaceID id) {
         this(id, BBModelLoader.getResource(id));
     }
 
-    public BBModelLoader(Identifier id, Resource resource) {
+    public BBModelLoader(NamespaceID id, Resource resource) {
         this.id = id;
 
         JsonObject jsonObject = resource.loadJson(JsonObject.class);
@@ -71,7 +71,7 @@ public class BBModelLoader implements ModelImporter {
         this.animations = loadAnimations(animations1);
     }
 
-    private static @NotNull Resource getResource(Identifier id) {
+    private static @NotNull Resource getResource(NamespaceID id) {
         QuantumClient client = QuantumClient.get();
         Resource resource = client.getResourceManager().getResource(id);
         if (resource == null) {
@@ -441,7 +441,7 @@ public class BBModelLoader implements ModelImporter {
         return elements;
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return id;
     }
 

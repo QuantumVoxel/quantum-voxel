@@ -4,13 +4,13 @@ import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MenuRegistry {
-    private static final Map<Identifier, ScreenBuilder<?>> REGISTRY = new HashMap<>();
+    private static final Map<NamespaceID, ScreenBuilder<?>> REGISTRY = new HashMap<>();
 
     public static <T extends ContainerMenu> void registerScreen(MenuType<T> menu, ScreenBuilder<T> builder) {
         MenuRegistry.REGISTRY.put(menu.getId(), builder);

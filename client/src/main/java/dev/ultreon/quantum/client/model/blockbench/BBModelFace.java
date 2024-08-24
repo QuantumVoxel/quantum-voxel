@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.model.blockbench;
 
-import dev.ultreon.libs.commons.v0.vector.Vec4f;
+import dev.ultreon.quantum.util.Vec4f;
 import dev.ultreon.quantum.world.CubicDirection;
 
 import java.util.Objects;

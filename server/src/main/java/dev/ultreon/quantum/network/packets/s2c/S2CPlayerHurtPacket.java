@@ -6,7 +6,7 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
     private final float damage;
@@ -28,9 +28,9 @@ public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
 
     @Override
     public void toBytes(PacketIO buffer) {
-        Identifier type = this.source.getType();
+        NamespaceID type = this.source.getType();
         buffer.writeFloat(this.damage);
-        buffer.writeId(type == null ? new Identifier("none") : type);
+        buffer.writeId(type == null ? new NamespaceID("none") : type);
     }
 
     @Override
@@ -44,5 +44,13 @@ public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
 
     public DamageSource getSource() {
         return this.source;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CPlayerHurtPacket{" +
+                "damage=" + this.damage +
+                ", source=" + this.source +
+                '}';
     }
 }

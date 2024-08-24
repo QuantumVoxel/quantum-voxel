@@ -121,7 +121,13 @@ public class QuantumVxlGameProvider implements GameProvider {
                 // Creating a BuiltinMod for LibGDX
                 new BuiltinMod(List.of(this.libGdxJar), new BuiltinModMetadata.Builder("gdx", this.versions.getProperty("gdx"))
                         .setName("LibGDX")
-                        .setDescription("A game framework used by Quantum Voxel (and various other games).")
+                        .setDescription("""
+                                LibGDX is a Java game development framework for
+                                 creating games across multiple platforms.
+                                It simplifies the development process with
+                                 cross-platform capabilities, high-performance rendering,
+                                 and a large community.
+                                """)
                         .addLicense("Apache-2.0")
                         .addAuthor("libGDX", Map.of("homepage", "http://www.libgdx.com/", "patreon", "https://patreon.com/libgdx", "github", "https://github.com/libgdx", "sources", "https://github.com/libgdx/libgdx"))
                         .addAuthor("Mario Zechner", Map.of("github", "https://github.com/badlogic", "email", "badlogicgames@gmail.com"))
@@ -137,7 +143,12 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .addIcon(128, "assets/craft/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
                         .setContact(new ContactInformationImpl(Map.of("sources", "https://github.con/Ultreon/quantum-voxel", "email", "contact.ultreon@gmail.com", "discord", "https://discord.gg/sQsU7sE2Sx")))
-                        .setDescription("It's the game you are now playing.")
+                        .setDescription("""
+                                A blocky, voxel-based world where you can explore,
+                                 build, and survive in a vast and ever-changing environment.
+                                Inspired by the best of the voxel game genre.
+                                
+                                It's also the game that you're playing right now!""")
                         .setName("Quantum Voxel")
                         .build())
         );
@@ -222,9 +233,14 @@ public class QuantumVxlGameProvider implements GameProvider {
             if (commonGameJarDeclared) {
                 classifier.process(clientJar);
             }
+            List<Exception> suppressedExceptions = new ArrayList<>();
 
             // Process the launcher class path
             classifier.process(launcher.getClassPath());
+
+            for (Path path : launcher.getClassPath()) {
+                System.out.println(path);
+            }
 
             // Get the client and server jars from the classifier
             clientJar = classifier.getOrigin(GameLibrary.QUANTUM_VXL_CLIENT);
@@ -234,20 +250,38 @@ public class QuantumVxlGameProvider implements GameProvider {
             // Warn if the common game jar didn't contain any of the expected classes
             if (commonGameJarDeclared && clientJar == null) {
                 Log.warn(LogCategory.GAME_PROVIDER, "The declared common game jar didn't contain any of the expected classes!");
+                suppressedExceptions.add(new FormattedException("The declared common game jar didn't contain any of the expected classes!", "The declared common game jar didn't contain any of the expected classes!"));
             }
 
             // Add the client and server jars to the game jars list
             if (clientJar != null) {
                 this.gameJars.add(clientJar);
+            } else {
+                suppressedExceptions.add(new FormattedException("No client jar found", "No client jar found for Quantum Voxel"));
             }
             if (serverJar != null) {
                 this.gameJars.add(serverJar);
+            } else {
+                suppressedExceptions.add(new FormattedException("No server jar found", "No server jar found for Quantum Voxel"));
             }
             if (this.libGdxJar != null) {
                 this.gameJars.add(this.libGdxJar);
+            } else {
+                suppressedExceptions.add(new FormattedException("No libgdx jar found", "No libgdx jar found for Quantum Voxel"));
             }
 
-            // Get the entry point class name from the classifier
+            if (this.gameJars.isEmpty()) {
+                if (!suppressedExceptions.isEmpty()) {
+                    FormattedException noGameJarFound = new FormattedException("No game jar found", "No game jar found for Quantum Voxel");
+
+                    for (Exception e : suppressedExceptions) {
+                        noGameJarFound.addSuppressed(e);
+                    }
+                    throw noGameJarFound;
+                }
+                throw new FormattedException("No game jar found", "No game jar found for Quantum Voxel");
+            }
+
             // Get the entry point class name from the classifier
             this.entrypoint = classifier.getClassName(clientLib);
             if (this.entrypoint == null) {
@@ -289,7 +323,7 @@ public class QuantumVxlGameProvider implements GameProvider {
         // Expose game jar locations to the FabricLoader share
         var share = FabricLoaderImpl.INSTANCE.getObjectShare();
 
-        share.put("fabric-loader:inputGameJar", this.gameJars.get(0));
+        share.put("fabric-loader:inputGameJar", this.gameJars.getFirst());
         share.put("fabric-loader:inputGameJars", this.gameJars);
 
         return true;

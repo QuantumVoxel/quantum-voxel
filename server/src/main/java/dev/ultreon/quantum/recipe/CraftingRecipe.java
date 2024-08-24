@@ -5,7 +5,7 @@ import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public final class CraftingRecipe implements Recipe {
         return RecipeType.CRAFTING;
     }
 
-    public static CraftingRecipe deserialize(Identifier identifier, Json5Object object) {
+    public static CraftingRecipe deserialize(NamespaceID namespaceID, Json5Object object) {
         List<ItemStack> ingredients = new ArrayList<>();
 
         for (Json5Element json5Element : object.getAsJson5Array("ingredients")) {

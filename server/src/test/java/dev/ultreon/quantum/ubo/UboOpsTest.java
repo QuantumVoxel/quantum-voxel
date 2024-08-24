@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +14,8 @@ class UboOpsTest {
     record TestStruct(int a, int b) {}
 
     @Test
-    void test() {
+    @DisplayName("Codec test")
+    void codecTest() {
         UboOps ops = new UboOps();
         Codec<TestStruct> codec = RecordCodecBuilder.create(instance -> instance
                 .group(

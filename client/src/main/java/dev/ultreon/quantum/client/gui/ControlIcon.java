@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui;
 
 import dev.ultreon.quantum.client.gui.icon.Icon;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public enum ControlIcon implements Icon {
     Close(0, 0),
@@ -18,8 +18,8 @@ public enum ControlIcon implements Icon {
     }
 
     @Override
-    public Identifier id() {
-        return new Identifier("textures/gui/control_icons.png");
+    public NamespaceID id() {
+        return new NamespaceID("textures/gui/control_icons.png");
     }
 
     @Override

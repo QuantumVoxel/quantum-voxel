@@ -1,15 +1,15 @@
 package dev.ultreon.quantum.network.api;
 
-import dev.ultreon.quantum.util.Identifier;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class NetworkManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkManager.class);
-    private static final Map<Identifier, Network> NETWORKS = new HashMap<>();
+    private static final Map<NamespaceID, Network> NETWORKS = new HashMap<>();
 
     public static void registerNetwork(Network network) {
         if (NetworkManager.NETWORKS.containsKey(network.getId())) {

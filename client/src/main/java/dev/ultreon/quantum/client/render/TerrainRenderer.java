@@ -1,15 +1,16 @@
 package dev.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.Skybox;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.resources.ReloadContext;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,9 +19,11 @@ public interface TerrainRenderer extends Disposable {
 
     void free(ClientChunkAccess chunk);
 
-    void render(RenderLayer renderLayer, float deltaTime);
+    void renderBackground(ModelBatch batch, float deltaTime);
 
-    void collectEntity(Entity entity, RenderLayer renderLayer);
+    void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime);
+
+    void collectEntity(Entity entity, ModelBatch batch);
 
     int getLoadedChunksCount();
 
@@ -48,4 +51,6 @@ public interface TerrainRenderer extends Disposable {
     }
 
     int getVisibleChunks();
+
+    void reloadChunks();
 }

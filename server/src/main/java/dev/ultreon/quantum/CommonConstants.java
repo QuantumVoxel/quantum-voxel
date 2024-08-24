@@ -5,7 +5,7 @@ import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Options;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class CommonConstants {
     public static final String EX_NOT_ON_RENDER_THREAD = "Current thread is not the rendering thread.";
@@ -30,7 +30,7 @@ public class CommonConstants {
             .quoteless()
             .build();
     public static final int MAX_BLOCK_REGISTRY = 128;
-    public static final Identifier DEFAULT_FONT = new Identifier("quantium");
+    public static final NamespaceID DEFAULT_FONT = new NamespaceID("quantium");
 
     private CommonConstants() {
 
@@ -42,7 +42,7 @@ public class CommonConstants {
         return NAMESPACE + ":" + outlineCursor;
     }
 
-    public static Identifier id(String path) {
-        return new Identifier(NAMESPACE, path);
+    public static NamespaceID id(String path) {
+        return new NamespaceID(NAMESPACE, path);
     }
 }

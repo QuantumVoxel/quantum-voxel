@@ -61,9 +61,7 @@ public class MainRenderNode extends RenderNode {
                 render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
             });
         } else {
-            this.client.renderer.blurred(0, ClientConfig.blurRadius * 0, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
-            });
+            render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
         }
 
         // Disable blending and end rendering
@@ -116,7 +114,7 @@ public class MainRenderNode extends RenderNode {
 
     private void drawDiffuse(Texture diffuseTexture) {
         this.client.spriteBatch.setShader(null);
-        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        if (diffuseTexture != null) this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override

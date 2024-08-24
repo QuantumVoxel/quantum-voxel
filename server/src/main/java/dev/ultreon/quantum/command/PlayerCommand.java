@@ -12,10 +12,11 @@ public class PlayerCommand extends Command {
     public PlayerCommand() {
         this.requirePermission("quantum.commands.kill");
         this.setCategory(CommandCategory.TELEPORT);
+
         this.data().aliases("player", "person");
     }
 
-    @DefineCommand("dump-data <player>")
+    @DefineCommand("<player> dump-data")
     public @Nullable CommandResult executeDumpData(CommandSender sender, CommandContext commandContext, String alias, Player player) {
         MapType save = player.save(new MapType());
 
@@ -23,5 +24,10 @@ public class PlayerCommand extends Command {
         sender.sendMessage(TextObject.translation("quantum.commands.player.dumpData.success").append(formatted));
 
         return null;
+    }
+
+    @DefineCommand("<player>")
+    public @Nullable CommandResult executeVar(CommandSender sender, CommandContext commandContext, String alias, Player player) {
+        return objectResult(player);
     }
 }

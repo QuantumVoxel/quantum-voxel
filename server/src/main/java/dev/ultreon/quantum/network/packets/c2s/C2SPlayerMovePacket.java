@@ -33,4 +33,20 @@ public class C2SPlayerMovePacket extends Packet<InGameServerPacketHandler> {
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onPlayerMove(ctx.requirePlayer(), this.x, this.y, this.z);
     }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
+    public static C2SPlayerMovePacket read(PacketIO buffer) {
+        return new C2SPlayerMovePacket(buffer);
+    }
 }

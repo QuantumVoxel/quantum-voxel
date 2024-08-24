@@ -2,18 +2,17 @@ package dev.ultreon.quantum.client.sound;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
-import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.SoundEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 
 public class ClientSoundRegistry {
-    private Map<Identifier, Sound> soundMap = Collections.emptyMap();
+    private Map<NamespaceID, Sound> soundMap = Collections.emptyMap();
 
     public ClientSoundRegistry() {
 
@@ -22,10 +21,10 @@ public class ClientSoundRegistry {
     @ApiStatus.Internal
     public void registerSounds() {
         Registry<SoundEvent> soundEvents = Registries.SOUND_EVENT;
-        Map<Identifier, Sound> soundMap = new HashMap<>();
+        Map<NamespaceID, Sound> soundMap = new HashMap<>();
         for (Map.Entry<RegistryKey<SoundEvent>, SoundEvent> entry : soundEvents.entries()) {
-            Identifier key = entry.getKey().element();
-            Sound sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", key.namespace(), key.path().replaceAll("\\.", "/"))));
+            NamespaceID key = entry.getKey().element();
+            Sound sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", key.getDomain(), key.getPath().replaceAll("\\.", "/"))));
 
             soundMap.put(key, sound);
         }
@@ -33,7 +32,7 @@ public class ClientSoundRegistry {
         this.soundMap = soundMap;
     }
 
-    public Sound getSound(Identifier id) {
+    public Sound getSound(NamespaceID id) {
         return this.soundMap.get(id);
     }
 

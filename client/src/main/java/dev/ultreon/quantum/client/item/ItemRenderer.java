@@ -2,16 +2,18 @@ package dev.ultreon.quantum.client.item;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.util.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
@@ -26,8 +28,9 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -50,7 +53,7 @@ public class ItemRenderer implements Disposable {
     protected final Vector3 tmp = new Vector3();
     private final Map<Item, ItemModel> models = new HashMap<>();
     private final Map<Item, ModelInstance> modelsInstances = new HashMap<>();
-    private Cache<BlockProperties, ModelInstance> blockModelCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
+    private Cache<BlockState, ModelInstance> blockModelCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
 
     public ItemRenderer(QuantumClient client) {
         this.client = client;
@@ -84,7 +87,7 @@ public class ItemRenderer implements Disposable {
             return;
         }
 
-        Identifier curKey = Registries.ITEM.getId(item);
+        NamespaceID curKey = Registries.ITEM.getId(item);
         if (curKey == null) {
             renderer.blitColor(RgbColor.WHITE);
             renderer.blit((TextureRegion) null, x, y, 16, 16);
@@ -116,7 +119,7 @@ public class ItemRenderer implements Disposable {
         }
     }
 
-    private void renderBlockItem(Item item, BlockProperties block, Renderer renderer, int x, int y) {
+    private void renderBlockItem(Item item, BlockState block, Renderer renderer, int x, int y) {
         renderer.external(() -> {
             float guiScale = this.client.getGuiScale();
             this.itemCam.zoom = 4.0f / guiScale;
@@ -155,14 +158,14 @@ public class ItemRenderer implements Disposable {
         });
     }
 
-    private void renderCustomBlock(Item item, BlockProperties block, Renderer renderer, int x, int y) {
+    private void renderCustomBlock(Item item, BlockState block, Renderer renderer, int x, int y) {
         ModelInstance modelInstance = new ModelInstance(getModel(block));
         this.modelsInstances.put(item, modelInstance);
 
         renderModel(modelInstance, models.get(item), renderer, x, y);
     }
 
-    private static Model getModel(BlockProperties block) {
+    private static Model getModel(BlockState block) {
         BlockModel blockModel = BlockModelRegistry.get().get(block);
         Model defaultModel = BakedCubeModel.defaultModel().getModel();
         if (blockModel == null) return defaultModel;
@@ -184,7 +187,7 @@ public class ItemRenderer implements Disposable {
         ItemModel itemModel = models.get(stack.getItem());
         if (itemModel == null) {
             ModelInstance modelInstance = new ModelInstance(BakedCubeModel.defaultModel().getModel());
-            modelInstance.userData = new BlockItemModel(() -> BakedCubeModel.defaultModel());
+            modelInstance.userData = new BlockItemModel(BakedCubeModel::defaultModel);
             return modelInstance;
         }
         ModelInstance modelInstance = new ModelInstance(itemModel.getModel());

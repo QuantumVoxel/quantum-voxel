@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.gen;
 
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;

@@ -4,9 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -15,6 +17,8 @@ import dev.ultreon.quantum.client.input.DesktopInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.js.JsLang;
+import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
+import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.python.PyLang;
@@ -85,6 +89,9 @@ public class DesktopLauncher {
                 return List.of();
             }
         };
+
+        Log.setLogger(KyroSlf4jLogger.INSTANCE);
+        com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
 
         CrashHandler.addHandler(crashLog -> {
             try {
@@ -190,32 +197,22 @@ public class DesktopLauncher {
 
             WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
 
-//            extractAcrylicNative();
-//
-//            // Check for OS and apply acrylic/mica/vibrancy
-//            if (GamePlatform.get().isWindows()) {
-//                if (System.getProperty("os.name").startsWith("Windows 11")) {
-//                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
-//                        CommonConstants.LOGGER.warn("Unsupported Windows 11 build for mica background: {}", System.getProperty("os.name"));
-//                    }
-//                    windowVibrancyEnabled = true;
-//                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
-//                    if (!Acrylic.applyAcrylic(gameWindow.getPeer())) {
-//                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
-//                    }
-//                    windowVibrancyEnabled = true;
-//                } else {
-//                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
-//                }
-//            } else if (GamePlatform.get().isMacOSX()) {
-//                if (!Acrylic.applyVibrancy(gameWindow.getPeer())) {
-//                    CommonConstants.LOGGER.warn("Unsupported macOS version for vibrancy background: {}", System.getProperty("os.name"));
-//                }
-//                windowVibrancyEnabled = true;
-//            } else if (GamePlatform.get().isLinux()) {
-//                CommonConstants.LOGGER.warn("Unsupported operating system for blur background: {}", System.getProperty("os.name"));
-//            }
+            extractAcrylicNative();
 
+            // Check for OS and apply acrylic/mica/vibrancy
+            if (GamePlatform.get().isWindows()) {
+                if (System.getProperty("os.name").startsWith("Windows 11") && (System.getProperty("os.arch").equals("x86_64") || System.getProperty("os.arch").equals("amd64"))) {
+                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
+                        CommonConstants.LOGGER.warn("Unsupported Windows 11 build for mica background: {}", System.getProperty("os.name"));
+                    }
+                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
+                    if (!Acrylic.applyAcrylic(gameWindow.getPeer())) {
+                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
+                    }
+                } else {
+                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
+                }
+            }
         }
 
         private void extractAcrylicNative() {
@@ -246,7 +243,7 @@ public class DesktopLauncher {
         }
 
         private static void extractWindows() {
-            if (!System.getProperty("os.arch").equals("x86_64")) {
+            if (!System.getProperty("os.arch").equals("x86_64") && !System.getProperty("os.arch").equals("amd64")) {
                 CommonConstants.LOGGER.warn("Unsupported Windows architecture for acrylic/mica: {}", System.getProperty("os.arch"));
                 return;
             }
@@ -295,7 +292,7 @@ public class DesktopLauncher {
 
         @Override
         public boolean closeRequested() {
-            return QuantumClient.get().tryShutdown();
+            return !QuantumClient.get().tryShutdown();
         }
 
         @Override

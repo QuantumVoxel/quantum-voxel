@@ -2,8 +2,8 @@ package dev.ultreon.quantum.client.gui.widget.components;
 
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.util.Color;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 
 public class ColorComponent extends UIComponent {
     private Color color;
@@ -50,7 +50,7 @@ public class ColorComponent extends UIComponent {
     }
 
     @Override
-    public void handleImGui(String path, Identifier key, Widget widget) {
+    public void handleImGui(String path, NamespaceID key, Widget widget) {
 
     }
 }

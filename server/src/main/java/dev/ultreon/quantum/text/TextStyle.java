@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.text;
 
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +17,7 @@ public class TextStyle {
     private @Nullable HoverEvent<?> hoverEvent = null;
     private @Nullable ClickEvent clickEvent = null;
     private RgbColor color = RgbColor.WHITE;
-    private Identifier font;
+    private NamespaceID font;
     private boolean shadow = false;
 
     public static TextStyle deserialize(MapType data) {
@@ -112,11 +112,11 @@ public class TextStyle {
         return this;
     }
 
-    public Identifier getFont() {
+    public NamespaceID getFont() {
         return this.font;
     }
 
-    public TextStyle font(Identifier font) {
+    public TextStyle font(NamespaceID font) {
         this.font = font;
         return this;
     }

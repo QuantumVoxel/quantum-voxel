@@ -30,4 +30,20 @@ public class S2CMenuItemChanged extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onMenuItemChanged(this.index, this.stack);
     }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public ItemStack getStack() {
+        return stack;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CMenuItemChanged{" +
+                "index=" + index +
+                ", stack=" + stack +
+                '}';
+    }
 }

@@ -25,4 +25,15 @@ public class S2CPlayerHealthPacket extends Packet<InGameClientPacketHandler> {
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onPlayerHealth(this.newHealth);
     }
+
+    public float getNewHealth() {
+        return newHealth;
+    }
+
+    @Override
+    public String toString() {
+        return "S2CPlayerHealthPacket{" +
+                "newHealth=" + newHealth +
+                '}';
+    }
 }

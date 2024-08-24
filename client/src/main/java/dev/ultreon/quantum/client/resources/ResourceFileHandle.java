@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.Resource;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,10 +14,10 @@ import java.io.InputStream;
 import java.util.UUID;
 
 public class ResourceFileHandle extends FileHandle {
-    private final Identifier id;
+    private final NamespaceID id;
     private final @Nullable Resource resource;
 
-    public ResourceFileHandle(Identifier id) {
+    public ResourceFileHandle(NamespaceID id) {
         super(id.toString());
         this.id = id;
         this.resource = QuantumClient.get().getResourceManager().getResource(id);
@@ -28,11 +28,11 @@ public class ResourceFileHandle extends FileHandle {
 
         Preconditions.checkNotNull(resource, "resource");
 
-        this.id = new Identifier("java", "generated_" + UUID.randomUUID().toString().replace("-", ""));
+        this.id = new NamespaceID("java", "generated_" + UUID.randomUUID().toString().replace("-", ""));
         this.resource = resource;
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return this.id;
     }
 

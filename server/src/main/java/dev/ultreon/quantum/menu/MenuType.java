@@ -2,8 +2,8 @@ package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,11 +14,11 @@ public class MenuType<T extends ContainerMenu> {
         this.menuBuilder = menuBuilder;
     }
 
-    public @Nullable T create(World world, Entity entity, @Nullable BlockPos pos) {
+    public @Nullable T create(World world, Entity entity, @Nullable BlockVec pos) {
         return this.menuBuilder.create(this, world, entity, pos);
     }
 
-    public Identifier getId() {
+    public NamespaceID getId() {
         return Registries.MENU_TYPE.getId(this);
     }
 
@@ -28,6 +28,6 @@ public class MenuType<T extends ContainerMenu> {
     }
 
     public interface MenuBuilder<T extends ContainerMenu> {
-        @Nullable T create(MenuType<T> menuType, World world, Entity entity, @Nullable BlockPos pos);
+        @Nullable T create(MenuType<T> menuType, World world, Entity entity, @Nullable BlockVec pos);
     }
 }

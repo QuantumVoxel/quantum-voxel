@@ -3,6 +3,7 @@ package dev.ultreon.quantum.world;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.util.Hashing;
+import dev.ultreon.quantum.world.vec.RegionVec;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
@@ -156,8 +157,8 @@ public final class WorldStorage {
      * @return {@code true} if the region file exists, {@code false} otherwise.
      * @throws IOException if an I/O error occurs.
      */
-    public boolean regionExists(int x, int z) throws IOException {
-        return this.exists("regions/" + x + "." + z + ".ubo");
+    public boolean regionExists(int x, int y, int z) throws IOException {
+        return this.exists("regions/" + x + "." + y + "." + z + ".ubo");
     }
 
     /**
@@ -167,8 +168,8 @@ public final class WorldStorage {
      * @param z the z coordinate of the region.
      * @return the region file.
      */
-    public File regionFile(int x, int z) {
-        return this.directory.resolve("regions/" + x + "." + z + ".ubo").toFile();
+    public File regionFile(int x, int y, int z) {
+        return this.directory.resolve("regions/" + x + "." + y + "." + z + ".ubo").toFile();
     }
 
     /**
@@ -195,8 +196,8 @@ public final class WorldStorage {
      * @param pos the position of the region.
      * @return the region file.
      */
-    public File regionFile(RegionPos pos) {
-        return this.regionFile(pos.x(), pos.z());
+    public File regionFile(RegionVec pos) {
+        return this.regionFile(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     /**

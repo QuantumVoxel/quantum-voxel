@@ -6,8 +6,8 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.icon.EmoteMap;
 import dev.ultreon.quantum.text.icon.IconMap;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Identifier;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharList;
 import it.unimi.dsi.fastutil.chars.CharPredicate;
@@ -51,7 +51,7 @@ public class Formatter {
     private RgbColor currentColor;
     private @Nullable ClickEvent currentClickEvent = null;
     private @Nullable HoverEvent<?> currentHoverEvent = null;
-    private final @Nullable Identifier currentFont = null;
+    private final @Nullable NamespaceID currentFont = null;
     private boolean bold = false;
     private boolean italic = false;
     private boolean underlined = false;
@@ -373,7 +373,7 @@ public class Formatter {
                 this.currentBuilder.append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
                 break;
             default:
-                var identifier = Identifier.tryParse(key);
+                var identifier = NamespaceID.tryParse(key);
                 if (identifier == null) {
                     this.currentBuilder.append('%');
                     this.currentBuilder.append(key);
@@ -885,7 +885,7 @@ public class Formatter {
         return String.format("<blue>%s\n<gray>Name <i>%s</i>\n<dark-gray>%s\n", ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
     }
 
-    public @Nullable Identifier getCurrentFont() {
+    public @Nullable NamespaceID getCurrentFont() {
         return currentFont;
     }
 

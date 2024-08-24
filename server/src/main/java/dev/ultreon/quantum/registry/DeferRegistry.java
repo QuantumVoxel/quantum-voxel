@@ -2,7 +2,7 @@ package dev.ultreon.quantum.registry;
 
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import groovy.lang.Closure;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ public class DeferRegistry<T> {
     private final String modId;
     @NotNull
     private final Registry<T> registry;
-    private final ArrayList<HashMap.Entry<Identifier, Supplier<T>>> objects = new ArrayList<>();
+    private final ArrayList<HashMap.Entry<NamespaceID, Supplier<T>>> objects = new ArrayList<>();
 
     protected DeferRegistry(@NotNull String modId, @NotNull Registry<T> registry) {
         Preconditions.checkNotNull(modId, "modId");
@@ -28,7 +28,7 @@ public class DeferRegistry<T> {
     }
 
     public <C extends T> DeferredElement<C> defer(@NotNull String name, @NotNull Supplier<@NotNull C> supplier) {
-        var id = new Identifier(this.modId, name);
+        var id = new NamespaceID(this.modId, name);
 
         this.objects.add(new HashMap.SimpleEntry<>(id, supplier::get));
 
@@ -45,9 +45,9 @@ public class DeferRegistry<T> {
                 return;
             }
 
-            for (HashMap.Entry<Identifier, Supplier<T>> entry : this.objects) {
+            for (HashMap.Entry<NamespaceID, Supplier<T>> entry : this.objects) {
                 T object = entry.getValue().get();
-                Identifier id = entry.getKey();
+                NamespaceID id = entry.getKey();
 
                 if (!registry.getType().isAssignableFrom(object.getClass())) {
                     throw new IllegalArgumentException("Got invalid type in deferred register: " + object.getClass() + " expected assignable to " + registry.getType());

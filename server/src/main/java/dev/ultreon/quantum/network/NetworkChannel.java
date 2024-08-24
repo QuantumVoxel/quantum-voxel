@@ -12,7 +12,7 @@ import dev.ultreon.quantum.network.packets.s2c.S2CModPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +22,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class NetworkChannel {
-    private static final Map<Identifier, NetworkChannel> CHANNELS = new HashMap<>();
-    private final Identifier key;
+    private static final Map<NamespaceID, NetworkChannel> CHANNELS = new HashMap<>();
+    private final NamespaceID key;
     private int curId;
     private final ObjectIntMap<Class<? extends ModPacket<?>>> idMap = new ObjectIntMap<>();
     private final Map<Class<? extends ModPacket<?>>, BiConsumer<? extends ModPacket<?>, PacketIO>> encoders = new HashMap<>();
@@ -32,18 +32,18 @@ public class NetworkChannel {
 
     private IConnection<ClientPacketHandler, ServerPacketHandler> c2sConnection;
 
-    private NetworkChannel(Identifier key) {
+    private NetworkChannel(NamespaceID key) {
         this.key = key;
     }
 
-    public static NetworkChannel create(Identifier id) {
+    public static NetworkChannel create(NamespaceID id) {
         NetworkChannel channel = new NetworkChannel(id);
         NetworkChannel.CHANNELS.put(id, channel);
         return channel;
     }
 
     @CheckReturnValue
-    public static NetworkChannel getChannel(Identifier channelId) {
+    public static NetworkChannel getChannel(NamespaceID channelId) {
         return NetworkChannel.CHANNELS.get(channelId);
     }
 
@@ -51,7 +51,7 @@ public class NetworkChannel {
         this.c2sConnection = connection;
     }
 
-    public Identifier id() {
+    public NamespaceID id() {
         return this.key;
     }
 

@@ -1,17 +1,19 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 public class Location {
-    public Identifier world;
+    public NamespaceID world;
     public double x;
     public double y;
     public double z;
     public float xRot;
     public float yRot;
 
-    public Location(Identifier world, double x, double y, double z, float xRot, float yRot) {
+    public Location(NamespaceID world, double x, double y, double z, float xRot, float yRot) {
         this.world = world;
         this.x = x;
         this.y = y;
@@ -25,7 +27,7 @@ public class Location {
     }
 
     public Location(double x, double y, double z, float xRot, float yRot) {
-        this((Identifier) null, x, y, z, xRot, yRot);
+        this((NamespaceID) null, x, y, z, xRot, yRot);
     }
 
     public Location(double x, double y, double z) {
@@ -47,7 +49,7 @@ public class Location {
         return server.getWorld(this.world);
     }
 
-    public BlockPos getBlockPos() {
-        return new BlockPos(this.x, this.y, this.z);
+    public BlockVec getBlockVec() {
+        return new BlockVec(this.x, this.y, this.z, BlockVecSpace.WORLD);
     }
 }

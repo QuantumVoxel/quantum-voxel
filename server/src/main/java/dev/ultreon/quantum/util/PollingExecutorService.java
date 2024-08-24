@@ -2,10 +2,10 @@ package dev.ultreon.quantum.util;
 
 import com.google.common.collect.Queues;
 import dev.ultreon.quantum.debug.profiler.Profiler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("NewApi")
 public class PollingExecutorService implements ExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
-    private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>());
+    private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>(2000));
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
     protected Thread thread;
     private boolean isShutdown = false;
@@ -33,13 +33,25 @@ public class PollingExecutorService implements ExecutorService {
 
     @Override
     public void shutdown() {
-        this.isShutdown = true;
-        this.tasks.clear();
+        if (this.isSameThread()) {
+            this.isShutdown = true;
+            for (CompletableFuture<?> future : this.futures) {
+                future.completeExceptionally(new RejectedExecutionException("Executor has been shut down"));
+            }
 
-        for (CompletableFuture<?> future : this.futures) {
-            future.cancel(true);
+            this.tasks.clear();
+            this.futures.clear();
+        } else {
+            this.submit(() -> {
+                this.isShutdown = true;
+                for (CompletableFuture<?> future : this.futures) {
+                    future.completeExceptionally(new RejectedExecutionException("Executor has been shut down"));
+                }
+
+                this.tasks.clear();
+                this.futures.clear();
+            });
         }
-        this.futures.clear();
     }
 
     @Override
@@ -81,7 +93,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(task.call());
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.completeExceptionally(throwable);
@@ -108,7 +120,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(result);
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.completeExceptionally(throwable);
@@ -135,12 +147,11 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(null);
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.completeExceptionally(throwable);
             }
-            futures.remove(future);
             return future;
         }
         this.execute(() -> {
@@ -149,7 +160,7 @@ public class PollingExecutorService implements ExecutorService {
                 future.complete(null);
             } catch (Throwable throwable) {
                 if (task instanceof Task<?>) {
-                    Identifier id = ((Task<?>) task).id();
+                    NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 PollingExecutorService.LOGGER.error("Failed to run task:", throwable);
@@ -166,7 +177,7 @@ public class PollingExecutorService implements ExecutorService {
     public <T> @NotNull List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
         List<CompletableFuture<T>> futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
         return futures.stream()
                 .map(CompletableFuture::join)
                 .map(CompletableFuture::completedFuture)
@@ -178,7 +189,7 @@ public class PollingExecutorService implements ExecutorService {
         long endTime = System.currentTimeMillis() + unit.toMillis(timeout);
         List<CompletableFuture<T>> futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
         List<Future<T>> resultList = new ArrayList<>();
 
         for (CompletableFuture<T> future : futures) {
@@ -197,7 +208,7 @@ public class PollingExecutorService implements ExecutorService {
     public <T> @NotNull T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         var futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
 
         try {
             return CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]))
@@ -215,7 +226,7 @@ public class PollingExecutorService implements ExecutorService {
         var endTime = System.currentTimeMillis() + unit.toMillis(timeout);
         var futures = tasks.stream()
                 .map(this::submit)
-                .collect(Collectors.toList());
+                .toList();
 
         try {
             var result = CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]))
@@ -246,7 +257,7 @@ public class PollingExecutorService implements ExecutorService {
     }
 
     private boolean isSameThread() {
-        return Thread.currentThread().getId() == this.thread.getId();
+        return Thread.currentThread().threadId() == this.thread.threadId();
     }
 
     public void poll() {
@@ -273,5 +284,9 @@ public class PollingExecutorService implements ExecutorService {
                 }
             });
         }
+    }
+
+    public int getQueueSize() {
+        return this.tasks.size();
     }
 }

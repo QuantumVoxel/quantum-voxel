@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.model.entity.renderer;
 import com.badlogic.gdx.graphics.g3d.Model;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
+import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.WorldRenderContext;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
 import dev.ultreon.quantum.client.render.EntityTextures;
@@ -24,7 +25,10 @@ public class PigRenderer extends LivingEntityRenderer<@NotNull Pig> {
 
         switch (pose) {
             case IDLE:
-                instance.getModel().queue("animation.model.idle", -1, 1f, null, 0f);
+                QVModel model = instance.getModel();
+                if (model != null) {
+                    model.queue("animation.model.idle", -1, 1f, null, 0f);
+                }
                 break;
             case WALKING:// TODO: Add walking animation
                 break;

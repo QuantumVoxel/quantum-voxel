@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network.packets.s2c;
 
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketContext;
@@ -11,10 +11,11 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.BlockPos;
-import dev.ultreon.quantum.world.ChunkPos;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
@@ -23,16 +24,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
-    private final ChunkPos pos;
-    private final Storage<BlockProperties> storage;
+    private final ChunkVec pos;
+    private final ChunkBuildInfo info;
+    private final Storage<BlockState> storage;
     private final Storage<Biome> biomeStorage;
     private final IntList blockEntityPositions = new IntArrayList();
     private final IntList blockEntities = new IntArrayList();
     public static final int MAX_SIZE = 1048576;
 
     public S2CChunkDataPacket(PacketIO buffer) {
-        this.pos = buffer.readChunkPos();
-        this.storage = new PaletteStorage<>(BlockProperties.AIR, buffer, PacketIO::readBlockMeta);
+        this.pos = buffer.readChunkVec();
+        this.info = new ChunkBuildInfo(buffer);
+        this.storage = new PaletteStorage<>(BlockState.AIR, buffer, PacketIO::readBlockMeta);
         this.biomeStorage = new PaletteStorage<>(Biomes.PLAINS, buffer, buf -> Registries.BIOME.byId(buf.readShort()));
 
         int blockEntityCount = buffer.readVarInt();
@@ -42,21 +45,23 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
         }
     }
 
-    public S2CChunkDataPacket(ChunkPos pos, Storage<BlockProperties> storage, Storage<Biome> biomeStorage, Collection<BlockEntity> blockEntities) {
+    public S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Collection<BlockEntity> blockEntities) {
         this.pos = pos;
+        this.info = info;
         this.storage = storage;
         this.biomeStorage = biomeStorage;
 
         for (BlockEntity blockEntity : blockEntities) {
-            BlockPos bPos = World.toLocalBlockPos(blockEntity.pos());
-            this.blockEntityPositions.add((bPos.x() % 16) << 20 | (bPos.y() % 65536) << 4 | bPos.z() % 16);
+            BlockVec bPos = blockEntity.pos().chunkLocal();
+            this.blockEntityPositions.add((bPos.getIntX() % 16) << 20 | (bPos.getIntY() % 65536) << 4 | bPos.getIntZ() % 16);
             this.blockEntities.add(blockEntity.getType().getRawId());
         }
     }
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeChunkPos(this.pos);
+        buffer.writeChunkVec(this.pos);
+        this.info.toBytes(buffer);
         this.storage.write(buffer, (encode, block) -> block.write(encode));
         this.biomeStorage.write(buffer, (encode, biome) -> {
             if (biome == null) {
@@ -75,15 +80,35 @@ public class S2CChunkDataPacket extends Packet<InGameClientPacketHandler> {
 
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
-        Map<BlockPos, BlockEntityType<?>> blockEntities = new HashMap<>();
+        Map<BlockVec, BlockEntityType<?>> blockEntities = new HashMap<>();
         int i = 0;
-        for (Integer blockEntityPosition : this.blockEntityPositions) {
-            int x = (blockEntityPosition >> 20) & 0xF;
-            int y = (blockEntityPosition >> 4) & 0xFFFF;
-            int z = blockEntityPosition & 0xF;
-            blockEntities.put(World.toLocalBlockPos(x, y, z), Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntities.getInt(i)));
+        for (Integer blkEntityVec : this.blockEntityPositions) {
+            int x = (blkEntityVec >> 16) & 0xFF;
+            int y = (blkEntityVec >> 8) & 0xFF;
+            int z = blkEntityVec & 0xFF;
+            blockEntities.put(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntities.getInt(i)));
         }
 
-        handler.onChunkData(this.pos, this.storage, this.biomeStorage, blockEntities);
+        handler.onChunkData(this.pos, this.info, this.storage, this.biomeStorage, blockEntities);
+    }
+
+    public ChunkVec pos() {
+        return this.pos;
+    }
+
+    public Storage<BlockState> storage() {
+        return this.storage;
+    }
+
+    public Storage<Biome> biomeStorage() {
+        return this.biomeStorage;
+    }
+
+    public IntList blockEntityPositions() {
+        return this.blockEntityPositions;
+    }
+
+    public IntList blockEntities() {
+        return this.blockEntities;
     }
 }

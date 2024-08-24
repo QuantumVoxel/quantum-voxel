@@ -1,10 +1,8 @@
 package dev.ultreon.quantum.api.commands;
 
 import com.google.common.collect.Lists;
-import dev.ultreon.ubo.UsoParser;
-import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.libs.commons.v0.Either;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.error.CommandError;
@@ -27,12 +25,14 @@ import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.weather.Weather;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.ubo.UsoParser;
+import dev.ultreon.ubo.types.DataType;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import org.jetbrains.annotations.NotNull;
@@ -605,7 +605,7 @@ public class CommandData {
         throw new CommandParseException.NotFound("item", ctx.getOffset());
     }
 
-    private static Item getItem(@Nullable Identifier id) {
+    private static Item getItem(@Nullable NamespaceID id) {
         return Registries.ITEM.get(id);
     }
 
@@ -704,7 +704,7 @@ public class CommandData {
         throw new CommandParseException.NotFound(type, ctx.getOffset());
     }
 
-    public static <T> T readFromFunc(CommandReader ctx, String type, Function<Identifier, T> enum_) throws CommandParseException {
+    public static <T> T readFromFunc(CommandReader ctx, String type, Function<NamespaceID, T> enum_) throws CommandParseException {
         var id = ctx.readId();
         T apply = enum_.apply(id);
         if (apply == null) throw new CommandParseException.NotFound(type, ctx.getOffset());

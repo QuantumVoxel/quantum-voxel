@@ -4,27 +4,27 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.JavascriptDebuggerScreen;
+import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
-import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
-import dev.ultreon.quantum.util.BlockHitResult;
-import dev.ultreon.quantum.util.EntityHitResult;
-import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.EntityHit;
+import dev.ultreon.quantum.util.Hit;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
@@ -169,6 +169,11 @@ public class DesktopInput extends GameInput {
         if (DesktopInput.isCtrlDown() && GamePlatform.get().isDevEnvironment()) {
             if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
                 this.client.showScreen(new JavascriptDebuggerScreen());
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
+                TerrainRenderer worldRenderer = this.client.worldRenderer;
+                if (worldRenderer != null) {
+                    worldRenderer.reloadChunks();
+                }
             }
         }
 
@@ -306,19 +311,19 @@ public class DesktopInput extends GameInput {
         @Nullable ClientWorldAccess world = this.client.world;
         if (world == null) return;
 
-        HitResult hitResult = this.client.hitResult;
-        if (hitResult == null) return;
+        Hit hit = this.client.hit;
+        if (hit == null) return;
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            this.doPlayerInteraction(Input.Buttons.LEFT, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.LEFT, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            this.doPlayerInteraction(Input.Buttons.RIGHT, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.RIGHT, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-            this.doPlayerInteraction(Input.Buttons.MIDDLE, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.MIDDLE, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.BACK)) {
-            this.doPlayerInteraction(Input.Buttons.BACK, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.BACK, hit, world, player);
         } else if (Gdx.input.isButtonPressed(Input.Buttons.FORWARD)) {
-            this.doPlayerInteraction(Input.Buttons.FORWARD, hitResult, world, player);
+            this.doPlayerInteraction(Input.Buttons.FORWARD, hit, world, player);
         }
 
     }
@@ -342,7 +347,7 @@ public class DesktopInput extends GameInput {
      */
     private void handleInspectKey() {
         // Check if debug utilities are enabled and inspection is enabled
-        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.enabled()) {
+        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             // Toggle the inspection mode
             this.client.inspection.setInspecting(!this.client.inspection.isInspecting());
         }
@@ -478,7 +483,7 @@ public class DesktopInput extends GameInput {
         Screen currentScreen = this.client.screen;
         @Nullable ClientWorldAccess world = this.client.world;
         Player player = this.client.player;
-        HitResult hitResult = this.client.hitResult;
+        Hit hit = this.client.hit;
 
         // Check if the cursor is not caught and there is a current screen
         if (!Gdx.input.isCursorCatched() && currentScreen != null) {
@@ -501,27 +506,27 @@ public class DesktopInput extends GameInput {
         }
 
         // Check if player and hit result are not null
-        return player != null && hitResult != null;
+        return player != null && hit != null;
     }
 
     /**
      * Handles player interaction with the game environment.
      *
      * @param button the input button pressed by the player
-     * @param hitResult the result of the player's hit test
+     * @param hit the result of the player's hit test
      * @param world the game world
      * @param player the player entity
      */
-    private void doPlayerInteraction(int button, HitResult hitResult, @Nullable ClientWorldAccess world, Player player) {
+    private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorldAccess world, Player player) {
         // Get the position and metadata of the current and next blocks
-        Vec3i pos = hitResult.getPos();
-        if (hitResult instanceof BlockHitResult blockHitResult){
-            BlockProperties block = world.get(new BlockPos(pos));
-            Vec3i posNext = blockHitResult.getNext();
-            BlockProperties blockNext = world.get(new BlockPos(posNext));
+        BlockVec pos = hit.getBlockVec();
+        if (hit instanceof BlockHit blockHitResult){
+            assert world != null;
+            BlockState block = world.get(new BlockVec(pos));
+            BlockVec posNext = blockHitResult.getNext();
 
             // Check if the hit result is valid and the current block is not air
-            if (!blockHitResult.isCollide() || block == null || block.isAir())
+            if (!blockHitResult.isCollide() || block.isAir())
                 return;
 
             // Handle left button input for block breaking
@@ -529,7 +534,7 @@ public class DesktopInput extends GameInput {
                 // Check for instant mine ability
                 if (player.abilities.instaMine) {
                     // Send a block break packet if instant mine is active
-                    this.client.connection.send(new C2SBlockBreakPacket(new BlockPos(blockHitResult.getPos())));
+                    this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getBlockVec())));
                     return;
                 }
 
@@ -542,10 +547,10 @@ public class DesktopInput extends GameInput {
             }
 
             // Handle right button input for using items on the next block
-            if (button == Input.Buttons.RIGHT && blockNext != null && blockNext.isAir()) {
+            if (button == Input.Buttons.RIGHT) {
                 this.useItem(player, world, blockHitResult);
             }
-        } else if (hitResult instanceof EntityHitResult entityHitResult) {
+        } else if (hit instanceof EntityHit entityHitResult) {
             if (!entityHitResult.isCollide()) {
                 return;
             }
@@ -585,13 +590,15 @@ public class DesktopInput extends GameInput {
             return false;
 
         // Handle mouse release event on the current screen
-        boolean eventHandled = false;
-        if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled())
-            eventHandled |= client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button) || currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button);
+        if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled()) {
+            if (!currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button)) {
+                client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button);
+            }
+        }
 
         // Handle mouse click event on the current screen
         if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1).isCanceled())
-            eventHandled |= currentScreen.mouseClick((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1);
+            currentScreen.mouseClick((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1);
 
         return false;
     }

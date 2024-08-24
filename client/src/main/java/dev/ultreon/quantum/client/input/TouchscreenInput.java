@@ -7,16 +7,16 @@ import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
-import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.platform.MouseDevice;
-import dev.ultreon.quantum.util.HitResult;
-import dev.ultreon.libs.commons.v0.vector.Vec2i;
+import dev.ultreon.quantum.util.Hit;
+import dev.ultreon.quantum.util.Vec2i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
@@ -203,14 +203,14 @@ public class TouchscreenInput extends GameInput {
             this.client.motionPointer = new TouchPoint(screenX, screenY, pointer, button);
         }
 
-        this.hitResult = client.hitResult;
+        this.hit = client.hit;
 
-        return this.doPlayerInteraction(button, hitResult, world, player);
+        return this.doPlayerInteraction(button, hit, world, player);
     }
 
-    private boolean doPlayerInteraction(int button, HitResult hitResult, @Nullable ClientWorldAccess world, Player player) {
+    private boolean doPlayerInteraction(int button, Hit hit, @Nullable ClientWorldAccess world, Player player) {
         if (button == Input.Buttons.RIGHT) {
-            this.useItem(player, world, hitResult);
+            this.useItem(player, world, hit);
             return true;
         }
 

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.tags.NamedTag;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 public class BlockTags {
     public static final NamedTag<Block> REQUIRES_WOODEN_TOOL = create("block/requires_wooden_tool");
@@ -18,6 +18,6 @@ public class BlockTags {
     public static final NamedTag<Block> REQUIRES_ULTRINIUM_TOOL = create("block/requires_ultrinium_tool");
 
     private static NamedTag<Block> create(String name) {
-        return Registries.BLOCK.createTag(new Identifier(name));
+        return Registries.BLOCK.createTag(new NamespaceID(name));
     }
 }

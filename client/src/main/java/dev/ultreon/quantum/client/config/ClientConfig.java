@@ -5,7 +5,7 @@ import dev.ultreon.quantum.config.crafty.ConfigEntry;
 import dev.ultreon.quantum.config.crafty.ConfigInfo;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.config.crafty.Ranged;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 /**
  * This is the client configuration.
@@ -34,7 +34,7 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "video.fpsLimit", comment = "The limit of frames per second.")
     @Ranged(min = 10, max = 240)
-    public static int fpsLimit = 60;
+    public static int fpsLimit = 240;
 
     @ConfigEntry(path = "video.fov", comment = "The field of view.")
     @Ranged(min = 40, max = 120)
@@ -67,7 +67,7 @@ public class ClientConfig extends CraftyConfig {
     public static boolean enableDebugOverlay = false;
 
     @ConfigEntry(path = "generic.language", comment = "The language of the game. Use the ISO 639-1 code.")
-    public static Identifier language = new Identifier("en_us");
+    public static NamespaceID language = new NamespaceID("en_us");
 
     @ConfigEntry(path = "personalisation.diagonalFontShadow", comment = "Whether diagonal font shadows are enabled.")
     public static boolean diagonalFontShadow = false;
@@ -164,4 +164,10 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "personalisation.blurEnabled", comment = "Whether the blur effect in menu backgrounds should be enabled. (Performance intense)")
     public static boolean blurEnabled = true;
+
+    @ConfigEntry(path = "network.keepAliveTime", comment = "The time in milliseconds between keep alive packets sent to the server.\nNote that the value is in milliseconds.")
+    public static int networkKeepAliveTime = 10000;
+
+    @ConfigEntry(path = "network.timeout", comment = "The time in milliseconds between keep alive packets sent to the server.\nNote that the value is in milliseconds.")
+    public static int networkTimeout = 30000;
 }

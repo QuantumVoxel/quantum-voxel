@@ -1,11 +1,7 @@
 package dev.ultreon.quantum.entity.player;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.vector.Vec2f;
-import dev.ultreon.libs.commons.v0.vector.Vec3d;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.Entity;
@@ -24,12 +20,12 @@ import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.SoundEvent;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -163,6 +159,13 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
+    public void setPosition(double x, double y, double z) {
+        x = Mth.clamp(x, -30000000, 30000000);
+        z = Mth.clamp(z, -30000000, 30000000);
+        super.setPosition(x, y, z);
+    }
+
+    @Override
     public @NotNull TextObject getDisplayName() {
         return TextObject.literal(this.name);
     }
@@ -243,12 +246,12 @@ public abstract class Player extends LivingEntity {
         //    and will break client <-> server connection. DO NOT CALL SUPER HERE!
     }
 
-    public HitResult rayCast() {
+    public Hit rayCast() {
         Ray ray = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
-        if (this.world.get(getBlockPos()).getBlock().hasCollider()) {
-            return new BlockHitResult(ray, getBlockPos(), world.get(getBlockPos()));
+        if (this.world.get(getBlockVec()).getBlock().hasCollider()) {
+            return new BlockHit(ray, getBlockVec(), world.get(getBlockVec()));
         }
-        EntityHitResult entityHitResult = this.world.rayCastEntity(ray);
+        EntityHit entityHitResult = this.world.rayCastEntity(ray);
         if (entityHitResult.isCollide()) return entityHitResult;
         Ray ray1 = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
         return this.world.rayCast(ray1);

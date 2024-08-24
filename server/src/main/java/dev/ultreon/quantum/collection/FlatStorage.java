@@ -26,6 +26,7 @@ public class FlatStorage<D> implements Storage<D> {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public FlatStorage(D defaultValue, int size) {
         this.defaultValue = defaultValue;
         this.data = (D[]) Array.newInstance(defaultValue.getClass(), size);
@@ -61,6 +62,10 @@ public class FlatStorage<D> implements Storage<D> {
         for (int i = 0; i < size; i++) {
             this.data[i] = decoder.apply(buffer);
         }
+    }
+
+    public FlatStorage(int size, D defaultValue) {
+        this(defaultValue, size);
     }
 
     @Override

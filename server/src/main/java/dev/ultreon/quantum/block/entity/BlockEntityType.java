@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.block.entity;
 
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Identifier;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockEntityType<T extends BlockEntity> {
@@ -14,17 +14,17 @@ public class BlockEntityType<T extends BlockEntity> {
         this.factory = factory;
     }
 
-    public T create(World world, BlockPos pos) {
+    public T create(World world, BlockVec pos) {
         return factory.create(this, world, pos);
     }
 
-    public T load(World world, BlockPos pos, MapType data) {
+    public T load(World world, BlockVec pos, MapType data) {
         T blockEntity = factory.create(this, world, pos);
         blockEntity.load(data);
         return blockEntity;
     }
 
-    public @Nullable Identifier getId() {
+    public @Nullable NamespaceID getId() {
         return Registries.BLOCK_ENTITY_TYPE.getId(this);
     }
 
@@ -34,6 +34,6 @@ public class BlockEntityType<T extends BlockEntity> {
 
     @FunctionalInterface
     public interface BlockEntityFactory<T extends BlockEntity> {
-        T create(BlockEntityType<T> type, World world, BlockPos pos);
+        T create(BlockEntityType<T> type, World world, BlockVec pos);
     }
 }

@@ -7,7 +7,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CubemapManager implements Manager<Cubemap>, Disposable {
-    private final Map<Identifier, Cubemap> cubemaps = new LinkedHashMap<>();
+    private final Map<NamespaceID, Cubemap> cubemaps = new LinkedHashMap<>();
     private final ResourceManager resourceManager;
 
     public CubemapManager(ResourceManager resourceManager) {
@@ -26,32 +26,32 @@ public class CubemapManager implements Manager<Cubemap>, Disposable {
     }
 
     @Override
-    public Cubemap register(@NotNull Identifier id, @NotNull Cubemap cubemap) {
+    public Cubemap register(@NotNull NamespaceID id, @NotNull Cubemap cubemap) {
         this.cubemaps.put(id, cubemap);
         return cubemap;
     }
 
-    public void loadCubemap(Identifier id) {
+    public void loadCubemap(NamespaceID id) {
         try (InputStream inputStream = resourceManager.openResourceStream(id)) {
             Json5Object root = CommonConstants.JSON5.parse(inputStream).getAsJson5Object();
 
             String identifier = root.getAsJson5Primitive("target_pos_x").getAsString();
-            Identifier targetPosX = new Identifier(identifier);
+            NamespaceID targetPosX = new NamespaceID(identifier);
 
             identifier = root.getAsJson5Primitive("target_neg_x").getAsString();
-            Identifier targetNegX = new Identifier(identifier);
+            NamespaceID targetNegX = new NamespaceID(identifier);
 
             identifier = root.getAsJson5Primitive("target_pos_y").getAsString();
-            Identifier targetPosY = new Identifier(identifier);
+            NamespaceID targetPosY = new NamespaceID(identifier);
 
             identifier = root.getAsJson5Primitive("target_neg_y").getAsString();
-            Identifier targetNegY = new Identifier(identifier);
+            NamespaceID targetNegY = new NamespaceID(identifier);
 
             identifier = root.getAsJson5Primitive("target_pos_z").getAsString();
-            Identifier targetPosZ = new Identifier(identifier);
+            NamespaceID targetPosZ = new NamespaceID(identifier);
 
             identifier = root.getAsJson5Primitive("target_neg_z").getAsString();
-            Identifier targetNegZ = new Identifier(identifier);
+            NamespaceID targetNegZ = new NamespaceID(identifier);
 
             Cubemap cubemap = new Cubemap(
                     new ResourceFileHandle(targetPosX.mapPath(p -> "textures/cubemap/" + p + ".png")),
@@ -69,7 +69,7 @@ public class CubemapManager implements Manager<Cubemap>, Disposable {
     }
 
     @Override
-    public @Nullable Cubemap get(Identifier id) {
+    public @Nullable Cubemap get(NamespaceID id) {
         if (!this.cubemaps.containsKey(id)) {
             this.loadCubemap(id);
         }

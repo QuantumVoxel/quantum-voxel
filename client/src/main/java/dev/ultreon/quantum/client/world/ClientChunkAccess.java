@@ -1,15 +1,14 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.libs.commons.v0.vector.Vec3i;
-import dev.ultreon.quantum.block.state.BlockProperties;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.world.BlockPos;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.ChunkAccess;
-import dev.ultreon.quantum.world.ChunkPos;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
@@ -19,13 +18,11 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     float getBlockLightLevel(int x, int y, int z);
 
-    ChunkPos getPos();
+    ChunkVec getVec();
 
     boolean isInitialized();
 
     void revalidate();
-
-    ModelInstance getModelInstance();
 
     ClientWorldAccess getWorld();
 
@@ -35,12 +32,10 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     Vector3 getRenderOffset();
 
-    Model getModel();
-
     float getBrightness(int lightLevel);
 
-    ModelInstance addModel(BlockPos blockPos, ModelInstance modelInstance);
+    ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance);
 
-    BlockProperties get(Vec3i tmp3i);
+    BlockState get(Vec3i tmp3i);
 
 }

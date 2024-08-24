@@ -1,9 +1,11 @@
 package dev.ultreon.quantum.server;
 
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.commands.Command;
 import dev.ultreon.quantum.command.*;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.registry.CommandRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 
 public final class GameCommands {
     public static void register() {
@@ -20,6 +22,11 @@ public final class GameCommands {
         CommandRegistry.register(new SummonCommand());
         CommandRegistry.register(new SummonItemCommand());
         CommandRegistry.register(new SetVarCommand());
+        CommandRegistry.register(new EntityCommand());
+        CommandRegistry.register(new ItemCommand());
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment())
+            CommandRegistry.register(new JSCommand());
 
         LoadingEvent.REGISTER_COMMANDS.factory().onRegisterCommands();
 

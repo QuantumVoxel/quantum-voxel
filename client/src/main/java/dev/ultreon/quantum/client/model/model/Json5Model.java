@@ -9,30 +9,30 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.registry.RegistryKey;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.List;
 import java.util.Map;
 
 public class Json5Model implements BlockModel, ItemModel {
-    public final Map<String, Identifier> textureElements;
+    public final Map<String, NamespaceID> textureElements;
     public final List<Json5ModelLoader.ModelElement> modelElements;
     public final boolean ambientOcclusion;
     public final Json5ModelLoader.Display display;
     private final RegistryKey<?> key;
-    private final Identifier id;
+    private final NamespaceID id;
     private Model model;
     private final Table<String, BlockDataEntry<?>, Json5Model> overrides;
     private static final Vector3 SCALE = new Vector3(0.0625f, 0.0625f, 0.0625f);
 
-    public Json5Model(RegistryKey<?> key, Map<String, Identifier> textureElements, List<Json5ModelLoader.ModelElement> modelElements, boolean ambientOcclusion, Json5ModelLoader.Display display, Table<String, BlockDataEntry<?>, Json5Model> overrides) {
+    public Json5Model(RegistryKey<?> key, Map<String, NamespaceID> textureElements, List<Json5ModelLoader.ModelElement> modelElements, boolean ambientOcclusion, Json5ModelLoader.Display display, Table<String, BlockDataEntry<?>, Json5Model> overrides) {
         this.key = key;
         this.textureElements = textureElements;
         this.modelElements = modelElements;
         this.ambientOcclusion = ambientOcclusion;
         this.display = display;
         this.overrides = overrides;
-        id = key.parent().element().mapPath(s -> s + "/" + key.element().namespace() + "." + key.element().path());
+        id = key.parent().element().mapPath(s -> s + "/" + key.element().getDomain() + "." + key.element().getPath());
     }
 
     public Model bake() {
@@ -50,7 +50,7 @@ public class Json5Model implements BlockModel, ItemModel {
     }
 
     @Override
-    public Identifier resourceId() {
+    public NamespaceID resourceId() {
         return key.element();
     }
 

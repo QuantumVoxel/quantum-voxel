@@ -3,7 +3,7 @@ package dev.ultreon.quantum.recipe;
 import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.registry.AbstractRegistry;
-import dev.ultreon.quantum.util.Identifier;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RecipeRegistry<T extends Recipe> extends AbstractRegistry<Identifier, T> {
+public class RecipeRegistry<T extends Recipe> extends AbstractRegistry<NamespaceID, T> {
     public static final String CATEGORY = "recipe";
-    private final OrderedMap<Identifier, T> keyMap = new OrderedMap<>();
-    private final OrderedMap<T, Identifier> valueMap = new OrderedMap<>();
+    private final OrderedMap<NamespaceID, T> keyMap = new OrderedMap<>();
+    private final OrderedMap<T, NamespaceID> valueMap = new OrderedMap<>();
     private final Class<T> type;
     private boolean frozen = false;
 
@@ -26,12 +26,12 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistry<Identifie
     }
 
     @Override
-    public T get(Identifier obj) {
+    public T get(NamespaceID obj) {
         return this.keyMap.get(obj);
     }
 
     @Override
-    public void register(Identifier key, T val) {
+    public void register(NamespaceID key, T val) {
         if (this.frozen) throw new IllegalStateException("Registry is frozen");
 
         this.keyMap.put(key, val);
@@ -44,12 +44,12 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistry<Identifie
     }
 
     @Override
-    public List<Identifier> keys() {
+    public List<NamespaceID> keys() {
         return this.keyMap.keyList();
     }
 
     @Override
-    public Set<Map.Entry<Identifier, T>> entries() throws IllegalAccessException {
+    public Set<Map.Entry<NamespaceID, T>> entries() throws IllegalAccessException {
         return this.keyMap.entrySet();
     }
 
@@ -61,11 +61,11 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistry<Identifie
         return new PagedList<>(pageSize, values);
     }
 
-    public Identifier getKey(T recipe) {
+    public NamespaceID getKey(T recipe) {
         return this.valueMap.get(recipe);
     }
 
-    public T removeRecipe(Identifier id) {
+    public T removeRecipe(NamespaceID id) {
         if (this.frozen) throw new IllegalStateException("Registry is frozen");
 
         T recipe = this.keyMap.remove(id);
