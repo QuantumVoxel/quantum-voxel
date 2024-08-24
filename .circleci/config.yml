@@ -77,4 +77,6 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - build
+      - build-linux
+      - build-windows
+      - build-macos
