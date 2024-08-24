@@ -28,7 +28,6 @@ jobs:
           name: "Store Binaries"
           path: build/dist
   build-windows:
-    executor: win/server-2022
     machine:
       image: windows-server-2022-gui:current
       resource_class: windows.medium
