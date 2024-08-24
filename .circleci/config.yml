@@ -8,6 +8,9 @@ jobs:
   build-linux:
     # Specify the execution environment. You can specify an image from Dockerhub, or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    machine:
+      image: ubuntu-2204:current
+      resource_class: medium
     docker:
       - image: gradle:jdk22
     description: "Build Project"
@@ -28,12 +31,16 @@ jobs:
           name: "Store Binaries"
           path: build/dist
   build-windows:
+    executor: win/server-2022
     machine:
-      image: 'windows-server-2022-gui:current'
-      shell: 'powershell.exe -ExecutionPolicy Bypass'
+      image: windows-server-2022-gui:current
+      resource_class: windows.medium
     description: "Build Project (Windows)"
     steps:
       - checkout
+      - run:
+          name: "Set PowerShell Execution Policy"
+          command: "powershell.exe -ExecutionPolicy Bypass"
       - run:
           name: Get GraalVM 22 from WinGet
           command: 'winget install --id=GraalVM.22 --accept-source-agreements --accept-package-agreements --force'
