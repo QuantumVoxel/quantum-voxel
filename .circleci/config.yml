@@ -5,7 +5,7 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
+  build-linux:
     # Specify the execution environment. You can specify an image from Dockerhub, or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -18,6 +18,50 @@ jobs:
       - run:
           name: "Make gradlew executable"
           command: "chmod +x gradlew"
+      - run:
+          name: "Build Project"
+          command: |
+            ./gradlew jpackage
+          environment:
+            CIRCLE_CI: "true"
+      - store_artifacts:
+          name: "Store Binaries"
+          path: build/dist
+  build-windows:
+    machine:
+      image: 'windows-server-2022-gui:current'
+      shell: 'powershell.exe -ExecutionPolicy Bypass'
+    description: "Build Project (Windows)"
+    steps:
+      - checkout
+      - run:
+          name: Get GraalVM 22 from WinGet
+          command: 'winget install --id=GraalVM.22 --accept-source-agreements --accept-package-agreements --force'
+      - run:
+          name: Get WiX for JPackage from WinGet
+          command: 'winget install --id=WiX.3.11.0 --accept-source-agreements --accept-package-agreements --force'
+      - run:
+          name: "Build Project"
+          command: |
+            ./gradlew.bat jpackage
+          environment:
+            CIRCLE_CI: "true"
+      - store_artifacts:
+          name: "Store Binaries"
+          path: build/dist
+  build-macos:
+    macos:
+      xcode: 14.2.0
+    resource_class: macos.m1.medium.gen1
+    description: "Build Project (macOS)"
+    steps:
+      - checkout
+      - run:
+          name: "Install Brew"
+          command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - run:
+          name: "Install GraalVM JDK @ 22"
+          command: brew install --cask graalvm@22
       - run:
           name: "Build Project"
           command: |
