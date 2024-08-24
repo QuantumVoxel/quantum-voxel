@@ -246,8 +246,15 @@ tasks.register('package', Zip) {
     destinationDirectory = file("$rootProject/build/dist/")
 }
 
+tasks.register('packageBin', Zip) {
+    from fileTree(dir: "$projectDir/build/bin/")
+    archiveFileName = 'package.zip'
+    destinationDirectory = file("$rootProject/build/dist/")
+}
+
 jpackage {
     dependsOn("build", ":gameprovider:build", ":desktop:build", ":client:build", "copyDependencies", "copyJar")
+    finalizedBy("packageBin")
 
     input  = "$projectDir/build/jars"
     destination = "$projectDir/build/bin"
