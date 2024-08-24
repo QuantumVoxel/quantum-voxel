@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.debug;
 import com.badlogic.gdx.graphics.Mesh;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
@@ -89,6 +90,14 @@ public class GenericDebugPage implements DebugPage {
                     .left("Pool Max", WorldRenderer.getPoolMax())
                     .left("Pool Peak", WorldRenderer.getPoolPeak())
                     .left();
+        }
+
+        // Queues
+        context.left();
+        context.left("Executor Sizes");
+        context.left("Client Queue", QuantumClient.get().getQueueSize());
+        if (integratedServer != null) {
+            context.left("Server Queue", integratedServer.getQueueSize());
         }
 
         // Chunk

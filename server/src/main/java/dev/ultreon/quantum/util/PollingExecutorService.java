@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("NewApi")
 public class PollingExecutorService implements ExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
-    private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>());
+    private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>(2000));
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
     protected Thread thread;
     private boolean isShutdown = false;
@@ -284,5 +284,9 @@ public class PollingExecutorService implements ExecutorService {
                 }
             });
         }
+    }
+
+    public int getQueueSize() {
+        return this.tasks.size();
     }
 }

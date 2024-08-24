@@ -1327,7 +1327,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         this.updateActivity();
 
-        this.poll();
+        this.pollAll();
 
         QuantumClient.PROFILER.section("client-tick", this::tryClientTick);
 
