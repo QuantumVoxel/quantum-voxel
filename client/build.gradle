@@ -92,7 +92,7 @@ dependencies {
     // GDX GLTF Models
     api("com.github.mgsx-dev.gdx-gltf:gltf:$gltf_version")
 
-    api("org.apache.commons:commons-lang3:3.13.0")
+    api("org.apache.commons:commons-lang3:3.15.0")
     api("org.apache.commons:commons-collections4:$commons_collections4_version")
     api("org.tukaani:xz:$tukaani_xz_version")
     api("com.jcraft:jzlib:1.1.3")

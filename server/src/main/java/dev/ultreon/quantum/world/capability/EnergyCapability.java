@@ -4,7 +4,9 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.energy.Energy;
 import dev.ultreon.quantum.world.energy.EnergyNetwork;
 import dev.ultreon.ubo.types.MapType;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Experimental
 public class EnergyCapability implements Capability<Energy>, Comparable<EnergyCapability> {
     private final Energy data;
     private final CapabilityType<? extends EnergyCapability, Energy> type;

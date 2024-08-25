@@ -4,10 +4,23 @@
   "version": "${version}",
   "name": "mixinprovider",
   "description": "",
-  "authors": [],
-  "contact": {},
+  "authors": [
+    {
+      "name": "Ultreon Team",
+      "url": "https://gitlab.com/ultreon",
+      "role": "team"
+    },
+    {
+      "name": "XyperCode",
+      "url": "https://gitlab.com/XyperCode",
+      "role": "maintainer"
+    }
+  ],
+  "contact": {
+    "sources": "https://gitlab.com/ultreon/quantum/game",
+    "issues": "https://gitlab.com/ultreon/quantum/game/issues"
+  },
   "license": "All-Rights-Reserved",
-  "icon": "assets/mixinprovider/icon.png",
   "environment": "*",
   "entrypoints": {},
   "mixins": [

@@ -24,7 +24,7 @@ import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
-import dev.ultreon.quantum.network.packets.s2c.C2SAbilitiesPacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -50,7 +50,6 @@ public class LocalPlayer extends ClientPlayer {
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
     private final Vec3d tmp = new Vec3d();
-    private ChunkVec lastChunkVec;
     private final Vec2i tmp2I = new Vec2i();
     private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
     private long lastRefresh;
@@ -134,7 +133,6 @@ public class LocalPlayer extends ClientPlayer {
         this.oz = this.z;
 
         this.refreshChunks();
-        this.lastChunkVec = this.getChunkVec();
     }
 
     private void refreshChunks() {

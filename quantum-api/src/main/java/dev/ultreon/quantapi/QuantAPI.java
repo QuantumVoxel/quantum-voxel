@@ -1,6 +1,8 @@
-package dev.ultreon.quantapi.networking.impl;
+package dev.ultreon.quantapi;
 
 import dev.ultreon.quantapi.networking.api.INetworkEntryPoint;
+import dev.ultreon.quantapi.networking.impl.Network;
+import dev.ultreon.quantapi.networking.impl.NetworkManager;
 import dev.ultreon.quantapi.networking.impl.test.TestNetworkEntry;
 import dev.ultreon.quantapi.networking.impl.test.TestPacket;
 import dev.ultreon.quantum.ModInit;
@@ -12,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ServiceLoader;
 
 @SuppressWarnings("unused")
-public class UcNetworkingMod implements ModInit {
+public class QuantAPI implements ModInit {
     public static final String MOD_ID = "uc_networking";
-    public static final Logger LOGGER = LoggerFactory.getLogger(UcNetworkingMod.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(QuantAPI.class);
 
     @Override
     public void onInitialize() {

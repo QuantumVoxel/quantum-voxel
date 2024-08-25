@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.network.packets.s2c;
+package dev.ultreon.quantum.network.packets.c2s;
 
 import dev.ultreon.quantum.entity.player.PlayerAbilities;
 import dev.ultreon.quantum.network.PacketContext;

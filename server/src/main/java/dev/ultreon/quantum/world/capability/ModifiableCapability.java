@@ -2,8 +2,10 @@ package dev.ultreon.quantum.world.capability;
 
 import com.badlogic.gdx.utils.Array;
 import dev.ultreon.ubo.types.MapType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Experimental
 public abstract class ModifiableCapability<Value> extends ArrayCapability<Value> {
     public ModifiableCapability(CapabilityType<? extends ModifiableCapability<Value>, Array<Value>> type, Class<? extends Value> clazz) {
         super(type, clazz);

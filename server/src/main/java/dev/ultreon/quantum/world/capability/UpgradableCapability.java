@@ -1,8 +1,10 @@
 package dev.ultreon.quantum.world.capability;
 
 import com.badlogic.gdx.utils.Array;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+@ApiStatus.Experimental
 public abstract class UpgradableCapability<Value> extends ModifiableCapability<Value> {
     public UpgradableCapability(CapabilityType<? extends UpgradableCapability<Value> , Array<Value>> type, Class<? extends Value> clazz) {
         super(type, clazz);
