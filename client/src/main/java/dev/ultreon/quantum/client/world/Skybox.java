@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.util.InvalidThreadException;
 
 public class Skybox implements RenderableProvider, Disposable {

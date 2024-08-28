@@ -1,5 +1,6 @@
 package dev.ultreon.quantapi.kotlin.client.gui
 
+import dev.ultreon.quantapi.kotlin.text.literal
 import dev.ultreon.quantum.client.gui.widget.TextButton
 import dev.ultreon.quantum.text.TextObject
 

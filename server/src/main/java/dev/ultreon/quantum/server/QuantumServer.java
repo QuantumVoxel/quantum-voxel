@@ -45,6 +45,8 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PollingExecutorService;
 import dev.ultreon.quantum.util.Shutdownable;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldStorage;
@@ -863,5 +865,29 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public Map<String, ServerPlayer> getPlayersByName() {
         return Collections.unmodifiableMap(this.players.values().stream().collect(Collectors.toMap(ServerPlayer::getName, Function.identity())));
+    }
+
+    public void onChunkBuilt(ServerChunk builtChunk) {
+
+    }
+
+    public void onChunkLoaded(ServerChunk loadedChunk) {
+
+    }
+
+    public void onChunkFailedToLoad(Vec3d d) {
+
+    }
+
+    public void onChunkUnloaded(ServerChunk unloadedChunk) {
+
+    }
+
+    public void onChunkLoadRequested(ChunkVec globalVec) {
+
+    }
+
+    public void onChunkSent(ServerChunk serverChunk) {
+
     }
 }

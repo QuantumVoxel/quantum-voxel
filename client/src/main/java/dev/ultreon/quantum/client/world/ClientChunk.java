@@ -18,7 +18,7 @@ import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;

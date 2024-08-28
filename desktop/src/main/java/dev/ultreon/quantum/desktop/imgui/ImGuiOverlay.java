@@ -309,6 +309,17 @@ public class ImGuiOverlay {
                 ImGui.menuItem("Model Viewer", null, ImGuiOverlay.SHOW_MODEL_VIEWER);
                 ImGui.endMenu();
             }
+            if (ImGui.beginMenu("Gizmos")) {
+                @Nullable ClientWorldAccess terrainRenderer = QuantumClient.get().world;
+                if (terrainRenderer instanceof ClientWorld world){
+                    for (String category : world.getGizmoCategories()) {
+                        if (ImGui.menuItem("Gizmo '" + category + "'", null, world.isGimzoCategoryEnabled(category))) {
+                            world.toggleGizmoCategory(category);
+                        }
+                    }
+                }
+                ImGui.endMenu();
+            }
             if (ImGui.beginMenu("Resources")) {
                 if (ImGui.menuItem("Reload Resources", "F1+R")) {
                     QuantumClient.get().reloadResourcesAsync();

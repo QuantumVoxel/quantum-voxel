@@ -43,8 +43,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -130,7 +128,7 @@ public abstract class World implements Disposable, WorldAccess {
     protected abstract int getRenderDistance();
 
     protected boolean shouldStayLoaded(ChunkVec pos) {
-        return this.isSpawnChunk(pos) || this.isAlwaysLoaded(pos);
+        return this.isAlwaysLoaded(pos);
     }
 
     @Override

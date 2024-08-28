@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.render.shader;
+package dev.ultreon.quantum.client.shaders;
 
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
-import dev.ultreon.quantum.client.shaders.provider.ModelShaders;
-import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
-import dev.ultreon.quantum.client.shaders.provider.SkyboxShaders;
+import dev.ultreon.quantum.client.shaders.provider.*;
 
 import static dev.ultreon.quantum.client.QuantumClient.get;
 import static dev.ultreon.quantum.client.QuantumClient.id;
@@ -39,9 +37,16 @@ public class Shaders {
             new ResourceFileHandle(id("shaders/model.vert")),
             new ResourceFileHandle(id("shaders/model.frag")),
             new ResourceFileHandle(id("shaders/model.geom"))));
+    public static final Supplier<GizmoShaders> GIZMO = Shaders.register("model_view", () -> new GizmoShaders(
+            new ResourceFileHandle(id("shaders/gizmo.vert")),
+            new ResourceFileHandle(id("shaders/gizmo.frag")),
+            new ResourceFileHandle(id("shaders/gizmo.geom"))));
     public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
             new ResourceFileHandle(id("shaders/outline.vert")),
-            new ResourceFileHandle(id("shaders/outline.frag"))
+            new ResourceFileHandle(id("shaders/outline.frag"))));
+    public static final Supplier<GizmoOutlineShaders> GIZMO_OUTLINE = Shaders.register("outline", () -> new GizmoOutlineShaders(
+            new ResourceFileHandle(id("shaders/gizmo_outline.vert")),
+            new ResourceFileHandle(id("shaders/gizmo_outline.frag"))
     ));
 
     private static <T extends ShaderProvider> Supplier<T> register(String name, Supplier<T> provider) {

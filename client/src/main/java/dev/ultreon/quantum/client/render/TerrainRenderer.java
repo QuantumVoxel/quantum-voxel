@@ -53,4 +53,6 @@ public interface TerrainRenderer extends Disposable {
     int getVisibleChunks();
 
     void reloadChunks();
+
+    void renderForeground(ModelBatch modelBatch, float deltaTime);
 }

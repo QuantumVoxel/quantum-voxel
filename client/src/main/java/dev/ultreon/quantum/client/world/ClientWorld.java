@@ -8,6 +8,8 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.debug.BoxGizmo;
+import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
@@ -74,6 +76,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private final Queue<LightData> panelQueue = new Queue<>();
     private final ObjectIntMap<LightData> panelMap = new ObjectIntMap<>();
 
+    private final ObjectMap<String, Array<Gizmo>> gizmos = new ObjectMap<>();
+    private final ObjectSet<String> enabledCategories = new ObjectSet<>();
+
     /**
      * Constructs a new ClientWorld object.
      *
@@ -82,6 +87,44 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public ClientWorld(@NotNull QuantumClient client) {
         super();
         this.client = client;
+    }
+
+    public void toggleGizmoCategory(String category) {
+        if (enabledCategories.contains(category)) enabledCategories.remove(category);
+        else enabledCategories.add(category);
+    }
+
+    public void addGizmo(Gizmo gizmo) {
+        String category = gizmo.category;
+        if (!this.gizmos.containsKey(category)) {
+            this.gizmos.put(category, new Array<>(new Gizmo[]{gizmo}));
+        } else {
+            this.gizmos.get(category).add(gizmo);
+        }
+    }
+
+    public void removeGizmo(Gizmo gizmo) {
+        String category = gizmo.category;
+        var gizmos = this.gizmos.get(category);
+        if (gizmos != null) {
+            gizmos.removeValue(gizmo, true);
+        }
+    }
+
+    public Gizmo[] getGizmos(String category) {
+        return gizmos.get(category, new Array<>()).toArray(Gizmo.class);
+    }
+
+    public String[] getGizmoCategories() {
+        return gizmos.keys().toArray().toArray(String.class);
+    }
+
+    public boolean isGimzoCategoryEnabled(String category) {
+        return enabledCategories.contains(category);
+    }
+
+    public ObjectSet<String> getEnabledGizmoCategories() {
+        return enabledCategories;
     }
 
     @Override
@@ -123,7 +166,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
                 this.totalChunks--;
                 removedChunk.dispose();
             }
-
 
             // Return true if the chunk was removed, false otherwise
             return removed;
@@ -846,6 +888,16 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
             return;
         }
+
+        QuantumClient.invoke(() -> {
+            TerrainRenderer terrainRenderer = client.worldRenderer;
+            BoxGizmo gizmo = new BoxGizmo("chunk");
+            gizmo.position.set(data.getOffset().vec().d().add(8.0, 8.0, 8.0));
+            gizmo.size.set(16, 16, 16);
+            gizmo.color.set(1.0F, 0.0F, 0.0F, 1.0F);
+            gizmo.outline = true;
+            this.addGizmo(gizmo);
+        });
 
         // Calculate the distance between the chunk and the player
         synchronized (this.chunks) {

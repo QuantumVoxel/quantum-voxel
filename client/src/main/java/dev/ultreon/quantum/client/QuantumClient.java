@@ -55,11 +55,8 @@ import dev.ultreon.quantum.client.gui.screens.*;
 import dev.ultreon.quantum.client.input.*;
 import dev.ultreon.quantum.client.input.controller.ControllerContext;
 import dev.ultreon.quantum.client.input.controller.ControllerInput;
-import dev.ultreon.quantum.client.input.controller.ControllerMappings;
 import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
 import dev.ultreon.quantum.client.input.controller.context.MenuControllerContext;
-import dev.ultreon.quantum.client.input.controller.context.VirtKeyboardControllerContext;
-import dev.ultreon.quantum.client.input.controller.gui.TextInputScreen;
 import dev.ultreon.quantum.client.input.controller.gui.VirtualKeyboard;
 import dev.ultreon.quantum.client.item.ItemRenderer;
 import dev.ultreon.quantum.client.management.*;
@@ -94,6 +91,7 @@ import dev.ultreon.quantum.client.util.DeferredDisposable;
 import dev.ultreon.quantum.client.util.GG;
 import dev.ultreon.quantum.client.util.PlayerView;
 import dev.ultreon.quantum.client.util.Resizer;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
@@ -606,6 +604,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
                 .node(new CollectNode())
                 .node(new WorldNode())
+                .node(new ForegroundNode())
                 .node(new BackgroundNode()));
 
         // Create a white pixel for the shape drawer
@@ -2330,6 +2329,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
+        ClientWorld clientWorld = new ClientWorld(this);
+        this.world = clientWorld;
+
         this.integratedServer.start();
 
         mem.setOtherSide((MemoryConnection<ServerPacketHandler, ClientPacketHandler>) ((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
@@ -2340,6 +2342,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void connectToServer(String host, int port) {
+        ClientWorld clientWorld = new ClientWorld(this);
+        this.world = clientWorld;
+
         this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {
             this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e.getMessage(), true));
             return null;

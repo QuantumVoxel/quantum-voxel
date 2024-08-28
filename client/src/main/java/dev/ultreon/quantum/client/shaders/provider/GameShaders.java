@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.render.shader;
+package dev.ultreon.quantum.client.shaders.provider;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;

@@ -4,13 +4,12 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import dev.ultreon.quantum.client.render.shader.GameShaders;
-import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.shaders.ModelViewShader;
+import dev.ultreon.quantum.client.shaders.Shaders;
 
 public class ModelShaders extends DefaultShaderProvider implements GameShaders {
-    private final GeomShaderConfig config;
+    protected final GeomShaderConfig config;
 
     public ModelShaders(final GeomShaderConfig config) {
         super(config);

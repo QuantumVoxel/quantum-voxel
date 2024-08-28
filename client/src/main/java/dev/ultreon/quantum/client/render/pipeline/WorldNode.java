@@ -15,7 +15,7 @@ import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;

@@ -4,7 +4,19 @@
             "type": "gradle",
             "name": "Run Client",
             "tasks": ["runClient"],
-            "args": ["--console=plain"],
+            "args": ["--console=plain"]
+        },
+        {
+            "type": "gradle",
+            "name": "Run Client Alt",
+            "tasks": ["runClientAlt"],
+            "args": ["--console=plain"]
+        },
+        {
+            "type": "gradle",
+            "name": "Run Server",
+            "tasks": ["runServer"],
+            "args": ["--console=plain"]
         }
     ]
 }

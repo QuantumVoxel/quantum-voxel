@@ -5,14 +5,14 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelObject;
-import dev.ultreon.quantum.client.render.shader.GameShaders;
-import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
+import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 
 public class SceneShaders extends DefaultShaderProvider implements GameShaders {
@@ -52,30 +52,16 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
         return switch (userData) {
-            case QVModel qvModel -> {
-                yield qvModel.getShaderProvider().createShader(renderable);
-            }
-            case SkyboxShaders provider -> {
-                yield provider.createShader(renderable);
-            }
-            case GameShaders provider -> {
-                yield provider.createShader(renderable);
-            }
-            case ItemModel itemModel -> {
-                yield Shaders.MODEL_VIEW.get().createShader(renderable);
-            }
-            case BlockModel blockModel -> {
-                yield Shaders.MODEL_VIEW.get().createShader(renderable);
-            }
-            case Shader shader -> {
-                yield shader;
-            }
-            case ModelObject modelObject -> {
-                yield modelObject.shaderProvider().createShader(renderable);
-            }
-            case null, default -> {
-                yield new DefaultShader(renderable, new DefaultShader.Config());
-            }
+            case Gizmo gizmo ->
+                gizmo.outline ? Shaders.GIZMO_OUTLINE.get().createShader(renderable) : Shaders.GIZMO.get().createShader(renderable);
+            case QVModel qvModel -> qvModel.getShaderProvider().createShader(renderable);
+            case SkyboxShaders provider -> provider.createShader(renderable);
+            case GameShaders provider -> provider.createShader(renderable);
+            case ItemModel itemModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
+            case BlockModel blockModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
+            case Shader shader -> shader;
+            case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
+            case null, default -> new DefaultShader(renderable, new DefaultShader.Config());
         };
     }
 }

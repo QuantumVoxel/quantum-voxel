@@ -23,7 +23,6 @@ import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
-import dev.ultreon.quantum.network.packets.c2s.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -147,6 +146,7 @@ public class LocalPlayer extends ClientPlayer {
         for (ClientChunkAccess chunk : this.world.getLoadedChunks()) {
             if (chunk.getVec().dst(chunkVec) > renderDistance) {
                 this.unloadChunk(chunk);
+                this.client.connection.send(new C2SUnloadChunkPacket(chunk.getVec()));
             }
         }
 

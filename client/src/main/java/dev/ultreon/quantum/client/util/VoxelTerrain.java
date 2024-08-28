@@ -646,6 +646,11 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
+    public void renderForeground(ModelBatch modelBatch, float deltaTime) {
+        
+    }
+
+    @Override
     public void dispose() {
 
     }

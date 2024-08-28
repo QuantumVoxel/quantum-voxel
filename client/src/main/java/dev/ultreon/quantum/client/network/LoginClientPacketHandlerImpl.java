@@ -11,7 +11,6 @@ import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.entity.EntityTypes;
-import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.client.LoginClientPacketHandler;
@@ -45,18 +44,16 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
         float health = packet.getHealth();
         float hunger = packet.getHunger(); // TODO
 
-        ClientWorld clientWorld = new ClientWorld(this.client);
-        this.client.world = clientWorld;
         this.client.inspection.createNode("world", () -> this.client.world);
 
-        var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, clientWorld, uuid);
+        var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, this.client.world, uuid);
         ClientPlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
 
         player.setPosition(spawnPos.x, spawnPos.y, spawnPos.z);
         player.setHealth(health);
         player.setGameMode(gameMode);
 
-        clientWorld.spawn(player);
+        this.client.world.spawn(player);
 
         IConnection.LOGGER.info("Logged in with uuid: {}", uuid);
 
@@ -68,8 +65,11 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
         } else {
             QuantumClient.invoke(() -> {
                 this.client.renderWorld = true;
-                ClientWorldAccess world1 = this.client.world;
-                this.client.worldRenderer = new WorldRenderer(clientWorld);
+                ClientWorldAccess clientWorldAccess = this.client.world;
+                ClientWorldAccess world1 = clientWorldAccess;
+                if (clientWorldAccess instanceof ClientWorld clientWorld) {
+                    this.client.worldRenderer = new WorldRenderer(clientWorld);
+                }
                 this.client.showScreen(null);
             });
         }

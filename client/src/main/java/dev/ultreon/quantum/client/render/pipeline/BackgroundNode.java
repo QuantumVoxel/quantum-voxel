@@ -11,7 +11,7 @@ import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.util.Vec3d;

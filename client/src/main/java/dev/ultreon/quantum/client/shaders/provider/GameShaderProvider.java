@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.render.shader;
+package dev.ultreon.quantum.client.shaders.provider;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
@@ -14,7 +14,7 @@ public class GameShaderProvider extends BaseShaderProvider {
     }
 
     @Override
-    protected Shader createShader(Renderable renderable) {
+    public Shader createShader(Renderable renderable) {
         GameShaders gameShaders = ShaderContext.get();
         Shader shader = gameShaders.createShader(renderable);
         if (shader == null) throw new IllegalStateException("Shader not found");

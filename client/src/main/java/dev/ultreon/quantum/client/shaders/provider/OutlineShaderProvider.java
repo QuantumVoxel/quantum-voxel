@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.render.shader;
+package dev.ultreon.quantum.client.shaders.provider;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -21,9 +21,8 @@ public class OutlineShaderProvider extends DefaultShaderProvider implements Game
                 QuantumClient.resource(QuantumClient.id("shaders/outline.frag")).readString(),
                 QuantumClient.resource(QuantumClient.id("shaders/outline.geom")).readString()
         ));
-        if (!outlineShader.program.isCompiled()) {
+        if (!outlineShader.program.isCompiled())
             Gdx.app.error("OutlineShader", outlineShader.program.getLog());
-        }
         return outlineShader;
     }
 }

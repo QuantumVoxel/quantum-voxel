@@ -2,9 +2,13 @@ package dev.ultreon.quantum.client;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.debug.BoxGizmo;
+import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.gui.Notification;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.world.ClientWorld;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
@@ -12,8 +16,10 @@ import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerSetPosPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -23,12 +29,15 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class IntegratedServer extends QuantumServer {
     private final QuantumClient client = QuantumClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
+    private Timer timer = new Timer();
 
     /**
      * Constructs a new IntegratedServer with the given WorldStorage.
@@ -294,6 +303,150 @@ public class IntegratedServer extends QuantumServer {
     @Override
     public void fatalCrash(Throwable throwable) {
         QuantumClient.crash(throwable);
+    }
+
+    @Override
+    public void onChunkBuilt(ServerChunk builtChunk) {
+        super.onChunkBuilt(builtChunk);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess terrainRenderer = this.client.world;
+            if (terrainRenderer instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("built-chunk");
+                gizmo.color.set(1F, 0.8F, 0F, 1F);
+                gizmo.position.set(builtChunk.getOffset().vec().d().add(8, 8, 8));
+                gizmo.size.set(15.5f, 15.5f, 15.5f);
+                gizmo.outline = true;
+                clientWorld.addGizmo(gizmo);
+
+                this.timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clientWorld.removeGizmo(gizmo);
+                    }
+                }, 10000L);
+            }
+        });
+    }
+
+    @Override
+    public void onChunkLoadRequested(ChunkVec globalVec) {
+        super.onChunkLoadRequested(globalVec);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess terrainRenderer = this.client.world;
+            if (terrainRenderer instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("request-chunk");
+                gizmo.color.set(0F, 0F, 1F, 1F);
+                gizmo.position.set(globalVec.blockInWorldSpace(0, 0, 0).vec().d().add(8, 8, 8));
+                gizmo.size.set(16, 16, 16);
+                gizmo.outline = true;
+                clientWorld.addGizmo(gizmo);
+
+                this.timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clientWorld.removeGizmo(gizmo);
+                    }
+                }, 10000L);
+            }
+        });
+    }
+
+    @Override
+    public void onChunkSent(ServerChunk serverChunk) {
+        super.onChunkSent(serverChunk);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess terrainRenderer = this.client.world;
+            if (terrainRenderer instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("sent-chunk");
+                gizmo.color.set(0F, 1F, 0F, 1F);
+                gizmo.position.set(serverChunk.getOffset().vec().d().add(8, 8, 8));
+                gizmo.size.set(15.5f, 15.5f, 15.5f);
+                gizmo.outline = true;
+                clientWorld.addGizmo(gizmo);
+
+                this.timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clientWorld.removeGizmo(gizmo);
+                    }
+                }, 10000L);
+            }
+        });
+    }
+
+    @Override
+    public void onChunkUnloaded(ServerChunk unloadedChunk) {
+        super.onChunkUnloaded(unloadedChunk);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess terrainRenderer = this.client.world;
+            if (terrainRenderer instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("unloaded-chunk");
+                gizmo.color.set(1.0F, 0.5F, 1F, 1F);
+                gizmo.position.set(unloadedChunk.getOffset().vec().d().add(8, 8, 8));
+                gizmo.size.set(15.5f, 15.5f, 15.5f);
+                gizmo.outline = true;
+                clientWorld.addGizmo(gizmo);
+
+                this.timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clientWorld.removeGizmo(gizmo);
+                    }
+                }, 10000L);
+            }
+        });
+    }
+
+    @Override
+    public void onChunkLoaded(ServerChunk loadedChunk) {
+        super.onChunkLoaded(loadedChunk);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess terrainRenderer = this.client.world;
+            if (terrainRenderer instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("loaded-chunk");
+                gizmo.color.set(0F, 1.0F, 1F, 1F);
+                gizmo.position.set(loadedChunk.getOffset().vec().d());
+                gizmo.size.set(16, 16, 16);
+                gizmo.outline = true;
+                clientWorld.addGizmo(gizmo);
+
+                this.timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clientWorld.removeGizmo(gizmo);
+                    }
+                }, 10000L);
+            }
+        });
+    }
+
+    @Override
+    public void onChunkFailedToLoad(Vec3d d) {
+        super.onChunkFailedToLoad(d);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess terrainRenderer = this.client.world;
+            if (terrainRenderer instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("failed-chunk");
+                gizmo.color.set(1F, 0F, 1F, 1F);
+                gizmo.position.set(d.add(8, 8, 8));
+                gizmo.size.set(15, 15, 15);
+                gizmo.outline = true;
+                clientWorld.addGizmo(gizmo);
+
+                this.timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clientWorld.removeGizmo(gizmo);
+                    }
+                }, 10000L);
+            }
+        });
     }
 
     public QuantumClient getClient() {

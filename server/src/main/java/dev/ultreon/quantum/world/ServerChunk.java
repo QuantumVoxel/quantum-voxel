@@ -9,6 +9,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CChunkDataPacket;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
@@ -182,7 +183,14 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
+        if (!isBeingTracked()) {
+            this.world.unloadChunk(this, this.getVec());
+            return;
+        }
+
+        this.world.getServer().onChunkSent(this);
         this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage, this.biomeStorage, this.getBlockEntities()));
+
     }
 
     public void tick() {
@@ -200,5 +208,9 @@ public final class ServerChunk extends Chunk {
         for (BlockEntity blockEntity : blockEntities) {
             blockEntity.tick();
         }
+    }
+
+    public void stopTracking(ServerPlayer serverPlayer) {
+        this.tracker.stopTracking(serverPlayer);
     }
 }
