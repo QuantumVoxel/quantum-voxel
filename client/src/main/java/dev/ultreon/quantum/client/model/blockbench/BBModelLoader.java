@@ -4,13 +4,11 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec4f;
@@ -29,6 +27,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BBModelLoader implements ModelImporter {
     private static final Matrix4 TEMP_MATRIX = new Matrix4();
@@ -285,7 +284,7 @@ public class BBModelLoader implements ModelImporter {
         String renderOrder = meshJson.getAsJsonPrimitive("render_order").getAsString();
         boolean allowMirrorModeling = meshJson.getAsJsonPrimitive("allow_mirror_modeling").getAsBoolean();
 
-        Map<String, BBModelVertex> vertices = loadVertices(meshJson.getAsJsonObject("vertices"));
+        LinkedHashMap<String, BBModelVertex> vertices = loadVertices(meshJson.getAsJsonObject("vertices"));
 
         List<BBModelMeshFace> faces = loadMeshFaces(vertices, meshJson.getAsJsonObject("faces"));
 
@@ -294,7 +293,7 @@ public class BBModelLoader implements ModelImporter {
         return new BBMeshModelElement(name, color, origin, rotation, export, visibility, locked, renderOrder, allowMirrorModeling, faces, uuid);
     }
 
-    private List<BBModelMeshFace> loadMeshFaces(Map<String, BBModelVertex> vertices, JsonObject faces) {
+    private List<BBModelMeshFace> loadMeshFaces(LinkedHashMap<String, BBModelVertex> vertices, JsonObject faces) {
         List<BBModelMeshFace> processed = new ArrayList<>();
         for (Map.Entry<String, JsonElement> elem : faces.entrySet()) {
             BBModelMeshFace e = this.loadMeshFace(vertices, elem.getValue().getAsJsonObject());
@@ -338,8 +337,8 @@ public class BBModelLoader implements ModelImporter {
         return new BBModelMeshFace(mappedUVs, Collections.unmodifiableList(vertices), texture.getAsInt());
     }
 
-    private Map<String, BBModelVertex> loadVertices(JsonObject vertices) {
-        Map<String, BBModelVertex> processed = new HashMap<>();
+    private LinkedHashMap<String, BBModelVertex> loadVertices(JsonObject vertices) {
+        LinkedHashMap<String, BBModelVertex> processed = new LinkedHashMap<>();
         for (Map.Entry<String, JsonElement> elem : vertices.entrySet()) {
             processed.put(elem.getKey(), this.loadVertex(elem.getValue().getAsJsonArray()));
         }

@@ -661,6 +661,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             Gdx.gl.glCullFace(GL_NONE);
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(batch, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
+
+            model.update(Gdx.graphics.getDeltaTime());
+
             renderer.animate(instance, context);
             renderer.render(instance, context);
 

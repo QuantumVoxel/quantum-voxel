@@ -1,8 +1,15 @@
 package dev.ultreon.quantum.client.registry;
 
+import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.ModelLoader;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
+import com.badlogic.gdx.utils.BaseJsonReader;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.JsonReader;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import dev.ultreon.quantum.client.model.blockbench.BBModelLoader;
@@ -23,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
+    public static final G3dModelLoader MODEL_LOADER = new G3dModelLoader(new JsonReader());
     private final Map<EntityType<?>, EntityModel<?>> registry = new HashMap<>();
     private final Map<EntityType<?>, NamespaceID> g3dRegistry = new HashMap<>();
     private final Map<EntityType<?>, NamespaceID> gltfRegistry = new HashMap<>();
@@ -100,7 +108,23 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
 
         for (Map.Entry<EntityType<?>, NamespaceID> e : this.bbModelRegistry.entrySet()) {
             NamespaceID id = e.getValue();
-            Model model = blockBenchModel(id.mapPath(path -> "entity/" + path));
+            NamespaceID mappedId = id.mapPath(path -> "models/entity/" + path + ".g3dj");
+
+            Model model = QuantumClient.invokeAndWait(() -> MODEL_LOADER.loadModel(new ResourceFileHandle(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
+                if (path.startsWith("models/entity/")) {
+                    path = path.substring("models/entity/".length());
+                } else if (path.startsWith(mappedId.toString())) {
+                    path = path.substring(mappedId.toString().length());
+                } else {
+                    String string = mappedId.toString();
+                    int len = string.length() - path.length() - ".g3dj".length();
+                    if (path.startsWith(string.substring(0, len))) {
+                        path = path.substring(len);
+                    }
+                }
+
+                return "textures/entity/" + path;
+            }))));
             this.finishedRegistry.put(e.getKey(), model);
         }
 
@@ -109,7 +133,23 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
     }
 
     private Model blockBenchModel(NamespaceID id) {
-        return new BBModelLoader(id.mapPath(path -> "models/" + path + ".bbmodel")).createModel();
+        NamespaceID mappedId = id.mapPath(path -> "models/" + path + ".g3dj");
+
+        return MODEL_LOADER.loadModel(new ResourceFileHandle(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
+            if (path.startsWith("models/")) {
+                path = path.substring("models/".length());
+            } else if (path.startsWith(mappedId.toString())) {
+                path = path.substring(mappedId.toString().length());
+            } else {
+                String string = mappedId.toString();
+                int len = string.length() - path.length() - ".g3dj".length();
+                if (path.startsWith(string.substring(0, len))) {
+                    path = path.substring(len);
+                }
+            }
+
+            return "textures/" + path;
+        })));
     }
 
     @Override
