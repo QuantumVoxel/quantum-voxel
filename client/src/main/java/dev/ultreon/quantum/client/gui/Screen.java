@@ -21,7 +21,7 @@ public abstract class Screen extends UIContainer<Screen> {
     private static final Color BACKGOUND_OVERLAY = new Color(0, 0, 0, 0.25f);
     private static final Color DIALOG_BACKGROUND = new Color(0, 0, 0, 0.45f);
     protected @Nullable TextObject title;
-    public Screen parentScreen;
+    public @Nullable Screen parentScreen;
     public Widget directHovered;
     public @Nullable Widget focused;
     @Nullable
@@ -36,11 +36,11 @@ public abstract class Screen extends UIContainer<Screen> {
         this(title, QuantumClient.get().screen);
     }
 
-    protected Screen(@Nullable String title, Screen parent) {
+    protected Screen(@Nullable String title, @Nullable Screen parent) {
         this(title == null ? null : TextObject.literal(title), parent);
     }
 
-    protected Screen(@Nullable TextObject title, Screen parent) {
+    protected Screen(@Nullable TextObject title, @Nullable Screen parent) {
         super(Screen.width(), Screen.height());
         this.parentScreen = parent;
         this.root = this;
@@ -54,6 +54,15 @@ public abstract class Screen extends UIContainer<Screen> {
         }
         this.size.set(width, height);
         this.revalidate();
+        this.resized(width, height);
+    }
+
+    protected void init() {
+
+    }
+
+    public void resized(int width, int height) {
+
     }
 
     @Override
@@ -114,9 +123,13 @@ public abstract class Screen extends UIContainer<Screen> {
         GuiBuilder builder = new GuiBuilder(this);
         this.build(builder);
         this.revalidate();
+        this.init();
     }
 
-    public abstract void build(GuiBuilder builder);
+    @Deprecated
+    public void build(@NotNull GuiBuilder builder) {
+
+    }
 
     /**
      * Renders the background of this screen.

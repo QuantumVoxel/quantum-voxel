@@ -74,7 +74,7 @@ public class CrashScreen extends Screen {
      * @param builder the GuiBuilder used to construct the GUI
      */
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         // Define the size of each item in the list
         final int itemSize = 75;
 
@@ -101,8 +101,8 @@ public class CrashScreen extends Screen {
      * Overrides the superclass method and sets the width of the list to match the scaled width of the client.
      *
      * @param renderer the renderer to use for rendering
-     * @param mouseX the x coordinate of the mouse
-     * @param mouseY the y coordinate of the mouse
+     * @param mouseX the setX coordinate of the mouse
+     * @param mouseY the setY coordinate of the mouse
      * @param deltaTime the time that has passed since the last frame
      */
     @Override
@@ -117,9 +117,9 @@ public class CrashScreen extends Screen {
      *
      * @param renderer the renderer object
      * @param value the CrashLog object to render
-     * @param y the y-coordinate for rendering
-     * @param mouseX the x-coordinate of the mouse
-     * @param mouseY the y-coordinate of the mouse
+     * @param y the setY-coordinate for rendering
+     * @param mouseX the setX-coordinate of the mouse
+     * @param mouseY the setY-coordinate of the mouse
      * @param selected whether the log is selected
      * @param deltaTime the time difference for rendering
      */

@@ -117,6 +117,8 @@ dependencies {
 
     // OSHI
     api("com.github.oshi:oshi-core:6.6.1")
+
+    api("io.github.libsdl4j:libsdl4j:$libsdl4j_version")
 }
 
 processResources {

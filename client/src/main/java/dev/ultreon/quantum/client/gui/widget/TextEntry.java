@@ -19,7 +19,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.client.QuantumClient.id;
-import static dev.ultreon.quantum.client.input.DesktopInput.*;
+import static dev.ultreon.quantum.client.input.KeyAndMouseInput.*;
 
 public class TextEntry extends Widget {
     private CharPredicate filter = c -> true;

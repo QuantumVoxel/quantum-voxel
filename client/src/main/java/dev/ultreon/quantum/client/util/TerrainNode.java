@@ -42,6 +42,7 @@ import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.Heightmap;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
     public static final int TERRAIN_SIZE = 16;
@@ -484,6 +485,11 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
         return materials.get(tmp3i.x + tmp3i.y * TERRAIN_SIZE + tmp3i.z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
+    @Override
+    public boolean isLoaded() {
+        return true;
+    }
+
     public Mesh getMesh() {
         return mesh;
     }
@@ -521,7 +527,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
 
     @Override
     public ChunkVec getVec() {
-        return new ChunkVec(x, y, z);
+        return new ChunkVec(x, y, z, ChunkVecSpace.WORLD);
     }
 
     @Override
@@ -535,18 +541,8 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockState block) {
-        return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
-    }
-
-    @Override
     public boolean set(int x, int y, int z, BlockState block) {
         return materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, block);
-    }
-
-    @Override
-    public BlockState getFast(int x, int y, int z) {
-        return materials.get(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE);
     }
 
     @Override

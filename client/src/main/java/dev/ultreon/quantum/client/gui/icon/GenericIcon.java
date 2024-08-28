@@ -9,6 +9,7 @@ public final class GenericIcon implements Icon {
     public static final GenericIcon LOCKED = new GenericIcon(16, 16, 0, 0);
     public static final GenericIcon UNLOCKED = new GenericIcon(16, 16, 16, 0);
     public static final GenericIcon RELOAD = new GenericIcon(16, 16, 0, 16);
+    public static final GenericIcon RESET = new GenericIcon(16, 16, 16, 16);
     private final int width;
     private final int height;
     private final int u;

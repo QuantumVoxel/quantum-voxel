@@ -1,7 +1,9 @@
 package dev.ultreon.quantum.menu;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Item slot for {@link ContainerMenu}.
@@ -125,5 +127,13 @@ public class ItemSlot {
     public void grow(int amount) {
         this.item.grow(amount);
         this.container.onItemChanged(this);
+    }
+
+    public boolean mayPickup(Player player) {
+        return true;
+    }
+
+    public boolean mayPlace(ItemStack carried) {
+        return true;
     }
 }

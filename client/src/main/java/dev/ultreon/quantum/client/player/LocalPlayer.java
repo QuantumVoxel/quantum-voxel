@@ -10,7 +10,6 @@ import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
-import dev.ultreon.quantum.client.input.util.ControllerButton;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -70,8 +69,7 @@ public class LocalPlayer extends ClientPlayer {
         if (!this.client.renderWorld) return;
 
         // Determine if the player is jumping based on input
-        this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched() || GameInput.isControllerButtonDown(ControllerButton.A));
-
+        this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched());
 
         var connection = this.client.connection;
         if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {

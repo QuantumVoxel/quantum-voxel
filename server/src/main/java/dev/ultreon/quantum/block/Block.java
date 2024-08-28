@@ -235,6 +235,10 @@ public class Block implements DataWriter<MapType> {
         return lightReduction;
     }
 
+    public boolean canUse(Player player) {
+        return false;
+    }
+
     public static class Properties {
         private boolean greedyMerge = true;
         private boolean occlude = true;

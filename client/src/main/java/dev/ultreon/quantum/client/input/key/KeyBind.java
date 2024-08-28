@@ -1,7 +1,10 @@
 package dev.ultreon.quantum.client.input.key;
 
 import com.badlogic.gdx.Input.Keys;
-import dev.ultreon.quantum.client.input.DesktopInput;
+import dev.ultreon.quantum.client.input.GameInput;
+import dev.ultreon.quantum.client.input.KeyAndMouseInput;
+import dev.ultreon.quantum.client.input.controller.ControllerInput;
+import dev.ultreon.quantum.client.input.controller.ControllerMapping;
 
 import java.util.function.Predicate;
 
@@ -13,6 +16,10 @@ public class KeyBind {
     private int modifiers;
     private Type type;
     private int keyCode;
+    private boolean down;
+    private int clicks;
+
+    private ControllerMapping<?> mapping = null;
 
     public KeyBind(String name, int keyCode, Type type) {
         this(name, keyCode, 0);
@@ -27,19 +34,29 @@ public class KeyBind {
     }
 
     public boolean isPressed() {
+        if (GameInput.getCurrent() instanceof ControllerInput) {
+            return mapping != null && mapping.getAction().isPressed();
+        }
         return type.pressed.test(this);
     }
 
     public boolean isReleased() {
+        if (GameInput.getCurrent() instanceof ControllerInput) {
+            return mapping != null && !mapping.getAction().isPressed();
+        }
         return !type.pressed.test(this);
     }
 
     public boolean isJustPressed() {
-        if ((modifiers & SHIFT_MOD) != 0 && !DesktopInput.isKeyPressed(Keys.SHIFT_LEFT) && !DesktopInput.isKeyPressed(Keys.SHIFT_RIGHT))
+        if (GameInput.getCurrent() instanceof ControllerInput) {
+            return mapping != null && mapping.getAction().isJustPressed();
+        }
+
+        if ((modifiers & SHIFT_MOD) != 0 && !KeyAndMouseInput.isKeyPressed(Keys.SHIFT_LEFT) && !KeyAndMouseInput.isKeyPressed(Keys.SHIFT_RIGHT))
             return false;
-        if ((modifiers & CTRL_MOD) != 0 && !DesktopInput.isKeyPressed(Keys.CONTROL_LEFT) && !DesktopInput.isKeyPressed(Keys.CONTROL_RIGHT))
+        if ((modifiers & CTRL_MOD) != 0 && !KeyAndMouseInput.isKeyPressed(Keys.CONTROL_LEFT) && !KeyAndMouseInput.isKeyPressed(Keys.CONTROL_RIGHT))
             return false;
-        if ((modifiers & ALT_MOD) != 0 && !DesktopInput.isKeyPressed(Keys.ALT_LEFT) && !DesktopInput.isKeyPressed(Keys.ALT_RIGHT))
+        if ((modifiers & ALT_MOD) != 0 && !KeyAndMouseInput.isKeyPressed(Keys.ALT_LEFT) && !KeyAndMouseInput.isKeyPressed(Keys.ALT_RIGHT))
             return false;
         return type.justPressed.test(this);
     }
@@ -68,9 +85,19 @@ public class KeyBind {
         return this.keyCode == keyCode;
     }
 
+    public void release() {
+        this.down = false;
+        this.clicks = 0;
+    }
+
+    public void press() {
+        this.down = true;
+        this.clicks++;
+    }
+
     public enum Type {
-        KEY(key -> DesktopInput.isKeyJustPressed(key.keyCode), key -> DesktopInput.isKeyPressed(key.keyCode)),
-        MOUSE(key -> DesktopInput.isButtonJustPressed(key.keyCode), key -> DesktopInput.isButtonPressed(key.keyCode));
+        KEY(key -> KeyAndMouseInput.isKeyJustPressed(key.keyCode), key -> KeyAndMouseInput.isKeyPressed(key.keyCode)),
+        MOUSE(key -> KeyAndMouseInput.isButtonJustPressed(key.keyCode), key -> KeyAndMouseInput.isButtonPressed(key.keyCode));
 
         private final Predicate<KeyBind> justPressed;
         private final Predicate<KeyBind> pressed;

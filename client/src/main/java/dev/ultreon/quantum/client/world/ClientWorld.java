@@ -44,20 +44,23 @@ import static java.lang.Math.max;
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public final class ClientWorld extends World implements Disposable, ClientWorldAccess {
     public static final int DAY_CYCLE = 24000;
+
     public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
+    public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(2048, 2048));
     public static final AtomicDouble FOG_DENSITY = new AtomicDouble(0.001);
     public static final AtomicDouble FOG_START = new AtomicDouble(0.0);
     public static final AtomicDouble FOG_END = new AtomicDouble(1.0);
-    public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(2048, 2048));
-    //                                                                           off.get().set(f(1 - 1 / size.get().x * size.get().x * 2 / 87), 1)
-    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
-    public static Rot SKYBOX_ROTATION = deg(-60);
+
     public static final Color DAY_TOP_COLOR = new Color(0x7fb0feff);
     public static final Color DAY_BOTTOM_COLOR = new Color(0xc1d3f1ff);
     public static final Color NIGHT_TOP_COLOR = new Color(0x01010bff);
     public static final Color NIGHT_BOTTOM_COLOR = new Color(0x0a0c16ff);
     public static final Color SUN_RISE_COLOR = new Color(0xff3000ff);
     public static final Color VOID_COLOR = new Color(0x0a0a0aff);
+
+    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
+
+    public static Rot SKYBOX_ROTATION = deg(-60);
     public static int VOID_Y_START = 20;
     public static int VOID_Y_END = 0;
     @NotNull
@@ -105,8 +108,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         // Try to remove the chunk from the chunk map
-        this.rwLock.writeLock().lock();
-        try {
+        synchronized (this.chunks){
             ClientChunk removedChunk = this.chunks.remove(pos);
             boolean removed = removedChunk != null;
             if (removed) {
@@ -119,29 +121,24 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
                     LOGGER.warn("Removed chunk mismatch: {} != {}", removedChunk, chunk);
 
                 this.totalChunks--;
+                removedChunk.dispose();
             }
+
 
             // Return true if the chunk was removed, false otherwise
             return removed;
-        } finally {
-            this.rwLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void checkThread() {
-//        if (!QuantumClient.isOnRenderThread())
-//            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
+
     }
 
     @Override
     public @Nullable ClientChunk getChunk(@NotNull ChunkVec pos) {
-        this.rwLock.readLock().lock();
-
-        try {
+        synchronized (this.chunks) {
             return this.chunks.get(pos);
-        } finally {
-            this.rwLock.readLock().unlock();
         }
     }
 
@@ -256,8 +253,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * Plays a sound at a specific position.
      *
      * @param sound The sound event to be played.
-     * @param x     The x position of the sound.
-     * @param y     The y position of the sound.
+     * @param x     The setX position of the sound.
+     * @param y     The setY position of the sound.
      * @param z     The z position of the sound.
      */
     @Override
@@ -285,8 +282,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     /**
      * Sets the block at the specified position to the given block properties.
      *
-     * @param x The x-coordinate of the block position.
-     * @param y The y-coordinate of the block position.
+     * @param x The setX-coordinate of the block position.
+     * @param y The setY-coordinate of the block position.
      * @param z The z-coordinate of the block position.
      * @param block The block properties to set.
      * @param flags Flags indicating how the block should be set.
@@ -552,8 +549,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * Fills a region with light starting from a given position.
      * Uses a breadth-first search algorithm to traverse the region.
      *
-     * @param startX The x-coordinate of the starting position.
-     * @param startY The y-coordinate of the starting position.
+     * @param startX The setX-coordinate of the starting position.
+     * @param startY The setY-coordinate of the starting position.
      * @param startZ The z-coordinate of the starting position.
      * @param light  The initial light intensity.
      */
@@ -595,8 +592,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * Adds a new position to the queue to be processed in the floodfill algorithm.
      *
      * @param queue     The queue of positions to be processed.
-     * @param x         The x-coordinate of the new position.
-     * @param y         The y-coordinate of the new position.
+     * @param x         The setX-coordinate of the new position.
+     * @param y         The setY-coordinate of the new position.
      * @param z         The z-coordinate of the new position.
      * @param intensity The light intensity of the new position.
      */
@@ -696,6 +693,15 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
     }
 
+    @Override
+    public boolean isLoaded(@NotNull Chunk chunk) {
+        if (chunk instanceof ClientChunk clientChunk) {
+            return this.chunks.containsValue(clientChunk);
+        }
+
+        return false;
+    }
+
     private void updateSunlight(int blockX, int blockY, int blockZ, boolean isAdded) {
         if (blockY >= 256) return;
 
@@ -751,8 +757,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * Updates the sunlight of a neighboring block and adds it to the queue.
      *
      * @param queue        The queue to add the block to.
-     * @param x            The x-coordinate of the block.
-     * @param y            The y-coordinate of the block.
+     * @param x            The setX-coordinate of the block.
+     * @param y            The setY-coordinate of the block.
      * @param z            The z-coordinate of the block.
      * @param currentLight The current sunlight of the block.
      * @param reduction    The amount of sunlight to reduce.
@@ -818,12 +824,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      */
     public void loadChunk(ChunkVec pos, ClientChunk data) {
         // Get the current chunk at the given position
-        this.rwLock.readLock().lock();
         ClientChunk chunk;
-        try {
+        synchronized (this.chunks) {
             chunk = this.chunks.get(pos);
-        } finally {
-            this.rwLock.readLock().unlock();
         }
 
         // If the chunk doesn't exist, set it to the new data
@@ -831,7 +834,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             chunk = data;
         } else {
             // If the chunk already exists, log a warning and return
-            World.LOGGER.warn("Duplicate chunk packet detected! Chunk {}", pos);
             unloadChunk(chunk, pos);
             return;
         }
@@ -846,8 +848,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         // Calculate the distance between the chunk and the player
-        this.rwLock.writeLock().lock();
-        try {
+        synchronized (this.chunks) {
             if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance) {
                 player.pendingChunks.remove(pos);
 
@@ -866,8 +867,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             chunk.ready();
             // Send a success chunk status packet
             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
-        } finally {
-            this.rwLock.writeLock().unlock();
         }
     }
 
@@ -979,11 +978,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public void dispose() {
-        this.checkThread();
-
         super.dispose();
 
-        synchronized (this) {
+        synchronized (this.chunks) {
             this.chunks.forEach((ChunkVec, clientChunk) -> clientChunk.dispose());
             this.chunks.clear();
         }

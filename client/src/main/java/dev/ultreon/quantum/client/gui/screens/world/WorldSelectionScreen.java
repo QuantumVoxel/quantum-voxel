@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.screens.world;
 
-import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
@@ -9,11 +8,11 @@ import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.WorldStorage;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ public class WorldSelectionScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         this.worldList = builder.add(WorldCardList.create(() -> calculateMaxEntries(this.size.width)))
                 .worlds(this.locateWorlds())
                 .selectable(true)

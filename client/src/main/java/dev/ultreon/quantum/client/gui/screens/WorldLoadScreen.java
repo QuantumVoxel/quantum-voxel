@@ -15,7 +15,6 @@ import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -47,7 +46,7 @@ public class WorldLoadScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         IntegratedServer server = new IntegratedServer(this.storage);
         this.client.integratedServer = server;
         this.world = server.getWorld();

@@ -231,5 +231,40 @@
   "quantum.misc.mebibytes": " MiB",
   "quantum.misc.gibibytes": " GiB",
   "quantum.misc.tebibytes": " TiB",
-  "quantum.misc.pebibytes": " PiB"
+  "quantum.misc.pebibytes": " PiB",
+
+  "quantum.controller.action.ingame.jump": "Jump",
+  "quantum.controller.action.ingame.sneak": "Sneak",
+  "quantum.controller.action.ingame.sprint": "Sprint",
+  "quantum.controller.action.ingame.move": "Move",
+  "quantum.controller.action.ingame.look": "Look",
+  "quantum.controller.action.ingame.inventory": "Open Inventory",
+  "quantum.controller.action.ingame.chat": "Open Chat",
+  "quantum.controller.action.ingame.perspective": "Change Perspective",
+  "quantum.controller.action.ingame.hotbar.left": "Hotbar Left",
+  "quantum.controller.action.ingame.hotbar.right": "Hotbar Right",
+  "quantum.controller.action.ingame.drop": "Drop Item",
+  "quantum.controller.action.ingame.destroy": "Destroy Block",
+  "quantum.controller.action.ingame.place": "Place Block",
+  "quantum.controller.action.ingame.use": "Use Item",
+
+  "quantum.controller.action.menu.joystick_move": "Move Selection (Joystick)",
+  "quantum.controller.action.menu.dpad_move": "Move Selection (D-Pad)",
+  "quantum.controller.action.menu.activate": "Activate",
+  "quantum.controller.action.menu.scroll_y": "Scroll",
+  "quantum.controller.action.menu.close_inventory": "Close",
+  "quantum.controller.action.menu.back": "Back",
+  "quantum.controller.action.menu.close": "Close",
+  "quantum.controller.action.menu.pickup": "Pickup Item",
+  "quantum.controller.action.menu.place": "Place Item",
+  "quantum.controller.action.menu.split": "Split Item",
+  "quantum.controller.action.menu.drop": "Drop Item",
+  "quantum.controller.action.menu.drop_stack": "Drop Stack",
+  "quantum.controller.action.menu.putSingle": "Put Single Item",
+
+  "quantum.message.controller_connected.title": "Controller Connected",
+  "quantum.message.controller_connected.text": "The controller %1$s has been connected.",
+
+  "quantum.message.controller_disconnected.title": "Controller Disconnected",
+  "quantum.message.controller_disconnected.text": "A controller has been disconnected."
 }

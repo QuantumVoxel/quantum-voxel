@@ -44,7 +44,7 @@ public class ModListScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         this.list = builder.add(new SelectionList<Mod>()
                 .itemHeight(48)
                 .drawBackground(false)

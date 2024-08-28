@@ -9,7 +9,7 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
+import org.jetbrains.annotations.NotNull;
 
 public class ModImportFailedScreen extends Screen {
     public ModImportFailedScreen() {
@@ -17,7 +17,7 @@ public class ModImportFailedScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(ColorCode.RED).position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
                 .scale(2));
 

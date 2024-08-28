@@ -13,7 +13,7 @@ import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.WindowEvents;
-import dev.ultreon.quantum.client.input.DesktopInput;
+import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.js.JsLang;
@@ -95,7 +95,7 @@ public class DesktopLauncher {
 
         CrashHandler.addHandler(crashLog -> {
             try {
-                DesktopInput.setCursorCaught(false);
+                KeyAndMouseInput.setCursorCaught(false);
                 Lwjgl3Graphics graphics = (Lwjgl3Graphics) Gdx.graphics;
                 graphics.getWindow().setVisible(false);
             } catch (Exception e) {

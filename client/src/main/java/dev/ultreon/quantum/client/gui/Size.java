@@ -56,7 +56,7 @@ public class Size implements Copyable<Size> {
 
     @Override
     public String toString() {
-        return "(" + this.width + " x " + this.height + ")";
+        return "(" + this.width + " setX " + this.height + ")";
     }
 
     @Override

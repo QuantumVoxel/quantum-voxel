@@ -168,7 +168,7 @@ public class CreditsScreen extends TabbedUI {
             for (Widget widget : children()) {
                 widget.setPos(pos.x + x, pos.y + 5);
                 if (x == 0) {
-                    widget.y(pos.y + 9);
+                    widget.setY(pos.y + 9);
                     x += 85;
                 }
                 x += widget.getWidth() + 5;

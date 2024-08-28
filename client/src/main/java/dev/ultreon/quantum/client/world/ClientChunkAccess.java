@@ -38,4 +38,5 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     BlockState get(Vec3i tmp3i);
 
+    boolean isLoaded();
 }

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.input.DesktopInput;
+import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.world.TerrainNoise;
 import dev.ultreon.quantum.world.gen.CaveNoiseGenerator;
 import dev.ultreon.quantum.world.gen.HillinessNoise;
@@ -44,7 +44,7 @@ public class WorldGenTestPanel extends Rectangle {
 
     @Override
     public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
-        if (DesktopInput.isShiftDown()) {
+        if (KeyAndMouseInput.isShiftDown()) {
             z += rotation;
             revalidateImage();
             return true;
@@ -68,17 +68,17 @@ public class WorldGenTestPanel extends Rectangle {
         terrain.drawRectangle(0, 0, terrain.getWidth(), terrain.getHeight());
         for (int i = 0; i < size.width; i++) {
             int height = (int) ((terrainNoise.evaluateNoise(i + terrainX) - 64) * (hillinessNoise.evaluateNoise(i + terrainX) / 4.0f + 0.5f)) + 64;
-//            renderer.line(pos.x + i, size.height, pos.x + i, size.height - height, RgbColor.rgb(height <= 64 ? 0x0055aa : 0x55aa55));
+//            renderer.line(pos.setX + i, size.height, pos.setX + i, size.height - height, RgbColor.rgb(height <= 64 ? 0x0055aa : 0x55aa55));
 
             for (int y = 0; y < 256; y++) {
 //                boolean cave = false;
 //                double v = 1.0 - ((height - 70) / (70.0));
-//                double v1 = caveNoise.evaluateNoise(i + terrainX, y);
+//                double v1 = caveNoise.evaluateNoise(i + terrainX, setY);
 //                cave = !((v - v1) > 0.0) && v1 > 0.0;
                 boolean cave;
 //                double densityFx = 64.0;
 //                double v = 1.0 - ((height - densityFx) / densityFx);
-//                v *= ((height - (height - 7 - y))) / densityFx;
+//                v *= ((height - (height - 7 - setY))) / densityFx;
                 double v1 = caveNoise.evaluateNoise(i + terrainX, y, z);
 //                cave = !((v - v1) > 0.0) && v1 > 0.0;
                 cave = v1 > 0.0;

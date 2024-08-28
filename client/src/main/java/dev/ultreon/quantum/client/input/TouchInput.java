@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
@@ -19,9 +20,13 @@ import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec2i;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.IntStream;
 
-public class TouchscreenInput extends GameInput {
+public class TouchInput extends GameInput implements InputProcessor {
+    private static final Set<Integer> KEYS = new HashSet<>(Input.Keys.MAX_KEYCODE);
+
     public static final KeyBind PAUSE_KEY = KeyBinds.pauseKey;
     public static final KeyBind IM_GUI_KEY = KeyBinds.imGuiKey;
     public static final KeyBind IM_GUI_FOCUS_KEY = KeyBinds.imGuiFocusKey;
@@ -36,7 +41,7 @@ public class TouchscreenInput extends GameInput {
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
     private Vector2 cursorPos;
 
-    public TouchscreenInput(QuantumClient client, Camera camera) {
+    public TouchInput(QuantumClient client, Camera camera) {
         super(client, camera);
 
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
@@ -62,7 +67,7 @@ public class TouchscreenInput extends GameInput {
 
     @Override
     public boolean keyDown(int keyCode) {
-        super.keyDown(keyCode);
+        KEYS.add(keyCode);
 
         Screen currentScreen = this.client.screen;
         if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode))
@@ -80,7 +85,7 @@ public class TouchscreenInput extends GameInput {
 
     @Override
     public boolean keyUp(int keyCode) {
-        super.keyUp(keyCode);
+        KEYS.remove(keyCode);
 
         Screen currentScreen = this.client.screen;
         if (currentScreen != null)
@@ -91,15 +96,13 @@ public class TouchscreenInput extends GameInput {
 
     @Override
     public void update(float deltaTime) {
-        super.update(deltaTime);
-
         MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();
         if (mouseDevice != null)
             this.updateMouse(mouseDevice);
 
-        if (TouchscreenInput.PAUSE_KEY.isJustPressed() && Gdx.input.isCursorCatched()) {
+        if (TouchInput.PAUSE_KEY.isJustPressed() && Gdx.input.isCursorCatched()) {
             this.client.showScreen(new PauseScreen());
-        } else if (TouchscreenInput.PAUSE_KEY.isJustPressed() && !Gdx.input.isCursorCatched()) {
+        } else if (TouchInput.PAUSE_KEY.isJustPressed() && !Gdx.input.isCursorCatched()) {
             this.client.showScreen(null);
         }
 

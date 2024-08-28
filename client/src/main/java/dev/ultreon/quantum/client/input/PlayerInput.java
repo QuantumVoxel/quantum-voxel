@@ -3,13 +3,14 @@ package dev.ultreon.quantum.client.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.input.controller.ControllerContext;
+import dev.ultreon.quantum.client.input.controller.ControllerInput;
+import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
-import dev.ultreon.quantum.client.input.util.JoystickType;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerInput {
@@ -23,13 +24,7 @@ public class PlayerInput {
     public float moveY;
     private final Vector3 vel = new Vector3();
     private final Vector3 tmp = new Vector3();
-    private final QuantumClient client;
     private int flyCountdown = 0;
-
-
-    public PlayerInput(QuantumClient client) {
-        this.client = client;
-    }
 
     public void tick(@NotNull Player player, float speed) {
         this.vel.set(0, 0, 0);
@@ -71,19 +66,24 @@ public class PlayerInput {
     }
 
     private void controllerMove() {
-        if (!this.client.input.isControllerConnected() || this.moveX != 0 || this.moveY != 0)
+        if (!ControllerInput.isControllerConnected() || this.moveX != 0 || this.moveY != 0)
+            return;
+        if (!(GameInput.getCurrent() instanceof ControllerInput))
             return;
 
-        Vector2 joystick = GameInput.getJoystick(JoystickType.LEFT);
+        if (ControllerContext.get() instanceof InGameControllerContext context) {
+            Vector2 joystick = context.move.getAction().get2DValue();
 
-        if (joystick == null)
-            return;
+            if (joystick == null)
+                return;
 
-        this.moveX = -joystick.x;
-        this.moveY = joystick.y;
+            this.moveX = -joystick.x;
+            this.moveY = joystick.y;
+        }
     }
 
     private void move() {
+        if (!(GameInput.getCurrent() instanceof KeyAndMouseInput)) return;
         if (!this.forward && !this.backward && !this.strafeLeft && !this.strafeRight)
             return;
 

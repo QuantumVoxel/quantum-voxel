@@ -67,13 +67,13 @@ public final class BuilderChunk extends Chunk {
     }
 
     @Override
-    public void setFast(Vec3i pos, BlockState block) {
+    protected void setFast(Vec3i pos, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
         super.setFast(pos, block);
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockState block) {
+    protected boolean setFast(int x, int y, int z, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
         return super.setFast(x, y, z, block);
     }

@@ -24,7 +24,7 @@ public class WorldDeleteConfirmScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(RgbColor.RED).position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
                 .scale(2));
 

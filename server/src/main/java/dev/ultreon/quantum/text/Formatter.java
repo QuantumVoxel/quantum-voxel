@@ -593,7 +593,7 @@ public class Formatter {
         this.pushBuilder();
 
         switch (arg) {
-            case "/mc/":
+            case "/client/":
             case "/message/":
             case "/message-color/":
                 this.currentColor = this.messageColor;

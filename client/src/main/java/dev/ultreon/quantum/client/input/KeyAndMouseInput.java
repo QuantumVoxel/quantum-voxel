@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
@@ -15,6 +16,7 @@ import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
+import dev.ultreon.quantum.client.input.key.KeyBindRegistry;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
@@ -27,6 +29,7 @@ import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.BitSet;
 import java.util.stream.IntStream;
 
 /**
@@ -35,7 +38,9 @@ import java.util.stream.IntStream;
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  * @since 0.1.0
  */
-public class DesktopInput extends GameInput {
+public final class KeyAndMouseInput extends GameInput implements InputProcessor {
+    private static final BitSet KEYS = new BitSet(Input.Keys.MAX_KEYCODE);
+
     public static final KeyBind PAUSE_KEY = KeyBinds.pauseKey;
     public static final KeyBind DROP_ITEM_KEY = KeyBinds.dropItemKey;
     public static final KeyBind IM_GUI_KEY = KeyBinds.imGuiKey;
@@ -49,11 +54,30 @@ public class DesktopInput extends GameInput {
     public static final KeyBind COMMAND_KEY = KeyBinds.commandKey;
     public static final KeyBind FULL_SCREEN_KEY = KeyBinds.fullScreenKey;
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
-    private static boolean[] pressed = new boolean[Input.Keys.MAX_KEYCODE];
-    private static boolean[] wasPressed = new boolean[Input.Keys.MAX_KEYCODE];
+    private static final BitSet PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
+    private static final BitSet WAS_PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
 
-    public DesktopInput(QuantumClient client, Camera camera) {
+    public KeyAndMouseInput(QuantumClient client, Camera camera) {
         super(client, camera);
+    }
+
+    @Override
+    protected void switchOut() {
+        for (int key : PRESSED.stream().toArray()) {
+            this.keyUp(key);
+        }
+
+        for (KeyBind keyBind : KeyBindRegistry.getAll()) {
+            keyBind.release();
+        }
+    }
+
+    private void release(int key) {
+
+    }
+
+    public static boolean isKeyDown(int keycode) {
+        return KeyAndMouseInput.KEYS.get(keycode);
     }
 
     /**
@@ -101,19 +125,19 @@ public class DesktopInput extends GameInput {
     }
 
     public static boolean isKeyPressed(int key) {
-        return pressed[key];
+        return PRESSED.get(key);
     }
 
     public static boolean isKeyJustPressed(int key) {
-        return pressed[key] && !wasPressed[key];
+        return PRESSED.get(key) && !WAS_PRESSED.get(key);
     }
 
     public static boolean isKeyReleased(int key) {
-        return !pressed[key];
+        return !PRESSED.get(key);
     }
 
     public static boolean isKeyJustReleased(int key) {
-        return !pressed[key] && wasPressed[key];
+        return !PRESSED.get(key) && WAS_PRESSED.get(key);
     }
 
     public static boolean isButtonJustPressed(int keyCode) {
@@ -132,9 +156,13 @@ public class DesktopInput extends GameInput {
      */
     @Override
     public boolean keyDown(int keyCode) {
-        super.keyDown(keyCode);
+        GameInput.switchTo(this);
 
-        pressed[keyCode] = true;
+        if (!isActive()) return false;
+
+        KeyAndMouseInput.KEYS.set(keyCode);
+
+        PRESSED.set(keyCode);
 
         // Invoke key press event for the current screen
         Screen currentScreen = this.client.screen;
@@ -146,11 +174,11 @@ public class DesktopInput extends GameInput {
         // Handle key press for player
         Player player = this.client.player;
 
-        if (DesktopInput.IM_GUI_KEY.is(keyCode)) {
+        if (KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) {
             this.handleImGuiKey();
         }
 
-        if (DesktopInput.isAltDown() && GamePlatform.get().isDevEnvironment()) {
+        if (KeyAndMouseInput.isAltDown() && GamePlatform.get().isDevEnvironment()) {
             if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
                 this.client.viewMode = 0;
             } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
@@ -166,7 +194,7 @@ public class DesktopInput extends GameInput {
             }
         }
 
-        if (DesktopInput.isCtrlDown() && GamePlatform.get().isDevEnvironment()) {
+        if (KeyAndMouseInput.isCtrlDown() && GamePlatform.get().isDevEnvironment()) {
             if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
                 this.client.showScreen(new JavascriptDebuggerScreen());
             } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
@@ -178,37 +206,37 @@ public class DesktopInput extends GameInput {
         }
 
         if (player != null) {
-            if (DesktopInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
+            if (KeyAndMouseInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
                 this.handleImGuiFocus();
-            } else if (DesktopInput.INVENTORY_KEY.is(keyCode) && currentScreen == null && player != null) {
+            } else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen == null) {
                 player.openInventory();
-            } else if (DesktopInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen && player != null) {
+            } else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen) {
                 this.client.showScreen(null);
-            } else if (DesktopInput.CHAT_KEY.is(keyCode) && currentScreen == null) {
+            } else if (KeyAndMouseInput.CHAT_KEY.is(keyCode) && currentScreen == null) {
                 this.client.showScreen(new ChatScreen());
-            } else if (DesktopInput.COMMAND_KEY.is(keyCode) && currentScreen == null) {
+            } else if (KeyAndMouseInput.COMMAND_KEY.is(keyCode) && currentScreen == null) {
                 this.client.showScreen(new ChatScreen("/"));
-            } else if (DesktopInput.DEBUG_KEY.is(keyCode)) {
+            } else if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) {
                 this.handleDebugKey();
-            } else if (DesktopInput.INSPECT_KEY.is(keyCode)) {
+            } else if (KeyAndMouseInput.INSPECT_KEY.is(keyCode)) {
                 this.handleInspectKey();
-            } else if (DesktopInput.SCREENSHOT_KEY.is(keyCode)) {
+            } else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) {
                 this.client.screenshot();
-            } else if (DesktopInput.HIDE_HUD_KEY.is(keyCode)) {
+            } else if (KeyAndMouseInput.HIDE_HUD_KEY.is(keyCode)) {
                 this.client.hideHud = !this.client.hideHud;
-            } else if (DesktopInput.FULL_SCREEN_KEY.is(keyCode)) {
+            } else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) {
                 this.client.setFullScreen(!this.client.isFullScreen());
-            } else if (DesktopInput.THIRD_PERSON_KEY.is(keyCode)) {
+            } else if (KeyAndMouseInput.THIRD_PERSON_KEY.is(keyCode)) {
                 this.client.cyclePlayerView();
             } else if (this.client.world != null
-                    && DesktopInput.PAUSE_KEY.is(keyCode)
-                    && Gdx.input.isCursorCatched()) {
+                       && KeyAndMouseInput.PAUSE_KEY.is(keyCode)
+                       && Gdx.input.isCursorCatched()) {
                 this.client.showScreen(new PauseScreen());
-            } else if (DesktopInput.PAUSE_KEY.is(keyCode)
-                    && !Gdx.input.isCursorCatched()
-                    && this.client.screen instanceof PauseScreen) {
+            } else if (KeyAndMouseInput.PAUSE_KEY.is(keyCode)
+                       && !Gdx.input.isCursorCatched()
+                       && this.client.screen instanceof PauseScreen) {
                 this.client.showScreen(null);
-            } else if (DesktopInput.DROP_ITEM_KEY.is(keyCode) && player != null) {
+            } else if (KeyAndMouseInput.DROP_ITEM_KEY.is(keyCode)) {
                 player.dropItem();
             }
         }
@@ -225,9 +253,13 @@ public class DesktopInput extends GameInput {
 
     @Override
     public boolean keyUp(int keyCode) {
-        super.keyUp(keyCode);
+        if (!KEYS.get(keyCode)) return false;
 
-        pressed[keyCode] = false;
+        KEYS.clear(keyCode);
+
+        GameInput.switchTo(this);
+
+        PRESSED.clear(keyCode);
 
         Screen currentScreen = this.client.screen;
         if (currentScreen != null) {
@@ -245,7 +277,8 @@ public class DesktopInput extends GameInput {
      */
     @Override
     public void update(float deltaTime) {
-        super.update(deltaTime);
+        for (int key = 32; key < Input.Keys.MAX_KEYCODE; key++) WAS_PRESSED.set(key, PRESSED.get(key));
+        for (int key = 32; key < Input.Keys.MAX_KEYCODE; key++) PRESSED.set(key, Gdx.input.isKeyPressed(key));
 
         // Get player and current screen
         Player player = this.client.player;
@@ -294,7 +327,6 @@ public class DesktopInput extends GameInput {
             if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
                 QuantumClient.get().reloadResourcesAsync();
             }
-            return;
         }
     }
 
@@ -337,7 +369,7 @@ public class DesktopInput extends GameInput {
 
         // Toggle ImGui visibility and cursor caught status
         if (GamePlatform.get().isShowingImGui() && this.client.world != null)
-            DesktopInput.setCursorCaught(true);
+            KeyAndMouseInput.setCursorCaught(true);
 
         GamePlatform.get().setShowingImGui((!GamePlatform.get().isShowingImGui()));
     }
@@ -384,7 +416,7 @@ public class DesktopInput extends GameInput {
      */
     private void handleImGuiFocus() {
         if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null) {
-            DesktopInput.setCursorCaught(!Gdx.input.isCursorCatched());
+            KeyAndMouseInput.setCursorCaught(!Gdx.input.isCursorCatched());
         }
     }
 
@@ -414,8 +446,8 @@ public class DesktopInput extends GameInput {
      * Adjusts the screen coordinates based on the draw offset and scales them before passing to the current screen.
      * Does not process mouse movement if the cursor is caught or if there is no current screen.
      *
-     * @param screenX The x-coordinate of the mouse on the screen
-     * @param screenY The y-coordinate of the mouse on the screen
+     * @param screenX The setX-coordinate of the mouse on the screen
+     * @param screenY The setY-coordinate of the mouse on the screen
      * @return true if the mouse movement was processed, false otherwise
      */
     @Override
@@ -443,8 +475,8 @@ public class DesktopInput extends GameInput {
      * Overrides the touchDragged method to handle mouse dragging events.
      * Adjusts the screenX and screenY coordinates and then calls the appropriate method on the current screen.
      *
-     * @param screenX The x-coordinate of the mouse on the screen
-     * @param screenY The y-coordinate of the mouse on the screen
+     * @param screenX The setX-coordinate of the mouse on the screen
+     * @param screenY The setY-coordinate of the mouse on the screen
      * @param pointer The pointer id
      * @return Always returns true
      */
@@ -468,8 +500,8 @@ public class DesktopInput extends GameInput {
     /**
      * Handles touch-down events.
      *
-     * @param screenX The x-coordinate of the touch event
-     * @param screenY The y-coordinate of the touch event
+     * @param screenX The setX-coordinate of the touch event
+     * @param screenY The setY-coordinate of the touch event
      * @param pointer The pointer index for the event
      * @param button The button pressed
      * @return Whether the touch event was successfully handled
@@ -523,7 +555,6 @@ public class DesktopInput extends GameInput {
         if (hit instanceof BlockHit blockHitResult){
             assert world != null;
             BlockState block = world.get(new BlockVec(pos));
-            BlockVec posNext = blockHitResult.getNext();
 
             // Check if the hit result is valid and the current block is not air
             if (!blockHitResult.isCollide() || block.isAir())
@@ -565,8 +596,8 @@ public class DesktopInput extends GameInput {
      * Called when the user releases a touch or mouse button.
      * Stops breaking action, and handles mouse events.
      *
-     * @param screenX The x coordinate of the touch or mouse release event
-     * @param screenY The y coordinate of the touch or mouse release event
+     * @param screenX The setX coordinate of the touch or mouse release event
+     * @param screenY The setY coordinate of the touch or mouse release event
      * @param pointer The pointer for the event
      * @param button The button that was released
      * @return true if the event was handled, false otherwise
@@ -612,8 +643,8 @@ public class DesktopInput extends GameInput {
      * Overrides the scrolled method to handle mouse scroll events.
      * If the ImGui overlay is shown, the method returns {@code false}.
      *
-     * @param amountX The amount scrolled on the x-axis.
-     * @param amountY The amount scrolled on the y-axis.
+     * @param amountX The amount scrolled on the setX-axis.
+     * @param amountY The amount scrolled on the setY-axis.
      * @return {@code true} if the scroll event was handled, {@code false} otherwise.
      */
     @Override

@@ -669,7 +669,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {
-        UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack);
+        UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack, 1F);
         BlockHit result = (BlockHit) ctx.result();
         if (result == null)
             return UseResult.SKIP;

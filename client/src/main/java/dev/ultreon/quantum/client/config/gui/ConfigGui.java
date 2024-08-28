@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.config.gui;
 
-import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -51,7 +50,7 @@ public class ConfigGui extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         this.list = builder.add(new SelectionList<ConfigEntry<?>>(40)
                 .entries(entries)
                 .drawBackground(true)
@@ -71,8 +70,8 @@ public class ConfigGui extends Screen {
         if (renderer.pushScissors(this.list.getBounds())) {
             int y = (int) (list.getY() + 16 - list.getScrollY());
             for (Widget entryWidget : this.entryWidgets) {
-                entryWidget.y(y);
-                entryWidget.x(list.getX() + list.getWidth() - 30 - entryWidget.getWidth());
+                entryWidget.setY(y);
+                entryWidget.setX(list.getX() + list.getWidth() - 30 - entryWidget.getWidth());
                 this.defineRoot(entryWidget);
                 entryWidget.render(renderer, mouseX, mouseY, deltaTime);
                 y += list.getItemHeight();

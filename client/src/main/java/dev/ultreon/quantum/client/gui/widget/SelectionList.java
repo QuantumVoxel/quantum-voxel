@@ -22,7 +22,7 @@ import static dev.ultreon.quantum.client.QuantumClient.id;
 @ApiStatus.NonExtendable
 public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private static final int SCROLLBAR_WIDTH = 5;
-    private final List<Entry<T>> entries = new ArrayList<>();
+    protected final List<Entry<T>> entries = new ArrayList<>();
     private float scrollY = 0;
     private int itemHeight = 20;
     private Entry<T> selected;
@@ -41,6 +41,8 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     public SelectionList(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
 
+        this.pos.x = x;
+        this.pos.y = y;
     }
 
     public SelectionList(Position position, Size size) {

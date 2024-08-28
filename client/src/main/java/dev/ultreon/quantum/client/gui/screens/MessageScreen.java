@@ -4,6 +4,7 @@ import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.text.TranslationText;
+import org.jetbrains.annotations.NotNull;
 
 public class MessageScreen extends Screen {
     private String deferredMessage = "";
@@ -20,7 +21,7 @@ public class MessageScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 40))

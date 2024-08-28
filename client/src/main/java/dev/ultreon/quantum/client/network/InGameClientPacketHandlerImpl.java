@@ -126,7 +126,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         try {
             LocalPlayer player = this.client.player;
-            if (player == null/* || new Vec2d(pos.x(), pos.z()).dst(new Vec2d(player.getChunkVec().x(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
+            if (player == null/* || new Vec2d(pos.setX(), pos.z()).dst(new Vec2d(player.getChunkVec().setX(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
                 this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                 return;
             }

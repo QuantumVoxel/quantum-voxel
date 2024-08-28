@@ -35,7 +35,7 @@ import java.util.Objects;
 /**
  * Mesher using the "greedy meshing" technique.
  * <p>
- * Similar to the method described by Mikola Lysenko at <a href="http://0fps.net/2012/06/30/meshing-in-a-minecraft-game/">0fps.net (Meshing in a Minecraft game)</a>
+ * Similar to the method described by Mikola Lysenko at <a href="http://0fps.net/2012/06/30/meshing-in-a-client-game/">0fps.net (Meshing in a client game)</a>
  * <p>
  * Goes through each direction and attempts to merge multiple faces into rectangles quickly in one pass.
  * <p>
@@ -83,6 +83,9 @@ public class GreedyMesher implements Mesher {
 
     @Override
     public void meshVoxels(ModelBuilder builder, MeshBuilder meshBuilder, UseCondition condition) {
+        if (!chunk.isLoaded())
+            throw new IllegalStateException("Chunk is not loaded");
+
         List<Face> faces = this.getFaces(condition);
 
         this.meshFaces(faces, meshBuilder);
@@ -446,7 +449,7 @@ public class GreedyMesher implements Mesher {
                 for (int x = 0; x < width; x++) {
                     if (!mask[x][y]) continue;
 
-                    // "real" values of x,y,z
+                    // "real" values of setX,setY,z
                     int realX = this.realX(side, x, z);
                     int realY = this.realY(side, y, z);
                     int realZ = this.realZ(side, x, y, z);
@@ -583,7 +586,7 @@ public class GreedyMesher implements Mesher {
                 negY = negX = -1;
                 break;
         }
-        // sx,sy,sz are the x, y, and z positions of the side block
+        // sx,sy,sz are the setX, setY, and z positions of the side block
         int count = 0;
         float lightSum = 0;
         for (int sy = y + negY; sy <= y + posY; sy++) {
@@ -680,7 +683,7 @@ public class GreedyMesher implements Mesher {
                 negY = negX = -1;
                 break;
         }
-        // sx,sy,sz are the x, y, and z positions of the side block
+        // sx,sy,sz are the setX, setY, and z positions of the side block
         int count = 0;
         float lightSum = 0;
         for (int sy = y + negY; sy <= y + posY; sy++) {
@@ -856,7 +859,7 @@ public class GreedyMesher implements Mesher {
 
     }
 
-    // Find "real" x based on relative position in the greedy method
+    // Find "real" setX based on relative position in the greedy method
     private int realX(CubicDirection side, int x, int z) {
         return switch (side) {
             case UP, DOWN, NORTH, SOUTH -> x;
@@ -864,7 +867,7 @@ public class GreedyMesher implements Mesher {
         };
     }
 
-    // Find "real" y based on relative position in the greedy method
+    // Find "real" setY based on relative position in the greedy method
     private int realY(CubicDirection side, int y, int z) {
         return switch (side) {
             case EAST, WEST, NORTH, SOUTH -> y;

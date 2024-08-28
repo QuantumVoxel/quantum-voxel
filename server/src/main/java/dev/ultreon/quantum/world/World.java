@@ -45,8 +45,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -71,14 +69,12 @@ public abstract class World implements Disposable, WorldAccess {
 
     protected final BlockVec spawnPoint = new BlockVec();
     protected final long seed;
-    protected ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private int renderedChunks;
 
     protected final IntMap<Entity> entitiesById = new IntMap<>();
     private int curId;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final List<ChunkVec> alwaysLoaded = new ArrayList<>();
-    final Executor executor = Executors.newFixedThreadPool(4, QuantumServer.WORLD_GEN_THREAD_FACTORY);
 
     boolean disposed;
     private final Set<ChunkVec> invalidatedChunks = Collections.synchronizedSet(new LinkedHashSet<>());
@@ -942,4 +938,6 @@ public abstract class World implements Disposable, WorldAccess {
     public void updateLightSources(Vec3i offset, ObjectMap<Vec3i, LightSource> lights) {
 
     }
+
+    public abstract boolean isLoaded(@NotNull Chunk chunk);
 }

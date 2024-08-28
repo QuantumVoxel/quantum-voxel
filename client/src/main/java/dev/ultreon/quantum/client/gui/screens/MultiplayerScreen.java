@@ -11,6 +11,7 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.TextEntry;
 import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.text.TextObject;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MultiplayerScreen extends Screen {
@@ -26,7 +27,7 @@ public class MultiplayerScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Panel.create().bounds(() -> new Bounds(this.size.width / 2 - 105, this.size.height / 2 - 15, 210, 57)));
 
         this.entry = builder.add(TextEntry.of().position(() -> new Position(this.size.width / 2 - 100, this.size.height / 2 - 10)))

@@ -1,15 +1,14 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
-import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +24,7 @@ public class LanguageScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         List<Locale> locales = LanguageManager.INSTANCE.getLocales().stream().sorted((a, b) -> a.getDisplayLanguage().compareToIgnoreCase(b.getDisplayLanguage())).collect(Collectors.toList());
 
         this.titleLabel = builder.add(Label.of(this.title)

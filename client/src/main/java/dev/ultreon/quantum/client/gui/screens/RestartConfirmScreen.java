@@ -9,8 +9,8 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
+import org.jetbrains.annotations.NotNull;
 
 public class RestartConfirmScreen extends Screen {
     public RestartConfirmScreen() {
@@ -18,7 +18,7 @@ public class RestartConfirmScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(ColorCode.RED).position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
                 .scale(2));
 

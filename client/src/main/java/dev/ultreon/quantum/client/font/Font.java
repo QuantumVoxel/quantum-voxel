@@ -100,13 +100,13 @@ public class Font implements Disposable {
     @Deprecated
     public void drawText(Renderer renderer, FormattedText text, float x, float y, Color color, boolean shadow) {
 //        TextObjectRenderer textRenderer = new TextObjectRenderer(Collections.singletonList(text));
-//        textRenderer.render(renderer, color, x, y, shadow);
+//        textRenderer.render(renderer, color, setX, setY, shadow);
     }
 
     @Deprecated
     public void drawText(Renderer renderer, List<FormattedText> text, float x, float y, Color color, boolean shadow) {
 //        TextObjectRenderer textRenderer = new TextObjectRenderer(text);
-//        textRenderer.render(renderer, color, x, y, shadow);
+//        textRenderer.render(renderer, color, setX, setY, shadow);
     }
 
     boolean isForcingUnicode() {

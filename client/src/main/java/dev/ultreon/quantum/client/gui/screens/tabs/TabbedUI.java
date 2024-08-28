@@ -45,7 +45,7 @@ public abstract class TabbedUI extends Screen {
     }
 
     @Override
-    public final void build(GuiBuilder builder) {
+    public final void build(@NotNull GuiBuilder builder) {
         TabbedUIBuilder tabbedUIBuilder = new TabbedUIBuilder(builder, this);
         this.build(tabbedUIBuilder);
 

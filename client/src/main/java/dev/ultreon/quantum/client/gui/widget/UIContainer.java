@@ -6,6 +6,7 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.layout.Layout;
 import dev.ultreon.quantum.client.gui.widget.layout.StandardLayout;
+import dev.ultreon.quantum.client.input.controller.GuiNavigator;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
 public class UIContainer<T extends UIContainer<T>> extends Widget {
+
     @SuppressWarnings("rawtypes")
     public static final UIContainer<?> ROOT = new UIContainer(Integer.MAX_VALUE, Integer.MAX_VALUE) {
         @Override
@@ -34,6 +36,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @ApiStatus.Internal
     protected final List<Widget> widgets = new CopyOnWriteArrayList<>();
+    private final GuiNavigator navigator = new GuiNavigator(this);
 
     private Layout layout = new StandardLayout();
     protected Widget focused;
@@ -69,7 +72,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
         super.revalidate();
 
         List<Widget> widgetList = List.copyOf(this.widgets);
-        for (int i = widgetList.size() - 1, widgetListSize = widgetList.size(); i >= 0; i--) {
+        for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             widget.revalidate();
         }

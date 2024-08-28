@@ -60,8 +60,8 @@ public class Tab extends Button<Tab> {
 
     @Override
     public void revalidate() {
-        this.x(this.parent.getTabX() + this.parent.getContentX() + 1 + this.index * 22);
-        this.y(this.parent.getContentY() - 22 + (this.bottom ? (this.parent.getHeight() - 18) : 0));
+        this.setX(this.parent.getTabX() + this.parent.getContentX() + 1 + this.index * 22);
+        this.setY(this.parent.getContentY() - 22 + (this.bottom ? (this.parent.getHeight() - 18) : 0));
 
         if (this.content != null) {
             this.content.revalidate();

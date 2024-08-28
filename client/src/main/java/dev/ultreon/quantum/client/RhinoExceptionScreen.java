@@ -6,6 +6,7 @@ import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
+import org.jetbrains.annotations.NotNull;
 import org.mozilla.javascript.RhinoException;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class RhinoExceptionScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(title.copy().style(style -> style.color(RgbColor.rgb(0xff4040)))).position(() -> new Position(this.size.width / 2, 10)).alignment(Alignment.CENTER).scale(2));
 
         this.list = builder.add(new SelectionList<RhinoException>())

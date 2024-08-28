@@ -53,6 +53,14 @@ import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.*;
 import dev.ultreon.quantum.client.input.*;
+import dev.ultreon.quantum.client.input.controller.ControllerContext;
+import dev.ultreon.quantum.client.input.controller.ControllerInput;
+import dev.ultreon.quantum.client.input.controller.ControllerMappings;
+import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
+import dev.ultreon.quantum.client.input.controller.context.MenuControllerContext;
+import dev.ultreon.quantum.client.input.controller.context.VirtKeyboardControllerContext;
+import dev.ultreon.quantum.client.input.controller.gui.TextInputScreen;
+import dev.ultreon.quantum.client.input.controller.gui.VirtualKeyboard;
 import dev.ultreon.quantum.client.item.ItemRenderer;
 import dev.ultreon.quantum.client.management.*;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
@@ -216,6 +224,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         thread.setDaemon(true);
         return thread;
     });
+    public ControllerInput controllerInput;
+    public TouchInput touchInput;
+    public VirtualKeyboard virtualKeyboard;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -348,7 +359,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public Notifications notifications = new Notifications(this);
 
     // Input
-    public GameInput input;
+    public KeyAndMouseInput keyAndMouseInput;
 
     // World
     @Nullable
@@ -367,7 +378,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     @Nullable
     public LocalPlayer player;
     public final GameCamera camera;
-    public final PlayerInput playerInput = new PlayerInput(this);
+    public final PlayerInput playerInput = new PlayerInput();
 
     // Managers
     private final TextureManager textureManager;
@@ -1142,7 +1153,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         this.screen = next;
         this.screen.init(this.getScaledWidth(), this.getScaledHeight());
-        DesktopInput.setCursorCaught(false);
+        KeyAndMouseInput.setCursorCaught(false);
 
         this.setWindowTitle(this.screen.getTitle());
 
@@ -1161,7 +1172,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private boolean closeScreen(Screen cur) {
         if (this.closeScreen(null, cur)) return false;
         this.screen = null;
-        DesktopInput.setCursorCaught(true);
+        KeyAndMouseInput.setCursorCaught(true);
 
         return true;
     }
@@ -1376,16 +1387,23 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, RgbColor.BLACK);
         renderer.end();
 
-        GameInput input = this.input;
-        if (input != null) {
-            QuantumClient.PROFILER.section("input", input::update);
+        GameInput input = GameInput.getCurrent();
+        if (this.controllerInput != null && this.keyAndMouseInput != null) {
+            QuantumClient.PROFILER.section("input", () -> {
+                this.controllerInput.update();
+                this.keyAndMouseInput.update();
+                if (this.touchInput != null) this.touchInput.update();
+            });
         }
 
+        ControllerContext.register(InGameControllerContext.INSTANCE, client -> client.screen == null);
+        ControllerContext.register(MenuControllerContext.INSTANCE, client -> client.screen != null);
+
         Screen screen = this.screen;
-        if (screen != null && DesktopInput.isPressingAnyButton() && !this.wasClicking) {
+        if (screen != null && KeyAndMouseInput.isPressingAnyButton() && !this.wasClicking) {
             this.setCursor(this.clickCursor);
             this.wasClicking = true;
-        } else if (screen != null && !DesktopInput.isPressingAnyButton() && this.wasClicking) {
+        } else if (screen != null && !KeyAndMouseInput.isPressingAnyButton() && this.wasClicking) {
             this.setCursor(this.normalCursor);
             this.wasClicking = false;
         }
@@ -1603,14 +1621,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         renderer.draw9PatchTexture(new NamespaceID("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
         renderer.textCenter("<bold>" + window.getTitle(), width / 2, 5);
 
-        this.closeButton.x(width - 17 - winXOff * 2);
-        this.closeButton.y(3);
+        this.closeButton.setX(width - 17 - winXOff * 2);
+        this.closeButton.setY(3);
 
-        this.maximizeButton.x(width - 35 - winXOff * 2);
-        this.maximizeButton.y(3);
+        this.maximizeButton.setX(width - 35 - winXOff * 2);
+        this.maximizeButton.setY(3);
 
-        this.minimizeButton.x(width - 53 - winXOff * 2);
-        this.minimizeButton.y(3);
+        this.minimizeButton.setX(width - 53 - winXOff * 2);
+        this.minimizeButton.setY(3);
 
         this.closeButton.render(renderer, Gdx.input.getX() / 2, Gdx.input.getY() / 2, 0);
         this.maximizeButton.render(renderer, Gdx.input.getX() / 2, Gdx.input.getY() / 2, 0);

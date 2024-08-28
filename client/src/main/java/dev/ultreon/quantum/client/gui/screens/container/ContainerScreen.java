@@ -2,12 +2,11 @@ package dev.ultreon.quantum.client.gui.screens.container;
 
 import com.badlogic.gdx.Input;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.widget.ItemSlotWidget;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
@@ -19,13 +18,13 @@ import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class ContainerScreen extends Screen {
     private final int maxSlots;
     private final ContainerMenu menu;
     private final LocalPlayer player;
+    private ItemSlotWidget[] slots;
 
     protected ContainerScreen(ContainerMenu menu, TextObject title, int maxSlots) {
         this(menu, QuantumClient.get().screen, title, maxSlots);
@@ -41,8 +40,26 @@ public abstract class ContainerScreen extends Screen {
     }
 
     @Override
-    public final void build(GuiBuilder builder) {
-        //* Stub
+    public final void build(@NotNull GuiBuilder builder) {
+        this.slots = new ItemSlotWidget[this.maxSlots];
+        for (int i = 0; i < this.maxSlots; i++) {
+            var slot = this.menu.slots[i];
+            if (slot == null) continue;
+
+            ItemSlotWidget widget = new ItemSlotWidget(slot, this.left() + slot.getSlotX(), this.top() + slot.getSlotY());
+            this.slots[i] = builder.add(widget);
+        }
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        super.resized(width, height);
+
+        for (int i = 0; i < this.maxSlots; i++) {
+            if (this.slots[i] == null) continue;
+            this.slots[i].setX(this.left() + this.menu.slots[i].getSlotX());
+            this.slots[i].setY(this.top() + this.menu.slots[i].getSlotY());
+        }
     }
 
     @Override
@@ -112,61 +129,13 @@ public abstract class ContainerScreen extends Screen {
     public void renderForeground(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         ItemSlot slotAt = this.getSlotAt(mouseX, mouseY);
         if (slotAt != null && !slotAt.getItem().isEmpty()) {
-            this.renderTooltip(renderer, mouseX + 4, mouseY + 4, slotAt.getItem().getItem().getTranslation(), slotAt.getItem().getDescription(), slotAt.getItem().getItem().getId().toString());
+            renderer.renderTooltip(slotAt.getItem(), mouseX + 4, mouseY + 4);
         }
 
         ItemStack cursor = this.player.getCursor();
         if (!cursor.isEmpty()) {
             this.client.itemRenderer.render(cursor.getItem(), renderer, mouseX - 8, mouseY - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
         }
-    }
-
-    protected void renderTooltip(Renderer renderer, int x, int y, TextObject title, List<TextObject> description, @Nullable String subTitle) {
-        var all = Lists.newArrayList(description);
-        all.addFirst(title);
-        if (subTitle != null) all.add(TextObject.literal(subTitle));
-        boolean seen = false;
-        int best = 0;
-        int[] arr = new int[10];
-        int count = 0;
-        Font font1 = this.font;
-        for (TextObject textObject : all) {
-            int width = font1.width(textObject);
-            if (arr.length == count) arr = Arrays.copyOf(arr, count * 2);
-            arr[count++] = width;
-        }
-        arr = Arrays.copyOfRange(arr, 0, count);
-        for (int i : arr) {
-            if (!seen || i > best) {
-                seen = true;
-                best = i;
-            }
-        }
-        int textWidth = seen ? best : 0;
-        int descHeight = description.size() * (this.font.lineHeight + 1) - 1;
-        int textHeight = descHeight + 3 + this.font.lineHeight;
-
-        if (description.isEmpty() && subTitle == null) {
-            textHeight -= 3;
-        }
-        if (subTitle != null) {
-            textHeight += 1 + this.font.lineHeight;
-        }
-
-        renderer.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));
-        renderer.fill(x, y + 1, textWidth + 6, textHeight + 4, RgbColor.rgb(0x202020));
-        renderer.box(x + 1, y + 1, textWidth + 4, textHeight + 4, RgbColor.rgb(0x303030));
-
-        renderer.textLeft(title, x + 3, y + 3, RgbColor.WHITE);
-
-        int lineNr = 0;
-        for (TextObject line : description) {
-            renderer.textLeft(line, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0xa0a0a0));
-            lineNr++;
-        }
-
-        if (subTitle != null)
-            renderer.textLeft(subTitle, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0x606060));
     }
 
     protected @Nullable ItemSlot getSlotAt(int mouseX, int mouseY) {
@@ -222,5 +191,9 @@ public abstract class ContainerScreen extends Screen {
         for (int i = 0; i < items.size(); i++) {
             this.menu.slots[i].setItem(items.get(i), false);
         }
+    }
+
+    public boolean isOnSlot() {
+        return focused instanceof ItemSlotWidget;
     }
 }
