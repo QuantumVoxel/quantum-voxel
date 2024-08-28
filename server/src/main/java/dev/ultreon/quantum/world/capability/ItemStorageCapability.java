@@ -3,7 +3,9 @@ package dev.ultreon.quantum.world.capability;
 import com.badlogic.gdx.utils.Array;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.ubo.types.MapType;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Experimental
 public class ItemStorageCapability extends ModifiableCapability<ItemStack> {
     public ItemStorageCapability() {
         super(Capabilities.ITEM_STORAGE, ItemStack.class);

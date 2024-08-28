@@ -20,14 +20,13 @@ import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.input.TouchscreenInput;
+import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.platform.MouseDevice;
-import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -203,7 +202,7 @@ public class GameRenderer implements Disposable {
                     if (mouseDevice != null) {
                         x = mouseDevice.getX() / this.client.getGuiScale();
                         y = mouseDevice.getY() / this.client.getGuiScale();
-                    } else if (TouchscreenInput.isPressingAnyButton()) {
+                    } else if (TouchInput.isPressingAnyButton()) {
                         x = Gdx.input.getX() / this.client.getGuiScale();
                         y = Gdx.input.getY() / this.client.getGuiScale();
                     } else {

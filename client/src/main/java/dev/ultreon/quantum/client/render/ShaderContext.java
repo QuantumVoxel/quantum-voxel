@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.render;
 
-import dev.ultreon.quantum.client.render.shader.GameShaders;
+import dev.ultreon.quantum.client.shaders.provider.GameShaders;
 
 public class ShaderContext {
     private static GameShaders mode;

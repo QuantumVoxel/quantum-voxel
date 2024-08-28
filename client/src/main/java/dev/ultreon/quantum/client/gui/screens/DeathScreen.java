@@ -20,7 +20,7 @@ public class DeathScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
                 .scale(2)

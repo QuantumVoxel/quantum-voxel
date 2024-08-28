@@ -12,6 +12,7 @@ import dev.ultreon.quantum.client.gui.widget.Panel;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.ServerWorld;
+import org.jetbrains.annotations.NotNull;
 
 public class PauseScreen extends Screen {
     private Label gamePausedLabel;
@@ -26,7 +27,7 @@ public class PauseScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         IntegratedServer server = this.client.getSingleplayerServer();
         ServerWorld world = server != null ? server.getWorld() : null;
         if (world != null)

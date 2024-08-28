@@ -17,6 +17,7 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ public class WorldCreationScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         var titleLabel = builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 60))

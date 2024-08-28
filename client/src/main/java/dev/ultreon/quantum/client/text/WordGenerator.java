@@ -20,7 +20,7 @@ public class WordGenerator {
     private final boolean isNamed;
 
     private static final String[] A = {
-            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "x", "y", "z",
+            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "x", "setY", "z",
             "br", "bl", "cl", "cr", "dr", "fl", "fr", "gl", "gn", "gr", "kl", "kn", "kr", "ks", "mr",
             "ng", "nk", "ph", "pr", "ps", "rl", "rt", "sch", "sc", "sh", "sl", "sn", "sr", "st", "sw", "th",
             "tr", "vl", "vr", "wr"
@@ -29,7 +29,7 @@ public class WordGenerator {
             "a", "e", "i", "o", "u", "ee", "oo", "eo", "ou", "ue"
     };
     private static final String[] C = {
-            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "x", "y", "z"
+            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "x", "setY", "z"
     };
     private static final String[] CA = {
             "br", "bl", "cr", "dr", "fr", "gr", "gl", "gn", "kr", "kl", "kn", "pr", "pl", "sr", "sl", "sn", "s"

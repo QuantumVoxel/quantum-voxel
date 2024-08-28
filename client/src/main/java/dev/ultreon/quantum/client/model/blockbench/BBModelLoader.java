@@ -4,12 +4,11 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec4f;
@@ -28,6 +27,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BBModelLoader implements ModelImporter {
     private static final Matrix4 TEMP_MATRIX = new Matrix4();
@@ -284,7 +284,7 @@ public class BBModelLoader implements ModelImporter {
         String renderOrder = meshJson.getAsJsonPrimitive("render_order").getAsString();
         boolean allowMirrorModeling = meshJson.getAsJsonPrimitive("allow_mirror_modeling").getAsBoolean();
 
-        Map<String, BBModelVertex> vertices = loadVertices(meshJson.getAsJsonObject("vertices"));
+        LinkedHashMap<String, BBModelVertex> vertices = loadVertices(meshJson.getAsJsonObject("vertices"));
 
         List<BBModelMeshFace> faces = loadMeshFaces(vertices, meshJson.getAsJsonObject("faces"));
 
@@ -293,10 +293,11 @@ public class BBModelLoader implements ModelImporter {
         return new BBMeshModelElement(name, color, origin, rotation, export, visibility, locked, renderOrder, allowMirrorModeling, faces, uuid);
     }
 
-    private List<BBModelMeshFace> loadMeshFaces(Map<String, BBModelVertex> vertices, JsonObject faces) {
+    private List<BBModelMeshFace> loadMeshFaces(LinkedHashMap<String, BBModelVertex> vertices, JsonObject faces) {
         List<BBModelMeshFace> processed = new ArrayList<>();
         for (Map.Entry<String, JsonElement> elem : faces.entrySet()) {
-            processed.add(this.loadMeshFace(vertices, elem.getValue().getAsJsonObject()));
+            BBModelMeshFace e = this.loadMeshFace(vertices, elem.getValue().getAsJsonObject());
+            if (e != null) processed.add(e);
         }
 
         return processed;
@@ -307,6 +308,7 @@ public class BBModelLoader implements ModelImporter {
         JsonObject uvJson = asJsonObject.getAsJsonObject("uv");
 
         List<BBModelVertex> vertices = new ArrayList<>();
+        List<Vector2> mappedUVs = new ArrayList<>();
 
         for (Map.Entry<String, JsonElement> entry : uvJson.entrySet()) {
             uvs.put(entry.getKey(), loadVec2(entry.getValue().getAsJsonArray()));
@@ -319,15 +321,24 @@ public class BBModelLoader implements ModelImporter {
                 throw new IllegalArgumentException("Missing uv for vertex: " + elem.getAsString());
         }
 
-        for (Map.Entry<String, Vec2f> entry : uvs.entrySet())
+        for (Map.Entry<String, Vec2f> entry : uvs.entrySet()) {
+            Vec2f vec2f = uvs.get(entry.getKey());
+            mappedUVs.add(new Vector2(vec2f.x, vec2f.y));
+
             if (!vertices.contains(verticesRef.get(entry.getKey())))
                 throw new IllegalArgumentException("Missing vertex for uv: " + entry.getKey());
+        }
 
-        return new BBModelMeshFace(Collections.unmodifiableMap(uvs), Collections.unmodifiableList(vertices), asJsonObject.get("texture").getAsInt());
+        JsonElement texture = asJsonObject.get("texture");
+        if (texture == null) {
+            QuantumClient.LOGGER.warn("BlockBench model {} has a mesh face with no texture", this.id);
+            return null;
+        }
+        return new BBModelMeshFace(mappedUVs, Collections.unmodifiableList(vertices), texture.getAsInt());
     }
 
-    private Map<String, BBModelVertex> loadVertices(JsonObject vertices) {
-        Map<String, BBModelVertex> processed = new HashMap<>();
+    private LinkedHashMap<String, BBModelVertex> loadVertices(JsonObject vertices) {
+        LinkedHashMap<String, BBModelVertex> processed = new LinkedHashMap<>();
         for (Map.Entry<String, JsonElement> elem : vertices.entrySet()) {
             processed.put(elem.getKey(), this.loadVertex(elem.getValue().getAsJsonArray()));
         }

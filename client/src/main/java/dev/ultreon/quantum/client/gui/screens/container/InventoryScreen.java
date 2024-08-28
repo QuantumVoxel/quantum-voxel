@@ -136,7 +136,7 @@ public class InventoryScreen extends ContainerScreen {
 
         var slotAt = this.getRecipeSlotAt(mouseX, mouseY);
         if (slotAt != null && !slotAt.slot.getItem().isEmpty()) {
-            this.renderTooltip(renderer, mouseX + 4, mouseY + 4, slotAt.slot.getItem().getItem().getTranslation(), this.withRecipeInfo(slotAt.recipe, slotAt.slot.getItem().getDescription()), slotAt.slot.getItem().getItem().getId().toString());
+            renderer.renderTooltip(slotAt.slot.getItem(), mouseX + 4, mouseY + 4, this.withRecipeInfo(slotAt.recipe, slotAt.slot.getItem().getDescription()));
         }
     }
 
@@ -147,7 +147,7 @@ public class InventoryScreen extends ContainerScreen {
             result.add(TextObject.empty());
             result.add(TextObject.translation("quantum.recipe.ingredients").style(textStyle -> textStyle.color(RgbColor.WHITE).bold(true)));
             for (ItemStack stack : ingredients) {
-                result.add(TextObject.literal(stack.getCount() + "x ").append(stack.getItem().getTranslation()));
+                result.add(TextObject.literal(stack.getCount() + "setX ").append(stack.getItem().getTranslation()));
             }
 
             if (!this.showOnlyCraftable()) {

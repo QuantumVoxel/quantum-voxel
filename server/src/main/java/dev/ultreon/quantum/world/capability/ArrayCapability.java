@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@ApiStatus.Experimental
 public abstract class ArrayCapability<Value> implements Capability<Array<Value>> {
     private final CapabilityType<? extends ArrayCapability<Value>, Array<Value>> type;
     private final Class<? extends Value> clazz;

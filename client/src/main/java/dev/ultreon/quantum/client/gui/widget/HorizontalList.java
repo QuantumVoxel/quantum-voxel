@@ -419,7 +419,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
             this.size.width = this.list.itemWidth;
             this.size.height = this.list.itemHeight;
             ItemRenderer<?> itemRenderer = this.list.itemRenderer;
-//            if (itemRenderer != null && renderer.pushScissors(this.pos.x, this.pos.y, this.size.width, this.size.height)) {
+//            if (itemRenderer != null && renderer.pushScissors(this.pos.setX, this.pos.setY, this.size.width, this.size.height)) {
                 renderEntry(renderer, this.pos.x, this.pos.y, mouseX, mouseY, selected, deltaTime);
 //                renderer.popScissors();
 //            }

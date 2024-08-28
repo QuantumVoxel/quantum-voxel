@@ -1,26 +1,18 @@
 package dev.ultreon.quantum.client.input;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerListener;
-import com.badlogic.gdx.controllers.ControllerMapping;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockState;
-import dev.ultreon.quantum.client.Constants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.input.util.*;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.quantum.debug.Debugger;
+import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.ItemEvents;
 import dev.ultreon.quantum.item.Item;
@@ -28,191 +20,106 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.network.packets.c2s.C2SItemUsePacket;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.Hit;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import it.unimi.dsi.fastutil.ints.Int2BooleanArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
-import it.unimi.dsi.fastutil.ints.IntArraySet;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+@SuppressWarnings("GDXJavaStaticResource")
+public abstract class GameInput implements Disposable {
+    private static long lastSwitch;
 
-public abstract class GameInput implements InputProcessor, ControllerListener, Disposable {
-    protected static final float DEG_PER_PIXEL = 0.6384300433839F;
-    private static final IntArraySet keys = new IntArraySet();
     protected final QuantumClient client;
     protected final Camera camera;
-    private final Set<Controller> controllers = new HashSet<>();
-    private static final Map<JoystickType, Joystick> JOYSTICKS = new EnumMap<>(JoystickType.class);
-    private static final Map<TriggerType, Trigger> TRIGGERS = new EnumMap<>(TriggerType.class);
-    private static final Int2BooleanMap CONTROLLER_BUTTONS = new Int2BooleanArrayMap();
 
-    static {
-        for (JoystickType type : JoystickType.values()) {
-            GameInput.JOYSTICKS.put(type, new Joystick());
-        }
-        for (TriggerType type : TriggerType.values()) {
-            GameInput.TRIGGERS.put(type, new Trigger());
-        }
-    }
+    private static @Nullable GameInput current = null;
 
-    private long nextBreak;
-    private long itemUse;
-    private boolean breaking;
-    private boolean using;
-    private final Vec3d vel = new Vec3d();
+    protected long nextBreak;
+    protected long itemUse;
+    protected boolean breaking;
+    protected boolean using;
+    protected final Vec3d vel = new Vec3d();
     @Nullable
     protected Hit hit;
-    private static final Set<ControllerButton> BUTTONS_DOWN = new HashSet<>();
-    private static final Set<ControllerButton> BUTTONS_JUST_PRESSED = new HashSet<>();
     private long itemUseCooldown;
 
     protected GameInput(QuantumClient client, Camera camera) {
         this.client = client;
         this.camera = camera;
-
-        Controllers.addListener(this);
-        this.controllers.addAll(Arrays.stream((Object[]) Controllers.getControllers().items).map(o -> (Controller) o).toList());
     }
 
-    public static boolean isControllerButtonJustPressed(ControllerButton button) {
-        return BUTTONS_JUST_PRESSED.contains(button);
-    }
-
-    @Override
-    public void connected(Controller controller) {
-        Debugger.log("Controller connected: " + controller.getName()); // Print the name of the connected controller
-        this.controllers.add(controller);
-    }
-
-    @Override
-    public void disconnected(Controller controller) {
-        Debugger.log("Controller disconnected: " + controller.getName()); // Print the name of the disconnected controller
-        this.controllers.remove(controller);
-    }
-
-    @Override
-    public boolean axisMoved(Controller controller, int axisCode, float value) {
-        // Check if the absolute value of the value is less than the dead zone
-        if (Math.abs(value) < Constants.CONTROLLER_DEADZONE) {
-            value = 0; // Set the value to 0 if it's within the dead zone
+    public static @NotNull GameInput getCurrent() {
+        final GameInput cur = current;
+        if (cur != null) {
+            return cur;
         }
 
-        ControllerMapping mapping = controller.getMapping();
-        if (axisCode == mapping.axisLeftX) GameInput.JOYSTICKS.get(JoystickType.LEFT).x = -value;
-        if (axisCode == mapping.axisLeftY) GameInput.JOYSTICKS.get(JoystickType.LEFT).y = -value;
-
-        if (axisCode == mapping.axisRightX) GameInput.JOYSTICKS.get(JoystickType.RIGHT).x = -value;
-        if (axisCode == mapping.axisRightY) GameInput.JOYSTICKS.get(JoystickType.RIGHT).y = -value;
-
-        if (axisCode == 4) GameInput.TRIGGERS.get(TriggerType.LEFT).value = value;
-        if (axisCode == 5) GameInput.TRIGGERS.get(TriggerType.RIGHT).value = value;
-
-        return true;
+        return current = getDefault();
     }
 
-    @Override
-    public boolean buttonUp(Controller controller, int buttonCode) {
-        GameInput.CONTROLLER_BUTTONS.put(buttonCode, false);
-
-        return false;
+    private static void setCurrent(@NotNull GameInput current) {
+        GameInput.current = current;
     }
 
-    @Override
-    public boolean buttonDown(Controller controller, int buttonCode) {
-        @Nullable Screen currentScreen = this.client.screen;
-        GameInput.CONTROLLER_BUTTONS.put(buttonCode, true);
+    protected static void switchTo(GameInput controllerInput) {
+        if (lastSwitch + 1000 > System.currentTimeMillis()) return;
 
-        if (this.client.isPlaying()) {
-            Player player = this.client.player;
-            if (player != null) {
-                if (controller.getMapping().buttonL1 == buttonCode)
-                    player.selectBlock(player.selected - 1);
-                if (controller.getMapping().buttonR1 == buttonCode)
-                    player.selectBlock(player.selected + 1);
-            }
+        if (current != null) {
+            current.switchOut();
         }
+        lastSwitch = System.currentTimeMillis();
+        setCurrent(controllerInput);
+    }
 
-        if (controller.getMapping().buttonB == buttonCode && currentScreen != null) {
-            currentScreen.back();
+    protected void switchOut() {
+
+    }
+
+    protected static void switchToFallback() {
+        lastSwitch = System.currentTimeMillis();
+        setCurrent(getDefault());
+        Gdx.app.log("GameInput", "Switching to fallback input");
+    }
+
+    private static GameInput getDefault() {
+        QuantumClient client = QuantumClient.get();
+        if (Gdx.input.isPeripheralAvailable(Input.Peripheral.HardwareKeyboard)) {
+            return client.keyAndMouseInput;
+        } else if (Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen)) {
+            return client.touchInput;
+        } else if (!Controllers.getControllers().isEmpty()) {
+            return client.controllerInput;
+        } else {
+            Gdx.app.log("GameInput", "No input devices found, using fallback input");
+            return client.keyAndMouseInput;
         }
-
-        return true;
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        GameInput.keys.add(keycode);
-
-        return true;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        GameInput.keys.remove(keycode);
-        return true;
-    }
-
-    public static boolean isKeyDown(int keycode) {
-        return GameInput.keys.contains(keycode);
+    public boolean isActive() {
+        return current == this;
     }
 
     @ApiStatus.NonExtendable
-    public void update() {
-        this.update(Gdx.graphics.getDeltaTime());
-    }
+    public final void update() {
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        this.update(deltaTime);
 
-    public void update(float deltaTime) {
-        if (this.client.isPlaying()) {
-            Player player = this.client.player;
-            if (player != null && this.isControllerConnected()) {
-                this.updatePlayer(deltaTime, player);
-            }
-        }
+        LocalPlayer player = this.client.player;
+        if (player != null) {
+            boolean flying = player.abilities.flying;
+            PlayerInput input = this.client.playerInput;
+            input.tick(player, flying ? player.getFlyingSpeed() : player.getWalkingSpeed());
 
-        for (ControllerButton button : ControllerButton.values()) {
-            if (isControllerButtonDown(button)) {
-                BUTTONS_JUST_PRESSED.remove(button);
-                if (!BUTTONS_DOWN.contains(button))
-                    BUTTONS_JUST_PRESSED.add(button);
-                BUTTONS_DOWN.add(button);
-            } else {
-                BUTTONS_DOWN.remove(button);
-            }
+            this.updateMotion(deltaTime, player, flying ? player.getFlyingSpeed() : player.getWalkingSpeed());
         }
     }
 
-    private void updatePlayer(float deltaTime, Player player) {
-        Joystick joystick = GameInput.JOYSTICKS.get(JoystickType.RIGHT);
-
-        float deltaX = joystick.x * deltaTime * Constants.CTRL_CAMERA_SPEED;
-        float deltaY = joystick.y * deltaTime * Constants.CTRL_CAMERA_SPEED;
-
-        player.rotateHead(deltaX * GameInput.DEG_PER_PIXEL, deltaY * GameInput.DEG_PER_PIXEL);
-
-        @Nullable ClientWorldAccess world = this.client.world;
-        if (world != null)
-            this.updateInGame(player, world);
-
-        player.setRunning(GameInput.isControllerButtonDown(ControllerButton.LEFT_STICK));
-
-        if (!player.isFlying()) {
-            player.setCrouching(GameInput.isControllerButtonDown(ControllerButton.RIGHT_STICK));
-        }
-
-        float speed = player.isFlying() ? player.getFlyingSpeed() : player.getWalkingSpeed();
-
-        if (player.isCrouching()) speed *= player.crouchModifier;
-        else if (player.isRunning()) speed *= player.runModifier;
-
-        this.client.playerInput.tick(player, speed);
-        this.updateControllerMove(deltaTime, player, speed);
-    }
-
-    private void updateControllerMove(float deltaTime, Player player, float speed) {
+    private void updateMotion(float deltaTime, Player player, float speed) {
         Vec3d tmp = new Vec3d();
         Vector3 velocity = this.client.playerInput.getVelocity();
         this.vel.set(velocity.x, velocity.y, velocity.z);
@@ -226,7 +133,7 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
             // If not affected by fluid, reset the flag and set the vertical velocity
             if (player.wasInFluid && !player.isAffectedByFluid()) {
                 player.wasInFluid = false;
-                player.velocityY = 0.3;
+                player.jump();
             }
         }
 
@@ -248,94 +155,48 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
         player.setVelocity(player.getVelocity().add(this.vel));
     }
 
-    private void updateInGame(Player player, @Nullable ClientWorldAccess world) {
-        assert world != null;
-        BlockHit hitResult = world.rayCast(new Ray(player.getPosition().add(0, player.getEyeHeight(), 0), player.getLookVector()));
-        Vec3i pos = hitResult.getBlockVec();
-        BlockState block = world.get(pos.x, pos.y, pos.z);
-        if (!hitResult.isCollide() || block == null || block.isAir()) return;
-
-        this.updateControllerBlockBreak();
-        this.updateControllerBlockPlace(player, world, hitResult);
-    }
-
-    private void updateControllerBlockPlace(Player player, @Nullable ClientWorldAccess world, BlockHit hitResult) {
-        float left = GameInput.TRIGGERS.get(TriggerType.LEFT).value;
-        if (left >= 0.3F && this.itemUse < System.currentTimeMillis()) {
-            this.useItem(player, world, hitResult);
-
-            this.itemUse = System.currentTimeMillis() + 500;
-            this.using = true;
-        } else if (left < 0.3F && this.using) {
-            this.itemUse = 0;
-            this.using = false;
-        }
-    }
-
-    private void updateControllerBlockBreak() {
-        float right = GameInput.TRIGGERS.get(TriggerType.RIGHT).value;
-        if (right >= 0.3F && this.nextBreak < System.currentTimeMillis()) {
-            this.client.startBreaking();
-            this.nextBreak = System.currentTimeMillis() + 500;
-            this.breaking = true;
-        } else if (right < 0.3F && this.breaking) {
-            this.client.stopBreaking();
-            this.nextBreak = 0;
-            this.breaking = false;
-        }
-    }
+    public abstract void update(float deltaTime);
 
     @CanIgnoreReturnValue
     public UseResult useItem(Player player, @Nullable WorldAccess world, Hit hit) {
+        return useItem(player, world, hit, 1F);
+    }
+
+    @CanIgnoreReturnValue
+    public UseResult useItem(Player player, @Nullable WorldAccess world, Hit hit, float amount) {
         if (this.itemUseCooldown > System.currentTimeMillis())
             return UseResult.DENY;
 
-        UseResult useResult = useItem0(player, world, hit);
+        UseResult useResult = useItem0(player, world, hit, amount);
         this.itemUseCooldown = System.currentTimeMillis() + 1000;
 
         return useResult;
     }
 
-    private UseResult useItem0(Player player, @Nullable WorldAccess world, Hit hit) {
+    private UseResult useItem0(Player player, @Nullable WorldAccess world, Hit hit, float amount) {
         if (!(hit instanceof BlockHit)) return UseResult.DENY;
 
         ItemStack stack = player.getSelectedItem();
-        UseItemContext context = new UseItemContext(world, player, hit, stack);
+        UseItemContext context = new UseItemContext(world, player, hit, stack, amount);
         Item item = stack.getItem();
         ItemEvents.USE.factory().onUseItem(item, context);
         this.client.connection.send(new C2SItemUsePacket((BlockHit) hit));
 
-        UseItemContext ctx = new UseItemContext(world, player, hit, stack);
-        Hit result = ctx.result();
+        Hit result = context.result();
         if (result == null)
             return UseResult.SKIP;
 
         if (hit instanceof BlockHit blockHitResult) {
             Block block = blockHitResult.getBlock();
             if (block != null && !block.isAir()) {
-                UseResult blockResult = block.use(ctx.world(), ctx.player(), stack.getItem(), new BlockVec(result.getBlockVec()));
+                UseResult blockResult = block.use(context.world(), context.player(), stack.getItem(), new BlockVec(result.getBlockVec()));
 
                 if (blockResult == UseResult.DENY || blockResult == UseResult.ALLOW)
                     return blockResult;
             }
         }
 
-        return stack.getItem().use(ctx);
-    }
-
-    public boolean isControllerConnected() {
-        return !this.controllers.isEmpty();
-    }
-
-    public static Vector2 getJoystick(JoystickType joystick) {
-        return GameInput.JOYSTICKS.get(joystick).cpy();
-    }
-
-    public static boolean isControllerButtonDown(ControllerButton button) {
-        Controller current = Controllers.getCurrent();
-        if (current == null) return false;
-        ControllerMapping mapping = current.getMapping();
-        return GameInput.CONTROLLER_BUTTONS.get(button.get(mapping));
+        return stack.getItem().use(context);
     }
 
     @CanIgnoreReturnValue
@@ -358,6 +219,6 @@ public abstract class GameInput implements InputProcessor, ControllerListener, D
 
     @Override
     public void dispose() {
-        Controllers.removeListener(this);
+
     }
 }

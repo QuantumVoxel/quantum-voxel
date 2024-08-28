@@ -54,7 +54,7 @@ public class VideoSettingsUI {
                     if (scale.get() == 0) {
                         return TextObject.translation("quantum.ui.auto");
                     }
-                    return TextObject.literal(scale.get() + "x");
+                    return TextObject.literal(scale.get() + "setX");
                 })
                 .callback(this::setScale));
 

@@ -18,7 +18,7 @@ import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.util.InvalidThreadException;
@@ -136,14 +136,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
         }
 
-
         synchronized (this) {
             super.dispose();
 
             @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
-            if (worldRenderer != null) {
-                worldRenderer.unload(this);
-            }
+            if (worldRenderer != null) worldRenderer.unload(this);
 
             this.tmp.setZero();
             this.tmp1.setZero();
@@ -155,7 +152,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public @NotNull BlockState getFast(int x, int y, int z) {
+    protected @NotNull BlockState getFast(int x, int y, int z) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -163,7 +160,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public void setFast(Vec3i pos, BlockState block) {
+    protected void setFast(Vec3i pos, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -186,7 +183,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public boolean setFast(int x, int y, int z, BlockState block) {
+    protected boolean setFast(int x, int y, int z, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -261,6 +258,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             this.models.remove(pos);
         }
         return this.addedModels.put(pos, instance);
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return this.world.isLoaded(this);
     }
 
     public void renderModels(RenderLayer renderLayer) {

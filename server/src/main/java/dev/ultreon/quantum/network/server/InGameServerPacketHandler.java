@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.network.server;
 
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockAttemptBreakEvent;
 import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
@@ -23,6 +22,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakingPacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SUnloadChunkPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CBlockSetPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPingPacket;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -290,5 +290,9 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     public void onAttack(int id) {
         this.player.onAttack(id);
+    }
+
+    public void handleUnloadChunk(C2SUnloadChunkPacket c2SUnloadChunkPacket) {
+        this.server.execute(() -> this.player.stopTracking(c2SUnloadChunkPacket.getVec()));
     }
 }

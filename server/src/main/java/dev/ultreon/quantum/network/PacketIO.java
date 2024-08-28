@@ -524,28 +524,12 @@ public class PacketIO {
     }
 
     public int readVarInt() {
-        int value = 0;
-        int shift = 0;
-        int byteRead;
-
-        do {
-            byteRead = this.readByte();
-            value |= (byteRead & 0x7F) << shift;
-            shift += 7;
-        } while ((byteRead & 0x80)!= 0);
-
-        return value;
+        return readInt();
     }
 
     @CanIgnoreReturnValue
     public PacketIO writeVarInt(int value) {
-        while ((value & ~0x7F)!= 0) {
-            this.writeByte((byte) ((value & 0x7F) | 0x80));
-            value >>>= 7;
-        }
-
-        this.writeByte((byte) value);
-        return this;
+        return writeInt(value);
     }
 
     public int getVarIntSize(int value) {

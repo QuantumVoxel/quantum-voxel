@@ -9,6 +9,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CChunkDataPacket;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
@@ -47,27 +48,6 @@ public final class ServerChunk extends Chunk {
         this.region = region;
     }
 
-    @Override
-    public boolean setFast(int x,
-                           int y,
-                           int z,
-                           @NotNull BlockState block) {
-        this.rwLock.writeLock().lock();
-        try {
-            this.region.markDirty();
-            boolean result = super.setFast(x, y, z, block);
-
-            if (result) {
-                this.modified = true;
-                this.original = false;
-            }
-
-            return result;
-        } finally {
-            this.rwLock.writeLock().unlock();
-        }
-    }
-
     public static ServerChunk load(@NotNull ServerWorld world,
                                    @NotNull ChunkVec pos,
                                    @NotNull MapType chunkData,
@@ -86,19 +66,33 @@ public final class ServerChunk extends Chunk {
         return chunk;
     }
 
+    @Override
+    protected boolean setFast(int x,
+                              int y,
+                              int z,
+                              @NotNull BlockState block) {
+        synchronized (this) {
+            this.region.markDirty();
+            boolean result = super.setFast(x, y, z, block);
+
+            if (result) {
+                this.modified = true;
+                this.original = false;
+            }
+
+            return result;
+        }
+    }
+
     public void load(@NotNull MapType chunkData) {
-        this.rwLock.writeLock().lock();
-        try {
+        synchronized (this) {
             MapType extra = chunkData.getMap("Extra", new MapType());
             this.original = chunkData.getBoolean("original", this.original);
 
-            if (chunkData.<ShortArrayType>contains("HeightMap")) {
+            if (chunkData.<ShortArrayType>contains("HeightMap"))
                 this.motionBlockingHeightmap.load(chunkData.getShortArray("HeightMap"));
-            }
-
-            if (chunkData.<ByteArrayType>contains("LightMap")) {
+            if (chunkData.<ByteArrayType>contains("LightMap"))
                 this.lightMap.load(chunkData.getByteArray("LightMap"));
-            }
 
             this.modified = false;
 
@@ -113,24 +107,14 @@ public final class ServerChunk extends Chunk {
             }
 
             WorldEvents.LOAD_CHUNK.factory().onLoadChunk(this, extra);
-        } finally {
-            this.rwLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void setBlockEntity(@NotNull BlockVec blockVec,
                                   @NotNull BlockEntity blockEntity) {
-        if (!QuantumServer.isOnServerThread()) {
-            QuantumServer.invokeAndWait(() -> setBlockEntity(blockVec, blockEntity));
-            return;
-        }
-
-        this.rwLock.writeLock().lock();
-        try {
+        synchronized (this) {
             super.setBlockEntity(blockVec, blockEntity);
-        } finally {
-            this.rwLock.writeLock().unlock();
         }
     }
 
@@ -153,9 +137,7 @@ public final class ServerChunk extends Chunk {
         ListType<MapType> blockEntitiesData = new ListType<>();
         MapType extra = new MapType();
 
-        this.rwLock.readLock().lock();
-        try {
-
+        synchronized (this) {
             this.storage.save(chunkData, BlockState::save);
             this.biomeStorage.save(biomeData, Biome::save);
 
@@ -178,8 +160,6 @@ public final class ServerChunk extends Chunk {
             }
 
             this.modified = false;
-        } finally {
-            this.rwLock.readLock().unlock();
         }
 
         return data;
@@ -203,26 +183,34 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
+        if (!isBeingTracked()) {
+            this.world.unloadChunk(this, this.getVec());
+            return;
+        }
+
+        this.world.getServer().onChunkSent(this);
         this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage, this.biomeStorage, this.getBlockEntities()));
+
     }
 
     public void tick() {
-        this.rwLock.readLock().lock();
         Collection<BlockEntity> blockEntities;
-        try {
+        synchronized (this){
             if (!isBeingTracked() && lastTracked + 1000L < System.currentTimeMillis()) {
                 this.world.unloadChunk(this, this.getVec());
                 return;
-            } else {
-                lastTracked = System.currentTimeMillis();
             }
 
+            lastTracked = System.currentTimeMillis();
             blockEntities = List.copyOf(this.getBlockEntities());
-        } finally {
-            this.rwLock.readLock().unlock();
         }
 
-        for (BlockEntity blockEntity : blockEntities)
+        for (BlockEntity blockEntity : blockEntities) {
             blockEntity.tick();
+        }
+    }
+
+    public void stopTracking(ServerPlayer serverPlayer) {
+        this.tracker.stopTracking(serverPlayer);
     }
 }

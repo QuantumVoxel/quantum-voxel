@@ -18,8 +18,8 @@ public class Position implements Copyable<Position> {
     /**
      * Creates a new position
      *
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x the setX coordinate
+     * @param y the setY coordinate
      */
     public Position(int x, int y) {
         this.x = x;
@@ -29,7 +29,7 @@ public class Position implements Copyable<Position> {
     /**
      * Creates a new position
      *
-     * @param value the x and y coordinates
+     * @param value the setX and setY coordinates
      */
     public Position(int value) {
         this.x = value;
@@ -88,7 +88,7 @@ public class Position implements Copyable<Position> {
     }
 
     /**
-     * Sets the x and y coordinates
+     * Sets the setX and setY coordinates
      *
      * @param pos the new position
      */
@@ -98,10 +98,10 @@ public class Position implements Copyable<Position> {
     }
 
     /**
-     * Sets the x and y coordinates
+     * Sets the setX and setY coordinates
      *
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param x the setX coordinate
+     * @param y the setY coordinate
      */
     public void set(int x, int y) {
         this.x = x;
@@ -109,7 +109,7 @@ public class Position implements Copyable<Position> {
     }
 
     /**
-     * Sets the x and y coordinates to zero
+     * Sets the setX and setY coordinates to zero
      */
     public void idt() {
         this.x = 0;

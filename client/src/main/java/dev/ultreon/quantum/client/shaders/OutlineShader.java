@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.shaders;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
@@ -7,12 +8,12 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.util.Vec2f;
 import org.jetbrains.annotations.Nullable;
 
 public class OutlineShader extends DefaultShader {
@@ -20,10 +21,10 @@ public class OutlineShader extends DefaultShader {
     public final int u_globalSunlight;
     public final int u_atlasSize;
     public final int u_atlasOffset;
-    private final int u_lodThreshold;
-    private final int u_cameraUp0;
-    private String log;
-
+    public final int u_lodThreshold;
+    public final int u_cameraUp0;
+    public final int u_viewportSize;
+    public final int u_lineWidth;
 
     public OutlineShader(final Renderable renderable) {
         this(renderable, new GeomShaderConfig());
@@ -61,6 +62,8 @@ public class OutlineShader extends DefaultShader {
         this.u_atlasOffset = this.register(Inputs.atlasOffset, Setters.atlasOffset);
         this.u_lodThreshold = this.register(Inputs.lodThreshold, Setters.lodThreshold);
         this.u_cameraUp0 = this.register(Inputs.cameraUp, Setters.cameraUp);
+        this.u_viewportSize = this.register(Inputs.viewportSize, Setters.viewportSize);
+        this.u_lineWidth = this.register(Inputs.lineWidth, Setters.lineWidth);
     }
     public static class Inputs extends DefaultShader.Inputs {
         public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
@@ -68,7 +71,8 @@ public class OutlineShader extends DefaultShader {
         public final static Uniform atlasOffset = new Uniform("u_atlasOffset");
         public final static Uniform lodThreshold = new Uniform("u_lodThreshold");
         public final static Uniform cameraUp = new Uniform("u_cameraUp0");
-
+        public final static Uniform viewportSize = new Uniform("u_viewportSize");
+        public final static Uniform lineWidth = new Uniform("u_lineWidth");
     }
     public static class Setters extends DefaultShader.Setters {
         public final static Setter globalSunlight = new LocalSetter() {
@@ -110,6 +114,20 @@ public class OutlineShader extends DefaultShader {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 shader.set(inputID, CAMERA_UP);
+            }
+        };
+
+        public final static Setter viewportSize = new LocalSetter() {
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                shader.set(inputID, new Vector2(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight()));
+            }
+        };
+
+        public final static Setter lineWidth = new LocalSetter() {
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                shader.set(inputID, 6.0F);
             }
         };
     }

@@ -61,7 +61,7 @@ public class ChatScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         this.entry = (ChatTextEntry) builder.add(new ChatTextEntry(this).bounds(() -> new Bounds(-1, this.getHeight() - 21, this.getWidth() + 2, 21)));
         if (this.input != null) {
             this.entry.value(this.input);

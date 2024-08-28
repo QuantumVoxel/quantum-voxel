@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.render;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.client.render.shader.GameShaders;
+import dev.ultreon.quantum.client.shaders.provider.GameShaders;
 import dev.ultreon.quantum.client.util.RenderableArray;
 
 import java.util.Objects;

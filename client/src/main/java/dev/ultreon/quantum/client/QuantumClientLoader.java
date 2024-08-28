@@ -21,9 +21,10 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
-import dev.ultreon.quantum.client.input.DesktopInput;
-import dev.ultreon.quantum.client.input.GameInput;
-import dev.ultreon.quantum.client.input.TouchscreenInput;
+import dev.ultreon.quantum.client.input.KeyAndMouseInput;
+import dev.ultreon.quantum.client.input.TouchInput;
+import dev.ultreon.quantum.client.input.controller.ControllerInput;
+import dev.ultreon.quantum.client.input.controller.gui.VirtualKeyboard;
 import dev.ultreon.quantum.client.item.ItemRenderer;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.particle.ClientParticleRegistry;
@@ -33,8 +34,8 @@ import dev.ultreon.quantum.client.particle.ParticleEmitters;
 import dev.ultreon.quantum.client.registry.LanguageRegistry;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
-import dev.ultreon.quantum.client.render.shader.Shaders;
 import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -123,9 +124,13 @@ class QuantumClientLoader implements Runnable {
         //----------------------
         QuantumClient.LOGGER.info("Initializing rendering stuffs");
         QuantumClient.invokeAndWait(() -> {
-            client.input = client.deferDispose(createInput(client));
+            client.keyAndMouseInput = new KeyAndMouseInput(client, client.camera);
+            client.controllerInput = new ControllerInput(client, client.camera);
+            client.touchInput = new TouchInput(client, client.camera);
+
+            client.virtualKeyboard = new VirtualKeyboard();
         });
-        Gdx.input.setInputProcessor(client.input);
+        Gdx.input.setInputProcessor(client.keyAndMouseInput);
 
         QuantumClient.LOGGER.info("Setting up HUD");
         client.hud = QuantumClient.invokeAndWait(() -> new Hud(client));
@@ -269,11 +274,8 @@ class QuantumClientLoader implements Runnable {
         OverlayManager.resize(ceil(client.getWidth() / client.getGuiScale()), ceil(client.getHeight() / client.getGuiScale()));
     }
 
-    private GameInput createInput(QuantumClient quantumClient) {
-        if (GamePlatform.get().isMobile()) {
-            return new TouchscreenInput(quantumClient, quantumClient.camera);
-        }
-        return new DesktopInput(quantumClient, quantumClient.camera);
+    private KeyAndMouseInput createInput(QuantumClient quantumClient) {
+        return new KeyAndMouseInput(quantumClient, quantumClient.camera);
     }
 
     private void loadLanguages(QuantumClient client) {

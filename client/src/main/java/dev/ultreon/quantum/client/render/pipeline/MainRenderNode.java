@@ -48,6 +48,7 @@ public class MainRenderNode extends RenderNode {
         Texture normalTex = textures.get("normal");
         Texture reflectiveTex = textures.get("reflective");
         Texture specularTex = textures.get("specular");
+        Texture foregroundTex = textures.get("foreground");
 
         // End modelBatch and begin rendering
         modelBatch.end();
@@ -58,10 +59,10 @@ public class MainRenderNode extends RenderNode {
         // Handle blur effect
         if (blurScale > 0f) {
             this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
+                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex, foregroundTex);
             });
         } else {
-            render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex);
+            render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex, foregroundTex);
         }
 
         // Disable blending and end rendering
@@ -81,7 +82,7 @@ public class MainRenderNode extends RenderNode {
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(normalTex, (float) (2 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
-            this.client.spriteBatch.draw(reflectiveTex, (float) (3 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            this.client.spriteBatch.draw(foregroundTex, (float) (3 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.spriteBatch.flush();
             this.client.spriteBatch.draw(skyboxTex, (float) (4 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
             this.client.renderer.end();
@@ -93,12 +94,13 @@ public class MainRenderNode extends RenderNode {
         return input;
     }
 
-    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex) {
+    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex, Texture foregroundTex) {
         this.client.spriteBatch.enableBlending();
 
         if (this.client.viewMode == 0) {
             this.drawDiffuse(skyboxTex);
             this.drawDiffuse(diffuseTex);
+            this.drawDiffuse(foregroundTex);
         } else if (this.client.viewMode == 1) {
             this.drawDiffuse(normalTex);
         } else if (this.client.viewMode == 2) {
@@ -109,6 +111,11 @@ public class MainRenderNode extends RenderNode {
             this.drawDiffuse(positionTex);
         } else if (this.client.viewMode == 5) {
             this.drawDiffuse(specularTex);
+        } else if (this.client.viewMode == 6) {
+            this.drawDiffuse(foregroundTex);
+        } else {
+            this.drawDiffuse(skyboxTex);
+            this.drawDiffuse(foregroundTex);
         }
     }
 

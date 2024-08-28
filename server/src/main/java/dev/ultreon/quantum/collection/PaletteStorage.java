@@ -65,7 +65,12 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         this.rwLock.readLock().lock();
         try {
             ListType<MapType> data = new ListType<>();
-            for (@Nullable D entry : this.data.toArray()) if (entry != null) data.add(encoder.apply(entry));
+            for (@NotNull D entry : this.data.toArray()) {
+                if (entry == null) {
+                    throw new IllegalArgumentException("Cannot save null data!");
+                }
+                data.add(encoder.apply(entry));
+            }
             outputData.put("Data", data);
 
             outputData.putShortArray("Palette", this.palette);
@@ -104,7 +109,10 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
             buffer.writeVarInt(this.data.size);
             for (D entry : this.data.toArray()) if (entry != null) encoder.accept(buffer, entry);
             buffer.writeVarInt(this.palette.length);
-            for (short v : this.palette) buffer.writeShort(v);
+            for (short v : this.palette) {
+                if (v != -1 && v >= this.data.size) throw new IllegalArgumentException("Invalid palette index " + v);
+                buffer.writeShort(v);
+            }
         } finally {
             this.rwLock.readLock().unlock();
         }
@@ -116,14 +124,15 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         try {
             var data = new Array<D>(defaultValue.getClass());
             var dataSize = buffer.readVarInt();
-            for (int i = 0; i < dataSize; i++) {
+            for (int i = 0; i < dataSize; i++)
                 data.add(decoder.apply(buffer));
-            }
             this.data = data;
 
             short[] palette = new short[buffer.readVarInt()];
             for (int i = 0; i < palette.length; i++) {
                 palette[i] = buffer.readShort();
+                if (palette[i] != -1 && palette[i] >= this.data.size)
+                    throw new IllegalArgumentException("Invalid palette index " + palette[i]);
             }
 
             this.palette = palette;
@@ -231,6 +240,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     @Override
     public void dispose() {
         this.data.clear();
+        this.palette = null;
     }
 
     @Nullable

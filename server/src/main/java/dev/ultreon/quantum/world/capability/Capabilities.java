@@ -6,9 +6,11 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.energy.Energy;
 import dev.ultreon.quantum.world.energy.EnergyConnection;
 import dev.ultreon.quantum.world.energy.EnergyNode;
+import org.jetbrains.annotations.ApiStatus;
 
 import static dev.ultreon.quantum.CommonConstants.id;
 
+@ApiStatus.Experimental
 public class Capabilities {
     public static final CapabilityType<EnergyCapability, Energy> ENERGY = new CapabilityType<>(EnergyCapability::new);
     public static final CapabilityType<EnergyNode, EnergyConnection> ENERGY_NODE = new CapabilityType<>(EnergyNode::new);

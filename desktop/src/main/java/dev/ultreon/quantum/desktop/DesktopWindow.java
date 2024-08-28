@@ -24,18 +24,18 @@ public class DesktopWindow extends GameWindow {
 
         if (isDragging()) {
             GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//            int x = dragX;
-//            int y = dragY;
+//            int setX = dragX;
+//            int setY = dragY;
 //
 //            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 //            Point location = pointerInfo.getLocation();
-//            int nx = location.x;
-//            int ny = location.y;
+//            int nx = location.setX;
+//            int ny = location.setY;
 //
-//            int i = nx - x;
-//            int i1 = ny - y;
+//            int i = nx - setX;
+//            int i1 = ny - setY;
 //
-//            GLFW.glfwSetWindowPos(getHandle(), i + x - dragOffX, i1 + y - dragOffY);
+//            GLFW.glfwSetWindowPos(getHandle(), i + setX - dragOffX, i1 + setY - dragOffY);
         }
     }
 
@@ -49,10 +49,10 @@ public class DesktopWindow extends GameWindow {
 //        booleanPointerInfo pointerInfo = MouseInfo.getPointerInfo();
 //        Point location = pointerInfo.getLocation();
 //        GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//        int x = location.x - xPos[0];
-//        int y = location.y - yPos[0];
+//        int setX = location.setX - xPos[0];
+//        int setY = location.setY - yPos[0];
 //
-//        return x >= 0 && x < Gdx.graphics.getWidth() && y >= 0 && y < Gdx.graphics.getHeight();
+//        return setX >= 0 && setX < Gdx.graphics.getWidth() && setY >= 0 && setY < Gdx.graphics.getHeight();
         return true;
     }
 
@@ -140,8 +140,8 @@ public class DesktopWindow extends GameWindow {
 //            this.dragging = dragging;
 //            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 //            Point location = pointerInfo.getLocation();
-//            int nx = location.x;
-//            int ny = location.y;
+//            int nx = location.setX;
+//            int ny = location.setY;
 //            this.dragX = nx;
 //            this.dragY = ny;
 //            this.dragOffX = nx - xPos[0];

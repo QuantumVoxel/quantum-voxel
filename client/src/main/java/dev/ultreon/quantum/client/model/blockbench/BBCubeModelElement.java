@@ -180,14 +180,14 @@ public final class BBCubeModelElement extends BBModelElement {
         Vec3f to = this.to().cpy().div(16);
 
 //        Vec3f rotation = this.rotation().cpy();
-//        Vector3 from = new Vector3(fromVec.x, fromVec.y, fromVec.z);
-//        Vector3 to = new Vector3(toVec.x, toVec.y, toVec.z);
+//        Vector3 from = new Vector3(fromVec.setX, fromVec.setY, fromVec.z);
+//        Vector3 to = new Vector3(toVec.setX, toVec.setY, toVec.z);
 //        Matrix4 transform = new Matrix4();
-//        transform.translate(from.x, from.y, from.z);
-//        transform.rotate(1, 0, 0, rotation.x);
-//        transform.rotate(0, 1, 0, rotation.y);
+//        transform.translate(from.setX, from.setY, from.z);
+//        transform.rotate(1, 0, 0, rotation.setX);
+//        transform.rotate(0, 1, 0, rotation.setY);
 //        transform.rotate(0, 0, 1, rotation.z);
-//        transform.translate(-from.x, -from.y, -from.z);
+//        transform.translate(-from.setX, -from.setY, -from.z);
 //
 //        from.mul(transform);
 //        to.mul(transform);

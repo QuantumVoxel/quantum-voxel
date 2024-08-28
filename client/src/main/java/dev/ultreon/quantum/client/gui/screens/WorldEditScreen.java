@@ -8,6 +8,7 @@ import dev.ultreon.quantum.client.gui.widget.TextEntry;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -25,7 +26,7 @@ public class WorldEditScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         ScrollableContainer container = builder.add(new ScrollableContainer())
                 .bounds(() -> new Bounds(size.width / 2 - 200, size.height / 2 - 100, 400, 200));
 

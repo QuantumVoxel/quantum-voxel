@@ -1,7 +1,10 @@
 package dev.ultreon.quantum.world.capability;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.function.Consumer;
 
+@ApiStatus.Experimental
 public class CapabilityType<Instance extends Capability<Holder>, Holder> {
     private final CapabilityFactory<Instance, Holder> factory;
 

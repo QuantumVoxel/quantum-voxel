@@ -170,4 +170,11 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "network.timeout", comment = "The time in milliseconds between keep alive packets sent to the server.\nNote that the value is in milliseconds.")
     public static int networkTimeout = 30000;
+
+    @ConfigEntry(path = "accessibility.controllerDeadZone", comment = "The dead zone of the controller.")
+    @Ranged(min = 0, max = 1)
+    public static float controllerDeadZone = 0.2F;
+
+    @ConfigEntry(path = "accessibility.enableVirtualKeyboard", comment = "Whether the virtual keyboard is enabled in the game.")
+    public static boolean enableVirtualKeyboard = true;
 }

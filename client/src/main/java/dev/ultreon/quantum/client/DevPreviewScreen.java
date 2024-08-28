@@ -33,7 +33,7 @@ public class DevPreviewScreen extends Screen {
      * @param builder The GuiBuilder object to build the GUI layout.
      */
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(TextObject.translation("quantum.screen.dev.message"))
                 .alignment(Alignment.LEFT)
                 .position(() -> new Position(40, 40)));
@@ -48,8 +48,8 @@ public class DevPreviewScreen extends Screen {
      * Calls the superclass method to render the background.
      *
      * @param renderer  The Renderer object to render the widget.
-     * @param mouseX    The x-coordinate of the mouse.
-     * @param mouseY    The y-coordinate of the mouse.
+     * @param mouseX    The setX-coordinate of the mouse.
+     * @param mouseY    The setY-coordinate of the mouse.
      * @param deltaTime The time passed since the last frame.
      */
     @Override

@@ -10,7 +10,6 @@ import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
-import dev.ultreon.quantum.client.input.util.ControllerButton;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -24,7 +23,6 @@ import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
-import dev.ultreon.quantum.network.packets.s2c.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -50,7 +48,6 @@ public class LocalPlayer extends ClientPlayer {
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
     private final Vec3d tmp = new Vec3d();
-    private ChunkVec lastChunkVec;
     private final Vec2i tmp2I = new Vec2i();
     private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
     private long lastRefresh;
@@ -71,8 +68,7 @@ public class LocalPlayer extends ClientPlayer {
         if (!this.client.renderWorld) return;
 
         // Determine if the player is jumping based on input
-        this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched() || GameInput.isControllerButtonDown(ControllerButton.A));
-
+        this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched());
 
         var connection = this.client.connection;
         if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
@@ -134,7 +130,6 @@ public class LocalPlayer extends ClientPlayer {
         this.oz = this.z;
 
         this.refreshChunks();
-        this.lastChunkVec = this.getChunkVec();
     }
 
     private void refreshChunks() {
@@ -151,6 +146,7 @@ public class LocalPlayer extends ClientPlayer {
         for (ClientChunkAccess chunk : this.world.getLoadedChunks()) {
             if (chunk.getVec().dst(chunkVec) > renderDistance) {
                 this.unloadChunk(chunk);
+                this.client.connection.send(new C2SUnloadChunkPacket(chunk.getVec()));
             }
         }
 

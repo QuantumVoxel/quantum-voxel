@@ -6,19 +6,9 @@ import dev.ultreon.quantum.util.Vec3f;
 
 import java.util.Objects;
 
-public final class BBModelVertex {
-    private final Vec3f vertex;
-
-    public BBModelVertex(Vec3f vertex) {
-        this.vertex = vertex;
-    }
-
+public record BBModelVertex(Vec3f vertex) {
     public void write(MeshPartBuilder builder, Vec2f resolution) {
         builder.vertex(vertex.x / 16f, vertex.y / 16f, vertex.z / 16f);
-    }
-
-    public Vec3f vertex() {
-        return vertex;
     }
 
     @Override
@@ -27,11 +17,6 @@ public final class BBModelVertex {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (BBModelVertex) obj;
         return Objects.equals(this.vertex, that.vertex);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(vertex);
     }
 
     @Override

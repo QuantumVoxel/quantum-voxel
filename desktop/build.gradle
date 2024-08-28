@@ -109,7 +109,7 @@ dependencies {
     implementation api("com.google.guava:guava:$guava_version")
 
     // Misc
-    implementation api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    implementation api("it.unimi.dsi:fastutil:8.5.13", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
     implementation api("com.raylabz:opensimplex:1.0.3")
 
     implementation api("space.earlygrey:shapedrawer:$shapedrawer_version")
@@ -121,8 +121,9 @@ dependencies {
     implementation api("io.github.spair:imgui-java-natives-macos:$imgui_version")
     implementation api("io.github.spair:imgui-java-natives-windows:$imgui_version")
 
-    implementation api("it.unimi.dsi:fastutil-core:8.5.9")
+    implementation api("it.unimi.dsi:fastutil-core:8.5.13")
     implementation api("com.google.code.findbugs:jsr305:$jsr_version")
+
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
 

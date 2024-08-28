@@ -14,14 +14,17 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Disposable;
 import com.crashinvaders.vfx.VfxManager;
+import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.ultreon.libs.commons.v0.Anchor;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.world.RenderablePool;
+import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.FormattedText;
 import dev.ultreon.quantum.text.TextObject;
@@ -32,13 +35,14 @@ import dev.ultreon.quantum.util.Vec4i;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.Objects;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static dev.ultreon.quantum.client.QuantumClient.id;
@@ -82,6 +86,8 @@ public class Renderer implements Disposable {
     private final RenderablePool renderablePool = new RenderablePool();
     private final com.badlogic.gdx.graphics.Color tmpC = new com.badlogic.gdx.graphics.Color();
     private float iTime;
+    private boolean hexItems;
+    private long shouldCheckMathDay;
 
     /**
      * Creates a new Renderer instance with the default matrices.
@@ -401,8 +407,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex the texture to draw
-     * @param x   the x coordinate
-     * @param y   the y coordinate
+     * @param x   the setX coordinate
+     * @param y   the setY coordinate
      * @return this
      * @see #blit(NamespaceID, float, float, float, float, float, float, float, float)
      */
@@ -419,8 +425,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex    the texture to draw
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param width  the width
      * @param height the height
      * @return this
@@ -439,8 +445,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex the texture to draw
-     * @param x   the x coordinate
-     * @param y   the y coordinate
+     * @param x   the setX coordinate
+     * @param y   the setY coordinate
      * @return this
      * @see #blit(NamespaceID, float, float, float, float)
      */
@@ -457,8 +463,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex             the texture to draw
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param backgroundColor the background color to use
      * @return this
      * @see #blit(NamespaceID, float, float, float, float, float, float, Color)
@@ -478,8 +484,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex             the texture to draw
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param backgroundColor the background color to use
@@ -498,8 +504,8 @@ public class Renderer implements Disposable {
      * This also allows you to specify the UV coordinates of the texture.
      * This assumes that the texture is 256×256.
      *
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param u               the texture u coordinate of the region
@@ -522,8 +528,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex             the texture to draw
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param u               the texture u coordinate of the region
@@ -547,8 +553,8 @@ public class Renderer implements Disposable {
      * And the UV width and height.
      *
      * @param tex             the texture to draw
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param u               the texture u coordinate of the region
@@ -578,8 +584,8 @@ public class Renderer implements Disposable {
      * This assumes that the texture is 256×256.
      *
      * @param tex    the texture to draw
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param width  the width
      * @param height the height
      * @return this
@@ -596,8 +602,8 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates
      *
      * @param tex    the texture to draw
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param width  the width
      * @param height the height
      * @param u      the texture u coordinate of the region
@@ -616,8 +622,8 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates
      *
      * @param tex     the texture to draw
-     * @param x       the x coordinate
-     * @param y       the y coordinate
+     * @param x       the setX coordinate
+     * @param y       the setY coordinate
      * @param width   the width
      * @param height  the height
      * @param u       the texture u coordinate of the region
@@ -638,8 +644,8 @@ public class Renderer implements Disposable {
      * Draws a texture at the specified coordinates
      *
      * @param tex       the texture to draw
-     * @param x         the x coordinate
-     * @param y         the y coordinate
+     * @param x         the setX coordinate
+     * @param y         the setY coordinate
      * @param width     the width
      * @param height    the height
      * @param u         the texture u coordinate of the region
@@ -665,8 +671,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id              the texture identifier
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param backgroundColor the background color
@@ -682,8 +688,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id              the texture identifier
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param u               the texture u coordinate of the region
@@ -702,8 +708,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id              the texture identifier
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param u               the texture u coordinate of the region
@@ -724,8 +730,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id     the texture identifier
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param width  the width
      * @param height the height
      * @return this
@@ -740,8 +746,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id     the texture identifier
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param width  the width
      * @param height the height
      * @param u      the texture u coordinate of the region
@@ -758,8 +764,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id      the texture identifier
-     * @param x       the x coordinate
-     * @param y       the y coordinate
+     * @param x       the setX coordinate
+     * @param y       the setY coordinate
      * @param width   the width
      * @param height  the height
      * @param u       the texture u coordinate of the region
@@ -778,8 +784,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id        the texture identifier
-     * @param x         the x coordinate
-     * @param y         the y coordinate
+     * @param x         the setX coordinate
+     * @param y         the setY coordinate
      * @param width     the width
      * @param height    the height
      * @param u         the texture u coordinate of the region
@@ -804,8 +810,8 @@ public class Renderer implements Disposable {
      * Draws a texture by id at the specified coordinates
      *
      * @param id              the texture identifier
-     * @param x               the x coordinate
-     * @param y               the y coordinate
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
      * @param width           the width
      * @param height          the height
      * @param u               the texture u coordinate of the region
@@ -833,8 +839,8 @@ public class Renderer implements Disposable {
      * Draws a sprite
      *
      * @param sprite the sprite
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @return this
      */
     @CanIgnoreReturnValue
@@ -847,8 +853,8 @@ public class Renderer implements Disposable {
      * Draws a sprite
      *
      * @param sprite the sprite
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param width  the width
      * @param height the height
      * @return this
@@ -863,8 +869,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text the text
-     * @param x    the x coordinate
-     * @param y    the y coordinate
+     * @param x    the setX coordinate
+     * @param y    the setY coordinate
      * @return this
      */
     @CanIgnoreReturnValue
@@ -877,8 +883,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text  the text
-     * @param x     the x coordinate
-     * @param y     the y coordinate
+     * @param x     the setX coordinate
+     * @param y     the setY coordinate
      * @param color the color
      * @return this
      */
@@ -892,8 +898,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text  the text
-     * @param x     the x coordinate
-     * @param y     the y coordinate
+     * @param x     the setX coordinate
+     * @param y     the setY coordinate
      * @param color the color
      * @return this
      */
@@ -907,8 +913,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text   the text
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -922,8 +928,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text   the text
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
@@ -938,8 +944,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text   the text
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
@@ -954,8 +960,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text the text
-     * @param x    the x coordinate
-     * @param y    the y coordinate
+     * @param x    the setX coordinate
+     * @param y    the setY coordinate
      * @return this
      */
     @CanIgnoreReturnValue
@@ -968,8 +974,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text  the text
-     * @param x     the x coordinate
-     * @param y     the y coordinate
+     * @param x     the setX coordinate
+     * @param y     the setY coordinate
      * @param color the color
      * @return this
      */
@@ -983,8 +989,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text  the text
-     * @param x     the x coordinate
-     * @param y     the y coordinate
+     * @param x     the setX coordinate
+     * @param y     the setY coordinate
      * @param color the color
      * @return this
      */
@@ -998,8 +1004,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text   the text
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
@@ -1013,8 +1019,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text   the text
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
@@ -1029,8 +1035,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text   the text
-     * @param x      the x coordinate
-     * @param y      the y coordinate
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
      * @param color  the color
      * @param shadow if the text should be drawn with a shadow
      * @return this
@@ -1045,8 +1051,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
      * @return this
@@ -1061,8 +1067,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
@@ -1078,8 +1084,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
@@ -1095,8 +1101,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
      * @param truncate the text to show when truncated
@@ -1112,8 +1118,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
@@ -1130,8 +1136,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
@@ -1148,8 +1154,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param maxWidth the max width
      * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
@@ -1165,8 +1171,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param maxWidth the max width
      * @param wrap     if the text should be wrapped
@@ -1183,8 +1189,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param maxWidth the max width
      * @param wrap     if the text should be wrapped
@@ -1201,8 +1207,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param maxWidth the max width
      * @param wrap     if the text should be wrapped
      * @param truncate the text to show when truncated
@@ -1218,8 +1224,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
@@ -1237,8 +1243,8 @@ public class Renderer implements Disposable {
      * Draws text anchored to the left
      *
      * @param text     the text
-     * @param x        the x coordinate
-     * @param y        the y coordinate
+     * @param x        the setX coordinate
+     * @param y        the setY coordinate
      * @param color    the color
      * @param shadow   if the text should be drawn with a shadow
      * @param maxWidth the max width
@@ -3179,4 +3185,84 @@ public class Renderer implements Disposable {
     public void popState() {
         this.glState.pop();
     }
+
+    public void drawItemStack(ItemStack item, int x, int y) {
+        drawItemStack(item, x, y, Anchor.CENTER);
+    }
+
+    public void drawItemStack(ItemStack item, int x, int y, Anchor anchor) {
+        int mx = x + anchor.getX() * 8;
+        int my = y + anchor.getY() * 8;
+        this.client.itemRenderer.render(item.getItem(), this, mx, my);
+        this.textRight(Integer.toString(item.getCount(), isMathDay() ? 16 : 10), mx + 8, my + 8);
+    }
+
+    private boolean isMathDay() {
+        if (this.shouldCheckMathDay + 3000 > System.currentTimeMillis())
+            return false;
+
+        this.shouldCheckMathDay = System.currentTimeMillis();
+        LocalDateTime clock = LocalDateTime.now(Clock.systemUTC());
+        return clock.getMonth() == Month.MARCH && clock.getDayOfMonth() == 14;
+    }
+
+    public void renderTooltip(ItemStack item, int x, int y) {
+        this.renderTooltip(item, x, y, item.getDescription());
+    }
+
+    public void renderTooltip(ItemStack item, int x, int y, List<TextObject> description) {
+        this.renderTooltip(x, y, item.getItem().getTranslation(), description, item.getItem().getId().toString());
+    }
+
+    public void renderTooltip(int x, int y, TextObject title, List<TextObject> description, @Nullable String subTitle) {
+        x += 8;
+        y += 8;
+
+        var all = Lists.newArrayList(description);
+        all.addFirst(title);
+        if (subTitle != null) all.add(TextObject.literal(subTitle));
+        boolean seen = false;
+        int best = 0;
+        int[] arr = new int[10];
+        int count = 0;
+        Font font1 = this.font;
+        for (TextObject textObject : all) {
+            int width = font1.width(textObject);
+            if (arr.length == count) arr = Arrays.copyOf(arr, count * 2);
+            arr[count++] = width;
+        }
+        arr = Arrays.copyOfRange(arr, 0, count);
+        for (int i : arr) {
+            if (!seen || i > best) {
+                seen = true;
+                best = i;
+            }
+        }
+        int textWidth = seen ? best : 0;
+        int descHeight = description.size() * (this.font.lineHeight + 1) - 1;
+        int textHeight = descHeight + 3 + this.font.lineHeight;
+
+        if (description.isEmpty() && subTitle == null) {
+            textHeight -= 3;
+        }
+        if (subTitle != null) {
+            textHeight += 1 + this.font.lineHeight;
+        }
+
+        this.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));
+        this.fill(x, y + 1, textWidth + 6, textHeight + 4, RgbColor.rgb(0x202020));
+        this.box(x + 1, y + 1, textWidth + 4, textHeight + 4, RgbColor.rgb(0x303030));
+
+        this.textLeft(title, x + 3, y + 3, RgbColor.WHITE);
+
+        int lineNr = 0;
+        for (TextObject line : description) {
+            this.textLeft(line, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0xa0a0a0));
+            lineNr++;
+        }
+
+        if (subTitle != null)
+            this.textLeft(subTitle, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0x606060));
+    }
+
 }

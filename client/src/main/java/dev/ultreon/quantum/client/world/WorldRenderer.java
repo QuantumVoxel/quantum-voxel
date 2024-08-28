@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -28,6 +29,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
@@ -42,7 +44,7 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderLayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -414,6 +416,34 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> this.collectEntity(remotePlayer, batch));
             }
         });
+
+        for (String category : world.getEnabledGizmoCategories()) {
+            Gizmo[] gizmos = world.getGizmos(category);
+            List<Gizmo> toSort = new ArrayList<>();
+            for (Gizmo gizmo1 : gizmos) {
+                if (gizmo1 != null) {
+                    toSort.add(gizmo1);
+                }
+            }
+            toSort.sort((o1, o2) -> {
+                double dst1 = 0;
+                double dst2 = 0;
+                if (client.player != null) {
+                    dst1 = o1.position.dst(client.player.getPosition(deltaTime));
+                    dst2 = o2.position.dst(client.player.getPosition(deltaTime));
+                }
+                return Double.compare(dst2, dst1);
+            });
+            for (Gizmo gizmo : toSort) {
+                batch.render(gizmo);
+                batch.flush();
+                Gdx.gl.glFlush();
+            }
+        }
+    }
+
+    public void renderForeground(ModelBatch batch, float deltaTime) {
+        Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
@@ -626,10 +656,19 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 this.qvModels.put(entity.getId(), model);
             }
 
+            batch.flush();
+
+            Gdx.gl.glCullFace(GL_NONE);
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(batch, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
+
+            model.update(Gdx.graphics.getDeltaTime());
+
             renderer.animate(instance, context);
             renderer.render(instance, context);
+
+            batch.flush();
+            Gdx.gl.glCullFace(GL_BACK);
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);
             CrashLog crashLog = new CrashLog("Error rendering entity " + entity.getId(), new Exception());

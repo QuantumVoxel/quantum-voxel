@@ -13,4 +13,8 @@ public class KeyBindRegistry {
         KeyBindRegistry.KEY_BINDS.add(keyBind);
         return keyBind;
     }
+
+    public static KeyBind[] getAll() {
+        return KEY_BINDS.toArray(KeyBind.class);
+    }
 }

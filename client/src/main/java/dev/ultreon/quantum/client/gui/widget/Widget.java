@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.math.Vector2;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -93,9 +94,13 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
         this.renderWidget(renderer, mouseX, mouseY, deltaTime);
     }
 
-    public abstract Widget position(Supplier<Position> position);
+    public Widget position(Supplier<Position> position) {
+        return this;
+    }
 
-    public abstract Widget bounds(Supplier<Bounds> position);
+    public Widget bounds(Supplier<Bounds> position) {
+        return this;
+    }
 
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
 
@@ -185,12 +190,12 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     @CanIgnoreReturnValue
-    public void x(int x) {
+    public void setX(int x) {
         this.pos.x = x;
     }
 
     @CanIgnoreReturnValue
-    public void y(int y) {
+    public void setY(int y) {
         this.pos.y = y;
     }
 
@@ -381,6 +386,10 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     public void bounds(Bounds bounds) {
         this.bounds.set(bounds);
+    }
+
+    public Vector2 getCenter() {
+        return new Vector2(this.pos.x + this.size.width / 2f, this.pos.y + this.size.height / 2f);
     }
 
     @FunctionalInterface

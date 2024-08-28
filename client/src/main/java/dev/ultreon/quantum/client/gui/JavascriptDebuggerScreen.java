@@ -16,32 +16,32 @@ public class JavascriptDebuggerScreen extends Screen {
     private static final Context CTX = Context.newBuilder("js").allowAllAccess(true).build();
 
     static {
-        CTX.eval("js", "function add(x, y) { return x + y; }");
-        CTX.eval("js", "function sub(x, y) { return x - y; }");
-        CTX.eval("js", "function mul(x, y) { return x * y; }");
-        CTX.eval("js", "function div(x, y) { return x / y; }");
-        CTX.eval("js", "function mod(x, y) { return x % y; }");
-        CTX.eval("js", "function pow(x, y) { return x ** y; }");
-        CTX.eval("js", "function sqrt(x) { return Math.sqrt(x); }");
+        CTX.eval("js", "function add(setX, setY) { return setX + setY; }");
+        CTX.eval("js", "function sub(setX, setY) { return setX - setY; }");
+        CTX.eval("js", "function mul(setX, setY) { return setX * setY; }");
+        CTX.eval("js", "function div(setX, setY) { return setX / setY; }");
+        CTX.eval("js", "function mod(setX, setY) { return setX % setY; }");
+        CTX.eval("js", "function pow(setX, setY) { return setX ** setY; }");
+        CTX.eval("js", "function sqrt(setX) { return Math.sqrt(setX); }");
 
-        CTX.eval("js", "function log(x) { return Math.log(x); }");
-        CTX.eval("js", "function log10(x) { return Math.log10(x); }");
-        CTX.eval("js", "function log2(x) { return Math.log2(x); }");
+        CTX.eval("js", "function log(setX) { return Math.log(setX); }");
+        CTX.eval("js", "function log10(setX) { return Math.log10(setX); }");
+        CTX.eval("js", "function log2(setX) { return Math.log2(setX); }");
 
-        CTX.eval("js", "function sin(x) { return Math.sin(x); }");
-        CTX.eval("js", "function cos(x) { return Math.cos(x); }");
-        CTX.eval("js", "function tan(x) { return Math.tan(x); }");
+        CTX.eval("js", "function sin(setX) { return Math.sin(setX); }");
+        CTX.eval("js", "function cos(setX) { return Math.cos(setX); }");
+        CTX.eval("js", "function tan(setX) { return Math.tan(setX); }");
 
-        CTX.eval("js", "function asin(x) { return Math.asin(x); }");
-        CTX.eval("js", "function acos(x) { return Math.acos(x); }");
-        CTX.eval("js", "function atan(x) { return Math.atan(x); }");
+        CTX.eval("js", "function asin(setX) { return Math.asin(setX); }");
+        CTX.eval("js", "function acos(setX) { return Math.acos(setX); }");
+        CTX.eval("js", "function atan(setX) { return Math.atan(setX); }");
 
-        CTX.eval("js", "function asinh(x) { return Math.asinh(x); }");
-        CTX.eval("js", "function acosh(x) { return Math.acosh(x); }");
-        CTX.eval("js", "function atanh(x) { return Math.atanh(x); }");
+        CTX.eval("js", "function asinh(setX) { return Math.asinh(setX); }");
+        CTX.eval("js", "function acosh(setX) { return Math.acosh(setX); }");
+        CTX.eval("js", "function atanh(setX) { return Math.atanh(setX); }");
 
-        CTX.eval("js", "function exp(x) { return Math.exp(x); }");
-        CTX.eval("js", "function ln(x) { return Math.log(x); }");
+        CTX.eval("js", "function exp(setX) { return Math.exp(setX); }");
+        CTX.eval("js", "function ln(setX) { return Math.log(setX); }");
 
         CTX.eval("js", "let client = Java.type('dev.ultreon.quantum.client.QuantumClient').get();");
         CTX.eval("js", "let ClientWorld = Java.type('dev.ultreon.quantum.client.world.ClientWorld');");
@@ -63,7 +63,7 @@ public class JavascriptDebuggerScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         if (jsInput != null) {
             builder.add(jsInput);
             return;

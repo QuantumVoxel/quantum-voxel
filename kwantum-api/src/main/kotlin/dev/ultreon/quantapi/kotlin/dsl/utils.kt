@@ -1,5 +1,12 @@
 package dev.ultreon.quantapi.kotlin.dsl
 
+import dev.ultreon.quantum.Mod
+import dev.ultreon.quantum.client.QuantumClient
+import dev.ultreon.quantum.log.Logger
+import dev.ultreon.quantum.log.LoggerFactory
+import dev.ultreon.quantum.server.QuantumServer
+import dev.ultreon.quantum.util.ModLoadingContext
+import dev.ultreon.quantum.util.NamespaceID
 import dev.ultreon.quantum.util.Vec3d
 import dev.ultreon.quantum.util.Vec3f
 import dev.ultreon.quantum.util.Vec3i
@@ -120,3 +127,28 @@ operator fun Vec3f.unaryMinus() = Vec3f(-this.x, -this.y, -this.z)
 operator fun Vec3f.component1() = this.x
 operator fun Vec3f.component2() = this.y
 operator fun Vec3f.component3() = this.z
+
+operator fun NamespaceID.component1() = this.domain
+operator fun NamespaceID.component2() = this.path
+
+val client: QuantumClient get() = QuantumClient.get()
+val server: QuantumServer get() = QuantumServer.get()
+
+val modContext: ModLoadingContext get() = ModLoadingContext.get()
+
+val mod: Mod get() = modContext.mod
+val modName: String get() = mod.name
+val modDisplayName: String get() = mod.displayName
+val modVersion: String get() = mod.version
+val modDescription: String? get() = mod.description
+val modAuthors: Collection<String> get() = mod.authors
+
+fun logger(name: String = "???"): Logger = LoggerFactory.getLogger(name)
+
+fun logger(mod: Mod): Logger = logger(mod.name)
+
+fun logger(mod: Mod, name: String): Logger = logger("${mod.name}:$name")
+
+fun main() {
+  println(255.toString(16))
+}

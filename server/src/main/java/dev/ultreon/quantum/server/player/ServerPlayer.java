@@ -669,7 +669,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {
-        UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack);
+        UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack, 1F);
         BlockHit result = (BlockHit) ctx.result();
         if (result == null)
             return UseResult.SKIP;
@@ -724,33 +724,57 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void requestChunkLoad(ChunkVec pos) {
+
         // Get or load the chunk.
         synchronized (this.chunkTracker) {
             QuantumServer.invoke(() -> {
-                if (!this.chunkTracker.isTracking(pos)) {
-                    this.chunkTracker.startTracking(pos);
-                } else {
-                    @Nullable ServerChunk chunk = this.world.getChunk(pos);
-                    if (chunk != null) chunk.sendChunk();
-                    else return;
-                }
-
-                this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
-                    if (receivedChunk == null) {
-                        return;
+                try {
+                    this.server.onChunkLoadRequested(pos);
+                    if (!this.chunkTracker.isTracking(pos)) {
+                        this.chunkTracker.startTracking(pos);
+                    } else {
+                        @Nullable ServerChunk chunk = this.world.getChunk(pos);
+                        if (chunk != null) {
+                            chunk.sendChunk();
+                        } else {
+                            this.server.onChunkFailedToLoad(pos.blockInWorldSpace(0, 0, 0).vec().d());
+                            return;
+                        }
                     }
 
-                    receivedChunk.getTracker().startTracking(this);
-                    receivedChunk.sendChunk();
-                }).exceptionally(throwable -> {
+                    this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {
+                        if (receivedChunk == null) {
+                            this.server.onChunkFailedToLoad(pos.blockInWorldSpace(0, 0, 0).vec().d());
+                            return;
+                        }
+
+                        receivedChunk.getTracker().startTracking(this);
+                        receivedChunk.sendChunk();
+                    }).exceptionally(throwable -> {
+                        this.chunkTracker.stopTracking(pos);
+                        this.sendPacket(new S2CChunkUnloadPacket(pos));
+
+                        this.server.onChunkFailedToLoad(pos.blockInWorldSpace(0, 0, 0).vec().d());
+
+                        CommonConstants.LOGGER.error("Failed to load chunk {} due to exception", pos, throwable);
+
+                        return null;
+                    });
+                } catch (Exception e) {
                     this.chunkTracker.stopTracking(pos);
                     this.sendPacket(new S2CChunkUnloadPacket(pos));
-
-                    CommonConstants.LOGGER.error("Failed to load chunk {} due to exception", pos, throwable);
-
-                    return null;
-                });
+                    this.server.onChunkFailedToLoad(pos.blockInWorldSpace(0, 0, 0).vec().d());
+                    CommonConstants.LOGGER.error("Failed to load chunk {} due to exception", pos, e);
+                }
             });
+        }
+    }
+
+    public void stopTracking(ChunkVec vec) {
+        synchronized (this.chunkTracker) {
+            this.chunkTracker.stopTracking(vec);
+
+            this.world.stopTrackingChunk(vec, this);
         }
     }
 }

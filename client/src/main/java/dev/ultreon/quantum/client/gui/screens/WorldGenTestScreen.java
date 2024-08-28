@@ -5,6 +5,7 @@ import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.WorldGenTestPanel;
+import org.jetbrains.annotations.NotNull;
 
 public class WorldGenTestScreen extends Screen {
     private WorldGenTestPanel panel;
@@ -14,7 +15,7 @@ public class WorldGenTestScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         focused = this.panel = (WorldGenTestPanel) builder.add(WorldGenTestPanel.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)));
         focused.focused = true;
     }

@@ -142,9 +142,9 @@ public class ItemRenderer implements Disposable {
 //                renderable.meshPart.primitiveType = GL20.GL_TRIANGLES;
 //                renderable.material = this.material;
 //                renderable.environment = this.environment;
-//                renderable.worldTransform.set(this.position.cpy().add((x - (int) (this.client.getScaledWidth() / 2.0F)) * guiScale, -(-y + (int) (this.client.getScaledHeight() / 2.0F)) * guiScale, 100), this.quaternion, this.scale);
-//                renderable.worldTransform.rotate(Vector3.X, this.rotation.x);
-//                renderable.worldTransform.rotate(Vector3.Y, this.rotation.y);
+//                renderable.worldTransform.set(this.position.cpy().add((setX - (int) (this.client.getScaledWidth() / 2.0F)) * guiScale, -(-setY + (int) (this.client.getScaledHeight() / 2.0F)) * guiScale, 100), this.quaternion, this.scale);
+//                renderable.worldTransform.rotate(Vector3.X, this.rotation.setX);
+//                renderable.worldTransform.rotate(Vector3.Y, this.rotation.setY);
 //                this.batch.render(renderable);
 //                this.batch.end();
 //            } else {

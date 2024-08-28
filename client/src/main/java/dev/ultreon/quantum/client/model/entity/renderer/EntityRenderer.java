@@ -8,15 +8,15 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.WorldRenderContext;
 import dev.ultreon.quantum.client.render.EntityTextures;
-import dev.ultreon.quantum.client.render.shader.Shaders;
+import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3f;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class EntityRenderer<E extends Entity> implements Disposable {

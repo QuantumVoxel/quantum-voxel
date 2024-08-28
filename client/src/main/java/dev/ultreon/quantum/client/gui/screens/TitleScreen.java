@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.CameraPlayer;
@@ -17,6 +16,7 @@ import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TitleScreen extends Screen {
@@ -37,7 +37,7 @@ public class TitleScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         this.client.setActivity(GameActivity.MAIN_MENU);
 
         builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));

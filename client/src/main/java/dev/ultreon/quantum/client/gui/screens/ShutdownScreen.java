@@ -6,6 +6,7 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.text.TextObject;
+import org.jetbrains.annotations.NotNull;
 
 public class ShutdownScreen extends Screen {
     private Label message;
@@ -15,7 +16,7 @@ public class ShutdownScreen extends Screen {
     }
 
     @Override
-    public void build(GuiBuilder builder) {
+    public void build(@NotNull GuiBuilder builder) {
         this.message = builder.add(Label.of(TextObject.translation("Quantum.screen.shutdown.message")))
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.size.width / 2, this.size.height / 2 - 40))
