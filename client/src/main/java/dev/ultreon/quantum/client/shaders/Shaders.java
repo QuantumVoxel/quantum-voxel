@@ -37,14 +37,14 @@ public class Shaders {
             new ResourceFileHandle(id("shaders/model.vert")),
             new ResourceFileHandle(id("shaders/model.frag")),
             new ResourceFileHandle(id("shaders/model.geom"))));
-    public static final Supplier<GizmoShaders> GIZMO = Shaders.register("model_view", () -> new GizmoShaders(
+    public static final Supplier<GizmoShaders> GIZMO = Shaders.register("gizmo", () -> new GizmoShaders(
             new ResourceFileHandle(id("shaders/gizmo.vert")),
             new ResourceFileHandle(id("shaders/gizmo.frag")),
             new ResourceFileHandle(id("shaders/gizmo.geom"))));
     public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
             new ResourceFileHandle(id("shaders/outline.vert")),
             new ResourceFileHandle(id("shaders/outline.frag"))));
-    public static final Supplier<GizmoOutlineShaders> GIZMO_OUTLINE = Shaders.register("outline", () -> new GizmoOutlineShaders(
+    public static final Supplier<GizmoOutlineShaders> GIZMO_OUTLINE = Shaders.register("gizmo_outline", () -> new GizmoOutlineShaders(
             new ResourceFileHandle(id("shaders/gizmo_outline.vert")),
             new ResourceFileHandle(id("shaders/gizmo_outline.frag"))
     ));

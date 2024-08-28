@@ -1048,7 +1048,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     public void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
-        QuantumClient.LOGGER.debug("Adding entity with id {} of type {} at {}", new Object[]{id, type.getId(), position});
+        QuantumClient.LOGGER.debug("Adding entity with id " + id + " of type " + type.getId() + " at " + position);
 
         Entity entity = type.create(this);
         entity.setId(id);

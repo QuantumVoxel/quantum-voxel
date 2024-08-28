@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -296,7 +297,8 @@ public class BBModelLoader implements ModelImporter {
     private List<BBModelMeshFace> loadMeshFaces(Map<String, BBModelVertex> vertices, JsonObject faces) {
         List<BBModelMeshFace> processed = new ArrayList<>();
         for (Map.Entry<String, JsonElement> elem : faces.entrySet()) {
-            processed.add(this.loadMeshFace(vertices, elem.getValue().getAsJsonObject()));
+            BBModelMeshFace e = this.loadMeshFace(vertices, elem.getValue().getAsJsonObject());
+            if (e != null) processed.add(e);
         }
 
         return processed;
@@ -307,6 +309,7 @@ public class BBModelLoader implements ModelImporter {
         JsonObject uvJson = asJsonObject.getAsJsonObject("uv");
 
         List<BBModelVertex> vertices = new ArrayList<>();
+        List<Vector2> mappedUVs = new ArrayList<>();
 
         for (Map.Entry<String, JsonElement> entry : uvJson.entrySet()) {
             uvs.put(entry.getKey(), loadVec2(entry.getValue().getAsJsonArray()));
@@ -319,11 +322,20 @@ public class BBModelLoader implements ModelImporter {
                 throw new IllegalArgumentException("Missing uv for vertex: " + elem.getAsString());
         }
 
-        for (Map.Entry<String, Vec2f> entry : uvs.entrySet())
+        for (Map.Entry<String, Vec2f> entry : uvs.entrySet()) {
+            Vec2f vec2f = uvs.get(entry.getKey());
+            mappedUVs.add(new Vector2(vec2f.x, vec2f.y));
+
             if (!vertices.contains(verticesRef.get(entry.getKey())))
                 throw new IllegalArgumentException("Missing vertex for uv: " + entry.getKey());
+        }
 
-        return new BBModelMeshFace(Collections.unmodifiableMap(uvs), Collections.unmodifiableList(vertices), asJsonObject.get("texture").getAsInt());
+        JsonElement texture = asJsonObject.get("texture");
+        if (texture == null) {
+            QuantumClient.LOGGER.warn("BlockBench model {} has a mesh face with no texture", this.id);
+            return null;
+        }
+        return new BBModelMeshFace(mappedUVs, Collections.unmodifiableList(vertices), texture.getAsInt());
     }
 
     private Map<String, BBModelVertex> loadVertices(JsonObject vertices) {

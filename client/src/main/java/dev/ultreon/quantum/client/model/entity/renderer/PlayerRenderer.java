@@ -15,7 +15,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
+public class PlayerRenderer extends QVModelEntityRenderer<@NotNull Player> {
     public PlayerRenderer(PlayerModel<@NotNull Player> playerModel, @Nullable Model model) {
         super(playerModel, model);
     }
@@ -51,7 +51,7 @@ public class PlayerRenderer extends LivingEntityRenderer<@NotNull Player> {
 
         if (clientPlayer.isWalking()) clientPlayer.walking = true;
         if (!clientPlayer.walking) clientPlayer.walkAnim = 0;
-        else LivingEntityRenderer.updateWalkAnim(clientPlayer, walkAnim, delta, duration);
+        else QVModelEntityRenderer.updateWalkAnim(clientPlayer, walkAnim, delta, duration);
 
         float bopDuration = 3.4f;
         var bop = clientPlayer.bop;

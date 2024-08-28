@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -655,10 +656,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 this.qvModels.put(entity.getId(), model);
             }
 
+            batch.flush();
+
+            Gdx.gl.glCullFace(GL_NONE);
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(batch, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
             renderer.animate(instance, context);
             renderer.render(instance, context);
+
+            batch.flush();
+            Gdx.gl.glCullFace(GL_BACK);
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);
             CrashLog crashLog = new CrashLog("Error rendering entity " + entity.getId(), new Exception());

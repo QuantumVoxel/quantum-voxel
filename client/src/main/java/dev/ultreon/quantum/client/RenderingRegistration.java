@@ -6,10 +6,7 @@ import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.block.ModelProperties;
-import dev.ultreon.quantum.client.model.entity.renderer.DroppedItemRenderer;
-import dev.ultreon.quantum.client.model.entity.renderer.PigRenderer;
-import dev.ultreon.quantum.client.model.entity.renderer.PlayerRenderer;
-import dev.ultreon.quantum.client.model.entity.renderer.SomethingRenderer;
+import dev.ultreon.quantum.client.model.entity.renderer.*;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.registry.BlockRenderTypeRegistry;
@@ -136,6 +133,7 @@ public class RenderingRegistration {
         entityModelManager.registerBBModel(EntityTypes.PLAYER, QuantumClient.id("player"));
         entityModelManager.registerBBModel(EntityTypes.SOMETHING, QuantumClient.id("something"));
         entityModelManager.registerBBModel(EntityTypes.PIG, QuantumClient.id("pig"));
+        entityModelManager.registerBBModel(EntityTypes.BANVIL, QuantumClient.id("banvil"));
 
         // Register the player entity renderer
         EntityRendererRegistry.register(EntityTypes.PLAYER, PlayerRenderer::new);
@@ -144,6 +142,7 @@ public class RenderingRegistration {
         EntityRendererRegistry.register(EntityTypes.DROPPED_ITEM, DroppedItemRenderer::new);
         EntityRendererRegistry.register(EntityTypes.SOMETHING, SomethingRenderer::new);
         EntityRendererRegistry.register(EntityTypes.PIG, PigRenderer::new);
+        EntityRendererRegistry.register(EntityTypes.BANVIL, BanvilRenderer::new);
 
         // Call the onRegister method of the factory in ENTITY_RENDERERS
         ClientRegistrationEvents.ENTITY_RENDERERS.factory().onRegister();

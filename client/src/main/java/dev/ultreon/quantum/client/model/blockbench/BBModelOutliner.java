@@ -4,12 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public final class BBModelOutliner {
-    private final List<BBModelOutlineInfo> entries;
-
-    public BBModelOutliner(List<BBModelOutlineInfo> entries) {
-        this.entries = entries;
-    }
+public record BBModelOutliner(List<BBModelOutlineInfo> entries) {
 
     public BBModelOutlineInfo parent(UUID uuid) {
         for (BBModelOutlineInfo node : entries) {
@@ -24,21 +19,12 @@ public final class BBModelOutliner {
         return null;
     }
 
-    public List<BBModelOutlineInfo> entries() {
-        return entries;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (BBModelOutliner) obj;
         return Objects.equals(this.entries, that.entries);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(entries);
     }
 
     @Override

@@ -5,14 +5,15 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class LivingEntityRenderer<E extends LivingEntity> extends EntityRenderer<E> {
+public abstract class QVModelEntityRenderer<E extends Entity> extends EntityRenderer<E> {
     private final EntityModel<E> entityModel;
     private final Model model;
 
-    protected LivingEntityRenderer(EntityModel<E> entityModel, @Nullable Model model) {
+    protected QVModelEntityRenderer(EntityModel<E> entityModel, @Nullable Model model) {
         super();
 
         Preconditions.checkNotNull(model, "Model cannot be null");

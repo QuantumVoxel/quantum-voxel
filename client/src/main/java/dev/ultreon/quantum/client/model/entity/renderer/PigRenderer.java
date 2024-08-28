@@ -12,7 +12,7 @@ import dev.ultreon.quantum.entity.Pig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PigRenderer extends LivingEntityRenderer<@NotNull Pig> {
+public class PigRenderer extends QVModelEntityRenderer<@NotNull Pig> {
     public PigRenderer(EntityModel<@NotNull Pig> pigModel, @Nullable Model model) {
         super(pigModel, model);
     }

@@ -11,7 +11,7 @@ import dev.ultreon.quantum.entity.Something;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SomethingRenderer extends LivingEntityRenderer<@NotNull Something> {
+public class SomethingRenderer extends QVModelEntityRenderer<@NotNull Something> {
     public SomethingRenderer(EntityModel<@NotNull Something> droppedItemModel, @Nullable Model model) {
         super(droppedItemModel, model);
     }
