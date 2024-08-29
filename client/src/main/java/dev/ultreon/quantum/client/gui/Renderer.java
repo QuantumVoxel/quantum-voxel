@@ -2836,7 +2836,6 @@ public class Renderer implements Disposable {
                                \s
                       // Output to screen
                       color /= Quality * Directions;
-                      color.a = 1.0;
                       gl_FragColor = color;
                     }
                     """;
@@ -2967,8 +2966,8 @@ public class Renderer implements Disposable {
 
         this.blurred = true;
         try {
-            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
             TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
 
             //Start rendering to an offscreen color buffer

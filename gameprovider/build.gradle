@@ -73,12 +73,8 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", version
-    inputs.property "quantum_version", project(":client").version
-    inputs.property "gdx_version", gdx_version
-
     filesMatching("versions.properties") {
-        expand "quantum_version": project(":client").version, "gdx_version": gdx_version
+        expand project.properties + [quantum_version: project(":client").version]
     }
 
     exclude "*.pdn", "*.xcf", "*.ps"

@@ -87,6 +87,14 @@ public abstract class Screen extends UIContainer<Screen> {
             this.titleWidget.render(renderer, mouseX, mouseY, deltaTime);
             return;
         }
+
+        if (this.dialog != null) {
+            renderer.blurred(() -> super.render(renderer, Integer.MIN_VALUE, Integer.MIN_VALUE, deltaTime));
+            renderer.fill(0, 0, this.size.width, this.size.height, DIALOG_BACKGROUND);
+            this.dialog.render(renderer, mouseX, mouseY, deltaTime);
+            return;
+        }
+
         super.render(renderer, mouseX, mouseY, deltaTime);
     }
 

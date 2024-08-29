@@ -3,6 +3,7 @@ package dev.ultreon.quantum;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
@@ -80,4 +81,28 @@ public interface Mod {
      */
     @Nullable
     Iterable<Path> getRootPaths();
+
+    @Nullable
+    default String getSources() {
+        return null;
+    }
+
+    @Nullable
+    default String getHomepage() {
+        return null;
+    }
+
+    @Nullable
+    default String getIssues() {
+        return null;
+    }
+
+    @Nullable
+    default String getDiscord() {
+        return null;
+    }
+
+    default String getLicense() {
+        return "All-Rights-Reserved";
+    }
 }

@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.Person;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -82,5 +83,34 @@ public class FabricMod implements Mod {
     @Override
     public Iterable<Path> getRootPaths() {
         return null;
+    }
+
+    @Override
+    public String getSources() {
+        return metadata.getContact().get("sources").orElse(null);
+    }
+
+    @Override
+    public @Nullable String getHomepage() {
+        return metadata.getContact().get("homepage").orElse(null);
+    }
+
+    @Override
+    public @Nullable String getIssues() {
+        return metadata.getContact().get("issues").orElse(null);
+    }
+
+    @Override
+    public @Nullable String getDiscord() {
+        return metadata.getContact().get("discord").orElse(null);
+    }
+
+    @Override
+    public String getLicense() {
+        String join = String.join(", ", metadata.getLicense());
+        if (join.isEmpty()) {
+            join = "None";
+        }
+        return join;
     }
 }
