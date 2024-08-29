@@ -11,5 +11,5 @@ public interface Hit {
 
     boolean isCollide();
 
-    double getDistance();
+    float getDistance();
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
@@ -26,7 +27,7 @@ import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
-import dev.ultreon.quantum.sound.event.SoundEvents;
+import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
@@ -97,7 +98,9 @@ public class LocalPlayer extends ClientPlayer {
             if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
                 double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
                 if (isWalking() && onGround && this.lastWalkSound + 0.2 / dst < this.client.getGameTime() && !this.isSpectator()) {
-                    this.client.playSound(SoundEvents.WALK, 1.0F);
+                    SoundEvent walkSound = getWalkSound();
+                    if (walkSound != null)
+                        this.client.playSound(walkSound, 1.0F);
                     this.lastWalkSound = this.client.getGameTime();
                 }
                 this.handleMove();
@@ -108,6 +111,17 @@ public class LocalPlayer extends ClientPlayer {
                 this.oz = this.z;
             }
         }
+    }
+
+    private @Nullable SoundEvent getWalkSound() {
+        BlockState state = this.getOnBlock();
+        SoundType soundType = state.getBlock().getSoundType(state, this.world, this.getBlockVec());
+        return soundType.getStepSound(getRng());
+    }
+
+    private BlockState getOnBlock() {
+        if (this.world == null) return BlockState.AIR;
+        return this.world.get(this.getBlockVec().below());
     }
 
 
@@ -203,7 +217,7 @@ public class LocalPlayer extends ClientPlayer {
 
     @Override
     public boolean isWalking() {
-        return this.client.playerInput.isWalking();
+        return this.client.playerInput.isWalking() && (ox != x || oy != y || oz != z);
     }
 
     @Override

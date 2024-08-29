@@ -65,7 +65,7 @@ public abstract class World implements Disposable, WorldAccess {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(World.class);
 
-    protected final BlockVec spawnPoint = new BlockVec();
+    protected final BlockVec spawnPoint = new BlockVec(BlockVecSpace.WORLD);
     protected final long seed;
     private int renderedChunks;
 
@@ -160,10 +160,11 @@ public abstract class World implements Disposable, WorldAccess {
         Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
         entitiesWithin.forEach(entity -> {
             double curDistance = ray.origin.dst(entity.getPosition());
+            if (curDistance > distance) return;
             Vec intersection = new Vec();
             if (Intersector.intersectRayBounds(ray, entity.getBoundingBox(), intersection) && (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax())) {
                 result.entity = entity;
-                result.distance = curDistance;
+                result.distance = (float) curDistance;
                 result.position = intersection;
                 result.collide = true;
             }
@@ -179,9 +180,10 @@ public abstract class World implements Disposable, WorldAccess {
         entitiesWithin.forEach(entity -> {
             if (filter.test(entity)) {
                 double curDistance = ray.origin.dst(entity.getPosition());
+                if (curDistance > distance) return;
                 if (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax()) {
                     result.entity = entity;
-                    result.distance = curDistance;
+                    result.distance = (float) curDistance;
                 }
             }
         });

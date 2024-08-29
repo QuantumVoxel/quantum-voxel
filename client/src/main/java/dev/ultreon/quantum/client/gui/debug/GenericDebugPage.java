@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
+import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -9,14 +10,17 @@ import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class GenericDebugPage implements DebugPage {
@@ -117,15 +121,24 @@ public class GenericDebugPage implements DebugPage {
         }
 
         // Cursor
-        BlockHit cursor = client.cursor;
-        if (cursor != null && cursor.isCollide()) {
-            BlockState block = cursor.getBlockMeta();
+        @NotNull Hit cursor = client.cursor;
+        if (cursor instanceof BlockHit blockHit && cursor.isCollide()) {
+            BlockState block = blockHit.getBlockMeta();
             if (block != null && !block.isAir()) {
                 context.right();
                 context.right("Cursor");
                 context.right("Block", block.getBlock().getId());
                 context.right("Pos", cursor.getBlockVec());
-                context.right("Next", cursor.getNext());
+                context.right("Next", blockHit.getNext());
+            }
+        } else if (cursor instanceof EntityHit entityHit) {
+            Entity entity = entityHit.getEntity();
+            if (entity != null) {
+                context.right();
+                context.right("Cursor");
+                context.right("Entity ID", entity.getId());
+                context.right("Entity Key", entity.getType().getId());
+                context.right("Pos", cursor.getBlockVec());
             }
         }
     }

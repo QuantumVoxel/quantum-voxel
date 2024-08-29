@@ -19,6 +19,7 @@ import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBindRegistry;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.player.Player;
@@ -201,6 +202,11 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
                 TerrainRenderer worldRenderer = this.client.worldRenderer;
                 if (worldRenderer != null) {
                     worldRenderer.reloadChunks();
+                }
+            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) {
+                ClientWorldAccess world = this.client.world;
+                if (world instanceof ClientWorld clientWorld) {
+                    clientWorld.toggleGizmoCategory("entity-bounds");
                 }
             }
         }

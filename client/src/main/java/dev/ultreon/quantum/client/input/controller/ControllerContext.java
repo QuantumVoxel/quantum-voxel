@@ -7,6 +7,8 @@ import dev.ultreon.quantum.client.gui.widget.ItemSlotWidget;
 import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
 import dev.ultreon.quantum.client.input.controller.context.MenuControllerContext;
 import dev.ultreon.quantum.client.input.controller.context.VirtKeyboardControllerContext;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -78,11 +80,11 @@ public abstract class ControllerContext {
     }
 
     public static boolean isTargetingEntity(QuantumClient client) {
-        return false; // As yet, not implemented
+        return client.cursor.isCollide() && client.cursor instanceof EntityHit;
     }
 
     public static boolean isTargetingBlock(QuantumClient client) {
-        return client.cursor.isCollide();
+        return client.cursor.isCollide() && client.cursor instanceof BlockHit;
     }
 
     public static boolean isInMenu(QuantumClient client) {

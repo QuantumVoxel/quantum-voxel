@@ -104,8 +104,29 @@ public interface WorldAccess extends Disposable, WorldReader {
      * @return the result
      */
     @NotNull
-    default BlockHit rayCast(Ray ray) {
-        return WorldRayCaster.rayCast(new BlockHit(ray), this);
+    default Hit rayCast(Ray ray, Entity caster, float distance, Vec3d tmp) {
+        Entity closestToOrigin = null;
+        double closestDst = Double.MAX_VALUE;
+        for (Entity entity : getEntities()) {
+            if (entity == caster) continue;
+            if (Intersector.intersectRayBounds(ray, entity.getBoundingBox(), null)) {
+                if (entity.getBoundingBox().getCenter(tmp).dst(ray.origin) < closestDst) {
+                    closestToOrigin = entity;
+                    closestDst = entity.getBoundingBox().getCenter(tmp).dst(ray.origin);
+                }
+            }
+        }
+        EntityHit entityHit = new EntityHit(ray, distance);
+        entityHit.entity = closestToOrigin;
+        entityHit.collide = true;
+
+        if (closestToOrigin != null) {
+            return entityHit;
+        }
+
+        BlockHit blockHit = WorldRayCaster.rayCast(new BlockHit(ray, entityHit.distance), this);
+        if (blockHit.isCollide()) return blockHit;
+        return entityHit;
     }
 
     void tick();

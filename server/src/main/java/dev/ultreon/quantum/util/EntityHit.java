@@ -19,7 +19,7 @@ public class EntityHit implements Hit {
     protected BlockVec pos = new BlockVec(BlockVecSpace.WORLD);
     public Entity entity;
     public boolean collide;
-    public double distance;
+    public float distance;
 
     public EntityHit() {
 
@@ -45,7 +45,7 @@ public class EntityHit implements Hit {
         this.normal.set(buffer.readVec3d());
         this.pos.set(buffer.readVec3i());
         this.collide = buffer.readBoolean();
-        this.distance = buffer.readDouble();
+        this.distance = buffer.readFloat();
     }
 
     public void write(PacketIO buffer) {
@@ -57,7 +57,7 @@ public class EntityHit implements Hit {
         buffer.writeUuid(this.entity.getWorld().getUID());
         buffer.writeInt(this.entity.getId());
         buffer.writeBoolean(this.collide);
-        buffer.writeDouble(this.getDistance());
+        buffer.writeFloat(this.getDistance());
     }
 
     public EntityHit setInput(Ray ray) {
@@ -100,7 +100,7 @@ public class EntityHit implements Hit {
     }
 
     @Override
-    public double getDistance() {
+    public float getDistance() {
         return this.distance;
     }
 

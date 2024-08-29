@@ -111,7 +111,7 @@ public class WorldRayCaster {
         if (Intersector.intersectRayBounds(ray, box, intersection)) {
             double dst = intersection.dst(ray.origin);
             result.collide = true;
-            result.distance = dst;
+            result.distance = (float) dst;
             result.position.set(intersection);
             result.vec.set(abs);
             result.blockMeta = block;

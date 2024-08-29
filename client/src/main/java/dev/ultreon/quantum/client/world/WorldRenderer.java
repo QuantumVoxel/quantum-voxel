@@ -356,20 +356,20 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(batch, renderLayer, chunks, positions, player, ref));
 
         // Render the cursor.
-        BlockHit gameCursor = this.client.cursor;
-        if (gameCursor != null && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
+        @NotNull Hit gameCursor = this.client.cursor;
+        if (gameCursor instanceof BlockHit blockHit && blockHit.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             QuantumClient.PROFILER.section("cursor", () -> {
                 // Block outline.
-                Vec3i pos = gameCursor.getBlockVec();
+                Vec3i pos = blockHit.getBlockVec();
                 Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
-                var boundingBox = gameCursor.getBlock().getBoundingBox(0, 0, 0, gameCursor.getBlockMeta());
+                var boundingBox = blockHit.getBlock().getBoundingBox(0, 0, 0, blockHit.getBlockMeta());
                 renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
 
                 // Render the outline.
-                if (lastHitResult != null && this.lastHitResult.equals(gameCursor))
+                if (lastHitResult != null && this.lastHitResult.equals(blockHit))
                     return;
 
-                this.lastHitResult = gameCursor;
+                this.lastHitResult = blockHit;
 
                 if (this.cursor != null) {
                     RenderLayer.WORLD.destroy(this.cursor);
@@ -668,6 +668,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             renderer.render(instance, context);
 
             batch.flush();
+
+            Gizmo entityGizmo = world.getEntityGizmo(entity);
+            if (entityGizmo != null) entityGizmo.position.set(entity.getPosition());
             Gdx.gl.glCullFace(GL_BACK);
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);

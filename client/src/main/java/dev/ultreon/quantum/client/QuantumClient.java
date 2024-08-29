@@ -399,7 +399,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private BlockVec breaking;
     private BlockState breakingBlock;
 
-    public BlockHit cursor;
+    public @NotNull Hit cursor;
 
     // Public Flags
     public boolean renderWorld = false;
@@ -1764,7 +1764,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Update cursor position based on player's look vector
         final LocalPlayer player = this.player;
         if (player != null && this.world != null) {
-            this.cursor = this.world.rayCast(new Ray(player.getPosition(this.partialTick).add(0, player.getEyeHeight(), 0), player.getLookVector()));
+            this.cursor = this.world.rayCast(new Ray(player.getPosition(this.partialTick).add(0, player.getEyeHeight(), 0), player.getLookVector()), player, player.getReach(), CommonConstants.VEC3D_0_C);
         }
 
         // Update connection tick
@@ -1774,6 +1774,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             // Update client connection tick
             this.connection.tick();
         }
+
+        if (this.controllerInput != null) this.controllerInput.tick();
+        if (this.keyAndMouseInput != null) this.keyAndMouseInput.tick();
+        if (this.touchInput != null) this.touchInput.tick();
 
         // Execute player tick if not canceled
         if (player != null && !ClientTickEvents.PRE_PLAYER_TICK.factory().onPlayerTick(player).isCanceled()) {

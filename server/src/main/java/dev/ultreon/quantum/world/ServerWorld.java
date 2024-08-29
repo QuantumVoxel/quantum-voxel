@@ -158,7 +158,7 @@ public class ServerWorld extends World {
     public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos) {
         this.checkThread();
 
-        if (!this.unloadChunk(pos, true)) World.LOGGER.warn("Failed to unload chunk at {}", pos);
+        this.unloadChunk(pos, true);
 
         WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getVec(), chunk);
         return true;
@@ -220,7 +220,7 @@ public class ServerWorld extends World {
      * @see BlockFlags
      */
     @Override
-    public boolean set(BlockVec pos, @NotNull BlockState block,
+    public boolean set(@NotNull BlockVec pos, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         int x = pos.getIntX();
         int y = pos.getIntY();
@@ -665,12 +665,11 @@ public class ServerWorld extends World {
 
         var chunk = region.deactivate(localChunkVec);
         if (chunk == null) {
-            LOGGER.warn("Tried to unload non-existing chunk: " + chunkVec);
             return false;
         }
 
         chunk.sendAllViewers(new S2CChunkUnloadPacket(chunkVec));
-        LOGGER.debug("Unloaded chunk %s", chunkVec);
+        LOGGER.debug("Unloaded chunk " + chunkVec);
 
         if (region.isEmpty() && save) {
             try {
@@ -1382,7 +1381,7 @@ public class ServerWorld extends World {
                 if (chunk == null) return null;
 
                 if (!this.activeChunks.remove(chunkVec))
-                    return null;
+                    return null; // Already deactivated
 
                 chunk.active = false;
                 return chunk;
@@ -1573,6 +1572,8 @@ public class ServerWorld extends World {
                     var ref = new Object() {
                         ServerChunk builtChunk = null;
                     };
+
+                    @SuppressWarnings("UnnecessaryLocalVariable") // It's a necessary local variable, IntelliJ is broken
                     long l = TimingKt.measureTimeMillis(() -> {
                         ref.builtChunk = this.buildChunk(globalVec);
                         return null;

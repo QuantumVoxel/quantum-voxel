@@ -10,6 +10,7 @@ import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.item.tool.ToolType;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.ubo.DataWriter;
 import dev.ultreon.quantum.util.BoundingBox;
@@ -46,6 +47,7 @@ public class Block implements DataWriter<MapType> {
     private final boolean greedyMerge;
     private final @Nullable ToolLevel toolLevel;
     private final int lightReduction;
+    private final SoundType soundType;
 
     public Block() {
         this(new Properties());
@@ -66,6 +68,7 @@ public class Block implements DataWriter<MapType> {
         this.greedyMerge = properties.greedyMerge;
         this.toolLevel = properties.toolLevel;
         this.lightReduction = properties.lightReduction;
+        this.soundType = properties.soundType;
     }
 
     public NamespaceID getId() {
@@ -239,7 +242,12 @@ public class Block implements DataWriter<MapType> {
         return false;
     }
 
+    public SoundType getSoundType(BlockState state, WorldAccess world, BlockVec blockVec) {
+        return this.soundType;
+    }
+
     public static class Properties {
+        private SoundType soundType = new SoundType();
         private boolean greedyMerge = true;
         private boolean occlude = true;
         private boolean replaceable = false;
@@ -255,6 +263,11 @@ public class Block implements DataWriter<MapType> {
         private boolean disableRendering = false;
         private int lightReduction = 15;
         private @Nullable ToolLevel toolLevel = null;
+
+        public @This Properties soundType(SoundType soundType) {
+            this.soundType = soundType;
+            return this;
+        }
 
         public @This Properties transparent() {
             this.transparent = true;

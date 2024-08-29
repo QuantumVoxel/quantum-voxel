@@ -21,10 +21,13 @@ import dev.ultreon.quantum.client.input.dyn.ControllerInterDynamic;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.util.PlayerView;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.network.packets.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.EntityHit;
+import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import io.github.libsdl4j.api.gamecontroller.SDL_GameController;
@@ -41,7 +44,6 @@ import static io.github.libsdl4j.api.Sdl.SDL_Init;
 import static io.github.libsdl4j.api.Sdl.SDL_Quit;
 import static io.github.libsdl4j.api.SdlSubSystemConst.*;
 import static io.github.libsdl4j.api.event.SdlEventsConst.SDL_PRESSED;
-import static io.github.libsdl4j.api.gamecontroller.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_MAX;
 import static io.github.libsdl4j.api.gamecontroller.SdlGamecontroller.*;
 
 public class ControllerInput extends GameInput {
@@ -218,16 +220,22 @@ public class ControllerInput extends GameInput {
         } else if (context.openInventory.getAction().isPressed()) {
             client.showScreen(new InventoryScreen(player.inventory, player.inventory.getTitle()));
         } else if (context.destroyBlock.getAction().isPressed()) {
-            if (player.abilities.instaMine) {
-                BlockHit cursor = client.cursor;
-                if (cursor != null)
-                    this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(cursor.getBlockVec())));
+            @NotNull Hit cursor = client.cursor;
+            if (cursor instanceof BlockHit) {
+                if (player.abilities.instaMine) {
+                    if (cursor != null)
+                        this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(cursor.getBlockVec())));
 
+                    this.client.stopBreaking();
+                    return;
+                }
+
+                this.client.startBreaking();
+            } else if (cursor instanceof EntityHit entityHit) {
                 this.client.stopBreaking();
-                return;
-            }
 
-            this.client.startBreaking();
+                this.client.connection.send(new C2SAttackPacket(entityHit.getEntity()));
+            }
         } else if (context.destroyBlock.getAction().isJustReleased()) {
             if (player.abilities.instaMine) return;
 
@@ -235,9 +243,13 @@ public class ControllerInput extends GameInput {
         } else if (context.placeBlock.getAction().isPressed()) {
             this.client.stopBreaking();
 
-            BlockHit cursor = client.cursor;
-            if (cursor == null) return;
-            this.useItem(player, client.world, cursor);
+            @NotNull Hit cursor = client.cursor;
+            if (cursor instanceof BlockHit) {
+                this.useItem(player, client.world, cursor);
+            } else if (cursor instanceof EntityHit entityHit) {
+                // TODO - Add entity interaction
+//                this.client.connection.send(new C2SInteractEntityPacket(entityHit.getEntity(), entityHit.getHitVec()));
+            }
         } else if (context.moveHead.getAction().isPressed()) {
             Vector2 vector2 = context.moveHead.getAction().get2DValue();
             player.rotateHead(vector2.x * 20F * deltaTime, vector2.y * 20F * deltaTime);

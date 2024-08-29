@@ -50,6 +50,8 @@ public class Carver {
                     chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
                     height = min(height, y - 1);
                 }
+            } else if (y <= World.SEA_LEVEL) {
+                chunk.set(x, y, z, Blocks.WATER.createMeta());
             } else {
                 chunk.set(x, y, z, Blocks.AIR.createMeta());
             }

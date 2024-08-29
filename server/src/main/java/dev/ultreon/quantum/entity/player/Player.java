@@ -36,8 +36,8 @@ public abstract class Player extends LivingEntity {
     private boolean running = false;
     private float walkingSpeed = .09F;
     private float flyingSpeed = 0.5F;
-    public float runModifier = 2.0F;
-    public float crouchModifier = 0.5F;
+    public float runModifier = 4.0F;
+    public float crouchModifier = 0.2F;
     public final PlayerAbilities abilities = new PlayerAbilities();
     private boolean crouching = false;
     @Nullable
@@ -46,6 +46,7 @@ public abstract class Player extends LivingEntity {
     private final String name;
     private GameMode gamemode = GameMode.SURVIVAL;
     private final FoodStatus foodStatus = new FoodStatus(this);
+    private float reach = 6.0F;
 
     protected Player(EntityType<? extends Player> entityType, WorldAccess world, String name) {
         super(entityType, world);
@@ -247,14 +248,8 @@ public abstract class Player extends LivingEntity {
     }
 
     public Hit rayCast() {
-        Ray ray = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
-        if (this.world.get(getBlockVec()).getBlock().hasCollider()) {
-            return new BlockHit(ray, getBlockVec(), world.get(getBlockVec()));
-        }
-        EntityHit entityHitResult = this.world.rayCastEntity(ray);
-        if (entityHitResult.isCollide()) return entityHitResult;
         Ray ray1 = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
-        return this.world.rayCast(ray1);
+        return this.world.rayCast(ray1, this, this.getReach(), CommonConstants.VEC3D_0_C);
     }
 
     @Override
@@ -487,5 +482,9 @@ public abstract class Player extends LivingEntity {
 
     public boolean isSwimming() {
         return this.isInWater() && (this.x != this.ox || this.z != this.oz || this.y > this.oy);
+    }
+
+    public float getReach() {
+        return reach;
     }
 }

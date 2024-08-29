@@ -1,8 +1,11 @@
 package dev.ultreon.quantum.world.rng;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Random;
 
 public class JavaRNG implements RNG {
+    public static final @Nullable RNG GLOBAL = new JavaRNG();
     private final Random random;
 
     public JavaRNG() {

@@ -76,6 +76,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private final Queue<LightData> panelQueue = new Queue<>();
     private final ObjectIntMap<LightData> panelMap = new ObjectIntMap<>();
 
+    private final IntMap<Gizmo> entityGizmos = new IntMap<>();
+
     private final ObjectMap<String, Array<Gizmo>> gizmos = new ObjectMap<>();
     private final ObjectSet<String> enabledCategories = new ObjectSet<>();
 
@@ -922,6 +924,10 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
     }
 
+    public Gizmo getEntityGizmo(Entity entity) {
+        return this.entityGizmos.get(entity.getId());
+    }
+
     /**
      * Tick method to update the state of the ClientWorld.
      * It increments the time and checks if the chunk refresh is due.
@@ -1054,12 +1060,19 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         entity.setId(id);
         entity.setPosition(position);
         entity.onPipeline(pipeline);
+        BoxGizmo boxGizmo = new BoxGizmo("entity-bounds");
+        boxGizmo.position.set(position);
+        boxGizmo.size.set(entity.getSize().width(), entity.getSize().height(), entity.getSize().width());
+        boxGizmo.outline = true;
+        this.entityGizmos.put(id, boxGizmo);
+        this.addGizmo(boxGizmo);
         this.entitiesById.put(id, entity);
     }
 
     @CanIgnoreReturnValue
     public Entity removeEntity(int id) {
         Entity remove = this.entitiesById.remove(id);
+        this.removeGizmo(this.entityGizmos.remove(id));
         @Nullable TerrainRenderer worldRenderer = client.worldRenderer;
         if (worldRenderer != null) {
             worldRenderer.removeEntity(id);

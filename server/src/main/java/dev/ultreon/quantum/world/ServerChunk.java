@@ -199,9 +199,10 @@ public final class ServerChunk extends Chunk {
             if (!isBeingTracked() && lastTracked + 1000L < System.currentTimeMillis()) {
                 this.world.unloadChunk(this, this.getVec());
                 return;
+            } else if (isBeingTracked()) {
+                lastTracked = System.currentTimeMillis();
             }
 
-            lastTracked = System.currentTimeMillis();
             blockEntities = List.copyOf(this.getBlockEntities());
         }
 

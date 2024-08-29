@@ -23,7 +23,7 @@ public class BlockHit implements Hit {
     protected BlockState blockMeta = BlockState.AIR;
     protected Block block = Blocks.AIR;
     protected boolean collide;
-    protected double distance;
+    protected float distance;
 
     public BlockHit() {
 
@@ -51,7 +51,7 @@ public class BlockHit implements Hit {
         this.blockMeta = buffer.readBlockMeta();
         this.block = Registries.BLOCK.byId(buffer.readVarInt());
         this.collide = buffer.readBoolean();
-        this.distance = buffer.readDouble();
+        this.distance = buffer.readFloat();
     }
 
     public BlockHit(Ray ray, BlockVec blockVec, BlockState block) {
@@ -64,7 +64,7 @@ public class BlockHit implements Hit {
         this.vec.set(blockVec.vec());
         this.normal.set(0, 0, 0);
         this.collide = true;
-        this.distance = 0.0D;
+        this.distance = 0.0F;
     }
 
     public void write(PacketIO buffer) {
@@ -76,7 +76,7 @@ public class BlockHit implements Hit {
         buffer.writeBlockMeta(this.getBlockMeta());
         buffer.writeVarInt(Registries.BLOCK.getRawId(this.getBlock()));
         buffer.writeBoolean(this.collide);
-        buffer.writeDouble(this.getDistance());
+        buffer.writeFloat(this.getDistance());
     }
 
     public BlockHit setInput(Ray ray) {
@@ -127,7 +127,7 @@ public class BlockHit implements Hit {
     }
 
     @Override
-    public double getDistance() {
+    public float getDistance() {
         return this.distance;
     }
 

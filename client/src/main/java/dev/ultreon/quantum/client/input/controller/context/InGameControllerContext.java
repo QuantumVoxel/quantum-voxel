@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.input.controller.context;
 
 import dev.ultreon.quantum.client.input.controller.*;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.NamespaceID;
 
 public class InGameControllerContext extends ControllerContext {
@@ -15,6 +16,7 @@ public class InGameControllerContext extends ControllerContext {
     public final ControllerMapping<ControllerBoolean> openChat;
     public final ControllerMapping<ControllerBoolean> changePerspective;
     public final ControllerMapping<ControllerBoolean> destroyBlock;
+    public final ControllerMapping<ControllerBoolean> attackEntity;
     public final ControllerMapping<ControllerBoolean> placeBlock;
     public final ControllerMapping<ControllerUnsignedFloat> useItem;
     public final ControllerMapping<ControllerBoolean> dropItem;
@@ -30,9 +32,10 @@ public class InGameControllerContext extends ControllerContext {
         this.changePerspective = mappings.register(new ControllerMapping<>(ControllerActions.DPAD_DOWN, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.perspective"), true, "perspective", client -> client.player != null));
         this.changeItemLeft = mappings.register(new ControllerMapping<>(ControllerActions.LEFT_SHOULDER, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.hotbar.left"), true, "hotbar_left", client -> client.player != null));
         this.changeItemRight = mappings.register(new ControllerMapping<>(ControllerActions.RIGHT_SHOULDER, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.hotbar.right"), true, "hotbar_right", client -> client.player != null));
-        this.destroyBlock = mappings.register(new ControllerMapping<>(ControllerActions.RIGHT_TRIGGER_HOLD, ControllerMapping.Side.RIGHT, TextObject.translation("quantum.controller.action.ingame.destroy"), true, "destroy", client -> isTargetingBlock(client) && !client.cursor.getBlock().isUnbreakable()));
-        this.placeBlock = mappings.register(new ControllerMapping<>(ControllerActions.LEFT_TRIGGER_HOLD, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.place"), true, "place", client -> isTargetingBlock(client) && !client.cursor.getBlock().canUse(client.player)));
-        this.useItem = mappings.register(new ControllerMapping<>(ControllerActions.LEFT_TRIGGER, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.use"), true, "use", client -> isTargetingBlock(client) && !client.cursor.getBlock().canUse(client.player)));
+        this.destroyBlock = mappings.register(new ControllerMapping<>(ControllerActions.RIGHT_TRIGGER_HOLD, ControllerMapping.Side.RIGHT, TextObject.translation("quantum.controller.action.ingame.destroy"), true, "destroy", client -> isTargetingBlock(client) && !((BlockHit) client.cursor).getBlock().isUnbreakable()));
+        this.attackEntity = mappings.register(new ControllerMapping<>(ControllerActions.RIGHT_TRIGGER_HOLD, ControllerMapping.Side.RIGHT, TextObject.translation("quantum.controller.action.ingame.attack"), true, "attack", client -> isTargetingEntity(client) && !((BlockHit) client.cursor).getBlock().isUnbreakable()));
+        this.placeBlock = mappings.register(new ControllerMapping<>(ControllerActions.LEFT_TRIGGER_HOLD, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.place"), true, "place", client -> isTargetingBlock(client) && !((BlockHit) client.cursor).getBlock().canUse(client.player)));
+        this.useItem = mappings.register(new ControllerMapping<>(ControllerActions.LEFT_TRIGGER, ControllerMapping.Side.LEFT, TextObject.translation("quantum.controller.action.ingame.use"), true, "use", client -> isTargetingBlock(client) && !((BlockHit) client.cursor).getBlock().canUse(client.player)));
         this.dropItem = mappings.register(new ControllerMapping<>(ControllerActions.X, ControllerMapping.Side.RIGHT, TextObject.translation("quantum.controller.action.ingame.drop"), true, "drop", client -> client.player != null && client.world != null));
     }
 }

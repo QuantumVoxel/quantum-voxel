@@ -14,7 +14,7 @@ public class Pig extends LivingEntity {
 
     @Override
     public @Nullable SoundEvent getHurtSound() {
-        return SoundEvents.SCREENSHOT;
+        return SoundEvents.ENTITY_HIT;
     }
 
     @Override
