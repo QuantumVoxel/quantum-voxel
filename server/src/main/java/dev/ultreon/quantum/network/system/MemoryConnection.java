@@ -2,6 +2,8 @@ package dev.ultreon.quantum.network.system;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.crash.ApplicationCrash;
+import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
@@ -14,10 +16,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
-    @LazyInit private MemoryConnection<TheirHandler, OurHandler> otherSide;
+    @LazyInit
+    private MemoryConnection<TheirHandler, OurHandler> otherSide;
     private final Executor executor;
     private OurHandler handler;
 
@@ -25,18 +29,24 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private PacketData<TheirHandler> theirPacketData;
     private boolean readOnly;
 
-    private final Queue<Packet<? extends TheirHandler>> sendQueue = new java.util.concurrent.ConcurrentLinkedQueue<>();
-    private final Queue<Packet<? extends OurHandler>> receiveQueue = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    private final Queue<Packet<? extends TheirHandler>> sendQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Packet<? extends OurHandler>> receiveQueue = new ConcurrentLinkedQueue<>();
 
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
         this.otherSide = otherSide;
         this.executor = executor;
 
         Thread receiver = new Thread(() -> {
-            while (true) {
-                Packet<? extends OurHandler> packet = this.receiveQueue.poll();
-                if (packet == null) continue;
-                this.received(packet, null);
+            try {
+                while (true) {
+                    Packet<? extends OurHandler> packet = this.receiveQueue.poll();
+                    if (packet == null) continue;
+                    this.received(packet, null);
+
+                    Thread.sleep(5);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
@@ -69,10 +79,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @SuppressWarnings("unchecked")
     private void receive(int id, byte[] ourPacket) {
+        rx.incrementAndGet();
         ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
         PacketIO io = new PacketIO(bis, null);
         Packet<?> packet = ourPacketData.decode(id, io);
-        this.queue(() -> this.received((Packet<? extends OurHandler>) packet, null));
+        this.received((Packet<? extends OurHandler>) packet, null);
     }
 
     public static int getRx() {
@@ -94,6 +105,12 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
         tx.incrementAndGet();
         this.sendQueue.add(packet);
+
+        if (sendQueue.size() >= 5000) {
+            CrashLog crashLog = new CrashLog("Too many packets in send queue", new Throwable(":("));
+            crashLog.add("Send queue size", sendQueue.size());
+            throw new ApplicationCrash(crashLog);
+        }
     }
 
     @Override
@@ -111,14 +128,17 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     protected void received(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
         try {
             if (handler == null) throw new SanityCheckException("No handler set");
-            if (ourPacketData.getId(packet) < 0) throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
-            rx.incrementAndGet();
+            if (ourPacketData.getId(packet) < 0) {
+                throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
+            }
             ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
             rx.decrementAndGet();
         } catch (Throwable e) {
-            if (resultListener != null)
+            if (resultListener != null) {
                 resultListener.onFailure();
+            }
             CommonConstants.LOGGER.error("Failed to handle packet", e);
+            rx.decrementAndGet();
             return;
         }
 

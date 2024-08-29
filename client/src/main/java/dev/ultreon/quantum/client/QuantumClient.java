@@ -1212,7 +1212,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 this.debugGui.updateProfiler();
             }
 
-            QuantumClient.PROFILER.section("render", () -> this.doRender(deltaTime));
+            try (var ignored = PROFILER.start("render")) {
+                this.doRender(deltaTime);
+            }
             this.renderer.actuallyEnd();
         } catch (OutOfMemoryError e) {
             System.gc(); // try to free up some memory before handling out of memory.
@@ -1383,16 +1385,15 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         renderer.begin();
         GridPoint2 drawOffset = this.getDrawOffset();
-        renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, RgbColor.BLACK);
+        renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, Color.BLACK);
         renderer.end();
 
-        GameInput input = GameInput.getCurrent();
         if (this.controllerInput != null && this.keyAndMouseInput != null) {
-            QuantumClient.PROFILER.section("input", () -> {
+            try (var ignored = QuantumClient.PROFILER.start("input")) {
                 this.controllerInput.update();
                 this.keyAndMouseInput.update();
                 if (this.touchInput != null) this.touchInput.update();
-            });
+            }
         }
 
         ControllerContext.register(InGameControllerContext.INSTANCE, client -> client.screen == null);
@@ -1423,7 +1424,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     private void renderLoadingOverlay(Renderer renderer, float deltaTime, LoadingOverlay loading) {
-        QuantumClient.PROFILER.section("loading", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("loading")) {
             renderer.begin();
             renderer.pushMatrix();
             renderer.translate(this.getDrawOffset().x, this.getDrawOffset().y);
@@ -1432,7 +1433,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             loading.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
             renderer.popMatrix();
             renderer.end();
-        });
+        }
     }
 
     private void startLoading() {
@@ -1474,7 +1475,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     private void renderLibGDXSplash(Renderer renderer) {
-        QuantumClient.PROFILER.section("libGdxSplash", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("libGdxSplash")) {
             if (this.libGDXSplashTime == 0L) {
                 this.libGDXSplashTime = System.currentTimeMillis();
             }
@@ -1490,11 +1491,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 this.showLibGDXSplash = false;
                 this.showUltreonSplash = true;
             }
-        });
+        }
     }
 
     private void renderUltreonSplash(Renderer renderer) {
-        QuantumClient.PROFILER.section("ultreonSplash", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
             if (this.ultreonSplashTime == 0L) {
                 this.ultreonSplashTime = System.currentTimeMillis();
 
@@ -1522,7 +1523,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 showUltreonSplash = false;
                 this.startLoading();
             }
-        });
+        }
     }
 
     /**
@@ -2578,6 +2579,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void attack(Entity entity) {
+        if (entity == null) return;
         this.connection.send(new C2SAttackPacket(entity));
     }
 

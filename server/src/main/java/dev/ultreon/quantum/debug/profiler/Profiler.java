@@ -1,31 +1,33 @@
 package dev.ultreon.quantum.debug.profiler;
 
 import com.badlogic.gdx.utils.Disposable;
+import net.fabricmc.loader.api.FabricLoader;
 import org.intellij.lang.annotations.RegExp;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 @ThreadSafe
 public final class Profiler implements Disposable {
     @RegExp
-    static final String SECTION_REGEX = "[a-zA-Z0-9_ \\[\\],.\\-]+";
+    static final String SECTION_REGEX = "[^/]+";
     private final ConcurrentMap<Thread, ThreadSection> threads = new ConcurrentHashMap<>();
     private final ConcurrentMap<Thread, ThreadSection.FinishedThreadSection> finished = new ConcurrentHashMap<>();
     private boolean profiling;
 
-    private void start(String name) {
-        if (!this.profiling) {
-            return;
+    public @Nullable ProfilerSection start(String name) {
+        if (!profiling) {
+            return null;
         }
         var threadSection = this.threads.computeIfAbsent(Thread.currentThread(), thread -> new ThreadSection(this));
         threadSection.start(name);
+
+        return new ProfilerSection(this, name);
     }
 
-    private void end() {
+    void end() {
         var cur = Thread.currentThread();
         if (this.threads.containsKey(cur)) this.threads.get(cur).end();
         else this.threads.put(cur, new ThreadSection(this));
@@ -42,16 +44,18 @@ public final class Profiler implements Disposable {
 
     public ProfileData collect() {
         for (var thread : this.threads.keySet()) {
-            if (!thread.isAlive()) this.threads.remove(thread);
+            if (!thread.isAlive())
+                this.threads.remove(thread);
         }
 
         return new ProfileData(this.finished);
     }
 
+    @Deprecated
     public void section(String name, Runnable block) {
-        this.start(name);
-        block.run();
-        this.end();
+        try (ProfilerSection ignored = this.start(name)) {
+            block.run();
+        }
     }
 
     public boolean isProfiling() {
@@ -64,6 +68,13 @@ public final class Profiler implements Disposable {
 
     @Override
     public void dispose() {
+        this.threads.clear();
+        this.finished.clear();
+    }
 
+    public void addStat(String s, int size) {
+        var cur = Thread.currentThread();
+        var threadSection = this.threads.computeIfAbsent(cur, thread -> new ThreadSection(this));
+        threadSection.addStat(s, size);
     }
 }

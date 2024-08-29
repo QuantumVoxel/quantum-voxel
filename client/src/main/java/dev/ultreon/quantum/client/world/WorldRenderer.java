@@ -358,7 +358,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         // Render the cursor.
         @NotNull Hit gameCursor = this.client.cursor;
         if (gameCursor instanceof BlockHit blockHit && blockHit.isCollide() && !this.client.hideHud && !player.isSpectator()) {
-            QuantumClient.PROFILER.section("cursor", () -> {
+            try (var ignored = QuantumClient.PROFILER.start("cursor")) {
                 // Block outline.
                 Vec3i pos = blockHit.getBlockVec();
                 Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
@@ -392,14 +392,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
                 this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
                 this.cursor.userData = Shaders.OUTLINE.get();
-            });
+            }
 
             if (this.cursor != null) {
                 batch.render(this.cursor);
             }
         }
 
-        QuantumClient.PROFILER.section("(Local Player)", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("(Local Player)")) {
             LocalPlayer localPlayer = this.client.player;
             if (localPlayer == null || !this.client.isInThirdPerson() && ClientConfig.hideFirstPersonPlayer) {
                 if (localPlayer != null) modelInstances.remove(localPlayer.getId());
@@ -407,15 +407,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
 
             this.collectEntity(localPlayer, batch);
-        });
+        }
 
-        QuantumClient.PROFILER.section("players", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("players")) {
             MultiplayerData multiplayerData = this.client.getMultiplayerData();
             if (multiplayerData == null) return;
             for (var remotePlayer : multiplayerData.getRemotePlayers()) {
                 QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> this.collectEntity(remotePlayer, batch));
             }
-        });
+        }
 
         for (String category : world.getEnabledGizmoCategories()) {
             Gizmo[] gizmos = world.getGizmos(category);
@@ -464,65 +464,74 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             Vec3i chunkOffset = chunk.getOffset();
             Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
             chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-            if (chunk.visible && !this.client.camera.frustum.boundsInFrustum(chunk.renderOffset.cpy().add(WorldRenderer.HALF_CHUNK_DIMENSIONS), WorldRenderer.CHUNK_DIMENSIONS)) {
-                chunk.visible = false;
-                continue;
-            } else if (!chunk.visible) {
-                chunk.visible = true;
+
+            try (var ignoredFrustumCullingSection = PROFILER.start("frustum-culling")) {
+                if (chunk.visible && !this.client.camera.frustum.boundsInFrustum(chunk.renderOffset.cpy().add(WorldRenderer.HALF_CHUNK_DIMENSIONS), WorldRenderer.CHUNK_DIMENSIONS)) {
+                    chunk.visible = false;
+                    continue;
+                } else if (!chunk.visible) {
+                    chunk.visible = true;
+                }
             }
 
             ChunkModel model = this.chunkModels.get(chunk.getVec());
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
                 if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild() || this.shouldIgnoreRebuild() && !chunk.immediateRebuild)) {
-                    chunk.dirty = false;
-                    if (model != null) {
-                        if (model.rebuild()) {
-                            ref.chunkRendered = true;
-                            this.lastChunkBuild = System.currentTimeMillis();
-                            chunk.dirty = false;
+                    try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
+                        chunk.dirty = false;
+                        if (model != null) {
+                            if (model.rebuild()) {
+                                ref.chunkRendered = true;
+                                this.lastChunkBuild = System.currentTimeMillis();
+                                chunk.dirty = false;
+                            } else {
+                                LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
+                                continue;
+                            }
                         } else {
-                            LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
-                            continue;
+                            model = new ChunkModel(chunk.getVec(), chunk, this);
+                            if (model.build()) {
+                                ref.chunkRendered = true;
+                                this.lastChunkBuild = System.currentTimeMillis();
+                                chunk.dirty = false;
+                                this.chunkModels.put(chunk.getVec(), model);
+                            } else {
+                                LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
+                                continue;
+                            }
                         }
-                    } else {
-                        model = new ChunkModel(chunk.getVec(), chunk, this);
-                        if (model.build()) {
-                            ref.chunkRendered = true;
-                            this.lastChunkBuild = System.currentTimeMillis();
-                            chunk.dirty = false;
-                            this.chunkModels.put(chunk.getVec(), model);
-                        } else {
-                            LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
-                            continue;
-                        }
-                    }
 
-                    chunk.onUpdated();
-                    chunk.initialized = true;
+                        chunk.onUpdated();
+                        chunk.initialized = true;
+                    }
                 }
             } else if (model == null) {
                 if (ref.chunkRendered || this.shouldIgnoreRebuild()) continue;
-                chunk.dirty = false;
-                model = new ChunkModel(chunk.getVec(), chunk, this);
-                if (model.build()) {
-                    ref.chunkRendered = true;
-                    this.lastChunkBuild = System.currentTimeMillis();
+                try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
                     chunk.dirty = false;
-                    chunk.initialized = true;
-                    this.chunkModels.put(chunk.getVec(), model);
-                } else {
-                    LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
-                    continue;
+                    model = new ChunkModel(chunk.getVec(), chunk, this);
+                    if (model.build()) {
+                        ref.chunkRendered = true;
+                        this.lastChunkBuild = System.currentTimeMillis();
+                        chunk.dirty = false;
+                        chunk.initialized = true;
+                        this.chunkModels.put(chunk.getVec(), model);
+                    } else {
+                        LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
+                        continue;
+                    }
                 }
             } else if (model.needsRebuild(world) && !(ref.chunkRendered || this.shouldIgnoreRebuild())) {
-                if (model.rebuild()) {
-                    ref.chunkRendered = true;
-                    this.lastChunkBuild = System.currentTimeMillis();
-                    chunk.dirty = false;
-                    chunk.onUpdated();
-                    chunk.initialized = true;
-                } else {
-                    LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
+                try (var ignoredRebuildSection = this.client.profiler.start("rebuild-chunk")) {
+                    if (model.rebuild()) {
+                        ref.chunkRendered = true;
+                        this.lastChunkBuild = System.currentTimeMillis();
+                        chunk.dirty = false;
+                        chunk.onUpdated();
+                        chunk.initialized = true;
+                    } else {
+                        LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
+                    }
                 }
                 continue;
             }
@@ -564,8 +573,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         chunkModel.dispose();
 
-        NamespaceID id = createId(chunk.getVec());
-
         Map<BlockVec, BlockState> customRendered = chunk.getCustomRendered();
         for (var entry : blockInstances.entrySet()) {
             if (customRendered.containsKey(entry.getKey())) {
@@ -578,34 +585,32 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
 
-    private static @NotNull NamespaceID createId(ChunkVec pos) {
-        return id(("generated/chunk/" + pos.getIntX() + "." + pos.getIntZ()).replace('-', '_'));
-    }
-
     private void renderBlockModels(ModelBatch batch, ClientChunk chunk) {
         for (var entry : chunk.getCustomRendered().entrySet()) {
-            BlockVec localVec = entry.getKey();
-            Vector3 translation = this.tmp.set(chunk.renderOffset).add(localVec.getIntX(), localVec.getIntY(), localVec.getIntZ());
+            try (var ignored = this.client.profiler.start("render-block")) {
+                BlockVec localVec = entry.getKey();
+                Vector3 translation = this.tmp.set(chunk.renderOffset).add(localVec.getIntX(), localVec.getIntY(), localVec.getIntZ());
 
-            BlockState blockState = entry.getValue();
-            BlockModel blockModel = BlockModelRegistry.get().get(blockState);
-            BlockVec globalVec = chunk.getVec().blockInWorldSpace(localVec);
-            if (!blockInstances.containsKey(globalVec) && blockModel != null) {
-                Model model = blockModel.getModel();
-                if (model != null) {
-                    ModelInstance modelInstance = new ModelInstance(model, this.tmp);
-                    this.blockInstances.put(globalVec, modelInstance);
+                BlockState blockState = entry.getValue();
+                BlockModel blockModel = BlockModelRegistry.get().get(blockState);
+                BlockVec globalVec = chunk.getVec().blockInWorldSpace(localVec);
+                if (!blockInstances.containsKey(globalVec) && blockModel != null) {
+                    Model model = blockModel.getModel();
+                    if (model != null) {
+                        ModelInstance modelInstance = new ModelInstance(model, this.tmp);
+                        this.blockInstances.put(globalVec, modelInstance);
+                    }
+                } else if (!chunk.getCustomRendered().containsKey(globalVec)) {
+                    blockInstances.remove(globalVec);
+                    continue;
                 }
-            } else if (!chunk.getCustomRendered().containsKey(globalVec)) {
-                blockInstances.remove(globalVec);
-                continue;
+
+                ModelInstance modelInstance = blockInstances.get(globalVec);
+                modelInstance.userData = Shaders.MODEL_VIEW.get();
+                modelInstance.transform.setTranslation(translation);
+
+                batch.render(modelInstance, this.environment);
             }
-
-            ModelInstance modelInstance = blockInstances.get(globalVec);
-            modelInstance.userData = Shaders.MODEL_VIEW.get();
-            modelInstance.transform.setTranslation(translation);
-
-            batch.render(modelInstance, this.environment);
         }
     }
 

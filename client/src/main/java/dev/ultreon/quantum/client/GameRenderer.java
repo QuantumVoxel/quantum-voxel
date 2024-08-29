@@ -73,7 +73,7 @@ public class GameRenderer implements Disposable {
         }
 
         if (player != null) {
-            QuantumClient.PROFILER.section("camera", () -> {
+            try (var ignored1 = QuantumClient.PROFILER.start("camera")) {
                 if (this.client.screen == null && !GamePlatform.get().isShowingImGui()) {
                     // Calculate delta position for player rotation.
                     int width = Gdx.graphics.getWidth();
@@ -104,7 +104,7 @@ public class GameRenderer implements Disposable {
                 this.client.camera.up.rotate(Vector3.Y, rotation.x);
                 this.client.camera.up.rotate(Vector3.Z, cameraBop);
                 this.client.camera.up.rotate(Vector3.Y, -rotation.x);
-            });
+            };
         }
 
         RenderLayer.BACKGROUND.update(deltaTime);
@@ -112,7 +112,7 @@ public class GameRenderer implements Disposable {
 
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
 
-            QuantumClient.PROFILER.section("world", () -> {
+            try (var ignored = QuantumClient.PROFILER.start("world")) {
                 RenderEvents.PRE_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
 
                 var blurScale = this.blurScale;
@@ -123,7 +123,7 @@ public class GameRenderer implements Disposable {
 
                 this.renderWorld(Math.max(blurScale, 0f), deltaTime);
                 RenderEvents.POST_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
-            });
+            }
         }
 
         renderer.begin();
@@ -134,7 +134,7 @@ public class GameRenderer implements Disposable {
         renderer.pushMatrix();
         renderer.translate(this.client.getDrawOffset().x, this.client.getDrawOffset().y);
         renderer.scale(this.client.getGuiScale(), this.client.getGuiScale());
-        QuantumClient.PROFILER.section("overlay", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("overlay")) {
             if (!(this.client.isWindowVibrancyEnabled() && ClientConfig.useFullWindowVibrancy) && !(this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed())) {
                 renderer.clearColor(1 / 255f, 1 / 255f, 1 / 255f, 1);
             }
@@ -148,7 +148,7 @@ public class GameRenderer implements Disposable {
                     this.client.crashOverlay.reset();
                 }
             }
-        });
+        }
 
         if (!this.client.isLoading()) {
             this.client.notifications.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
@@ -184,15 +184,15 @@ public class GameRenderer implements Disposable {
 
     private void renderOverlays(Renderer renderer, @Nullable Screen screen, ClientWorldAccess world, float deltaTime) {
         if (world != null) {
-            QuantumClient.PROFILER.section("hud", () -> {
+            try (var ignored = QuantumClient.PROFILER.start("hud")) {
                 if (this.client.hideHud) return;
                 OverlayManager.render(renderer, deltaTime);
                 RenderEvents.RENDER_OVERLAY.factory().onRenderOverlay(renderer, deltaTime);
-            });
+            }
         }
 
         if (screen != null) {
-            QuantumClient.PROFILER.section("screen", () -> {
+            try (var ignored = QuantumClient.PROFILER.start("screen")) {
 
                 float x = (Gdx.input.getX() - this.client.getDrawOffset().x) / this.client.getGuiScale();
                 float y = (Gdx.input.getY() - this.client.getDrawOffset().y) / this.client.getGuiScale();
@@ -220,13 +220,13 @@ public class GameRenderer implements Disposable {
 
                 Overlays.MEMORY.render(renderer, deltaTime);
                 RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
-            });
+            }
         }
 
-        QuantumClient.PROFILER.section("debug", () -> {
+        try (var ignored = QuantumClient.PROFILER.start("debug")) {
             if (this.client.hideHud || this.client.isLoading()) return;
             this.client.debugGui.render(renderer);
-        });
+        }
     }
 
     public RenderContext getContext() {

@@ -1,23 +1,18 @@
 package dev.ultreon.quantum.debug.profiler;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 public final class Section {
     private long start;
     private final String name;
     private long end;
-    private final Cache<String, Section> data = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.SECONDS).build();
+    private final Map<String, Section> data = new LinkedHashMap<>();
     private final Profiler profiler;
     @Nullable
     private Section current;
+    private final SequencedMap<String, Integer> stats = new LinkedHashMap<>();
 
     public Section(String name, Profiler profiler) {
         this.profiler = profiler;
@@ -50,11 +45,7 @@ public final class Section {
             this.current.start(name);
             return;
         }
-        try {
-            this.current = this.data.get(name, () -> new Section(name, this.profiler));
-        } catch (ExecutionException ignored) {
-            // ignore
-        }
+        this.current = this.data.computeIfAbsent(name, this::createSection);
 
         if (this.current == null) return;
         this.current.startThis();
@@ -72,7 +63,7 @@ public final class Section {
     }
 
     public Map<String, Section> getData() {
-        return this.data.asMap();
+        return this.data;
     }
 
     public String getName() {
@@ -92,17 +83,32 @@ public final class Section {
 
     public Map<String, FinishedSection> collect() {
         Map<String, FinishedSection> map = new HashMap<>();
-        for (var entry : this.data.asMap().entrySet()) {
+        for (var entry : this.data.entrySet()) {
             map.put(entry.getKey(), FinishedSection.create(entry.getValue()));
         }
 
+        this.stats.clear();
+
         return map;
+    }
+
+    public void addStat(String name, int amount) {
+        if (this.current != null) {
+            this.current.addStat(name, amount);
+            return;
+        }
+        this.stats.put(name, this.stats.getOrDefault(name, 0) + amount);
+    }
+
+    private Section createSection(String str) {
+        return new Section(str, this.profiler);
     }
 
     public static class FinishedSection {
         private final Map<String, FinishedSection> data = new HashMap<>();
         private final long nanos;
         private final String name;
+        private final SequencedMap<String, Integer> stats;
 
         public FinishedSection(Section section) {
             for (var entry : section.getData().entrySet()) {
@@ -110,6 +116,7 @@ public final class Section {
             }
             this.nanos = section.getNanos();
             this.name = section.getName();
+            this.stats = section.stats;
         }
 
         static FinishedSection create(Section section) {
@@ -126,6 +133,10 @@ public final class Section {
 
         public String getName() {
             return this.name;
+        }
+
+        public SequencedMap<String, Integer> getStats() {
+            return this.stats;
         }
     }
 }

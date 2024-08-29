@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.SequencedMap;
 import java.util.stream.Collectors;
 
 public class ProfilerDebugPage implements DebugPage {
@@ -141,6 +143,12 @@ public class ProfilerDebugPage implements DebugPage {
             }
 
             data = section.getData().values().stream().sorted(comparator).collect(Collectors.toList());
+            SequencedMap<String, Integer> stats = section.getStats();
+            for (Map.Entry<String, Integer> entry : stats.sequencedEntrySet()) {
+                context.entryLine(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+
+            if (!data.isEmpty()) context.entryLine();
         }
         for (int i = 0, sectionsSize = data.size(); i < sectionsSize; i++) {
             Section.FinishedSection s = data.get(i);

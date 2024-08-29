@@ -127,11 +127,6 @@ public abstract class ContainerScreen extends Screen {
     }
 
     public void renderForeground(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        ItemSlot slotAt = this.getSlotAt(mouseX, mouseY);
-        if (slotAt != null && !slotAt.getItem().isEmpty()) {
-            renderer.renderTooltip(slotAt.getItem(), mouseX + 4, mouseY + 4);
-        }
-
         ItemStack cursor = this.player.getCursor();
         if (!cursor.isEmpty()) {
             this.client.itemRenderer.render(cursor.getItem(), renderer, mouseX - 8, mouseY - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());

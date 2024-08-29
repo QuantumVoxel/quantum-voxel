@@ -51,6 +51,12 @@ public final class ThreadSection {
         return map;
     }
 
+    public void addStat(String name, int amount) {
+        if (this.current == null) return;
+        this.current.addStat(name, amount);
+        this.lastUpdate = System.currentTimeMillis();
+    }
+
     public static class FinishedThreadSection {
         private final Map<String, Section.FinishedSection> data;
 

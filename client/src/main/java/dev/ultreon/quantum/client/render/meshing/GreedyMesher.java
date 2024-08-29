@@ -423,7 +423,9 @@ public class GreedyMesher implements Mesher {
     }
 
     public List<Face> getFaces(UseCondition condition) {
-        return this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+        try (var ignoredSection = QuantumClient.PROFILER.start("chunk-get-faces")) {
+            return this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+        }
     }
 
     private boolean shouldNotRenderNormally(Block blockToBlockFace) {
@@ -537,9 +539,12 @@ public class GreedyMesher implements Mesher {
     }
 
     public void meshFaces(List<Face> faces, MeshPartBuilder builder) {
-        builder.ensureVertices(faces.size() * 4);
-        for (Face f : faces) {
-            f.render(builder);
+        try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
+            if (section != null) section.addStat("face-count", faces.size());
+            builder.ensureVertices(faces.size() * 4);
+            for (Face f : faces) {
+                f.render(builder);
+            }
         }
     }
 
@@ -839,21 +844,23 @@ public class GreedyMesher implements Mesher {
         }
 
         public void render(MeshPartBuilder builder) {
-            LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);
-            if (this.bakedBlockModel == null) return;
-            switch (this.side) {
-                case UP ->
-                        this.renderer.renderTop(this.bakedBlockModel.top(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
-                case DOWN ->
-                        this.renderer.renderBottom(this.bakedBlockModel.bottom(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
-                case NORTH ->
-                        this.renderer.renderNorth(this.bakedBlockModel.north(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
-                case SOUTH ->
-                        this.renderer.renderSouth(this.bakedBlockModel.south(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
-                case EAST ->
-                        this.renderer.renderEast(this.bakedBlockModel.east(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
-                case WEST ->
-                        this.renderer.renderWest(this.bakedBlockModel.west(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+            try (var ignored = QuantumClient.PROFILER.start("face")) {
+                LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);
+                if (this.bakedBlockModel == null) return;
+                switch (this.side) {
+                    case UP ->
+                            this.renderer.renderTop(this.bakedBlockModel.top(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
+                    case DOWN ->
+                            this.renderer.renderBottom(this.bakedBlockModel.bottom(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                    case NORTH ->
+                            this.renderer.renderNorth(this.bakedBlockModel.north(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
+                    case SOUTH ->
+                            this.renderer.renderSouth(this.bakedBlockModel.south(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                    case EAST ->
+                            this.renderer.renderEast(this.bakedBlockModel.east(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, builder);
+                    case WEST ->
+                            this.renderer.renderWest(this.bakedBlockModel.west(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, builder);
+                }
             }
         }
 

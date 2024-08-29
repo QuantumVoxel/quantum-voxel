@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +56,30 @@ public class DesktopLauncher {
      */
     @ApiStatus.Internal
     public static void main(String[] argv) {
+        Thread.UncaughtExceptionHandler defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            private final Logger logger = LoggerFactory.getLogger("Quantum:ExceptionHandler");
+
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                try {
+                    if (e instanceof ApplicationCrash crash) {
+                        QuantumClient.crash(crash.getCrashLog());
+                    }
+
+                    defaultUncaughtExceptionHandler.uncaughtException(t, e);
+                } catch (Throwable t1) {
+                    try {
+                        logger.error("Failed to handle exception", t1);
+                        Runtime.getRuntime().halt(StatusCode.forException());
+                    } catch (Throwable t2) {
+                        Runtime.getRuntime().halt(StatusCode.forAbort());
+                    }
+                }
+
+            }
+        });
+
         try {
             DesktopLauncher.launch(argv);
         } catch (Exception | OutOfMemoryError e) {
@@ -184,7 +210,6 @@ public class DesktopLauncher {
                 // Setup icons the mac way, using JNA.
                 // So this requires native interaction.
                 long l = GLFWNativeCocoa.glfwGetCocoaWindow(gameWindow.getHandle());
-
 
                 try {
 //                    final Image image = QuantumClient.getIconImage();

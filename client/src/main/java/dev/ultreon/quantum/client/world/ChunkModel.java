@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
@@ -51,49 +52,56 @@ public class ChunkModel implements RenderableProvider {
     }
 
     private Model generateModel() {
-        chunk.immediateRebuild = false;
-        this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
+        try (var ignored = QuantumClient.PROFILER.start("build")) {
+            chunk.immediateRebuild = false;
+            this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
 
-        chunk.whileLocked(() -> {
-            if (modelInstance == null) {
-                ModelManager modelManager = ModelManager.INSTANCE;
-                ChunkVec pos = chunk.getVec();
-                ModelBuilder modelBuilder = new ModelBuilder();
-                MeshBuilder meshBuilder = new MeshBuilder();
-                modelBuilder.begin();
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                chunk.mesher.meshVoxels(modelBuilder,
-                        meshBuilder,
-                        block -> block.doesRender() && !block.isTransparent()
-                );
-                Mesh end = meshBuilder.end();
-                modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
+            chunk.whileLocked(() -> {
+                if (modelInstance == null) {
+                    ModelManager modelManager = ModelManager.INSTANCE;
+                    ChunkVec pos = chunk.getVec();
+                    ModelBuilder modelBuilder = new ModelBuilder();
+                    MeshBuilder meshBuilder = new MeshBuilder();
+                    modelBuilder.begin();
 
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                chunk.mesher.meshVoxels(modelBuilder,
-                        meshBuilder,
-                        block -> block.doesRender() && block.isTransparent()
-                );
-                Mesh end2 = meshBuilder.end();
-                modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
+                    try (var ignored2 = QuantumClient.PROFILER.start("solid-mesh")) {
+                        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+                        chunk.mesher.meshVoxels(modelBuilder,
+                                meshBuilder,
+                                block -> block.doesRender() && !block.isTransparent()
+                        );
+                        Mesh end = meshBuilder.end();
+                        modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
+                    }
 
-                this.model = modelBuilder.end();
+                    try (var ignored3 = QuantumClient.PROFILER.start("transparent-mesh")) {
+                        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+                        chunk.mesher.meshVoxels(modelBuilder,
+                                meshBuilder,
+                                block -> block.doesRender() && block.isTransparent()
+                        );
+                        Mesh end2 = meshBuilder.end();
+                        modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
+                    }
 
-                if (this.model == null) {
-                    throw new IllegalStateException("Failed to generate chunk model: " + pos);
+                    this.model = modelBuilder.end();
+
+                    if (this.model == null) {
+                        throw new IllegalStateException("Failed to generate chunk model: " + pos);
+                    }
+
+                    this.modelInstance = new ModelInstance(model, 0, 0, 0);
+                    this.modelInstance.userData = chunk;
                 }
+                chunk.loadCustomRendered();
 
-                this.modelInstance = new ModelInstance(model, 0, 0, 0);
-                this.modelInstance.userData = chunk;
-            }
-            chunk.loadCustomRendered();
+                chunk.dirty = false;
+                chunk.onUpdated();
+                chunk.initialized = true;
+            });
 
-            chunk.dirty = false;
-            chunk.onUpdated();
-            chunk.initialized = true;
-        });
-
-        return model;
+            return model;
+        }
     }
 
     private static Model createBorderGizmo() {
@@ -115,9 +123,11 @@ public class ChunkModel implements RenderableProvider {
     }
 
     public void unload() {
-        model.dispose();
-        model = null;
-        modelInstance = null;
+        try (var ignoredSection = QuantumClient.PROFILER.start("chunk-model-unload")) {
+            model.dispose();
+            model = null;
+            modelInstance = null;
+        }
     }
 
     public boolean rebuild() {

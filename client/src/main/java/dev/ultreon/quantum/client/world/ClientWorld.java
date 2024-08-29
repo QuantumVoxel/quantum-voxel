@@ -892,7 +892,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         QuantumClient.invoke(() -> {
-            TerrainRenderer terrainRenderer = client.worldRenderer;
             BoxGizmo gizmo = new BoxGizmo("chunk");
             gizmo.position.set(data.getOffset().vec().d().add(8.0, 8.0, 8.0));
             gizmo.size.set(16, 16, 16);
