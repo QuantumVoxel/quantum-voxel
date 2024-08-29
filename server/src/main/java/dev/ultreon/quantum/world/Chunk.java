@@ -308,7 +308,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return true if the block was successfully set, false if setting the block failed
      */
     protected boolean setFast(int x, int y, int z, BlockState block) {
-        if (this.disposed) return false;
+         if (this.disposed) return false;
         synchronized (this){
             int index = this.getIndex(x, y, z);
 
@@ -397,12 +397,14 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         this.breaking.put(new BlockVec(x, y, z, BlockVecSpace.CHUNK), 0.0F);
     }
 
-    public void stopBreaking(int x, int y, int z) {
-        this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+    public boolean stopBreaking(int x, int y, int z) {
+        Float remove = this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+        return remove != null && remove > 0.5F;
     }
 
     public BreakResult continueBreaking(int x, int y, int z, float amount) {
         BlockVec pos = new BlockVec(x, y, z, BlockVecSpace.CHUNK);
+        if (!this.breaking.containsKey(pos)) return BreakResult.FAILED;
         Float v = this.breaking.computeIfPresent(pos, (pos1, cur) -> Mth.clamp(cur + amount, 0, 1));
         if (v != null && v == 1.0F) {
             this.breaking.remove(pos);

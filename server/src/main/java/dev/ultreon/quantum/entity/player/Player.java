@@ -35,8 +35,8 @@ public abstract class Player extends LivingEntity {
     public int regenFlashTimer = -1;
     private boolean running = false;
     private float walkingSpeed = .09F;
-    private float flyingSpeed = 0.5F;
-    public float runModifier = 4.0F;
+    private float flyingSpeed = 0.3F;
+    public float runModifier = 8.0F;
     public float crouchModifier = 0.2F;
     public final PlayerAbilities abilities = new PlayerAbilities();
     private boolean crouching = false;
@@ -486,5 +486,9 @@ public abstract class Player extends LivingEntity {
 
     public float getReach() {
         return reach;
+    }
+
+    public void setReach(float reach) {
+        this.reach = reach;
     }
 }

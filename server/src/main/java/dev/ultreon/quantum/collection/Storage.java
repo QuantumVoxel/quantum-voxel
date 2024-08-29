@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.collection;
 
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.network.PacketIO;
+import dev.ultreon.ubo.types.MapType;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public interface Storage<D> {
+public interface Storage<D> extends Cloneable {
 
     MapType save(MapType outputData, Function<D, MapType> encoder);
 
@@ -21,6 +21,7 @@ public interface Storage<D> {
 
     D get(int idx);
 
-
     <R> Storage<R> map(R defaultValue, Class<R> type, Function<D, R> o);
+
+    Storage<D> clone() throws CloneNotSupportedException;
 }

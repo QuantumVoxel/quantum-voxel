@@ -36,7 +36,7 @@ public interface ClientWorldAccess extends WorldAccess {
 
     BreakResult continueBreaking(dev.ultreon.quantum.world.vec.BlockVec breaking, float v, Player player);
 
-    void stopBreaking(dev.ultreon.quantum.world.vec.BlockVec blockVec, Player player);
+    boolean stopBreaking(BlockVec blockVec, Player player);
 
     void startBreaking(dev.ultreon.quantum.world.vec.BlockVec blockVec, Player player);
 

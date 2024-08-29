@@ -22,8 +22,8 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
     }
 
     @Override
-    protected void receive(Packet<? extends ClientPacketHandler> packet, @Nullable PacketListener resultListener) {
-        QuantumClient.invoke(() -> super.receive(packet, resultListener));
+    protected void received(Packet<? extends ClientPacketHandler> packet, @Nullable PacketListener resultListener) {
+        QuantumClient.invoke(() -> super.received(packet, resultListener));
     }
 
     @Override

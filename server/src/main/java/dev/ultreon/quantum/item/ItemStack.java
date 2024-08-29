@@ -20,6 +20,12 @@ import java.util.List;
  * @see Item
  */
 public class ItemStack {
+    public static final ItemStack EMPTY = new ItemStack() {
+        @Override
+        public void setCount(int count) {
+
+        }
+    };
     private Item item;
     @NotNull
     private MapType data;
@@ -99,12 +105,7 @@ public class ItemStack {
     }
 
     public static ItemStack empty() {
-        return new ItemStack() {
-            @Override
-            public void setCount(int count) {
-
-            }
-        };
+        return EMPTY;
     }
 
     /**

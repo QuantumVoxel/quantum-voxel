@@ -358,4 +358,10 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
             this.rwLock.readLock().unlock();
         }
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public PaletteStorage<D> clone() throws CloneNotSupportedException {
+        return (PaletteStorage<D>) super.clone();
+    }
 }

@@ -10,8 +10,8 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.Result;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler, ClientPacketHandler> {
@@ -26,10 +26,10 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
     }
 
     @Override
-    protected void receive(Packet<? extends ServerPacketHandler> packet, @Nullable PacketListener resultListener) {
+    protected void received(Packet<? extends ServerPacketHandler> packet, @Nullable PacketListener resultListener) {
         QuantumServer.invoke(() -> {
             try {
-                super.receive(packet, resultListener);
+                super.received(packet, resultListener);
             } catch (Exception e) {
                 CommonConstants.LOGGER.warn("Packet failed to receive!", e);
             }

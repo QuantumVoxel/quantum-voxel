@@ -58,6 +58,12 @@ public class IndexedArray<T> implements Storage<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public IndexedArray<T> clone() throws CloneNotSupportedException {
+        return (IndexedArray<T>) super.clone();
+    }
+
+    @Override
     public MapType save(MapType outputData, Function<T, MapType> encoder) {
         this.lock.readLock().lock();
 

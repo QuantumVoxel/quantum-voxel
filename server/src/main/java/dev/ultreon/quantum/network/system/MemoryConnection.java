@@ -2,10 +2,7 @@ package dev.ultreon.quantum.network.system;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.network.PacketContext;
-import dev.ultreon.quantum.network.PacketData;
-import dev.ultreon.quantum.network.PacketHandler;
-import dev.ultreon.quantum.network.PacketListener;
+import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.server.player.ServerPlayer;
@@ -13,6 +10,10 @@ import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.SanityCheckException;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
@@ -24,9 +25,54 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private PacketData<TheirHandler> theirPacketData;
     private boolean readOnly;
 
+    private final Queue<Packet<? extends TheirHandler>> sendQueue = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    private final Queue<Packet<? extends OurHandler>> receiveQueue = new java.util.concurrent.ConcurrentLinkedQueue<>();
+
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
         this.otherSide = otherSide;
         this.executor = executor;
+
+        Thread receiver = new Thread(() -> {
+            while (true) {
+                Packet<? extends OurHandler> packet = this.receiveQueue.poll();
+                if (packet == null) break;
+                this.received(packet, null);
+            }
+        });
+
+        Thread sender = new Thread(() -> {
+            while (true) {
+                Packet<? extends TheirHandler> packet = this.sendQueue.poll();
+                if (packet == null) break;
+
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    PacketIO io = new PacketIO(null, bos);
+                    packet.toBytes(io);
+                    bos.close();
+
+                    ourPacketData.encode(packet, io);
+
+                    int id = ourPacketData.getId(packet);
+
+                    this.otherSide.receive(id, bos.toByteArray());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                tx.decrementAndGet();
+            }
+        });
+
+        receiver.start();
+        sender.start();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void receive(int id, byte[] ourPacket) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
+        PacketIO io = new PacketIO(bis, null);
+        Packet<?> packet = ourPacketData.decode(id, io);
+        this.queue(() -> this.received((Packet<? extends OurHandler>) packet, null));
     }
 
     public static int getRx() {
@@ -38,29 +84,23 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         // No-op
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void send(Packet<? extends TheirHandler> packet) {
         if (otherSide == null || this.readOnly)
             throw new ReadOnlyConnectionException();
-        if (theirPacketData.getId(packet) < 0)
+        final int id = theirPacketData.getId(packet);
+        if (id < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
-        this.otherSide.queue(() -> this.otherSide.receive(packet, null));
+        tx.incrementAndGet();
+        this.sendQueue.add(packet);
     }
 
     @Override
     @Deprecated
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
-        if (otherSide == null || this.readOnly) {
-            throw new ReadOnlyConnectionException();
-        }
-        if (theirPacketData.getId(packet) < 0) {
-            throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
-        }
-
-        tx.incrementAndGet();
-        this.otherSide.queue(() -> this.otherSide.receive(packet, resultListener));
-        tx.decrementAndGet();
+        this.send(packet);
     }
 
     @Override
@@ -69,7 +109,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     }
 
     @SuppressWarnings("unchecked")
-    protected void receive(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
+    protected void received(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
         try {
             if (handler == null) throw new SanityCheckException("No handler set");
             if (ourPacketData.getId(packet) < 0) throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());

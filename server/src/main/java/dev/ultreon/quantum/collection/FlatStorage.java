@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.collection;
 
 import com.google.common.base.Preconditions;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.DataKeys;
+import dev.ultreon.ubo.types.ListType;
+import dev.ultreon.ubo.types.MapType;
 import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;
 import it.unimi.dsi.fastutil.shorts.Short2ReferenceFunction;
 
@@ -153,5 +153,11 @@ public class FlatStorage<D> implements Storage<D> {
     public <R> Storage<R> map(R defaultValue, Class<R> type, Function<D, R> o) {
         var data = Arrays.stream(this.data).map(o).collect(Collectors.toList());
         return new FlatStorage<>(defaultValue, data);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public FlatStorage<D> clone() throws CloneNotSupportedException {
+        return (FlatStorage<D>) super.clone();
     }
 }

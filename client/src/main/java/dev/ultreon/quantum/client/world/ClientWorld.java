@@ -220,10 +220,19 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public void updateChunk(@Nullable Chunk chunk) {
+        if (chunk == null) return;
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invokeAndWait(() -> this.updateChunk(chunk));
             return;
         }
+
+        if (!(chunk instanceof ClientChunk clientChunk))
+            throw new IllegalArgumentException("Chunk must be a ClientChunk but was " + chunk.getClass().getSimpleName());
+
+        if (this.client.worldRenderer instanceof WorldRenderer worldRenderer) {
+            worldRenderer.rebuild(clientChunk);
+        }
+
         super.updateChunk(chunk);
     }
 
@@ -258,7 +267,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         if (breakResult == BreakResult.BROKEN) {
             // Attempt to destroy the block and send appropriate packets
             if (this.destroyBlock(breaking, breaker)) {
-                this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.BROKEN));
                 this.client.connection.send(new C2SBlockBreakPacket(breaking));
             }
         }
@@ -271,16 +279,17 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      *
      * @param breaking the position of the block being broken.
      * @param breaker  the player breaking the block.
+     * @return
      */
     @Override
-    public void stopBreaking(@NotNull BlockVec breaking, @NotNull Player breaker) {
+    public boolean stopBreaking(@NotNull BlockVec breaking, @NotNull Player breaker) {
         // Check if the breaker is the local player
         if (breaker == this.client.player) {
             // Send a packet to stop the breaking process
             this.client.connection.send(new C2SBlockBreakingPacket(breaking, C2SBlockBreakingPacket.BlockStatus.STOP));
         }
 
-        super.stopBreaking(breaking, breaker);
+        return super.stopBreaking(breaking, breaker);
     }
 
     /**
@@ -428,16 +437,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         return isBlockSet;
-    }
-
-    @Override
-    public void destroy(@NotNull BlockVec pos) {
-        this.set(pos, BlockState.AIR);
-    }
-
-    @Override
-    public void destroy(int x, int y, int z) {
-        this.set(x, y, z, BlockState.AIR);
     }
 
     /**
@@ -857,6 +856,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     private void sync(int x, int y, int z, BlockState block) {
+        if (block.isAir()) return;
         this.client.connection.send(new C2SPlaceBlockPacket(x, y, z, block));
     }
 

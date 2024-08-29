@@ -37,14 +37,6 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean set(BlockVec pos, BlockState block, int flags);
 
-    default void destroy(@NotNull BlockVec pos) {
-        destroy(pos.getIntX(), pos.getIntY(), pos.getIntZ());
-    }
-
-    default void destroy(int x, int y, int z) {
-        set(x, y, z, BlockState.AIR, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.DESTROY);
-    }
-
     ChunkAccess getChunkAt(@NotNull BlockVec pos);
 
     @Nullable
@@ -173,7 +165,7 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     BreakResult continueBreaking(BlockVec breaking, float amount, Player breaker);
 
-    void stopBreaking(BlockVec breaking, Player breaker);
+    boolean stopBreaking(BlockVec breaking, Player breaker);
 
     float getBreakProgress(BlockVec pos);
 

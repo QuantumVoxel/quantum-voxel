@@ -700,7 +700,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void placeBlock(int x, int y, int z, BlockState block) {
         BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
-        if (block == null || !this.world.isLoaded(blockVec)) return;
+        if (block == null || block.isAir() || !this.world.isLoaded(blockVec) || !this.world.get(x, y, z).isAir()) {
+            this.world.sync(blockVec);
+            return;
+        }
 
         this.world.set(x, y, z, block, BlockFlags.SYNC | BlockFlags.UPDATE);
     }

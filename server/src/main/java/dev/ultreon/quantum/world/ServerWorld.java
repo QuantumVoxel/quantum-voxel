@@ -9,6 +9,8 @@ import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.api.ModApi;
+import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.config.QuantumServerConfig;
@@ -22,6 +24,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.EntityEvents;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
@@ -222,6 +225,9 @@ public class ServerWorld extends World {
     @Override
     public boolean set(@NotNull BlockVec pos, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
+
+        QuantumServer.LOGGER.debug("Setting block at " + pos + " to " + block.getBlock().getId(), new Exception());
+
         int x = pos.getIntX();
         int y = pos.getIntY();
         int z = pos.getIntZ();
@@ -269,11 +275,24 @@ public class ServerWorld extends World {
         }
 
         boolean broken = super.destroyBlock(breaking, breaker);
+
+        ItemStack stack = breaker != null ? breaker.getSelectedItem() : ItemStack.empty();
+        ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(this, breaking, blockState, BlockState.AIR, stack, breaker));
+
         if (broken) {
+            if (blockState.isToolRequired()
+                    && (!(stack.getItem() instanceof ToolItem)
+                    || ((ToolItem) stack.getItem()).getToolType() != blockState.getEffectiveTool()))
+                return false;
+
             LootGenerator lootGen = blockState.getLootGen();
             if (lootGen == null) return true;
             for (ItemStack item : lootGen.generate(breaker != null ? breaker.getRng() : new JavaRNG())) {
                 drop(item, breaking.vec().d().add(0.5));
+
+                if (breaker != null) {
+                    breaker.sendMessage("<yellow><bold>[DEBUG] <white>You looted " + item.getItem().getTranslation().getText() + " from " + blockState.getBlock().getTranslation().getText() + "!");
+                }
             }
         }
         return broken;

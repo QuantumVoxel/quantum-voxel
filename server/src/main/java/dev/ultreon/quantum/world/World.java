@@ -687,13 +687,14 @@ public abstract class World implements Disposable, WorldAccess {
      *
      * @param breaking the position of the block.
      * @param breaker  the player breaking the block.
+     * @return
      */
     @Override
-    public void stopBreaking(BlockVec breaking, Player breaker) {
+    public boolean stopBreaking(BlockVec breaking, Player breaker) {
         Chunk chunk = this.getChunkAt(breaking);
-        if (chunk == null) return;
+        if (chunk == null) return false;
         BlockVec localBlockVec = breaking.chunkLocal();
-        chunk.stopBreaking(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ());
+        return chunk.stopBreaking(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ());
     }
 
     /**

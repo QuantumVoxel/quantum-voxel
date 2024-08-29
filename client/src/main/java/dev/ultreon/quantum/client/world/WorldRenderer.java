@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -22,6 +21,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DisposableContainer;
@@ -903,6 +903,23 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     @Override
     public ParticleSystem getParticleSystem() {
         return particleSystem;
+    }
+
+    @CanIgnoreReturnValue
+    public Boolean rebuild(ClientChunk chunk) {
+        if (!QuantumClient.isOnRenderThread()) {
+            QuantumClient.invoke(() -> this.rebuild(chunk));
+            return null;
+        }
+
+        ChunkModel model = this.chunkModels.get(chunk.getVec());
+
+        if (model != null) {
+            model.rebuild();
+            return true;
+        }
+
+        return false;
     }
 
     private static class ChunkRenderRef {

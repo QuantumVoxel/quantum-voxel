@@ -2,8 +2,6 @@ package dev.ultreon.quantum.network.server;
 
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockAttemptBreakEvent;
-import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
-import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.events.PlayerEvents;
@@ -31,19 +29,15 @@ import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.TickTask;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -185,43 +179,25 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         }
 
         QuantumServer.invoke(() -> {
-            if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
-                    || this.player.blockBrokenTick) {
-
-                revertBlockSet(pos, world);
-                return;
-            }
-
             BlockState original = world.get(pos);
             ItemStack stack = this.player.getSelectedItem();
             BlockState block = world.get(pos);
 
-            if (ModApi.getGlobalEventHandler().call(new BlockAttemptBreakEvent(world, pos, original, block, stack, this.player))) {
+            if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
+                    || this.player.blockBrokenTick
+                    || world.getBreakProgress(pos) <= 0.0F
+                    || ModApi.getGlobalEventHandler().call(new BlockAttemptBreakEvent(world, pos, original, block, stack, this.player))
+                    || !world.stopBreaking(pos, this.player)) {
                 revertBlockSet(pos, world);
                 return;
             }
 
-            world.set(pos, Blocks.AIR.createMeta());
-
-            ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(world, pos, original, block, stack, this.player));
-
-            if (block.isToolRequired()
-                && (!(stack.getItem() instanceof ToolItem)
-                    || ((ToolItem) stack.getItem()).getToolType() != block.getEffectiveTool()))
-                return;
-
-            @Nullable LootGenerator lootGen = original.getLootGen();
-            if (lootGen == null)
-                // No loot generator, no need to drop anything
-                return;
-            for (ItemStack itemStack : lootGen.generate(this.player.getRng())) {
-                world.drop(itemStack, new Vec3d(pos.getIntX() + 0.5, pos.getIntY() + 0.5, pos.getIntZ() + 0.5), new Vec3d(0.0, 0.0, 0.0));
-            }
+            this.player.getWorld().destroyBlock(pos, this.player);
         });
     }
 
     private static void revertBlockSet(BlockVec pos, ServerWorld world) {
-        QuantumServer.invoke(new TickTask(2, () -> world.sendAllTracking(pos.getIntX(), pos.getIntY(), pos.getIntZ(), new S2CBlockSetPacket(new BlockVec(pos.getIntX(), pos.getIntY(), pos.getIntZ(), BlockVecSpace.WORLD), world.get(pos)))));
+        QuantumServer.invoke(() -> world.sendAllTracking(pos.getIntX(), pos.getIntY(), pos.getIntZ(), new S2CBlockSetPacket(new BlockVec(pos.getIntX(), pos.getIntY(), pos.getIntZ(), BlockVecSpace.WORLD), world.get(pos))));
     }
 
     public void onHotbarIndex(int hotbarIdx) {

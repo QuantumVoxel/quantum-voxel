@@ -65,15 +65,15 @@ public class BlockItem extends Item {
 
         BlockState state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
         BlockState original = world.get(blockVec);
-        if (world.isClientSide()) {
+        if (world.isClientSide())
             world.set(blockVec, state, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.LIGHT);
-        }
 
         Player player = useItemContext.player();
         ItemStack stack = useItemContext.stack();
-        ModApi.getGlobalEventHandler().call(new BlockPlaceEvent(world, original, state, blockVec));
+        ModApi.getGlobalEventHandler().call(new BlockPlaceEvent(world, original, state, blockVec, player));
 
-        stack.shrink(1);
+        if (!world.isClientSide())
+            stack.shrink(1);
         return UseResult.ALLOW;
     }
 

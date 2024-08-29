@@ -113,7 +113,7 @@ public abstract class GameInput implements Disposable {
 
         LocalPlayer player = this.client.player;
         if (player != null) {
-            this.updateMotion(0.05f, player, player.abilities.flying ? 1.0f : (player.isRunning() ? 2.0f : 0.4f) * (player.isCrouching() ? 0.3f : 1.0f) / 6F);
+            this.updateMotion(deltaTime, player, 1.0F);
         }
     }
 
@@ -123,7 +123,7 @@ public abstract class GameInput implements Disposable {
         LocalPlayer player = this.client.player;
         if (player != null) {
             PlayerInput input = this.client.playerInput;
-            input.tick(player, player.abilities.flying ? 1.0f : (player.isRunning() ? 2.0f : 0.4f) * (player.isCrouching() ? 0.3f : 1.0f) / 6F);
+            input.tick(player, (float) player.getSpeed());
         }
     }
 

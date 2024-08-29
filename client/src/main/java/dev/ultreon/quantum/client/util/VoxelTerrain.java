@@ -481,8 +481,9 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void stopBreaking(BlockVec blockVec, Player player) {
+    public boolean stopBreaking(BlockVec blockVec, Player player) {
 
+        return false;
     }
 
     @Override
