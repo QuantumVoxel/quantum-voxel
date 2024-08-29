@@ -35,7 +35,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         Thread receiver = new Thread(() -> {
             while (true) {
                 Packet<? extends OurHandler> packet = this.receiveQueue.poll();
-                if (packet == null) break;
+                if (packet == null) continue;
                 this.received(packet, null);
             }
         });
@@ -43,7 +43,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         Thread sender = new Thread(() -> {
             while (true) {
                 Packet<? extends TheirHandler> packet = this.sendQueue.poll();
-                if (packet == null) break;
+                if (packet == null) continue;
 
                 try {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -51,9 +51,9 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
                     packet.toBytes(io);
                     bos.close();
 
-                    ourPacketData.encode(packet, io);
+                    theirPacketData.encode(packet, io);
 
-                    int id = ourPacketData.getId(packet);
+                    int id = theirPacketData.getId(packet);
 
                     this.otherSide.receive(id, bos.toByteArray());
                 } catch (IOException e) {
@@ -84,7 +84,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         // No-op
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void send(Packet<? extends TheirHandler> packet) {
         if (otherSide == null || this.readOnly)
