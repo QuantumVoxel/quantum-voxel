@@ -32,7 +32,7 @@ public class ControllerOverlay extends Overlay {
 
                 leftY += 20;
             } else {
-                int textRightX = width - 28 - client.font.width(mapping.getName());
+                int textRightX = width - 28 - client.renderer.textWidth(mapping.getName());
                 gfx.textLeft(mapping.getName(), textRightX - ctx.getRightXOffset(), height - rightY + 4);
 
                 rightY += 20;

@@ -60,7 +60,7 @@ public class BindingsConfigScreen extends Screen {
         super.renderWidget(gfx, i, j, f);
 
         TextObject title = this.getTitle();
-        gfx.textCenter(title != null ? title : TextObject.literal("Bindings"), this.size.width / 2, 16 - this.font.lineHeight / 2, TEXT_COLOR);
+        gfx.textCenter(title != null ? title : TextObject.literal("Bindings"), this.size.width / 2, 16 - this.font.cellHeight / 2, TEXT_COLOR);
     }
 
     public Screen getBack() {

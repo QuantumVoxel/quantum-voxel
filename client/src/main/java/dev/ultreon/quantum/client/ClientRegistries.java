@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRenderer;
-import dev.ultreon.quantum.client.font.Font;
+import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.gui.debug.DebugPage;
 import dev.ultreon.quantum.client.render.RenderEffect;
 import dev.ultreon.quantum.registry.Registry;

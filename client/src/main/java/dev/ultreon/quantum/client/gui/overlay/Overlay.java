@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.Renderer;
 
 public abstract class Overlay {

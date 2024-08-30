@@ -77,7 +77,7 @@ public class ConfigsList extends SelectionList<ConfigsList.ListEntry> {
                 renderer.fill(x - 4, y, x + rowWidth, y + rowHeight, COLOR);
             }
 
-            renderer.textLeft(this.configEntry.getTitle(), 2 + x, y + rowHeight / 2 - client.font.lineHeight / 2, 0xffffffff, true);
+            renderer.textLeft(this.configEntry.getTitle(), 2 + x, y + rowHeight / 2 - client.font.cellHeight / 2, 0xffffffff, true);
 
             this.widget.setPos(rowWidth - 160, y + 2);
             this.widget.render(renderer, mouseX, mouseY, partialTicks);

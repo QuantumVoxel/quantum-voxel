@@ -92,7 +92,7 @@ public class Dialog extends UIContainer<Dialog> {
             String message1 = message.getText();
             List<String> lines = StringUtils.splitIntoLines(message1);
             for (int i = 0; i < lines.size(); i++) {
-                renderer.textCenter(lines.get(i), pos.x + size.width / 2, pos.y + 30 + i * (font.lineHeight + 2), RgbColor.WHITE.withAlpha(0xa0), true);
+                renderer.textCenter(lines.get(i), pos.x + size.width / 2, pos.y + 30 + i * (font.cellHeight + 2), RgbColor.WHITE.withAlpha(0xa0), true);
             }
             renderer.popScissors();
         }

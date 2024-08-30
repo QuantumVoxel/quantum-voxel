@@ -104,7 +104,7 @@ public abstract class Player extends LivingEntity {
 
         this.foodStatus.tick();
 
-        if (this.isHurt()) {
+        if (this.isHurt() && !isDead) {
             this.regenerate();
         }
     }

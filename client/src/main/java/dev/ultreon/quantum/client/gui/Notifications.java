@@ -49,7 +49,7 @@ public class Notifications implements Renderable {
             MutableText subText = notification.getSubText();
             Icon icon = notification.getIcon();
 
-            int width = NumberUtils.max(this.client.font.width(title), this.client.font.width(summary), this.client.font.width(subText), Notifications.WIDTH) + 10;
+            int width = NumberUtils.max(renderer.textWidth(title), renderer.textWidth(summary), renderer.textWidth(subText), Notifications.WIDTH) + 10;
             if (icon != null) width += 37;
 
             int x = this.client.getScaledWidth() - Notifications.OFFSET - width;

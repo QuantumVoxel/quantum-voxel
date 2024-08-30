@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.math.Vector2;
+import com.github.tommyettinger.textra.Font;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
 import dev.ultreon.quantum.component.GameComponent;

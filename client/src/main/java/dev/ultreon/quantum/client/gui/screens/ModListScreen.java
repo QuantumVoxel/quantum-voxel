@@ -276,8 +276,8 @@ public class ModListScreen extends Screen {
             this.drawIcon(renderer, selected, x, y, 64);
 
             renderer.textLeft(TextObject.literal(selected.getDisplayName()).setBold(true), 2, xIcon, y);
-            renderer.textLeft("<aqua>ID: <light-gray>" + selected.getName(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft("<aqua>Version: <light-gray>" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft("[cyan]ID: [light grey]" + selected.getName(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft("[cyan]Version: [light grey]" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
             renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor)).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 
             this.sourcesButton.visible = selected.getSources() != null;

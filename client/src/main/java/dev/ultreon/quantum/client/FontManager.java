@@ -1,14 +1,18 @@
 package dev.ultreon.quantum.client;
 
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.Disposable;
+import com.github.tommyettinger.textra.Font;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
+import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class FontManager implements Disposable, ContextAwareReloadable {
+    public static final Font DEFAULT = new Font();
     private final Map<NamespaceID, Font> fonts = new HashMap<>();
 
     FontManager() {
@@ -42,9 +47,14 @@ public class FontManager implements Disposable, ContextAwareReloadable {
 
                 if (!id.getPath().endsWith(".fnt")) continue;
                 Debugger.log("Registering font: " + id);
-                this.registerFont(id, new Font(id.mapPath(path -> path.substring("font/".length(), path.length() - ".fnt".length()))));
+                this.registerFont(id, loadFont(id.mapPath(path -> path.substring("font/".length(), path.length() - ".fnt".length()))));
             }
         }
+    }
+
+    private Font loadFont(NamespaceID namespaceID) {
+        @NotNull FileHandle handle = QuantumClient.resource(namespaceID.mapPath(path -> "font/" + path + ".fnt"));
+        return QuantumClient.invokeAndWait(() -> new Font(new BitmapFont(handle, false), Font.DistanceFieldType.STANDARD, 0f, 0f, 0f, 0f, false));
     }
 
     @Override
@@ -61,6 +71,6 @@ public class FontManager implements Disposable, ContextAwareReloadable {
         this.dispose();
         this.registerFonts(resourceManager);
 
-        QuantumClient.get().font = this.fonts.getOrDefault(QuantumClient.get().fontId, Font.DEFAULT);
+        QuantumClient.get().font = this.fonts.getOrDefault(QuantumClient.get().fontId, DEFAULT);
     }
 }

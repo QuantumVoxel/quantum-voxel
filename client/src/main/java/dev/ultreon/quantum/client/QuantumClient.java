@@ -25,6 +25,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
+import com.github.tommyettinger.textra.Effect;
+import com.github.tommyettinger.textra.Font;
+import com.github.tommyettinger.textra.TypingConfig;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -45,7 +48,6 @@ import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.audio.ClientSound;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.config.ConfigScreenFactory;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.debug.DebugOverlay;
 import dev.ultreon.quantum.client.gui.overlay.LoadingOverlay;
@@ -327,10 +329,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
     // Font stuff
-    public Font font;
-    public final Font newFont;
-    @UnknownNullability
-    public final BitmapFont unifont = deferDispose(new BitmapFont(Gdx.files.internal("assets/quantum/unifont/unifont.fnt"), true));
+    public com.github.tommyettinger.textra.Font font;
+    @NotNull
+    @Deprecated
+    public final Font unifont;
 
     // Generic renderers
     @Nullable
@@ -535,8 +537,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 
         // Initialize the unifont and font
-        this.font = new Font(id("quantium"), true);
-        this.newFont = new Font(id("quantium"), true);
+        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
+        this.font.useIntegerPositions(true);
+        this.font.setBoldStrength(0.33f);
+        this.font.scale(1f, -1f);
+        this.unifont = new GameFont(new BitmapFont(resource(id("unifont/unifont.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -14, 0, -28, true);
+        this.unifont.useIntegerPositions(true);
+        this.unifont.setBoldStrength(0.33f);
+        this.unifont.scale(0.5f, -0.5f);
 
         // Initialize the game window
         this.window = GamePlatform.get().createWindow();
@@ -1262,7 +1270,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         if (this.triggerScreenshot) this.prepareScreenshot();
 
-        QuantumClient.PROFILER.section("renderGame", () -> this.renderGame(renderer, deltaTime));
+        try (var ignored0 = PROFILER.start("renderGame")) {
+            this.renderGame(renderer, deltaTime);
+        }
 
         if (this.captureScreenshot && !this.screenshotWorldOnly) this.handleScreenshot();
 

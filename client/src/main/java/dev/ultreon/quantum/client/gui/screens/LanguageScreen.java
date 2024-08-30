@@ -50,11 +50,17 @@ public class LanguageScreen extends Screen {
         if (locale.getLanguage().equalsIgnoreCase("utn") && locale.getCountry().equalsIgnoreCase("aa")) {
             renderer.textCenter("Ultanian (Ultania) - Utanïanī (Utanïa)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
             return;
-        } else if (locale.getLanguage().equalsIgnoreCase("qya") && locale.getCountry().equalsIgnoreCase("aa")) {
+        } else if (locale.getLanguage().equalsIgnoreCase("qua") && locale.getCountry().equalsIgnoreCase("aa")) {
             renderer.textCenter("Quenya (Quenya) - Quenya (Quenya)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
             return;
         } else if (locale.getLanguage().equalsIgnoreCase("en") && locale.getCountry().equalsIgnoreCase("ud")) {
             renderer.textCenter("English (Upside Down) - English (Upside Down)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
+            return;
+        } else if (locale.getLanguage().equalsIgnoreCase("en") && locale.getCountry().equalsIgnoreCase("pi")) {
+            renderer.textCenter("English (Pirate) - English (Pirate)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
+            return;
+        } else if (locale.getLanguage().equalsIgnoreCase("lol") && locale.getCountry().equalsIgnoreCase("us")) {
+            renderer.textCenter("LOLCAT (Kingdom of Cats) - LOLCAT (Kingdom of Cats)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
             return;
         }
 

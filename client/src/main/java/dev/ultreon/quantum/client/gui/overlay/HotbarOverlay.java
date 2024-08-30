@@ -24,9 +24,12 @@ public class HotbarOverlay extends Overlay {
         ItemStack selectedItem = player.getSelectedItem();
         NamespaceID key = Registries.ITEM.getId(selectedItem.getItem());
 
-        var widgetsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/widgets.png"));
-        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90, leftY - 24, 180, 24, 0, 59);
-        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90 + x, leftY - 24, 20, 21, 0, 82);
+        var widgetsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/hotbar.png"));
+        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 25, leftY - 48, 59, 28, 175, 189, 50, 28, 400, 256);
+        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 126, leftY - 48, 254, 32, 73, 224, 254, 32, 400, 256);
+        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 125, leftY - 64, 102, 16, 74, 162, 102, 16, 400, 256);
+        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) + 23, leftY - 64, 102, 16, 74, 162, 102, 16, 400, 256);
+//        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90 + x, leftY - 24, 20, 21, 0, 82);
 
         List<ItemSlot> allowed = player.inventory.getHotbarSlots();
         for (int index = 0, allowedLength = allowed.size(); index < allowedLength; index++) {
@@ -35,27 +38,25 @@ public class HotbarOverlay extends Overlay {
 
         if (key != null && !selectedItem.isEmpty()) {
             TextObject name = selectedItem.getItem().getTranslation();
-            int tWidth = font.width(name);
 
-            renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 - 4, leftY - 40, 4, 14, 79, 42, 4, 17);
-            renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 - 1, leftY - 40, tWidth + 2, 14, 83, 42, 14, 17);
-            renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 + tWidth, leftY - 40, 4, 14, 97, 42, 4, 17);
-
-            renderer.textCenter(name, (int) ((float) this.client.getScaledWidth()) / 2, leftY - 39);
+            renderer.textCenter(name, (int) ((float) this.client.getScaledWidth()) / 2, leftY - 80);
         }
 
-        leftY -= 47;
-        rightY -= 47;
+        leftY -= 49;
+        rightY -= 49;
     }
 
     private void drawHotbarSlot(Renderer renderer, List<ItemSlot> allowed, int index) {
         ItemStack item = allowed.get(index).getItem();
-        int ix = (int) ((float) this.client.getScaledWidth() / 2) - 90 + index * 20 + 2;
-        this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 21);
+        int ix = (int) ((float) this.client.getScaledWidth() / 2) - 103 + index * 19 + 2;
+        if (index >= 4) {
+            ix = (int) ((float) this.client.getScaledWidth() / 2) + 27 + (index - 4) * 19 + 2;
+        }
+        this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 41);
         int count = item.getCount();
         if (!item.isEmpty() && count > 1) {
             String text = Integer.toString(count);
-            renderer.textLeft(text, ix + 18 - this.client.font.width(text), this.client.getScaledHeight() - 5 - this.client.font.lineHeight, RgbColor.WHITE, false);
+            renderer.textLeft(text, ix + 18 - this.client.renderer.textWidth(text), this.client.getScaledHeight() - 24 - this.client.font.cellHeight, RgbColor.WHITE, false);
         }
     }
 }
