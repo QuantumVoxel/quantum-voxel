@@ -21,6 +21,9 @@ import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongLists;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +34,7 @@ import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+@Deprecated
 public class TerrainGenerator implements Disposable {
     private final DomainWarping biomeDomain;
     private final DomainWarping layerDomain;
@@ -42,6 +46,9 @@ public class TerrainGenerator implements Disposable {
     private @Nullable BiomeNoise tempNoise = null;
     private @Nullable BiomeNoise variationNoise = null;
     private @Nullable HillinessNoise hillinessNoise = null;
+
+    public static long totalDurations = 0L;
+    public static LongList durations = LongLists.synchronize(new LongArrayList());
 
     public TerrainGenerator(DomainWarping biomeDomain, DomainWarping layerDomain, NoiseConfig noiseConfig) {
         this.biomeDomain = biomeDomain;
@@ -81,6 +88,8 @@ public class TerrainGenerator implements Disposable {
         Carver carver = this.carver;
         if (carver == null) throw new IllegalStateException("Carver has not been initialized yet!");
 
+        long start = System.currentTimeMillis();
+
         RecordingChunk recordingChunk = new RecordingChunk(chunk);
 
         generateTerrain(chunk, carver, recordedChanges);
@@ -89,6 +98,20 @@ public class TerrainGenerator implements Disposable {
         generateFeatures(chunk, recordingChunk);
         generateStructures(chunk, recordingChunk);
 
+        long end = System.currentTimeMillis();
+
+        long duration = end - start;
+
+        synchronized (this) {
+            if (durations.size() > 100) {
+                Long l = durations.removeFirst();
+                totalDurations -= l;
+            }
+
+            totalDurations += duration;
+            durations.addLast(duration);
+        }
+
         return chunk;
     }
 
@@ -96,14 +119,26 @@ public class TerrainGenerator implements Disposable {
         if (this.hillinessNoise == null)
             throw new IllegalStateException("Hilliness noise has not been initialized yet!");
         BlockVec offset = chunk.getOffset();
-        for (var x = 0; x < CHUNK_SIZE; x++) {
-            for (var z = 0; z < CHUNK_SIZE; z++) {
-                double hilliness = this.hillinessNoise.evaluateNoise(offset.x + x, offset.z + z) - 2.0f;
-                int groundPos = carver.carve(chunk, offset.x + x, offset.z + z, hilliness);
+        try (var ignoredSection = QuantumServer.get().profiler.start("gen-chunk")) {
+            for (var x = 0; x < CHUNK_SIZE; x++) {
+                for (var z = 0; z < CHUNK_SIZE; z++) {
+                    double hilliness = this.hillinessNoise.evaluateNoise(offset.x + x, offset.z + z) - 2.0f;
+                    int groundPos;
+                    try (var ignoredSection0 = QuantumServer.get().profiler.start("carve")) {
+                        groundPos = carver.carve(chunk, offset.x + x, offset.z + z, hilliness);
+                    }
 
-                var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
-                chunk.setBiomeGenerator(x, z, index.biomeGenerator);
-                index.biomeGenerator.processColumn(chunk, x, groundPos, z, recordedChanges);
+
+                    BiomeGenerator.Index index;
+                    try (var ignoredSection0 = QuantumServer.get().profiler.start("find-gen")) {
+                        index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
+                    }
+                    chunk.setBiomeGenerator(x, z, index.biomeGenerator);
+
+                    try (var ignoredSection0 = QuantumServer.get().profiler.start("process")) {
+                        index.biomeGenerator.processColumn(chunk, x, groundPos, z, recordedChanges);
+                    }
+                }
             }
         }
     }

@@ -16,8 +16,6 @@
 
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.quantum.util.Vec3d;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -194,7 +192,7 @@ public class BoundingBox implements Serializable {
      * Should be called if you modify {@link #min} and/or {@link #max} vectors manually.
      */
     public void update() {
-        this.cnt.set(this.min).add(this.max).mul(0.5);
+        this.cnt.set(this.min).add(this.max).scl(0.5);
         this.dim.set(this.max).sub(this.min);
     }
 

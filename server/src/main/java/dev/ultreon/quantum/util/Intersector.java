@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 public class Intersector {
@@ -19,7 +18,7 @@ public class Intersector {
         if (ray.origin.x <= box.min.x && ray.direction.x > 0) {
             t = (box.min.x - ray.origin.x) / ray.direction.x;
             if (t >= 0) {
-                tmp.set(ray.direction).mul(t).add(ray.origin);
+                tmp.set(ray.direction).scl(t).add(ray.origin);
                 if (tmp.y >= box.min.y && tmp.y <= box.max.y && tmp.z >= box.min.z && tmp.z <= box.max.z && (!hit || t < lowest)) {
                     hit = true;
                     lowest = t;
@@ -30,7 +29,7 @@ public class Intersector {
         if (ray.origin.x >= box.max.x && ray.direction.x < 0) {
             t = (box.max.x - ray.origin.x) / ray.direction.x;
             if (t >= 0) {
-                tmp.set(ray.direction).mul(t).add(ray.origin);
+                tmp.set(ray.direction).scl(t).add(ray.origin);
                 if (tmp.y >= box.min.y && tmp.y <= box.max.y && tmp.z >= box.min.z && tmp.z <= box.max.z && (!hit || t < lowest)) {
                     hit = true;
                     lowest = t;
@@ -41,7 +40,7 @@ public class Intersector {
         if (ray.origin.y <= box.min.y && ray.direction.y > 0) {
             t = (box.min.y - ray.origin.y) / ray.direction.y;
             if (t >= 0) {
-                tmp.set(ray.direction).mul(t).add(ray.origin);
+                tmp.set(ray.direction).scl(t).add(ray.origin);
                 if (tmp.x >= box.min.x && tmp.x <= box.max.x && tmp.z >= box.min.z && tmp.z <= box.max.z && (!hit || t < lowest)) {
                     hit = true;
                     lowest = t;
@@ -52,7 +51,7 @@ public class Intersector {
         if (ray.origin.y >= box.max.y && ray.direction.y < 0) {
             t = (box.max.y - ray.origin.y) / ray.direction.y;
             if (t >= 0) {
-                tmp.set(ray.direction).mul(t).add(ray.origin);
+                tmp.set(ray.direction).scl(t).add(ray.origin);
                 if (tmp.x >= box.min.x && tmp.x <= box.max.x && tmp.z >= box.min.z && tmp.z <= box.max.z && (!hit || t < lowest)) {
                     hit = true;
                     lowest = t;
@@ -63,7 +62,7 @@ public class Intersector {
         if (ray.origin.z <= box.min.z && ray.direction.z > 0) {
             t = (box.min.z - ray.origin.z) / ray.direction.z;
             if (t >= 0) {
-                tmp.set(ray.direction).mul(t).add(ray.origin);
+                tmp.set(ray.direction).scl(t).add(ray.origin);
                 if (tmp.x >= box.min.x && tmp.x <= box.max.x && tmp.y >= box.min.y && tmp.y <= box.max.y && (!hit || t < lowest)) {
                     hit = true;
                     lowest = t;
@@ -74,7 +73,7 @@ public class Intersector {
         if (ray.origin.z >= box.max.z && ray.direction.z < 0) {
             t = (box.max.z - ray.origin.z) / ray.direction.z;
             if (t >= 0) {
-                tmp.set(ray.direction).mul(t).add(ray.origin);
+                tmp.set(ray.direction).scl(t).add(ray.origin);
                 if (tmp.x >= box.min.x && tmp.x <= box.max.x && tmp.y >= box.min.y && tmp.y <= box.max.y && (!hit || t < lowest)) {
                     hit = true;
                     lowest = t;
@@ -82,7 +81,7 @@ public class Intersector {
             }
         }
         if (hit && intersection != null) {
-            intersection.set(ray.direction).mul(lowest).add(ray.origin);
+            intersection.set(ray.direction).scl(lowest).add(ray.origin);
             if (intersection.x < box.min.x) {
                 intersection.x = box.min.x;
             } else if (intersection.x > box.max.x) {

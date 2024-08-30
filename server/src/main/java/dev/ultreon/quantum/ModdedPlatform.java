@@ -1,7 +1,6 @@
 package dev.ultreon.quantum;
 
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import dev.ultreon.quantum.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;

@@ -18,7 +18,6 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.ValueTracker;
-import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.EntityEvents;
@@ -32,6 +31,7 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.gen.CaveCarver;
 import dev.ultreon.quantum.world.gen.TerrainGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
@@ -55,6 +55,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -281,7 +282,7 @@ public class ServerWorld extends World {
 
         if (broken) {
             if (blockState.isToolRequired()
-                    && (!(stack.getItem() instanceof ToolItem)
+                && (!(stack.getItem() instanceof ToolItem)
                     || ((ToolItem) stack.getItem()).getToolType() != blockState.getEffectiveTool()))
                 return false;
 
@@ -1072,9 +1073,6 @@ public class ServerWorld extends World {
      * @return the region at the specified chunk position
      */
     private @NotNull Region getOrOpenRegionAt(ChunkVec chunkVec) {
-        // Ensure this method is called from the correct thread
-        this.checkThread();
-
         var regionPos = chunkVec.region();
 
         // Get the map of regions
@@ -1098,6 +1096,7 @@ public class ServerWorld extends World {
 
         // Create a new region if it doesn't exist and add it to the regions map
         var region = new Region(this, regionPos);
+        region.initialize();
         this.regionStorage.regions.put(regionPos, region);
         this.regionStorage.chunkCount += region.getChunkCount();
 
@@ -1222,22 +1221,24 @@ public class ServerWorld extends World {
     }
 
     public void recordOutOfBounds(int x, int y, int z, BlockState block) {
-        if (this.isOutOfWorldBounds(x, y, z)) {
-            return;
-        }
+//        if (this.isOutOfWorldBounds(x, y, z)) {
+//            return;
+//        }
+//
+//        Chunk chunkAt = this.getChunkAt(x, y, z);
+//        if (chunkAt == null) {
+//            if (WorldGenDebugContext.isActive())
+//                System.out.println("[DEBUG] Recorded out of bounds block at " + x + " " + y + " " + z + " " + block);
+//            this.recordedChanges.add(new RecordedChange(x, y, z, block));
+//            return;
+//        }
+//
+//        if (WorldGenDebugContext.isActive())
+//            System.out.println("[DEBUG] Chunk is available, setting block at " + x + " " + y + " " + z + " " + block);
+//
+//        chunkAt.setFast(World.toLocalBlockVec(x, y, z).vec(), block);
 
-        Chunk chunkAt = this.getChunkAt(x, y, z);
-        if (chunkAt == null) {
-            if (WorldGenDebugContext.isActive())
-                System.out.println("[DEBUG] Recorded out of bounds block at " + x + " " + y + " " + z + " " + block);
-            this.recordedChanges.add(new RecordedChange(x, y, z, block));
-            return;
-        }
-
-        if (WorldGenDebugContext.isActive())
-            System.out.println("[DEBUG] Chunk is available, setting block at " + x + " " + y + " " + z + " " + block);
-
-        chunkAt.setFast(World.toLocalBlockVec(x, y, z).vec(), block);
+        // NO
     }
 
     /**
@@ -1303,6 +1304,18 @@ public class ServerWorld extends World {
         }
     }
 
+    public Stream<Vec3d> getCavePointsFor(@NotNull ChunkVec vec) {
+        return getOrOpenRegionAt(vec).caveCache.stream().filter(vec3d -> {
+            BlockVec start = vec.start().regionLocal();
+            return vec3d.x >= start.x && vec3d.y >= start.y && vec3d.z >= start.z &&
+                   vec3d.x < start.x + 16 && vec3d.y < start.y + 16 && vec3d.z < start.z + 16;
+        });
+    }
+
+    public String executorStatus() {
+        return executor.toString();
+    }
+
     /**
      * The region class.
      * Note: This class is not thread safe.
@@ -1325,6 +1338,7 @@ public class ServerWorld extends World {
         private final Object buildLock = new Object();
         private boolean dirty;
         private int chunkCount;
+        private Set<Vec3d> caveCache = new HashSet<>();
 
         /**
          * Constructs a new region with the given world and position.
@@ -1760,6 +1774,43 @@ public class ServerWorld extends World {
 
             return false;
         }
+
+        public int getStartX() {
+            return 0;
+        }
+
+        public int getStartY() {
+            return 0;
+        }
+
+        public int getStartZ() {
+            return 0;
+        }
+
+        public int getEndX() {
+            return 512;
+        }
+
+        public int getEndY() {
+            return 512;
+        }
+
+        public int getEndZ() {
+            return 512;
+        }
+
+        public boolean isWithinBounds(int x, int y, int z) {
+            return x >= 0 && y >= 0 && z >= 0 && x < 512 && y < 512 && z < 512;
+        }
+
+        public void setCave(int x, int y, int z) {
+            this.caveCache.add(new Vec3d(x, y, z));
+        }
+
+        public void initialize() {
+            CaveCarver caveCarver = new CaveCarver(this);
+            caveCarver.generateCaves();
+        }
     }
 
     /**
@@ -1954,11 +2005,11 @@ public class ServerWorld extends World {
         @Override
         public String toString() {
             return "RecordedChange{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    ", z=" + z +
-                    ", block=" + block +
-                    '}';
+                   "x=" + x +
+                   ", y=" + y +
+                   ", z=" + z +
+                   ", block=" + block +
+                   '}';
         }
 
     }

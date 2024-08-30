@@ -76,7 +76,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
      * @return The relative translation of the given translation from the camera position.
      */
     public Vec3d relative(Vec3d translation, Vec3d tmp) {
-        return tmp.set(0).add(translation).sub(cameraPos).mul(1.0 / worldScale);
+        return tmp.set(0).add(translation).sub(cameraPos).scl(1.0 / worldScale);
     }
 
     /**

@@ -134,7 +134,7 @@ public abstract class GameInput implements Disposable {
 
         // Water movement
         if (player.isInWater() && this.client.playerInput.up) {
-            tmp.set(0, 1, 0).nor().mul(speed);
+            tmp.set(0, 1, 0).nor().scl(speed);
             this.vel.add(tmp);
 
 
@@ -147,12 +147,12 @@ public abstract class GameInput implements Disposable {
 
         // Flight movement
         if (player.isFlying() && this.client.playerInput.up) {
-            tmp.set(0, 1, 0).nor().mul(speed);
+            tmp.set(0, 1, 0).nor().scl(speed);
             this.vel.add(tmp);
         }
 
         if (player.isFlying() && this.client.playerInput.down) {
-            tmp.set(0, 1, 0).nor().mul(-speed);
+            tmp.set(0, 1, 0).nor().scl(-speed);
             this.vel.add(tmp);
         }
 

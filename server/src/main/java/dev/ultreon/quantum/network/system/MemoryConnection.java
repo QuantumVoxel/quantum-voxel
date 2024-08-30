@@ -73,6 +73,9 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             }
         });
 
+        receiver.setDaemon(true);
+        sender.setDaemon(true);
+
         receiver.start();
         sender.start();
     }

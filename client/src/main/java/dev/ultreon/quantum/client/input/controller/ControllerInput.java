@@ -267,7 +267,7 @@ public class ControllerInput extends GameInput {
 
         // Water movement
         if (player.isInWater() && this.client.playerInput.up) {
-            tmp.set(0, 1, 0).nor().mul(speed);
+            tmp.set(0, 1, 0).nor().scl(speed);
             this.vel.add(tmp);
 
 
@@ -280,12 +280,12 @@ public class ControllerInput extends GameInput {
 
         // Flight movement
         if (player.isFlying() && this.client.playerInput.up) {
-            tmp.set(0, 1, 0).nor().mul(speed);
+            tmp.set(0, 1, 0).nor().scl(speed);
             this.vel.add(tmp);
         }
 
         if (player.isFlying() && this.client.playerInput.down) {
-            tmp.set(0, 1, 0).nor().mul(-speed);
+            tmp.set(0, 1, 0).nor().scl(-speed);
             this.vel.add(tmp);
         }
 

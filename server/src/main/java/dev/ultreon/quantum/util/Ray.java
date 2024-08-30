@@ -16,7 +16,6 @@
 
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.world.CubicDirection;
 
@@ -64,7 +63,7 @@ public class Ray implements Serializable {
 	 * @param distance The distance from the end point to the start point.
 	 * @return The out param */
 	public Vec3d getEndPoint (final Vec3d out, final float distance) {
-		return out.set(this.direction).mul(distance).add(this.origin);
+		return out.set(this.direction).scl(distance).add(this.origin);
 	}
 
 	static Vec3d tmp = new Vec3d();

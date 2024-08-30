@@ -81,7 +81,7 @@ public class Vec3d implements Externalizable, Cloneable {
         this.z = z;
     }
 
-    public static Vec3d mul(Vec3d a, Vec3d b) {
+    public static Vec3d scl(Vec3d a, Vec3d b) {
         return new Vec3d(a.x * b.x, a.y * b.y, a.z * b.z);
     }
 
@@ -124,7 +124,7 @@ public class Vec3d implements Externalizable, Cloneable {
     public Vec3d nor () {
         final double len2 = this.len2();
         if (len2 == 0f || len2 == 1f) return this;
-        return this.mul(1f / (float)Math.sqrt(len2));
+        return this.scl(1f / (float)Math.sqrt(len2));
     }
 
     public double dst(Vec3d vec) {
@@ -204,21 +204,21 @@ public class Vec3d implements Externalizable, Cloneable {
         return this;
     }
 
-    public Vec3d mul(Vec3d vec) {
+    public Vec3d scl(Vec3d vec) {
         this.x *= vec.x;
         this.y *= vec.y;
         this.z *= vec.z;
         return this;
     }
 
-    public Vec3d mul(double x, double y, double z) {
+    public Vec3d scl(double x, double y, double z) {
         this.x *= x;
         this.y *= y;
         this.z *= z;
         return this;
     }
 
-    public Vec3d mul(double v) {
+    public Vec3d scl(double v) {
         this.x *= v;
         this.y *= v;
         this.z *= v;

@@ -5,7 +5,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
-import dev.ultreon.quantum.DesktopLogger.Slf4jLogger;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.js.JsLoader;

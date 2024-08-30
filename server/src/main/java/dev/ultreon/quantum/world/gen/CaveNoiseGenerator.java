@@ -3,10 +3,8 @@ package dev.ultreon.quantum.world.gen;
 import de.articdive.jnoise.core.api.functions.Interpolation;
 import de.articdive.jnoise.core.api.noisegen.NoiseGenerator;
 import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
-import de.articdive.jnoise.generators.noisegen.worley.WorleyNoiseResult;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
-import de.articdive.jnoise.pipeline.JNoiseDetailed;
 
 import static java.lang.Math.abs;
 
@@ -16,6 +14,7 @@ import static java.lang.Math.abs;
  *
  * @author XyperCode
  */
+@Deprecated
 public class CaveNoiseGenerator implements NoiseGenerator {
     public static final double SCALE = 24;
     public static final double THRESHOLD = 0.4;

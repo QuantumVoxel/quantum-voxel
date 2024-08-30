@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.util;
 
+import scala.util.Random;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -406,5 +408,13 @@ public class Vec3i implements Externalizable, Cloneable {
         this.x = in.readInt();
         this.y = in.readInt();
         this.z = in.readInt();
+    }
+
+    public long seed() {
+        long result = x;
+        result = 31L * result + y;
+        result = 31L * result + z;
+        Random current = new Random(result);
+        return current.nextLong();
     }
 }

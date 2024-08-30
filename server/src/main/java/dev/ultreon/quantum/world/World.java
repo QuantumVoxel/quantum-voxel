@@ -157,7 +157,7 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray, float distance) {
         EntityHit result = new EntityHit(ray, distance);
-        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
+        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
         entitiesWithin.forEach(entity -> {
             double curDistance = ray.origin.dst(entity.getPosition());
             if (curDistance > distance) return;
@@ -176,7 +176,7 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
         EntityHit result = new EntityHit(ray, distance);
-        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().mul(distance))));
+        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
         entitiesWithin.forEach(entity -> {
             if (filter.test(entity)) {
                 double curDistance = ray.origin.dst(entity.getPosition());

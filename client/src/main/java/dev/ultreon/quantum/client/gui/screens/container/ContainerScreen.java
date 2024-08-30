@@ -41,8 +41,8 @@ public abstract class ContainerScreen extends Screen {
 
     @Override
     public final void build(@NotNull GuiBuilder builder) {
-        this.slots = new ItemSlotWidget[this.maxSlots];
-        for (int i = 0; i < this.maxSlots; i++) {
+        this.slots = new ItemSlotWidget[this.menu.slots.length];
+        for (int i = 0; i < this.menu.slots.length; i++) {
             var slot = this.menu.slots[i];
             if (slot == null) continue;
 

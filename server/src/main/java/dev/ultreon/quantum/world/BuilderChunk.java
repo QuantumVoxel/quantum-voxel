@@ -3,8 +3,8 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.InvalidThreadException;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
@@ -132,5 +133,9 @@ public final class BuilderChunk extends Chunk {
 
     public RNG getRNG() {
         return this.rng;
+    }
+
+    public Stream<Vec3d> getCavePoints() {
+        return this.world.getCavePointsFor(getVec());
     }
 }

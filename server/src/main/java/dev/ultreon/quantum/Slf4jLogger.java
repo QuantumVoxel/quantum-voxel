@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.DesktopLogger;
+package dev.ultreon.quantum;
 
 import dev.ultreon.quantum.log.Logger;
 

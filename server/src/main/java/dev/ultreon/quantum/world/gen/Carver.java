@@ -10,15 +10,20 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongLists;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 import static java.lang.Math.min;
 
 public class Carver {
-    static final int HAS_CAVES_FLAG = 129;
     private final DomainWarping domainWarping;
     private final NoiseSource biomeNoise;
     private final CaveNoiseGenerator caveNoise;
+
+    public static long totalDurations = 0L;
+    public static LongList durations = LongLists.synchronize(new LongArrayList());
 
     public Carver(DomainWarping domainWarping, NoiseSource biomeNoise, long seed) {
         this.domainWarping = domainWarping;
@@ -28,10 +33,12 @@ public class Carver {
     }
 
     public int carve(BuilderChunk chunk, int x, int z, double hilliness) {
+        long start = System.currentTimeMillis();
         Vec3i offset = chunk.getOffset();
         int groundPos = (int) ((this.getSurfaceHeightNoise(x, z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
         int height = groundPos;
         if (height < 0) height = 0;
+
         for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
             if (y <= groundPos) {
                 if (y <= World.SEA_LEVEL) {
@@ -59,6 +66,20 @@ public class Carver {
 
         BlockVec vec = new BlockVec(x, height, z, BlockVecSpace.WORLD).chunkLocal();
         chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE).set(vec.x, vec.z, (short) height);
+
+        long end = System.currentTimeMillis();
+
+        long duration = end - start;
+
+        synchronized (this) {
+            if (durations.size() > 100) {
+                Long l = durations.removeFirst();
+                totalDurations -= l;
+            }
+
+            totalDurations += duration;
+            durations.addLast(duration);
+        }
 
         return groundPos;
     }
