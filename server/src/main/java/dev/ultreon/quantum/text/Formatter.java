@@ -553,7 +553,7 @@ public class Formatter {
             this.pushBuilder();
 
             var hoverText = String.format(
-                    "<blue>%s\n<gray>Name <i>%s</i>\n<dark-gray>%s".trim(),
+                    "[light blue]%s\n[grey]Name [/]%s</i>\n[dark grey]%s".trim(),
                     ColorCode.stripColor(player.getPublicName()),
                     player.getName(),
                     player.getUuid()
@@ -879,10 +879,10 @@ public class Formatter {
 
     private String getPlayerHoverText(@Nullable Player player) {
         if (player == null) {
-            return "<red>NULL\n<dark-gray>&<unknown-entity>";
+            return "[light red]NULL\n[dark grey]<unknown-entity>";
         }
         // Set hover text.
-        return String.format("<blue>%s\n<gray>Name <i>%s</i>\n<dark-gray>%s\n", ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
+        return String.format("[light blue]%s\n[grey]Name [/]%s</i>\n[dark grey]%s\n", ColorCode.stripColor(player.getPublicName()), player.getName(), player.getUuid());
     }
 
     public @Nullable NamespaceID getCurrentFont() {

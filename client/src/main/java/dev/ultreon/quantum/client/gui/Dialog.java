@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.client.gui.widget.Button;
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class Dialog extends UIContainer<Dialog> {
     private final Screen parent;
@@ -85,7 +83,7 @@ public class Dialog extends UIContainer<Dialog> {
 
         this.titleBounds.set(pos.x, pos.y, size.width - 21, 21);
         if (renderer.pushScissors(titleBounds)) {
-            renderer.textCenter("<bold>" + title.getText(), pos.x + (size.width) / 2, pos.y + 5, RgbColor.WHITE, true);
+            renderer.textCenter("[*]" + title.getText(), pos.x + (size.width) / 2, pos.y + 5, RgbColor.WHITE, true);
             renderer.popScissors();
         }
         if (renderer.pushScissors(this.bounds)) {

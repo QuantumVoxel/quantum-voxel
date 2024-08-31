@@ -292,7 +292,7 @@ public class ServerWorld extends World {
                 drop(item, breaking.vec().d().add(0.5));
 
                 if (breaker != null) {
-                    breaker.sendMessage("<yellow><bold>[DEBUG] <white>You looted " + item.getItem().getTranslation().getText() + " from " + blockState.getBlock().getTranslation().getText() + "!");
+                    breaker.sendMessage("[yellow][*][DEBUG] [white]You looted " + item.getItem().getTranslation().getText() + " from " + blockState.getBlock().getTranslation().getText() + "!");
                 }
             }
         }

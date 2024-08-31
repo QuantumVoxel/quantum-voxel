@@ -24,7 +24,7 @@ public class ConsoleCommandSender implements CommandSender {
 
     @Override
     public @Nullable String getPublicName() {
-        return "<red>Console";
+        return "[light red]Console";
     }
 
     @Override

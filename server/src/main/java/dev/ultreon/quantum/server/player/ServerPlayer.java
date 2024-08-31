@@ -365,7 +365,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         if (tmp3d$1.set(this.ox, this.oy, this.oz).dst(this.getPosition()) > 5) {
             this.teleportTo(this.ox, this.oy, this.oz);
-            this.sendMessage("<red>You moved to quickly!");
+            this.sendMessage("[light red]You moved to quickly!");
             return;
         }
 
@@ -635,7 +635,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public void onMessageSent(String message) {
         for (ServerPlayer player : this.server.getPlayers()) {
-            player.sendMessage(new Formatter(true, true, "<aqua>&<" + this.getName() + "> <white>" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
+            player.sendMessage(new Formatter(true, true, "[cyan]&<" + this.getName() + "> [white]" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
         }
     }
 

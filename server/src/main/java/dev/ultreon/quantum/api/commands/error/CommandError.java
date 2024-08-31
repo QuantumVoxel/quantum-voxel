@@ -49,14 +49,14 @@ public abstract class CommandError implements CommandResult {
     @Override
     public void send(CommandSender sender) {
         if (this.index >= 0) {
-            TextObject argErr = Chat.formatError(sender, "<!>" + this.message + " - At argument " + this.index, this.getName());
+            TextObject argErr = Chat.formatError(sender, "[light red]" + this.message + " - At argument " + this.index, this.getName());
             sender.sendMessage(argErr);
         } else {
-            MutableText msgErr = Chat.formatError(sender, "<!>" + this.message, this.getName());
+            MutableText msgErr = Chat.formatError(sender, "[light red]" + this.message, this.getName());
             sender.sendMessage(msgErr);
         }
-        MutableText msgErr = Chat.formatError(sender, "<!>" + this.message, this.getName());
-        MutableText msgCode = Chat.formatError(sender, "  <gray-12>" + "Error code: " + this.messageCode.getCode() + " (" + this.messageCode + ")", this.getName());
+        MutableText msgErr = Chat.formatError(sender, "[light red]" + this.message, this.getName());
+        MutableText msgCode = Chat.formatError(sender, "  [#cccccc]" + "Error code: " + this.messageCode.getCode() + " (" + this.messageCode + ")", this.getName());
         sender.sendMessage(msgErr);
         sender.sendMessage(msgCode);
     }
@@ -70,20 +70,20 @@ public abstract class CommandError implements CommandResult {
         }
         if (this.onlyOverloads) {
             for (CommandSpec key : cmdData.getOverloads().keySet()) {
-                MutableText text = Chat.formatError(sender, "  <gray-12>" + key.toString().replace("<", "&<"), this.getName());
+                MutableText text = Chat.formatError(sender, "  [#cccccc]" + key.toString(), this.getName());
                 sender.sendMessage(text);
             }
         } else {
             cmdData.sendUsage(this.getName(), sender);
         }
         if (this.index >= 0) {
-            MutableText argErr = Chat.formatError(sender, "<!>" + this.message + " - At argument " + this.index, this.getName());
+            MutableText argErr = Chat.formatError(sender, "[light red]" + this.message + " - At argument " + this.index, this.getName());
             sender.sendMessage(argErr);
         } else {
-            MutableText msgErr = Chat.formatError(sender, "<!>" + this.message, this.getName());
+            MutableText msgErr = Chat.formatError(sender, "[light red]" + this.message, this.getName());
             sender.sendMessage(msgErr);
         }
-        MutableText msgCode = Chat.formatError(sender, "  <gray-12>" + "Error code: " + this.messageCode.getCode() + " (" + this.messageCode + ")", this.getName());
+        MutableText msgCode = Chat.formatError(sender, "  [#cccccc]" + "Error code: " + this.messageCode.getCode() + " (" + this.messageCode + ")", this.getName());
         sender.sendMessage(msgCode);
     }
 

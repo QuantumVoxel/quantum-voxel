@@ -29,8 +29,8 @@ public class DamageSource {
 
     public TextObject getDescription(@Nullable Entity entity) {
         NamespaceID type = this.getType();
-        if (type == null) return Formatter.format("<red>NULL</>");
-        if (entity == null) return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), Formatter.format("<red>NULL</>"));
+        if (type == null) return Formatter.format("[light red]NULL</>");
+        if (entity == null) return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), Formatter.format("[light red]NULL</>"));
         TextObject displayName = entity.getDisplayName();
         return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), displayName);
     }

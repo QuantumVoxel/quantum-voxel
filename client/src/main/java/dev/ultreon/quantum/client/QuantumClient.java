@@ -25,9 +25,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
-import com.github.tommyettinger.textra.Effect;
 import com.github.tommyettinger.textra.Font;
-import com.github.tommyettinger.textra.TypingConfig;
+import com.github.tommyettinger.textra.KnownFonts;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -541,10 +540,15 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.font.useIntegerPositions(true);
         this.font.setBoldStrength(0.33f);
         this.font.scale(1f, -1f);
+
+        KnownFonts.addEmoji(font);
+
         this.unifont = new GameFont(new BitmapFont(resource(id("unifont/unifont.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -14, 0, -28, true);
         this.unifont.useIntegerPositions(true);
         this.unifont.setBoldStrength(0.33f);
         this.unifont.scale(0.5f, -0.5f);
+
+        KnownFonts.addEmoji(unifont);
 
         // Initialize the game window
         this.window = GamePlatform.get().createWindow();
@@ -1629,7 +1633,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         int winXOff = maximized ? 18 : 0;
         int winHOff = maximized ? 22 : 0;
         renderer.draw9PatchTexture(new NamespaceID("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
-        renderer.textCenter("<bold>" + window.getTitle(), width / 2, 5);
+        renderer.textCenter("[*]" + window.getTitle(), width / 2, 5);
 
         this.closeButton.setX(width - 17 - winXOff * 2);
         this.closeButton.setY(3);

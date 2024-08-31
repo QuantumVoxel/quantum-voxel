@@ -53,6 +53,7 @@ public class LocalPlayer extends ClientPlayer {
     private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
     private long lastRefresh;
     public final Set<ChunkVec> pendingChunks = new HashSet<>();
+    private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -110,6 +111,11 @@ public class LocalPlayer extends ClientPlayer {
                 this.oy = this.y;
                 this.oz = this.z;
             }
+        }
+
+        ChunkVec toLoad = this.sendQueue.poll();
+        if (toLoad != null && connection != null) {
+            connection.send(new C2SRequestChunkLoadPacket(toLoad));
         }
     }
 
@@ -181,9 +187,9 @@ public class LocalPlayer extends ClientPlayer {
 
         if (!this.chunksToLoad.isEmpty()) {
             Stream<ChunkVec> sorted = chunksToLoad.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
-            sorted.forEachOrdered(toLoad -> {
-                connection.send(new C2SRequestChunkLoadPacket(toLoad));
-                this.pendingChunks.add(toLoad);
+            sorted.forEachOrdered(e -> {
+                this.pendingChunks.add(e);
+                this.sendQueue.add(e);
             });
         }
     }

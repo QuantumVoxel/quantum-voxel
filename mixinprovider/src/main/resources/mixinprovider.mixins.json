@@ -6,6 +6,7 @@
   "mixins": [
     "BaseShaderMixin",
     "ImmediateModeRenderer20Mixin",
+    "KnownFontsMixin",
     "Lwjgl3GL20Mixin"
   ],
   "client": [

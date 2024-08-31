@@ -225,7 +225,7 @@ public class TextureManager implements Disposable {
     }
 
     public String getManagedStatus() {
-        return "<white>Size: <gray>" + this.textures.size() + " <gold><b>|</b> <white>Frozen: <gray>" + this.frozen;
+        return "[white]Size: [grey]" + this.textures.size() + " [gold][*]|</b> [white]Frozen: [grey]" + this.frozen;
     }
 
     public NamespaceID getAtlasId(TextureAtlas atlas) {

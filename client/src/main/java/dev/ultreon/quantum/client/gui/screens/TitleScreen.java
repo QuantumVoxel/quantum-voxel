@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.CameraPlayer;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -8,7 +7,10 @@ import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
-import dev.ultreon.quantum.client.gui.widget.*;
+import dev.ultreon.quantum.client.gui.widget.Label;
+import dev.ultreon.quantum.client.gui.widget.Rectangle;
+import dev.ultreon.quantum.client.gui.widget.TextButton;
+import dev.ultreon.quantum.client.gui.widget.TitleButton;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.client.util.VoxelTerrain;
@@ -16,6 +18,7 @@ import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.Vec2f;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +45,7 @@ public class TitleScreen extends Screen {
 
         builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
 
-        this.titleLabel = builder.add(Label.of(Formatter.format("<bold>Quantum<gray><bold>Voxel")).position(() -> new Position(this.size.width / 2, 40))
+        this.titleLabel = builder.add(Label.of(Formatter.format("[*]Quantum[grey][*]Voxel")).position(() -> new Position(this.size.width / 2, 40))
                 .alignment(Alignment.CENTER)
                 .scale(2));
 
