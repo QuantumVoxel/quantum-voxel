@@ -2,14 +2,11 @@ package dev.ultreon.quantum.client.gui.screens.settings;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.gui.Alignment;
 import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.screens.options.BooleanEnum;
 import dev.ultreon.quantum.client.gui.screens.options.Scale;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
 import dev.ultreon.quantum.client.gui.widget.CycleButton;
-import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Slider;
 import dev.ultreon.quantum.text.TextObject;
 
@@ -54,7 +51,7 @@ public class VideoSettingsUI {
                     if (scale.get() == 0) {
                         return TextObject.translation("quantum.ui.auto");
                     }
-                    return TextObject.literal(scale.get() + "setX");
+                    return TextObject.literal(scale.get() + "x");
                 })
                 .callback(this::setScale));
 

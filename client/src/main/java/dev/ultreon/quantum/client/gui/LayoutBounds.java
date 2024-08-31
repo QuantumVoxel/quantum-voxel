@@ -83,6 +83,6 @@ public class LayoutBounds {
 
     @Override
     public String toString() {
-        return "(" + this.x.getAsInt() + ", " + this.y.getAsInt() + "):(" + this.width.getAsInt() + " setX " + this.height.getAsInt() + ")";
+        return "(" + this.x.getAsInt() + ", " + this.y.getAsInt() + "):(" + this.width.getAsInt() + " x " + this.height.getAsInt() + ")";
     }
 }

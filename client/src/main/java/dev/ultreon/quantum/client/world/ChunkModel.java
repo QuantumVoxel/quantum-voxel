@@ -12,9 +12,12 @@ import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
+
+import java.util.List;
 
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
@@ -64,24 +67,41 @@ public class ChunkModel implements RenderableProvider {
                     MeshBuilder meshBuilder = new MeshBuilder();
                     modelBuilder.begin();
 
-                    try (var ignored2 = QuantumClient.PROFILER.start("solid-mesh")) {
-                        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                        chunk.mesher.meshVoxels(modelBuilder,
-                                meshBuilder,
-                                block -> block.doesRender() && !block.isTransparent()
-                        );
-                        Mesh end = meshBuilder.end();
-                        modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
+                    boolean skip = true;
+
+                    List<GreedyMesher.Face> prepareSolid = chunk.mesher.prepare(
+                            block -> block.doesRender() && !block.isTransparent()
+                    );
+                    skip &= prepareSolid.isEmpty();
+
+                    List<GreedyMesher.Face> prepareTransparent = chunk.mesher.prepare(
+                            block -> block.doesRender() && block.isTransparent()
+                    );
+                    skip &= prepareTransparent.isEmpty();
+
+                    if (skip) {
+                        chunk.markEmpty();
+                        return;
                     }
 
-                    try (var ignored3 = QuantumClient.PROFILER.start("transparent-mesh")) {
-                        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                        chunk.mesher.meshVoxels(modelBuilder,
-                                meshBuilder,
-                                block -> block.doesRender() && block.isTransparent()
-                        );
-                        Mesh end2 = meshBuilder.end();
-                        modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
+                    chunk.markNotEmpty();
+
+                    if (!prepareSolid.isEmpty()) {
+                        try (var ignored2 = QuantumClient.PROFILER.start("solid-mesh")) {
+                            meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+                            chunk.mesher.meshFaces(prepareSolid, meshBuilder);
+                            Mesh end = meshBuilder.end();
+                            modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
+                        }
+                    }
+
+                    if (!prepareTransparent.isEmpty()) {
+                        try (var ignored3 = QuantumClient.PROFILER.start("transparent-mesh")) {
+                            meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+                            chunk.mesher.meshFaces(prepareTransparent, meshBuilder);
+                            Mesh end2 = meshBuilder.end();
+                            modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
+                        }
                     }
 
                     this.model = modelBuilder.end();

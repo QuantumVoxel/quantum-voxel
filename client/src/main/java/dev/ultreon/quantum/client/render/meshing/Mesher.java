@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.client.render.meshing;
 
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import dev.ultreon.quantum.block.Block;
+
+import java.util.List;
 
 /**
  * Turns an array of voxels into OpenGL vertices
@@ -13,10 +13,12 @@ public interface Mesher {
     /**
      * Meshes the specified voxels.
      *
-     * @param builder   MeshBuilder to build the mesh onto
      * @param condition Condition to check if the block should be used in the mesh
+     * @return
      */
-    void meshVoxels(ModelBuilder builder, MeshBuilder meshBuilder, UseCondition condition);
+    List<GreedyMesher.Face> prepare(UseCondition condition);
+
+    void meshFaces(List<GreedyMesher.Face> faces, MeshPartBuilder builder);
 
     interface UseCondition {
         /**

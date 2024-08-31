@@ -53,6 +53,7 @@ public class LocalPlayer extends ClientPlayer {
     private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
     private long lastRefresh;
     public final Set<ChunkVec> pendingChunks = new HashSet<>();
+    private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -110,6 +111,11 @@ public class LocalPlayer extends ClientPlayer {
                 this.oy = this.y;
                 this.oz = this.z;
             }
+        }
+
+        ChunkVec toLoad = this.sendQueue.poll();
+        if (toLoad != null && connection != null) {
+            connection.send(new C2SRequestChunkLoadPacket(toLoad));
         }
     }
 
@@ -171,19 +177,19 @@ public class LocalPlayer extends ClientPlayer {
             for (int y = -renderDistance; y <= renderDistance; y++) {
                 for (int z = -renderDistance; z <= renderDistance; z++) {
                     ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
-                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null) continue;
+                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null)
+                        continue;
                     if (chunkPos.dst(relativePos) <= renderDistance && !this.world.isLoaded(relativePos)) {
                         chunksToLoad.add(relativePos);
                     }
                 }
             }
         }
-
         if (!this.chunksToLoad.isEmpty()) {
             Stream<ChunkVec> sorted = chunksToLoad.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
-            sorted.forEachOrdered(toLoad -> {
-                connection.send(new C2SRequestChunkLoadPacket(toLoad));
-                this.pendingChunks.add(toLoad);
+            sorted.forEachOrdered(e -> {
+                this.pendingChunks.add(e);
+                this.sendQueue.add(e);
             });
         }
     }

@@ -229,6 +229,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         if (!(chunk instanceof ClientChunk clientChunk))
             throw new IllegalArgumentException("Chunk must be a ClientChunk but was " + chunk.getClass().getSimpleName());
 
+        clientChunk.markNotEmpty();
+
         if (this.client.worldRenderer instanceof WorldRenderer worldRenderer) {
             worldRenderer.rebuild(clientChunk);
         }
