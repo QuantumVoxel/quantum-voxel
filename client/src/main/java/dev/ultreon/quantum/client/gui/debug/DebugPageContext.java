@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.client.gui.debug;
 
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
 public interface DebugPageContext {
@@ -24,6 +24,7 @@ public interface DebugPageContext {
     DebugPageContext entryLine(int idx, String name);
 
     DebugPageContext entryLine(TextObject value);
+    DebugPageContext entryLine(String value);
 
     DebugPageContext entryLine();
 

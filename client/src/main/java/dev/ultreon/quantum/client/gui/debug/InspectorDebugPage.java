@@ -4,13 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
-import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static dev.ultreon.quantum.client.gui.debug.DebugOverlay.escape;
 
 public class InspectorDebugPage implements DebugPage {
     private String inspectCurrentPath = "/";
@@ -22,8 +21,8 @@ public class InspectorDebugPage implements DebugPage {
 
         Comparator<InspectionNode<?>> comparator = Comparator.comparing(InspectionNode::getName);
 
-        context.entryLine(TextObject.literal(this.inspectIdxInput).setColor(RgbColor.WHITE))
-                .entryLine(TextObject.literal(path).setColor(RgbColor.AZURE).setBold(true).setUnderlined(true))
+        context.entryLine("[white]" + escape(this.inspectIdxInput))
+                .entryLine("[#0080ff][*][_]" + escape(path))
                 .entryLine();
 
         if (this.renderNodes(context, path, comparator)) return;
@@ -67,7 +66,7 @@ public class InspectorDebugPage implements DebugPage {
                 this.inspectCurrentPath = "/";
                 return;
             }
-            List<InspectionNode<?>> nodes = node.getNodes().values().stream().sorted(comparator).collect(Collectors.toList());
+            List<InspectionNode<?>> nodes = node.getNodes().values().stream().sorted(comparator).toList();
 
             if (nodes.isEmpty()) return;
 
@@ -88,13 +87,13 @@ public class InspectorDebugPage implements DebugPage {
             return true;
         }
 
-        List<InspectionNode<?>> nodes = node.getNodes().values().stream().sorted(comparator).collect(Collectors.toList());
+        List<InspectionNode<?>> nodes = node.getNodes().values().stream().sorted(comparator).toList();
         for (int i = 0, nodeSize = nodes.size(); i < nodeSize; i++) {
             InspectionNode<?> curNode = nodes.get(i);
             context.entryLine(i, curNode.getName());
         }
 
-        List<Pair<String, String>> elements = node.getElements().entrySet().stream().map(t -> new Pair<>(t.getKey(), t.getValue().get())).sorted(Comparator.comparing(Pair::getFirst)).collect(Collectors.toList());
+        List<Pair<String, String>> elements = node.getElements().entrySet().stream().map(t -> new Pair<>(t.getKey(), t.getValue().get())).sorted(Comparator.comparing(Pair::getFirst)).toList();
         for (Pair<String, String> element : elements) {
             context.entryLine(element.getFirst(), element.getSecond());
         }
