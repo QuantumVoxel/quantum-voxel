@@ -64,6 +64,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
     private final Stack<Integer> stack = new Stack<>();
     public final ClientChunkInfo info = new ClientChunkInfo();
+    private boolean empty = false;
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
@@ -193,11 +194,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
         this.dirty = true;
         this.clientWorld.updateChunkAndNeighbours(this);
-        return isBlockSet;
-    }
 
-    public void updated() {
-        this.dirty = false;
+        if (!block.isAir())
+            this.empty = false;
+
+        return isBlockSet;
     }
 
     @Override
@@ -263,6 +264,21 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @Override
     public boolean isLoaded() {
         return this.world.isLoaded(this);
+    }
+
+    @Override
+    public void markEmpty() {
+        this.empty = true;
+    }
+
+    @Override
+    public void markNotEmpty() {
+        this.empty = false;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return empty;
     }
 
     public void renderModels(RenderLayer renderLayer) {

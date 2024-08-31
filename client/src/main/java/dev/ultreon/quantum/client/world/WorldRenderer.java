@@ -448,6 +448,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
         for (var chunk : chunks) {
+            if (chunk.isEmpty()) continue;
+
             if (positions.contains(chunk.getVec(), false)) {
                 QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getVec());
                 continue;
@@ -540,8 +542,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.renderBlockModels(batch, chunk);
 
             if (model != null) {
-                model.getModelInstance().transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-                batch.render(model, this.environment);
+                ModelInstance modelInstance = model.getModelInstance();
+                if (modelInstance != null) {
+                    modelInstance.transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+                    batch.render(model, this.environment);
+                }
             }
 
             chunk.renderModels(renderLayer);

@@ -2992,12 +2992,14 @@ public class Renderer implements Disposable {
 
         this.blurred = true;
         try {
-            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
             TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
 
             //Start rendering to an offscreen color buffer
             blurTargetA.begin();
+            clearColor(0x00000000);
+            clear();
 
             //before rendering, ensure we are using the default shader
             batch.setShader(null);
@@ -3029,6 +3031,7 @@ public class Renderer implements Disposable {
 
             //our first blur pass goes to target B
             blurTargetB.begin();
+            clear();
 
             //we want to render FBO target A into target B
             fboRegion.setTexture(blurTargetA.getColorBufferTexture());

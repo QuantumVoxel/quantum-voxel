@@ -177,14 +177,14 @@ public class LocalPlayer extends ClientPlayer {
             for (int y = -renderDistance; y <= renderDistance; y++) {
                 for (int z = -renderDistance; z <= renderDistance; z++) {
                     ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
-                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null) continue;
+                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null)
+                        continue;
                     if (chunkPos.dst(relativePos) <= renderDistance && !this.world.isLoaded(relativePos)) {
                         chunksToLoad.add(relativePos);
                     }
                 }
             }
         }
-
         if (!this.chunksToLoad.isEmpty()) {
             Stream<ChunkVec> sorted = chunksToLoad.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
             sorted.forEachOrdered(e -> {

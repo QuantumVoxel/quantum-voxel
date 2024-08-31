@@ -147,7 +147,7 @@ public class InventoryScreen extends ContainerScreen {
             result.add(TextObject.empty());
             result.add(TextObject.translation("quantum.recipe.ingredients").style(textStyle -> textStyle.color(RgbColor.WHITE).bold(true)));
             for (ItemStack stack : ingredients) {
-                result.add(TextObject.literal(stack.getCount() + "setX ").append(stack.getItem().getTranslation()));
+                result.add(TextObject.literal(stack.getCount() + "x ").append(stack.getItem().getTranslation()));
             }
 
             if (!this.showOnlyCraftable()) {

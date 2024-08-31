@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client.render.meshing;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.Block;
@@ -82,13 +80,12 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public void meshVoxels(ModelBuilder builder, MeshBuilder meshBuilder, UseCondition condition) {
+    public List<Face> prepare(UseCondition condition) {
         if (!chunk.isLoaded())
             throw new IllegalStateException("Chunk is not loaded");
 
         List<Face> faces = this.getFaces(condition);
-
-        this.meshFaces(faces, meshBuilder);
+        return faces;
     }
 
     public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
@@ -538,6 +535,7 @@ public class GreedyMesher implements Mesher {
         }
     }
 
+    @Override
     public void meshFaces(List<Face> faces, MeshPartBuilder builder) {
         try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
             if (section != null) section.addStat("face-count", faces.size());
