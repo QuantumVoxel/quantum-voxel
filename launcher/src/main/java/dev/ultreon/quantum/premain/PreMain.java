@@ -32,39 +32,45 @@ public final class PreMain {
      */
     @ApiStatus.Internal
     public static void main(String[] args) {
-        List<String> argv = Lists.newArrayList(args);
-        System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL", "true");
-
-        if (OS.isWindows()) {
-            try {
-                System.setOut(new PrintStream(Files.newOutputStream(Paths.get("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        if (argv.remove("--packaged")) {
-            PreMain.setDirectory();
-        }
-
-        if (argv.remove("--debug")) System.setProperty("fabric.log.level", "debug");
-        if (argv.remove("--server")) System.setProperty("fabric.side", "server");
-        else System.setProperty("fabric.side", "client");
-
-        System.setProperty("log4j2.formatMsgNoLookups", "true");
-//        System.setProperty("fabric.development", "true");
-        System.setProperty("fabric.log.disableAnsi", "true");
-
-        // Copy mixinprovider.jar to ./mods/
         try {
-            Files.copy(PreMain.class.getResourceAsStream("/mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"));
-        } catch (IOException e) {
-            e.printStackTrace();
+            List<String> argv = Lists.newArrayList(args);
+            System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL", "true");
+
+            if (OS.isWindows()) {
+                try {
+                    System.setOut(new PrintStream(Files.newOutputStream(Paths.get("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
+                    System.setErr(new PrintStream(Files.newOutputStream(Paths.get("launcher_err.log"), StandardOpenOption.APPEND)));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            if (argv.remove("--packaged")) {
+                PreMain.setDirectory();
+            }
+
+            if (argv.remove("--debug")) System.setProperty("fabric.log.level", "debug");
+            if (argv.remove("--server")) System.setProperty("fabric.side", "server");
+            else System.setProperty("fabric.side", "client");
+
+            System.setProperty("log4j2.formatMsgNoLookups", "true");
+//        System.setProperty("fabric.development", "true");
+            System.setProperty("fabric.log.disableAnsi", "true");
+
+            // Copy mixinprovider.jar to ./mods/
+            try {
+                Files.copy(PreMain.class.getResourceAsStream("/mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                Runtime.getRuntime().exit(1);
+            }
+
+            args = argv.toArray(new String[0]);
+            KnotClient.main(args);
+        } catch (Throwable t) {
+            t.printStackTrace();
             Runtime.getRuntime().exit(1);
         }
-
-        args = argv.toArray(new String[0]);
-        KnotClient.main(args);
     }
 
     private static void setDirectory() {
