@@ -249,7 +249,16 @@ tasks.register('package', Zip) {
 tasks.register('packageBin', Zip) {
     from fileTree(dir: "$projectDir/build/dist/")
     archiveFileName = 'package.zip'
-    destinationDirectory = file("$rootProject/build/dist/")
+
+    doLast {
+        copy {
+            from "$projectDir/build/dist/package.zip"
+            into "$rootProject.projectDir/build/dist"
+            rename "package.zip", "${app_name}-${project_version}.zip"
+        }
+    }
+
+    if (System.getProperty("os.name").toLowerCase().contains("linux")) mustRunAfter "createAppImage"
 }
 
 jpackage {
@@ -279,6 +288,7 @@ jpackage {
         macPackageIdentifier = project_id
         macPackageName = project_name
         appVersion = packageVersion
+        type = ImageType.DMG
     }
 
     linux {
