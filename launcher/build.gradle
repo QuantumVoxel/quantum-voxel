@@ -328,7 +328,7 @@ jpackage {
     finalizedBy("packageBin")
 
     input  = "$projectDir/build/jars"
-    destination = "$projectDir/build/bin"
+    destination = "$projectDir/build/dist"
 
     appName = app_name
     appVersion = project_version
@@ -339,7 +339,6 @@ jpackage {
     mainJar = jar.archiveFileName.get()
     mainClass = "dev.ultreon.quantum.premain.PreMain"
 
-    destination = "$projectDir/build/dist"
 
     javaOptions = [ "-Xmx8g", "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]
     arguments = [ "--packaged" ]
@@ -386,7 +385,7 @@ jpackage {
         doLast {
             copy {
                 from configurations.natives_win.collect {  it.isDirectory() ? it : zipTree(it) }
-                into "$rootProject.projectDir/build/dist/$jpackage.appName/natives"
+                into "$projectDir/build/dist/$jpackage.appName/natives"
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
         }
