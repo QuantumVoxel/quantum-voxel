@@ -147,12 +147,16 @@ public class StartupHelper {
         if (launcherPath != null) {
             if (System.getProperty("os.name").toLowerCase().contains("mac"))
                 jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
-            else
+            else if (osName.contains("windows"))
+                jvmArgs.add("runtime/bin/java.exe");
+            else if (osName.contains("linux"))
                 jvmArgs.add("runtime/bin/java");
+            else
+                throw new RuntimeException("Unsupported OS: " + osName);
         } else {
             jvmArgs.add(javaExecPath);
         }
-        jvmArgs.add("-XstartOnFirstThread");
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) jvmArgs.add("-XstartOnFirstThread");
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
         jvmArgs.add("-cp");
         jvmArgs.add(ManagementFactory.getRuntimeMXBean().getClassPath());
