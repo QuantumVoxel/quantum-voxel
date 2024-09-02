@@ -183,6 +183,7 @@ public class StartupHelper {
                     }
                 }
                 jvmArgs.clear();
+                jvmArgs.add(javaExecPath);
                 jvmArgs.add("@" + argFile.getAbsolutePath());
             } catch (IOException e) {
                 throw new RuntimeException(e);
