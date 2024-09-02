@@ -6,13 +6,6 @@ version: 2.1
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   build-linux:
-    filters:  # using regex filters requires the entire branch to match
-      branches:
-        only:  # only branches matching the below regex filters will run
-          - edge
-          - dev
-          - stable
-          - main
     # Specify the execution environment. You can specify an image from Dockerhub, or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -42,13 +35,6 @@ jobs:
           name: "Store Binaries"
           path: build/dist
   build-windows:
-    filters:  # using regex filters requires the entire branch to match
-      branches:
-        only:  # only branches matching the below regex filters will run
-          - edge
-          - dev
-          - stable
-          - main
     machine:
       image: windows-server-2022-gui:current
       resource_class: windows.medium
@@ -99,13 +85,6 @@ jobs:
           name: "Store Binaries"
           path: build/dist
   build-macos:
-    filters:  # using regex filters requires the entire branch to match
-      branches:
-        only:  # only branches matching the below regex filters will run
-          - edge
-          - dev
-          - stable
-          - main
     macos:
       xcode: 14.2.0
     resource_class: macos.m1.medium.gen1
