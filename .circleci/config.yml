@@ -20,7 +20,7 @@ jobs:
           command: "chmod +x gradlew"
       - run:
           name: "Get SDKMan"
-          command: 'apt-get update && apt-get install -y curl && curl -sL https://get.sdkman.io | bash'
+          command: 'apt-get update && apt-get install -y curl unzip && curl -sL https://get.sdkman.io | bash'
       - run:
           name: "Install SDKMan and GraalVM 21"
           command: 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install java 21.2.0-graalce'
