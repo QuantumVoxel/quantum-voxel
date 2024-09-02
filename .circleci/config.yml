@@ -59,7 +59,7 @@ jobs:
       - run:
           name: Install WiX Toolset
           command: |
-            curl.exe -L -o wix311-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip
+            curl.exe -L -o wix314-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip
             Expand-Archive -Force -Path wix314-binaries.zip -DestinationPath C:\wix
             $env:PATH += ";C:\wix"
             dir.exe C:\wix
