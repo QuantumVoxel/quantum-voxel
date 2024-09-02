@@ -78,7 +78,7 @@ jobs:
             $env:PATH += ";C:\wix"
             $env:JAVA_HOME = "C:\graalvm"
             ./gradlew.bat jpackage
-            shell: powershell
+          shell: powershell
           environment:
             CIRCLE_CI: "true"
       - store_artifacts:
