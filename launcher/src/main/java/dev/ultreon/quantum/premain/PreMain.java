@@ -41,7 +41,7 @@ public final class PreMain {
             if (OS.isWindows()) {
                 try {
                     System.setOut(new PrintStream(Files.newOutputStream(Paths.get("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
-                    System.setErr(new PrintStream(Files.newOutputStream(Paths.get("launcher_err.log"), StandardOpenOption.APPEND)));
+                    System.setErr(new PrintStream(Files.newOutputStream(Paths.get("launcher_err.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
