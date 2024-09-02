@@ -53,7 +53,6 @@ jobs:
           command: |
             curl.exe -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip
             Expand-Archive -Force -Path graalvm.zip -DestinationPath C:\graalvm
-            [Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\graalvm\bin", [EnvironmentVariableTarget]::Machine)
             dir.exe C:\graalvm
           shell: powershell
       - run:
@@ -61,18 +60,23 @@ jobs:
           command: |
             curl.exe -L -o wix314-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip
             Expand-Archive -Force -Path wix314-binaries.zip -DestinationPath C:\wix
-            [Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\wix", [EnvironmentVariableTarget]::Machine)
             dir.exe C:\wix
           shell: powershell
       - run:
           name: Verify Installation
           command: |
-            java -version
+            $env:PATH += ";C:\graalvm\bin"
+            $env:PATH += ";C:\wix"
+            java.exe -version
             candle.exe -v  # Verifying WiX installation
             light.exe -v   # Verifying WiX installation
+          shell: powershell
       - run:
           name: "Build Project"
           command: |
+            $env:PATH += ";C:\graalvm\bin"
+            $env:PATH += ";C:\wix"
+            $env:JAVA_HOME = "C:\graalvm"
             ./gradlew.bat jpackage
           environment:
             CIRCLE_CI: "true"
