@@ -66,7 +66,6 @@ jobs:
           name: Verify Installation
           command: |
             java -version
-            gu --version
             candle.exe -v  # Verifying WiX installation
             light.exe -v   # Verifying WiX installation
       - run:
