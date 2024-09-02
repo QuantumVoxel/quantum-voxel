@@ -5,9 +5,11 @@ import dev.ultreon.gameprovider.quantum.OS;
 import dev.ultreon.gameprovider.quantum.QuantumVxlGameProvider;
 import dev.ultreon.quantum.desktop.StartupHelper;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -66,11 +68,11 @@ public final class PreMain {
             }
 
             args = argv.toArray(new String[0]);
-            KnotClient.main(args);
         } catch (Throwable t) {
-            t.printStackTrace();
-            Runtime.getRuntime().exit(1);
+            JOptionPane.showMessageDialog(null, t.getMessage() + "\n" + ExceptionUtils.getStackTrace(t).replace("\t", "    "), "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(255);
         }
+        KnotClient.main(args);
     }
 
     private static void setDirectory() {
