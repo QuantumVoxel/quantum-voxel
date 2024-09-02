@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Pre-main class for quantum.
@@ -61,7 +62,9 @@ public final class PreMain {
 
             // Copy mixinprovider.jar to ./mods/
             try {
-                Files.copy(PreMain.class.getResourceAsStream("/mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"));
+                if (!Files.exists(Paths.get("mods/")))
+                    Files.createDirectory(Paths.get("mods/"));
+                Files.copy(Objects.requireNonNull(PreMain.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"));
             } catch (IOException e) {
                 e.printStackTrace();
                 Runtime.getRuntime().exit(1);
