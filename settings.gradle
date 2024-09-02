@@ -16,7 +16,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
 }
 
-include 'desktop-merge'
+include 'launcher'
 include 'gameprovider'
 include 'desktop'
 include 'client'
@@ -25,4 +25,3 @@ include 'testmod'
 include 'mixinprovider'
 include 'kwantum-api'
 include 'quantum-api'
-

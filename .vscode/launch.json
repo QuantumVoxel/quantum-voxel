@@ -120,14 +120,14 @@
             "name": "DevMain",
             "request": "launch",
             "mainClass": "dev.ultreon.quantum.premain.DevMain",
-            "projectName": "desktop-merge"
+            "projectName": "launcher"
         },
         {
             "type": "java",
             "name": "PreMain",
             "request": "launch",
             "mainClass": "dev.ultreon.quantum.premain.PreMain",
-            "projectName": "desktop-merge"
+            "projectName": "launcher"
         },
         {
             "type": "java",

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 //Note, the above license and copyright applies to this file only.
+//Another note: this file has changed by XyperCode. And differs from the original.
 
 package dev.ultreon.quantum.desktop;
 
@@ -22,7 +23,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Adds some utilities to ensure that the JVM was started with the
@@ -58,6 +62,33 @@ public class StartupHelper {
      * }
      * </code></pre>
      *
+     * @param redirectOutput whether the output of the new JVM should be rerouted to the
+     *                       old JVM, so it can be accessed in the same place; keeps the
+     *                       old JVM running if enabled
+     * @return whether a new JVM was started and thus no code should be executed
+     * in this one
+     */
+    public static boolean startNewJvmIfRequired(boolean redirectOutput) {
+        return startNewJvmIfRequired(redirectOutput, null);
+    }
+
+    /**
+     * Starts a new JVM if the application was started on macOS without the
+     * {@code -XstartOnFirstThread} argument. This also includes some code for
+     * Windows, for the case where the user's home directory includes certain
+     * non-Latin-alphabet characters (without this code, most LWJGL3 apps fail
+     * immediately for those users). Returns whether a new JVM was started and
+     * thus no code should be executed.
+     * <p>
+     * <u>Usage:</u>
+     *
+     * <pre><code>
+     * public static void main(String... args) {
+     * 	if (StartupHelper.startNewJvmIfRequired(true)) return; // This handles macOS support and helps on Windows.
+     * 	// after this is the actual main method code
+     * }
+     * </code></pre>
+     *
      * @param redirectOutput
      *            whether the output of the new JVM should be rerouted to the
      *            old JVM, so it can be accessed in the same place; keeps the
@@ -65,9 +96,9 @@ public class StartupHelper {
      * @return whether a new JVM was started and thus no code should be executed
      *         in this one
      */
-    public static boolean startNewJvmIfRequired(boolean redirectOutput) {
+    public static boolean startNewJvmIfRequired(boolean redirectOutput, Path launcherPath) {
         String osName = System.getProperty("os.name").toLowerCase();
-        if (!osName.contains("mac")) {
+        if (launcherPath == null && !osName.contains("mac")) {
             if (osName.contains("windows")) {
 // Here, we are trying to work around an issue with how LWJGL3 loads its extracted .dll files.
 // By default, LWJGL3 extracts to the directory specified by "java.io.tmpdir", which is usually the user's home.
@@ -75,26 +106,28 @@ public class StartupHelper {
 // By extracting to the relevant "ProgramData" folder, which is usually "C:\ProgramData", we avoid this.
                 System.setProperty("java.io.tmpdir", System.getenv("ProgramData") + "/libGDX-temp");
             }
+            System.out.println("No JVM required.");
             return false;
         }
 
         // There is no need for -XstartOnFirstThread on Graal native image
-        if (!System.getProperty("org.graalvm.nativeimage.imagecode", "").isEmpty()) {
+        if (launcherPath == null && !System.getProperty("org.graalvm.nativeimage.imagecode", "").isEmpty()) {
+            System.out.println("No JVM required.");
             return false;
         }
 
         long pid = LibC.getpid();
 
         // check whether -XstartOnFirstThread is enabled
-        if ("1".equals(System.getenv("JAVA_STARTED_ON_FIRST_THREAD_" + pid))) {
+        if (launcherPath == null && "1".equals(System.getenv("JAVA_STARTED_ON_FIRST_THREAD_" + pid))) {
+            System.out.println("No JVM required.");
             return false;
         }
 
         // check whether the JVM was previously restarted
         // avoids looping, but most certainly leads to a crash
-        if ("true".equals(System.getProperty(JVM_RESTARTED_ARG))) {
-            System.err.println(
-                    "There was a problem evaluating whether the JVM was started with the -XstartOnFirstThread argument.");
+        if (launcherPath == null && "true".equals(System.getProperty(JVM_RESTARTED_ARG))) {
+            System.err.println("There was a problem evaluating whether the JVM was started with the -XstartOnFirstThread argument.");
             return false;
         }
 
@@ -106,18 +139,23 @@ public class StartupHelper {
         // If targeting Java 9 or higher, you could use the following instead of the above line:
         String javaExecPath = ProcessHandle.current().info().command().orElseThrow();
 
-        if (!(new File(javaExecPath)).exists()) {
-            System.err.println(
-                    "A Java installation could not be found. If you are distributing this app with a bundled JRE, be sure to set the -XstartOnFirstThread argument manually!");
+        if (!new File(javaExecPath).exists()) {
+            System.err.println("A Java installation could not be found. If you are distributing this app with a bundled JRE, be sure to set the -XstartOnFirstThread argument manually!");
             return false;
         }
 
-        jvmArgs.add(javaExecPath);
+        if (launcherPath != null) {
+            if (System.getProperty("os.name").toLowerCase().contains("mac"))
+                jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
+            else
+                jvmArgs.add("runtime/bin/java");
+        } else {
+            jvmArgs.add(javaExecPath);
+        }
         jvmArgs.add("-XstartOnFirstThread");
-        jvmArgs.add("-D" + JVM_RESTARTED_ARG + "=true");
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
         jvmArgs.add("-cp");
-        jvmArgs.add(System.getProperty("java.class.path"));
+        jvmArgs.add(ManagementFactory.getRuntimeMXBean().getClassPath());
         String mainClass = System.getenv("JAVA_MAIN_CLASS_" + pid);
         if (mainClass == null) {
             StackTraceElement[] trace = Thread.currentThread().getStackTrace();
@@ -132,13 +170,18 @@ public class StartupHelper {
 
         try {
             if (!redirectOutput) {
-                ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs);
+                ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs).directory(launcherPath != null ? launcherPath.toFile() : new File(".").getAbsoluteFile());
                 processBuilder.start();
             } else {
-                Process process = (new ProcessBuilder(jvmArgs))
-                        .redirectErrorStream(true).start();
-                BufferedReader processOutput = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()));
+                if (launcherPath != null && Files.notExists(launcherPath)) {
+                    Files.createDirectories(launcherPath);
+                }
+                Process process = new ProcessBuilder(jvmArgs.stream().filter(Objects::nonNull).toArray(String[]::new))
+                        .directory(launcherPath != null ? launcherPath.toFile() : new File(".")
+                                .getAbsoluteFile())
+                        .redirectErrorStream(true)
+                        .start();
+                BufferedReader processOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 String line;
 
                 while ((line = processOutput.readLine()) != null) {

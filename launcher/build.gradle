@@ -54,7 +54,7 @@ group = project_group
 def packageVersion = "1.0.0"
 
 base {
-    archivesName = archives_base_name + "-gameprovider"
+    archivesName = archives_base_name + "-launcher"
 }
 
 java {
@@ -81,6 +81,7 @@ dependencies {
     addToJar api(project(":gameprovider"))
     pack api(project(":client"))
     pack api(project(":desktop"))
+    pack api(project(":mixinprovider"))
 
     pack api("com.formdev:flatlaf:3.2.1")
 
@@ -174,6 +175,8 @@ jar {
     dependsOn ":gameprovider:build"
     dependsOn ":desktop:build"
     dependsOn ":client:build"
+    dependsOn ":mixinprovider:build"
+
     //noinspection GroovyAssignabilityCheck
     manifest {
         //noinspection GroovyAssignabilityCheck
@@ -184,19 +187,16 @@ jar {
                 'Multi-Release': 'true'
     }
 
-    from(configurations.addToJar.collect {
-        zipTree(it).matching {
-            exclude "*.RSA", "*.SF", "*.MF"
-        }
-    })
-    from {
-        compileJava.outputs
-    }
-    from {
-        processResources.outputs
-    }
-
     exclude "*.RSA", "*.SF", "*.MF"
+
+    from(project(":mixinprovider").tasks.jar.outputs) {
+        into("")
+        rename {
+            "mixinprovider.jar"
+        }
+
+        duplicatesStrategy DuplicatesStrategy.FAIL
+    }
 
     zip64 true
     duplicatesStrategy DuplicatesStrategy.INCLUDE
@@ -208,7 +208,7 @@ jar {
         println "GAMEPROVIDER FILE: ${file("${project(":gameprovider")buildDir}/libs/").list().toArrayString()}"
     }
 
-    archiveBaseName = base.archivesBaseName
+    archiveBaseName = base.archivesName
 }
 
 tasks.create('prepareRun', {
@@ -279,7 +279,7 @@ jpackage {
 
     destination = "$projectDir/build/dist"
 
-    javaOptions = [ "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]
+    javaOptions = [ "-Xmx8g", "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]
     arguments = [ "--packaged" ]
 
     mac {
