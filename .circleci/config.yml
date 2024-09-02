@@ -19,6 +19,9 @@ jobs:
           name: "Make gradlew executable"
           command: "chmod +x gradlew"
       - run:
+          name: Install xargs
+          command: sudo apt-get install xargs
+      - run:
           name: "Build Project"
           command: |
             ./gradlew jpackage
