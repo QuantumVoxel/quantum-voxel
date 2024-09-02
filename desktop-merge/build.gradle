@@ -247,7 +247,7 @@ tasks.register('package', Zip) {
 }
 
 tasks.register('packageBin', Zip) {
-    from fileTree(dir: "$projectDir/build/bin/")
+    from fileTree(dir: "$projectDir/build/dist/")
     archiveFileName = 'package.zip'
     destinationDirectory = file("$rootProject/build/dist/")
 }
