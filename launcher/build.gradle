@@ -3,6 +3,7 @@
 
 //import dev.ultreon.gameutils.GameUtilsPlugin
 //import dev.ultreon.gameutils.ProjectType
+
 import org.panteleyev.jpackage.ImageType
 
 import java.nio.file.Files
@@ -337,7 +338,7 @@ jpackage {
     runtimeImage = System.getProperty("java.home")
 
     mainJar = jar.archiveFileName.get()
-    mainClass = "dev.ultreon.quantum.premain.PreMain"
+    mainClass = "dev.ultreon.quantum.launcher.Launcher"
 
 
     javaOptions = [ "-Xmx8g", "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]

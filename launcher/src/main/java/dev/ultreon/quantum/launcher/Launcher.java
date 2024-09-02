@@ -23,7 +23,7 @@ import java.util.Objects;
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  */
 @ApiStatus.Internal
-public final class PreMain {
+public final class Launcher {
     /**
      * Production main method.
      * <p style="color: red;">NOTE: Internal API!</p>
@@ -46,7 +46,7 @@ public final class PreMain {
             }
 
             if (argv.remove("--packaged")) {
-                PreMain.setDirectory();
+                Launcher.setDirectory();
             }
 
             if (argv.remove("--debug")) System.setProperty("fabric.log.level", "debug");
@@ -61,7 +61,7 @@ public final class PreMain {
             try {
                 if (!Files.exists(Paths.get("mods/")))
                     Files.createDirectory(Paths.get("mods/"));
-                Files.copy(Objects.requireNonNull(PreMain.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(Objects.requireNonNull(Launcher.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
                 Runtime.getRuntime().exit(1);
