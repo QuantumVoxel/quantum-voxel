@@ -51,9 +51,8 @@ jobs:
       - run:
           name: Install GraalVM
           command: |
-            curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java11-windows-amd64-21.0.2.zip
-            powershell.exe -Command "Expand-Archive -Path graalvm.zip -DestinationPath . -Force"
-            move graalvm-ce-java11-21.0.2 C:\graalvm
+            curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip
+            powershell.exe -Command "Expand-Archive -Path graalvm.zip -DestinationPath C:\graalvm -Force"
             setx /M PATH "%PATH%;C:\graalvm\bin"
       - run:
           name: Install WiX Toolset
