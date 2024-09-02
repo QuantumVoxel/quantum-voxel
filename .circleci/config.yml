@@ -64,7 +64,7 @@ jobs:
           command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - run:
           name: "Install GraalVM JDK @ 21"
-          command: brew install --cask graalvm@21
+          command: brew install --cask graalvm-jdk@21
       - run:
           name: "Build Project"
           command: |
