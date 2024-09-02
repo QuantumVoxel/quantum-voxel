@@ -48,20 +48,16 @@ jobs:
           name: "Set PowerShell Execution Policy"
           command: "powershell.exe -ExecutionPolicy Bypass"
       - run:
-          name: "Install WinGet"
-          command: "Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe"
-          shell: powershell.exe
-      - run:
-          name: "Update WinGet"
-          command: "winget upgrade --all"
-          shell: powershell.exe
-      - run:
-          name: Get GraalVM 21 from WinGet
-          command: 'winget install --id=GraalVM.21 --accept-source-agreements --accept-package-agreements --force'
+          name: Download and Install GraalVM 21 (Windows)
+          command: |
+            Invoke-WebRequest -Uri https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java11-windows-amd64-21.0.2.exe -OutFile graalvm.exe
+            ./graalvm.exe /quiet
           shell: powershell.exe
       - run:
           name: Get WiX for JPackage from WinGet
-          command: 'winget install --id=WiX.3.11.0 --accept-source-agreements --accept-package-agreements --force'
+          command: |
+            Invoke-WebRequest -Uri https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe -OutFile wix.exe
+            ./wix.exe /quiet
           shell: powershell.exe
       - run:
           name: "Build Project"
