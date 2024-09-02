@@ -52,14 +52,14 @@ jobs:
           name: Install GraalVM
           command: |
             curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java11-windows-amd64-21.0.2.zip
-            tar -xf graalvm.zip
+            powershell.exe -Command "Expand-Archive -Path graalvm.zip -DestinationPath . -Force"
             move graalvm-ce-java11-21.0.2 C:\graalvm
             setx /M PATH "%PATH%;C:\graalvm\bin"
       - run:
           name: Install WiX Toolset
           command: |
             curl -L -o wix311-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip
-            tar -xf wix311-binaries.zip -C C:\wix
+            powershell.exe -Command "Expand-Archive -Path wix311-binaries.zip -DestinationPath C:\wix -Force"
             setx /M PATH "%PATH%;C:\wix"
       - run:
           name: Verify Installation
