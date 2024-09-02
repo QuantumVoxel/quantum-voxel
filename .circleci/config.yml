@@ -40,6 +40,9 @@ jobs:
       resource_class: windows.medium
     description: "Build Project (Windows)"
     steps:
+      - add_ssh_keys:
+            fingerprints:
+              - "SHA256:0muEzYkWa1cMz1RF6VEIAgZWddVo5XffBgGdcKBGAxA"
       - checkout
       - run:
           name: "Set PowerShell Execution Policy"
