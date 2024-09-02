@@ -17,8 +17,6 @@
 
 package dev.ultreon.quantum.desktop;
 
-import org.lwjgl.system.macosx.LibC;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -116,7 +114,9 @@ public class StartupHelper {
             return false;
         }
 
-        long pid = LibC.getpid();
+        ProcessHandle current = ProcessHandle.current();
+        ProcessHandle.Info procInfo = current.info();
+        long pid = current.pid();
 
         // check whether -XstartOnFirstThread is enabled
         if (launcherPath == null && "1".equals(System.getenv("JAVA_STARTED_ON_FIRST_THREAD_" + pid))) {
@@ -137,7 +137,7 @@ public class StartupHelper {
         // The following line is used assuming you target Java 8, the minimum for LWJGL3.
 //        String javaExecPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
         // If targeting Java 9 or higher, you could use the following instead of the above line:
-        String javaExecPath = ProcessHandle.current().info().command().orElseThrow();
+        String javaExecPath = procInfo.command().orElseThrow();
 
         if (!new File(javaExecPath).exists()) {
             System.err.println("A Java installation could not be found. If you are distributing this app with a bundled JRE, be sure to set the -XstartOnFirstThread argument manually!");
