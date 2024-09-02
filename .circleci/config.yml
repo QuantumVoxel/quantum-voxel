@@ -27,6 +27,7 @@ jobs:
       - run:
           name: "Build Project"
           command: |
+            export JAVA_HOME=$HOME/.sdkman/candidates/java/current
             ./gradlew jpackage
           environment:
             CIRCLE_CI: "true"
