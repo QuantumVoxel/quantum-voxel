@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.github.tommyettinger.textra.Font;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
@@ -38,7 +39,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     UIContainer<?> parent = UIContainer.ROOT;
     protected final long createTime = System.nanoTime();
     protected final QuantumClient client = QuantumClient.get();
-    protected Font font = this.client.font;
+    protected GameFont font = this.client.font;
     private final List<RevalidateListener> revalidateListeners = new ArrayList<>();
     private final Map<NamespaceID, UIComponent> components = new HashMap<>();
 

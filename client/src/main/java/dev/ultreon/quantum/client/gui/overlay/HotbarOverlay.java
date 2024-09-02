@@ -56,7 +56,7 @@ public class HotbarOverlay extends Overlay {
         int count = item.getCount();
         if (!item.isEmpty() && count > 1) {
             String text = Integer.toString(count);
-            renderer.textLeft(text, ix + 18 - this.client.renderer.textWidth(text), this.client.getScaledHeight() - 24 - this.client.font.cellHeight, RgbColor.WHITE, false);
+            renderer.textLeft(text, ix + 18 - this.client.renderer.textWidth(text), this.client.getScaledHeight() - 24 - this.client.font.getLineHeight(), RgbColor.WHITE, false);
         }
     }
 }

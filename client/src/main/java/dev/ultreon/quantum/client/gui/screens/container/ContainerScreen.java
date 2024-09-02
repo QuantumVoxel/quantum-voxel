@@ -110,7 +110,7 @@ public abstract class ContainerScreen extends Screen {
 
         if (!slotItem.isEmpty() && slotItem.getCount() > 1) {
             String text = Integer.toString(slotItem.getCount());
-            renderer.textLeft(text, x + 18 - renderer.textWidth(text), y + 17 - this.font.cellHeight, RgbColor.WHITE, false);
+            renderer.textLeft(text, x + 18 - renderer.textWidth(text), y + 17 - this.font.getLineHeight(), RgbColor.WHITE, false);
         }
     }
 

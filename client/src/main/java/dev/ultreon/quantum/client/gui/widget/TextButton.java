@@ -99,7 +99,7 @@ public class TextButton extends Button<TextButton> {
         TextObject textObject = this.text.get();
         if (renderer.pushScissors(this.getBounds().shrink(2))) {
             if (textObject != null) {
-                renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height / 2 - this.font.cellHeight + (this.isPressed() ? 2 : 0)), this.enabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
+                renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height / 2 - this.font.getLineHeight() + (this.isPressed() ? 2 : 0)), this.enabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
             }
 
             renderer.popScissors();

@@ -11,9 +11,11 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class EntityType<T extends Entity> {
     private final EntitySize size;
+    private float eyeHeight = 0.5f;
 
     private EntityType(Builder<T> properties) {
         this.size = new EntitySize(properties.width, properties.height);
+        this.eyeHeight = properties.eyeHeight;
     }
 
     public abstract T create(World world);
@@ -38,7 +40,12 @@ public abstract class EntityType<T extends Entity> {
         return Registries.ENTITY_TYPE.getId(this);
     }
 
+    public float getEyeHeight() {
+        return eyeHeight;
+    }
+
     public static class Builder<T extends Entity> {
+        private float eyeHeight = 0.5f;
         private float width = 0.8f;
         private float height = 1.9f;
         @Nullable
@@ -52,6 +59,12 @@ public abstract class EntityType<T extends Entity> {
         public Builder<T> size(float width, float height) {
             this.width = width;
             this.height = height;
+            return this;
+        }
+
+        @Contract("_->this")
+        public Builder<T> eyeHeight(float eyeHeight) {
+            this.eyeHeight = eyeHeight;
             return this;
         }
 

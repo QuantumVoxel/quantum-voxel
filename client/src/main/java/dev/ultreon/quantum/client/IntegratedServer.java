@@ -37,7 +37,7 @@ public class IntegratedServer extends QuantumServer {
     private final QuantumClient client = QuantumClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
     /**
      * Constructs a new IntegratedServer with the given WorldStorage.
@@ -250,11 +250,14 @@ public class IntegratedServer extends QuantumServer {
     public void shutdown() {
         super.shutdown();
 
+        this.timer.cancel();
         this.client.integratedServer = null;
     }
 
     @Override
     public void close() {
+        this.timer.cancel();
+
         super.close();
 
         try {
@@ -303,6 +306,13 @@ public class IntegratedServer extends QuantumServer {
     @Override
     public void fatalCrash(Throwable throwable) {
         QuantumClient.crash(throwable);
+    }
+
+    @Override
+    public @NotNull List<Runnable> shutdownNow() {
+        this.timer.cancel();
+
+        return super.shutdownNow();
     }
 
     @Override

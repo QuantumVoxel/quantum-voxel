@@ -21,6 +21,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.libs.commons.v0.Anchor;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.texture.TextureManager;
@@ -68,7 +69,7 @@ public class Renderer implements Disposable {
     private final ShaderProgram blurShader;
     private final ShaderProgram gridShader;
     private float strokeWidth = 1;
-    private com.github.tommyettinger.textra.Font font;
+    private GameFont font;
     private final Matrices matrices;
     private Color blitColor = RgbColor.rgb(0xffffff);
     private final Vector2 tmp2A = new Vector2();
@@ -2280,10 +2281,10 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textMultiline(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        y -= this.font.cellHeight;
+        y -= this.font.getLineHeight();
 
         for (String line : text.split("\n")) {
-            y += this.font.cellHeight + 2;
+            y += this.font.getLineHeight() + 2;
             this.textLeft(line, x, y, color, shadow);
         }
 
@@ -2501,7 +2502,7 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer font(com.github.tommyettinger.textra.Font font) {
+    public Renderer font(GameFont font) {
         this.font = font;
         return this;
     }
@@ -3267,14 +3268,14 @@ public class Renderer implements Disposable {
             }
         }
         int textWidth = seen ? best : 0;
-        int descHeight = (int) (description.size() * (this.font.cellHeight + 1) - 1);
-        int textHeight = (int) (descHeight + 3 + this.font.cellHeight);
+        int descHeight = (int) (description.size() * (this.font.getLineHeight() + 1) - 1);
+        int textHeight = (int) (descHeight + 3 + this.font.getLineHeight());
 
         if (description.isEmpty() && subTitle == null) {
             textHeight -= 3;
         }
         if (subTitle != null) {
-            textHeight += 1 + this.font.cellHeight;
+            textHeight += 1 + this.font.getLineHeight();
         }
 
         this.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));
@@ -3285,12 +3286,12 @@ public class Renderer implements Disposable {
 
         int lineNr = 0;
         for (TextObject line : description) {
-            this.textLeft(line, x + 3, y + 3 + this.font.cellHeight + 3 + lineNr * (this.font.cellHeight + 1f) - 1, RgbColor.rgb(0xa0a0a0));
+            this.textLeft(line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1, RgbColor.rgb(0xa0a0a0));
             lineNr++;
         }
 
         if (subTitle != null)
-            this.textLeft(subTitle, x + 3, y + 3 + this.font.cellHeight + 3 + lineNr * (this.font.cellHeight + 1f) - 1, RgbColor.rgb(0x606060));
+            this.textLeft(subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1, RgbColor.rgb(0x606060));
     }
 
     private void drawText(@NotNull String text, float x, float y, Color color, boolean shadow) {
@@ -3375,6 +3376,8 @@ public class Renderer implements Disposable {
 
     private void drawText0(Batch batch, String string, float x, float y, int c) {
         String formatted = "[#%06x]%s".formatted(c, string);
+        y -= (int) this.font.lineHeight / 2;
+
         if (this.layoutText.equals(formatted)) {
             this.font.drawGlyphs(batch, layout, x, y);
             return;

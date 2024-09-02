@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Disposable;
 import com.github.tommyettinger.textra.Font;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
-import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceCategory;
@@ -20,8 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class FontManager implements Disposable, ContextAwareReloadable {
-    public static final Font DEFAULT = new Font();
-    private final Map<NamespaceID, Font> fonts = new HashMap<>();
+    public static final GameFont DEFAULT = new GameFont();
+    private final Map<NamespaceID, GameFont> fonts = new HashMap<>();
 
     FontManager() {
         // No-op
@@ -33,7 +32,7 @@ public class FontManager implements Disposable, ContextAwareReloadable {
     }
 
     @CanIgnoreReturnValue
-    public Font registerFont(NamespaceID id, Font font) {
+    public GameFont registerFont(NamespaceID id, GameFont font) {
         this.fonts.put(id, font);
         return font;
     }
@@ -52,9 +51,9 @@ public class FontManager implements Disposable, ContextAwareReloadable {
         }
     }
 
-    private Font loadFont(NamespaceID namespaceID) {
+    private GameFont loadFont(NamespaceID namespaceID) {
         @NotNull FileHandle handle = QuantumClient.resource(namespaceID.mapPath(path -> "font/" + path + ".fnt"));
-        return QuantumClient.invokeAndWait(() -> new Font(new BitmapFont(handle, false), Font.DistanceFieldType.STANDARD, 0f, 0f, 0f, 0f, false));
+        return QuantumClient.invokeAndWait(() -> new GameFont(new BitmapFont(handle, false), Font.DistanceFieldType.STANDARD, 0f, 0f, 0f, 0f, false));
     }
 
     @Override
@@ -70,7 +69,5 @@ public class FontManager implements Disposable, ContextAwareReloadable {
     public void reload(ResourceManager resourceManager, ReloadContext context) {
         this.dispose();
         this.registerFonts(resourceManager);
-
-        QuantumClient.get().font = this.fonts.getOrDefault(QuantumClient.get().fontId, DEFAULT);
     }
 }

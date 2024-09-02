@@ -130,6 +130,10 @@ import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -328,10 +332,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
     // Font stuff
-    public com.github.tommyettinger.textra.Font font;
+    public GameFont font;
     @NotNull
     @Deprecated
-    public final Font unifont;
+    public final GameFont unifont;
 
     // Generic renderers
     @Nullable
@@ -536,10 +540,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 
         // Initialize the unifont and font
-        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
+        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -8, 0, -20, true);
         this.font.useIntegerPositions(true);
         this.font.setBoldStrength(0.33f);
         this.font.scale(1f, -1f);
+        this.font.lineHeight = 10f;
 
         KnownFonts.addEmoji(font);
 
@@ -2000,6 +2005,28 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
                 ClientLifecycleEvents.CLIENT_STOPPED.factory().onGameDisposed();
                 System.gc();
+
+                int secondsPassed = 0;
+                LongSet threadIds = new LongArraySet();
+                while (true) {
+                    Set<Thread> threads = Thread.getAllStackTraces().keySet().stream().filter(t -> !t.isDaemon() && !t.isInterrupted() && t.threadId() != Thread.currentThread().threadId()).collect(Collectors.toSet());
+                    for (Thread t : threads) {
+                        if (threadIds.add(t.threadId())) LOGGER.debug("{}: {}", t.getName(), t.getState());
+                        t.interrupt();
+                    }
+
+                    if (threads.isEmpty()) {
+                        break;
+                    } else {
+                        LOGGER.info("Waiting for {} threads to finish...", threads.size());
+                        Thread.sleep(1000);
+
+                        if (secondsPassed++ > 10) {
+                            LOGGER.warn("Still waiting for {} threads to finish. Terminating...", threads.size());
+                            Runtime.getRuntime().halt(1);
+                        }
+                    }
+                }
             } catch (Exception t) {
                 QuantumClient.crash(t);
             }

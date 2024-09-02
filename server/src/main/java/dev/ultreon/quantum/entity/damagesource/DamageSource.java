@@ -15,6 +15,8 @@ public class DamageSource {
     public static final DamageSource KILL = DamageSource.register(new NamespaceID("kill"), new DamageSource().byPassInvincibility(true));
     public static final DamageSource HUNGER = DamageSource.register(new NamespaceID("hunger"), new DamageSource());
     public static final DamageSource PLAYER = DamageSource.register(new NamespaceID("player"), new DamageSource());
+    public static final DamageSource SUFFOCATION = DamageSource.register(new NamespaceID("suffocation"), new DamageSource());
+    public static final DamageSource IN_SPACE = DamageSource.register(new NamespaceID("in_space"), new DamageSource());
 
     private boolean byPassInvincibility;
 

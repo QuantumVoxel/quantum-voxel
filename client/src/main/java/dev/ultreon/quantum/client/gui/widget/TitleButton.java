@@ -112,7 +112,7 @@ public class TitleButton extends Button<TitleButton> {
 
             renderer.line(x + 40, y + this.size.height - 30, x + this.size.width - 40, y + this.size.height - 30, (this.enabled ? this.textColor.get().withAlpha(0x80) : this.textColor.get().withAlpha(0x40)).toGdx());
 
-            renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height - 20 - this.font.cellHeight + (this.isPressed() ? 2 : 0)), this.enabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
+            renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height - 20 - this.font.getLineHeight() + (this.isPressed() ? 2 : 0)), this.enabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
         }
     }
 

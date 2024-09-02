@@ -33,6 +33,7 @@ import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
@@ -410,5 +411,11 @@ public class LocalPlayer extends ClientPlayer {
     @Deprecated
     public @NotNull Vec3d getPosition() {
         return super.getPosition();
+    }
+
+    @Override
+    public BlockState getBuriedBlock() {
+        Vec3d add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
+        return this.world.get((int) add.x, (int) add.y, (int) add.z);
     }
 }

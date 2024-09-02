@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.entity.LivingEntityDeathEvent;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.ai.Navigator;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.events.EntityEvents;
@@ -107,6 +108,10 @@ public abstract class LivingEntity extends Entity {
         // Decrease damage immunity counter
         if (this.damageImmunity > 0) {
             this.damageImmunity--;
+        }
+
+        if (this.isBuried()) {
+            this.hurt(0.5f, DamageSource.SUFFOCATION);
         }
 
         // Check if the entity is in the void and apply damage
@@ -374,5 +379,18 @@ public abstract class LivingEntity extends Entity {
         this.x += (x - this.x) / speed;
         this.y += (y - this.y) / speed;
         this.z += (z - this.z) / speed;
+    }
+
+    public boolean isBuried() {
+        return !getBuriedBlock().isAir();
+    }
+
+    public BlockState getBuriedBlock() {
+        Vec3d add = getPosition().add(0, getEyeHeight(), 0);
+        return world.get((int) add.x, (int) add.y, (int) add.z);
+    }
+
+    public float getEyeHeight() {
+        return getType().getEyeHeight();
     }
 }

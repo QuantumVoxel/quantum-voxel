@@ -134,6 +134,8 @@ public class WorldLoadScreen extends Screen {
             this.client.connection.send(new C2SRequestChunkLoadPacket(chunkVec));
 
             this.message("Waiting for server to finalize...");
+        } catch (InterruptedException e) {
+            QuantumClient.LOGGER.info("World load interrupted");
         } catch (Exception throwable) {
             QuantumClient.LOGGER.error("Failed to load world:", throwable);
             QuantumClient.crash(throwable);
