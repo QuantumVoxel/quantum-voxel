@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.premain;
 
 import com.google.common.collect.Lists;
+import dev.ultreon.gameprovider.quantum.OS;
 import dev.ultreon.gameprovider.quantum.QuantumVxlGameProvider;
 import dev.ultreon.quantum.desktop.StartupHelper;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
@@ -8,9 +9,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 /**
@@ -31,6 +34,15 @@ public final class PreMain {
     public static void main(String[] args) {
         List<String> argv = Lists.newArrayList(args);
         System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL", "true");
+
+        if (OS.isWindows()) {
+            try {
+                System.setOut(new PrintStream(Files.newOutputStream(Paths.get("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (argv.remove("--packaged")) {
             PreMain.setDirectory();
         }
