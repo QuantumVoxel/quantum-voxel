@@ -9,7 +9,7 @@ jobs:
     # Specify the execution environment. You can specify an image from Dockerhub, or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: ghcr.io/graalvm/jdk:21.2.0
+      - image: ubuntu-latest
     description: "Build Project"
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
@@ -19,8 +19,14 @@ jobs:
           name: "Make gradlew executable"
           command: "chmod +x gradlew"
       - run:
-          name: Install xargs
-          command: sudo apt-get install xargs
+          name: "Get SDKMan"
+          command: 'curl -sL https://get.sdkman.io | bash'
+      - run:
+          name: "Install SDKMan and GraalVM 21"
+          command: 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install java 21.2.0-graalce'
+      - run:
+          name: "Install packages"
+          command: 'apt-get install -y xargs'
       - run:
           name: "Build Project"
           command: |
