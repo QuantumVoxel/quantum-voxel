@@ -25,9 +25,6 @@ jobs:
           name: "Install SDKMan and GraalVM 21"
           command: 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk list java && sdk install java 21.0.4-graal'
       - run:
-          name: "Install packages"
-          command: 'apt-get install -y xargs'
-      - run:
           name: "Build Project"
           command: |
             ./gradlew jpackage
