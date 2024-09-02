@@ -130,8 +130,6 @@ import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import it.unimi.dsi.fastutil.ints.IntArraySet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.ClientModInitializer;
@@ -540,11 +538,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 
         // Initialize the unifont and font
-        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -8, 0, -20, true);
+        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
         this.font.useIntegerPositions(true);
         this.font.setBoldStrength(0.33f);
         this.font.scale(1f, -1f);
-        this.font.lineHeight = 10f;
+        this.font.lineHeight = 7f;
 
         KnownFonts.addEmoji(font);
 
