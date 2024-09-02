@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.premain;
+package dev.ultreon.quantum.launcher;
 
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import org.jetbrains.annotations.ApiStatus;

@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.premain;
+package dev.ultreon.quantum.launcher;
 
 import com.google.common.collect.Lists;
 import dev.ultreon.gameprovider.quantum.OS;
@@ -12,10 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,7 +61,7 @@ public final class PreMain {
             try {
                 if (!Files.exists(Paths.get("mods/")))
                     Files.createDirectory(Paths.get("mods/"));
-                Files.copy(Objects.requireNonNull(PreMain.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"));
+                Files.copy(Objects.requireNonNull(PreMain.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
                 Runtime.getRuntime().exit(1);

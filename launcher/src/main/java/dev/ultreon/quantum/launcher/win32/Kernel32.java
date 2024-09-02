@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.premain.win32;
+package dev.ultreon.quantum.launcher.win32;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.premain.posix;
+package dev.ultreon.quantum.launcher.posix;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
