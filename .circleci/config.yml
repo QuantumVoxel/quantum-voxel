@@ -61,6 +61,7 @@ jobs:
             curl.exe -L -o wix311-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip
             Expand-Archive -Force -Path wix311-binaries.zip -DestinationPath C:\wix
             $env:PATH += ";C:\wix"
+          shell: powershell
       - run:
           name: Verify Installation
           command: |
