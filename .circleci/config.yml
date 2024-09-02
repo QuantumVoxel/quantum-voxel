@@ -50,15 +50,19 @@ jobs:
       - run:
           name: "Install WinGet"
           command: "Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe"
+          shell: powershell.exe
       - run:
           name: "Update WinGet"
           command: "winget upgrade --all"
+          shell: powershell.exe
       - run:
           name: Get GraalVM 21 from WinGet
           command: 'winget install --id=GraalVM.21 --accept-source-agreements --accept-package-agreements --force'
+          shell: powershell.exe
       - run:
           name: Get WiX for JPackage from WinGet
           command: 'winget install --id=WiX.3.11.0 --accept-source-agreements --accept-package-agreements --force'
+          shell: powershell.exe
       - run:
           name: "Build Project"
           command: |
