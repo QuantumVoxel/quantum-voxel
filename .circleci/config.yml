@@ -53,7 +53,7 @@ jobs:
           command: |
             curl.exe -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip
             Expand-Archive -Force -Path graalvm.zip -DestinationPath C:\graalvm
-            dir.exe C:\graalvm
+            dir.exe C:\graalvm\graalvm-ce-21.0.2\bin
           shell: powershell
       - run:
           name: Install WiX Toolset
@@ -65,7 +65,7 @@ jobs:
       - run:
           name: Verify Installation
           command: |
-            $env:PATH += ";C:\graalvm\bin"
+            $env:PATH += ";C:\graalvm\graalvm-ce-21.0.2\bin"
             $env:PATH += ";C:\wix"
             java.exe -version
             candle.exe -v  # Verifying WiX installation
@@ -74,9 +74,9 @@ jobs:
       - run:
           name: "Build Project"
           command: |
-            $env:PATH += ";C:\graalvm\bin"
+            $env:PATH += ";C:\graalvm\graalvm-ce-21.0.2\bin"
             $env:PATH += ";C:\wix"
-            $env:JAVA_HOME = "C:\graalvm"
+            $env:JAVA_HOME = "C:\graalvm\graalvm-ce-21.0.2"
             ./gradlew.bat jpackage
           shell: powershell
           environment:
