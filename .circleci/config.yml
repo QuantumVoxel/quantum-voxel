@@ -51,16 +51,16 @@ jobs:
       - run:
           name: Install GraalVM
           command: |
-            curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip
+            Invoke-WebRequest -Uri https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip -OutFile graalvm.zip
             Expand-Archive -Force -Path graalvm.zip -DestinationPath C:\graalvm
-            export PATH="%PATH%;C:\graalvm\bin"
+            $env:PATH += ";C:\graalvm\bin"
           shell: powershell
       - run:
           name: Install WiX Toolset
           command: |
-            curl -L -o wix311-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip
+            Invoke-WebRequest -Uri https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip -OutFile wix311-binaries.zip
             Expand-Archive -Force -Path wix311-binaries.zip -DestinationPath C:\wix
-            export PATH="%PATH%;C:\wix"
+            $env:PATH += ";C:\wix"
       - run:
           name: Verify Installation
           command: |
