@@ -17,9 +17,7 @@
 
 package dev.ultreon.quantum.desktop;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -148,9 +146,9 @@ public class StartupHelper {
             if (System.getProperty("os.name").toLowerCase().contains("mac"))
                 jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
             else if (osName.contains("windows"))
-                jvmArgs.add("runtime/bin/java.exe");
+                jvmArgs.add(new File("runtime/bin/java.exe").getAbsolutePath());
             else if (osName.contains("linux"))
-                jvmArgs.add("runtime/bin/java");
+                jvmArgs.add(new File("runtime/bin/java").getAbsolutePath());
             else
                 throw new RuntimeException("Unsupported OS: " + osName);
         } else {
@@ -162,6 +160,7 @@ public class StartupHelper {
         jvmArgs.add("-Djava.io.tmpdir=" + System.getProperty("java.io.tmpdir"));
         jvmArgs.add("-cp");
         jvmArgs.add(ManagementFactory.getRuntimeMXBean().getClassPath());
+
         String mainClass = System.getenv("JAVA_MAIN_CLASS_" + pid);
         if (mainClass == null) {
             StackTraceElement[] trace = Thread.currentThread().getStackTrace();
@@ -174,6 +173,22 @@ public class StartupHelper {
         }
         jvmArgs.add(mainClass);
 
+        // Use @argfile
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            try {
+                File argFile = File.createTempFile("jvmargs", ".txt");
+                try (PrintWriter out = new PrintWriter(argFile)) {
+                    for (String arg : jvmArgs) {
+                        out.println(arg);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            jvmArgs.clear();
+            jvmArgs.add("@" + argFile.getAbsolutePath());
+        }
         try {
             if (!redirectOutput) {
                 ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs).directory(launcherPath != null ? launcherPath.toFile() : new File(".").getAbsoluteFile());
