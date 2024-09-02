@@ -23,7 +23,7 @@ jobs:
           command: 'apt-get update && apt-get install -y curl unzip zip coreutils && curl -sL https://get.sdkman.io | bash'
       - run:
           name: "Install SDKMan and GraalVM 21"
-          command: 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk list java && sdk install java 21.0.4-graalce'
+          command: 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk list java && sdk install java 21.0.4-graal'
       - run:
           name: "Install packages"
           command: 'apt-get install -y xargs'
