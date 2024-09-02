@@ -252,7 +252,7 @@ tasks.register('packageBin', Zip) {
 
     doLast {
         copy {
-            from "$projectDir/build/dist/package.zip"
+            from "${outputs.files.singleFile.path}"
             into "$rootProject.projectDir/build/dist"
             rename "package.zip", "${app_name}-${project_version}.zip"
         }
