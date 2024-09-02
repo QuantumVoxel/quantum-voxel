@@ -158,6 +158,8 @@ public class StartupHelper {
         }
         if (System.getProperty("os.name").toLowerCase().contains("mac")) jvmArgs.add("-XstartOnFirstThread");
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+        jvmArgs.add("-Djava.library.path=" + ManagementFactory.getRuntimeMXBean().getClassPath() + separator + "natives");
+        jvmArgs.add("-Djava.io.tmpdir=" + System.getProperty("java.io.tmpdir"));
         jvmArgs.add("-cp");
         jvmArgs.add(ManagementFactory.getRuntimeMXBean().getClassPath());
         String mainClass = System.getenv("JAVA_MAIN_CLASS_" + pid);

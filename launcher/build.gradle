@@ -73,6 +73,20 @@ configurations {
     addToJar {
         canBeResolved true
     }
+
+    natives_win {
+        canBeConsumed = true
+        canBeResolved = true
+    }
+
+    natives_mac {
+        canBeConsumed = true
+        canBeResolved = true
+    }
+
+    natives_linux {
+
+    }
 }
 
 evaluationDependsOn(":client")
@@ -162,6 +176,54 @@ dependencies {
     pack api('net.fabricmc:access-widener:2.1.0')
 
     pack api("dev.ultreon.quantum:fabric-loader:$fabric_version")
+    
+    natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows")
+    natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")
+    natives_linux api("org.lwjgl:lwjgl:3.3.3:natives-linux")
+    natives_linux api("org.lwjgl:lwjgl:3.3.3:natives-linux-arm32")
+    natives_linux api("org.lwjgl:lwjgl:3.3.3:natives-linux-arm64")
+    natives_mac api("org.lwjgl:lwjgl:3.3.3:natives-macos")
+    natives_mac api("org.lwjgl:lwjgl:3.3.3:natives-macos-arm64")
+    
+    natives_win api("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows")
+    natives_win api("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows-arm64")
+    natives_linux api("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux")
+    natives_linux api("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux-arm32")
+    natives_linux api("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux-arm64")
+    natives_mac api("org.lwjgl:lwjgl-glfw:3.3.3:natives-macos")
+    natives_mac api("org.lwjgl:lwjgl-glfw:3.3.3:natives-macos-arm64")
+    
+    natives_win api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows")
+    natives_win api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows-arm64")
+    natives_linux api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux")
+    natives_linux api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux-arm32")
+    natives_linux api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux-arm64")
+    natives_mac api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-macos")
+    natives_mac api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-macos-arm64")
+    
+    natives_win api("org.lwjgl:lwjgl-openal:3.3.3:natives-windows")
+    natives_win api("org.lwjgl:lwjgl-openal:3.3.3:natives-windows-arm64")
+    natives_linux api("org.lwjgl:lwjgl-openal:3.3.3:natives-linux")
+    natives_linux api("org.lwjgl:lwjgl-openal:3.3.3:natives-linux-arm32")
+    natives_linux api("org.lwjgl:lwjgl-openal:3.3.3:natives-linux-arm64")
+    natives_mac api("org.lwjgl:lwjgl-openal:3.3.3:natives-macos")
+    natives_mac api("org.lwjgl:lwjgl-openal:3.3.3:natives-macos-arm64")
+    
+    natives_win api("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows")
+    natives_win api("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows-arm64")
+    natives_linux api("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux")
+    natives_linux api("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux-arm32")
+    natives_linux api("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux-arm64")
+    natives_mac api("org.lwjgl:lwjgl-opengl:3.3.3:natives-macos")
+    natives_mac api("org.lwjgl:lwjgl-opengl:3.3.3:natives-macos-arm64")
+    
+    natives_win api("org.lwjgl:lwjgl-stb:3.3.3:natives-windows")
+    natives_win api("org.lwjgl:lwjgl-stb:3.3.3:natives-windows-arm64")
+    natives_linux api("org.lwjgl:lwjgl-stb:3.3.3:natives-linux")
+    natives_linux api("org.lwjgl:lwjgl-stb:3.3.3:natives-linux-arm32")
+    natives_linux api("org.lwjgl:lwjgl-stb:3.3.3:natives-linux-arm64")
+    natives_mac api("org.lwjgl:lwjgl-stb:3.3.3:natives-macos")
+    natives_mac api("org.lwjgl:lwjgl-stb:3.3.3:natives-macos-arm64")
 }
 
 processResources {
@@ -320,6 +382,13 @@ jpackage {
         winConsole = false
 
         type ImageType.APP_IMAGE
+
+        doLast {
+            copy {
+                from configurations.natives_windows.collect {  it.isDirectory() ? it : zipTree(it) }
+                into "$rootProject.projectDir/build/dist/$jpackage.appName/natives"
+            }
+        }
     }
 }
 
