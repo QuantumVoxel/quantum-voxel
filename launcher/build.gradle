@@ -387,6 +387,7 @@ jpackage {
             copy {
                 from configurations.natives_win.collect {  it.isDirectory() ? it : zipTree(it) }
                 into "$rootProject.projectDir/build/dist/$jpackage.appName/natives"
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
         }
     }
