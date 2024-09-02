@@ -48,6 +48,12 @@ jobs:
           name: "Set PowerShell Execution Policy"
           command: "powershell.exe -ExecutionPolicy Bypass"
       - run:
+          name: "Install WinGet"
+          command: "Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe"
+      - run:
+          name: "Update WinGet"
+          command: "winget upgrade --all"
+      - run:
           name: Get GraalVM 21 from WinGet
           command: 'winget install --id=GraalVM.21 --accept-source-agreements --accept-package-agreements --force'
       - run:
