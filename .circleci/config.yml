@@ -47,18 +47,27 @@ jobs:
       - run:
           name: "Set PowerShell Execution Policy"
           command: "powershell.exe -ExecutionPolicy Bypass"
+
       - run:
-          name: Download and Install GraalVM 21 (Windows)
+          name: Install GraalVM
           command: |
-            Invoke-WebRequest -Uri https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java11-windows-amd64-21.0.2.exe -OutFile graalvm.exe
-            ./graalvm.exe /quiet
-          shell: powershell.exe
+            curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java11-windows-amd64-21.0.2.zip
+            tar -xf graalvm.zip
+            move graalvm-ce-java11-21.0.2 C:\graalvm
+            setx /M PATH "%PATH%;C:\graalvm\bin"
       - run:
-          name: Get WiX for JPackage from WinGet
+          name: Install WiX Toolset
           command: |
-            Invoke-WebRequest -Uri https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe -OutFile wix.exe
-            ./wix.exe /quiet
-          shell: powershell.exe
+            curl -L -o wix311-binaries.zip https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip
+            tar -xf wix311-binaries.zip -C C:\wix
+            setx /M PATH "%PATH%;C:\wix"
+      - run:
+          name: Verify Installation
+          command: |
+            java -version
+            gu --version
+            candle.exe -v  # Verifying WiX installation
+            light.exe -v   # Verifying WiX installation
       - run:
           name: "Build Project"
           command: |
