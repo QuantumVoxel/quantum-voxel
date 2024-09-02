@@ -182,12 +182,12 @@ public class StartupHelper {
                         out.println(arg);
                     }
                 }
+                jvmArgs.clear();
+                jvmArgs.add("@" + argFile.getAbsolutePath());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            jvmArgs.clear();
-            jvmArgs.add("@" + argFile.getAbsolutePath());
         }
         try {
             if (!redirectOutput) {
