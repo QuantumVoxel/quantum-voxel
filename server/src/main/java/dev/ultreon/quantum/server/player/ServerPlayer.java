@@ -109,14 +109,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         // Check if the world is not null
         assert this.world != null;
 
-        // Remove the player from the world if it exists in the world
-        if (this.world.getEntity(this.getId()) == this) {
-            this.world.despawn(this);
-        }
-
-        // Despawn player from the world
-        this.world.despawn(this);
-
         try {
             // Get the spawn point for the player
             BlockVec spawnPoint = this.server.submit(this.world::getSpawnPoint).join();
@@ -160,6 +152,17 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             this.connection.send(new S2CPlayerHurtPacket(damage, source));
         }
         return noDamage;
+    }
+
+    @Override
+    public void onDeath(DamageSource source) {
+        super.onDeath(source);
+
+        // Remove the player from the world if it exists in the world
+        if (this.world.getEntity(this.getId()) == this) {
+            this.world.despawn(this);
+        }
+
     }
 
     /**
@@ -432,7 +435,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     public void onAbilities(@NotNull AbilitiesPacket packet) {
         // Check if the player is trying to fly
-        boolean flying = packet.isFlying();
+        boolean flying = packet.flying();
         // Check if flight is allowed
         boolean allowFlight = this.abilities.allowFlight;
 
@@ -470,7 +473,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         super.openMenu(menu);
 
         // Send a packet to open the container menu
-        this.connection.send(new S2COpenMenuPacket(menu.getType().getId(), Arrays.asList(menu.slots)));
+        this.connection.send(S2COpenMenuPacket.of(menu.getType().getId(), Arrays.asList(menu.slots)));
     }
 
     @Override

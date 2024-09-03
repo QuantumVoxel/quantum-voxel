@@ -7,18 +7,12 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-public final class S2CBlockSetPacket extends Packet<InGameClientPacketHandler> {
-    private final BlockVec pos;
-    private final BlockState blockState;
+public record S2CBlockSetPacket(BlockVec pos, BlockState blockState) implements Packet<InGameClientPacketHandler> {
+    public static S2CBlockSetPacket read(PacketIO buffer) {
+        var pos = buffer.readBlockVec();
+        var blockState = buffer.readBlockMeta();
 
-    public S2CBlockSetPacket(BlockVec pos, BlockState blockState) {
-        this.pos = pos;
-        this.blockState = blockState;
-    }
-
-    public S2CBlockSetPacket(PacketIO buffer) {
-        this.pos = buffer.readBlockVec();
-        this.blockState = buffer.readBlockMeta();
+        return new S2CBlockSetPacket(pos, blockState);
     }
 
     @Override
@@ -30,14 +24,6 @@ public final class S2CBlockSetPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onBlockSet(this.pos, this.blockState);
-    }
-
-    public BlockVec pos() {
-        return this.pos;
-    }
-
-    public BlockState blockState() {
-        return this.blockState;
     }
 
     public String toString() {

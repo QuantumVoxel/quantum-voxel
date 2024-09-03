@@ -8,26 +8,25 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.NamespaceID;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class S2COpenMenuPacket extends Packet<InGameClientPacketHandler> {
-    private final NamespaceID menuType;
-    private final List<ItemStack> items;
-
-    public S2COpenMenuPacket(NamespaceID menuType, Collection<ItemSlot> items) {
-        this.menuType = menuType;
-        this.items = items.stream().map(itemSlot -> {
+public record S2COpenMenuPacket(NamespaceID menuType,
+                                List<ItemStack> items) implements Packet<InGameClientPacketHandler> {
+    public static S2COpenMenuPacket of(NamespaceID menuType, List<ItemSlot> slots) {
+        var stacks = slots.stream().map(itemSlot -> {
             if (itemSlot == null) return ItemStack.empty();
             if (itemSlot.isEmpty()) return ItemStack.empty();
             return itemSlot.getItem();
-        }).collect(Collectors.toList());
+        }).toList();
+
+        return new S2COpenMenuPacket(menuType, stacks);
     }
 
-    public S2COpenMenuPacket(PacketIO buffer) {
-        this.menuType = buffer.readId();
-        this.items = buffer.readList(PacketIO::readItemStack);
+    public static S2COpenMenuPacket read(PacketIO buffer) {
+        var menuType = buffer.readId();
+        var items = buffer.readList(PacketIO::readItemStack);
+
+        return new S2COpenMenuPacket(menuType, items);
     }
 
     @Override
@@ -39,14 +38,6 @@ public class S2COpenMenuPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onOpenContainerMenu(this.menuType, this.items);
-    }
-
-    public NamespaceID getMenuType() {
-        return menuType;
-    }
-
-    public List<ItemStack> getItems() {
-        return items;
     }
 
     @Override

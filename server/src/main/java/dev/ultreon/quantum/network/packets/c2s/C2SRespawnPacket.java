@@ -5,13 +5,9 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SRespawnPacket extends Packet<InGameServerPacketHandler> {
-    public C2SRespawnPacket() {
-
-    }
-
-    public C2SRespawnPacket(PacketIO ignoredBuffer) {
-
+public record C2SRespawnPacket() implements Packet<InGameServerPacketHandler> {
+    public static C2SRespawnPacket read(PacketIO ignoredBuffer) {
+        return new C2SRespawnPacket();
     }
 
     @Override

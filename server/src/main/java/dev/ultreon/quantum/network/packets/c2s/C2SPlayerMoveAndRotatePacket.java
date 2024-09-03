@@ -5,33 +5,19 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SPlayerMoveAndRotatePacket extends Packet<InGameServerPacketHandler> {
-    private final double x;
-    private final double y;
-    private final double z;
+public record C2SPlayerMoveAndRotatePacket(double x, double y, double z, float xHeadRot, float xRot,
+                                           float yRot) implements Packet<InGameServerPacketHandler> {
 
-    private final float xHeadRot;
-    private final float xRot;
-    private final float yRot;
+    public static C2SPlayerMoveAndRotatePacket read(PacketIO buffer) {
+        var x = buffer.readDouble();
+        var y = buffer.readDouble();
+        var z = buffer.readDouble();
 
-    public C2SPlayerMoveAndRotatePacket(double x, double y, double z, float xHeadRot, float xRot, float yRot) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        var xHeadRot = buffer.readFloat();
+        var xRot = buffer.readFloat();
+        var yRot = buffer.readFloat();
 
-        this.xHeadRot = xHeadRot;
-        this.xRot = xRot;
-        this.yRot = yRot;
-    }
-
-    public C2SPlayerMoveAndRotatePacket(PacketIO buffer) {
-        this.x = buffer.readDouble();
-        this.y = buffer.readDouble();
-        this.z = buffer.readDouble();
-
-        this.xHeadRot = buffer.readFloat();
-        this.xRot = buffer.readFloat();
-        this.yRot = buffer.readFloat();
+        return new C2SPlayerMoveAndRotatePacket(x, y, z, xHeadRot, xRot, yRot);
     }
 
     @Override
@@ -50,39 +36,15 @@ public class C2SPlayerMoveAndRotatePacket extends Packet<InGameServerPacketHandl
         handler.onPlayerMoveAndRotate(ctx.requirePlayer(), this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot);
     }
 
-    public double getX() {
-        return this.x;
-    }
-
-    public double getY() {
-        return this.y;
-    }
-
-    public double getZ() {
-        return this.z;
-    }
-
-    public float getXHeadRot() {
-        return this.xHeadRot;
-    }
-
-    public float getXRot() {
-        return this.xRot;
-    }
-
-    public float getYRot() {
-        return this.yRot;
-    }
-
     @Override
     public String toString() {
         return "C2SPlayerMoveAndRotatePacket{" +
-                "x=" + x +
-                ", y=" + y +
-                ", z=" + z +
-                ", xHeadRot=" + xHeadRot +
-                ", xRot=" + xRot +
-                ", yRot=" + yRot +
-                '}';
+               "x=" + x +
+               ", y=" + y +
+               ", z=" + z +
+               ", xHeadRot=" + xHeadRot +
+               ", xRot=" + xRot +
+               ", yRot=" + yRot +
+               '}';
     }
 }

@@ -6,15 +6,10 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.text.TextObject;
 
-public class S2CChatPacket extends Packet<InGameClientPacketHandler> {
-    private final TextObject message;
+public record S2CChatPacket(TextObject message) implements Packet<InGameClientPacketHandler> {
 
-    public S2CChatPacket(TextObject message) {
-        this.message = message;
-    }
-
-    public S2CChatPacket(PacketIO buffer) {
-        this.message = buffer.readTextObject();
+    public static S2CChatPacket read(PacketIO buffer) {
+        return new S2CChatPacket(buffer.readTextObject());
     }
 
     @Override
@@ -25,10 +20,6 @@ public class S2CChatPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onChatReceived(this.message);
-    }
-
-    public TextObject getMessage() {
-        return this.message;
     }
 
     @Override

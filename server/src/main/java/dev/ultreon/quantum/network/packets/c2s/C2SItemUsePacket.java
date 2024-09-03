@@ -6,15 +6,12 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.util.BlockHit;
 
-public class C2SItemUsePacket extends Packet<InGameServerPacketHandler> {
-    private final BlockHit hit;
+public record C2SItemUsePacket(BlockHit hit) implements Packet<InGameServerPacketHandler> {
 
-    public C2SItemUsePacket(BlockHit hit) {
-        this.hit = hit;
-    }
+    public static C2SItemUsePacket read(PacketIO buffer) {
+        var hit = new BlockHit(buffer);
 
-    public C2SItemUsePacket(PacketIO buffer) {
-        this.hit = new BlockHit(buffer);
+        return new C2SItemUsePacket(hit);
     }
 
     @Override
@@ -25,10 +22,6 @@ public class C2SItemUsePacket extends Packet<InGameServerPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onItemUse(this.hit);
-    }
-
-    public BlockHit getHit() {
-        return this.hit;
     }
 
     @Override

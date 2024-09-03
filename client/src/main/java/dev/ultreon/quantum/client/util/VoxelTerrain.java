@@ -522,7 +522,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public int getDaytime() {
+    public long getDaytime() {
         return 0;
     }
 
@@ -602,7 +602,7 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public void setDaytime(int time) {
+    public void setDaytime(long time) {
 
     }
 

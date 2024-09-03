@@ -5,15 +5,12 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public class S2CPlayerHealthPacket extends Packet<InGameClientPacketHandler> {
-    private final float newHealth;
+public record S2CPlayerHealthPacket(float newHealth) implements Packet<InGameClientPacketHandler> {
 
-    public S2CPlayerHealthPacket(float newHealth) {
-        this.newHealth = newHealth;
-    }
+    public static S2CPlayerHealthPacket read(PacketIO buffer) {
+        var newHealth = buffer.readFloat();
 
-    public S2CPlayerHealthPacket(PacketIO buffer) {
-        this.newHealth = buffer.readFloat();
+        return new S2CPlayerHealthPacket(newHealth);
     }
 
     @Override
@@ -26,14 +23,10 @@ public class S2CPlayerHealthPacket extends Packet<InGameClientPacketHandler> {
         handler.onPlayerHealth(this.newHealth);
     }
 
-    public float getNewHealth() {
-        return newHealth;
-    }
-
     @Override
     public String toString() {
         return "S2CPlayerHealthPacket{" +
-                "newHealth=" + newHealth +
-                '}';
+               "newHealth=" + newHealth +
+               '}';
     }
 }

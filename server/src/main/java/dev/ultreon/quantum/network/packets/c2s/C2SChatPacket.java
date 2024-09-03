@@ -7,15 +7,12 @@ import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import io.netty.handler.codec.DecoderException;
 
-public class C2SChatPacket extends Packet<InGameServerPacketHandler> {
-    private final String message;
+public record C2SChatPacket(String message) implements Packet<InGameServerPacketHandler> {
 
-    public C2SChatPacket(String message) {
-        this.message = message;
-    }
+    public static C2SChatPacket read(PacketIO buffer) {
+        var message = buffer.readString(1024);
 
-    public C2SChatPacket(PacketIO buffer) {
-        this.message = buffer.readString(1024);
+        return new C2SChatPacket(message);
     }
 
     @Override
@@ -28,10 +25,6 @@ public class C2SChatPacket extends Packet<InGameServerPacketHandler> {
         ServerPlayer player = ctx.getPlayer();
         if (player == null) throw new DecoderException("Player is null!");
         player.onMessageSent(this.message);
-    }
-
-    public String getMessage() {
-        return this.message;
     }
 
     @Override

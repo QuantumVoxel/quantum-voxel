@@ -7,18 +7,13 @@ import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
-public class C2SChunkStatusPacket extends Packet<InGameServerPacketHandler> {
-    private final Chunk.Status status;
-    private final ChunkVec pos;
+public record C2SChunkStatusPacket(ChunkVec pos, Chunk.Status status) implements Packet<InGameServerPacketHandler> {
 
-    public C2SChunkStatusPacket(ChunkVec pos, Chunk.Status status) {
-        this.pos = pos;
-        this.status = status;
-    }
+    public static C2SChunkStatusPacket read(PacketIO buffer) {
+        var pos = buffer.readChunkVec();
+        var status = Chunk.Status.values()[buffer.readUnsignedShort()];
 
-    public C2SChunkStatusPacket(PacketIO buffer) {
-        this.pos = buffer.readChunkVec();
-        this.status = Chunk.Status.values()[buffer.readUnsignedShort()];
+        return new C2SChunkStatusPacket(pos, status);
     }
 
     @Override
@@ -33,19 +28,11 @@ public class C2SChunkStatusPacket extends Packet<InGameServerPacketHandler> {
         handler.onChunkStatus(ctx.getPlayer(), this.pos, this.status);
     }
 
-    public ChunkVec getPos() {
-        return this.pos;
-    }
-
-    public Chunk.Status getStatus() {
-        return this.status;
-    }
-
     @Override
     public String toString() {
         return "C2SChunkStatusPacket{" +
-                "pos=" + this.pos +
-                ", status=" + this.status +
-                '}';
+               "pos=" + this.pos +
+               ", status=" + this.status +
+               '}';
     }
 }

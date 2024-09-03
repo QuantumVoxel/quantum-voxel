@@ -70,7 +70,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private final Map<ChunkVec, ClientChunk> chunks = new ConcurrentHashMap<>();
     private int chunkRefresh;
     private ChunkVec oldChunkVec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
-    private int time = 0;
+    private long time = 0;
     private int totalChunks;
     private final Vec3i tmp = new Vec3i();
     private final Queue<LightData> panelQueue = new Queue<>();
@@ -986,7 +986,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     public float getGlobalSunlight() {
-        int daytime = this.getDaytime();
+        long daytime = this.getDaytime();
         final int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
         if (daytime < riseSetDuration / 2) {
             return lerp(
@@ -1021,7 +1021,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         this.updateChunkAndNeighbours(chunkAt);
     }
 
-    public int getDaytime() {
+    public long getDaytime() {
         return this.time % DAY_CYCLE;
     }
 
@@ -1050,7 +1050,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         return this.totalChunks;
     }
 
-    public void setDaytime(int daytime) {
+    public void setDaytime(long daytime) {
         this.time = daytime;
     }
 

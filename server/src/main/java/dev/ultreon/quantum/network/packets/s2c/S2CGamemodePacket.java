@@ -6,15 +6,12 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.GameMode;
 
-public class S2CGamemodePacket extends Packet<InGameClientPacketHandler> {
-    private final GameMode gameMode;
+public record S2CGamemodePacket(GameMode gameMode) implements Packet<InGameClientPacketHandler> {
 
-    public S2CGamemodePacket(GameMode gameMode) {
-        this.gameMode = gameMode;
-    }
+    public static S2CGamemodePacket read(PacketIO buffer) {
+        var gameMode = GameMode.byOrdinal(buffer.readByte());
 
-    public S2CGamemodePacket(PacketIO buffer) {
-        this.gameMode = GameMode.byOrdinal(buffer.readByte());
+        return new S2CGamemodePacket(gameMode);
     }
 
     @Override
@@ -27,14 +24,10 @@ public class S2CGamemodePacket extends Packet<InGameClientPacketHandler> {
         handler.onGamemode(this.gameMode);
     }
 
-    public GameMode getGameMode() {
-        return gameMode;
-    }
-
     @Override
     public String toString() {
         return "S2CGamemodePacket{" +
-                "gameMode=" + gameMode +
-                '}';
+               "gameMode=" + gameMode +
+               '}';
     }
 }

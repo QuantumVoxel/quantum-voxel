@@ -6,15 +6,10 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
-public class S2CChunkUnloadPacket extends Packet<InGameClientPacketHandler> {
-    private final ChunkVec chunkVec;
+public record S2CChunkUnloadPacket(ChunkVec chunkVec) implements Packet<InGameClientPacketHandler> {
 
-    public S2CChunkUnloadPacket(ChunkVec chunkVec) {
-        this.chunkVec = chunkVec;
-    }
-
-    public S2CChunkUnloadPacket(PacketIO buffer) {
-        this.chunkVec = buffer.readChunkVec();
+    public static S2CChunkUnloadPacket read(PacketIO buffer) {
+        return new S2CChunkUnloadPacket(buffer.readChunkVec());
     }
 
     @Override
@@ -27,14 +22,10 @@ public class S2CChunkUnloadPacket extends Packet<InGameClientPacketHandler> {
         handler.onChunkUnload(this.chunkVec);
     }
 
-    public ChunkVec getChunkVec() {
-        return chunkVec;
-    }
-
     @Override
     public String toString() {
         return "S2CChunkUnloadPacket{" +
-                "chunkVec=" + chunkVec +
-                '}';
+               "chunkVec=" + chunkVec +
+               '}';
     }
 }

@@ -6,6 +6,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.network.api.packet.ClientEndpoint;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.api.packet.ModPacketContext;
+import dev.ultreon.quantum.network.api.packet.ServerEndpoint;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.c2s.C2SModPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CModPacket;
@@ -81,7 +82,7 @@ public class NetworkChannel {
         }
     }
 
-    public <T extends ModPacket<T> & ClientEndpoint> void sendToServer(ModPacket<T> modPacket) {
+    public <T extends ModPacket<T> & ServerEndpoint> void sendToServer(ModPacket<T> modPacket) {
         this.c2sConnection.send(new C2SModPacket(this, modPacket));
     }
 

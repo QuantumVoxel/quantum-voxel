@@ -7,18 +7,12 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-public class S2CBlockEntitySetPacket extends Packet<InGameClientPacketHandler> {
-    private final BlockVec pos;
-    private final int blockEntityId;
+public record S2CBlockEntitySetPacket(BlockVec pos, int blockEntityId) implements Packet<InGameClientPacketHandler> {
+    public static S2CBlockEntitySetPacket read(PacketIO buffer) {
+        var pos = buffer.readBlockVec();
+        var blockEntityId = buffer.readVarInt();
 
-    public S2CBlockEntitySetPacket(BlockVec pos, int blockEntityId) {
-        this.pos = pos;
-        this.blockEntityId = blockEntityId;
-    }
-
-    public S2CBlockEntitySetPacket(PacketIO buffer) {
-        this.pos = buffer.readBlockVec();
-        this.blockEntityId = buffer.readVarInt();
+        return new S2CBlockEntitySetPacket(pos, blockEntityId);
     }
 
     @Override
@@ -32,19 +26,11 @@ public class S2CBlockEntitySetPacket extends Packet<InGameClientPacketHandler> {
         handler.onBlockEntitySet(this.pos, Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntityId));
     }
 
-    public BlockVec getPos() {
-        return this.pos;
-    }
-
-    public int getBlockEntityId() {
-        return this.blockEntityId;
-    }
-
     @Override
     public String toString() {
         return "S2CBlockEntitySetPacket{" +
-                "pos=" + pos +
-                ", blockEntityId=" + blockEntityId +
-                '}';
+               "pos=" + pos +
+               ", blockEntityId=" + blockEntityId +
+               '}';
     }
 }

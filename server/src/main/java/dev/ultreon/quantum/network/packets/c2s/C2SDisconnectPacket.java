@@ -6,15 +6,12 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 
-public class C2SDisconnectPacket<T extends ServerPacketHandler> extends Packet<T> {
-    private final String message;
+public record C2SDisconnectPacket<T extends ServerPacketHandler>(String message) implements Packet<T> {
 
-    public C2SDisconnectPacket(String message) {
-        this.message = message;
-    }
+    public static <T extends ServerPacketHandler> C2SDisconnectPacket<T> read(PacketIO buffer) {
+        var message = buffer.readString(300);
 
-    public C2SDisconnectPacket(PacketIO buffer) {
-        this.message = buffer.readString(300);
+        return new C2SDisconnectPacket<>(message);
     }
 
     @Override
@@ -30,10 +27,6 @@ public class C2SDisconnectPacket<T extends ServerPacketHandler> extends Packet<T
     public void handle(PacketContext packetContext, T handler) {
         CommonConstants.LOGGER.info("Client disconnected: %s", this.message);
         handler.onDisconnect(this.message);
-    }
-
-    public String getMessage() {
-        return this.message;
     }
 
     @Override

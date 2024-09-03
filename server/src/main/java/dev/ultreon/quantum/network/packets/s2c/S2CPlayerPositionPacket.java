@@ -9,25 +9,19 @@ import dev.ultreon.quantum.util.Vec3d;
 
 import java.util.UUID;
 
-public class S2CPlayerPositionPacket extends Packet<InGameClientPacketHandler> {
-    private final UUID uuid;
-    private final Vec3d pos;
-    private final Vec2f rotation;
+public record S2CPlayerPositionPacket(UUID uuid, Vec3d pos,
+                                      Vec2f rotation) implements Packet<InGameClientPacketHandler> {
 
     public S2CPlayerPositionPacket(UUID uuid, Vec3d pos) {
         this(uuid, pos, new Vec2f(0, 0));
     }
 
-    public S2CPlayerPositionPacket(UUID uuid, Vec3d pos, Vec2f rotation) {
-        this.uuid = uuid;
-        this.pos = pos;
-        this.rotation = rotation;
-    }
+    public static S2CPlayerPositionPacket read(PacketIO buffer) {
+        var uuid = buffer.readUuid();
+        var pos = buffer.readVec3d();
+        var rotation = buffer.readVec2f();
 
-    public S2CPlayerPositionPacket(PacketIO buffer) {
-        this.uuid = buffer.readUuid();
-        this.pos = buffer.readVec3d();
-        this.rotation = buffer.readVec2f();
+        return new S2CPlayerPositionPacket(uuid, pos, rotation);
     }
 
     @Override
@@ -40,14 +34,6 @@ public class S2CPlayerPositionPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onPlayerPosition(ctx, this.uuid, this.pos, this.rotation);
-    }
-
-    public UUID getUuid() {
-        return this.uuid;
-    }
-
-    public Vec3d getPos() {
-        return this.pos;
     }
 
     @Override

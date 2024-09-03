@@ -82,6 +82,7 @@ public class ServerWorld extends World {
     private int chunksToLoadCount;
     private boolean saving;
     private int spawnY;
+    private long time;
 
     public ServerWorld(QuantumServer server, WorldStorage storage, MapType worldData) {
         super((LongType) worldData.get("seed"));
@@ -509,6 +510,7 @@ public class ServerWorld extends World {
     @SuppressWarnings("GDXJavaUnsafeIterator")
     public void tick() {
         this.playTime++;
+        this.time++;
 
         Entity[] array = this.entitiesById.values().toArray().toArray(Entity.class);
         for (Entity entity1 : array) {
@@ -528,6 +530,12 @@ public class ServerWorld extends World {
         if (poll != null) poll.run();
 
         this.regionStorage.tick();
+
+        if (this.time % 20 == 0) {
+            for (ServerPlayer player : this.server.getPlayers()) {
+                player.sendPacket(new S2CTimeSyncPacket(time));
+            }
+        }
 
         this.pollChunkQueues();
     }
@@ -1321,6 +1329,14 @@ public class ServerWorld extends World {
 
     public String executorStatus() {
         return executor.toString();
+    }
+
+    public long getTime() {
+        return this.time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     /**

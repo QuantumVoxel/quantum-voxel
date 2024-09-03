@@ -38,11 +38,11 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
     public void onLoginAccepted(S2CLoginAcceptedPacket packet) {
         this.client.connection.moveTo(PacketStages.IN_GAME, new InGameClientPacketHandlerImpl(this.connection));
 
-        UUID uuid = packet.getUuid();
-        Vec3d spawnPos = packet.getSpawnPos();
-        GameMode gameMode = packet.getGameMode();
-        float health = packet.getHealth();
-        float hunger = packet.getHunger(); // TODO
+        UUID uuid = packet.uuid();
+        Vec3d spawnPos = packet.spawnPos();
+        GameMode gameMode = packet.gameMode();
+        float health = packet.health();
+        float hunger = packet.hunger(); // TODO
 
         this.client.inspection.createNode("world", () -> this.client.world);
 

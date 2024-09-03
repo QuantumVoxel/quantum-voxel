@@ -99,7 +99,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Int2ObjectMap<ModelInstance> modelInstances = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<QVModel> qvModels = new Int2ObjectOpenHashMap<>();
     private final List<Disposable> disposables = new ArrayList<>();
-    private long lastChunkBuild;
     private final Skybox skybox = new Skybox();
     private BlockHit lastHitResult;
     private final Map<BlockVec, ModelInstance> breakingInstances = new HashMap<>();
@@ -484,7 +483,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                         if (model != null) {
                             if (model.rebuild()) {
                                 ref.chunkRendered = true;
-                                this.lastChunkBuild = System.currentTimeMillis();
                                 chunk.dirty = false;
                             } else {
                                 LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
@@ -494,7 +492,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                             model = new ChunkModel(chunk.getVec(), chunk, this);
                             if (model.build()) {
                                 ref.chunkRendered = true;
-                                this.lastChunkBuild = System.currentTimeMillis();
                                 chunk.dirty = false;
                                 this.chunkModels.put(chunk.getVec(), model);
                             } else {
@@ -514,7 +511,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                     model = new ChunkModel(chunk.getVec(), chunk, this);
                     if (model.build()) {
                         ref.chunkRendered = true;
-                        this.lastChunkBuild = System.currentTimeMillis();
                         chunk.dirty = false;
                         chunk.initialized = true;
                         this.chunkModels.put(chunk.getVec(), model);
@@ -527,7 +523,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 try (var ignoredRebuildSection = this.client.profiler.start("rebuild-chunk")) {
                     if (model.rebuild()) {
                         ref.chunkRendered = true;
-                        this.lastChunkBuild = System.currentTimeMillis();
                         chunk.dirty = false;
                         chunk.onUpdated();
                         chunk.initialized = true;
@@ -865,7 +860,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             var world = this.world;
             if (world == null) return;
 
-            int daytime = world.getDaytime();
+            long daytime = world.getDaytime();
 
             // Sun angle
             float sunAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);

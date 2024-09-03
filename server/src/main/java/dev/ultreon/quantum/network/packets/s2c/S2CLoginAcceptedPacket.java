@@ -9,27 +9,16 @@ import dev.ultreon.quantum.util.Vec3d;
 
 import java.util.UUID;
 
-public class S2CLoginAcceptedPacket extends Packet<LoginClientPacketHandler> {
-    private final UUID uuid;
-    private final Vec3d spawnPos;
-    private final GameMode gameMode;
-    private final float health;
-    private final float hunger;
+public record S2CLoginAcceptedPacket(UUID uuid, Vec3d spawnPos, GameMode gameMode, float health,
+                                     float hunger) implements Packet<LoginClientPacketHandler> {
+    public static S2CLoginAcceptedPacket read(PacketIO buffer) {
+        var uuid = buffer.readUuid();
+        var spawnPos = buffer.readVec3d();
+        var gameMode = buffer.readEnum(GameMode.SURVIVAL);
+        var health = buffer.readFloat();
+        var hunger = buffer.readFloat();
 
-    public S2CLoginAcceptedPacket(UUID uuid, Vec3d spawnPos, GameMode gameMode, float health, float hunger) {
-        this.uuid = uuid;
-        this.spawnPos = spawnPos;
-        this.gameMode = gameMode;
-        this.health = health;
-        this.hunger = hunger;
-    }
-
-    public S2CLoginAcceptedPacket(PacketIO buffer) {
-        this.uuid = buffer.readUuid();
-        this.spawnPos = buffer.readVec3d();
-        this.gameMode = buffer.readEnum(GameMode.SURVIVAL);
-        this.health = buffer.readFloat();
-        this.hunger = buffer.readFloat();
+        return new S2CLoginAcceptedPacket(uuid, spawnPos, gameMode, health, hunger);
     }
 
     @Override
@@ -46,30 +35,10 @@ public class S2CLoginAcceptedPacket extends Packet<LoginClientPacketHandler> {
         handler.onLoginAccepted(this);
     }
 
-    public Vec3d getSpawnPos() {
-        return this.spawnPos;
-    }
-
-    public GameMode getGameMode() {
-        return this.gameMode;
-    }
-
-    public float getHealth() {
-        return this.health;
-    }
-
-    public float getHunger() {
-        return this.hunger;
-    }
-
-    public UUID getUuid() {
-        return this.uuid;
-    }
-
     @Override
     public String toString() {
         return "S2CLoginAcceptedPacket{" +
-                "uuid=" + uuid +
-                '}';
+               "uuid=" + uuid +
+               '}';
     }
 }

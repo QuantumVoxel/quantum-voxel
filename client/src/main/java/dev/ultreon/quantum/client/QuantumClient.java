@@ -113,7 +113,7 @@ import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
-import dev.ultreon.quantum.network.packets.C2SAttackPacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;

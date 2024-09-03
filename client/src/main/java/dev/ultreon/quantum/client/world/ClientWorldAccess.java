@@ -42,13 +42,13 @@ public interface ClientWorldAccess extends WorldAccess {
 
     float getBreakProgress(BlockVec blockVec);
 
-    int getDaytime();
+    long getDaytime();
 
     Entity removeEntity(int id);
 
     void onPlayerAttack(int playerId, int entityId);
 
-    void setDaytime(int time);
+    void setDaytime(long time);
 
     void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline);
 

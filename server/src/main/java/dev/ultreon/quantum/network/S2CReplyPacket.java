@@ -3,7 +3,7 @@ package dev.ultreon.quantum.network;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public class S2CReplyPacket extends Packet<ClientPacketHandler> implements ReplyPacket {
+public class S2CReplyPacket implements ReplyPacket, Packet<ClientPacketHandler> {
     private final long sequenceId;
 
     public <T extends PacketHandler> S2CReplyPacket(long sequenceId) {

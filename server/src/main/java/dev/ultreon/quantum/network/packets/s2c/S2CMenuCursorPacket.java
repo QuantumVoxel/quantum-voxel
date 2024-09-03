@@ -6,15 +6,10 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public class S2CMenuCursorPacket extends Packet<InGameClientPacketHandler> {
-    private final ItemStack cursor;
+public record S2CMenuCursorPacket(ItemStack cursor) implements Packet<InGameClientPacketHandler> {
 
-    public S2CMenuCursorPacket(ItemStack cursor) {
-        this.cursor = cursor;
-    }
-
-    public S2CMenuCursorPacket(PacketIO buffer) {
-        this.cursor = buffer.readItemStack();
+    public static S2CMenuCursorPacket read(PacketIO buffer) {
+        return new S2CMenuCursorPacket(buffer.readItemStack());
     }
 
     @Override
@@ -25,10 +20,6 @@ public class S2CMenuCursorPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onMenuCursorChanged(this.cursor);
-    }
-
-    public ItemStack getCursor() {
-        return this.cursor;
     }
 
     @Override

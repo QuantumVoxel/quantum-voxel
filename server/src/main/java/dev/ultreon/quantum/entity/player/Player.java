@@ -3,7 +3,6 @@ package dev.ultreon.quantum.entity.player;
 import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
@@ -22,8 +21,6 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -309,7 +306,7 @@ public abstract class Player extends LivingEntity {
     protected abstract void sendAbilities();
 
     protected void onAbilities(AbilitiesPacket packet) {
-        this.noGravity = packet.isFlying();
+        this.noGravity = packet.flying();
     }
 
     public @Nullable ContainerMenu getOpenMenu() {

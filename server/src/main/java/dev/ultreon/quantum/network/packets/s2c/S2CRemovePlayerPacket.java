@@ -8,15 +8,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class S2CRemovePlayerPacket extends Packet<InGameClientPacketHandler> {
-    private final UUID uuid;
-
+public record S2CRemovePlayerPacket(UUID uuid) implements Packet<InGameClientPacketHandler> {
     public S2CRemovePlayerPacket(@NotNull UUID uuid) {
         this.uuid = uuid;
     }
 
-    public S2CRemovePlayerPacket(PacketIO buffer) {
-        this.uuid = buffer.readUuid();
+    public static S2CRemovePlayerPacket read(PacketIO buffer) {
+        var uuid = buffer.readUuid();
+
+        return new S2CRemovePlayerPacket(uuid);
     }
 
     @Override
@@ -29,14 +29,10 @@ public class S2CRemovePlayerPacket extends Packet<InGameClientPacketHandler> {
         handler.onRemovePlayer(this.uuid);
     }
 
-    public UUID getUuid() {
-        return this.uuid;
-    }
-
     @Override
     public String toString() {
         return "S2CRemovePlayerPacket{" +
-                "uuid=" + uuid +
-                '}';
+               "uuid=" + uuid +
+               '}';
     }
 }

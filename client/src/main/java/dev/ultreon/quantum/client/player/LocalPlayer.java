@@ -33,7 +33,6 @@ import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
@@ -303,7 +302,7 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public void onAbilities(@NotNull AbilitiesPacket packet) {
         // Update the player's abilities
-        this.abilities.flying = packet.isFlying();
+        this.abilities.flying = packet.flying();
         this.abilities.allowFlight = packet.allowFlight();
         this.abilities.instaMine = packet.isInstaMine();
         this.abilities.invincible = packet.isInvincible();
@@ -390,7 +389,7 @@ public class LocalPlayer extends ClientPlayer {
     }
 
     public void onHurt(S2CPlayerHurtPacket packet) {
-        this.hurt(packet.getDamage(), packet.getSource());
+        this.hurt(packet.damage(), packet.source());
     }
 
     /**

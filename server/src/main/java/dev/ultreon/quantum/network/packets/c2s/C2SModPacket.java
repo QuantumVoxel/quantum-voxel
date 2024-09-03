@@ -4,25 +4,25 @@ import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
+import dev.ultreon.quantum.network.api.packet.ServerEndpoint;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.util.NamespaceID;
 
-public class C2SModPacket extends Packet<InGameServerPacketHandler> {
-    private final NamespaceID channelId;
-    private final ModPacket<?> packet;
-    private NetworkChannel channel;
+public record C2SModPacket(NetworkChannel channel, NamespaceID channelId,
+                           ModPacket<?> packet) implements Packet<InGameServerPacketHandler> {
 
-    public C2SModPacket(NetworkChannel channel, ModPacket<?> packet) {
-        this.channel = channel;
-        this.channelId = channel.id();
-        this.packet = packet;
+
+    public <T extends ModPacket<T> & ServerEndpoint> C2SModPacket(NetworkChannel channel, ModPacket<T> modPacket) {
+        this(channel, channel.id(), modPacket);
     }
 
-    public C2SModPacket(PacketIO buffer) {
-        this.channelId = buffer.readId();
-        this.channel = NetworkChannel.getChannel(this.channelId);
-        this.packet = this.channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+    public static C2SModPacket read(PacketIO buffer) {
+        var channelId = buffer.readId();
+        var channel = NetworkChannel.getChannel(channelId);
+        var packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+
+        return new C2SModPacket(channel, channelId, packet);
     }
 
     @Override
@@ -38,23 +38,11 @@ public class C2SModPacket extends Packet<InGameServerPacketHandler> {
         handler.onModPacket(this.channel, this.packet);
     }
 
-    public NetworkChannel getChannel() {
-        return this.channel;
-    }
-
-    public ModPacket<?> getPacket() {
-        return this.packet;
-    }
-
-    public NamespaceID getChannelId() {
-        return this.channelId;
-    }
-
     @Override
     public String toString() {
         return "C2SModPacket{" +
-                "channelId=" + channelId +
-                ", packet=" + packet +
-                '}';
+               "channelId=" + channelId +
+               ", packet=" + packet +
+               '}';
     }
 }

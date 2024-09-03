@@ -29,7 +29,7 @@ public class Skybox implements RenderableProvider, Disposable {
     private final Color tmp = new Color();
     public static boolean debug = false;
 
-    public void update(int daytime, float deltaTime) {
+    public void update(long daytime, float deltaTime) {
         timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR, topColor);
         timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, midColor);
         if (QuantumClient.get().player != null) {
@@ -38,8 +38,8 @@ public class Skybox implements RenderableProvider, Disposable {
             timeMix(daytime, ClientWorld.DAY_BOTTOM_COLOR, ClientWorld.NIGHT_BOTTOM_COLOR, bottomColor);
         }
 
-        sunRiseSetMix(daytime, ClientWorld.SUN_RISE_COLOR, null, posZColor);
-        sunRiseSetMix(daytime, null, ClientWorld.SUN_RISE_COLOR, negZColor);
+//        sunRiseSetMix(daytime, ClientWorld.SUN_RISE_COLOR, null, posZColor);
+//        sunRiseSetMix(daytime, null, ClientWorld.SUN_RISE_COLOR, negZColor);
     }
 
     private Color posYMix(LocalPlayer player, float deltaTime, Color color, Color voidColor, Color output) {
@@ -57,7 +57,7 @@ public class Skybox implements RenderableProvider, Disposable {
         }
     }
 
-    private static Color timeMix(int daytime, Color dayColor, Color nightColor, Color output) {
+    private static Color timeMix(long daytime, Color dayColor, Color nightColor, Color output) {
         if (daytime < Skybox.riseSetDuration / 2) {
             return ClientWorld.mixColors(
                     dayColor, nightColor, output,
@@ -77,7 +77,7 @@ public class Skybox implements RenderableProvider, Disposable {
         }
     }
 
-    private static Color sunRiseSetMix(int daytime, Color sunRiseColor, Color sunSetColor, Color output) {
+    private static Color sunRiseSetMix(long daytime, Color sunRiseColor, Color sunSetColor, Color output) {
         if (sunRiseColor == null)
             sunRiseColor = NULL_COLOR;
 

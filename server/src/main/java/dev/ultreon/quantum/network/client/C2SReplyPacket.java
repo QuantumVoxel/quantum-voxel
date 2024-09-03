@@ -6,7 +6,7 @@ import dev.ultreon.quantum.network.ReplyPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 
-public class C2SReplyPacket extends Packet<ServerPacketHandler> implements ReplyPacket {
+public class C2SReplyPacket implements ReplyPacket, Packet<ServerPacketHandler> {
     private final long sequenceId;
 
     public C2SReplyPacket(long sequenceId) {

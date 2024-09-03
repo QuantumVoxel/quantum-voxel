@@ -6,15 +6,12 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 
-public class C2SCommandPacket extends Packet<InGameServerPacketHandler> {
-    private final String input;
+public record C2SCommandPacket(String input) implements Packet<InGameServerPacketHandler> {
 
-    public C2SCommandPacket(String input) {
-        this.input = input;
-    }
+    public static C2SCommandPacket read(PacketIO buffer) {
+        var input = buffer.readString(32768);
 
-    public C2SCommandPacket(PacketIO buffer) {
-        this.input = buffer.readString(32768);
+        return new C2SCommandPacket(input);
     }
 
     @Override
@@ -30,14 +27,10 @@ public class C2SCommandPacket extends Packet<InGameServerPacketHandler> {
         }
     }
 
-    public String getInput() {
-        return input;
-    }
-
     @Override
     public String toString() {
         return "C2SCommandPacket{" +
-                "input='" + input + '\'' +
-                '}';
+               "input='" + input + '\'' +
+               '}';
     }
 }
