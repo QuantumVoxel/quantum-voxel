@@ -183,8 +183,12 @@ public class StartupHelper {
 
         LaunchConfig config;
         try {
-            try (BufferedReader json = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-                config = Files.notExists(configPath) ? new LaunchConfig() : gson.fromJson(json, LaunchConfig.class);
+            if (Files.notExists(configPath)) {
+                config = new LaunchConfig();
+            } else {
+                try (BufferedReader json = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
+                    config = gson.fromJson(json, LaunchConfig.class);
+                }
             }
             config.fix(systemInfo);
             try (BufferedWriter writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
