@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -150,6 +151,17 @@ public class StartupHelper {
         }
 
         if (launcherPath != null) {
+            try {
+                if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux")) {
+                    UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+                } else {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                }
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                     UnsupportedLookAndFeelException e) {
+                throw new RuntimeException(e);
+            }
+
             if (System.getProperty("os.name").toLowerCase().contains("mac"))
                 jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
             else if (osName.contains("windows"))
