@@ -171,19 +171,24 @@ public class StartupHelper {
 
         LaunchConfig config;
         try {
-            config = Files.notExists(configPath) ? new LaunchConfig() : gson.fromJson(Files.newBufferedReader(configPath, StandardCharsets.UTF_8), LaunchConfig.class);
+            try (BufferedReader json = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
+                config = Files.notExists(configPath) ? new LaunchConfig() : gson.fromJson(json, LaunchConfig.class);
+            }
             config.fix(systemInfo);
-            gson.toJson(config, Files.newBufferedWriter(configPath, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE));
+            try (BufferedWriter writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
+                gson.toJson(config, writer);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         long available = systemInfo.getHardware().getMemory().getAvailable();
         if (config.maxMemoryMB >= (long) (available * 0.9) / MB) {
-            config.maxMemoryMB = (long) (available * 0.9) / MB;
             int i = JOptionPane.showConfirmDialog(null, "The game is set up the game to use " + config.maxMemoryMB + " MB but there's only " + available / MB + " MB available.\nRecommended amount to have available is 4096 MB.\n\nDo you want to continue?", "Low Memory", JOptionPane.YES_NO_OPTION);
-            if (i == JOptionPane.NO_OPTION)
+            if (i == JOptionPane.NO_OPTION) {
                 System.exit(0);
+            }
+            config.maxMemoryMB = (long) (available * 0.9) / MB;
         } else if (config.maxMemoryMB < 4096) {
             int i = JOptionPane.showConfirmDialog(null, "There's only " + available / MB + " MB set up for the game.\nRecommended amount to have available is 4096 MB.\n\nDo you want to continue?", "Low Memory", JOptionPane.YES_NO_OPTION);
             if (i == JOptionPane.NO_OPTION)
