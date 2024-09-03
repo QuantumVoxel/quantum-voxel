@@ -168,7 +168,7 @@ public class StartupHelper {
             else if (osName.contains("windows"))
                 jvmArgs.add(new File("runtime/bin/java.exe").getAbsolutePath());
             else if (osName.contains("linux")) {
-                Path file = Path.of(javaExecPath).toAbsolutePath().getParent().resolve("lib", "runtime", "bin", "java");
+                Path file = Path.of(javaExecPath).toAbsolutePath().getParent().resolve("lib/runtime/bin/java");
                 if (Files.notExists(file))
                     file = Path.of("lib/runtime/bin/java");
                 if (Files.notExists(file))
