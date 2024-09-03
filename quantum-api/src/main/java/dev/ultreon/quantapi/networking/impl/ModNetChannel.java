@@ -1,4 +1,4 @@
-package dev.ultreon.quantapi.networking.impl.packet;
+package dev.ultreon.quantapi.networking.impl;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantapi.networking.api.INetChannel;
@@ -6,6 +6,8 @@ import dev.ultreon.quantapi.networking.api.IPacketContext;
 import dev.ultreon.quantapi.networking.api.packet.IClientEndpoint;
 import dev.ultreon.quantapi.networking.api.packet.IServerEndpoint;
 import dev.ultreon.quantapi.networking.api.packet.Packet;
+import dev.ultreon.quantapi.networking.impl.packet.C2SModPacket;
+import dev.ultreon.quantapi.networking.impl.packet.S2CModPacket;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;

@@ -1,7 +1,6 @@
 package dev.ultreon.quantapi.networking.impl;
 
 import dev.ultreon.quantapi.networking.api.IPacketContext;
-import dev.ultreon.quantapi.networking.impl.packet.ModNetChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;

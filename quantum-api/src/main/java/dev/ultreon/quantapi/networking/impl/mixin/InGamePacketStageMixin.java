@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class InGamePacketStageMixin extends PacketStage {
     @Inject(method = "registerPackets", at = @At("TAIL"))
     public void registerPackets(CallbackInfo ci) {
-        this.addServerBound(C2SModPacket::new);
-        this.addClientBound(S2CModPacket::new);
+        this.addServerBound(C2SModPacket::read);
+        this.addClientBound(S2CModPacket::read);
     }
 }

@@ -2,7 +2,6 @@ package dev.ultreon.quantapi.networking.impl;
 
 import dev.ultreon.quantapi.networking.api.IPacketRegisterContext;
 import dev.ultreon.quantapi.networking.api.packet.Packet;
-import dev.ultreon.quantapi.networking.impl.packet.ModNetChannel;
 import dev.ultreon.quantum.network.PacketIO;
 import io.netty.handler.codec.DecoderException;
 

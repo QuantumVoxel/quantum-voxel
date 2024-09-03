@@ -1,6 +1,7 @@
 package dev.ultreon.quantapi.networking.impl.packet;
 
 import dev.ultreon.quantapi.networking.api.packet.Packet;
+import dev.ultreon.quantapi.networking.impl.ModNetChannel;
 import dev.ultreon.quantapi.networking.impl.ModPacketContext;
 import dev.ultreon.quantum.client.network.InGameClientPacketHandlerImpl;
 import dev.ultreon.quantum.network.PacketContext;
@@ -8,21 +9,19 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
 
-public class S2CModPacket extends dev.ultreon.quantum.network.packets.Packet<InGameClientPacketHandlerImpl> {
-    private final NamespaceID channelId;
-    private final Packet<?> packet;
-    private final ModNetChannel channel;
+public record S2CModPacket(ModNetChannel channel, NamespaceID channelId,
+                           Packet<?> packet) implements dev.ultreon.quantum.network.packets.Packet<InGameClientPacketHandlerImpl> {
 
     public S2CModPacket(ModNetChannel channel, Packet<?> packet) {
-        this.channel = channel;
-        this.channelId = channel.id();
-        this.packet = packet;
+        this(channel, channel.id(), packet);
     }
 
-    public S2CModPacket(PacketIO buffer) {
-        this.channelId = buffer.readId();
-        this.channel = ModNetChannel.getChannel(this.channelId);
-        this.packet = this.channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+    public static S2CModPacket read(PacketIO buffer) {
+        var channelId = buffer.readId();
+        var channel = ModNetChannel.getChannel(channelId);
+        var packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+
+        return new S2CModPacket(channel, channelId, packet);
     }
 
     @Override
