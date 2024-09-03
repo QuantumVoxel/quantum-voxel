@@ -152,21 +152,21 @@ workflows:
           filters:
             branches:
               only:
-                - /edge
-                - /dev
-                - /main
+                - edge
+                - dev
+                - main
       - build-windows:
           filters:
             branches:
               only:
-                - /edge
-                - /dev
-                - /main
+                - edge
+                - dev
+                - main
       - build-macos:
           filters:
             branches:
               only:
-                - /edge
-                - /dev
-                - /main
+                - edge
+                - dev
+                - main
       - test
