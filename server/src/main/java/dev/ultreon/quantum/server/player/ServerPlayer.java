@@ -158,9 +158,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             // Play hurt sound
             this.playSound(this.getHurtSound(), 1.0f);
             this.connection.send(new S2CPlayerHurtPacket(damage, source));
-
-            // DEBUG: Send debug message
-            Chat.sendInfo(this, "Oww, that hurts! You lost approx. " + ((int) damage) + " HP.");
         }
         return noDamage;
     }
