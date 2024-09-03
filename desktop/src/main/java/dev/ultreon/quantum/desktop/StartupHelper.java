@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import oshi.SystemInfo;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
@@ -166,9 +167,34 @@ public class StartupHelper {
                 jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
             else if (osName.contains("windows"))
                 jvmArgs.add(new File("runtime/bin/java.exe").getAbsolutePath());
-            else if (osName.contains("linux"))
-                jvmArgs.add(new File("runtime/bin/java").getAbsolutePath());
-            else
+            else if (osName.contains("linux")) {
+                Path file = Path.of(javaExecPath).toAbsolutePath().getParent().resolve("lib", "runtime", "bin", "java");
+                if (Files.notExists(file))
+                    file = Path.of("lib/runtime/bin/java");
+                if (Files.notExists(file))
+                    file = Path.of("../lib/runtime/bin/java");
+                if (Files.notExists(file))
+                    file = Path.of("runtime/bin/java");
+                if (Files.notExists(file)) {
+                    JFileChooser jFileChooser = new JFileChooser(".");
+                    jFileChooser.setFileFilter(new FileFilter() {
+                        @Override
+                        public boolean accept(File f) {
+                            return f.getName().equals("java") || f.isDirectory();
+                        }
+
+                        @Override
+                        public String getDescription() {
+                            return "Java Executable";
+                        }
+                    });
+                    jFileChooser.setDialogTitle("Select Java Executable");
+                    if (jFileChooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) {
+                        System.exit(1);
+                    }
+                }
+                jvmArgs.add(file.toAbsolutePath().toString());
+            } else
                 throw new RuntimeException("Unsupported OS: " + osName);
         } else {
             jvmArgs.add(javaExecPath);
