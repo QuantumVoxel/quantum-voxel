@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.Gdx;
+import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestTabComplete;
@@ -129,8 +130,12 @@ public class ChatTextEntry extends TextEntry {
 
     public void onTabComplete(String[] options) {
         String s = this.getValue().replaceAll(" .*^", "");
+        Layout layout = new Layout();
+        layout.setFont(this.font);
+        layout.clear();
+        this.font.markup(this.getValue().substring(0, s.length()), layout);
         this.completeX = s.length();
-        this.popup.x = (int) this.font.width(this.getValue().substring(0, s.length()));
+        this.popup.x = (int) layout.getWidth();
         this.popup.setValues(options);
         this.popup.visible = true;
     }

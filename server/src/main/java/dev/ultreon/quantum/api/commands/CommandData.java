@@ -2,7 +2,6 @@ package dev.ultreon.quantum.api.commands;
 
 import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Either;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.error.CommandError;
@@ -26,6 +25,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.weather.Weather;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.Location;
@@ -118,35 +118,35 @@ public class CommandData {
     }
 
     private void sendUsage0(String name, CommandSender sender, @Nullable String usage) {
-        Chat.sendError(sender, "</ptc/><b><_>Invalid usage:", name);
+        Chat.sendError(sender, "[ ptc][*][_]Invalid usage:", name);
         if (usage != null) {
-            Chat.sendError(sender, "  <gray-12>Usage: <gray-8>$usage", name);
+            Chat.sendError(sender, "  [#cccccc]Usage: [#888888]$usage", name);
         }
         this.sendInfo(name, sender);
     }
 
     public void sendHelp(String name, CommandSender s, String alias) {
-        Chat.sendError(s, "</ptc/><b><_>Command information for alias: $alias", name);
+        Chat.sendError(s, "[ ptc][*][_]Command information for alias: $alias", name);
         this.sendInfo(name, s);
         for (var entry : this.flags.reference2BooleanEntrySet()) {
             if (entry.getBooleanValue()) {
                 final var key = entry.getKey();
-                new BasicCommandResult("</pc/>[</ptc/>" + key.getMessageCode() + "</pc/>] </>" + key.getDescription(), key.getMessageType()).send(s);
+                new BasicCommandResult("[ pc][[ ptc]" + key.getMessageCode() + "[ pc]] </>" + key.getDescription(), key.getMessageType()).send(s);
             }
         }
     }
 
     private void sendInfo(String name, CommandSender s) {
         if (this.description != null) {
-            Chat.sendError(s, "  <gray-12>Description: <gray-8>${this.description}", name);
+            Chat.sendError(s, "  [#cccccc]Description: [#888888]${this.description}", name);
         }
-        Chat.sendError(s, "<!>Overloads:", name);
+        Chat.sendError(s, "[light red]Overloads:", name);
         for (var entry : this.overloads0.entrySet()) {
-            Chat.sendError(s, "  <gray-12>" + entry.getKey().toString().replace("<", "&<"), name);
-            Chat.sendError(s, "    <gray-8>$value", name);
+            Chat.sendError(s, "  [#cccccc]" + entry.getKey().toString(), name);
+            Chat.sendError(s, "    [#888888]$value", name);
         }
-        Chat.sendError(s, "<!>Aliases:", name);
-        Chat.sendError(s, "<gray-12>" + String.join(", ", this.aliases0), name);
+        Chat.sendError(s, "[light red]Aliases:", name);
+        Chat.sendError(s, "[#cccccc]" + String.join(", ", this.aliases0), name);
     }
 
     public void description(@Nullable String description) {

@@ -25,6 +25,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
+import com.github.tommyettinger.textra.Font;
+import com.github.tommyettinger.textra.KnownFonts;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -45,7 +47,6 @@ import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.audio.ClientSound;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.config.ConfigScreenFactory;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.debug.DebugOverlay;
 import dev.ultreon.quantum.client.gui.overlay.LoadingOverlay;
@@ -112,7 +113,7 @@ import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
-import dev.ultreon.quantum.network.packets.C2SAttackPacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -129,6 +130,8 @@ import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -327,10 +330,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private final List<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
     // Font stuff
-    public Font font;
-    public final Font newFont;
-    @UnknownNullability
-    public final BitmapFont unifont = deferDispose(new BitmapFont(Gdx.files.internal("assets/quantum/unifont/unifont.fnt"), true));
+    public GameFont font;
+    @NotNull
+    @Deprecated
+    public final GameFont unifont;
 
     // Generic renderers
     @Nullable
@@ -535,8 +538,20 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 
         // Initialize the unifont and font
-        this.font = new Font(id("quantium"), true);
-        this.newFont = new Font(id("quantium"), true);
+        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
+        this.font.useIntegerPositions(true);
+        this.font.setBoldStrength(0.33f);
+        this.font.scale(1f, -1f);
+        this.font.lineHeight = 7f;
+
+        KnownFonts.addEmoji(font);
+
+        this.unifont = new GameFont(new BitmapFont(resource(id("unifont/unifont.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -14, 0, -28, true);
+        this.unifont.useIntegerPositions(true);
+        this.unifont.setBoldStrength(0.33f);
+        this.unifont.scale(0.5f, -0.5f);
+
+        KnownFonts.addEmoji(unifont);
 
         // Initialize the game window
         this.window = GamePlatform.get().createWindow();
@@ -1262,7 +1277,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         if (this.triggerScreenshot) this.prepareScreenshot();
 
-        QuantumClient.PROFILER.section("renderGame", () -> this.renderGame(renderer, deltaTime));
+        try (var ignored0 = PROFILER.start("renderGame")) {
+            this.renderGame(renderer, deltaTime);
+        }
 
         if (this.captureScreenshot && !this.screenshotWorldOnly) this.handleScreenshot();
 
@@ -1619,7 +1636,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         int winXOff = maximized ? 18 : 0;
         int winHOff = maximized ? 22 : 0;
         renderer.draw9PatchTexture(new NamespaceID("textures/gui/window.png"), -winXOff, 0, width + winXOff * 2, height + winHOff, 0, 0, 18, 22, 256, 256);
-        renderer.textCenter("<bold>" + window.getTitle(), width / 2, 5);
+        renderer.textCenter("[*]" + window.getTitle(), width / 2, 5);
 
         this.closeButton.setX(width - 17 - winXOff * 2);
         this.closeButton.setY(3);
@@ -1961,8 +1978,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
                 // Dispose Models
                 ModelManager.INSTANCE.dispose();
-                QuantumClient.cleanUp(this.bakedBlockModels.atlas());
-                QuantumClient.cleanUp(this.bakedBlockModels);
+                BakedModelRegistry bakedBlockModels1 = this.bakedBlockModels;
+                if (bakedBlockModels1 != null) QuantumClient.cleanUp(bakedBlockModels1.atlas());
+                if (bakedBlockModels1 != null) QuantumClient.cleanUp(bakedBlockModels1);
                 QuantumClient.cleanUp(this.entityModelManager);
 
                 MeshManager.INSTANCE.dispose();
@@ -1986,6 +2004,28 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
                 ClientLifecycleEvents.CLIENT_STOPPED.factory().onGameDisposed();
                 System.gc();
+
+                int secondsPassed = 0;
+                LongSet threadIds = new LongArraySet();
+                while (true) {
+                    Set<Thread> threads = Thread.getAllStackTraces().keySet().stream().filter(t -> !t.isDaemon() && !t.isInterrupted() && t.threadId() != Thread.currentThread().threadId()).collect(Collectors.toSet());
+                    for (Thread t : threads) {
+                        if (threadIds.add(t.threadId())) LOGGER.debug("{}: {}", t.getName(), t.getState());
+                        t.interrupt();
+                    }
+
+                    if (threads.isEmpty()) {
+                        break;
+                    } else {
+                        LOGGER.info("Waiting for {} threads to finish...", threads.size());
+                        Thread.sleep(1000);
+
+                        if (secondsPassed++ > 10) {
+                            LOGGER.warn("Still waiting for {} threads to finish. Terminating...", threads.size());
+                            Runtime.getRuntime().halt(1);
+                        }
+                    }
+                }
             } catch (Exception t) {
                 QuantumClient.crash(t);
             }

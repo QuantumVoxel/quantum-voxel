@@ -5,13 +5,9 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SDropItemPacket extends Packet<InGameServerPacketHandler> {
-    public C2SDropItemPacket() {
-
-    }
-
-    public C2SDropItemPacket(PacketIO buffer) {
-
+public record C2SDropItemPacket() implements Packet<InGameServerPacketHandler> {
+    public static C2SDropItemPacket read(PacketIO buffer) {
+        return new C2SDropItemPacket();
     }
 
     @Override

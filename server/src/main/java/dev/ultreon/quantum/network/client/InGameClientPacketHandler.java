@@ -13,7 +13,7 @@ import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTimePacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -85,8 +85,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onBlockEntitySet(BlockVec pos, BlockEntityType<?> blockEntity);
 
-    void onTimeChange(PacketContext ctx, S2CTimePacket.Operation operation, int time);
-
     void onAddEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline);
 
     void onEntityPipeline(int id, MapType pipeline);
@@ -100,4 +98,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
 
     void onChunkUnload(ChunkVec chunkVec);
+
+    void handleTimeSync(S2CTimeSyncPacket s2CTimeSyncPacket, PacketContext ctx);
 }

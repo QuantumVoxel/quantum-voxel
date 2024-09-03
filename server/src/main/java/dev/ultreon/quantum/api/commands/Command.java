@@ -247,8 +247,8 @@ public abstract class Command {
 
             // Send error details
             Chat.sendFatal(sender, e.getCode(), "An internal error occurred when executing the command.");
-            Chat.sendFatal(sender, e.getCode(), "Error code:<i> " + e.getCode());
-            Chat.sendFatal(sender, e.getCode(), "Report ID:<i> " + details.id());
+            Chat.sendFatal(sender, e.getCode(), "Error code:[/] " + e.getCode());
+            Chat.sendFatal(sender, e.getCode(), "Report ID:[/] " + details.id());
             Chat.sendFatal(sender, e.getMessage());
         }
         return errorMessage("Internal error occurred, please check the console for details.");

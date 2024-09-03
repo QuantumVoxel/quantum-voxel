@@ -73,7 +73,7 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
                 gfx.fill(x - 4, y, x + rowWidth, y + rowHeight, COLOR);
             }
 
-            gfx.textLeft(this.configEntry.getDescription(), 2 + x, y + rowHeight / 2 - client.font.lineHeight / 2, 0xffffffff, true);
+            gfx.textLeft(this.configEntry.getDescription(), 2 + x, y + rowHeight / 2 - client.font.getLineHeight() / 2, 0xffffffff, true);
 
             this.widget.setX(x + rowWidth - this.widget.getWidth() - 2 - 22);
             this.widget.setY(y + 2);

@@ -5,13 +5,9 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SOpenInventoryPacket extends Packet<InGameServerPacketHandler> {
-    public C2SOpenInventoryPacket() {
-        super();
-    }
-
-    public C2SOpenInventoryPacket(PacketIO buffer) {
-
+public record C2SOpenInventoryPacket() implements Packet<InGameServerPacketHandler> {
+    public static C2SOpenInventoryPacket read(PacketIO buffer) {
+        return new C2SOpenInventoryPacket();
     }
 
     @Override

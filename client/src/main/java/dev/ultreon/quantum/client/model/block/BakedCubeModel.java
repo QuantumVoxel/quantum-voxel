@@ -18,6 +18,7 @@ import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.CubicDirection;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -314,6 +315,11 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
 
     public boolean isCustom() {
         return false;
+    }
+
+    @Override
+    public @Nullable TextureRegion getBuriedTexture() {
+        return front;
     }
 
     @Override

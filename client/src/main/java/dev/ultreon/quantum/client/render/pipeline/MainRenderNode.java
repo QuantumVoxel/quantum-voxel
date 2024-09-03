@@ -1,20 +1,26 @@
 package dev.ultreon.quantum.client.render.pipeline;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
+import dev.ultreon.quantum.client.texture.TextureManager;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.checkerframework.common.reflection.qual.NewInstance;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.function.Supplier;
@@ -26,6 +32,7 @@ public class MainRenderNode extends RenderNode {
     private Mesh quad = this.createFullScreenQuad();
     private final Supplier<ShaderProgram> program = ShaderPrograms.MAIN;
     private float blurScale = 0f;
+    private Texture vignetteTex;
 
     /**
      * Renders the scene with the given textures and parameters.
@@ -41,6 +48,10 @@ public class MainRenderNode extends RenderNode {
     @Override
     public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
         // Extract textures
+        if (vignetteTex == null) {
+            vignetteTex = this.client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
+        }
+
         Texture depthTex = textures.get("depth");
         Texture skyboxTex = textures.get("skybox");
         Texture diffuseTex = textures.get("diffuse");
@@ -101,6 +112,17 @@ public class MainRenderNode extends RenderNode {
             this.drawDiffuse(skyboxTex);
             this.drawDiffuse(diffuseTex);
             this.drawDiffuse(foregroundTex);
+
+            BlockState buriedBlock = this.client.player.getBuriedBlock();
+            if (!buriedBlock.isAir()) {
+                TextureRegion texture = this.client.getBlockModel(buriedBlock).getBuriedTexture();
+                if (!this.client.player.isSpectator() && texture != null && texture != TextureManager.DEFAULT_TEX_REG && texture.getTexture() != null && texture.getTexture() != TextureManager.DEFAULT_TEX_REG.getTexture()) {
+                    this.client.spriteBatch.draw(texture, 0, Gdx.graphics.getHeight(), Gdx.graphics.getWidth(), -Gdx.graphics.getHeight());
+                    this.client.renderer.fill(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), new Color(0, 0, 0, 0.5f));
+                }
+            }
+
+            this.drawDiffuse(vignetteTex);
         } else if (this.client.viewMode == 1) {
             this.drawDiffuse(normalTex);
         } else if (this.client.viewMode == 2) {
@@ -119,7 +141,7 @@ public class MainRenderNode extends RenderNode {
         }
     }
 
-    private void drawDiffuse(Texture diffuseTexture) {
+    private void drawDiffuse(@NotNull Texture diffuseTexture) {
         this.client.spriteBatch.setShader(null);
         if (diffuseTexture != null) this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }

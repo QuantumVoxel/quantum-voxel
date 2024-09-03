@@ -39,7 +39,7 @@ import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTimePacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
@@ -436,24 +436,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onTimeChange(PacketContext ctx, S2CTimePacket.Operation operation, int time) {
-        if (this.client.world != null) {
-            int daytime = this.client.world.getDaytime();
-            switch (operation) {
-                case SET:
-                    this.client.world.setDaytime(time);
-                    break;
-                case ADD:
-                    this.client.world.setDaytime(daytime + time);
-                    break;
-                case SUB:
-                    this.client.world.setDaytime(daytime - time);
-                    break;
-            }
-        }
-    }
-
-    @Override
     public void onAddEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
         if (this.client.world != null) {
             this.client.world.addEntity(id, type, position, pipeline);
@@ -511,6 +493,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (this.client.world != null)
             QuantumClient.invoke(() -> this.client.world.unloadChunk(chunkVec));
         else CommonConstants.LOGGER.error("Attempted to unload a chunk while the world wasn't loaded!");
+    }
+
+    @Override
+    public void handleTimeSync(S2CTimeSyncPacket timeSyncPacket, PacketContext ctx) {
+        if (this.client.world != null) {
+            this.client.world.setDaytime(timeSyncPacket.gameTime());
+        }
     }
 
     @Override

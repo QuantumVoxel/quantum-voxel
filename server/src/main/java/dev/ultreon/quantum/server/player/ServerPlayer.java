@@ -109,14 +109,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         // Check if the world is not null
         assert this.world != null;
 
-        // Remove the player from the world if it exists in the world
-        if (this.world.getEntity(this.getId()) == this) {
-            this.world.despawn(this);
-        }
-
-        // Despawn player from the world
-        this.world.despawn(this);
-
         try {
             // Get the spawn point for the player
             BlockVec spawnPoint = this.server.submit(this.world::getSpawnPoint).join();
@@ -158,11 +150,19 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             // Play hurt sound
             this.playSound(this.getHurtSound(), 1.0f);
             this.connection.send(new S2CPlayerHurtPacket(damage, source));
-
-            // DEBUG: Send debug message
-            Chat.sendInfo(this, "Oww, that hurts! You lost approx. " + ((int) damage) + " HP.");
         }
         return noDamage;
+    }
+
+    @Override
+    public void onDeath(DamageSource source) {
+        super.onDeath(source);
+
+        // Remove the player from the world if it exists in the world
+        if (this.world.getEntity(this.getId()) == this) {
+            this.world.despawn(this);
+        }
+
     }
 
     /**
@@ -365,7 +365,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         if (tmp3d$1.set(this.ox, this.oy, this.oz).dst(this.getPosition()) > 5) {
             this.teleportTo(this.ox, this.oy, this.oz);
-            this.sendMessage("<red>You moved to quickly!");
+            this.sendMessage("[light red]You moved to quickly!");
             return;
         }
 
@@ -435,7 +435,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     public void onAbilities(@NotNull AbilitiesPacket packet) {
         // Check if the player is trying to fly
-        boolean flying = packet.isFlying();
+        boolean flying = packet.flying();
         // Check if flight is allowed
         boolean allowFlight = this.abilities.allowFlight;
 
@@ -473,7 +473,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         super.openMenu(menu);
 
         // Send a packet to open the container menu
-        this.connection.send(new S2COpenMenuPacket(menu.getType().getId(), Arrays.asList(menu.slots)));
+        this.connection.send(S2COpenMenuPacket.of(menu.getType().getId(), Arrays.asList(menu.slots)));
     }
 
     @Override
@@ -635,7 +635,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public void onMessageSent(String message) {
         for (ServerPlayer player : this.server.getPlayers()) {
-            player.sendMessage(new Formatter(true, true, "<aqua>&<" + this.getName() + "> <white>" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
+            player.sendMessage(new Formatter(true, true, "[cyan]&<" + this.getName() + "> [white]" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
         }
     }
 

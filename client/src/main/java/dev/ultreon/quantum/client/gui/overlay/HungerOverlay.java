@@ -11,18 +11,18 @@ public class HungerOverlay extends Overlay {
         if (player == null) return;
         if (player.isInvincible()) return;
 
-        int x = (int) ((float) this.client.getScaledWidth() / 2) + 80;
+        int x = (int) ((float) this.client.getScaledWidth() / 2) + 110;
 
         var iconsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/icons.png"));
         for (int emptyHeartX = 0; emptyHeartX < 10; emptyHeartX++)
-            renderer.blit(iconsTex, x - emptyHeartX * 8, rightY - 9, 9, 9, 18, 27);
+            renderer.blit(iconsTex, x - emptyHeartX * 9, rightY - 9, 9, 9, 18, 27);
 
         int foodX;
         for (foodX = 0; foodX < player.getFoodStatus().getFoodLevel() / 2; foodX++)
-            renderer.blit(iconsTex, x - foodX * 8, rightY - 9, 9, 9, 36, 27);
+            renderer.blit(iconsTex, x - foodX * 9, rightY - 9, 9, 9, 36, 27);
 
         if ((int) player.getHealth() % 2 == 1)
-            renderer.blit(iconsTex, x - foodX * 8, rightY - 9, 9, 9, 27, 27);
+            renderer.blit(iconsTex, x - foodX * 9, rightY - 9, 9, 9, 27, 27);
 
         rightY -= 13;
     }

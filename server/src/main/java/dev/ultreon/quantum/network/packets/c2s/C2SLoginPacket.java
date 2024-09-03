@@ -5,15 +5,12 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
 
-public class C2SLoginPacket extends Packet<LoginServerPacketHandler> {
-    private final String name;
+public record C2SLoginPacket(String name) implements Packet<LoginServerPacketHandler> {
 
-    public C2SLoginPacket(String name) {
-        this.name = name;
-    }
+    public static C2SLoginPacket read(PacketIO buffer) {
+        var name = buffer.readString(20);
 
-    public C2SLoginPacket(PacketIO buffer) {
-        this.name = buffer.readString(20);
+        return new C2SLoginPacket(name);
     }
 
     @Override
@@ -24,9 +21,5 @@ public class C2SLoginPacket extends Packet<LoginServerPacketHandler> {
     @Override
     public void handle(PacketContext ctx, LoginServerPacketHandler handler) {
         handler.onPlayerLogin(this.name);
-    }
-
-    public String getName() {
-        return name;
     }
 }

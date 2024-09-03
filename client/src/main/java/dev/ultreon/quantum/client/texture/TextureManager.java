@@ -166,7 +166,7 @@ public class TextureManager implements Disposable {
 
         FileHandle handle = QuantumClient.resource(id);
         if (!handle.exists()) {
-            if (fallback != null) QuantumClient.LOGGER.warn("Texture not found: %s", id);
+            if (fallback != null) QuantumClient.LOGGER.warn("Texture not found: {}", id);
             this.textures.put(id, fallback);
             return fallback;
         }
@@ -175,7 +175,7 @@ public class TextureManager implements Disposable {
 
         Texture texture = new Texture(pixmap);
         if (texture.getTextureData() == null) {
-            if (fallback != null) QuantumClient.LOGGER.warn("Couldn't read texture data: %s", id);
+            if (fallback != null) QuantumClient.LOGGER.warn("Couldn't read texture data: {}", id);
             this.textures.put(id, fallback);
             return fallback;
         }
@@ -225,7 +225,7 @@ public class TextureManager implements Disposable {
     }
 
     public String getManagedStatus() {
-        return "<white>Size: <gray>" + this.textures.size() + " <gold><b>|</b> <white>Frozen: <gray>" + this.frozen;
+        return "[white]Size: [grey]" + this.textures.size() + " [gold][*]|</b> [white]Frozen: [grey]" + this.frozen;
     }
 
     public NamespaceID getAtlasId(TextureAtlas atlas) {

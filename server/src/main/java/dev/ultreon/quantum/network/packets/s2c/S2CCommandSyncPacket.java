@@ -7,15 +7,12 @@ import dev.ultreon.quantum.network.packets.Packet;
 
 import java.util.List;
 
-public class S2CCommandSyncPacket extends Packet<InGameClientPacketHandler> {
-    private final List<String> commands;
+public record S2CCommandSyncPacket(List<String> commands) implements Packet<InGameClientPacketHandler> {
 
-    public S2CCommandSyncPacket(List<String> commands) {
-        this.commands = commands;
-    }
+    public static S2CCommandSyncPacket read(PacketIO buffer) {
+        var commands = buffer.readList(buf -> buf.readString(64));
 
-    public S2CCommandSyncPacket(PacketIO buffer) {
-        this.commands = buffer.readList(buf -> buf.readString(64));
+        return new S2CCommandSyncPacket(commands);
     }
 
     @Override
@@ -28,14 +25,10 @@ public class S2CCommandSyncPacket extends Packet<InGameClientPacketHandler> {
 
     }
 
-    public List<String> getCommands() {
-        return commands;
-    }
-
     @Override
     public String toString() {
         return "S2CCommandSyncPacket{" +
-                "commands=" + commands +
-                '}';
+               "commands=" + commands +
+               '}';
     }
 }

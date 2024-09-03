@@ -5,13 +5,9 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SKeepAlivePacket extends Packet<InGameServerPacketHandler> {
-    public C2SKeepAlivePacket() {
-
-    }
-
-    public C2SKeepAlivePacket(PacketIO buffer) {
-
+public record C2SKeepAlivePacket() implements Packet<InGameServerPacketHandler> {
+    public static C2SKeepAlivePacket read(PacketIO buffer) {
+        return new C2SKeepAlivePacket();
     }
 
     @Override

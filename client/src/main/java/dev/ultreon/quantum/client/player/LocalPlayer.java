@@ -302,7 +302,7 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public void onAbilities(@NotNull AbilitiesPacket packet) {
         // Update the player's abilities
-        this.abilities.flying = packet.isFlying();
+        this.abilities.flying = packet.flying();
         this.abilities.allowFlight = packet.allowFlight();
         this.abilities.instaMine = packet.isInstaMine();
         this.abilities.invincible = packet.isInvincible();
@@ -389,7 +389,7 @@ public class LocalPlayer extends ClientPlayer {
     }
 
     public void onHurt(S2CPlayerHurtPacket packet) {
-        this.hurt(packet.getDamage(), packet.getSource());
+        this.hurt(packet.damage(), packet.source());
     }
 
     /**
@@ -410,5 +410,11 @@ public class LocalPlayer extends ClientPlayer {
     @Deprecated
     public @NotNull Vec3d getPosition() {
         return super.getPosition();
+    }
+
+    @Override
+    public BlockState getBuriedBlock() {
+        Vec3d add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
+        return this.world.get((int) add.x, (int) add.y, (int) add.z);
     }
 }

@@ -5,7 +5,6 @@ import dev.ultreon.quantapi.networking.api.IPacketRegisterContext;
 import dev.ultreon.quantapi.networking.api.packet.IClientEndpoint;
 import dev.ultreon.quantapi.networking.api.packet.IServerEndpoint;
 import dev.ultreon.quantapi.networking.api.packet.Packet;
-import dev.ultreon.quantapi.networking.impl.packet.ModNetChannel;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;

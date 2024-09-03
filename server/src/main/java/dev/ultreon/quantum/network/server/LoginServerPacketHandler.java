@@ -3,7 +3,6 @@ package dev.ultreon.quantum.network.server;
 import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
-import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.api.packet.ModPacketContext;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -102,7 +101,10 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
         IConnection.LOGGER.info("{} joined the server.", name);
 
-        BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> this.server.getWorld().getSpawnPoint());
+        BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> {
+            this.server.getWorld().getChunkAt(0, 0, 0);
+            return this.server.getWorld().getSpawnPoint();
+        });
 
         this.connection.send(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));
 

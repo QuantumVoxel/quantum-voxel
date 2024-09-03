@@ -5,18 +5,13 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SMenuTakeItemPacket extends Packet<InGameServerPacketHandler> {
-    private final int index;
-    private final boolean rightClick;
+public record C2SMenuTakeItemPacket(int index, boolean rightClick) implements Packet<InGameServerPacketHandler> {
 
-    public C2SMenuTakeItemPacket(int index, boolean rightClick) {
-        this.index = index;
-        this.rightClick = rightClick;
-    }
+    public static C2SMenuTakeItemPacket read(PacketIO buffer) {
+        var index = buffer.readInt();
+        var rightClick = buffer.readBoolean();
 
-    public C2SMenuTakeItemPacket(PacketIO buffer) {
-        this.index = buffer.readInt();
-        this.rightClick = buffer.readBoolean();
+        return new C2SMenuTakeItemPacket(index, rightClick);
     }
 
     @Override
@@ -28,13 +23,5 @@ public class C2SMenuTakeItemPacket extends Packet<InGameServerPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onTakeItem(this.index, this.rightClick);
-    }
-
-    public int getIndex() {
-        return this.index;
-    }
-
-    public boolean isRightClick() {
-        return this.rightClick;
     }
 }

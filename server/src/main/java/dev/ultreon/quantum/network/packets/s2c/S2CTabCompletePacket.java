@@ -8,20 +8,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class S2CTabCompletePacket extends Packet<InGameClientPacketHandler> {
-    private final List<String> options;
+public record S2CTabCompletePacket(@Nullable List<String> options) implements Packet<InGameClientPacketHandler> {
+    public static S2CTabCompletePacket read(PacketIO buffer) {
+        var options = buffer.readList(buf -> buf.readString(64));
 
-    public S2CTabCompletePacket(@Nullable List<String> options) {
-        this.options = options;
-    }
-
-    public S2CTabCompletePacket(PacketIO buffer) {
-        this.options = buffer.readList(buf -> buf.readString(64));
+        return new S2CTabCompletePacket(options);
     }
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeList(this.options, (buf, elem) -> buf.writeUTF(elem, 64));
+        if (this.options != null) {
+            buffer.writeList(this.options, (buf, elem) -> buf.writeUTF(elem, 64));
+        } else {
+            buffer.writeList(List.<String>of(), (buf, elem) -> buf.writeUTF(elem, 64));
+        }
     }
 
     @Override
@@ -29,14 +29,10 @@ public class S2CTabCompletePacket extends Packet<InGameClientPacketHandler> {
         handler.onTabCompleteResult(this.options.toArray(new String[0]));
     }
 
-    public List<String> getOptions() {
-        return this.options;
-    }
-
     @Override
     public String toString() {
         return "S2CTabCompletePacket{" +
-                "options=" + options +
-                '}';
+               "options=" + options +
+               '}';
     }
 }

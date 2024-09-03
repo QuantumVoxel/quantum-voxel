@@ -30,7 +30,14 @@ public class LiteralText extends MutableText {
 
     @Override
     public @NotNull String createString() {
-        return this.text;
+        String prefix = "";
+        prefix += "[%%%d00]".formatted(getSize());
+        if (this.isBold()) prefix += "[*]";
+        if (this.isItalic()) prefix += "[/]";
+        if (this.isUnderlined()) prefix += "[_]";
+        if (this.isStrikethrough()) prefix += "[~]";
+        prefix += "[#%06x]".formatted((this.getColor().getRed() & 0xff) << 16 | (this.getColor().getGreen() & 0xff) << 8 | this.getColor().getBlue() & 0xff);
+        return prefix + this.text;
     }
 
     @Override

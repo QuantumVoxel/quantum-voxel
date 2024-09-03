@@ -379,6 +379,13 @@ public abstract class World implements Disposable, WorldAccess {
         };
     }
 
+    public Heightmap heightMapAt(@NotNull ChunkVec vec, HeightmapType type) {
+        return switch (type) {
+            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CHUNK_SIZE));
+            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CHUNK_SIZE));
+        };
+    }
+
     @Override
     @Deprecated
     public void setColumn(int x, int z, BlockState block) {

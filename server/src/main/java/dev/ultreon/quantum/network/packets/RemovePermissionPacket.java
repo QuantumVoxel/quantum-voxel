@@ -5,7 +5,7 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 
-public class RemovePermissionPacket extends Packet<InGameClientPacketHandler> {
+public class RemovePermissionPacket implements Packet<InGameClientPacketHandler> {
     private final Permission permission;
 
     public RemovePermissionPacket(Permission permission) {

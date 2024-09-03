@@ -5,8 +5,6 @@ import com.badlogic.gdx.Input;
 import dev.ultreon.quantum.debug.profiler.ProfileData;
 import dev.ultreon.quantum.debug.profiler.Section;
 import dev.ultreon.quantum.debug.profiler.ThreadSection;
-import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SequencedMap;
 import java.util.stream.Collectors;
+
+import static dev.ultreon.quantum.client.gui.debug.DebugOverlay.escape;
 
 public class ProfilerDebugPage implements DebugPage {
     ProfileData profile;
@@ -31,7 +31,7 @@ public class ProfilerDebugPage implements DebugPage {
 
         Comparator<Section.FinishedSection> comparator = new FinishedSectionComparator();
 
-        context.entryLine(TextObject.literal(this.idxInput).setColor(RgbColor.WHITE));
+        context.entryLine("[white]" + this.idxInput);
 
         if (this.renderView(context, thread, path, comparator)) return;
         this.inputHandling(thread, path, comparator);
@@ -117,7 +117,7 @@ public class ProfilerDebugPage implements DebugPage {
 
     private void navThreadView(int idx) {
         Thread thread;
-        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).collect(Collectors.toList());
+        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).toList();
         if (idx >= 0 && idx < threads.size()) {
             thread = threads.get(idx);
             this.currentThread = thread;
@@ -129,7 +129,7 @@ public class ProfilerDebugPage implements DebugPage {
         ThreadSection.FinishedThreadSection threadSection = this.profile.getThreadSection(thread);
         List<Section.FinishedSection> data;
 
-        context.entryLine(TextObject.literal(path).setColor(RgbColor.AZURE).setBold(true).setUnderlined(true))
+        context.entryLine("[#0080ff][*][_]" + escape(path))
                 .entryLine();
 
         if (path.equals("/")) {
@@ -158,10 +158,10 @@ public class ProfilerDebugPage implements DebugPage {
     }
 
     private boolean renderThreadView(DebugPageContext context) {
-        context.entryLine(TextObject.literal("Thread View").setColor(RgbColor.GREEN).setBold(true).setUnderlined(true))
+        context.entryLine("[green][*][_]Thread View")
                 .entryLine();
 
-        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).collect(Collectors.toList());
+        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).toList();
         if (threads.isEmpty()) return true;
 
         for (int i = 0, threadsSize = threads.size(); i < threadsSize; i++) {

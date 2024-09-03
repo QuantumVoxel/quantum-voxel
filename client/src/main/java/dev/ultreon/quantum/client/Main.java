@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -111,13 +110,11 @@ public final class Main implements ApplicationListener {
     public void create() {
         if (client != null) return;
 
-        if (GamePlatform.get().isDevEnvironment()) {
-            glProfiler = new GLProfiler(Gdx.graphics);
-            glProfiler.setListener(error -> {
-                String stackTrace = ExceptionUtils.getStackTrace(new Exception());
-                Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
-            });
-        }
+        glProfiler = new GLProfiler(Gdx.graphics);
+        glProfiler.setListener(error -> {
+            String stackTrace = ExceptionUtils.getStackTrace(new Exception());
+            Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
+        });
 
         try {
             batch = new SpriteBatch();

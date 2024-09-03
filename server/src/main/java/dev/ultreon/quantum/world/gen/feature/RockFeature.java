@@ -25,10 +25,11 @@ public class RockFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
         if (this.noiseConfig == null) return false;
 
-        height = chunk.getHeight(x, z);
+        height++;
+        if (y != height) return false;
 
         int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
         long seed = (world.getSeed() ^ this.noiseConfig.seed() << 32) ^ posSeed;
@@ -38,8 +39,8 @@ public class RockFeature extends WorldGenFeature {
         if (this.random.nextFloat() < this.threshold) {
             for (int xOffset = -1; xOffset < 1; xOffset++) {
                 for (int zOffset = -1; zOffset < 1; zOffset++) {
-                    for (int y = height; y <= height + 1; y++) {
-                        chunk.set(x + xOffset, y, z + zOffset, this.material.createMeta());
+                    for (int ty = height; ty <= height + 1; ty++) {
+                        chunk.set(x + xOffset, ty, z + zOffset, this.material.createMeta());
                     }
                 }
             }

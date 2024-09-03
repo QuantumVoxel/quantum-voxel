@@ -269,6 +269,6 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void handleUnloadChunk(C2SUnloadChunkPacket c2SUnloadChunkPacket) {
-        this.server.execute(() -> this.player.stopTracking(c2SUnloadChunkPacket.getVec()));
+        this.server.execute(() -> this.player.stopTracking(c2SUnloadChunkPacket.vec()));
     }
 }

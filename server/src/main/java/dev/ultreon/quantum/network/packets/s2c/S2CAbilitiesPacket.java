@@ -9,35 +9,23 @@ import dev.ultreon.quantum.network.packets.Packet;
 
 import java.util.BitSet;
 
-public class S2CAbilitiesPacket extends Packet<InGameClientPacketHandler> implements AbilitiesPacket {
-    private final boolean flying;
-    private final boolean allowFlight;
-    private final boolean instaMine;
-    private final boolean invincible;
-    private final BitSet bitSet;
-
+public record S2CAbilitiesPacket(boolean flying, boolean allowFlight, boolean instaMine, boolean invincible) implements AbilitiesPacket, Packet<InGameClientPacketHandler> {
     public S2CAbilitiesPacket(PlayerAbilities abilities) {
-        this.flying = abilities.flying;
-        this.allowFlight = abilities.allowFlight;
-        this.invincible = abilities.invincible;
-        this.instaMine = abilities.instaMine;
-        this.bitSet = new BitSet();
-        this.bitSet.set(0, this.flying);
-        this.bitSet.set(1, this.allowFlight);
-        this.bitSet.set(2, this.instaMine);
-        this.bitSet.set(3, this.invincible);
+        this(abilities.flying, abilities.allowFlight, abilities.instaMine, abilities.invincible);
     }
 
-    public S2CAbilitiesPacket(PacketIO buffer) {
-        this.bitSet = buffer.readBitSet();
-        this.flying = this.bitSet.get(0);
-        this.allowFlight = this.bitSet.get(1);
-        this.instaMine = this.bitSet.get(2);
-        this.invincible = this.bitSet.get(3);
+    public static S2CAbilitiesPacket read(PacketIO buffer) {
+        var bitSet = buffer.readBitSet();
+        var flying = bitSet.get(0);
+        var allowFlight = bitSet.get(1);
+        var instaMine = bitSet.get(2);
+        var invincible = bitSet.get(3);
+
+        return new S2CAbilitiesPacket(flying, allowFlight, instaMine, invincible);
     }
 
     @Override
-    public boolean isFlying() {
+    public boolean flying() {
         return this.flying;
     }
 
@@ -58,7 +46,14 @@ public class S2CAbilitiesPacket extends Packet<InGameClientPacketHandler> implem
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeBitSet(this.bitSet);
+        var bitSet = new BitSet();
+
+        bitSet.set(0, this.flying);
+        bitSet.set(1, this.allowFlight);
+        bitSet.set(2, this.instaMine);
+        bitSet.set(3, this.invincible);
+
+        buffer.writeBitSet(bitSet);
     }
 
     @Override
@@ -73,7 +68,6 @@ public class S2CAbilitiesPacket extends Packet<InGameClientPacketHandler> implem
                 ", allowFlight=" + allowFlight +
                 ", instaMine=" + instaMine +
                 ", invincible=" + invincible +
-                ", bitSet=" + bitSet +
                 '}';
     }
 }

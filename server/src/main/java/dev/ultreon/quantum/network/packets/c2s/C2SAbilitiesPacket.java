@@ -7,26 +7,14 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-import java.util.BitSet;
-
-public class C2SAbilitiesPacket extends Packet<InGameServerPacketHandler> implements AbilitiesPacket {
-    private final boolean flying;
-    private final BitSet bitSet;
+public record C2SAbilitiesPacket(boolean flying) implements AbilitiesPacket, Packet<InGameServerPacketHandler> {
 
     public C2SAbilitiesPacket(PlayerAbilities abilities) {
-        this.flying = abilities.flying;
-        this.bitSet = new BitSet();
-        this.bitSet.set(0, this.flying);
+        this(abilities.flying);
     }
 
-    public C2SAbilitiesPacket(PacketIO buffer) {
-        this.bitSet = buffer.readBitSet();
-        this.flying = this.bitSet.get(0);
-    }
-
-    @Override
-    public boolean isFlying() {
-        return this.flying;
+    public static C2SAbilitiesPacket read(PacketIO buffer) {
+        return new C2SAbilitiesPacket(buffer.readBoolean());
     }
 
     @Override
@@ -46,7 +34,7 @@ public class C2SAbilitiesPacket extends Packet<InGameServerPacketHandler> implem
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeBitSet(this.bitSet);
+        buffer.writeBoolean(this.flying);
     }
 
     @Override

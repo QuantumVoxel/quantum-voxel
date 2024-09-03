@@ -1,8 +1,9 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import com.github.tommyettinger.textra.Font;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
+import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -22,7 +23,7 @@ public class ChatOverlay extends Overlay {
         super();
     }
 
-    public static void renderChatOverlay(Font font, @NotNull Renderer renderer, boolean showAnyways) {
+    public static void renderChatOverlay(GameFont font, @NotNull Renderer renderer, boolean showAnyways) {
         int y = QuantumClient.get().getScaledHeight() - 40;
         List<TextObject> messages = ChatScreen.getMessages();
         LongList messageTimestamps = ChatScreen.getMessageTimestamps();
@@ -33,7 +34,7 @@ public class ChatOverlay extends Overlay {
                 if (text == null) continue;
                 long lineCount = StringUtils.splitIntoLines(text.getText()).size();
                 if (lineCount == 0) continue;
-                if (lineCount > 1) y -= (int) ((font.lineHeight + 2) * (lineCount - 1));
+                if (lineCount > 1) y -= (int) ((font.getLineHeight() + 2) * (lineCount - 1));
                 long messageTimestamp = messageTimestamps.getLong(i);
                 long millisAgo = System.currentTimeMillis() - messageTimestamp;
                 if (millisAgo <= 4000 || showAnyways) {
@@ -48,7 +49,7 @@ public class ChatOverlay extends Overlay {
                         renderer.setBlitColor(RgbColor.WHITE);
                     }
                 }
-                y -= font.lineHeight + 2;
+                y -= font.getLineHeight() + 2;
             }
         } catch (Exception e) {
             messageLock.unlock();

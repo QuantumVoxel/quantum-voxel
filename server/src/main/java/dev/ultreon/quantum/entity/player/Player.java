@@ -104,7 +104,7 @@ public abstract class Player extends LivingEntity {
 
         this.foodStatus.tick();
 
-        if (this.isHurt()) {
+        if (this.isHurt() && !isDead) {
             this.regenerate();
         }
     }
@@ -182,7 +182,7 @@ public abstract class Player extends LivingEntity {
     }
 
     public boolean isRunning() {
-        return this.running && (this.ox != this.x || this.oz != this.z || this.oy != this.y);
+        return this.running && (this.ox != this.x || this.oz != this.z || this.oy != this.y) & isWalking();
     }
 
     public void setRunning(boolean running) {
@@ -306,7 +306,7 @@ public abstract class Player extends LivingEntity {
     protected abstract void sendAbilities();
 
     protected void onAbilities(AbilitiesPacket packet) {
-        this.noGravity = packet.isFlying();
+        this.noGravity = packet.flying();
     }
 
     public @Nullable ContainerMenu getOpenMenu() {

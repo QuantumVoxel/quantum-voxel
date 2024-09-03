@@ -180,6 +180,9 @@
   "quantum.damageSource.none": "%s just died out of thin air",
   "quantum.damageSource.none.player": "%1$s just died out of thin air due to %2$s",
   "quantum.damageSource.hunger": "%1$s was starved to death",
+  "quantum.damageSource.suffocation": "%1$s suffocated",
+  "quantum.damageSource.suffocation.player": "%1$s suffocated by %2$s",
+  "quantum.damageSource.in_space": "%1$s suffocated in space",
 
   "quantum.ui.auto": "Automatic",
   "quantum.ui.manual": "Manual",

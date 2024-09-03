@@ -5,7 +5,7 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 
-public class AddPermissionPacket extends Packet<InGameClientPacketHandler> {
+public class AddPermissionPacket implements Packet<InGameClientPacketHandler> {
     private final Permission permission;
 
     public AddPermissionPacket(Permission permission) {

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network.packets;
 
 public interface AbilitiesPacket {
-    boolean isFlying();
+    boolean flying();
 
     boolean allowFlight();
 

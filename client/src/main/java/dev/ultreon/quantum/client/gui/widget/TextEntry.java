@@ -106,8 +106,8 @@ public class TextEntry extends Widget {
                 String selected = this.value.substring(selectFrom, selectTo);
                 String after = this.value.substring(selectTo);
 
-                int beforeWidth = font.width(before);
-                int selectedWidth = font.width(selected);
+                int beforeWidth = renderer.textWidth(before);
+                int selectedWidth = renderer.textWidth(selected);
 
                 renderer.textLeft(before, this.pos.x + 5, this.pos.y + 6, RgbColor.WHITE.withAlpha(0x80), false);
                 renderer.fill(this.pos.x + 5 + beforeWidth, this.pos.y + 6, selectedWidth, 10, RgbColor.WHITE.withAlpha(0x80));
@@ -398,11 +398,15 @@ public class TextEntry extends Widget {
             return;
         }
 
-        this.cursorX = this.font.width(this.value.substring(0, this.cursorIdx)) + 3;
+        this.cursorX = this.textWidth(this.value.substring(0, this.cursorIdx)) + 3;
 
         GamePlatform.get().setTextCursorPos((int) this.cursorX, getY());
 
         this.callback.call(this);
+    }
+
+    private float textWidth(String substring) {
+        return 0;
     }
 
     @Override

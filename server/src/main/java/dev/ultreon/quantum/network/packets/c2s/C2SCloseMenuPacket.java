@@ -5,13 +5,9 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SCloseMenuPacket extends Packet<InGameServerPacketHandler> {
-    public C2SCloseMenuPacket() {
-        super();
-    }
-
-    public C2SCloseMenuPacket(PacketIO buffer) {
-
+public record C2SCloseMenuPacket() implements Packet<InGameServerPacketHandler> {
+    public static C2SCloseMenuPacket read(PacketIO buffer) {
+        return new C2SCloseMenuPacket();
     }
 
     @Override

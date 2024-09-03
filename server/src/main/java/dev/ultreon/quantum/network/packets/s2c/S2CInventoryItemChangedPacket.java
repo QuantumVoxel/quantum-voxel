@@ -6,18 +6,13 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public class S2CInventoryItemChangedPacket extends Packet<InGameClientPacketHandler> {
-    private final int index;
-    private final ItemStack stack;
+public record S2CInventoryItemChangedPacket(int index, ItemStack stack) implements Packet<InGameClientPacketHandler> {
 
-    public S2CInventoryItemChangedPacket(int index, ItemStack stack) {
-        this.index = index;
-        this.stack = stack;
-    }
+    public static S2CInventoryItemChangedPacket read(PacketIO buffer) {
+        var index = buffer.readInt();
+        var stack = buffer.readItemStack();
 
-    public S2CInventoryItemChangedPacket(PacketIO buffer) {
-        this.index = buffer.readInt();
-        this.stack = buffer.readItemStack();
+        return new S2CInventoryItemChangedPacket(index, stack);
     }
 
     @Override
@@ -31,19 +26,11 @@ public class S2CInventoryItemChangedPacket extends Packet<InGameClientPacketHand
         handler.onInventoryItemChanged(this.index, this.stack);
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public ItemStack getStack() {
-        return stack;
-    }
-
     @Override
     public String toString() {
         return "S2CInventoryItemChangedPacket{" +
-                "index=" + index +
-                ", stack=" + stack +
-                '}';
+               "index=" + index +
+               ", stack=" + stack +
+               '}';
     }
 }

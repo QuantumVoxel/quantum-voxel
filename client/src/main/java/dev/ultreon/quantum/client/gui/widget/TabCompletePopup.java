@@ -1,9 +1,11 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.graphics.Color;
+import com.github.tommyettinger.textra.Font;
+import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.util.Renderable;
 import dev.ultreon.quantum.text.ColorCode;
@@ -19,7 +21,7 @@ public class TabCompletePopup implements Renderable {
 
     String[] values = new String[0];
     private int index;
-    private final Font font = QuantumClient.get().font;
+    private final GameFont font = QuantumClient.get().font;
     private int width;
     private int height;
 
@@ -52,11 +54,16 @@ public class TabCompletePopup implements Renderable {
     }
 
     public void setValues(String[] values) {
+        Layout layout = new Layout();
         Arrays.sort(values);
         this.values = values;
         this.index = 0;
-        this.width = Arrays.stream(this.values).mapToInt(text -> (int) this.font.width(text)).max().orElse(0) + 4;
-        this.height = Math.min(Arrays.stream(this.values).mapToInt(text -> this.font.lineHeight + 4).sum(), 5 * (this.font.lineHeight + 4)) + 8;
+        this.width = Arrays.stream(this.values).mapToInt(text -> {
+            layout.clear();
+            font.markup(text, layout);
+            return (int) layout.getWidth();
+        }).max().orElse(0) + 4;
+        this.height = (int) (Math.min(Arrays.stream(this.values).mapToInt(text -> (int) (this.font.getLineHeight() + 4)).sum(), 5 * (this.font.getLineHeight() + 4)) + 8);
     }
 
     @Override
@@ -109,7 +116,7 @@ public class TabCompletePopup implements Renderable {
             if (i < min || i >= max) continue;
             String value = strings[i];
             renderer.textLeft(value, textX, textY + 2, i == this.index ? ColorCode.YELLOW : ColorCode.WHITE);
-            textY += this.font.lineHeight + 4;
+            textY += this.font.getLineHeight() + 4;
         }
     }
 }

@@ -8,6 +8,7 @@ import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
 import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
+import dev.ultreon.quantum.network.packets.s2c.S2CEntityPipeline;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerPositionPacket;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.player.ServerPlayer;

@@ -5,15 +5,16 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SPingPacket extends Packet<InGameServerPacketHandler> {
-    private final long time;
+public record C2SPingPacket(long time) implements Packet<InGameServerPacketHandler> {
 
     public C2SPingPacket() {
-        this.time = System.currentTimeMillis();
+        this(System.currentTimeMillis());
     }
 
-    public C2SPingPacket(PacketIO buffer) {
-        this.time = buffer.readLong();
+    public static C2SPingPacket read(PacketIO buffer) {
+        var time = buffer.readLong();
+
+        return new C2SPingPacket(time);
     }
 
     @Override
@@ -26,14 +27,10 @@ public class C2SPingPacket extends Packet<InGameServerPacketHandler> {
         handler.onPing(this.time);
     }
 
-    public long getTime() {
-        return time;
-    }
-
     @Override
     public String toString() {
         return "C2SPingPacket{" +
-                "time=" + time +
-                '}';
+               "time=" + time +
+               '}';
     }
 }

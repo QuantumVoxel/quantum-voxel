@@ -1,19 +1,21 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public class S2CRemoveEntityPacket extends Packet<InGameClientPacketHandler> {
-    private final int id;;
+public record S2CRemoveEntityPacket(int id) implements Packet<InGameClientPacketHandler> {
 
-    public S2CRemoveEntityPacket(int id) {
-        this.id = id;
+    public S2CRemoveEntityPacket(Entity entity) {
+        this(entity.getId());
     }
 
-    public S2CRemoveEntityPacket(PacketIO buffer) {
-        this.id = buffer.readVarInt();
+    public static S2CRemoveEntityPacket read(PacketIO buffer) {
+        var id = buffer.readVarInt();
+
+        return new S2CRemoveEntityPacket(id);
     }
 
     @Override
@@ -24,10 +26,6 @@ public class S2CRemoveEntityPacket extends Packet<InGameClientPacketHandler> {
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onRemoveEntity(this.id);
-    }
-
-    public int getId() {
-        return this.id;
     }
 
     @Override

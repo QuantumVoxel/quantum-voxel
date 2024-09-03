@@ -75,7 +75,7 @@
       for: [
         "Quantium Font"
       ]
-    }
+    },
   },
   // Downloaded resources
   Downloads: {
@@ -91,6 +91,13 @@
           name: "Grass Step Right",
           url: "https://freesound.org/s/535222/"
         }
+      ]
+    },
+    Twemoji: {
+      url: "https://github.com/twitter/twemoji",
+      license: "CC BY 4.0",
+      links: [
+
       ]
     }
   },

@@ -13,10 +13,10 @@ public class LoginPacketStage extends PacketStage {
     @Override
     @SuppressWarnings("unchecked")
     public void registerPackets() {
-        this.addServerBound(C2SDisconnectPacket::new);
-        this.addClientBound(S2CDisconnectPacket::new);
+        this.addServerBound(C2SDisconnectPacket::read);
+        this.addClientBound(S2CDisconnectPacket::read);
 
-        this.addServerBound(C2SLoginPacket::new);
-        this.addClientBound(S2CLoginAcceptedPacket::new);
+        this.addServerBound(C2SLoginPacket::read);
+        this.addClientBound(S2CLoginAcceptedPacket::read);
     }
 }

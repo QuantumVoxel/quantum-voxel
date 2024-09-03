@@ -25,7 +25,7 @@ public class FoliageFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
         if (this.noiseConfig == null) return false;
 
         height = chunk.getHeight(x, z);
@@ -38,8 +38,8 @@ public class FoliageFeature extends WorldGenFeature {
         if (this.random.nextFloat() < this.threshold) {
             for (int xOffset = -1; xOffset < 1; xOffset++) {
                 for (int zOffset = -1; zOffset < 1; zOffset++) {
-                    for (int y = height; y <= height + 1; y++) {
-                        chunk.set(x + xOffset, y, z + zOffset, this.material.createMeta());
+                    for (int fy = height; fy <= height + 1; fy++) {
+                        chunk.set(x + xOffset, fy, z + zOffset, this.material.createMeta());
                     }
                 }
             }

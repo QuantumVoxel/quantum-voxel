@@ -15,12 +15,12 @@ public class Heightmap {
     }
 
     public short get(int x, int z) {
-        return this.map[z * x + this.width];
+        return this.map[z * this.width + x];
     }
 
     public void set(int x, int z, short value) {
         if (value < 0) value = 0;
-        this.map[z * x + this.width] = value;
+        this.map[z * this.width + x] = value;
     }
 
     public int getWidth() {

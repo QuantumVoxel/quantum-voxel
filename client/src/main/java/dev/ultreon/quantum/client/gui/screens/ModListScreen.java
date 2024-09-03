@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -13,7 +12,6 @@ import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
 import dev.ultreon.quantum.client.gui.widget.Button;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
-import dev.ultreon.quantum.client.gui.widget.TabCompletePopup;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.text.UITranslations;
@@ -220,7 +218,7 @@ public class ModListScreen extends Screen {
     private void renderItem(Renderer renderer, Mod mod, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
         var x = this.list.getX();
 
-        renderer.textLeft(Formatter.format("<bold>" + mod.getDisplayName()), x + 50, y + this.list.getItemHeight() - 34);
+        renderer.textLeft(Formatter.format("[*]" + mod.getDisplayName()), x + 50, y + this.list.getItemHeight() - 34);
         renderer.textLeft("Version: " + mod.getVersion(), x + 50, y + this.list.getItemHeight() - 34 + 12, RgbColor.rgb(0xa0a0a0));
 
         this.drawIcon(renderer, mod, x + 7, y + 7, 32);
@@ -276,16 +274,16 @@ public class ModListScreen extends Screen {
             this.drawIcon(renderer, selected, x, y, 64);
 
             renderer.textLeft(TextObject.literal(selected.getDisplayName()).setBold(true), 2, xIcon, y);
-            renderer.textLeft("<aqua>ID: <light-gray>" + selected.getName(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft("<aqua>Version: <light-gray>" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("<aqua>Made By: <light-gray>" + modContributor)).orElse(Formatter.format("<yellow>Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
+            renderer.textLeft("[cyan]ID: [light grey]" + selected.getName(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft("[cyan]Version: [light grey]" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 
             this.sourcesButton.visible = selected.getSources() != null;
             this.homepageButton.visible = selected.getHomepage() != null;
             this.issuesButton.visible = selected.getIssues() != null;
             this.discordInviteButton.visible = selected.getDiscord() != null;
 
-            renderer.textLeft("<aqua>License: <light-gray>" + selected.getLicense(), xIcon, y + 72, RgbColor.rgb(0xa0a0a0));
+            renderer.textLeft("[cyan]License: [light grey]" + selected.getLicense(), xIcon, y + 72, RgbColor.rgb(0xa0a0a0));
 
             int btnX = x + 16;
             if (this.sourcesButton.visible) {

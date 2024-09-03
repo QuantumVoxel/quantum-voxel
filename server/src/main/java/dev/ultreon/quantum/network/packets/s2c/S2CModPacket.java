@@ -8,21 +8,19 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.NamespaceID;
 
-public class S2CModPacket extends Packet<InGameClientPacketHandler> {
-    private final NamespaceID channelId;
-    private final ModPacket<?> packet;
-    private final NetworkChannel channel;
+public record S2CModPacket(NetworkChannel channel, NamespaceID channelId,
+                           ModPacket<?> packet) implements Packet<InGameClientPacketHandler> {
 
     public S2CModPacket(NetworkChannel channel, ModPacket<?> packet) {
-        this.channel = channel;
-        this.channelId = channel.id();
-        this.packet = packet;
+        this(channel, channel.id(), packet);
     }
 
-    public S2CModPacket(PacketIO buffer) {
-        this.channelId = buffer.readId();
-        this.channel = NetworkChannel.getChannel(this.channelId);
-        this.packet = this.channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+    public static S2CModPacket read(PacketIO buffer) {
+        var channelId = buffer.readId();
+        var channel = NetworkChannel.getChannel(channelId);
+        var packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+
+        return new S2CModPacket(channel, channelId, packet);
     }
 
     @Override
@@ -38,23 +36,11 @@ public class S2CModPacket extends Packet<InGameClientPacketHandler> {
         handler.onModPacket(this.channel, this.packet);
     }
 
-    public ModPacket<?> getPacket() {
-        return packet;
-    }
-
-    public NetworkChannel getChannel() {
-        return channel;
-    }
-
-    public NamespaceID getChannelId() {
-        return channelId;
-    }
-
     @Override
     public String toString() {
         return "S2CModPacket{" +
-                "channelId=" + channelId +
-                ", packet=" + packet +
-                '}';
+               "channelId=" + channelId +
+               ", packet=" + packet +
+               '}';
     }
 }

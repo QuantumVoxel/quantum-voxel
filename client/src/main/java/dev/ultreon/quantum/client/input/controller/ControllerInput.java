@@ -21,7 +21,7 @@ import dev.ultreon.quantum.client.input.dyn.ControllerInterDynamic;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.util.PlayerView;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.network.packets.C2SAttackPacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.text.TextObject;

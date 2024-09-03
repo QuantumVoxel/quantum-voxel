@@ -51,10 +51,10 @@ public class TitleWidget extends Widget {
                 }
 
                 int yOffset = isBackPressed() ? 2 : 0;
-                renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.lineHeight / 2 + yOffset, RgbColor.WHITE);
+                renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);
             }
 
-            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.lineHeight / 2, RgbColor.WHITE);
+            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
         } else {
             renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
 
@@ -66,10 +66,10 @@ public class TitleWidget extends Widget {
                 renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
 
                 int yOffset = isBackPressed() ? 2 : 0;
-                renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.lineHeight / 2 + yOffset, RgbColor.WHITE);
+                renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);
             }
 
-            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.lineHeight / 2, RgbColor.WHITE);
+            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
         }
     }
 

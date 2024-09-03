@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.server;
 
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.commands.Command;
 import dev.ultreon.quantum.command.*;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.registry.CommandRegistry;
+import dev.ultreon.quantum.util.GameMode;
 import net.fabricmc.loader.api.FabricLoader;
 
 public final class GameCommands {
@@ -14,7 +14,13 @@ public final class GameCommands {
         CommandRegistry.register(new FlyCommand());
         CommandRegistry.register(new InvincibleCommand());
         CommandRegistry.register(new WhereAmICommand());
-        CommandRegistry.register(new GamemodeCommand());
+        CommandRegistry.register(new HeightmapCommand());
+        CommandRegistry.register(new GameModeCommand());
+        CommandRegistry.register(new SpecificGameModeCommand(GameMode.SURVIVAL));
+        CommandRegistry.register(new SpecificGameModeCommand(GameMode.SPECTATOR));
+        CommandRegistry.register(new SpecificGameModeCommand(GameMode.BUILDER));
+        CommandRegistry.register(new SpecificGameModeCommand(GameMode.BUILDER_PLUS));
+        CommandRegistry.register(new SpecificGameModeCommand(GameMode.ADVENTUROUS));
         CommandRegistry.register(new TimeCommand());
         CommandRegistry.register(new PlayerCommand());
         CommandRegistry.register(new ChunkCommand());

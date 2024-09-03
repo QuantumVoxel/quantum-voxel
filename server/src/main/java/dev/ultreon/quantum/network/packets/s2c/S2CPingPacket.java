@@ -6,18 +6,17 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public class S2CPingPacket extends Packet<ClientPacketHandler> {
-    private final long serverTime;
-    private final long time;
+public record S2CPingPacket(long serverTime, long time) implements Packet<ClientPacketHandler> {
 
     public S2CPingPacket(long time) {
-        this.serverTime = System.currentTimeMillis();
-        this.time = time;
+        this(System.currentTimeMillis(), time);
     }
 
-    public S2CPingPacket(PacketIO buffer) {
-        this.serverTime = buffer.readLong();
-        this.time = buffer.readLong();
+    public static S2CPingPacket read(PacketIO buffer) {
+        var serverTime = buffer.readLong();
+        var time = buffer.readLong();
+
+        return new S2CPingPacket(serverTime, time);
     }
 
     @Override
@@ -31,14 +30,6 @@ public class S2CPingPacket extends Packet<ClientPacketHandler> {
         if (handler instanceof InGameClientPacketHandler inGameHandler) {
             inGameHandler.onPing(this.serverTime, this.time);
         }
-    }
-
-    public long getServerTime() {
-        return this.serverTime;
-    }
-
-    public long getTime() {
-        return this.time;
     }
 
     @Override

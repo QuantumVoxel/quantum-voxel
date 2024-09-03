@@ -33,7 +33,7 @@ public class CommandParseException extends Exception {
             command = "... " + command.substring(command.length() - 13, command.length());
         }
         Chat.sendError(sender, this.originalMessage);
-        Chat.sendError(sender, "<gray>  /" + ctx.getCommand() + " " + command + " <red>&<-- HERE");
+        Chat.sendError(sender, "[grey]  /" + ctx.getCommand() + " " + command + " [light red]<-- HERE");
     }
 
     public static class NotADigit extends CommandParseException {

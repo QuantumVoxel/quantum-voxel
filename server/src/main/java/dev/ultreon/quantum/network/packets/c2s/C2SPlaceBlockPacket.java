@@ -6,24 +6,15 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public class C2SPlaceBlockPacket extends Packet<InGameServerPacketHandler> {
-    private final int x;
-    private final int y;
-    private final int z;
-    private final BlockState block;
+public record C2SPlaceBlockPacket(int x, int y, int z, BlockState block) implements Packet<InGameServerPacketHandler> {
 
-    public C2SPlaceBlockPacket(PacketIO buffer) {
-        x = buffer.readVarInt();
-        y = buffer.readVarInt();
-        z = buffer.readVarInt();
-        block = BlockState.read(buffer);
-    }
+    public static C2SPlaceBlockPacket read(PacketIO buffer) {
+        var x = buffer.readVarInt();
+        var y = buffer.readVarInt();
+        var z = buffer.readVarInt();
+        var block = BlockState.read(buffer);
 
-    public C2SPlaceBlockPacket(int x, int y, int z, BlockState block) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.block = block;
+        return new C2SPlaceBlockPacket(x, y, z, block);
     }
 
     @Override
@@ -39,29 +30,13 @@ public class C2SPlaceBlockPacket extends Packet<InGameServerPacketHandler> {
         handler.onPlaceBlock(x, y, z, block);
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getZ() {
-        return z;
-    }
-
-    public BlockState getBlock() {
-        return block;
-    }
-
     @Override
     public String toString() {
         return "C2SPlaceBlockPacket{" +
-                "x=" + x +
-                ", y=" + y +
-                ", z=" + z +
-                ", block=" + block +
-                '}';
+               "x=" + x +
+               ", y=" + y +
+               ", z=" + z +
+               ", block=" + block +
+               '}';
     }
 }

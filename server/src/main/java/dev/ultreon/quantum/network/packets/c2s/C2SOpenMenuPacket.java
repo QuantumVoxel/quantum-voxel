@@ -8,18 +8,17 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
-public class C2SOpenMenuPacket extends Packet<InGameServerPacketHandler> {
-    private final NamespaceID id;
-    private final BlockVec pos;
-
-    public C2SOpenMenuPacket(PacketIO buffer) {
-        this.id = buffer.readId();
-        this.pos = buffer.readBoolean() ? buffer.readBlockVec() : null;
-    }
-
+public record C2SOpenMenuPacket(NamespaceID id, BlockVec pos) implements Packet<InGameServerPacketHandler> {
     public C2SOpenMenuPacket(NamespaceID id, @Nullable BlockVec pos) {
         this.id = id;
         this.pos = pos;
+    }
+
+    public static C2SOpenMenuPacket read(PacketIO buffer) {
+        var id = buffer.readId();
+        var pos = buffer.readBoolean() ? buffer.readBlockVec() : null;
+
+        return new C2SOpenMenuPacket(id, pos);
     }
 
     @Override
@@ -36,20 +35,17 @@ public class C2SOpenMenuPacket extends Packet<InGameServerPacketHandler> {
         handler.handleOpenMenu(id, pos);
     }
 
-    public NamespaceID getId() {
-        return id;
-    }
-
+    @Override
     @Nullable
-    public BlockVec getPos() {
+    public BlockVec pos() {
         return pos;
     }
 
     @Override
     public String toString() {
         return "C2SOpenMenuPacket{" +
-                "id=" + id +
-                ", pos=" + pos +
-                '}';
+               "id=" + id +
+               ", pos=" + pos +
+               '}';
     }
 }

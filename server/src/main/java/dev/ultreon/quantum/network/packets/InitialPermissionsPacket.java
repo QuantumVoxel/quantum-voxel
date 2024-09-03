@@ -7,7 +7,7 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 
 import java.util.List;
 
-public class InitialPermissionsPacket extends Packet<InGameClientPacketHandler> {
+public class InitialPermissionsPacket implements Packet<InGameClientPacketHandler> {
     private final List<Permission> permissions;
 
     public InitialPermissionsPacket(List<Permission> permissions) {

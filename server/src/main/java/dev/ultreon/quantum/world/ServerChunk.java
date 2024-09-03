@@ -17,7 +17,6 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.ByteArrayType;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.ubo.types.ShortArrayType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -89,8 +88,6 @@ public final class ServerChunk extends Chunk {
             MapType extra = chunkData.getMap("Extra", new MapType());
             this.original = chunkData.getBoolean("original", this.original);
 
-            if (chunkData.<ShortArrayType>contains("HeightMap"))
-                this.motionBlockingHeightmap.load(chunkData.getShortArray("HeightMap"));
             if (chunkData.<ByteArrayType>contains("LightMap"))
                 this.lightMap.load(chunkData.getByteArray("LightMap"));
 
@@ -150,7 +147,6 @@ public final class ServerChunk extends Chunk {
             data.put("BlockEntities", blockEntitiesData);
             data.put("Biomes", biomeData);
             data.put("Blocks", chunkData);
-            data.putShortArray("HeightMap", this.motionBlockingHeightmap.save());
             data.putByteArray("LightMap", this.lightMap.save());
             data.putBoolean("original", this.original);
 

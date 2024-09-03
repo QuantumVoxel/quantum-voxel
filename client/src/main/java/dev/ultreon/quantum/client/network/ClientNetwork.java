@@ -22,7 +22,7 @@ public abstract class ClientNetwork extends Network {
     public <T extends ModPacket<T> & ServerEndpoint> void sendToServer(T packet) {
         IConnection connection = QuantumClient.get().connection;
         if (connection != null) {
-            connection.send(new C2SModPacket(this.channel, packet));
+            connection.send(new C2SModPacket(this.channel, (ModPacket<T>) packet));
         }
     }
 

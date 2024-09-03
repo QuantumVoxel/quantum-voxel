@@ -8,22 +8,17 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 
-public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
-    private final float damage;
-    private final DamageSource source;
+public record S2CPlayerHurtPacket(float damage, DamageSource source) implements Packet<InGameClientPacketHandler> {
 
-    public S2CPlayerHurtPacket(float damage, DamageSource source) {
-        this.damage = damage;
-        this.source = source;
-    }
-
-    public S2CPlayerHurtPacket(PacketIO buffer) {
-        this.damage = buffer.readFloat();
+    public static S2CPlayerHurtPacket read(PacketIO buffer) {
+        var damage = buffer.readFloat();
         var source = Registries.DAMAGE_SOURCE.get(buffer.readId());
         if (source == null) {
             source = DamageSource.NOTHING;
         }
-        this.source = source;
+
+
+        return new S2CPlayerHurtPacket(damage, source);
     }
 
     @Override
@@ -38,19 +33,11 @@ public class S2CPlayerHurtPacket extends Packet<InGameClientPacketHandler> {
         handler.onPlayerHurt(this);
     }
 
-    public float getDamage() {
-        return this.damage;
-    }
-
-    public DamageSource getSource() {
-        return this.source;
-    }
-
     @Override
     public String toString() {
         return "S2CPlayerHurtPacket{" +
-                "damage=" + this.damage +
-                ", source=" + this.source +
-                '}';
+               "damage=" + this.damage +
+               ", source=" + this.source +
+               '}';
     }
 }

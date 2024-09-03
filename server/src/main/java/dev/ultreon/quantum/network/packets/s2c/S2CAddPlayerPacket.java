@@ -9,21 +9,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class S2CAddPlayerPacket extends Packet<InGameClientPacketHandler> {
-    private final UUID uuid;
-    private final String name;
-    private final Vec3d position;
-
+public record S2CAddPlayerPacket(UUID uuid, String name, Vec3d position) implements Packet<InGameClientPacketHandler> {
     public S2CAddPlayerPacket(@NotNull UUID uuid, String name, Vec3d position) {
         this.uuid = uuid;
         this.name = name;
         this.position = position;
     }
 
-    public S2CAddPlayerPacket(PacketIO buffer) {
-        this.uuid = buffer.readUuid();
-        this.name = buffer.readString(20);
-        this.position = buffer.readVec3d();
+    public static S2CAddPlayerPacket read(PacketIO buffer) {
+        var uuid = buffer.readUuid();
+        var name = buffer.readString(20);
+        var position = buffer.readVec3d();
+
+        return new S2CAddPlayerPacket(uuid, name, position);
     }
 
     @Override
@@ -38,24 +36,12 @@ public class S2CAddPlayerPacket extends Packet<InGameClientPacketHandler> {
         handler.onAddPlayer(this.uuid, this.name, this.position);
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Vec3d getPosition() {
-        return position;
-    }
-
     @Override
     public String toString() {
         return "S2CAddPlayerPacket{" +
-                "uuid=" + uuid +
-                ", name='" + name + '\'' +
-                ", position=" + position +
-                '}';
+               "uuid=" + uuid +
+               ", name='" + name + '\'' +
+               ", position=" + position +
+               '}';
     }
 }

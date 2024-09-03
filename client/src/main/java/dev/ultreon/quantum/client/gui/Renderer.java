@@ -14,14 +14,16 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Disposable;
 import com.crashinvaders.vfx.VfxManager;
+import com.github.tommyettinger.textra.Font;
+import com.github.tommyettinger.textra.Layout;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.libs.commons.v0.Anchor;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.font.Font;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.world.RenderablePool;
 import dev.ultreon.quantum.item.ItemStack;
@@ -44,6 +46,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.client.QuantumClient.id;
 
@@ -66,7 +69,7 @@ public class Renderer implements Disposable {
     private final ShaderProgram blurShader;
     private final ShaderProgram gridShader;
     private float strokeWidth = 1;
-    private Font font;
+    private GameFont font;
     private final Matrices matrices;
     private Color blitColor = RgbColor.rgb(0xffffff);
     private final Vector2 tmp2A = new Vector2();
@@ -88,6 +91,9 @@ public class Renderer implements Disposable {
     private float iTime;
     private boolean hexItems;
     private long shouldCheckMathDay;
+    private com.badlogic.gdx.graphics.Color fontColor = new com.badlogic.gdx.graphics.Color();
+    private final Layout layout = new Layout();
+    private String layoutText = "";
 
     /**
      * Creates a new Renderer instance with the default matrices.
@@ -181,7 +187,7 @@ public class Renderer implements Disposable {
     public Renderer setColor(Color c) {
         if (c == null) return this;
         if (this.font != null)
-            this.font.setColor(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f);
+            this.fontColor.set(c.toGdx());
         this.shapes.setColor(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f);
         return this;
     }
@@ -191,7 +197,7 @@ public class Renderer implements Disposable {
     public Renderer setColor(com.badlogic.gdx.graphics.Color c) {
         if (c == null) return this;
         if (this.font != null)
-            this.font.setColor(c);
+            this.fontColor.set(c);
         this.shapes.setColor(c);
         return this;
     }
@@ -936,7 +942,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
@@ -952,7 +958,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, int x, int y, ColorCode color, boolean shadow) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1027,7 +1033,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
@@ -1043,7 +1049,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1128,7 +1134,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow, float maxWidth, String truncate) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
@@ -1146,7 +1152,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth, String truncate) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1235,7 +1241,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow, float maxWidth, boolean wrap, String truncate) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
@@ -1254,7 +1260,7 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth, boolean wrap, String truncate) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1284,13 +1290,13 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, int x, int y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, int x, int y, ColorCode color, boolean shadow) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1314,7 +1320,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull TextObject text, float x, float y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
@@ -1349,14 +1355,14 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, int x, int y, ColorCode color, boolean shadow) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1384,7 +1390,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
@@ -1419,14 +1425,14 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, int x, int y, ColorCode color, boolean shadow) {
-        this.font.drawText(this, text, x, y, RgbColor.of(color), shadow);
+        this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
 
@@ -1454,103 +1460,124 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textLeft(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
-        this.font.drawText(this, text, x, y, color, shadow);
+        this.drawText(text, x, y, color, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, int x, int y) {
-        this.textLeft(text, x - this.font.width(text) / 2, y);
+        this.textLeft(text, x - this.textWidth(text) / 2, y);
         return this;
+    }
+
+    public int textWidth(@NotNull String text) {
+        this.layout.setFont(font);
+        this.layout.clear();
+        this.font.markup(text, this.layout);
+        return (int) this.layout.getWidth();
+    }
+
+    public int textWidth(@NotNull TextObject text) {
+        return this.textWidth(text.getText());
+    }
+
+    @Deprecated
+    private int textWidth(@NotNull FormattedText text) {
+        return this.textWidth(text.getText());
+    }
+
+    @Deprecated
+    private int textWidth(@NotNull List<FormattedText> text) {
+        return this.textWidth(text.stream().map(FormattedText::getText).collect(Collectors.joining()));
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, int x, int y, Color color) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, float x, float y) {
-        this.textLeft(text, x - this.font.width(text) / 2, y);
+        this.textLeft(text, x - this.textWidth(text) / 2, y);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, float x, float y, Color color) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull String text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, int x, int y) {
-        this.textLeft(text, x - this.font.width(text) / 2, y);
+        this.textLeft(text, x - this.textWidth(text) / 2, y);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, int x, int y, Color color) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, float x, float y) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, float x, float y, Color color) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull TextObject text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
@@ -1562,7 +1589,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull TextObject text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1574,7 +1601,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull TextObject text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
@@ -1586,7 +1613,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull TextObject text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1598,63 +1625,63 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull TextObject text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y) {
-        this.textLeft(text, x - this.font.width(text) / 2, y);
+        this.textLeft(text, x - this.textWidth(text) / 2, y);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y, Color color) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y, Color color) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
@@ -1668,7 +1695,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1682,7 +1709,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
@@ -1696,7 +1723,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1710,63 +1737,63 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull FormattedText text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y) {
-        this.textLeft(text, x - this.font.width(text) / 2, y);
+        this.textLeft(text, x - this.textWidth(text) / 2, y);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y, Color color) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y, Color color) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, color);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, color);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, shadow);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, shadow);
         return this;
     }
 
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textCenter(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - (float) this.font.width(text) / 2, y, color, shadow);
+        this.textLeft(text, x - (float) this.textWidth(text) / 2, y, color, shadow);
         return this;
     }
 
@@ -1780,7 +1807,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1794,7 +1821,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
@@ -1808,7 +1835,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1822,7 +1849,7 @@ public class Renderer implements Disposable {
     @Deprecated
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull List<FormattedText> text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
@@ -1834,7 +1861,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull String text, float x, float y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1846,7 +1873,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull String text, float x, float y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
@@ -1858,7 +1885,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull String text, int x, int y, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, shadow);
         return this;
     }
 
@@ -1870,7 +1897,7 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textRight(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        this.textLeft(text, x - this.font.width(text), y, color, shadow);
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
 
@@ -2022,7 +2049,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, int x, int y) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale);
         this.popMatrix();
         return this;
     }
@@ -2031,7 +2058,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, int x, int y, Color color) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale, color);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale, color);
         this.popMatrix();
         return this;
     }
@@ -2040,7 +2067,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, int x, int y, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale, shadow);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale, shadow);
         this.popMatrix();
         return this;
     }
@@ -2049,7 +2076,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, int x, int y, Color color, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale, color, shadow);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale, color, shadow);
         this.popMatrix();
         return this;
     }
@@ -2058,7 +2085,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, float x, float y) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale);
         this.popMatrix();
         return this;
     }
@@ -2067,7 +2094,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, float x, float y, Color color) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale, color);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale, color);
         this.popMatrix();
         return this;
     }
@@ -2076,7 +2103,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, float x, float y, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale, shadow);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale, shadow);
         this.popMatrix();
         return this;
     }
@@ -2085,7 +2112,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull String text, float scale, float x, float y, Color color, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - this.font.width(text) / 2, y / scale, color, shadow);
+        this.textLeft(text, x / scale - this.textWidth(text) / 2, y / scale, color, shadow);
         this.popMatrix();
         return this;
     }
@@ -2094,7 +2121,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, int x, int y) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale);
         this.popMatrix();
         return this;
     }
@@ -2103,7 +2130,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, int x, int y, Color color) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale, color);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale, color);
         this.popMatrix();
         return this;
     }
@@ -2112,7 +2139,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, int x, int y, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale, shadow);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale, shadow);
         this.popMatrix();
         return this;
     }
@@ -2121,7 +2148,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, int x, int y, Color color, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale, color, shadow);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale, color, shadow);
         this.popMatrix();
         return this;
     }
@@ -2130,7 +2157,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, float x, float y) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale);
         this.popMatrix();
         return this;
     }
@@ -2139,7 +2166,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, float x, float y, Color color) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale, color);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale, color);
         this.popMatrix();
         return this;
     }
@@ -2148,7 +2175,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, float x, float y, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale, shadow);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale, shadow);
         this.popMatrix();
         return this;
     }
@@ -2157,7 +2184,7 @@ public class Renderer implements Disposable {
     public Renderer textCenter(@NotNull TextObject text, float scale, float x, float y, Color color, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textLeft(text, x / scale - (float) this.font.width(text) / 2, y / scale, color, shadow);
+        this.textLeft(text, x / scale - (float) this.textWidth(text) / 2, y / scale, color, shadow);
         this.popMatrix();
         return this;
     }
@@ -2166,7 +2193,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull TextObject text, float scale, float x, float value) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale);
         this.popMatrix();
         return this;
     }
@@ -2175,7 +2202,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull TextObject text, float scale, float x, float value, Color color) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale, color);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale, color);
         this.popMatrix();
         return this;
     }
@@ -2184,7 +2211,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull TextObject text, float scale, float x, float value, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale, shadow);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale, shadow);
         this.popMatrix();
         return this;
     }
@@ -2193,7 +2220,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull TextObject text, float scale, float x, float value, Color color, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale, color, shadow);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale, color, shadow);
         this.popMatrix();
         return this;
     }
@@ -2202,7 +2229,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull String text, float scale, float x, float value) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale);
         this.popMatrix();
         return this;
     }
@@ -2211,7 +2238,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull String text, float scale, float x, float value, Color color) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale, color);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale, color);
         this.popMatrix();
         return this;
     }
@@ -2220,7 +2247,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull String text, float scale, float x, float value, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale, shadow);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale, shadow);
         this.popMatrix();
         return this;
     }
@@ -2229,7 +2256,7 @@ public class Renderer implements Disposable {
     public Renderer textRight(@NotNull String text, float scale, float x, float value, Color color, boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
-        this.textRight(text, x / scale - this.font.width(text), value / scale, color, shadow);
+        this.textRight(text, x / scale - this.textWidth(text), value / scale, color, shadow);
         this.popMatrix();
         return this;
     }
@@ -2254,10 +2281,10 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textMultiline(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        y -= this.font.lineHeight;
+        y -= this.font.getLineHeight();
 
         for (String line : text.split("\n")) {
-            y += this.font.lineHeight + 2;
+            y += this.font.getLineHeight() + 2;
             this.textLeft(line, x, y, color, shadow);
         }
 
@@ -2357,7 +2384,7 @@ public class Renderer implements Disposable {
         return Color.fromGdx(tmpC);
     }
 
-    public Font getFont() {
+    public com.github.tommyettinger.textra.Font getFont() {
         return this.font;
     }
 
@@ -2475,7 +2502,7 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
-    public Renderer font(Font font) {
+    public Renderer font(GameFont font) {
         this.font = font;
         return this;
     }
@@ -3229,7 +3256,7 @@ public class Renderer implements Disposable {
         int count = 0;
         Font font1 = this.font;
         for (TextObject textObject : all) {
-            int width = font1.width(textObject);
+            int width = textWidth(textObject);
             if (arr.length == count) arr = Arrays.copyOf(arr, count * 2);
             arr[count++] = width;
         }
@@ -3241,14 +3268,14 @@ public class Renderer implements Disposable {
             }
         }
         int textWidth = seen ? best : 0;
-        int descHeight = description.size() * (this.font.lineHeight + 1) - 1;
-        int textHeight = descHeight + 3 + this.font.lineHeight;
+        int descHeight = (int) (description.size() * (this.font.getLineHeight() + 1) - 1);
+        int textHeight = (int) (descHeight + 3 + this.font.getLineHeight());
 
         if (description.isEmpty() && subTitle == null) {
             textHeight -= 3;
         }
         if (subTitle != null) {
-            textHeight += 1 + this.font.lineHeight;
+            textHeight += 1 + this.font.getLineHeight();
         }
 
         this.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));
@@ -3259,12 +3286,104 @@ public class Renderer implements Disposable {
 
         int lineNr = 0;
         for (TextObject line : description) {
-            this.textLeft(line, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0xa0a0a0));
+            this.textLeft(line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1, RgbColor.rgb(0xa0a0a0));
             lineNr++;
         }
 
         if (subTitle != null)
-            this.textLeft(subTitle, x + 3, y + 3 + this.font.lineHeight + 3 + lineNr * (this.font.lineHeight + 1f) - 1, RgbColor.rgb(0x606060));
+            this.textLeft(subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1, RgbColor.rgb(0x606060));
     }
 
+    private void drawText(@NotNull String text, float x, float y, Color color, boolean shadow) {
+        int c = (color.getRed() & 0xff) << 16 | (color.getGreen() & 0xff) << 8 | (color.getBlue() & 0xff);
+        Color darker = color.darker().darker();
+        int cd = (darker.getRed() & 0xff) << 16 | (darker.getGreen() & 0xff) << 8 | (darker.getBlue() & 0xff);
+
+        if (shadow) {
+            batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
+            if (ClientConfig.diagonalFontShadow) {
+                this.drawText0(this.batch, text, x + 1, y + 1, c);
+            } else {
+                this.drawText0(this.batch, text, x, y + 1, c);
+            }
+        }
+
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        this.drawText0(this.batch, text, x, y, c);
+    }
+
+    public void drawText(@NotNull TextObject text, float x, float y, Color color, boolean shadow) {
+        String string = text.getText();
+
+        int c = (color.getRed() & 0xff) << 16 | (color.getGreen() & 0xff) << 8 | (color.getBlue() & 0xff);
+        Color darker = color.darker().darker();
+        int cd = (darker.getRed() & 0xff) << 16 | (darker.getGreen() & 0xff) << 8 | (darker.getBlue() & 0xff);
+
+        if (shadow) {
+            batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
+            if (ClientConfig.diagonalFontShadow) {
+                this.drawText0(this.batch, string, x + 1, y + 1, c);
+            } else {
+                this.drawText0(this.batch, string, x, y + 1, c);
+            }
+        }
+
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        this.drawText0(this.batch, string, x, y, c);
+    }
+
+    @Deprecated
+    private void drawText(@NotNull FormattedText text, float x, float y, Color color, boolean shadow) {
+        String string = text.getText();
+
+        int c = (color.getRed() & 0xff) << 16 + (color.getGreen() & 0xff) << 8 + (color.getBlue() & 0xff);
+        Color darker = color.darker().darker();
+        int cd = (darker.getRed() & 0xff) << 16 + (darker.getGreen() & 0xff) << 8 + (darker.getBlue() & 0xff);
+
+        if (shadow) {
+            batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
+            if (ClientConfig.diagonalFontShadow) {
+                this.drawText0(this.batch, string, x + 1, y + 1, c);
+            } else {
+                this.drawText0(this.batch, string, x, y + 1, c);
+            }
+        }
+
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        this.drawText0(this.batch, string, x, y, c);
+    }
+
+    @Deprecated
+    private void drawText(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
+        String string = text.stream().map(FormattedText::getText).collect(Collectors.joining(""));
+
+        int c = (color.getRed() & 0xff) << 16 + (color.getGreen() & 0xff) << 8 + (color.getBlue() & 0xff);
+        Color darker = color.darker().darker();
+        int cd = (darker.getRed() & 0xff) << 16 + (darker.getGreen() & 0xff) << 8 + (darker.getBlue() & 0xff);
+
+        if (shadow) {
+            batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
+            if (ClientConfig.diagonalFontShadow) {
+                this.drawText0(this.batch, string, x + 1, y + 1, c);
+            } else {
+                this.drawText0(this.batch, string, x, y + 1, c);
+            }
+        }
+
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        this.drawText0(this.batch, string, x, y, c);
+    }
+
+    private void drawText0(Batch batch, String string, float x, float y, int c) {
+        String formatted = "[#%06x]%s".formatted(c, string);
+
+        if (this.layoutText.equals(formatted)) {
+            this.font.drawGlyphs(batch, layout, x, y - (int) this.font.getAscent());
+            return;
+        }
+        this.layoutText = formatted;
+        this.layout.clear();
+        this.font.markup(formatted, this.layout);
+        this.font.drawGlyphs(batch, layout, x, y - (int) this.font.getAscent());
+    }
 }

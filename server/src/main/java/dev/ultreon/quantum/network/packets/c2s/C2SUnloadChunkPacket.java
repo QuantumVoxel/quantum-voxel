@@ -6,24 +6,17 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
-public class C2SUnloadChunkPacket extends Packet<InGameServerPacketHandler> {
-    private final ChunkVec vec;
+public record C2SUnloadChunkPacket(ChunkVec vec) implements Packet<InGameServerPacketHandler> {
 
-    public C2SUnloadChunkPacket(ChunkVec vec) {
-        this.vec = vec;
-    }
+    public static C2SUnloadChunkPacket read(PacketIO buffer) {
+        var vec = buffer.readChunkVec();
 
-    public C2SUnloadChunkPacket(PacketIO buffer) {
-        this.vec = buffer.readChunkVec();
+        return new C2SUnloadChunkPacket(vec);
     }
 
     @Override
     public void toBytes(PacketIO buffer) {
         buffer.writeChunkVec(this.vec);
-    }
-
-    public ChunkVec getVec() {
-        return this.vec;
     }
 
     @Override

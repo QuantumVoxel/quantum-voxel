@@ -50,7 +50,7 @@ public class DisconnectedScreen extends Screen {
 
         int lineY = 0;
         for (String line : StringUtils.splitIntoLines(this.message)) {
-            renderer.textCenter(line, this.size.width / 2, this.size.height / 3 + 30 + lineY * (this.font.lineHeight + 1) - 1, RgbColor.WHITE, false);
+            renderer.textCenter(line, this.size.width / 2, this.size.height / 3 + 30 + lineY * (this.font.getLineHeight() + 1) - 1, RgbColor.WHITE, false);
             lineY++;
         }
     }

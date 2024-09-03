@@ -6,15 +6,12 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-public class C2SBlockBreakPacket extends Packet<InGameServerPacketHandler> {
-    private final BlockVec pos;
+public record C2SBlockBreakPacket(BlockVec pos) implements Packet<InGameServerPacketHandler> {
 
-    public C2SBlockBreakPacket(BlockVec pos) {
-        this.pos = pos;
-    }
+    public static C2SBlockBreakPacket read(PacketIO buffer) {
+        var pos = buffer.readBlockVec();
 
-    public C2SBlockBreakPacket(PacketIO buffer) {
-        this.pos = buffer.readBlockVec();
+        return new C2SBlockBreakPacket(pos);
     }
 
     @Override
@@ -27,14 +24,10 @@ public class C2SBlockBreakPacket extends Packet<InGameServerPacketHandler> {
         handler.onBlockBroken(this.pos);
     }
 
-    public BlockVec getPos() {
-        return this.pos;
-    }
-
     @Override
     public String toString() {
         return "C2SBlockBreakPacket{" +
-                "pos=" + pos +
-                '}';
+               "pos=" + pos +
+               '}';
     }
 }

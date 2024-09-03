@@ -106,7 +106,7 @@ jar {
 }
 
 build {
-    finalizedBy ":desktop-merge:build"
+    finalizedBy ":launcher:build"
     finalizedBy ":desktop:build"
     finalizedBy ":client:build"
 }
