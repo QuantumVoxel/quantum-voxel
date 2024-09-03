@@ -17,10 +17,16 @@
 
 package dev.ultreon.quantum.desktop;
 
+import com.google.gson.Gson;
+import oshi.SystemInfo;
+
+import javax.swing.*;
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -36,6 +42,7 @@ import java.util.Objects;
 public class StartupHelper {
 
     private static final String JVM_RESTARTED_ARG = "jvmIsRestarted";
+    public static final long MB = 1048576;
 
     private StartupHelper() {
         throw new UnsupportedOperationException();
@@ -155,7 +162,36 @@ public class StartupHelper {
             jvmArgs.add(javaExecPath);
         }
         if (System.getProperty("os.name").toLowerCase().contains("mac")) jvmArgs.add("-XstartOnFirstThread");
-        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(v -> !v.startsWith("-Xmx") && !v.startsWith("-Xms")).toList());
+
+        Gson gson = new Gson();
+        Path configPath = launcherPath.resolve("launch_cfg.json");
+
+        SystemInfo systemInfo = new SystemInfo();
+
+        LaunchConfig config;
+        try {
+            config = Files.notExists(configPath) ? new LaunchConfig() : gson.fromJson(Files.newBufferedReader(configPath, StandardCharsets.UTF_8), LaunchConfig.class);
+            config.fix(systemInfo);
+            gson.toJson(config, Files.newBufferedWriter(configPath, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        long available = systemInfo.getHardware().getMemory().getAvailable();
+        if (config.maxMemoryMB >= (long) (available * 0.9) / MB) {
+            config.maxMemoryMB = (long) (available * 0.9) / MB;
+            int i = JOptionPane.showConfirmDialog(null, "The game is set up the game to use " + config.maxMemoryMB + " MB but there's only " + available / MB + " MB available.\nRecommended amount to have available is 4096 MB.\n\nDo you want to continue?", "Low Memory", JOptionPane.YES_NO_OPTION);
+            if (i == JOptionPane.NO_OPTION)
+                System.exit(0);
+        } else if (config.maxMemoryMB < 4096) {
+            int i = JOptionPane.showConfirmDialog(null, "There's only " + available / MB + " MB set up for the game.\nRecommended amount to have available is 4096 MB.\n\nDo you want to continue?", "Low Memory", JOptionPane.YES_NO_OPTION);
+            if (i == JOptionPane.NO_OPTION)
+                System.exit(0);
+        }
+
+        jvmArgs.add("-Xmx" + config.maxMemoryMB + "M");
+        jvmArgs.add("-Xms" + config.maxMemoryMB + "M");
         jvmArgs.add("-Djava.library.path=" + ManagementFactory.getRuntimeMXBean().getClassPath() + (System.getProperty("os.name").toLowerCase().contains("windows") ? separator + "natives" : ""));
         jvmArgs.add("-Djava.io.tmpdir=" + System.getProperty("java.io.tmpdir"));
         jvmArgs.add("-cp");
