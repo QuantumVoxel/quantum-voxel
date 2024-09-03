@@ -56,13 +56,15 @@ public class PatchFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
         if (this.baseNoise == null) return false;
 
+        if (y != height) return false;
+
         boolean changed = false;
-        for (int y = height - this.depth; y < height; y++) {
-            float value = (float) this.baseNoise.eval(x, y, z);
-            changed |= value < this.threshold && chunk.set(x, y, z, this.patchBlock.createMeta());
+        for (int ty = height - this.depth; ty < height; ty++) {
+            float value = (float) this.baseNoise.eval(x, ty, z);
+            changed |= value < this.threshold && chunk.set(x, ty, z, this.patchBlock.createMeta());
         }
 
         return changed;

@@ -28,13 +28,13 @@ public class OreFeature extends WorldGenFeature {
         this.seed = seed;
 
         this.ore = ore;
-        this.chance = chance;
+        this.chance = chance * 16;
         this.sizeRange = sizeRange;
         this.heightRange = heightRange;
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
         int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
         long seed = (world.getSeed() ^ this.seed << 32) ^ posSeed;
 
@@ -43,8 +43,6 @@ public class OreFeature extends WorldGenFeature {
         if (height < this.heightRange.getStart()) return false;
 
         if (random.chance(this.chance)) {
-            int y = random.randint(heightRange.getStart(), heightRange.getEndInclusive());
-
             if (chunk.get(x, y, z).getBlock() != Blocks.STONE) return false;
 
             int v = random.randint(sizeRange.getStart(), sizeRange.getEndInclusive());

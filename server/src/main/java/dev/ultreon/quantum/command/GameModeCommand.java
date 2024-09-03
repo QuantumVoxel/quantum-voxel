@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public class GamemodeCommand extends Command {
-    public GamemodeCommand() {
+public class GameModeCommand extends Command {
+    public GameModeCommand() {
         this.requirePermission("quantum.commands.gamemode");
         this.setCategory(CommandCategory.CHEATS);
         this.data().aliases("gamemode", "gm");

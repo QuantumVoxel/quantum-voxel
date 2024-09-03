@@ -56,8 +56,6 @@ public abstract class Chunk implements Disposable, ChunkAccess {
 
     public final @NotNull Storage<BlockState> storage;
     protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
-    protected final @NotNull Heightmap motionBlockingHeightmap = new Heightmap(CHUNK_SIZE);
-    protected final @NotNull Heightmap worldSurfaceHeightmap = new Heightmap(CHUNK_SIZE);
     public final @NotNull Storage<Biome> biomeStorage;
 
     static {
@@ -315,14 +313,27 @@ public abstract class Chunk implements Disposable, ChunkAccess {
             this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
             this.storage.set(index, block);
 
-            // Update the world surface heightmap
-            int oldHeight = this.worldSurfaceHeightmap.get(x, z);
-            if (y > oldHeight && !block.isAir()) this.worldSurfaceHeightmap.set(x, z, (short) y);
-            else if (y < oldHeight && block.isAir()) for (int cy = oldHeight; cy > y; cy--) {
-                if (getFast(x, cy, z).isAir()) continue;
-                this.worldSurfaceHeightmap.set(x, z, (short) cy);
-                break;
-            }
+//            // Update the world surface heightmap
+//            Heightmap worldSurfaceHeightmap = this.world.heightMapAt(vec, HeightmapType.WORLD_SURFACE);
+//
+//            int oldSurfaceHeight = worldSurfaceHeightmap.get(x, z);
+//            if (y > oldSurfaceHeight && !block.isAir()) worldSurfaceHeightmap.set(x, z, (short) y);
+//            else if (y < oldSurfaceHeight && block.isAir()) for (int cy = oldSurfaceHeight; cy > y; cy--) {
+//                if (getFast(x, cy, z).isAir()) continue;
+//                worldSurfaceHeightmap.set(x, z, (short) cy);
+//                break;
+//            }
+//
+//            // Update the motion blocking heightmap
+//            Heightmap motionBlockingHeightmap = this.world.heightMapAt(vec, HeightmapType.MOTION_BLOCKING);
+//
+//            int oldColliderHeight = motionBlockingHeightmap.get(x, z);
+//            if (y > oldColliderHeight && !block.hasCollider()) motionBlockingHeightmap.set(x, z, (short) y);
+//            else if (y < oldColliderHeight && block.hasCollider()) for (int cy = oldColliderHeight; cy > y; cy--) {
+//                if (getFast(x, cy, z).hasCollider()) continue;
+//                motionBlockingHeightmap.set(x, z, (short) cy);
+//                break;
+//            }
         }
 
         return true;
@@ -452,7 +463,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     @Override
     public int getHeight(int x, int z) {
-        return this.worldSurfaceHeightmap.get(x, z);
+        return this.world.getHeight(this.offset.x + x, this.offset.z + z);
     }
 
     /**
@@ -463,10 +474,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @return The highest block Y coordinate.
      */
     public int getHeight(int x, int z, HeightmapType type) {
-        return switch (type) {
-            case MOTION_BLOCKING -> this.motionBlockingHeightmap.get(x, z);
-            case WORLD_SURFACE -> this.worldSurfaceHeightmap.get(x, z);
-        };
+        return this.world.getHeight(this.offset.x + x, this.offset.z + z, type);
     }
 
     /**

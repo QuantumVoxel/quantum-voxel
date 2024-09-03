@@ -34,9 +34,10 @@ public class TreeFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
         if (this.noiseConfig == null) return false;
         height += 1;
+        if (y != height) return false;
 
         int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
         long seed = (world.getSeed() ^ this.noiseConfig.seed() << 32) ^ posSeed;
@@ -56,35 +57,35 @@ public class TreeFeature extends WorldGenFeature {
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
 
             // Check if there is enough space
-            for (int y = height + 1; y < height + trunkHeight; y++) {
-                if (!chunk.get(x, y, z).isAir()) {
+            for (int ty = height + 1; ty < height + trunkHeight; ty++) {
+                if (!chunk.get(x, ty, z).isAir()) {
                     if (WorldGenDebugContext.isActive()) {
-                        System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
+                        System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
                     }
                     return false;
                 }
             }
 
 
-            for (int y = height + 1; y < height + trunkHeight; y++) {
-                chunk.set(x, y, z, this.trunk.createMeta());
+            for (int ty = height + 1; ty < height + trunkHeight; ty++) {
+                chunk.set(x, ty, z, this.trunk.createMeta());
             }
 
             chunk.set(x, height - 1, z, Blocks.DIRT.createMeta());
             for (int xOffset = -1; xOffset <= 1; xOffset++) {
                 for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                    for (int y = height + trunkHeight - 1; y <= height + trunkHeight + 1; y++) {
-                        chunk.set(x + xOffset, y, z + zOffset, this.leaves.createMeta());
+                    for (int ty = height + trunkHeight - 1; ty <= height + trunkHeight + 1; ty++) {
+                        chunk.set(x + xOffset, ty, z + zOffset, this.leaves.createMeta());
 
                         if (WorldGenDebugContext.isActive()) {
-                            System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Setting leaf at " + (x + xOffset) + ", " + y + ", " + (z + zOffset));
+                            System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Setting leaf at " + (x + xOffset) + ", " + ty + ", " + (z + zOffset));
                         }
                     }
                 }
             }
 
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Success");
+                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Success");
             }
             return true;
         }

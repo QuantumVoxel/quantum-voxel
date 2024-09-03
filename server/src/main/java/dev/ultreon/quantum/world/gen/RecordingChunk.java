@@ -35,7 +35,7 @@ public class RecordingChunk implements ChunkAccess {
         if (this.chunk.isOutOfBounds(x, y, z)) {
             ServerWorld world = this.chunk.getWorld();
             BlockVec pos = new BlockVec(x, y, z, BlockVecSpace.WORLD);
-            Chunk chunk = world.getChunkAt(pos);
+            Chunk chunk = world.getChunkAtNoLoad(pos);
 
             if (chunk != null) {
                 return chunk.get(pos.chunkLocal());

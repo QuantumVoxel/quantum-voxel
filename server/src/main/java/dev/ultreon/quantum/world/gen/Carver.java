@@ -66,6 +66,7 @@ public class Carver {
 
         BlockVec vec = new BlockVec(x, height, z, BlockVecSpace.WORLD).chunkLocal();
         chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE).set(vec.x, vec.z, (short) height);
+        chunk.getWorld().heightMapAt(x, z, HeightmapType.MOTION_BLOCKING).set(vec.x, vec.z, (short) height);
 
         long end = System.currentTimeMillis();
 

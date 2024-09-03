@@ -30,10 +30,12 @@ public class CactiFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int z, int height) {
+    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
         if (this.noiseConfig == null) return false;
 
         height++;
+
+        if (y != height) return false;
 
         int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
         long seed = (world.getSeed() ^ this.noiseConfig.seed() << 32) ^ posSeed;
@@ -48,10 +50,10 @@ public class CactiFeature extends WorldGenFeature {
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
 
             // Check if there is enough space
-            for (int y = height; y < height + trunkHeight; y++) {
+            for (int ty = height; ty < height + trunkHeight; ty++) {
                 for (int xOffset = -1; xOffset <= 1; xOffset++) {
                     for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                        if (!chunk.get(x + xOffset, y, z + zOffset).isAir()){
+                        if (!chunk.get(x + xOffset, ty, z + zOffset).isAir()){
                             if (WorldGenDebugContext.isActive()) {
                                 System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
                             }
@@ -61,8 +63,8 @@ public class CactiFeature extends WorldGenFeature {
                 }
             }
 
-            for (int y = height; y < height + trunkHeight; y++) {
-                chunk.set(x, y, z, this.block.createMeta());
+            for (int ty = height; ty < height + trunkHeight; ty++) {
+                chunk.set(x, ty, z, this.block.createMeta());
             }
 
             if (WorldGenDebugContext.isActive()) {

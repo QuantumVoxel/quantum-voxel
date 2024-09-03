@@ -2,7 +2,6 @@ package dev.ultreon.quantum.world.gen.biome;
 
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.RecordingChunk;
@@ -56,8 +55,12 @@ public class BiomeGenerator implements Disposable {
 //    }
 
     public void generateTerrainFeatures(RecordingChunk chunk, int x, int z, int groundPos) {
-        for (var feature : this.features) {
-            feature.handle(this.world, chunk, x, z, groundPos);
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (var feature : this.features) {
+                if (feature.handle(this.world, chunk, x, y, z, groundPos)) {
+                    break;
+                }
+            }
         }
     }
 
@@ -81,8 +84,8 @@ public class BiomeGenerator implements Disposable {
     private static void setRecordedChanges(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
         for (ServerWorld.RecordedChange recordedChange : recordedChanges) {
             boolean isWithinChunkBounds = recordedChange.x() >= chunk.getOffset().x && recordedChange.x() < chunk.getOffset().x + CHUNK_SIZE
-                    && recordedChange.y() >= chunk.getOffset().y && recordedChange.y() < chunk.getOffset().y + CHUNK_SIZE
-                    && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + CHUNK_SIZE;
+                                          && recordedChange.y() >= chunk.getOffset().y && recordedChange.y() < chunk.getOffset().y + CHUNK_SIZE
+                                          && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + CHUNK_SIZE;
             BlockVec localBlockVec = World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z());
             if (isWithinChunkBounds && localBlockVec.getIntX() == x && localBlockVec.getIntY() == y && localBlockVec.getIntZ() == z) {
                 chunk.set(new BlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z(), BlockVecSpace.WORLD).chunkLocal().vec(), recordedChange.block());

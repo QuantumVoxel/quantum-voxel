@@ -1978,8 +1978,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
                 // Dispose Models
                 ModelManager.INSTANCE.dispose();
-                QuantumClient.cleanUp(this.bakedBlockModels.atlas());
-                QuantumClient.cleanUp(this.bakedBlockModels);
+                BakedModelRegistry bakedBlockModels1 = this.bakedBlockModels;
+                if (bakedBlockModels1 != null) QuantumClient.cleanUp(bakedBlockModels1.atlas());
+                if (bakedBlockModels1 != null) QuantumClient.cleanUp(bakedBlockModels1);
                 QuantumClient.cleanUp(this.entityModelManager);
 
                 MeshManager.INSTANCE.dispose();
