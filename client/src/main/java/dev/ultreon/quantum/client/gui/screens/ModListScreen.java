@@ -26,11 +26,9 @@ import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.zip.ZipException;
 
 public class ModListScreen extends Screen {
     private static final NamespaceID DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
@@ -53,7 +51,7 @@ public class ModListScreen extends Screen {
         this.list = builder.add(new SelectionList<Mod>()
                 .itemHeight(48)
                 .drawBackground(false)
-                .bounds(() -> new Bounds(0, 0, 200, this.size.height - 77))
+                .bounds(() -> new Bounds(0, 0, 200, this.size.height - 52))
                 .itemRenderer(this::renderItem)
                 .selectable(true)
                 .callback(caller -> {
@@ -76,7 +74,7 @@ public class ModListScreen extends Screen {
                         .collect(Collectors.toList())));
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
-                .position(() -> new Position(5, this.size.height - 76))
+                .position(() -> new Position(5, this.size.height - 51))
                 .callback(button -> {
                     Mod mod = this.list.getSelected();
                     if (mod != null) {
@@ -96,11 +94,6 @@ public class ModListScreen extends Screen {
                 })
                 .type(Button.Type.DARK_EMBED));
         this.configButton.disable();
-
-        this.importXeox = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.import_xeox"), 190)
-                .position(() -> new Position(5, this.size.height - 51))
-                .callback(this::onImportXeox)
-                .type(Button.Type.DARK_EMBED));
 
         this.sourcesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.sources"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
@@ -184,31 +177,6 @@ public class ModListScreen extends Screen {
                     Utils.openURL(selected.getDiscord());
                 })
                 .button(UITranslations.CANCEL, () -> this.closeDialog(getDialog())));
-    }
-
-    private void onImportXeox(TextButton textButton) {
-        GamePlatform.get().openImportDialog().ifFailure(throwable -> {
-            QuantumClient.invoke(() -> {
-                switch (throwable) {
-                    case ZipException zipException -> this.showDialog(new DialogBuilder(this)
-                            .title(TextObject.literal("Import Failed"))
-                            .message(TextObject.literal("Invalid Xeox mod file.\nXeox only supports .zip files!"))
-                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                    case IOException ioException -> this.showDialog(new DialogBuilder(this)
-                            .title(TextObject.literal("Import Failed"))
-                            .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
-                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                    case RuntimeException runtimeException -> this.showDialog(new DialogBuilder(this)
-                            .title(TextObject.literal("Import Failed"))
-                            .message(TextObject.literal("Failed to import Xeox mod file!\n" + throwable.getMessage()))
-                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                    case null, default -> this.showDialog(new DialogBuilder(this)
-                            .title(TextObject.literal("Import Failed"))
-                            .message(TextObject.literal("Failed to import Xeox mod file!\nInternal error!"))
-                            .button(UITranslations.OK, () -> this.client.showScreen(this)));
-                }
-            });
-        });
     }
 
     public void onBack(TextButton button) {
