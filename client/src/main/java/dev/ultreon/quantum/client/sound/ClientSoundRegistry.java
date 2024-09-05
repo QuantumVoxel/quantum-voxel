@@ -23,7 +23,7 @@ public class ClientSoundRegistry {
         Registry<SoundEvent> soundEvents = Registries.SOUND_EVENT;
         Map<NamespaceID, Sound> soundMap = new HashMap<>();
         for (Map.Entry<RegistryKey<SoundEvent>, SoundEvent> entry : soundEvents.entries()) {
-            NamespaceID key = entry.getKey().element();
+            NamespaceID key = entry.getKey().id();
             Sound sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", key.getDomain(), key.getPath().replaceAll("\\.", "/"))));
 
             soundMap.put(key, sound);

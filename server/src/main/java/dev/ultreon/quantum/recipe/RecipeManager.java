@@ -6,6 +6,7 @@ import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.resources.StaticResource;
@@ -139,5 +140,10 @@ public class RecipeManager {
 
     public QuantumServer getServer() {
         return server;
+    }
+
+    public void reload(ReloadContext context) {
+        this.registryMap.clear();
+        this.load(context.getResourceManager());
     }
 }

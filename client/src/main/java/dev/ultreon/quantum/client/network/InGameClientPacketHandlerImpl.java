@@ -38,11 +38,13 @@ import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.Biome;
@@ -53,6 +55,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import kotlin.system.TimingKt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -123,7 +126,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         try {
             LocalPlayer player = this.client.player;
             if (player == null/* || new Vec2d(pos.setX(), pos.z()).dst(new Vec2d(player.getChunkVec().setX(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
@@ -500,6 +503,25 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (this.client.world != null) {
             this.client.world.setDaytime(timeSyncPacket.gameTime());
         }
+    }
+
+    @Override
+    public void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet) {
+        ClientWorldAccess world = this.client.world;
+        if (world != null) world.dispose();
+        this.client.world = world = new ClientWorld(this.client, packet.dimension());
+
+        TerrainRenderer worldRenderer = this.client.worldRenderer;
+        if (worldRenderer != null) worldRenderer.setWorld(world);
+
+        ClientWorldAccess finalWorld = world;
+        this.client.execute(() -> {
+            LocalPlayer player = this.client.player;
+            if (player != null) {
+                player.onTeleportedDimension(finalWorld);
+                player.refreshChunks();
+            }
+        });
     }
 
     @Override

@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.command;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +31,7 @@ public class TeleportCommand extends Command {
 
         player.teleportDimension(position, world);
 
-        return this.successMessage("Teleported to " + position + " in " + world.getDimension().getName());
+        return this.successMessage("Teleported to " + position + " in " + world.getDimension().id());
     }
 
     @DefineCommand("relative <position>")
@@ -49,7 +49,7 @@ public class TeleportCommand extends Command {
 
         player.teleportDimension(player.getPosition().add(offset), world);
 
-        return this.successMessage("Teleported to " + player.getPosition() + " in " + world.getDimension().getName());
+        return this.successMessage("Teleported to " + player.getPosition() + " in " + world.getDimension().id());
     }
 
     @DefineCommand("to <entity>")

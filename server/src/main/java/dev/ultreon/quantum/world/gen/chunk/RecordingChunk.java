@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.world.gen;
+package dev.ultreon.quantum.world.gen.chunk;
 
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.util.Vec3i;
@@ -47,7 +47,7 @@ public class RecordingChunk implements ChunkAccess {
         return this.chunk.get(x, y, z);
     }
 
-    Collection<ServerWorld.RecordedChange> deferredChanges() {
+    public Collection<ServerWorld.RecordedChange> deferredChanges() {
         return this.deferredChanges;
     }
 

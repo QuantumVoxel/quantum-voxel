@@ -5,6 +5,7 @@ import dev.ultreon.ubo.types.MapType;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public interface Storage<D> extends Cloneable {
 
@@ -21,7 +22,7 @@ public interface Storage<D> extends Cloneable {
 
     D get(int idx);
 
-    <R> Storage<R> map(R defaultValue, Class<R> type, Function<D, R> o);
+    <R> Storage<R> map(R defaultValue, IntFunction<R[]> type, Function<D, R> o);
 
     Storage<D> clone() throws CloneNotSupportedException;
 }

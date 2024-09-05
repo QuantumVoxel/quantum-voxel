@@ -27,11 +27,11 @@ public class CommandSpecValues extends HashSet<String> {
     }
 
     /**
-     * Adds the specified element to this set if it is a valid command spec value.
+     * Adds the specified id to this set if it is a valid command spec value.
      *
-     * @param element the element to add to the set
-     * @return true if this set did not already contain the specified element
-     * @throws IllegalArgumentException if the element is not a valid command spec value
+     * @param element the id to add to the set
+     * @return true if this set did not already contain the specified id
+     * @throws IllegalArgumentException if the id is not a valid command spec value
      */
     @Override
     public boolean add(String element) {

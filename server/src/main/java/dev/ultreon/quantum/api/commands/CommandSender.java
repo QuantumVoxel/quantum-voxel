@@ -120,7 +120,9 @@ public interface CommandSender {
         Command baseCommand = CommandRegistry.get(command);
         if (baseCommand == null) {
             // If the command is not found, send an error message
-            return new BasicCommandResult("Unknown command&: " + command, BasicCommandResult.MessageType.ERROR);
+            BasicCommandResult basicCommandResult = new BasicCommandResult("Unknown command: " + command, BasicCommandResult.MessageType.ERROR);
+            basicCommandResult.send(this);
+            return basicCommandResult;
         }
 
         CommandResult commandResult = baseCommand.onCommand(this, new CommandContext(command), command, argv);
@@ -135,4 +137,6 @@ public interface CommandSender {
         }
         return commandResult;
     }
+
+    @Nullable QuantumServer getServer();
 }

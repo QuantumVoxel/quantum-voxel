@@ -20,7 +20,6 @@ import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
-import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.input.controller.ControllerInput;
@@ -42,13 +41,12 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.menu.MenuTypes;
 import dev.ultreon.quantum.python.PyLoader;
+import dev.ultreon.quantum.registry.GlobalRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Task;
-import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.gen.biome.Biomes;
 
 import java.util.*;
 
@@ -159,7 +157,6 @@ class QuantumClientLoader implements Runnable {
             // Client registry
             Fonts.register();
             Overlays.init();
-            Biomes.init();
 
             // Stuff that needs to be initialized on the render thread
             QuantumClient.invokeAndWait(() -> {
@@ -177,7 +174,7 @@ class QuantumClientLoader implements Runnable {
         for (var mod : GamePlatform.get().getMods()) {
             final String id = mod.getName();
             LoadingContext.withinContext(new LoadingContext(id), () -> {
-                for (Registry<?> registry : Registry.getRegistries()) {
+                for (Registry<?> registry : GlobalRegistry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
                 }
             });
@@ -185,7 +182,7 @@ class QuantumClientLoader implements Runnable {
 
         for (var pyMod : PyLoader.getInstance().getMods()) {
             LoadingContext.withinContext(new LoadingContext(pyMod.id), () -> {
-                for (Registry<?> registry : Registry.getRegistries()) {
+                for (Registry<?> registry : GlobalRegistry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(pyMod.id, registry);
                 }
             });
@@ -193,17 +190,13 @@ class QuantumClientLoader implements Runnable {
 
         for (var jsMod : JsLoader.getInstance().getMods()) {
             LoadingContext.withinContext(new LoadingContext(jsMod.name), () -> {
-                for (Registry<?> registry : Registry.getRegistries()) {
+                for (Registry<?> registry : GlobalRegistry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(jsMod.name, registry);
                 }
             });
         }
 
         Registry.freeze();
-
-        for (Biome biome : Registries.BIOME.values()) {
-            biome.buildLayers();
-        }
 
         QuantumClient.LOGGER.info("Registering models");
         registerMenuScreens();

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.api.events.chunk;
 
 import dev.ultreon.quantum.api.events.Cancelable;
 import dev.ultreon.quantum.world.BuilderChunk;
-import dev.ultreon.quantum.world.gen.RecordingChunk;
+import dev.ultreon.quantum.world.gen.chunk.RecordingChunk;
 import org.jetbrains.annotations.NotNull;
 
 public class ChunkGenerateEvent extends ChunkEvent implements Cancelable {

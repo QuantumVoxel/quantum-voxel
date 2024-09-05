@@ -4,20 +4,18 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec3f;
-import dev.ultreon.quantum.util.Vec4f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.ModelImporter;
 import dev.ultreon.quantum.client.model.blockbench.anim.*;
 import dev.ultreon.quantum.resources.Resource;
-import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.CubicDirection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class BBModelLoader implements ModelImporter {
     private static final Matrix4 TEMP_MATRIX = new Matrix4();
@@ -478,8 +475,8 @@ public class BBModelLoader implements ModelImporter {
         }
 
         Map<UUID, ModelBuilder> subNodes = new HashMap<>();
-//        for (BBModelElement element : elements) {
-//            writeElement(model, subNodes, texture2texture, element);
+//        for (BBModelElement id : elements) {
+//            writeElement(model, subNodes, texture2texture, id);
 //        }
 
         Map<UUID, Node> nodes = new HashMap<>();

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.entity;
 
+import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
@@ -11,6 +12,7 @@ import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.network.packets.s2c.S2CEntityPipeline;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerPositionPacket;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.LanguageBootstrap;
@@ -49,7 +51,7 @@ import java.util.UUID;
  */
 public abstract class Entity extends ComponentSystem implements CommandSender {
     private final EntityType<? extends Entity> type;
-    protected final WorldAccess world;
+    protected WorldAccess world;
     protected double x;
     protected double y;
     protected double z;
@@ -781,6 +783,11 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         return false;
     }
 
+    @Override
+    public @Nullable QuantumServer getServer() {
+        return world instanceof ServerWorld serverWorld ? serverWorld.getServer() : null;
+    }
+
     public AttributeMap getAttributes() {
         return this.attributes;
     }
@@ -845,7 +852,15 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
     public void teleportDimension(Vec3d position, ServerWorld world) {
         this.getWorld().despawn(this);
         this.teleportTo(position);
+        this.onTeleportedDimension(world);
+        this.world = world;
+
         world.spawn(this);
+    }
+
+    @DoNotCall
+    public void onTeleportedDimension(WorldAccess world) {
+        this.world = world;
     }
 
     public double distanceTo(Entity entity) {

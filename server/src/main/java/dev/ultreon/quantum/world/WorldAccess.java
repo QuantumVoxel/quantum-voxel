@@ -9,6 +9,7 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -139,9 +140,9 @@ public interface WorldAccess extends Disposable, WorldReader {
 
     boolean isServerSide();
 
-    Biome getBiome(BlockVec pos);
+    RegistryKey<Biome> getBiome(BlockVec pos);
 
-    DimensionInfo getDimension();
+    RegistryKey<DimensionInfo> getDimension();
 
     boolean isChunkInvalidated(Chunk chunk);
 

@@ -14,16 +14,13 @@ import static java.lang.Math.abs;
  *
  * @author XyperCode
  */
-@Deprecated
 public class CaveNoiseGenerator implements NoiseGenerator {
     public static final double SCALE = 24;
     public static final double THRESHOLD = 0.4;
     private final JNoise baseNoise;
     private final JNoise baseNoise2;
     private final JNoise baseNoise3;
-    private WorleyUtil worley;
-    private double xzCompression = 1.0;
-    private double yCompression = 2.0;
+    private final WorleyUtil worley;
 
     public CaveNoiseGenerator(long seed) {
         this.baseNoise = newNoiseBuilder(seed).build();
@@ -57,15 +54,17 @@ public class CaveNoiseGenerator implements NoiseGenerator {
         x *= 1;
         int distort = 16;
 
-        double xDisp = 0f;
-        double yDisp = 0f;
-        double zDisp = 0f;
+        double xDisp;
+        double yDisp;
+        double zDisp;
 
         xDisp = baseNoise.evaluateNoise(x, z) * distort;
         yDisp = baseNoise2.evaluateNoise(x, z + 67.0f) * distort;
         zDisp = baseNoise3.evaluateNoise(x, z + 149.0f) * distort;
 
         // doubling the y frequency to get some more caves
+        double yCompression = 2.0;
+        double xzCompression = 1.0;
         double noise = worley.SingleCellular3Edge(x * xzCompression + xDisp, y * yCompression + yDisp, z * xzCompression + zDisp);
 
         return abs(noise) < 0.18 ? 1 : 0;

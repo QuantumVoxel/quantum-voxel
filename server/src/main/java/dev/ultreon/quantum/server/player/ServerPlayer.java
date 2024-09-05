@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.server.player;
 
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.Command;
 import dev.ultreon.quantum.api.commands.CommandContext;
@@ -58,7 +59,7 @@ import java.util.stream.Collectors;
 public class ServerPlayer extends Player implements CacheablePlayer {
     private final Vec3d tmp3d$1 = new Vec3d();
     public IConnection<ServerPacketHandler, ClientPacketHandler> connection;
-    private final ServerWorld world;
+    private ServerWorld world;
     public int hotbarIdx;
     private final UUID uuid;
     private final String name;
@@ -659,12 +660,22 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         return this.isAdmin;
     }
 
+    @Override
+    @DoNotCall
+    public void onTeleportedDimension(@NotNull WorldAccess world) {
+        super.onTeleportedDimension(world);
+
+        if (!(world instanceof ServerWorld serverWorld)) throw new IllegalArgumentException("Expected a " + ServerWorld.class.getName() +", got a " + world.getClass().getName());
+        this.world = serverWorld;
+        this.sendPacket(new S2CChangeDimensionPacket(world.getDimension()));
+    }
+
     public void makeAdmin() {
         this.isAdmin = true;
         this.resendCommands();
     }
 
-    private void resendCommands() {
+    public void resendCommands() {
         this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().collect(Collectors.toList())));
     }
 

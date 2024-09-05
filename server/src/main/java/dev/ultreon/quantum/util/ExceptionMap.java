@@ -165,7 +165,7 @@ public class ExceptionMap {
         } else if (thrown instanceof NoSuchMethodError) {
             s.sendMessage("[J-0017] No such method error: " + thrown.getMessage());
         } else if (thrown instanceof NoSuchElementException) {
-            s.sendMessage("[J-0018] No such element: " + thrown.getMessage());
+            s.sendMessage("[J-0018] No such id: " + thrown.getMessage());
         } else if (thrown instanceof NoSuchFileException) {
             s.sendMessage("[J-0019] No such file: " + thrown.getMessage());
         } else if (thrown instanceof NoSuchObjectException) {

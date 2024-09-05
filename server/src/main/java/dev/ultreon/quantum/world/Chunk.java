@@ -10,10 +10,12 @@ import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.RegistryKeys;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.ValidationError;
 import dev.ultreon.quantum.util.Vec3i;
-import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -56,7 +58,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
 
     public final @NotNull Storage<BlockState> storage;
     protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
-    public final @NotNull Storage<Biome> biomeStorage;
+    public final @NotNull Storage<RegistryKey<Biome>> biomeStorage;
 
     static {
         for (int i = 0; i <= Chunk.MAX_LIGHT_LEVEL; i++) {
@@ -87,7 +89,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
                     int height,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, size, height, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS));
+        this(world, size, height, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
     /**
@@ -99,7 +101,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
                     int ignoredHeight,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage,
-                    @NotNull Storage<Biome> biomeStorage) {
+                    @NotNull Storage<RegistryKey<Biome>> biomeStorage) {
         this(world, vec, storage, biomeStorage);
     }
 
@@ -128,7 +130,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS));
+        this(world, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
     /**
@@ -144,7 +146,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage,
-                    @NotNull Storage<Biome> biomeStorage) {
+                    @NotNull Storage<RegistryKey<Biome>> biomeStorage) {
         this.world = world;
 
         if (vec.getSpace() != ChunkVecSpace.WORLD)
@@ -527,14 +529,14 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     /**
      * Get the biome at the given position.
      *
-     * @param x the x position in the chunk
+     * @param x        the x position in the chunk
      * @param ignoredY the y position in the chunk
-     * @param z the z position in the chunk
+     * @param z        the z position in the chunk
      * @return the biome at the given position
      * @deprecated deprecated until biomes are 3 dimensional
      */
     @Deprecated
-    public Biome getBiome(int x, int ignoredY, int z) {
+    public RegistryKey<Biome> getBiome(int x, int ignoredY, int z) {
         int index = this.toFlatIndex(x, z);
         return this.biomeStorage.get(index);
     }
@@ -546,7 +548,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      * @param z the z column position in the chunk
      * @return the biome at the given position
      */
-    public Biome getBiome(int x, int z) {
+    public RegistryKey<Biome> getBiome(int x, int z) {
         int index = this.toFlatIndex(x, z);
         return this.biomeStorage.get(index);
     }

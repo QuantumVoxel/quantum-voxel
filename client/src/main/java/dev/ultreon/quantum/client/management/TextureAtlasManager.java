@@ -55,7 +55,7 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
         for (Map.Entry<RegistryKey<Item>, Item> e : Registries.ITEM.entries()) {
             if (e.getValue() == Items.AIR || e.getValue() instanceof BlockItem) continue;
 
-            NamespaceID texId = e.getKey().element().mapPath(path -> "textures/items/" + path + ".png");
+            NamespaceID texId = e.getKey().id().mapPath(path -> "textures/items/" + path + ".png");
             FileHandle resource = QuantumClient.resource(texId);
             if (!resource.exists()) {
                 itemTextures.add(texId, TextureManager.MISSING_NO);

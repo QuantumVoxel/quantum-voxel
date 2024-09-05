@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRenderer;
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.gui.debug.DebugPage;
+import dev.ultreon.quantum.client.registry.ClientRegistry;
 import dev.ultreon.quantum.client.render.RenderEffect;
 import dev.ultreon.quantum.registry.Registry;
 
@@ -38,6 +39,6 @@ public class ClientRegistries {
      * @return The Registry builder.
      */
     private static <T> Registry.Builder<T> builder(String name, T... typeGetter) {
-        return Registry.builder(name, typeGetter).doNotSync();
+        return ClientRegistry.builder(name, typeGetter).doNotSync();
     }
 }

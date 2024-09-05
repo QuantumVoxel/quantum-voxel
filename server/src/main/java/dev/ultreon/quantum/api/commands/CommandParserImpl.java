@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class CommandParserImpl {
     private static final List<CommandParserImpl> parsers = new ArrayList<>();
@@ -187,7 +186,7 @@ public class CommandParserImpl {
             QuantumServer.LOGGER.error("Failed to access command method: " + method);
             return null;
         } catch (InvocationTargetException e) {
-            QuantumServer.LOGGER.error("Failed to invoke command method: " + method);
+            QuantumServer.LOGGER.error("Failed to invoke command method: " + method, e);
             return null;
         } catch (IllegalArgumentException e) {
             QuantumServer.LOGGER.error("Got illegal argument, possible argument mismatch.");

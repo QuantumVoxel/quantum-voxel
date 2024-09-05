@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.world.gen;
+package dev.ultreon.quantum.world.gen.chunk;
 
 import com.badlogic.gdx.utils.Array;
 import dev.ultreon.quantum.CommonConstants;
@@ -11,6 +11,9 @@ import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.HeightmapType;
 import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.gen.carver.Carver;
+import dev.ultreon.quantum.world.gen.noise.DomainWarping;
+import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -20,6 +23,7 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 public abstract class SimpleChunkGenerator implements ChunkGenerator {
     private final Registry<Biome> biomesRegistry;
     private final Array<Biome> biomes = new Array<>();
+    private DomainWarping layerDomain;
 
     public SimpleChunkGenerator(Registry<Biome> biomeRegistry) {
         biomesRegistry = biomeRegistry;
@@ -27,6 +31,8 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
 
     @Override
     public void create(ServerWorld world, long seed) {
+        NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
+        layerDomain = new DomainWarping(QuantumServer.get().disposeOnClose(noiseConfigs.layerX.create(seed)), QuantumServer.get().disposeOnClose(noiseConfigs.layerY.create(seed)));
     }
 
     @Override
@@ -39,6 +45,11 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
         this.generateRecordedChanges(chunk, recordingChunk);
         this.generateFeatures(chunk, recordingChunk);
         this.generateStructures(chunk, recordingChunk);
+    }
+
+    @Override
+    public DomainWarping getLayerDomain() {
+        return layerDomain;
     }
 
     protected abstract void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver, @NotNull Collection<ServerWorld.@NotNull RecordedChange> recordedChanges);

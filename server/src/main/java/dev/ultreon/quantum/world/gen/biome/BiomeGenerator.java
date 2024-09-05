@@ -3,11 +3,14 @@ package dev.ultreon.quantum.world.gen.biome;
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
+import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.RegistryKeys;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.world.*;
-import dev.ultreon.quantum.world.gen.RecordingChunk;
 import dev.ultreon.quantum.world.gen.TreeData;
 import dev.ultreon.quantum.world.gen.TreeGenerator;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;
+import dev.ultreon.quantum.world.gen.chunk.RecordingChunk;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.rng.RNG;
@@ -115,6 +118,10 @@ public class BiomeGenerator implements Disposable {
 
     public Biome getBiome() {
         return this.biome;
+    }
+
+    public RegistryKey<Biome> getBiomeKey(QuantumServer server) {
+        return server.getRegistries().get(RegistryKeys.BIOME).getKey(this.biome);
     }
 
     public void generateStructureFeatures(RecordingChunk recordingChunk, int x, int y, int z) {

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * <p>Palette storage is used for storing data in palettes.
@@ -256,7 +257,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    public <R> Storage<R> map(@NotNull R defaultValue, Class<R> type, @NotNull Function<@NotNull D, @Nullable R> mapper) {
+    public <R> Storage<R> map(@NotNull R defaultValue, IntFunction<R[]> generator, @NotNull Function<@NotNull D, @Nullable R> mapper) {
         Preconditions.checkNotNull(defaultValue, "defaultValue");
         Preconditions.checkNotNull(mapper, "mapper");
 
@@ -266,10 +267,13 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
         this.rwLock.readLock().lock();
         try {
-            @SuppressWarnings("unchecked") var data = Arrays.stream(this.data.toArray()).map(d -> {
+            R[] data = generator.apply(this.data.size);
+            for (int i = 0; i < this.data.size; i++) {
+                D d = this.data.get(i);
                 if (ref.mapperRef == null) {
                     QuantumServer.LOGGER.warn("Mapper in PaletteStorage.mapper(...) just nullified out of thin air! What the f*** is going on?");
-                    return defaultValue;
+                    data[i] = defaultValue;
+                    continue;
                 }
 
                 R applied;
@@ -277,11 +281,11 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
                     applied = ref.mapperRef.apply(d);
                 } catch (NullPointerException e) {
                     QuantumServer.LOGGER.warn("Something sus going on, why is there a nullptr? Double check passed, third check failed :huh:", e);
-                    return defaultValue;
+                    data[i] = defaultValue;
+                    continue;
                 }
-                if (applied == null) return defaultValue;
-                return applied;
-            }).toArray(value -> (R[])java.lang.reflect.Array.newInstance(type, value));
+                data[i] = applied == null ? defaultValue : applied;
+            }
             return new PaletteStorage<>(defaultValue, this.palette, new Array<>(data));
         } finally {
             this.rwLock.readLock().unlock();

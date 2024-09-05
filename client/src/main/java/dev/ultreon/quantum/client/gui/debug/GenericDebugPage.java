@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Mesh;
-import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -13,11 +12,12 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.system.IConnection;
-import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
@@ -60,15 +60,16 @@ public class GenericDebugPage implements DebugPage {
                 @Nullable ClientChunkAccess chunk = world.getChunkAt(blockVec);
                 BlockVec localBlockVec = blockVec.chunkLocal();
 
+                RegistryKey<Biome> biome = world.getBiome(blockVec);
                 context.left("XYZ", player.getPosition())
                         .left("Block XYZ", blockVec)
-                        .left("Chunk XYZ", sectionPos)
-                        .left("Biome", Registries.BIOME.getId(world.getBiome(blockVec)));
+                        .left("Chunk XYZ", sectionPos);
                 if (chunk != null) {
                     int sunlight = chunk.getSunlight(localBlockVec.vec());
                     int blockLight = chunk.getBlockLight(localBlockVec.vec());
 
-                    context.left("Chunk Offset", chunk.getRenderOffset())
+                    context.left("Biome", biome == null ? null : biome.id())
+                            .left("Chunk Offset", chunk.getRenderOffset())
                             .left("Sunlight", sunlight)
                             .left("Block Light", blockLight);
                 }

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.server;
 
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -17,6 +18,7 @@ import dev.ultreon.quantum.api.events.server.ServerStoppedEvent;
 import dev.ultreon.quantum.api.events.server.ServerStoppingEvent;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.data.Json5Ops;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
@@ -37,6 +39,11 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.Recipes;
+import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.RegistryKeys;
+import dev.ultreon.quantum.registry.ServerRegistry;
+import dev.ultreon.quantum.resources.ReloadContext;
+import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.CachedPlayer;
@@ -46,10 +53,12 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PollingExecutorService;
 import dev.ultreon.quantum.util.Shutdownable;
 import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.world.ServerChunk;
-import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.gen.biome.Biomes;
+import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
+import dev.ultreon.quantum.world.gen.chunk.OverworldGenerator;
+import dev.ultreon.quantum.world.gen.chunk.TestGenerator;
+import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
@@ -57,7 +66,11 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -101,12 +114,12 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     });
     private final Queue<Pair<ServerPlayer, Supplier<Packet<? extends ClientPacketHandler>>>> chunkNetworkQueue = new ArrayDeque<>();
     private final Map<UUID, ServerPlayer> players = new ConcurrentHashMap<>();
+    private final MapType worldData;
     protected Networker networker;
     private final WorldStorage storage;
     private final ResourceManager resourceManager;
     protected InspectionNode<QuantumServer> node;
     private InspectionNode<Object> playersNode;
-    protected ServerWorld world;
     protected int port;
     protected int entityRenderDistance = 6 * World.CHUNK_SIZE;
     private int chunkRefresh;
@@ -116,12 +129,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private boolean sendingChunk;
     protected int maxPlayers = 10;
     private final Cache<String, CachedPlayer> cachedPlayers = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).build();
-    private final Map<NamespaceID, ? extends ServerWorld> worlds;
     private final GameRules gameRules = new GameRules();
     private final PermissionMap permissions = new PermissionMap();
-    private final CommandSender consoleSender = new ConsoleCommandSender();
+    private final CommandSender consoleSender = new ConsoleCommandSender(this);
     private final RecipeManager recipeManager;
     private final PlayerManager playerManager = new PlayerManager(this);
+    private final ServerRegistries registries = new ServerRegistries(this);
+    protected final DimensionManager dimManager = new DimensionManager(this);
+    private final Biomes biomes;
+    private final NoiseConfigs noiseConfigs;
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -150,17 +166,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             }
         }
 
-        this.world = new ServerWorld(this, this.storage, worldData);
+        this.worldData = worldData;
 
-        // TODO: Make dimension registry.
-        this.worlds = Map.of(
-                new NamespaceID("overworld"), this.world // Overworld dimension. TODO: Add more dimensions.
-        );
+        this.noiseConfigs = new NoiseConfigs(this);
+        this.biomes = new Biomes(this);
 
         if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.node = parentNode.createNode("server", () -> this);
             this.playersNode = this.node.createNode("players", this.players::values);
-            this.node.createNode("world", () -> this.world);
+            this.node.createNode("overworld", () -> this.overworld());
             this.node.create("refreshChunks", () -> this.chunkRefresh);
             this.node.create("renderDistance", this::getRenderDistance);
             this.node.create("entityRenderDistance", () -> this.entityRenderDistance);
@@ -170,11 +184,73 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         }
 
         this.resourceManager = new ResourceManager("data");
+        URL serverResource = QuantumServer.class.getResource("/.quantum-server-resources");
+        if (serverResource == null) {
+            throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
+        }
+        String serverPath = serverResource.toString();
 
+        if (serverPath.startsWith("jar:")) {
+            serverPath = serverPath.substring("jar:".length());
+        }
+
+        serverPath = serverPath.substring(0, serverPath.lastIndexOf('/'));
+
+        if (serverPath.endsWith("!")) {
+            serverPath = serverPath.substring(0, serverPath.length() - 1);
+        }
+
+        try {
+            resourceManager.importPackage(new File(new URI(serverPath)).toPath());
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.warn("Server resources location is unknown!");
+        }
         this.recipeManager = new RecipeManager(this);
         this.recipeManager.load(this.resourceManager);
 
+        this.loadRegistries();
+
+        for (Biome value : this.registries.get(RegistryKeys.BIOME).values()) {
+            value.buildLayers();
+        }
+
+        reload(ReloadContext.create(this, this.resourceManager));
+
         Recipes.init();
+    }
+
+    private ServerWorld overworld() {
+        return this.dimManager.getWorld(DimensionInfo.OVERWORLD);
+    }
+
+    private void loadRegistries() {
+        var chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
+        chunkGenRegistry.register(ChunkGenerator.OVERWORLD, new OverworldGenerator(this.registries.biomes()));
+        chunkGenRegistry.register(ChunkGenerator.TEST, new TestGenerator(this.registries.biomes()));
+
+        var dimRegistry = registries.get(RegistryKeys.DIMENSION);
+        for (ResourceCategory dimensions : resourceManager.getResourceCategory("dimensions")) {
+            for (NamespaceID entry : dimensions.entries()) {
+                if (dimRegistry.contains(entry)) {
+                    LOGGER.warn("Dimension {} is already registered", entry);
+                    continue;
+                }
+
+                dimRegistry.register(
+                        entry.mapPath(path -> path.substring("dimensions/".length(), path.lastIndexOf('.'))),
+                        DimensionInfo.CODEC.parse(Json5Ops.INSTANCE, dimensions.get(entry).readJson5()).getOrThrow()
+                );
+            }
+        }
+
+        this.dimManager.load(registries);
+    }
+
+    private void reload(ReloadContext context) {
+        for (ServerRegistry<?> registry : registries.stream().toList())
+            registry.reload(context);
+
+        this.recipeManager.reload(context);
     }
 
 //    public static WatchManager getWatchManager() {
@@ -182,12 +258,21 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 //    }
 
     public void load() throws IOException {
-        this.world.load();
+
     }
 
     public void save(boolean silent) throws IOException {
         try {
-            this.world.save(silent);
+            for (var worldEntry : dimManager.getWorlds().entrySet()) {
+                if (!silent) {
+                    LOGGER.info("Saving world {}", worldEntry.getKey());
+                }
+
+                var world = worldEntry.getValue();
+                if (world.isSaveable()) {
+                    world.save(silent);
+                }
+            }
         } catch (IOException e) {
             QuantumServer.LOGGER.error("Failed to save world", e);
         }
@@ -272,7 +357,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static boolean isOnServerThread() {
         QuantumServer instance = QuantumServer.instance;
         if (instance == null) throw new IllegalStateException("Server closed!");
-        return instance.thread.getId() == Thread.currentThread().getId();
+        return instance.thread.threadId() == Thread.currentThread().threadId();
     }
 
     @ApiStatus.Internal
@@ -399,7 +484,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public CrashLog crash(Throwable t) {
         // Create crash log.
         CrashLog crashLog = new CrashLog("Server crashed! :(", t);
-        this.world.fillCrashInfo(crashLog);
+
+        for (ServerWorld world : this.dimManager.getWorlds().values()) {
+            world.fillCrashInfo(crashLog);
+        }
 
         this.crash(crashLog);
         return crashLog;
@@ -457,8 +545,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.profiler.section("connections", this.networker::tick);
 
         // Tick the world.
-        var world = this.world;
-        if (world != null) {
+        for (ServerWorld world : this.dimManager.getWorlds().values()) {
             this.profiler.section("world", () -> {
                 WorldEvents.PRE_TICK.factory().onPreTick(world);
                 world.tick();
@@ -550,7 +637,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             disposable.dispose();
         }
 
-        this.world.dispose();
+        for (ServerWorld world : this.dimManager.getWorlds().values()) {
+            world.dispose();
+        }
 
         this.recipeManager.unload();
         this.cachedPlayers.invalidateAll();
@@ -677,8 +766,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     /**
      * @return the server world.
      */
+    @Deprecated
     public ServerWorld getWorld() {
-        return this.world;
+        return this.dimManager.getWorld(DimensionInfo.OVERWORLD);
     }
 
     /**
@@ -766,11 +856,18 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public ServerPlayer loadPlayer(String name, UUID uuid, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
-        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.world, uuid, name, connection);
         try {
             if (this.storage.exists(String.format("players/%s.ubo", name))) {
                 QuantumServer.LOGGER.info("Loading player '%s'...", name);
                 MapType read = this.storage.read(String.format("players/%s.ubo", name));
+                NamespaceID dimId = NamespaceID.tryParse(read.getString("dimension"));
+                RegistryKey<DimensionInfo> key = RegistryKey.of(RegistryKeys.DIMENSION, dimId);
+                ServerWorld world = this.dimManager.getWorld(key);
+                if (world == null) {
+                    QuantumServer.LOGGER.warn("Failed to properly load player '%s'! Unknown dimension: %s", name, dimId);
+                    world = this.dimManager.getWorld(DimensionInfo.OVERWORLD);
+                }
+                ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, world, uuid, name, connection);
                 player.load(read);
                 player.markSpawned();
                 player.markPlayedBefore();
@@ -780,6 +877,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             QuantumServer.LOGGER.warn("Failed to load player '" + name + "'!", e);
         }
 
+        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.dimManager.getWorld(DimensionInfo.OVERWORLD), uuid, name, connection);
+        player.markSpawned();
         return player;
     }
 
@@ -800,7 +899,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public Collection<? extends World> getWorlds() {
-        return Collections.unmodifiableCollection(this.worlds.values());
+        return Collections.unmodifiableCollection(this.dimManager.getWorlds().values());
     }
 
     public GameRules getGameRules() {
@@ -808,7 +907,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public ServerWorld getWorld(NamespaceID name) {
-        return this.worlds.get(name);
+        return this.dimManager.getWorld(RegistryKey.of(RegistryKeys.DIMENSION, name));
     }
 
     public PermissionMap getDefaultPermissions() {
@@ -827,7 +926,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public @Nullable Entity getEntity(@NotNull UUID uuid) {
-        return this.worlds.values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getUuid().equals(uuid)).findAny().orElse(null);
+        return this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
     public CommandSender getConsoleSender() {
@@ -854,7 +953,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Experimental
     public final <T extends Entity> T getEntity(int id, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-        Entity entityById = this.worlds.values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getId() == id).findAny().orElse(null);
+        Entity entityById = this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getId() == id).findAny().orElse(null);
 
         if (type.isInstance(entityById)) {
             return type.cast(entityById);
@@ -889,5 +988,27 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public void onChunkSent(ServerChunk serverChunk) {
 
+    }
+
+    public ServerRegistries getRegistries() {
+        return registries;
+    }
+
+    public Biomes getBiomes() {
+        return this.biomes;
+    }
+
+    public NoiseConfigs getNoiseConfigs() {
+        return noiseConfigs;
+    }
+
+    public DimensionManager getDimManager() {
+        return dimManager;
+    }
+
+    public void init() {
+        this.dimManager.setDefaults(registries);
+
+        this.dimManager.loadWorlds();
     }
 }

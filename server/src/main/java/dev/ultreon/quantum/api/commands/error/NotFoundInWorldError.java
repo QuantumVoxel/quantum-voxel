@@ -14,11 +14,11 @@ public class NotFoundInWorldError extends CommandError {
     }
 
     public NotFoundInWorldError(String WHAT, World world) {
-        super(MessageCode.NOT_FOUND_IN_WORLD, "There's no " + WHAT + " found in world: " + world.getDimension().getId());
+        super(MessageCode.NOT_FOUND_IN_WORLD, "There's no " + WHAT + " found in world: " + world.getDimension().id());
     }
 
     public NotFoundInWorldError(String WHAT, World world, int index) {
-        super(MessageCode.NOT_FOUND_IN_WORLD, "There's no " + WHAT + " found in world: " + world.getDimension().getId(), index);
+        super(MessageCode.NOT_FOUND_IN_WORLD, "There's no " + WHAT + " found in world: " + world.getDimension().id(), index);
     }
 
     @Override

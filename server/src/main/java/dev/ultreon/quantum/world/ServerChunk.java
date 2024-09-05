@@ -8,9 +8,11 @@ import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CChunkDataPacket;
+import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.gen.biome.Biomes;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -40,7 +42,7 @@ public final class ServerChunk extends Chunk {
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
                        @NotNull Storage<BlockState> storage,
-                       @NotNull Storage<Biome> biomeStorage,
+                       @NotNull Storage<RegistryKey<Biome>> biomeStorage,
                        @NotNull ServerWorld.Region region) {
         super(world, pos, storage, biomeStorage);
         this.world = world;
@@ -52,13 +54,13 @@ public final class ServerChunk extends Chunk {
                                    @NotNull MapType chunkData,
                                    @NotNull ServerWorld.Region region) {
         var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockState.AIR);
-        var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS);
+        var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, world.getServer().getBiomes().getDefaultKey());
 
         MapType blockData = chunkData.getMap("Blocks");
         storage.load(blockData, BlockState::load);
 
         MapType biomeData = chunkData.getMap("Biomes");
-        biomeStorage.load(biomeData, Biome::load);
+        biomeStorage.load(biomeData, data -> RegistryKey.of(RegistryKeys.BIOME, new NamespaceID(data.getString("id"))));
 
         ServerChunk chunk = new ServerChunk(world, pos, storage, biomeStorage, region);
         chunk.load(chunkData);
@@ -136,7 +138,12 @@ public final class ServerChunk extends Chunk {
 
         synchronized (this) {
             this.storage.save(chunkData, BlockState::save);
-            this.biomeStorage.save(biomeData, Biome::save);
+            this.biomeStorage.save(biomeData, biomeRegistryKey -> {
+                MapType biomeUbo = new MapType();
+
+                biomeUbo.putString("id", biomeRegistryKey.id().toString());
+                return biomeUbo;
+            });
 
             for (BlockEntity blockEntity : this.getBlockEntities()) {
                 MapType blockEntityData = new MapType();

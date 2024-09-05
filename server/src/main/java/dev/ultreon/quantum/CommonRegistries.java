@@ -7,7 +7,6 @@ import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.server.GameCommands;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.world.capability.Capabilities;
-import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 
 public class CommonRegistries {
@@ -15,7 +14,6 @@ public class CommonRegistries {
         Blocks.init();
         BlockEntityTypes.init();
         Items.init();
-        NoiseConfigs.init();
         EntityTypes.init();
         SoundEvents.init();
         ParticleTypes.init();

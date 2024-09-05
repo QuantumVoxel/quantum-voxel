@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.debug.inspect;
 
-import dev.ultreon.quantum.util.Suppliers;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,11 +56,11 @@ public class InspectionNode<T> {
     }
 
     /**
-     * Create an element in the inspection node.
+     * Create an id in the inspection node.
      * Uses supplier for dynamic values.
      *
-     * @param name  the name of the element.
-     * @param value supplier of the element value.
+     * @param name  the name of the id.
+     * @param value supplier of the id value.
      */
     public void create(String name, Supplier<@Nullable Object> value) {
         this.elements.putIfAbsent(name, () -> {
@@ -86,7 +86,7 @@ public class InspectionNode<T> {
      * Remove a node from the inspection node.
      *
      * @param name the name of the node to remove.
-     * @return true if the element was present, false otherwise.
+     * @return true if the id was present, false otherwise.
      */
     @CanIgnoreReturnValue
     public boolean remove(String name) {

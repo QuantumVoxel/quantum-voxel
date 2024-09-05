@@ -18,6 +18,9 @@ import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.biome.BiomeData;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
+import dev.ultreon.quantum.world.gen.carver.Carver;
+import dev.ultreon.quantum.world.gen.carver.OverworldCarver;
+import dev.ultreon.quantum.world.gen.chunk.RecordingChunk;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -67,7 +70,7 @@ public class TerrainGenerator implements Disposable {
         this.tempNoise = new BiomeNoise(world.getSeed() + 210);
         this.variationNoise = new BiomeNoise(world.getSeed() + 220);
         this.hillinessNoise = new HillinessNoise(world.getSeed() + 230);
-        this.carver = new Carver(biomeDomain, noise, world.getSeed() + 300);
+        this.carver = new OverworldCarver(biomeDomain, noise, world.getSeed() + 300);
     }
 
     @CanIgnoreReturnValue

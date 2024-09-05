@@ -10,6 +10,7 @@ import net.fabricmc.loader.api.FabricLoader;
 public final class GameCommands {
     public static void register() {
         CommandRegistry.register(new TeleportCommand());
+        CommandRegistry.register(new TpDimCommand());
         CommandRegistry.register(new KillCommand());
         CommandRegistry.register(new FlyCommand());
         CommandRegistry.register(new InvincibleCommand());

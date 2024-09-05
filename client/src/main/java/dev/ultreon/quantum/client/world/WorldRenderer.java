@@ -87,7 +87,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
     private static final Vector3 HALF_CHUNK_DIMENSIONS = WorldRenderer.CHUNK_DIMENSIONS.cpy().scl(0.5f);
 
-    private final ClientWorld world;
+    private ClientWorld world;
     private final QuantumClient client = QuantumClient.get();
 
     private ModelInstance cursor = null;
@@ -443,6 +443,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public void renderForeground(ModelBatch batch, float deltaTime) {
         Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    @Override
+    public void setWorld(@Nullable ClientWorldAccess world) {
+        this.world = (ClientWorld) world;
     }
 
     private void collectChunks(ModelBatch batch, RenderLayer renderLayer, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {

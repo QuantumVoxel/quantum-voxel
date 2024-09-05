@@ -15,9 +15,7 @@ import dev.ultreon.quantum.entity.*;
 import dev.ultreon.quantum.gamerule.Rule;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.registry.CommandRegistry;
-import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.registry.Registry;
+import dev.ultreon.quantum.registry.*;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
@@ -46,7 +44,6 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class CommandData {
@@ -184,7 +181,7 @@ public class CommandData {
     }
 
     final List<Method> getMethods() {
-        return this.methodMap.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(this.methodMap.values());
     }
 
     public @Nullable String mapToPerm(@Nullable CommandSpec spec) {
@@ -350,15 +347,11 @@ public class CommandData {
                 name = ctx.readUntil('.');
 
                 if (ctx.getLastChar() != '.') {
-                    switch (name) {
-                        case "true":
-                        case "false":
-                        case "null":
-                        case "root":
-                            return List.of(":" + name + ".");
-                        default:
-                            return TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
-                    }
+                    return switch (name) {
+                        case "true", "false", "null", "root" -> List.of(":" + name + ".");
+                        default ->
+                                TabCompleting.prefixed(":", ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(1), "true", "false", "null", "root"));
+                    };
                 }
 
                 if (!Objects.equals(name, "root")) {
@@ -458,19 +451,12 @@ public class CommandData {
     }
 
     private static Weather readWeather(CommandReader ctx) throws CommandParseException {
-        switch (ctx.readString()) {
-            case "clear":
-            case "sunny":
-                return Weather.SUNNY;
-            case "rain":
-            case "downfall":
-                return Weather.RAIN;
-            case "storm":
-            case "thunder":
-                return Weather.THUNDER;
-            default:
-                throw new CommandParseException.NotFound("weather", ctx.getOffset());
-        }
+        return switch (ctx.readString()) {
+            case "clear", "sunny" -> Weather.SUNNY;
+            case "rain", "downfall" -> Weather.RAIN;
+            case "storm", "thunder" -> Weather.THUNDER;
+            default -> throw new CommandParseException.NotFound("weather", ctx.getOffset());
+        };
     }
 
     private static World readDimension(CommandReader ctx) throws CommandParseException {
@@ -622,20 +608,14 @@ public class CommandData {
     }
 
     private static GameMode readGamemode(CommandReader ctx) throws CommandParseException {
-        switch (ctx.readString()) {
-            case "survival":
-                return GameMode.SURVIVAL;
-            case "adventurous":
-                return GameMode.ADVENTUROUS;
-            case "builder":
-                return GameMode.BUILDER;
-            case "builder_plus":
-                return GameMode.BUILDER_PLUS;
-            case "spectator":
-                return GameMode.SPECTATOR;
-            default:
-                throw new CommandParseException.NotFound("game mode", ctx.getOffset());
-        }
+        return switch (ctx.readString()) {
+            case "survival" -> GameMode.SURVIVAL;
+            case "adventurous" -> GameMode.ADVENTUROUS;
+            case "builder" -> GameMode.BUILDER;
+            case "builder_plus" -> GameMode.BUILDER_PLUS;
+            case "spectator" -> GameMode.SPECTATOR;
+            default -> throw new CommandParseException.NotFound("game mode", ctx.getOffset());
+        };
     }
 
     private static Block readBlock(CommandReader ctx) throws CommandParseException {
@@ -665,7 +645,7 @@ public class CommandData {
     }
 
     private static Biome readBiome(CommandReader ctx) throws CommandParseException {
-        return CommandData.readFromRegistry(ctx, "biome", Registries.BIOME);
+        return CommandData.readFromRegistry(ctx, "biome", RegistryKeys.BIOME);
     }
 
     private static Attribute readAttribute(CommandReader ctx) throws CommandParseException {
@@ -683,6 +663,12 @@ public class CommandData {
 
     private static SoundEvent readSound(CommandReader ctx) throws CommandParseException {
         return CommandData.readFromRegistry(ctx, "sound", Registries.SOUND_EVENT);
+    }
+
+    public static <T> T readFromRegistry(CommandReader ctx, String type, RegistryKey<Registry<T>> key) throws CommandParseException {
+        QuantumServer server = ctx.getServer();
+        Registry<T> registry = server.getRegistries().get(key);
+        return readFromRegistry(ctx, type, registry);
     }
 
     public static <T> T readFromRegistry(CommandReader ctx, String type, Registry<T> registry) throws CommandParseException {
@@ -761,7 +747,7 @@ public class CommandData {
     }
 
     private static List<String> completeBiome(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
-        return CommandData.complete(ctx, Registries.BIOME);
+        return CommandData.complete(ctx, RegistryKeys.BIOME);
     }
 
     private static List<String> completeBlocks(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
@@ -797,6 +783,12 @@ public class CommandData {
         return list;
     }
 
+    static <T> List<String> complete(CommandReader ctx, RegistryKey<Registry<T>> key) throws CommandParseException {
+        QuantumServer server = ctx.getServer();
+        Registry<T> registry = server.getRegistries().get(key);
+        return complete(ctx, registry);
+    }
+
     private static List<String> completeItemStackRef(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] strings) throws CommandParseException {
         return ItemBaseSelector.tabComplete(sender, commandCtx, ctx.readString());
     }
@@ -830,12 +822,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.get(parts.size() - 1).length() > 2) {
+            if (parts.getLast().length() > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add(":");
             }
-        } else if (!parts.get(parts.size() - 1).isEmpty()) {
+        } else if (!parts.getLast().isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -852,9 +844,9 @@ public class CommandData {
         if (parts.size() > 3) {
             return List.of();
         }
-        if (parts.get(parts.size() - 1).length() > 2) {
+        if (parts.getLast().length() > 2) {
             return List.of("$currentArgument:");
-        } else if (!parts.get(parts.size() - 1).isEmpty()) {
+        } else if (!parts.getLast().isEmpty()) {
             list.add(":");
         }
         for (var i : new Range(0, 9)) {
@@ -872,12 +864,12 @@ public class CommandData {
             return List.of();
         }
         if (parts.size() > 1) {
-            if (parts.get(parts.size() - 1).length()     > 2) {
+            if (parts.getLast().length() > 2) {
                 return List.of("$currentArgument:");
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add("-");
             }
-        } else if (!parts.get(parts.size() - 1).isEmpty()) {
+        } else if (!parts.getLast().isEmpty()) {
             list.add("-");
         }
         for (var i : new Range(0, 9)) {
@@ -896,12 +888,12 @@ public class CommandData {
                 return List.of(" ");
             }
             if (parts.size() > 1) {
-                if (parts.get(parts.size() - 1).length() > 2) {
+                if (parts.getLast().length() > 2) {
                     return List.of("$date:");
-                } else if (!parts.get(parts.size() - 1).isEmpty()) {
+                } else if (!parts.getLast().isEmpty()) {
                     list.add("-");
                 }
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add("-");
             }
             for (var i : new Range(0, 9)) {
@@ -915,9 +907,9 @@ public class CommandData {
             if (parts.size() > 3) {
                 return List.of();
             }
-            if (parts.get(parts.size() - 1).length()     > 2) {
+            if (parts.getLast().length() > 2) {
                 return List.of("$time:");
-            } else if (!parts.get(parts.size() - 1).isEmpty()) {
+            } else if (!parts.getLast().isEmpty()) {
                 list.add(":");
             }
             for (var i : new Range(0, 9)) {
@@ -968,7 +960,7 @@ public class CommandData {
     }
 
     private static List<String> completeCommand(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
-        List<Command> list = CommandRegistry.getCommands().collect(Collectors.toList());
+        List<Command> list = CommandRegistry.getCommands().toList();
         String s = ctx.readString();
         if (!ctx.isAtEndOfCmd()) {
             Command command = CommandRegistry.get(s);

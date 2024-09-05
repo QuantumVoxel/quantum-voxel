@@ -39,6 +39,7 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.*;
@@ -422,12 +423,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public Biome getBiome(BlockVec pos) {
+    public RegistryKey<Biome> getBiome(BlockVec pos) {
         return null;
     }
 
     @Override
-    public DimensionInfo getDimension() {
+    public RegistryKey<DimensionInfo> getDimension() {
         return null;
     }
 
@@ -649,6 +650,11 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     @Override
     public void renderForeground(ModelBatch modelBatch, float deltaTime) {
         
+    }
+
+    @Override
+    public void setWorld(@Nullable ClientWorldAccess world) {
+
     }
 
     @Override

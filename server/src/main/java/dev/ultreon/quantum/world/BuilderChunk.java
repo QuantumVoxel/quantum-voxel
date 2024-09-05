@@ -3,11 +3,11 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
-import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -33,7 +33,7 @@ public final class BuilderChunk extends Chunk {
         this.thread = thread;
         this.region = region;
         this.rng = new JavaRNG(this.world.getSeed() + (pos.getIntX() ^ ((long) pos.getIntZ() << 4)) & 0x3FFFFFFF);
-        this.biomeData = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, Biomes.PLAINS.create(this.world, world.getSeed()));
+        this.biomeData = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, world.getServer().getBiomes().plains.create(this.world, world.getSeed()));
     }
 
     @Override
@@ -92,8 +92,9 @@ public final class BuilderChunk extends Chunk {
         return this.thread.threadId() == Thread.currentThread().threadId();
     }
 
+    @SuppressWarnings("unchecked")
     public ServerChunk build() {
-        Storage<Biome> map = this.biomeData.map(Biomes.PLAINS, Biome.class, BiomeGenerator::getBiome);
+        Storage<RegistryKey<Biome>> map = this.biomeData.map(world.getServer().getBiomes().getDefaultKey(), RegistryKey[]::new, gen -> gen.getBiomeKey(world.getServer()));
         return new ServerChunk(this.world, this.getVec(), this.storage, map, region);
     }
 

@@ -1,5 +1,6 @@
 package dev.ultreon.xeox.loader;
 
+import dev.ultreon.quantum.registry.GlobalRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -27,7 +28,7 @@ public class JSRegistries {
     }
 
     public Registry.Builder<?> createBuilder(NamespaceID id) {
-        return new Registry.Builder<>(id);
+        return new GlobalRegistry.Builder<>(id);
         
     }
 }

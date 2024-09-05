@@ -7,7 +7,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.events.WorldLifecycleEvents;
-import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.gen.WorldGenFeature;
@@ -84,18 +84,15 @@ public abstract class Biome {
     }
 
     public BiomeGenerator create(ServerWorld world, long seed) {
-        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getTerrainGenerator().getLayerDomain(), this.layers, this.features);
+        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getGenerator().getLayerDomain(), this.layers, this.features);
 
         this.layers.forEach(layer -> layer.create(world));
         this.features.forEach(layer -> layer.create(world));
 
-        DomainWarping domainWarping = new DomainWarping(QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_X.create(seed)), QuantumServer.get().disposeOnClose(NoiseConfigs.LAYER_Y.create(seed)));
+        NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
+        DomainWarping domainWarping = new DomainWarping(QuantumServer.get().disposeOnClose(noiseConfigs.layerX.create(seed)), QuantumServer.get().disposeOnClose(noiseConfigs.layerY.create(seed)));
 
         return new BiomeGenerator(world, this, domainWarping, this.layers, this.features);
-    }
-
-    public NoiseConfig getSettings() {
-        return NoiseConfigs.BIOME_MAP;
     }
 
     public float getTemperatureStart() {
@@ -106,18 +103,15 @@ public abstract class Biome {
         return this.temperatureEnd;
     }
 
-    public MapType save() {
+    public MapType save(QuantumServer server) {
         MapType mapType = new MapType();
-        mapType.putString("id", String.valueOf(this.getId()));
+        mapType.putString("id", String.valueOf(server.getRegistries().get(RegistryKeys.BIOME).getKey(this).id()));
         return mapType;
     }
 
-    private NamespaceID getId() {
-        return Registries.BIOME.getId(this);
-    }
-
-    public static Biome load(MapType mapType) {
-        return Registries.BIOME.get(NamespaceID.tryParse(mapType.getString("id", "plains")));
+    public static Biome load(QuantumServer server, MapType mapType) {
+        Biome biome = QuantumServer.get().getRegistries().get(RegistryKeys.BIOME).get(NamespaceID.tryParse(mapType.getString("id", "plains")));
+        return biome != null ? biome : server.getBiomes().plains;
     }
 
     public boolean isOcean() {

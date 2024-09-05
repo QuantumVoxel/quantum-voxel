@@ -68,5 +68,6 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CSpawnParticlesPacket::read);
         this.addClientBound(S2CChunkUnloadPacket::read);
         this.addClientBound(S2CTimeSyncPacket::read);
+        this.addClientBound(S2CChangeDimensionPacket::read);
     }
 }

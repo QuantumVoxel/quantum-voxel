@@ -11,7 +11,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class ConsoleCommandSender implements CommandSender {
+    private final @Nullable QuantumServer server;
+
+    public ConsoleCommandSender(@Nullable QuantumServer server) {
+        this.server = server;
+    }
+
     @Override
     public @NotNull Location getLocation() {
         return new Location(World.OVERWORLD, 0, 0, 0, 0, 0);
@@ -70,5 +77,10 @@ public class ConsoleCommandSender implements CommandSender {
     @Override
     public boolean isAdmin() {
         return true;
+    }
+
+    @Override
+    public @Nullable QuantumServer getServer() {
+        return server;
     }
 }

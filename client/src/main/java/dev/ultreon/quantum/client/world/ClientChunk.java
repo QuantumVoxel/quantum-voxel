@@ -21,6 +21,7 @@ import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.Vec3i;
@@ -30,6 +31,7 @@ import dev.ultreon.quantum.world.LightSource;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -70,11 +72,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
      * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
      */
     @Deprecated(since = "0.1.0", forRemoval = true)
-    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkVec pos, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         this(world, pos, storage, biomeStorage, blockEntities);
     }
 
-    public ClientChunk(ClientWorld world, dev.ultreon.quantum.world.vec.ChunkVec pos, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, ChunkVec pos, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
         this.clientWorld = world;
         this.active = false;

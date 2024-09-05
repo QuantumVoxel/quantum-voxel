@@ -2,12 +2,14 @@ package dev.ultreon.quantum.client.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.screens.ChunkLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
@@ -44,7 +46,7 @@ import java.util.stream.Stream;
 
 public class LocalPlayer extends ClientPlayer {
     private final QuantumClient client = QuantumClient.get();
-    private final ClientWorldAccess world;
+    private ClientWorldAccess world;
     private int oldSelected;
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
@@ -52,8 +54,9 @@ public class LocalPlayer extends ClientPlayer {
     private final Vec2i tmp2I = new Vec2i();
     private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
     private long lastRefresh;
-    public final Set<ChunkVec> pendingChunks = new HashSet<>();
+    public final Set<ChunkVec> pendingChunks = new CopyOnWriteArraySet<>();
     private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
+    private boolean isLoading;
 
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -152,7 +155,7 @@ public class LocalPlayer extends ClientPlayer {
         this.refreshChunks();
     }
 
-    private void refreshChunks() {
+    public void refreshChunks() {
         if (!this.client.renderWorld) return;
         if (lastRefresh + 1000 > System.currentTimeMillis()) return;
         lastRefresh = System.currentTimeMillis();
@@ -192,6 +195,8 @@ public class LocalPlayer extends ClientPlayer {
                 this.sendQueue.add(e);
             });
         }
+
+        this.isLoading = false;
     }
 
     @Override
@@ -416,5 +421,22 @@ public class LocalPlayer extends ClientPlayer {
     public BlockState getBuriedBlock() {
         Vec3d add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
         return this.world.get((int) add.x, (int) add.y, (int) add.z);
+    }
+
+    @DoNotCall
+    public void onTeleportedDimension(ClientWorldAccess world) {
+        super.onTeleportedDimension(world);
+
+        pendingChunks.clear();
+        isLoading = true;
+        client.showScreen(new ChunkLoadScreen(() -> !isLoading && pendingChunks.isEmpty()));
+        this.world = world;
+    }
+
+    @Override
+    @DoNotCall
+    @Deprecated
+    public void onTeleportedDimension(WorldAccess world) {
+        super.onTeleportedDimension(world);
     }
 }

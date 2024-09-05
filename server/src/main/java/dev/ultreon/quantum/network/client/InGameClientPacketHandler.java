@@ -12,8 +12,10 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -25,6 +27,7 @@ import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +46,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onChunkCancel(ChunkVec pos);
 
-    void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, Storage<Biome> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
+    void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
 
     void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, Vec2f rotation);
 
@@ -100,4 +103,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onChunkUnload(ChunkVec chunkVec);
 
     void handleTimeSync(S2CTimeSyncPacket s2CTimeSyncPacket, PacketContext ctx);
+
+    void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet);
 }

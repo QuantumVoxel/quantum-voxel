@@ -91,7 +91,7 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
             EntityRenderer<?> renderer = this.get(type);
             EntityModel<?> entityModel = this.modelManager.get(type);
 
-            NamespaceID key = e.getKey().element();
+            NamespaceID key = e.getKey().id();
             FileHandle handle = QuantumClient.resource(key.mapPath(path -> "models/entity/" + path + ".g3dj"));
 
             // Load and register the model if it exists

@@ -11,6 +11,7 @@ import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.gamerule.Rule;
 import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
@@ -89,7 +90,7 @@ public class TabCompleting {
     public static List<String> entityTypes(List<String> list, String currentArgument, boolean includePlayer) {
         for (var entityType : Registries.ENTITY_TYPE.entries()) {
             var key = entityType.getKey();
-            if (!includePlayer && entityType.getKey().equals(Registries.ENTITY_TYPE.getKey(EntityTypes.PLAYER)))
+            if (!includePlayer && entityType != EntityTypes.PLAYER)
                 continue;
 
             TabCompleting.addIfStartsWith(list, key, currentArgument);
@@ -98,7 +99,7 @@ public class TabCompleting {
     }
 
     public static List<String> biomes(List<String> list, String currentArgument) {
-        for (var biome : Registries.BIOME.ids()) {
+        for (var biome : QuantumServer.get().getRegistries().get(RegistryKeys.BIOME).ids()) {
             var key = biome.toString();
             TabCompleting.addIfStartsWith(list, key, currentArgument);
         }
@@ -115,7 +116,7 @@ public class TabCompleting {
 
     public static List<String> entityUuids(List<String> list, String currentArgument) {
         for (World world : QuantumServer.get().getWorlds()) {
-            for (Entity entity : world.getEntities()) {
+            for (Entity entity : world.getEntities().toArray(Entity.class)) {
                 String uuid = entity.getUuid().toString();
                 TabCompleting.addIfStartsWith(list, uuid, currentArgument);
             }
@@ -125,7 +126,7 @@ public class TabCompleting {
 
     public static List<String> entityUuids(List<String> list, String currentArgument, Class<? extends Entity> instance) {
         for (World world : QuantumServer.get().getWorlds()) {
-            for (Entity entity : world.getEntities()) {
+            for (Entity entity : world.getEntities().toArray(Entity.class)) {
                 if (!instance.isInstance(entity)) {
                     continue;
                 }
@@ -160,7 +161,7 @@ public class TabCompleting {
 
     public static List<String> worlds(List<String> list, String currentArgument) {
         for (World world : QuantumServer.get().getWorlds()) {
-            NamespaceID id = world.getDimension().getId();
+            NamespaceID id = world.getDimension().id();
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
         return list;
@@ -387,7 +388,7 @@ public class TabCompleting {
     }
 
     public static List<String> entityIds(List<String> list, ServerWorld world, String currentArgument) {
-        for (var id : Arrays.stream(world.getEntities().toArray(Entity.class)).map(Entity::getId).collect(Collectors.toList())) {
+        for (var id : Arrays.stream(world.getEntities().toArray(Entity.class)).map(Entity::getId).toList()) {
             TabCompleting.addIfStartsWith(list, id, currentArgument);
         }
 

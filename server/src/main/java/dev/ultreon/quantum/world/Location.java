@@ -23,7 +23,7 @@ public class Location {
     }
 
     public Location(WorldAccess world, double x, double y, double z, float xRot, float yRot) {
-        this(world.getDimension().getId(), x, y, z, xRot, yRot);
+        this(world.getDimension().id(), x, y, z, xRot, yRot);
     }
 
     public Location(double x, double y, double z, float xRot, float yRot) {

@@ -1,14 +1,19 @@
-package dev.ultreon.quantum.world.gen;
+package dev.ultreon.quantum.world.gen.chunk;
 
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
-import dev.ultreon.quantum.registry.Registry;
+import dev.ultreon.quantum.registry.ServerRegistry;
+import dev.ultreon.quantum.tags.NamedTag;
 import dev.ultreon.quantum.util.MathHelper;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
+import dev.ultreon.quantum.world.gen.HillinessNoise;
 import dev.ultreon.quantum.world.gen.biome.BiomeData;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
+import dev.ultreon.quantum.world.gen.carver.Carver;
+import dev.ultreon.quantum.world.gen.carver.OverworldCarver;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
@@ -25,7 +30,8 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 public class OverworldGenerator extends SimpleChunkGenerator {
     private final List<BiomeData> biomeGenData = new ArrayList<>();
 
-    private final NoiseConfig noiseConfig = NoiseConfigs.BIOME_MAP;
+    private NoiseConfig noiseConfig;
+    private final NamedTag<Biome> biomeTag;
 
     private @UnknownNullability DomainWarping biomeDomain;
     private @UnknownNullability BiomeNoise humidNoise;
@@ -34,21 +40,34 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     private @UnknownNullability HillinessNoise hillinessNoise ;
     private @UnknownNullability Carver carver;
 
-    public OverworldGenerator(Registry<Biome> biomeRegistry) {
+    public OverworldGenerator(ServerRegistry<Biome> biomeRegistry) {
         super(biomeRegistry);
+
+        this.biomeTag = biomeRegistry.getTag(new NamespaceID("overworld_biomes")).orElseThrow();
     }
 
     @Override
     public void create(ServerWorld world, long seed) {
-
-        this.biomeDomain = new DomainWarping(NoiseConfigs.BIOME_X.create(seed + 100), NoiseConfigs.BIOME_Y.create(seed + 110));
+        NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
+        noiseConfig = noiseConfigs.biomeMap;
+        this.biomeDomain = new DomainWarping(noiseConfigs.biomeX.create(seed + 100), noiseConfigs.biomeY.create(seed + 110));
 
         TerrainNoise noise = new TerrainNoise(world.getSeed());
         this.humidNoise = new BiomeNoise(world.getSeed() + 200);
         this.tempNoise = new BiomeNoise(world.getSeed() + 210);
         this.variationNoise = new BiomeNoise(world.getSeed() + 220);
         this.hillinessNoise = new HillinessNoise(world.getSeed() + 230);
-        this.carver = new Carver(biomeDomain, noise, world.getSeed() + 300);
+        this.carver = new OverworldCarver(biomeDomain, noise, world.getSeed() + 300);
+
+        for (Biome biome : this.biomeTag.getValues()) {
+            this.biomeGenData.add(new BiomeData(
+                    biome.getTemperatureStart(), biome.getTemperatureEnd(),
+                    biome.getHumidityStart(), biome.getHumidityEnd(),
+                    biome.getHeightStart(), biome.getHeightEnd(),
+                    biome.getHillinessStart(), biome.getHillinessEnd(),
+                    biome.isOcean(), biome.create(world, seed)
+            ));
+        }
     }
 
     @Override

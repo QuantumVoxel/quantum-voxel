@@ -1,0 +1,22 @@
+{
+  elements: [
+    "quantum:snowy_plains",
+    "quantum:deep_taiga",
+    "quantum:taiga",
+    "quantum:plains",
+    "quantum:dry_plains",
+    "quantum:rocky_plains",
+    "quantum:cold_plains",
+    "quantum:frozen_plains",
+    "quantum:hills",
+    "quantum:jungle",
+    "quantum:forest",
+    "quantum:desert",
+    "quantum:beach",
+    "quantum:mountains",
+    "quantum:ocean",
+    "quantum:luke_warm_ocean",
+    "quantum:warm_ocean",
+    "quantum:cold_ocean",
+  ]
+}

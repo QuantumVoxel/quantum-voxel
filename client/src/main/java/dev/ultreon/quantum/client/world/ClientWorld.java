@@ -21,6 +21,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakingPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SPlaceBlockPacket;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
@@ -67,6 +68,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public static int VOID_Y_END = 0;
     @NotNull
     private final QuantumClient client;
+    private final RegistryKey<DimensionInfo> dimension;
     private final Map<ChunkVec, ClientChunk> chunks = new ConcurrentHashMap<>();
     private int chunkRefresh;
     private ChunkVec oldChunkVec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
@@ -82,13 +84,15 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private final ObjectSet<String> enabledCategories = new ObjectSet<>();
 
     /**
-     * Constructs a new ClientWorld object.
+     * Constructor for creating an instance of ClientWorld.
      *
-     * @param client The QuantumClient object that this ClientWorld is associated with.
+     * @param client    an instance of QuantumClient which interacts with the client-side quantum framework.
+     * @param dimension a RegistryKey of DimensionInfo representing the dimension of the world.
      */
-    public ClientWorld(@NotNull QuantumClient client) {
+    public ClientWorld(@NotNull QuantumClient client, RegistryKey<DimensionInfo> dimension) {
         super();
         this.client = client;
+        this.dimension = dimension;
     }
 
     public void toggleGizmoCategory(String category) {
@@ -772,7 +776,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
         // Process the queue to update sunlight propagation
         while (!queue.isEmpty()) {
-            // Remove the first element from the queue and get its position and light information
+            // Remove the first id from the queue and get its position and light information
             int[] current = queue.removeFirst();
             int x = current[0];
             int y = current[1];
@@ -1102,5 +1106,10 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             // Log a warning if a local player tries to attack (sanity check)
             LOGGER.warn("SANITY CHECK: local player tried to attack entity {}!", entityId);
         }
+    }
+
+    @Override
+    public RegistryKey<DimensionInfo> getDimension() {
+        return dimension;
     }
 }

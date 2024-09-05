@@ -160,33 +160,34 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
-    public void locateResources() {try {
-        URL resource = QuantumClient.class.getResource("/.quantum-resources");
-        if (resource == null) {
-            throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
-        }
-        String string = resource.toString();
+    public void locateResources() {
+        try {
+            URL resource = QuantumClient.class.getResource("/.quantum-resources");
+            if (resource == null) {
+                throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
+            }
+            String path = resource.toString();
 
-        if (string.startsWith("jar:")) {
-            string = string.substring("jar:".length());
-        }
+            if (path.startsWith("jar:")) {
+                path = path.substring("jar:".length());
+            }
 
-        string = string.substring(0, string.lastIndexOf('/'));
+            path = path.substring(0, path.lastIndexOf('/'));
 
-        if (string.endsWith("!")) {
-            string = string.substring(0, string.length() - 1);
-        }
+            if (path.endsWith("!")) {
+                path = path.substring(0, path.length() - 1);
+            }
 
-        QuantumClient.get().getResourceManager().importPackage(new File(new URI(string)).toPath());
-    } catch (Exception e) {
-        for (Path rootPath : FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getRootPaths()) {
-            try {
-                QuantumClient.get().getResourceManager().importPackage(rootPath);
-            } catch (IOException ex) {
-                crash(ex);
+            QuantumClient.get().getResourceManager().importPackage(new File(new URI(path)).toPath());
+        } catch (Exception e) {
+            for (Path rootPath : FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getRootPaths()) {
+                try {
+                    QuantumClient.get().getResourceManager().importPackage(rootPath);
+                } catch (IOException ex) {
+                    crash(ex);
+                }
             }
         }
-    }
     }
 
     @Override

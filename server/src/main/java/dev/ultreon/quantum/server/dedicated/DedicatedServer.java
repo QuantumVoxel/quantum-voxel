@@ -11,6 +11,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.ServerLanguage;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +74,7 @@ public class DedicatedServer extends QuantumServer {
         Locale locale = Locale.of("en", "us");
 
         // Load the language resource from the file system
-        InputStream resourceAsStream = getClass().getResourceAsStream("/assets/quantum/languages/main.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream("/data/quantum/lang/main.json");
         if (resourceAsStream == null) {
             throw new RuntimeException("Could not load language file!");
 
@@ -120,7 +121,7 @@ public class DedicatedServer extends QuantumServer {
         this.maxPlayers = ServerConfig.maxPlayers;
 
         // Set up the spawn for the world
-        this.world.setupSpawn();
+        this.dimManager.getWorld(DimensionInfo.OVERWORLD).setupSpawn();
     }
 
     /**

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.api.commands;
 
 import dev.ultreon.quantum.api.commands.selector.Selector;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharList;
@@ -24,12 +25,14 @@ public class CommandReader {
     private int off = 0;
     private int totalOff = 0;
     private final CharList hex = new CharArrayList("0123456789abcdefABCDEF".toCharArray());
+    private QuantumServer server;
 
     public CommandReader(CommandSender sender0, String cmd, String[] args) {
         this.sender0 = sender0;
         this.cmd = cmd;
         this.args = args;
         this.arg = args[this.cur];
+        this.server = sender0.getServer();
         CommandReader.instance.set(this);
     }
 
@@ -501,5 +504,9 @@ public class CommandReader {
 
     public char getCurChar() {
         return this.cmd.charAt(this.off);
+    }
+
+    public QuantumServer getServer() {
+        return server;
     }
 }

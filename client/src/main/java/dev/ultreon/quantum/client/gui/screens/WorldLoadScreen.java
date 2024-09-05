@@ -15,6 +15,7 @@ import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -49,7 +50,10 @@ public class WorldLoadScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         IntegratedServer server = new IntegratedServer(this.storage);
         this.client.integratedServer = server;
-        this.world = server.getWorld();
+
+        server.init();
+
+        this.world = server.getDimManager().getWorld(DimensionInfo.OVERWORLD);
         this.client.openedWorld = this.storage;
 
         this.titleLabel = builder.add(Label.of(this.title)
@@ -230,16 +234,6 @@ public class WorldLoadScreen extends Screen {
 
     public Label getDescriptionLabel() {
         return this.descriptionLabel;
-    }
-
-    private void loadWithinServer() {
-        try {
-            WorldLoadScreen.LOGGER.info("Loading spawn chunks...");
-
-            this.message("Spawn chunks loaded!");
-        } catch (Exception t) {
-            QuantumClient.LOGGER.error("Failed to load chunks for world.", t);
-        }
     }
 
     @Override

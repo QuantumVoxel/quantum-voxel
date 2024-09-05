@@ -11,22 +11,18 @@ import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.weather.Weather;
-import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.capability.CapabilityType;
-import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.particles.ParticleType;
 
 public final class Registries {
-    public static final Registry<Registry<?>> REGISTRY = Registry.REGISTRY;
+    public static final Registry<Registry<?>> REGISTRY = GlobalRegistry.REGISTRY;
 
     public static final Registry<Block> BLOCK = Registries.create(RegistryKeys.BLOCK);
     public static final Registry<Item> ITEM = Registries.create(RegistryKeys.ITEM);
-    public static final Registry<NoiseConfig> NOISE_SETTINGS = Registries.create(RegistryKeys.NOISE_SETTINGS);
     public static final Registry<EntityType<?>> ENTITY_TYPE = Registries.create(RegistryKeys.ENTITY_TYPE);
     public static final Registry<SoundEvent> SOUND_EVENT = Registries.create(RegistryKeys.SOUND_EVENT);
     public static final Registry<MenuType<?>> MENU_TYPE = Registries.create(RegistryKeys.MENU_TYPE);
-    public static final Registry<Biome> BIOME = Registries.create(RegistryKeys.BIOME);
     public static final Registry<Weather> WEATHER = Registries.create(RegistryKeys.WEATHER);
     public static final Registry<Attribute> ATTRIBUTE = Registries.create(RegistryKeys.ATTRIBUTE);
     public static final Registry<DamageSource> DAMAGE_SOURCE = Registries.create(RegistryKeys.DAMAGE_SOURCE);
@@ -42,15 +38,15 @@ public final class Registries {
 
     @SafeVarargs
     public static <T> Registry<T> create(NamespaceID id, T... typeGetter) {
-        Registry<T> registry = Registry.builder(id, typeGetter).build();
+        Registry<T> registry = GlobalRegistry.builder(id, typeGetter).build();
         Registries.REGISTRY.register(id, registry);
         return registry;
     }
 
     @SafeVarargs
     public static <T> Registry<T> create(RegistryKey<Registry<T>> id, T... typeGetter) {
-        Registry<T> registry = Registry.builder(id.element(), typeGetter).build();
-        Registries.REGISTRY.register(id.element(), registry);
+        Registry<T> registry = GlobalRegistry.builder(id.id(), typeGetter).build();
+        Registries.REGISTRY.register(id.id(), registry);
         return registry;
     }
 }

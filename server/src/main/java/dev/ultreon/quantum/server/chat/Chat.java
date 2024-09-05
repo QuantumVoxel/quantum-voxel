@@ -22,7 +22,7 @@ public class Chat {
     }
 
     public static void sendError(CommandSender sender, String message) {
-        sender.sendMessage("[light red][ERROR] [white]" + message);
+        sender.sendMessage("[light red][[ERROR] [white]" + message);
     }
 
     public static void sendError(CommandSender sender, String message, String name) {
@@ -30,23 +30,23 @@ public class Chat {
     }
 
     public static void sendWarning(CommandSender sender, String message) {
-        sender.sendMessage("[gold][WARNING] [white]" + message);
+        sender.sendMessage("[gold][[WARNING] [white]" + message);
     }
 
     public static void sendInfo(CommandSender sender, String message) {
-        sender.sendMessage("[light blue][INFO] [white]" + message);
+        sender.sendMessage("[light blue][[INFO] [white]" + message);
     }
 
     public static void sendDebug(CommandSender sender, String message) {
-        sender.sendMessage("[grey][DEBUG] [white]" + message);
+        sender.sendMessage("[grey][[DEBUG] [white]" + message);
     }
 
     public static void sendSuccess(CommandSender sender, String message) {
-        sender.sendMessage("[light green][SUCCESS] [white]" + message);
+        sender.sendMessage("[light green][[SUCCESS] [white]" + message);
     }
 
     public static void sendDenied(CommandSender sender, String message) {
-        sender.sendMessage("[gold][[light red]DENIED[gold]] [grey]" + message);
+        sender.sendMessage("[gold][[[light red]DENIED[gold]] [grey]" + message);
     }
 
     public static MutableText formatServerMessage(CommandSender formater, String message) {

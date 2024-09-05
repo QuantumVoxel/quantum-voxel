@@ -127,6 +127,7 @@ import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.BreakResult;
+import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -2374,7 +2375,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
-        ClientWorld clientWorld = new ClientWorld(this);
+        ClientWorld clientWorld = new ClientWorld(this, DimensionInfo.OVERWORLD);
         this.world = clientWorld;
 
         this.integratedServer.start();
@@ -2387,7 +2388,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void connectToServer(String host, int port) {
-        ClientWorld clientWorld = new ClientWorld(this);
+        ClientWorld clientWorld = new ClientWorld(this, DimensionInfo.OVERWORLD);
         this.world = clientWorld;
 
         this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {

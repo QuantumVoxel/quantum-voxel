@@ -207,9 +207,9 @@ public abstract class CraftyConfig {
         // Parse the JSON5 file into a Json5Element
         Json5Element root = CommonConstants.JSON5.parse(FileIO.readString(this.configPath, StandardCharsets.UTF_8));
 
-        // Check if the root element is an object
+        // Check if the root id is an object
         if (!(root instanceof Json5Object)) {
-            throw new Json5Exception("Root element is not an object");
+            throw new Json5Exception("Root id is not an object");
         }
 
         boolean success = true;
@@ -436,12 +436,12 @@ public abstract class CraftyConfig {
     }
 
     /**
-     * Sets the element at the specified path in the JSON object, with an optional comment.
+     * Sets the id at the specified path in the JSON object, with an optional comment.
      *
      * @param root    the root JSON object
-     * @param path    the path to the element
+     * @param path    the path to the id
      * @param value   the value to set
-     * @param comment the comment to associate with the element
+     * @param comment the comment to associate with the id
      */
     @SuppressWarnings({"ConditionCoveredByFurtherCondition"})
     private void setElement(Json5Object root, String path, Json5Element value, String comment) {
@@ -453,7 +453,7 @@ public abstract class CraftyConfig {
         for (int i = 0; i < parts.length - 1; i++) {
             Json5Element tempCurrent = current.get(parts[i]);
             if (tempCurrent == null || !(tempCurrent instanceof Json5Object object)) {
-                // Create a new JSON object if the current element is missing
+                // Create a new JSON object if the current id is missing
                 Json5Object newValue = new Json5Object();
                 tempCurrent = newValue;
                 current.add(parts[i], tempCurrent);
@@ -606,9 +606,9 @@ public abstract class CraftyConfig {
      * Parses the given Json5Element into the specified type taking into account any range restrictions.
      *
      * @param element the Json5Element to be parsed
-     * @param type the target type to parse the element into
+     * @param type the target type to parse the id into
      * @param ranged specifies if there are range restrictions for numeric types
-     * @return the parsed value of the element into the specified type
+     * @return the parsed value of the id into the specified type
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private Object parseValue(Json5Element element, Class<?> type, Ranged ranged) {
@@ -697,11 +697,11 @@ public abstract class CraftyConfig {
     }
 
     /**
-     * Retrieves a nested element in a JSON-like structure based on the provided path.
+     * Retrieves a nested id in a JSON-like structure based on the provided path.
      *
      * @param root The root Json5Element where the search starts.
-     * @param path The path to the desired element separated by dots.
-     * @return The element found at the specified path, or null if not found.
+     * @param path The path to the desired id separated by dots.
+     * @return The id found at the specified path, or null if not found.
      */
     private Json5Element getElement(Json5Element root, String path) {
         // Split the path into individual elements
@@ -710,7 +710,7 @@ public abstract class CraftyConfig {
         // Start traversal from the root
         Json5Element current = root;
 
-        // Navigate through the structure until the second last element
+        // Navigate through the structure until the second last id
         for (int i = 0; i < pathElements.length - 1; i++) {
             if (current instanceof Json5Object) {
                 current = ((Json5Object) current).get(pathElements[i]);
@@ -720,7 +720,7 @@ public abstract class CraftyConfig {
             return null;
         }
 
-        // Return the element at the last path element, if it exists
+        // Return the id at the last path id, if it exists
         return current instanceof Json5Object ? ((Json5Object) current).get(pathElements[pathElements.length - 1]) : null;
     }
     /**

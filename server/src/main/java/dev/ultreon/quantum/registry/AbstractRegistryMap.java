@@ -8,10 +8,10 @@ import java.util.*;
  * @param <K> The type key type for the registry.
  * @param <V> The type value type for the registry.
  */
-public abstract class AbstractRegistry<K, V> {
+public abstract class AbstractRegistryMap<K, V> {
     protected final HashMap<K, V> registry = new HashMap<>();
 
-    protected AbstractRegistry() throws IllegalStateException {
+    protected AbstractRegistryMap() throws IllegalStateException {
 
     }
 

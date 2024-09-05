@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
+import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.Skybox;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -55,4 +56,6 @@ public interface TerrainRenderer extends Disposable {
     void reloadChunks();
 
     void renderForeground(ModelBatch modelBatch, float deltaTime);
+
+    void setWorld(@Nullable ClientWorldAccess world);
 }

@@ -27,12 +27,13 @@ import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
-import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.gen.CaveCarver;
 import dev.ultreon.quantum.world.gen.TerrainGenerator;
+import dev.ultreon.quantum.world.gen.carver.CaveCarver;
+import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.loot.LootGenerator;
@@ -50,6 +51,7 @@ import org.jetbrains.annotations.*;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.*;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
@@ -61,6 +63,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class ServerWorld extends World {
     private final WorldStorage storage;
+    private final ChunkGenerator generator;
     private final QuantumServer server;
     private final RegionStorage regionStorage = new RegionStorage();
     private @Nullable CompletableFuture<Boolean> saveFuture;
@@ -68,8 +71,6 @@ public class ServerWorld extends World {
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "ServerWorld-Save"));
     private final ExecutorService executor = Executors.newFixedThreadPool(4, QuantumServer.WORLD_GEN_THREAD_FACTORY);
     private static long chunkUnloads;
-
-    private final TerrainGenerator terrainGen;
 
     private final Queue<ChunkVec> chunksToLoad = this.createSyncQueue();
     private final Queue<ChunkVec> chunksToUnload = this.createSyncQueue();
@@ -83,25 +84,31 @@ public class ServerWorld extends World {
     private boolean saving;
     private int spawnY;
     private long time;
+    private final RegistryKey<DimensionInfo> key;
 
-    public ServerWorld(QuantumServer server, WorldStorage storage, MapType worldData) {
+    public ServerWorld(QuantumServer server, RegistryKey<DimensionInfo> key, WorldStorage storage, ChunkGenerator generator, MapType worldData) {
         super((LongType) worldData.get("seed"));
+
+        this.key = key;
+
         this.server = server;
         this.storage = storage;
+        this.generator = generator;
 
         this.load(worldData);
 
-        final var biomeDomain = new DomainWarping(NoiseConfigs.BIOME_X.create(this.seed), NoiseConfigs.BIOME_Y.create(this.seed));
-        final var layerDomain = new DomainWarping(NoiseConfigs.LAYER_X.create(this.seed), NoiseConfigs.LAYER_Y.create(this.seed));
+        NoiseConfigs noiseConfigs = server.getNoiseConfigs();
+        final var biomeDomain = new DomainWarping(noiseConfigs.biomeX.create(this.seed), noiseConfigs.biomeY.create(this.seed));
+        final var layerDomain = new DomainWarping(noiseConfigs.layerX.create(this.seed), noiseConfigs.layerY.create(this.seed));
 
-        this.terrainGen = new TerrainGenerator(biomeDomain, layerDomain, NoiseConfigs.BIOME_MAP);
-
-        for (Biome value : Registries.BIOME.values()) {
-            if (value.doesNotGenerate()) continue;
-            this.terrainGen.registerBiome(this, this.getSeed(), value, value.getTemperatureStart(), value.getTemperatureEnd(), value.getHumidityStart(), value.getHumidityEnd(), value.getHeightStart(), value.getHeightEnd(), value.getHillinessStart(), value.getHillinessEnd(), value.isOcean());
-        }
-
-        this.terrainGen.create(this, this.seed);
+//        this.terrainGen = new TerrainGenerator(biomeDomain, layerDomain, NoiseConfigs.BIOME_MAP);
+//
+//        for (Biome value : Registries.BIOME.values()) {
+//            if (value.doesNotGenerate()) continue;
+//            this.terrainGen.registerBiome(this, this.getSeed(), value, value.getTemperatureStart(), value.getTemperatureEnd(), value.getHumidityStart(), value.getHumidityEnd(), value.getHeightStart(), value.getHeightEnd(), value.getHillinessStart(), value.getHillinessEnd(), value.isOcean());
+//        }
+//
+//        this.terrainGen.create(this, this.seed);
     }
 
     private void load(MapType worldData) {
@@ -386,7 +393,7 @@ public class ServerWorld extends World {
         try {
             // Check if there's an existing chunk at the global position
             var oldChunk = this.getChunk(globalVec);
-            if (oldChunk != null && !overwrite) {
+            if (!overwrite) {
                 Region regionAt = this.regionStorage.getRegionAt(globalVec);
                 if (regionAt == null) {
                     throw new IllegalChunkStateException("Region is not loaded.");
@@ -412,9 +419,6 @@ public class ServerWorld extends World {
                     throw new IllegalChunkStateException("Chunk is not loaded.");
 
                 ServerChunk chunk1 = this.getChunk(globalVec);
-                if (chunk1 == null) {
-                    throw new IllegalChunkStateException("Chunk not properly loaded.");
-                }
                 if (chunk1 != serverChunk)
                     throw new IllegalChunkStateException("Chunk is loaded at a different location: " + serverChunk.getVec() + " expected " + globalVec);
 
@@ -813,9 +817,9 @@ public class ServerWorld extends World {
         this.saveExecutor.shutdownNow();
         super.dispose();
 
-        this.regionStorage.dispose();
+        this.generator.dispose();
 
-        this.terrainGen.dispose();
+        this.regionStorage.dispose();
     }
 
     @Override
@@ -913,10 +917,14 @@ public class ServerWorld extends World {
     @Blocking
     @ApiStatus.Internal
     public void load() throws IOException {
+        this.generator.create(this, seed);
+
         this.storage.createDir("players/");
         this.storage.createDir("regions/");
 
-        World.LOGGER.info("Loading world: " + this.storage.getDirectory().getFileName());
+        Path dimPath = this.getDimensionPath();
+
+        World.LOGGER.info("Loading world: " + dimPath.getFileName());
 
         //<editor-fold defaultstate="collapsed" desc="<<Loading: entities.ubo>>">
         if (this.storage.exists("entities.ubo")) {
@@ -951,7 +959,7 @@ public class ServerWorld extends World {
 
         WorldEvents.LOAD_WORLD.factory().onLoadWorld(this, this.storage);
 
-        World.LOGGER.info("Loaded world: " + this.storage.getDirectory().getFileName());
+        World.LOGGER.info("Loaded world: " + dimPath.getFileName());
     }
 
     /**
@@ -966,8 +974,10 @@ public class ServerWorld extends World {
         if (this.saving) return;
         this.saving = true;
 
+        Path dimPath = getDimensionPath();
+
         // Log saving world message if not silent
-        if (!silent) World.LOGGER.info("Saving world: " + this.storage.getDirectory().getFileName());
+        if (!silent) World.LOGGER.info("Saving world: " + dimPath.getFileName());
 
         // Save entities data
         var entitiesData = new ListType<MapType>();
@@ -1004,8 +1014,12 @@ public class ServerWorld extends World {
         WorldEvents.SAVE_WORLD.factory().onSaveWorld(this, this.storage);
 
         // Log saved world message if not silent
-        if (!silent) World.LOGGER.info("Saved world: " + this.storage.getDirectory().getFileName());
+        if (!silent) World.LOGGER.info("Saved world: " + dimPath.getFileName());
         this.saving = false;
+    }
+
+    private Path getDimensionPath() {
+        return this.storage.getDirectory().resolve("regions/" + key.id().getDomain() + "/" + key.id().getPath() + ".region");
     }
 
     /**
@@ -1261,8 +1275,13 @@ public class ServerWorld extends World {
      *
      * @return the TerrainGenerator object
      */
+    @Deprecated(forRemoval = true)
     public TerrainGenerator getTerrainGenerator() {
-        return this.terrainGen;
+        throw new DeprecationCheckException("Use getGenerator() instead.");
+    }
+
+    public ChunkGenerator getGenerator() {
+        return this.generator;
     }
 
     /**
@@ -1337,6 +1356,15 @@ public class ServerWorld extends World {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+    public boolean isSaveable() {
+        return true;
+    }
+
+    @Override
+    public RegistryKey<DimensionInfo> getDimension() {
+        return key;
     }
 
     /**
@@ -1691,7 +1719,7 @@ public class ServerWorld extends World {
             // Generate terrain using the terrain generator.
             List<RecordedChange> recordedChanges1;
             recordedChanges1 = List.copyOf(world.recordedChanges);
-            this.world.terrainGen.generate(chunk, recordedChanges1);
+            this.world.generator.generate(world, chunk, recordedChanges1);
 
             WorldEvents.CHUNK_BUILT.factory().onChunkGenerated(this.world, this, chunk);
 

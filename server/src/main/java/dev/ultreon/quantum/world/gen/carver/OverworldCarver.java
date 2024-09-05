@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.world.gen;
+package dev.ultreon.quantum.world.gen.carver;
 
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import dev.ultreon.quantum.block.Blocks;
@@ -7,17 +7,20 @@ import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.HeightmapType;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.gen.CaveNoiseGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongLists;
+import org.jetbrains.annotations.NotNull;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 import static java.lang.Math.min;
 
-public class Carver {
+public class OverworldCarver implements Carver {
+    private final @NotNull BlockState stoneState = Blocks.STONE.createMeta();
     private final DomainWarping domainWarping;
     private final NoiseSource biomeNoise;
     private final CaveNoiseGenerator caveNoise;
@@ -25,13 +28,14 @@ public class Carver {
     public static long totalDurations = 0L;
     public static LongList durations = LongLists.synchronize(new LongArrayList());
 
-    public Carver(DomainWarping domainWarping, NoiseSource biomeNoise, long seed) {
+    public OverworldCarver(DomainWarping domainWarping, NoiseSource biomeNoise, long seed) {
         this.domainWarping = domainWarping;
         this.biomeNoise = biomeNoise;
 
         this.caveNoise = new CaveNoiseGenerator(seed);
     }
 
+    @Override
     public int carve(BuilderChunk chunk, int x, int z, double hilliness) {
         long start = System.currentTimeMillis();
         Vec3i offset = chunk.getOffset();
@@ -46,15 +50,15 @@ public class Carver {
                         boolean cave;
                         double v1 = caveNoise.evaluateNoise(x, y, z);
                         cave = v1 > 0.0;
-                        chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
+                        chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : stoneState);
                     } else {
-                        chunk.set(x, y, z, solidBlock(y));
+                        chunk.set(x, y, z, stoneState);
                     }
                 } else {
                     boolean cave;
                     double v1 = caveNoise.evaluateNoise(x, y, z);
                     cave = v1 > 0.0;
-                    chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : solidBlock(y));
+                    chunk.set(x, y, z, cave ? Blocks.CAVE_AIR.createMeta() : stoneState);
                     height = min(height, y - 1);
                 }
             } else if (y <= World.SEA_LEVEL) {
@@ -85,10 +89,7 @@ public class Carver {
         return groundPos;
     }
 
-    private static BlockState solidBlock(int y) {
-        return Blocks.STONE.createMeta();
-    }
-
+    @Override
     public int getSurfaceHeightNoise(float x, float z) {
         double height;
 

@@ -32,7 +32,7 @@ public class Json5Model implements BlockModel, ItemModel {
         this.ambientOcclusion = ambientOcclusion;
         this.display = display;
         this.overrides = overrides;
-        id = key.parent().element().mapPath(s -> s + "/" + key.element().getDomain() + "." + key.element().getPath());
+        id = key.parent().id().mapPath(s -> s + "/" + key.id().getDomain() + "." + key.id().getPath());
     }
 
     public Model bake() {
@@ -51,7 +51,7 @@ public class Json5Model implements BlockModel, ItemModel {
 
     @Override
     public NamespaceID resourceId() {
-        return key.element();
+        return key.id();
     }
 
     public RegistryKey<?> getKey() {

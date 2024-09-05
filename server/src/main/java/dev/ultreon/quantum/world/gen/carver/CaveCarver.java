@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.world.gen;
+package dev.ultreon.quantum.world.gen.carver;
 
 import com.badlogic.gdx.math.MathUtils;
 import de.articdive.jnoise.core.api.functions.Interpolation;

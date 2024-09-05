@@ -18,7 +18,7 @@ class StyleTextIterator implements Iterator<StylePart> {
 
     @Override
     public StylePart next() {
-        if (!hasNext()) throw new NoSuchElementException("No next element");
+        if (!hasNext()) throw new NoSuchElementException("No next id");
 
         return this.parts[this.index++];
     }

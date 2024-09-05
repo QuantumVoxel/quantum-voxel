@@ -64,13 +64,13 @@ public class DiscordRPC implements RpcHandler {
                 } else if (activity == GameActivity.SINGLEPLAYER) {
                     @Nullable ClientWorldAccess world = quantumClient.world;
                     builder.setState("Playing Singleplayer")
-                            .setDetails("In: " + (world != null ? world.getDimension().getName().getText() : null))
+                            .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion());
                 } else if (activity == GameActivity.MULTIPLAYER) {
                     @Nullable ClientWorldAccess world = quantumClient.world;
                     builder.setState("Playing Multiplayer")
-                            .setDetails("In: " + (world != null ? world.getDimension().getName().getText() : null))
+                            .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
                             .setJoinSecret(quantumClient.serverData.address());
@@ -81,9 +81,7 @@ public class DiscordRPC implements RpcHandler {
                 // Schedule a task to update the Rich Presence every 200 milliseconds
                 ScheduledFuture<?> scheduledFuture = QuantumClient.get().scheduleRepeat(() -> update(client), 0, 200, TimeUnit.MILLISECONDS);
                 // Set up a shutdown hook to cancel the scheduled task and close the IPC client
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    scheduledFuture.cancel(false);
-                }));
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> scheduledFuture.cancel(false)));
             }
             /**
              * Updates the Discord Rich Presence with the current game activity.
@@ -105,13 +103,13 @@ public class DiscordRPC implements RpcHandler {
                 if (activity == GameActivity.SINGLEPLAYER) {
                     @Nullable ClientWorldAccess world = QuantumClient.get().world;
                     builder.setState("Playing Singleplayer")
-                            .setDetails("In: " + (world != null ? world.getDimension().getName().getText() : null))
+                            .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion());
                 } else if (activity == GameActivity.MULTIPLAYER) {
                     @Nullable ClientWorldAccess world = QuantumClient.get().world;
                     builder.setState("Playing Multiplayer")
-                            .setDetails("In: " + (world != null ? world.getDimension().getName().getText() : null))
+                            .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
                             .setJoinSecret(QuantumClient.get().serverData.address());
@@ -169,7 +167,7 @@ public class DiscordRPC implements RpcHandler {
              * Called when the client is disconnected from Discord.
              *
              * @param client The IPC client.
-             * @param t      The cause of the disconnection. May be null.
+             * @param t      The cause of the disconnection. Maybe null.
              */
             @Override
             public void onDisconnect(IPCClient client, Throwable t) {

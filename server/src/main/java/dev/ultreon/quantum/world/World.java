@@ -23,6 +23,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.*;
@@ -77,7 +78,7 @@ public abstract class World implements Disposable, WorldAccess {
     boolean disposed;
     private final Set<ChunkVec> invalidatedChunks = Collections.synchronizedSet(new LinkedHashSet<>());
     private final List<ContainerMenu> menus = new ArrayList<>();
-    private final DimensionInfo info = DimensionInfo.OVERWORLD; // TODO WIP
+    private final RegistryKey<DimensionInfo> info = DimensionInfo.OVERWORLD; // TODO WIP
     protected UUID uid = Utils.ZEROED_UUID;
     protected int spawnX;
     protected int spawnZ;
@@ -694,7 +695,7 @@ public abstract class World implements Disposable, WorldAccess {
      *
      * @param breaking the position of the block.
      * @param breaker  the player breaking the block.
-     * @return
+     * @return {@code true} if the block was successfully stopped breaking, {@code false} otherwise.
      */
     @Override
     public boolean stopBreaking(BlockVec breaking, Player breaker) {
@@ -818,7 +819,7 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public Biome getBiome(BlockVec pos) {
+    public RegistryKey<Biome> getBiome(BlockVec pos) {
         Chunk chunk = this.getChunkAt(pos);
         if (chunk == null) return null;
         BlockVec localVec = pos.chunkLocal();
@@ -826,7 +827,7 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     @Override
-    public DimensionInfo getDimension() {
+    public RegistryKey<DimensionInfo> getDimension() {
         return this.info;
     }
 

@@ -48,15 +48,15 @@ public class CrashScreen extends Screen {
     }
 
     /**
-     * Check if a stack trace element is a usable element.
+     * Check if a stack trace id is a usable id.
      *
-     * @param stackTraceElement The stack trace element to check.
-     * @return true if the stack trace element is usable, false otherwise.
+     * @param stackTraceElement The stack trace id to check.
+     * @return true if the stack trace id is usable, false otherwise.
      */
     private static boolean isUsableStackElement(StackTraceElement stackTraceElement) {
         String className = stackTraceElement.getClassName();
 
-        // Iterate over each unusable stack element and check if the class name starts with it
+        // Iterate over each unusable stack id and check if the class name starts with it
         for (String unusableStackElement : UNUSABLE_STACK_ELEMENTS) {
             if (className.startsWith(unusableStackElement)) {
                 return false;
@@ -134,7 +134,7 @@ public class CrashScreen extends Screen {
         String message = throwable.getMessage();
         String errorMessage = message == null ? "<No message>" : message.trim().stripIndent().replace("\n", " ").replace("\t", "").replace("java.lang.", "");
 
-        // Get the first usable stack element from the throwable stack trace
+        // Get the first usable stack id from the throwable stack trace
         String usableStackTrace = Arrays.stream(throwable.getStackTrace())
                 .filter(CrashScreen::isUsableStackElement)
                 .map(StackTraceElement::toString)

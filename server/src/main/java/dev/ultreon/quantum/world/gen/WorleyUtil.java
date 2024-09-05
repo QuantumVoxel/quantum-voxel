@@ -16,8 +16,6 @@ public class WorleyUtil {
     /**
      * Sets frequency for all noise types<br>
      * Default: 0.01
-     *
-     * @param frequency
      */
     public void SetFrequency(double frequency) {
         m_frequency = frequency;
@@ -40,14 +38,7 @@ public class WorleyUtil {
         return hash;
     }
 
-    private static class Double3 {
-        public final double x, y, z;
-
-        public Double3(double x, double y, double z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
+    private record Double3(double x, double y, double z) {
     }
 
     private static final Double3[] CELL_3D = {
@@ -327,8 +318,8 @@ public class WorleyUtil {
         double distance3 = 999999;
 
         int xp = xrPrime;
-        int yp = yrPrime;
-        int zp = zrPrime;
+        int yp;
+        int zp;
         for (int xi = 0; xi < 3; xi++) {
             yp = yrPrime;
             for (int yi = 0; yi < 3; yi++) {
