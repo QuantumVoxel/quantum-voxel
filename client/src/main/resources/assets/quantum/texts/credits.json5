@@ -1,0 +1,182 @@
+{
+  /*
+   * This is the "credits" file for quantum.
+   * Any person that has contributed to the project will be added here.
+   * External libraries will be linked in this file. (Currently not all linked, as it's a lot of libraries lmao)
+   */
+
+  // Contributors that contributed with code.
+  Code: {
+    XyperCode: {
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Founder",
+        "Lead Maintainer"
+      ]
+    },
+    MaroonShaded: {
+      url: "https://github.com/MaroonShaded",
+      roles: [
+        "Contributor",
+      ]
+    }
+  },
+  // Contributors that contributed with assets.
+  Assets: {
+    P0TAT0_XD: {
+      url: null,
+      roles: [
+        "Artist",
+      ],
+      for: [
+        "Hotbar",
+        "Item name display",
+        "Health bar",
+        "Hunger bar",
+        "XP bar",
+        "Crosshairs",
+        "Sand texture",
+        "Leaves texture"
+      ]
+    },
+    hellay: {
+      url: null,
+      roles: [
+        "Artist",
+      ],
+      for: [
+        "Title button icons"
+      ]
+    },
+    ItsBeck: {
+      url: null,
+      roles: [
+        "Artist",
+        "Modeler"
+      ],
+      for: [
+        "Pig Model & Texture"
+      ]
+    },
+    Scrappy412: {
+      url: null,
+      roles: [
+        "Artist",
+      ],
+      for: [
+        "Leaves Block Texture"
+      ]
+    },
+    XyperCode: {
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Contributor"
+      ],
+      for: [
+        "Quantium Font"
+      ]
+    },
+  },
+  // Downloaded resources
+  Downloads: {
+    spycrah: {
+      url: "https://freesound.org/people/spycrah/",
+      license: "CC BY 4.0",
+      links: [
+        {
+          name: "Grass Step Left",
+          url: "https://freesound.org/s/535220/"
+        },
+        {
+          name: "Grass Step Right",
+          url: "https://freesound.org/s/535222/"
+        }
+      ]
+    },
+    Twemoji: {
+      url: "https://github.com/twitter/twemoji",
+      license: "CC BY 4.0",
+      links: [
+
+      ]
+    }
+  },
+  // Contributors that contributed language changes/additions through GitHub pull requests.
+  Translations: {
+    Oszoou: {
+      url: "https://github.com/Oszoou",
+      roles: [
+        "Contributor"
+      ]
+    },
+    XyperCode: {
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Contributor"
+      ]
+    },
+  },
+  // People that tested the game.
+  Testing: {
+    XyperCode: {
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Contributor",
+        "Testing"
+      ]
+    },
+    MincraftEinstein: {
+      url: "https://github.com/MincraftEinstein",
+      roles: [
+        "Testing",
+      ]
+    },
+    CreatomatGaming: {
+      url: "https://github.com/creatomat",
+      roles: [
+        "Testing",
+      ]
+    }
+  },
+  // Contributions to documentation.
+  Documentation: {
+    XyperCode: {
+      url: "https://github.com/XyperCode",
+      roles: [
+        "Documentation Contributor",
+      ]
+    }
+  },
+  SoundEffects: {
+    PixaBay: {
+      url: "https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=36186",
+      license: "Pixabay",
+      for: [
+        "Eating Sound Effect"
+      ],
+      roles: [
+        "External Source"
+      ]
+    },
+  },
+  // External libraries that are included with the game.
+  ExternalLibraries: {
+    LibGDX: {
+      url: "https://libgdx.com/",
+      license: "Apache 2.0",
+    },
+    "Fabric Loader": {
+      url: "https://fabricmc.net/",
+      license: "Apache 2.0",
+    },
+    LWJGL: {
+      url: "https://www.lwjgl.org/"
+    }
+    // TODO add other external libraries in credits
+  },
+  Extra: {
+    "Everyone on Crowdin that helped with translations": {
+      url: "https://crowdin.com/editor/ultreon-team/350"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+package dev.ultreon.quantum.client.api.events.gui;
+
+import dev.ultreon.quantum.client.gui.widget.UIContainer;
+import dev.ultreon.quantum.client.gui.widget.Widget;
+import dev.ultreon.quantum.events.api.Event;
+
+public class WidgetEvents {
+    public static final Event<WidgetAdded> WIDGET_ADDED = Event.withValue();
+    public static final Event<WidgetRemoved> WIDGET_REMOVED = Event.withValue();
+
+    @FunctionalInterface
+    public interface WidgetAdded {
+        void onWidgetAdded(UIContainer<?> screen, Widget widget);
+    }
+
+    @FunctionalInterface
+    public interface WidgetRemoved {
+        void onWidgetRemoved(UIContainer<?> screen, Widget widget);
+    }
+}

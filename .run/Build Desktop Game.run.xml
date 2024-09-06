@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":desktop-merge:jpackage" />
+          <option value=":launcher:jpackage" />
         </list>
       </option>
       <option name="vmOptions" />

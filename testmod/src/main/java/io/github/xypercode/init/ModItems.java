@@ -1,9 +1,9 @@
 package io.github.xypercode.init;
 
-import com.ultreon.craft.item.Item;
-import com.ultreon.craft.registry.DeferRegistry;
-import com.ultreon.craft.registry.Registries;
-import com.ultreon.craft.registry.DeferredElement;
+import dev.ultreon.quantum.item.Item;
+import dev.ultreon.quantum.registry.DeferRegistry;
+import dev.ultreon.quantum.registry.DeferredElement;
+import dev.ultreon.quantum.registry.Registries;
 import io.github.xypercode.TestMod;
 
 public class ModItems {

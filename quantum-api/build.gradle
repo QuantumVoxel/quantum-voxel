@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'dev.ultreon.quantum'
+version = rootProject.version
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    create("api") {
+        java {
+            srcDir("src/api/java")
+        }
+    }
+
+    main {
+        java {
+            compileClasspath += sourceSets["api"].output
+            runtimeClasspath += sourceSets["api"].output
+        }
+    }
+}
+
+tasks.register('apiJar', Jar) {
+    from sourceSets.api.output
+    archiveClassifier = 'api'
+}
+
+artifacts {
+    archives apiJar
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    apiImplementation project(":desktop")
+    implementation project(":desktop")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = "dev.ultreon"
+            artifactId = "mixinprovider"
+            version = project.version
+            from components.java
+        }
+    }
+
+    repositories {
+        if (findProperty("gitLabPrivateToken") != null) {
+            maven {
+                name = "GitLabMaven"
+                url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
+                credentials(HttpHeaderCredentials) {
+                    name = "Private-Token"
+                    value = findProperty("gitLabPrivateToken").toString()
+                    // the variable resides in $GRADLE_USER_HOME/gradle.properties
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
+            }
+        }
+    }
+}

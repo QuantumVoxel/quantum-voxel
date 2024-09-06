@@ -1,4 +1,4 @@
-//import com.ultreon.gameutils.ProjectType
+//import dev.ultreon.gameutils.ProjectType
 
 buildscript {
     repositories {
@@ -28,7 +28,6 @@ plugins {
     id "java-library"
 }
 
-version project_version
 group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
 //projectConfig {
@@ -39,8 +38,6 @@ java {
     withSourcesJar()
     withJavadocJar()
 }
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = "21" // Need this here so eclipse task generates correctly.
 
 repositories {
     mavenCentral()
@@ -69,23 +66,15 @@ dependencies {
     implementation api("org.apache.logging.log4j:log4j-api:$log4j_version")
     implementation api("com.formdev:flatlaf:3.2.1")
 
-    compileOnly("net.fabricmc:fabric-loader:$fabric_version") {
+    implementation api("dev.ultreon.quantum:fabric-loader:$fabric_version") {
         exclude group: "org.ow2.asm"
         exclude group: "org.ow2.sat4j"
     }
 }
 
 processResources {
-    inputs.property "version", version
-    inputs.property "ulreoncraft_version", project(":client").version
-    inputs.property "gdx_version", gdx_version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": version
-    }
-
     filesMatching("versions.properties") {
-        expand "ulreoncraft_version": project(":client").version, "gdx_version": gdx_version
+        expand project.properties + [quantum_version: project(":client").version]
     }
 
     exclude "*.pdn", "*.xcf", "*.ps"
@@ -117,7 +106,7 @@ jar {
 }
 
 build {
-    finalizedBy ":desktop-merge:build"
+    finalizedBy ":launcher:build"
     finalizedBy ":desktop:build"
     finalizedBy ":client:build"
 }
@@ -127,9 +116,18 @@ test {
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
+    repositories {
+        if (hasProperty("gitLabPrivateToken")) {
+            maven {
+                url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
+                credentials(HttpHeaderCredentials) {
+                    name = "Private-Token"
+                    value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
+            }
         }
     }
 }

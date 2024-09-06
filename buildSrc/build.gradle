@@ -8,16 +8,11 @@ plugins {
 dependencies {
     api 'org.ow2.asm:asm:9.6'
     api 'com.google.code.gson:gson:2.10.1'
-    compileOnly api('gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7')
-}
+    compileOnly api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.8"), {
+        exclude(group: 'com.google.guava', module: 'guava')
+    }
 
-java {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
-}
-
-kotlin {
-    jvmToolchain 21
+    compileOnly api("com.google.guava:guava:33.1.0-jre")
 }
 
 repositories {
@@ -29,7 +24,7 @@ gradlePlugin {
     plugins {
         register("gameutils") {
             id = "gameutils"
-            implementationClass = "com.ultreon.gameutils.GameUtilsPlugin"
+            implementationClass = "dev.ultreon.gameutils.GameUtilsPlugin"
         }
     }
 

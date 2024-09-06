@@ -2,7 +2,6 @@ import org.jetbrains.gradle.ext.Application
 import org.jetbrains.gradle.ext.GradleTask
 import org.jetbrains.gradle.ext.runConfigurations
 import org.jetbrains.gradle.ext.settings
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 
@@ -13,7 +12,7 @@ plugins {
 
 apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
 
-group = "io.github.ultreon.craftmods"
+group = "dev.ultreon.quantummods"
 version = "0.1.0"
 
 base {
@@ -28,10 +27,10 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 
-    api(project(":api"))
-    api(project(":client"))
-    api(project(":desktop"))
-    api(project(":server"))
+//    api(project(":api"))
+    implementation(project(":client"))
+    implementation(project(":desktop"))
+    implementation(project(":server"))
 }
 
 tasks.test {
@@ -89,7 +88,7 @@ commonProperties
 
                 runConfigurations {
                     create(
-                        "Ultracraft Client",
+                        "Quantum Voxel Client",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -105,7 +104,7 @@ commonProperties
                         }
                     }
                     create(
-                        "Ultracraft Client Alt",
+                        "Quantum Voxel Client Alt",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =
@@ -121,7 +120,7 @@ commonProperties
                         }
                     }
                     create(
-                        "Ultracraft Server",
+                        "Quantum Voxel Server",
                         Application::class.java
                     ) {                       // Create new run configuration "MyApp" that will run class foo.App
                         jvmArgs =

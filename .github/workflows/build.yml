@@ -30,8 +30,10 @@ jobs:
         run: chmod +x ./gradlew && ./gradlew pack
         env:
           GH_BUILD_NUMBER: ${{ github.run_number }}
+          USERNAME: ${{ github.actor }}
+          TOKEN: ${{ github.token }}
       - name: Capture the build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Ultracraft Build ${{ github.run_number }}
-          path: desktop-merge/build/dist/package.zip
+          name: Quantum Voxel Build ${{ github.run_number }}
+          path: launcher/build/dist/package.zip

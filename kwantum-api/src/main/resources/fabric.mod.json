@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "kwantum_api",
+  "version": "${version}",
+  "name": "Kwantum API",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/kwantum_api/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.ultreon.quantapi.kotlin.KwantumApi"]
+  },
+  "mixins": [
+
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "quantum": "${version}"
+  }
+}

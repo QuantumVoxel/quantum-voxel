@@ -1,0 +1,27 @@
+package dev.ultreon.quantum.network.packets.c2s;
+
+import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketIO;
+import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
+
+public record C2SKeepAlivePacket() implements Packet<InGameServerPacketHandler> {
+    public static C2SKeepAlivePacket read(PacketIO buffer) {
+        return new C2SKeepAlivePacket();
+    }
+
+    @Override
+    public void toBytes(PacketIO buffer) {
+
+    }
+
+    @Override
+    public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
+        handler.onKeepAlive();
+    }
+
+    @Override
+    public String toString() {
+        return "C2SKeepAlivePacket";
+    }
+}

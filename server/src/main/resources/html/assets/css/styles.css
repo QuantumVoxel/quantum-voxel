@@ -1,0 +1,188 @@
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #222;
+        --text-color: #e6dfde;
+        --card-bg-color: #444;
+        --link-color: #f8f9fc;
+        --link-hover-color: #fff;
+        --text-form-border-color: #111;
+        --hr-color: #444;
+        --card-hr-color: #666;
+        --accent-color: #ff4000;
+        --accent-color-hover: #ff6430;
+        --accent-color-active: #d23800;
+        --outline-color: #ff400050;
+        --accordion-button-bg: #555;
+        --console-bg-color: #111;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-color: #eee;
+        --text-color: #212529;
+        --card-bg-color: #fff;
+        --link-color: #495057;
+        --text-form-border-color: #dee2e6;
+        --hr-color: #dee2e6;
+        --card-hr-color: #dee2e6;
+        --accent-color: #ff4000;
+        --accent-color-hover: #ff6430;
+        --accent-color-active: #d23800;
+        --outline-color: #ff400050;
+        --accordion-button-bg: #888;
+        --console-bg-color: #fff;
+    }
+}
+
+.card {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+}
+
+a {
+    color: var(--link-color);
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+.text-dark {
+    color: var(--text-color) !important;
+}
+
+.card .form-control[type="text"],
+.card .form-control[type="email"],
+.card .form-control[type="password"] {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.form-control[type="text"],
+.form-control[type="email"],
+.form-control[type="password"] {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border-color: var(--text-form-border-color);
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.5);
+    background-color: var(--accent-color-hover) !important;
+    border-color: var(--accent-color-hover) !important;
+}
+
+.btn-primary:active {
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.5);
+    background-color: var(--accent-color-active) !important;
+    border-color: var(--accent-color-active) !important;
+}
+
+.btn-primary:active:focus {
+    background-color: var(--accent-color-active) !important;
+    border-color: var(--accent-color-active) !important;
+}
+
+.btn-primary:focus {
+    background-color: var(--accent-color-active) !important;
+    border-color: var(--accent-color-active) !important;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 .2rem var(--outline-color) !important;
+}
+
+.btn-primary:active {
+    box-shadow: 0 0 0 .2rem var(--outline-color) !important;
+}
+
+.btn-primary:active:focus {
+    box-shadow: 0 0 0 .2rem var(--outline-color) !important;
+}
+
+.sidebar :focus {
+    box-shadow: 0 0 0 .2rem #fff8 !important;
+    outline: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+hr {
+    border-color: var(--hr-color);
+}
+
+.card hr {
+    border-color: var(--card-hr-color) !important;
+}
+
+.bg-accent {
+    background-color: var(--accent-color) !important;
+}
+
+.accordion {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border-radius: 8px;
+}
+
+.accordion-item {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border-radius: 8px;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--accordion-button-bg);
+    color: var(--text-color);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.accordion-button.collapsed {
+    background-color: var(--accordion-button-bg);
+    color: var(--text-color);
+    border-radius: 8px;
+}
+
+.accordion-button::after {
+    color: var(--text-color);
+    filter: brightness(1000%);
+}
+
+.accordion-button {
+    background-color: var(--accordion-button-bg);
+}
+
+#console {
+    background-color: var(--console-bg-color);
+    min-width: calc(100vw - 340px);
+    min-height: calc(100vh - 115px);
+    max-width: calc(100vw - 340px);
+    max-height: calc(100vh - 115px) !important;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 16px;
+    margin: 16px 0;
+    color: var(--text-color);
+
+    white-space: pre;
+    word-wrap: normal;
+
+    font: 14px monospace;
+
+    border-radius: 8px;
+    margin-bottom: 16px;
+}

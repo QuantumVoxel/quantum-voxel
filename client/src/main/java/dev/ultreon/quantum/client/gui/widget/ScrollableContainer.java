@@ -1,0 +1,227 @@
+package dev.ultreon.quantum.client.gui.widget;
+
+import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.client.gui.Bounds;
+import dev.ultreon.quantum.client.gui.Position;
+import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.Size;
+import dev.ultreon.quantum.util.RgbColor;
+import org.checkerframework.common.value.qual.IntRange;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+@ApiStatus.NonExtendable
+public class ScrollableContainer extends UIContainer<ScrollableContainer> {
+    private float scrollY = 0;
+    private boolean selectable;
+    protected Widget hoveredWidget;
+    int innerXOffset;
+    int innerYOffset;
+
+    protected int contentHeight;
+    protected int contentWidth;
+    private RgbColor backgroundColor = RgbColor.argb(0x40000000);
+
+    public ScrollableContainer(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+        super(width, height);
+    }
+
+    public ScrollableContainer(Size size) {
+        this(size.width, size.height);
+    }
+
+    public ScrollableContainer() {
+        super(400, 500);
+    }
+
+    public boolean isSelectable() {
+        return this.selectable;
+    }
+
+    @Override
+    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+        renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, backgroundColor);
+
+        this.innerYOffset = (int) Mth.clamp(this.scrollY, 0, this.contentHeight - this.size.height);
+
+
+        renderer.pushMatrix();
+        if (renderer.pushScissors(this.getBounds())) {
+            renderer.translate(0, -this.scrollY);
+            this.renderChildren(renderer, mouseX, (int) (mouseY - scrollY), deltaTime);
+            renderer.popScissors();
+        }
+        renderer.popMatrix();
+    }
+
+    @Override
+    public String getName() {
+        return "SelectionList";
+    }
+
+    @Nullable
+    public Widget getWidgetAt(int x, int y) {
+        y -= this.pos.y;
+
+        if (!this.isWithinBounds(x, y)) return null;
+        List<? extends Widget> entries = this.children();
+        for (int i = entries.size() - 1; i >= 0; i--) {
+            Widget widget = entries.get(i);
+            if (!widget.enabled || !widget.visible) continue;
+            if (widget.isWithinBounds(x, y)) return widget;
+        }
+        return null;
+    }
+
+    @Override
+    public void mouseMove(int x, int y) {
+        @Nullable Widget widgetAt = this.getWidgetAt(x, y);
+        boolean widgetChanged = false;
+        if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
+            this.hoveredWidget.mouseExit();
+        }
+
+        if (widgetAt != this.hoveredWidget) widgetChanged = true;
+        this.hoveredWidget = widgetAt;
+
+        if (this.hoveredWidget != null) {
+            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY());
+
+            if (widgetChanged) {
+                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
+            }
+        }
+        super.mouseMove(x, y);
+    }
+
+    @Override
+    public void mouseEnter(int x, int y) {
+        @Nullable Widget widgetAt = this.getWidgetAt(x, y);
+        boolean widgetChanged = false;
+        if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
+            this.hoveredWidget.mouseExit();
+        }
+
+        if (widgetAt != this.hoveredWidget) widgetChanged = true;
+        this.hoveredWidget = widgetAt;
+
+        if (this.hoveredWidget != null) {
+            x -= this.pos.x;
+            y -= this.pos.y;
+            if (widgetChanged) {
+                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
+            }
+        }
+        super.mouseMove(x, y);
+    }
+
+    @Override
+    public boolean mouseDrag(int x, int y, int dragX, int dragY, int pointer) {
+        @Nullable Widget widgetAt = this.getWidgetAt(x, y);
+        dragX -= this.pos.x;
+        dragY -= this.pos.y;
+        if (widgetAt != null)
+            return widgetAt.mouseDrag(x, y - widgetAt.getY(), dragX, dragY, pointer);
+        return super.mouseDrag(x, y, dragX, dragY, pointer);
+    }
+
+    @Override
+    public void mouseExit() {
+        if (this.hoveredWidget != null) {
+            this.hoveredWidget.mouseExit();
+            this.hoveredWidget = null;
+        }
+    }
+
+    @Override
+    public boolean mouseWheel(int x, int y, double rotation) {
+        Widget widgetAt = this.getWidgetAt(x, y);
+        if (widgetAt != null && widgetAt.mouseWheel(x, y, rotation)) {
+            return true;
+        }
+
+        if (this.getContentHeight() > this.size.height) {
+            double scrollAmount = rotation * 10;
+            double newValue = this.scrollY + scrollAmount;
+            int max = this.getContentHeight() - this.size.height;
+            this.scrollY = Mth.clamp((float) newValue, 0, max);
+        } else {
+            this.scrollY = 0;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean mousePress(int mouseX, int mouseY, int button) {
+        return super.mousePress(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        return super.mouseRelease(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
+        return super.mouseClick(mouseX, mouseY, button, clicks);
+    }
+
+    public int getContentHeight() {
+        return this.contentHeight;
+    }
+
+    public void removeWidget(Widget value) {
+        this.removeWidgetIf(Predicate.isEqual(value));
+    }
+
+    public void removeWidgetIf(Predicate<Widget> predicate) {
+        Preconditions.checkNotNull(predicate, "predicate");
+
+        int found = -1;
+        int idx = 0;
+        for (Widget widget : this.widgets) {
+            if (predicate.test(widget)) {
+                found = idx;
+                break;
+            }
+            idx++;
+        }
+
+        if (found == -1) return;
+        this.widgets.remove(found);
+    }
+
+    @CanIgnoreReturnValue
+    public ScrollableContainer selectable(boolean selectable) {
+        this.selectable = selectable;
+        return this;
+    }
+
+    @Override
+    public ScrollableContainer position(Supplier<Position> position) {
+        this.onRevalidate(widget -> widget.setPos(position.get()));
+        return this;
+    }
+
+    @Override
+    public ScrollableContainer bounds(Supplier<Bounds> position) {
+        this.onRevalidate(widget -> widget.setBounds(position.get()));
+        return this;
+    }
+
+    public ScrollableContainer backgroundColor(RgbColor color) {
+        this.backgroundColor = color;
+        return this;
+    }
+
+    public RgbColor backgroundColor() {
+        return this.backgroundColor;
+    }
+}
