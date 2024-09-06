@@ -103,7 +103,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec(double x, double y, double z, BlockVecSpace space) {
-        super((int) x, (int) y, (int) z);
+        super((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
 
         space.validate((int) x, (int) y, (int) z);
         this.space = space;
