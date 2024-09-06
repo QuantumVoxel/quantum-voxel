@@ -4,14 +4,12 @@ import dev.ultreon.quantum.UnsafeApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.item.tool.ToolType;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.loot.LootGenerator;
@@ -480,12 +478,6 @@ public class BlockState {
      */
     public void onDestroy(World world, BlockVec breaking, Player breaker) {
         this.block.onDestroy(world, breaking, this, breaker);
-
-        if (!breaker.getWorld().isClientSide()) {
-            for (ItemStack stack : this.block.getDrops(breaking, this, breaker)) {
-                world.drop(stack, new Vec3d(breaking.getIntX() + 0.5, breaking.getIntY() + 0.5, breaking.getIntZ() + 0.5));
-            }
-        }
     }
 
     /**

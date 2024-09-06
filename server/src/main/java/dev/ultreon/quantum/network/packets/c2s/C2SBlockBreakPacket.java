@@ -6,6 +6,7 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
+@Deprecated
 public record C2SBlockBreakPacket(BlockVec pos) implements Packet<InGameServerPacketHandler> {
 
     public static C2SBlockBreakPacket read(PacketIO buffer) {
@@ -21,7 +22,7 @@ public record C2SBlockBreakPacket(BlockVec pos) implements Packet<InGameServerPa
 
     @Override
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
-        handler.onBlockBroken(this.pos);
+//        handler.onBlockBroken(this.pos);
     }
 
     @Override

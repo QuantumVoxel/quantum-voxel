@@ -871,7 +871,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                 }
                 ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, world, uuid, name, connection);
                 player.load(read);
-                player.markSpawned();
                 player.markPlayedBefore();
                 return player;
             }
@@ -880,7 +879,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         }
 
         ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.dimManager.getWorld(DimensionInfo.OVERWORLD), uuid, name, connection);
-        player.markSpawned();
         return player;
     }
 

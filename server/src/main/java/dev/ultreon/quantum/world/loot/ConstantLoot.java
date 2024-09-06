@@ -19,6 +19,6 @@ public class ConstantLoot implements LootGenerator {
 
     @Override
     public Iterable<ItemStack> generate(RNG random) {
-        return this.loot;
+        return this.loot.stream().map(ItemStack::copy).toList();
     }
 }

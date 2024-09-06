@@ -1841,8 +1841,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 efficiency = toolItem.getEfficiency();
             }
 
-            if (world.continueBreaking(breaking, 1.0F / (Math.max((this.breakingBlock.getHardness() / efficiency) * QuantumServer.TPS, 1) + 1), this.player) != BreakResult.CONTINUE) {
+            BreakResult breakResult = world.continueBreaking(breaking, 1.0F / (Math.max((this.breakingBlock.getHardness() / efficiency) * QuantumServer.TPS, 1) + 1), this.player);
+            if (breakResult == BreakResult.FAILED) {
                 this.resetBreaking();
+            } else if (breakResult == BreakResult.BROKEN) {
+                this.breaking = null;
+                this.breakingBlock = null;
             } else {
                 if (this.oldSelected != this.player.selected) {
                     this.resetBreaking();

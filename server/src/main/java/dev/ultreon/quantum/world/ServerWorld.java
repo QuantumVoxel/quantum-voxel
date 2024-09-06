@@ -251,8 +251,6 @@ public class ServerWorld extends World {
     public boolean set(@NotNull BlockVec pos, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
 
-        QuantumServer.LOGGER.debug("Setting block at " + pos + " to " + block.getBlock().getId(), new Exception());
-
         int x = pos.getIntX();
         int y = pos.getIntY();
         int z = pos.getIntZ();
@@ -1940,9 +1938,7 @@ public class ServerWorld extends World {
         }
 
         public void tick() {
-            synchronized (this) {
-                this.regions.values().forEach(Region::tick);
-            }
+            this.regions.values().forEach(Region::tick);
         }
 
         /**
@@ -2032,9 +2028,7 @@ public class ServerWorld extends World {
          * @return the loaded region, or null if it isn't loaded.
          */
         private @Nullable Region getRegion(RegionVec vec) {
-            synchronized (this) {
-                return this.regions.get(vec);
-            }
+            return this.regions.get(vec);
         }
 
         public void dispose() {

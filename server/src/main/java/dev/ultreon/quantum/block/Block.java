@@ -20,7 +20,6 @@ import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
-import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.common.returnsreceiver.qual.This;
@@ -222,11 +221,6 @@ public class Block implements DataWriter<MapType> {
 
     public void onDestroy(@NotNull World world, @NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
 
-    }
-
-    public Iterable<ItemStack> getDrops(@NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
-        if (breaker == null) return this.lootGen.generate(new JavaRNG());
-        return this.lootGen.generate(breaker.getRng());
     }
 
     public int getLight(@NotNull BlockState blockState) {

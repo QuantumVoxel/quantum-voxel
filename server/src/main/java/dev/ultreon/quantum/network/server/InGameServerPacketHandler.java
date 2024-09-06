@@ -33,6 +33,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -150,10 +151,21 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
                 efficiency = toolItem.getEfficiency();
             }
 
+            final float amount = 1.0F / (Math.max(block.getHardness() * QuantumServer.TPS / efficiency, 0) + 1);
             switch (status) {
                 case START-> world.startBreaking(pos, this.player);
-                case CONTINUE -> world.continueBreaking(pos, 1.0F / (Math.max(block.getHardness() * QuantumServer.TPS / efficiency, 0) + 1), this.player);
-                case STOP, BROKEN -> world.stopBreaking(pos, this.player);
+                case CONTINUE -> {
+                    BreakResult breakResult = world.continueBreaking(pos, amount, this.player);
+                    if (breakResult == BreakResult.BROKEN)
+                        onBlockBroken(pos);
+                }
+                case BROKEN -> {
+                    BreakResult breakResult = world.continueBreaking(pos, amount, this.player);
+                    if (breakResult == BreakResult.BROKEN || (breakResult == BreakResult.CONTINUE && amount > 0.5f)) {
+                        onBlockBroken(pos);
+                    }
+                }
+                case STOP -> world.stopBreaking(pos, this.player);
             }
         });
     }
@@ -185,9 +197,8 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
             if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick
-                    || world.getBreakProgress(pos) <= 0.0F
-                    || ModApi.getGlobalEventHandler().call(new BlockAttemptBreakEvent(world, pos, original, block, stack, this.player))
-                    || !world.stopBreaking(pos, this.player)) {
+                    || ModApi.getGlobalEventHandler().call(new BlockAttemptBreakEvent(world, pos, original, block, stack, this.player))) {
+                world.stopBreaking(pos, this.player);
                 revertBlockSet(pos, world);
                 return;
             }
