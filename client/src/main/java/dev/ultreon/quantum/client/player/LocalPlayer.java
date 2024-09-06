@@ -441,7 +441,7 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public BlockState getBuriedBlock() {
         Vec3d add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
-        return this.world.get((int) add.x, (int) add.y, (int) add.z);
+        return this.world.get((int) Math.floor(add.x), (int) Math.floor(add.y), (int) Math.floor(add.z));
     }
 
     @DoNotCall
