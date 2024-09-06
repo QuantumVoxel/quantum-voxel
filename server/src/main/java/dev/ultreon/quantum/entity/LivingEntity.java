@@ -382,7 +382,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     public boolean isBuried() {
-        return !getBuriedBlock().isAir();
+        return getBuriedBlock().hasCollider();
     }
 
     public BlockState getBuriedBlock() {
