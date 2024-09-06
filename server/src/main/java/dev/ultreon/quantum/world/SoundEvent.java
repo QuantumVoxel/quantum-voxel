@@ -3,7 +3,6 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class SoundEvent {
     private final float range;
     private final boolean varyingPitch;

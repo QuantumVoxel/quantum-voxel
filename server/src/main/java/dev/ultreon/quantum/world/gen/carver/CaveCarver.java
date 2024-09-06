@@ -7,10 +7,12 @@ import de.articdive.jnoise.pipeline.JNoise;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.ServerWorld.Region;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Experimental
 public class CaveCarver {
-    private JNoise noiseGenerator;
-    private Region region;
+    private final JNoise noiseGenerator;
+    private final Region region;
 
     public CaveCarver(ServerWorld.Region region) {
         this.region = region;

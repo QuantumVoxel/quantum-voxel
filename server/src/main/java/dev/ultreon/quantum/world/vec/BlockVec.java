@@ -565,4 +565,19 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     public double dst(BlockVec vec) {
         return super.dst(vec);
     }
+
+    public int[] toArray() {
+        return new int[]{x, y, z};
+    }
+
+    public BlockVec relative(CubicDirection dir) {
+        return switch (dir) {
+            case NORTH -> new BlockVec(this.x, this.y, this.z - 1, this.space);
+            case SOUTH -> new BlockVec(this.x, this.y, this.z + 1, this.space);
+            case EAST -> new BlockVec(this.x + 1, this.y, this.z, this.space);
+            case WEST -> new BlockVec(this.x - 1, this.y, this.z, this.space);
+            case UP -> new BlockVec(this.x, this.y + 1, this.z, this.space);
+            case DOWN -> new BlockVec(this.x, this.y - 1, this.z, this.space);
+        };
+    }
 }

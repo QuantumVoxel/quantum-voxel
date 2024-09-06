@@ -1,0 +1,27 @@
+package dev.ultreon.quantum.world.structure;
+
+import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.BlockSetter;
+import dev.ultreon.quantum.world.ChunkAccess;
+
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
+public class WorldSlice implements BlockSetter {
+    private final ChunkAccess chunk;
+
+    public WorldSlice(ChunkAccess chunk) {
+        this.chunk = chunk;
+        chunk.getWorld();
+    }
+
+    @Override
+    public boolean set(int x, int y, int z, BlockState block) {
+        Vec3i offset = chunk.getOffset();
+        if (offset.x <= x && offset.y <= y && offset.z <= z && offset.x + CHUNK_SIZE > x && offset.y + CHUNK_SIZE > y && offset.z + CHUNK_SIZE > z) {
+            chunk.set(x - offset.x, y - offset.y, z - offset.z, block);
+            return true;
+        }
+        return false;
+    }
+}

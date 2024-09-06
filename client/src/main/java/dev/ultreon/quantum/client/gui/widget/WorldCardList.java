@@ -164,7 +164,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                 WorldSaveInfo worldSaveInfo = world.loadInfo();
                 Texture picture = null;
                 if (world.exists("picture.png")) {
-                    String replace = world.getSHA256Name();
+                    String replace = world.getMD5Name();
                     NamespaceID id = id("generated/worlds/" + replace + "/picture.png");
                     if (client.getTextureManager().isTextureLoaded(id)) {
                         picture = client.getTextureManager().getTexture(id);

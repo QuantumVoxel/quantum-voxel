@@ -51,8 +51,8 @@ public class BindingsConfigScreen extends Screen {
         super.resized(width, height);
 
         this.list.bounds(width, height, 32, height - 32);
-        this.doneButton.bounds((int) (width / 2 + 5), (int) (height - 6 - 20), 150, 20);
-        this.cancelButton.bounds((int) (width / 2 - 155), (int) (height - 6 - 20), 150, 20);
+        this.doneButton.bounds(width / 2 + 5, height - 6 - 20, 150, 20);
+        this.cancelButton.bounds(width / 2 - 155, height - 6 - 20, 150, 20);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.world.gen.feature;
+package dev.ultreon.quantum.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;

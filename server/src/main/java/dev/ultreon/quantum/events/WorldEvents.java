@@ -1,8 +1,11 @@
 package dev.ultreon.quantum.events;
 
 import dev.ultreon.quantum.events.api.Event;
-import dev.ultreon.quantum.world.*;
-import dev.ultreon.quantum.world.gen.WorldGenFeature;
+import dev.ultreon.quantum.world.Chunk;
+import dev.ultreon.quantum.world.ServerWorld;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -51,7 +54,7 @@ public class WorldEvents {
 
     @FunctionalInterface
     public interface CreateBiome {
-        void onCreateBiome(World world, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features);
+        void onCreateBiome(World world, DomainWarping domainWarping, List<TerrainLayer> layers, List<TerrainFeature> features);
     }
 
     @FunctionalInterface

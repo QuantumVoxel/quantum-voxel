@@ -12,10 +12,7 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
-import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.util.ValidationError;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -185,26 +182,14 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     /**
      * Gets the block at the given coordinates. Note that this method is not thread safe.
      *
-     * @param pos the position of the block
+     * @param vec the position of the block
      * @return the block at the given coordinates
      */
     @Override
-    public BlockState get(Vec3i pos) {
-        if (this.disposed) return Blocks.AIR.createMeta();
-        return this.get(pos.x, pos.y, pos.z);
-    }
-
-    /**
-     * Gets the block at the given coordinates. Note that this method is not thread safe.
-     *
-     * @param pos the position of the block
-     * @return the block at the given coordinates
-     */
-    @Override
-    public @NotNull BlockState get(BlockVec pos) {
+    public @NotNull BlockState get(Point vec) {
         synchronized (this) {
             if (this.disposed) return Blocks.AIR.createMeta();
-            return this.get(pos.getIntX(), pos.getIntY(), pos.getIntZ());
+            return this.get(vec.getIntX(), vec.getIntY(), vec.getIntZ());
         }
     }
 
@@ -262,16 +247,6 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     /**
      * Sets the block at the given coordinates. Note that this method is not thread safe.
      *
-     * @param pos   the position of the block
-     * @param block the block to set
-     */
-    public void set(Vec3i pos, BlockState block) {
-        this.set(pos.x, pos.y, pos.z, block);
-    }
-
-    /**
-     * Sets the block at the given coordinates. Note that this method is not thread safe.
-     *
      * @param x     the x coordinate of the block
      * @param y     the y coordinate of the block
      * @param z     the z coordinate of the block
@@ -280,7 +255,8 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     @Override
     public boolean set(int x, int y, int z, BlockState block) {
-        if (this.isOutOfBounds(x, y, z)) return false;
+        if (this.isOutOfBounds(x, y, z))
+            throw new PosOutOfBoundsException("Position " + x + ", " + y + ", " + z + " is out of bounds for chunk.");
         return this.setFast(x, y, z, block);
     }
 
@@ -444,6 +420,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         this.world.onChunkUpdated(this);
     }
 
+    @Override
     public @NotNull World getWorld() {
         return this.world;
     }

@@ -281,11 +281,11 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     /**
-     * Stops the breaking of a block.
+     * Stops the block-breaking process for a specified player at a given block location.
      *
-     * @param breaking the position of the block being broken.
-     * @param breaker  the player breaking the block.
-     * @return
+     * @param breaking The block location where the breaking process is to be stopped.
+     * @param breaker  The player who is attempting to stop breaking the block.
+     * @return true if the stop breaking process was successful, false otherwise.
      */
     @Override
     public boolean stopBreaking(@NotNull BlockVec breaking, @NotNull Player breaker) {
@@ -338,16 +338,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         return true;
     }
 
-    /**
-     * Sets the block at the specified position to the given block properties.
-     *
-     * @param x The setX-coordinate of the block position.
-     * @param y The setY-coordinate of the block position.
-     * @param z The z-coordinate of the block position.
-     * @param block The block properties to set.
-     * @param flags Flags indicating how the block should be set.
-     * @return True if the block was successfully set, false otherwise.
-     */
     @Override
     public boolean set(int x, int y, int z, @NotNull BlockState block, int flags) {
         // Check if we're on the main thread, if not invokeAndWait the method on the main thread
@@ -518,7 +508,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         // Start from the top of the world and move downward
         for (int y = chunk.getOffset().y - 1; y >= 0; y--) {
             BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
-            int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
+            int lightReduction = chunk.get((Point) new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
                 setSunlight(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity); // Assuming maximum sunlight intensity is 15

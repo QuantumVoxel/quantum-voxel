@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.server;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.cache.Cache;
@@ -10,6 +11,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.events.server.ServerStartedEvent;
@@ -49,14 +51,12 @@ import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.CachedPlayer;
 import dev.ultreon.quantum.server.player.PermissionMap;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.PollingExecutorService;
-import dev.ultreon.quantum.util.Shutdownable;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.gen.chunk.OverworldGenerator;
+import dev.ultreon.quantum.world.gen.chunk.SpaceGenerator;
 import dev.ultreon.quantum.world.gen.chunk.TestGenerator;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -138,6 +138,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     protected final DimensionManager dimManager = new DimensionManager(this);
     private final Biomes biomes;
     private final NoiseConfigs noiseConfigs;
+    private long seed = CommonConstants.RANDOM.nextLong();
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -174,7 +175,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.node = parentNode.createNode("server", () -> this);
             this.playersNode = this.node.createNode("players", this.players::values);
-            this.node.createNode("overworld", () -> this.overworld());
+            this.node.createNode("overworld", this::overworld);
             this.node.create("refreshChunks", () -> this.chunkRefresh);
             this.node.create("renderDistance", this::getRenderDistance);
             this.node.create("entityRenderDistance", () -> this.entityRenderDistance);
@@ -227,6 +228,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         var chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
         chunkGenRegistry.register(ChunkGenerator.OVERWORLD, new OverworldGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.TEST, new TestGenerator(this.registries.biomes()));
+        chunkGenRegistry.register(ChunkGenerator.FLOATING_ISLANDS, new SpaceGenerator(this.registries.biomes()));
 
         var dimRegistry = registries.get(RegistryKeys.DIMENSION);
         for (ResourceCategory dimensions : resourceManager.getResourceCategory("dimensions")) {
@@ -1009,6 +1011,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public void init() {
         this.dimManager.setDefaults(registries);
 
-        this.dimManager.loadWorlds();
+        this.dimManager.loadWorlds(seed);
+    }
+
+    public void addGizmo(BoundingBox boundingBox, Color color) {
+
     }
 }

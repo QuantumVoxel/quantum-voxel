@@ -481,11 +481,6 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public BlockState get(Vec3i tmp3i) {
-        return materials.get(tmp3i.x + tmp3i.y * TERRAIN_SIZE + tmp3i.z * TERRAIN_SIZE * TERRAIN_SIZE);
-    }
-
-    @Override
     public boolean isLoaded() {
         return true;
     }

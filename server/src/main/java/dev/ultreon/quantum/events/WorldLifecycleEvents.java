@@ -2,7 +2,7 @@ package dev.ultreon.quantum.events;
 
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.gen.WorldGenFeature;
+import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 
 import java.util.List;
@@ -12,6 +12,6 @@ public class WorldLifecycleEvents {
 
     @FunctionalInterface
     public interface BiomeLayersBuilt {
-        void onBiomeLayersBuilt(Biome biome, List<TerrainLayer> layers, List<WorldGenFeature> features);
+        void onBiomeLayersBuilt(Biome biome, List<TerrainLayer> layers, List<TerrainFeature> features);
     }
 }

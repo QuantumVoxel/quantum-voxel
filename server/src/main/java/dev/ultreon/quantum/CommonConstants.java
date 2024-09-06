@@ -8,6 +8,7 @@ import de.marhali.json5.Json5Options;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.rng.JavaRNG;
 
 public class CommonConstants {
     public static final String EX_NOT_ON_RENDER_THREAD = "Current thread is not the rendering thread.";
@@ -129,6 +130,7 @@ public class CommonConstants {
     public static final Vector2 VECTOR2_1_S = new Vector2();
     public static final Vector2 VECTOR2_2_S = new Vector2();
     public static final Vector2 VECTOR2_3_S = new Vector2();
+    public static final JavaRNG RANDOM = new JavaRNG();
 
     private CommonConstants() {
 

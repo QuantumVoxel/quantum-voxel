@@ -10,7 +10,7 @@ import dev.ultreon.quantum.events.WorldLifecycleEvents;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.gen.WorldGenFeature;
+import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.layer.GroundTerrainLayer;
 import dev.ultreon.quantum.world.gen.layer.SurfaceTerrainLayer;
@@ -19,16 +19,22 @@ import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.ubo.types.MapType;
-import it.unimi.dsi.fastutil.longs.Long2ReferenceFunction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The Biome class represents a specific type of terrain with defined characteristics like temperature,
+ * humidity, height, and hilliness.
+ * It includes terrain layers and world generation features.
+ * Biome instances are built using the nested {@link Biome.Builder} class.
+ */
 public abstract class Biome {
-    private final List<TerrainLayer> layers = new ArrayList<>();
-    private final List<WorldGenFeature> features = new ArrayList<>();
+    protected final List<TerrainLayer> layers = new ArrayList<>();
+    protected final List<TerrainFeature> surfaceFeatures = new ArrayList<>();
+    protected final List<TerrainFeature> undergroundFeatures = new ArrayList<>();
     private final float temperatureStart;
     private final float temperatureEnd;
     private final boolean isOcean;
@@ -67,13 +73,13 @@ public abstract class Biome {
     }
 
     public final void buildLayers() {
-        this.onBuildLayers(this.layers, this.features);
+        this.onBuildLayers(this.layers, this.surfaceFeatures);
 
-        ModApi.getGlobalEventHandler().call(new BiomeLayersBuilt(this, this.layers, this.features));
-        WorldLifecycleEvents.BIOME_LAYERS_BUILT.factory().onBiomeLayersBuilt(this, this.layers, this.features);
+        ModApi.getGlobalEventHandler().call(new BiomeLayersBuilt(this, this.layers, this.surfaceFeatures));
+        WorldLifecycleEvents.BIOME_LAYERS_BUILT.factory().onBiomeLayersBuilt(this, this.layers, this.surfaceFeatures);
     }
 
-    protected abstract void onBuildLayers(List<TerrainLayer> layers, List<WorldGenFeature> features);
+    protected abstract void onBuildLayers(List<TerrainLayer> layers, List<TerrainFeature> features);
 
     public boolean doesNotGenerate() {
         return this.doesNotGenerate;
@@ -84,15 +90,16 @@ public abstract class Biome {
     }
 
     public BiomeGenerator create(ServerWorld world, long seed) {
-        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getGenerator().getLayerDomain(), this.layers, this.features);
+        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getGenerator().getLayerDomain(), this.layers, this.surfaceFeatures);
 
         this.layers.forEach(layer -> layer.create(world));
-        this.features.forEach(layer -> layer.create(world));
+        this.surfaceFeatures.forEach(feature -> feature.create(world));
+        this.undergroundFeatures.forEach(feature -> feature.create(world));
 
         NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
         DomainWarping domainWarping = new DomainWarping(QuantumServer.get().disposeOnClose(noiseConfigs.layerX.create(seed)), QuantumServer.get().disposeOnClose(noiseConfigs.layerY.create(seed)));
 
-        return new BiomeGenerator(world, this, domainWarping, this.layers, this.features);
+        return new BiomeGenerator(world, this, this.layers, this.surfaceFeatures, this.undergroundFeatures);
     }
 
     public float getTemperatureStart() {
@@ -155,11 +162,18 @@ public abstract class Biome {
         return this.hillinessEnd;
     }
 
+    /**
+     * Builder class for constructing {@link Biome} instances with various configurations.
+     * This builder allows setting noise configurations, terrain layers, world generation features,
+     * temperature, humidity, height, and hilliness ranges, as well as marking the biome as an ocean
+     * or a non-generating biome.
+     */
     public static class Builder {
         @Nullable
         private NoiseConfig biomeNoise;
         private final List<TerrainLayer> layers = new ArrayList<>();
-        private final List<WorldGenFeature> features = new ArrayList<>();
+        private final List<TerrainFeature> surfaceFeatures = new ArrayList<>();
+        private final List<TerrainFeature> undergroundFeatures = new ArrayList<>();
         private float temperatureStart = -2.0f;
         private float temperatureEnd = 2.0f;
         private float humidityStart = -2.0f;
@@ -180,17 +194,18 @@ public abstract class Biome {
             return this;
         }
 
-        public Builder domainWarping(Long2ReferenceFunction<DomainWarping> domainWarping) {
-            return this;
-        }
-
         public Builder layer(TerrainLayer layer) {
             this.layers.add(layer);
             return this;
         }
 
-        public Builder feature(WorldGenFeature feature) {
-            this.features.add(feature);
+        public Builder surfaceFeature(TerrainFeature feature) {
+            this.surfaceFeatures.add(feature);
+            return this;
+        }
+
+        public Builder undergroundFeature(TerrainFeature feature) {
+            this.undergroundFeatures.add(feature);
             return this;
         }
 
@@ -255,9 +270,10 @@ public abstract class Biome {
 
             return new Biome(this.temperatureStart, this.temperatureEnd, this.isOcean, this.doesNotGenerate, this.humidityStart, this.humidityEnd, this.heightStart, this.heightEnd, this.hillinessStart, this.hillinessEnd) {
                 @Override
-                protected void onBuildLayers(List<TerrainLayer> layerList, List<WorldGenFeature> featureList) {
-                    layerList.addAll(Builder.this.layers);
-                    featureList.addAll(Builder.this.features);
+                protected void onBuildLayers(List<TerrainLayer> layerList, List<TerrainFeature> featureList) {
+                    this.layers.addAll(Builder.this.layers);
+                    this.surfaceFeatures.addAll(Builder.this.surfaceFeatures);
+                    this.undergroundFeatures.addAll(Builder.this.undergroundFeatures);
                 }
             };
         }

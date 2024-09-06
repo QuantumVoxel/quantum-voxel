@@ -18,7 +18,7 @@ public class HeightmapCommand extends Command {
     public @Nullable CommandResult executeCoordsInWorld(CommandSender sender, CommandContext commandContext, String alias) {
         Location location = sender.getLocation();
 
-        ServerWorld severWorld = location.getSeverWorld();
+        ServerWorld severWorld = location.getServerWorld();
         int height = severWorld.getHeight((int) location.x, (int) location.z, HeightmapType.MOTION_BLOCKING);
         return this.infoMessage(String.format("The height at %s,%s is %s", location.getBlockVec().x, location.getBlockVec().z, height));
     }

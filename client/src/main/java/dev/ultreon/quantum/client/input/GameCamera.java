@@ -147,7 +147,7 @@ public class GameCamera extends PerspectiveCamera {
                     Vec3f normal = this.hitResult.getNormal().f();
                     Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
                     Vector3 hitOffset = TMP_2.set(this.direction).nor()
-                            .scl((float) -this.hitResult.getDistance())
+                            .scl(-this.hitResult.getDistance())
                             .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
                     this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
                 } else {
@@ -161,7 +161,7 @@ public class GameCamera extends PerspectiveCamera {
                     Vec3f normal = this.hitResult.getNormal().f();
                     Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
                     Vector3 hitOffset = TMP_2.set(this.direction).nor()
-                            .scl((float) -this.hitResult.getDistance())
+                            .scl(-this.hitResult.getDistance())
                             .sub(gdxNormal.scl(-0.1f).rotate(this.direction, 360));
                     this.hitPosition = TMP_1.set(0, 0, 0).add(hitOffset);
                 } else {

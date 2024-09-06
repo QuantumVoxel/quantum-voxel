@@ -668,17 +668,12 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     }
 
     @Override
-    public @NotNull List<ChunkVec> getChunksAround(BlockVec pos) {
-        return List.of();
-    }
-
-    @Override
     public @NotNull BlockState get(BlockVec pos) {
         ChunkAccess chunkAt = getChunkAt(pos);
         if (chunkAt == null) {
             return BlockState.AIR;
         }
-        return chunkAt.get(localize(pos));
+        return chunkAt.get((Point) localize(pos));
     }
 
     private BlockVec localize(BlockVec pos) {

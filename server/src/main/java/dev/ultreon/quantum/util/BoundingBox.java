@@ -399,4 +399,8 @@ public class BoundingBox implements Serializable {
         this.update(); // Update the bounding box
         return this; // Return the updated bounding box
     }
+
+    public boolean contains(double x, double y, double z) {
+        return this.min.x <= x && this.max.x >= x && this.min.y <= y && this.max.y >= y && this.min.z <= z && this.max.z >= z;
+    }
 }

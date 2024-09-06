@@ -6,15 +6,15 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 public class Location {
-    public NamespaceID world;
+    public NamespaceID dimension;
     public double x;
     public double y;
     public double z;
     public float xRot;
     public float yRot;
 
-    public Location(NamespaceID world, double x, double y, double z, float xRot, float yRot) {
-        this.world = world;
+    public Location(NamespaceID dimension, double x, double y, double z, float xRot, float yRot) {
+        this.dimension = dimension;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -22,8 +22,8 @@ public class Location {
         this.yRot = yRot;
     }
 
-    public Location(WorldAccess world, double x, double y, double z, float xRot, float yRot) {
-        this(world.getDimension().id(), x, y, z, xRot, yRot);
+    public Location(WorldAccess dimension, double x, double y, double z, float xRot, float yRot) {
+        this(dimension.getDimension().id(), x, y, z, xRot, yRot);
     }
 
     public Location(double x, double y, double z, float xRot, float yRot) {
@@ -39,14 +39,14 @@ public class Location {
     }
 
     public Location cpy() {
-        return new Location(this.world, this.x, this.y, this.z, this.xRot, this.yRot);
+        return new Location(this.dimension, this.x, this.y, this.z, this.xRot, this.yRot);
     }
 
-    public ServerWorld getSeverWorld() {
+    public ServerWorld getServerWorld() {
         QuantumServer server = QuantumServer.get();
         if (server == null) return null;
 
-        return server.getWorld(this.world);
+        return server.getWorld(this.dimension);
     }
 
     public BlockVec getBlockVec() {

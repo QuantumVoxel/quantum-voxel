@@ -4,16 +4,15 @@ import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.debug.WorldGenDebugContext;
-import dev.ultreon.quantum.world.ChunkAccess;
+import dev.ultreon.quantum.world.Fork;
 import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.gen.WorldGenFeature;
+import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.NotNull;
 
-public class TreeFeature extends WorldGenFeature {
+public class TreeFeature extends TerrainFeature {
     private final NoiseConfig noiseConfig;
     private final Block trunk;
     private final Block leaves;
@@ -34,58 +33,46 @@ public class TreeFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
-        if (this.noiseConfig == null) return false;
-        height += 1;
-        if (y != height) return false;
+    public boolean shouldPlace(int x, int y, int z, @NotNull BlockState origin) {
+        return origin.is(Blocks.GRASS_BLOCK) || origin.is(Blocks.SNOWY_GRASS_BLOCK) || origin.is(Blocks.DIRT);
+    }
 
-        int posSeed = (x + chunk.getOffset().x) << 16 | (z + chunk.getOffset().z) & 0xFFFF;
-        long seed = (world.getSeed() ^ this.noiseConfig.seed() << 32) ^ posSeed;
+    @Override
+    public boolean handle(@NotNull Fork setter, long seed, int x, int y, int z) {
+        if (this.noiseConfig == null) return false;
+
+        y++;
+
         this.random.setSeed(seed);
         this.random.setSeed(this.random.nextLong());
 
-        BlockState blockState = chunk.get(x, height - 1, z);
-        if (!blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.SNOWY_GRASS_BLOCK)) {
-            return false;
-        }
-
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height);
+                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y);
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
 
-            // Check if there is enough space
-            for (int ty = height + 1; ty < height + trunkHeight; ty++) {
-                if (!chunk.get(x, ty, z).isAir()) {
-                    if (WorldGenDebugContext.isActive()) {
-                        System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Not enough space");
-                    }
-                    return false;
-                }
+            for (int ty = y; ty < y + trunkHeight; ty++) {
+                setter.set(x, ty, z, this.trunk.createMeta());
             }
 
-
-            for (int ty = height + 1; ty < height + trunkHeight; ty++) {
-                chunk.set(x, ty, z, this.trunk.createMeta());
-            }
-
-            chunk.set(x, height - 1, z, Blocks.DIRT.createMeta());
+            setter.set(x, y - 1, z, Blocks.DIRT.createMeta());
             for (int xOffset = -1; xOffset <= 1; xOffset++) {
                 for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                    for (int ty = height + trunkHeight - 1; ty <= height + trunkHeight + 1; ty++) {
-                        chunk.set(x + xOffset, ty, z + zOffset, this.leaves.createMeta());
+                    for (int ty = trunkHeight - 1; ty <= trunkHeight + 1; ty++) {
+                        if (xOffset == 0 && zOffset == 0 && ty != trunkHeight + 1) continue;
+                        setter.set(x + xOffset, ty, z + zOffset, this.leaves.createMeta());
 
                         if (WorldGenDebugContext.isActive()) {
-                            System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Setting leaf at " + (x + xOffset) + ", " + ty + ", " + (z + zOffset));
+                            System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Setting leaf at " + (x + xOffset) + ", " + ty + ", " + (z + zOffset));
                         }
                     }
                 }
             }
 
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + height + " - Success");
+                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Success");
             }
             return true;
         }

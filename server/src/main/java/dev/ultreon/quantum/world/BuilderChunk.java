@@ -5,6 +5,7 @@ import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.InvalidThreadException;
+import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
@@ -19,6 +20,11 @@ import java.util.stream.Stream;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+/**
+ * The BuilderChunk class is an extension of the Chunk class,
+ * specifically designed to handle chunk operations on a dedicated builder thread.
+ * It includes functionality for handling biome data and block state manipulation.
+ */
 public final class BuilderChunk extends Chunk {
     private final @NotNull ServerWorld world;
     private final @NotNull Thread thread;
@@ -42,28 +48,13 @@ public final class BuilderChunk extends Chunk {
         return super.getFast(x, y, z);
     }
 
-    public void set(Vec3i pos, BlockState block) {
-        if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
-        pos.x -= this.offset.x;
-        pos.y -= this.offset.y;
-        pos.z -= this.offset.z;
-        if (this.isOutOfBounds(pos.x, pos.y, pos.z)) {
-            this.world.recordOutOfBounds(this.offset.x + pos.x, this.offset.y + pos.y, this.offset.z + pos.z, block);
-            return;
-        }
-        super.set(pos, block);
+    public boolean set(Point pos, BlockState block) {
+        return set(pos.getIntX(), pos.getIntY(), pos.getIntZ(), block);
     }
 
     @Override
     public boolean set(int x, int y, int z, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
-        x -= this.offset.x;
-        y -= this.offset.y;
-        z -= this.offset.z;
-        if (this.isOutOfBounds(x, y, z)) {
-            this.world.recordOutOfBounds(this.offset.x + x, this.offset.y + y, this.offset.z + z, block);
-            return false;
-        }
         return super.set(x, y, z, block);
     }
 
@@ -139,4 +130,9 @@ public final class BuilderChunk extends Chunk {
     public Stream<Vec3d> getCavePoints() {
         return this.world.getCavePointsFor(getVec());
     }
+
+    public BuilderFork createFork(int x, int y, int z) {
+        return new BuilderFork(this, x, y, z, this.world.getGenerator());
+    }
+
 }

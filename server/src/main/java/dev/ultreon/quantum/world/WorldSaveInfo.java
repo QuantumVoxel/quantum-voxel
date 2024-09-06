@@ -5,22 +5,38 @@ import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.libs.datetime.v0.DateTime;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.ubo.types.MapType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The WorldSaveInfo class encapsulates information about the state of a saved game world,
+ * including its seed, generator version, game mode, last played game mode, name, and the last save time.
+ */
 public final class WorldSaveInfo {
     private final long seed;
     private final int generatorVersion;
-    private final GameMode gamemode;
-    private final GameMode lastPlayedInMode;
-    private String name;
+    private final @NotNull GameMode gamemode;
+    private final @Nullable GameMode lastPlayedInMode;
+    private @NotNull String name;
     private DateTime lastSave;
 
-    public WorldSaveInfo(long seed, int generatorVersion, GameMode gamemode, GameMode lastPlayedInMode, String name,
-                         DateTime lastSave) {
+    /**
+     * Constructs a new WorldSaveInfo instance with the specified parameters.
+     *
+     * @param seed The seed value for the world generation.
+     * @param generatorVersion The version of the world generator used.
+     * @param gamemode The current game mode.
+     * @param lastPlayedInMode The game mode used the last time the world was played.
+     * @param name The name of the world.
+     * @param lastSave The date and time when the world was last saved.
+     */
+    public WorldSaveInfo(long seed, int generatorVersion, @NotNull GameMode gamemode, @Nullable GameMode lastPlayedInMode, @NotNull String name,
+                         @NotNull DateTime lastSave) {
         this.seed = seed;
         this.generatorVersion = generatorVersion;
         this.gamemode = gamemode;
@@ -33,7 +49,7 @@ public final class WorldSaveInfo {
         return new WorldSaveInfo(
                 infoData.getLong("seed", 0),
                 infoData.getInt("generatorVersion", 0),
-                GameMode.byOrdinal(infoData.getInt("gamemode", GameMode.SURVIVAL.ordinal())),
+                Objects.requireNonNull(GameMode.byOrdinal(infoData.getInt("gamemode", GameMode.SURVIVAL.ordinal()))),
                 GameMode.byOrdinal(infoData.getInt("lastPlayedIn", GameMode.SURVIVAL.ordinal())),
                 infoData.getString("name", "unnamed world"),
                 DateTime.ofEpochMilli(infoData.getLong("lastSave"), ZoneOffset.UTC)
@@ -92,7 +108,14 @@ public final class WorldSaveInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(seed, generatorVersion, gamemode, lastPlayedInMode, name, lastSave);
+        int hash = 7;
+        hash = 31 * hash + Long.hashCode(seed);
+        hash = 31 * hash + generatorVersion;
+        hash = 31 * hash + gamemode.hashCode();
+        hash = 31 * hash + (lastPlayedInMode != null ? lastPlayedInMode.hashCode() : 0);
+        hash = 31 * hash + name.hashCode();
+        hash = 31 * hash + (lastSave != null ? lastSave.hashCode() : 0);
+        return hash;
     }
 
     @Override
@@ -116,7 +139,7 @@ public final class WorldSaveInfo {
         save.putLong("seed", seed);
         save.putInt("generatorVersion", generatorVersion);
         save.putInt("gamemode", gamemode.ordinal());
-        save.putInt("lastPlayedIn", lastPlayedInMode.ordinal());
+        save.putInt("lastPlayedIn", lastPlayedInMode == null ? gamemode.ordinal() : lastPlayedInMode.ordinal());
         save.putString("name", name);
         save.putLong("lastSave", lastSave.toEpochMilli());
         storage.write(save, "info.ubo");

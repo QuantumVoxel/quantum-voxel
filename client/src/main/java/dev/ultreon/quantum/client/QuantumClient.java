@@ -111,7 +111,6 @@ import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
-import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.c2s.C2SAttackPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
@@ -2380,7 +2379,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         this.integratedServer.start();
 
-        mem.setOtherSide((MemoryConnection<ServerPacketHandler, ClientPacketHandler>) ((MemoryNetworker) this.integratedServer.getNetworker()).getConnections().getFirst());
+        mem.setOtherSide((MemoryConnection<ServerPacketHandler, ClientPacketHandler>) this.integratedServer.getNetworker().getConnections().getFirst());
 
         // Initialize (memory) connection.
         this.multiplayerData = new MultiplayerData(this);

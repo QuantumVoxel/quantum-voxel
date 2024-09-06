@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.math.Vector2;
-import com.github.tommyettinger.textra.Font;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.client.GameFont;
@@ -20,6 +19,11 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * The Widget class represents an abstract UI component in a game or application.
+ * It provides functionality related to rendering, positioning, and interaction within the UI.
+ * Widget instances manage their bounds, components and handle various user interactions.
+ */
 @SuppressWarnings("unchecked")
 public abstract class Widget implements StaticWidget, GameComponentHolder<UIComponent> {
     protected boolean ignoreBounds = false;

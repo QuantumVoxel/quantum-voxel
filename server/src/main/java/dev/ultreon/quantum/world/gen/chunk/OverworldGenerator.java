@@ -9,7 +9,6 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
-import dev.ultreon.quantum.world.gen.HillinessNoise;
 import dev.ultreon.quantum.world.gen.biome.BiomeData;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.carver.Carver;
@@ -22,11 +21,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+/**
+ * The OverworldGenerator is responsible for generating the terrain of the Overworld.
+ * It uses various noise configurations and biome data to create diverse and immersive biomes.
+ * It extends the SimpleChunkGenerator, inheriting its basic functionalities and providing further customization.
+ */
 public class OverworldGenerator extends SimpleChunkGenerator {
     private final List<BiomeData> biomeGenData = new ArrayList<>();
 
@@ -37,7 +40,6 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     private @UnknownNullability BiomeNoise humidNoise;
     private @UnknownNullability BiomeNoise tempNoise;
     private @UnknownNullability BiomeNoise variationNoise;
-    private @UnknownNullability HillinessNoise hillinessNoise ;
     private @UnknownNullability Carver carver;
 
     public OverworldGenerator(ServerRegistry<Biome> biomeRegistry) {
@@ -56,7 +58,6 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         this.humidNoise = new BiomeNoise(world.getSeed() + 200);
         this.tempNoise = new BiomeNoise(world.getSeed() + 210);
         this.variationNoise = new BiomeNoise(world.getSeed() + 220);
-        this.hillinessNoise = new HillinessNoise(world.getSeed() + 230);
         this.carver = new OverworldCarver(biomeDomain, noise, world.getSeed() + 300);
 
         for (Biome biome : this.biomeTag.getValues()) {
@@ -71,28 +72,39 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     }
 
     @Override
-    protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver, @NotNull Collection<ServerWorld.@NotNull RecordedChange> recordedChanges) {
-        if (this.hillinessNoise == null)
-            throw new IllegalStateException("Hilliness noise has not been initialized yet!");
-
+    protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
         BlockVec offset = chunk.getOffset();
         for (var x = 0; x < CHUNK_SIZE; x++) {
             for (var z = 0; z < CHUNK_SIZE; z++) {
-                double hilliness = this.hillinessNoise.evaluateNoise(offset.x + x, offset.z + z) - 2.0f;
-                int groundPos = carver.carve(chunk, offset.x + x, offset.z + z, hilliness);
+                int groundPos = carver.carve(chunk, offset.x + x, offset.z + z);
 
                 var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
-                index.biomeGenerator.processColumn(chunk, x, groundPos, z, recordedChanges);
+                index.biomeGenerator.processColumn(chunk, x, groundPos, z);
             }
         }
     }
 
-    private BiomeGenerator.Index findGenerator(Vec3i offset, int height) {
+    /**
+     * Finds the appropriate biome generator index based on the provided offset and height.
+     *
+     * @param offset the vector offset to locate the generator
+     * @param height the height to determine which generator to use
+     * @return the biome generator index for the specified offset and height
+     */
+    public BiomeGenerator.Index findGenerator(Vec3i offset, int height) {
         return this.findGenerator(offset, height, Modifications.INSTANCE.getEnableDomainWarping());
     }
 
-    private BiomeGenerator.Index findGenerator(Vec3i offset, int height, boolean useDomainWarping) {
+    /**
+     * Finds the appropriate biome generator index based on the provided offset, height, and domain warping preference.
+     *
+     * @param offset the vector offset to locate the generator
+     * @param height the height to determine which generator to use
+     * @param useDomainWarping flag indicating whether to apply domain warping to the offset
+     * @return the biome generator index for the specified offset and height
+     */
+    public BiomeGenerator.Index findGenerator(Vec3i offset, int height, boolean useDomainWarping) {
         if (useDomainWarping) {
             Vec2i domainOffset = MathHelper.round(this.biomeDomain.generateDomainOffset(offset.x, offset.z));
             offset.add(domainOffset.x, 0, domainOffset.y);
@@ -110,7 +122,16 @@ public class OverworldGenerator extends SimpleChunkGenerator {
 
     }
 
-    private BiomeGenerator selectGenerator(int height, double humid, double temp, double variation) {
+    /**
+     * Selects an appropriate biome generator based on provided environmental parameters such as height, humidity, temperature, and variation.
+     *
+     * @param height the vertical position, used to determine the terrain's elevation
+     * @param humid the humidity level, which influences biome moisture characteristics
+     * @param temp the temperature level, affecting biome heat properties
+     * @param variation the variation index, used to account for terrain irregularities
+     * @return the selected {@link BiomeGenerator} that matches the given parameters; if no suitable generator is found, a default generator is returned
+     */
+    public BiomeGenerator selectGenerator(int height, double humid, double temp, double variation) {
         BiomeGenerator biomeGen = null;
 
         if (variation < -2.0 || variation > 2.0) {
@@ -153,7 +174,8 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     }
 
     @Override
-    protected @NotNull Carver getCarver() {
+    @NotNull
+    public Carver getCarver() {
         if (carver == null) throw new IllegalStateException("Carver not initialized yet!");
         return carver;
     }

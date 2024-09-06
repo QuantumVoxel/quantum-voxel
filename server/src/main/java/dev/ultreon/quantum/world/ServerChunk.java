@@ -28,6 +28,11 @@ import java.util.List;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 import static java.lang.System.currentTimeMillis;
 
+/**
+ * The {@code ServerChunk} class represents a chunk of the game world in a server environment.
+ * It extends the {@code Chunk} class, providing additional server-specific functionality and is not thread-safe.
+ * This class manages the state and behavior of a chunk, including loading, saving, and tracking modifications.
+ */
 @NotThreadSafe
 public final class ServerChunk extends Chunk {
     private final @NotNull ServerWorld world;

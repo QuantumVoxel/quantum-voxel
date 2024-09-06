@@ -21,16 +21,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 
 /**
- * The world storage.
- * <p>Represents a world directory.</p>
+ * The WorldStorage class represents a storage system for world data.
+ * It provides methods to read, write, and manage data within a given world directory.
  */
 public final class WorldStorage {
     private final Path directory;
     private final Path infoFile;
-    private MapType infoData;
     private boolean infoLoaded;
     private WorldSaveInfo info;
-    private String sha256Name;
+    private String md5Name;
     private String name;
 
     /**
@@ -213,13 +212,14 @@ public final class WorldStorage {
     public WorldSaveInfo loadInfo() {
         if (!this.infoLoaded) {
             this.infoLoaded = true;
+            MapType infoData;
             try {
-                this.infoData = DataIo.readCompressed(this.infoFile.toFile());
+                infoData = DataIo.readCompressed(this.infoFile.toFile());
             } catch (IOException e) {
-                this.infoData = new MapType();
+                infoData = new MapType();
             }
 
-            this.info = WorldSaveInfo.fromMap(this.infoData);
+            this.info = WorldSaveInfo.fromMap(infoData);
         }
 
         return this.info;
@@ -229,18 +229,29 @@ public final class WorldStorage {
         return Files.exists(this.getDirectory().resolve("info.ubo"));
     }
 
-    public <V, K> String getSHA256Name() {
-        if (sha256Name == null) {
+    /**
+     * Retrieves the MD5 hash of the world storage directory name.
+     * If the hash has not been computed yet, it generates the hash and stores it.
+     *
+     * @return The MD5 hash of the world storage directory name in hexadecimal format.
+     */
+    public String getMD5Name() {
+        if (md5Name == null) {
             String string = getDirectory().getFileName().toString();
             Hashing.hashMD5(string.getBytes(StandardCharsets.UTF_8));
 
-            sha256Name = bytes2hex(hashSHA256(string.getBytes(StandardCharsets.UTF_8)));
+            md5Name = bytes2hex(hashSHA256(string.getBytes(StandardCharsets.UTF_8)));
         }
 
-        return sha256Name;
+        return md5Name;
     }
 
-    public static <V, K> String createFolderName() {
+    /**
+     * Generates a unique folder name using the current system time and MD5 hashing.
+     *
+     * @return A string representing the generated folder name in hexadecimal format.
+     */
+    public static String createFolderName() {
         long l = System.currentTimeMillis();
         byte[] bytes = Hashing.hashMD5(new byte[]{
                 (byte) ((l >> 56) & 0xff),
@@ -256,7 +267,13 @@ public final class WorldStorage {
         return bytes2hex(bytes);
     }
 
-    private static String bytes2hex(byte[] bytes) {
+    /**
+     * Converts an array of bytes into its hexadecimal string representation.
+     *
+     * @param bytes an array of bytes to be converted to a hexadecimal string.
+     * @return a string representing the hexadecimal value of the byte array.
+     */
+    public static String bytes2hex(byte[] bytes) {
         char[] hexArray = "0123456789abcdef".toCharArray();
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -267,15 +284,28 @@ public final class WorldStorage {
         return new String(hexChars);
     }
 
+    /**
+     * Computes the MD5 hash of the given input byte array.
+     *
+     * @param input the byte array to be hashed
+     * @return a byte array containing the MD5 hash of the input
+     */
     public static byte @NotNull [] hashSHA256(byte @NotNull [] input) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest md = MessageDigest.getInstance("MD5");
             return md.digest(input);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Retrieves the name associated with the world storage.
+     * If the name is not already known, it attempts to load this information.
+     * If the information cannot be loaded, it defaults to the name of the directory.
+     *
+     * @return The name of the world storage.
+     */
     public String getName() {
         if (name != null) return name;
         if (this.hasInfo()) {
@@ -287,6 +317,12 @@ public final class WorldStorage {
         return name;
     }
 
+    /**
+     * Saves the given WorldSaveInfo object and persists the changes.
+     *
+     * @param worldSaveInfo the WorldSaveInfo object that contains the information to be saved
+     * @throws IOException if an I/O error occurs during the saving process
+     */
     public void saveInfo(WorldSaveInfo worldSaveInfo) throws IOException {
         this.info = worldSaveInfo;
         worldSaveInfo.save(this);

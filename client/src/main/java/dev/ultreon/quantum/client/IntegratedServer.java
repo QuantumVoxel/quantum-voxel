@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client;
 
+import com.badlogic.gdx.graphics.Color;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.debug.BoxGizmo;
@@ -16,6 +17,7 @@ import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerSetPosPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.WorldStorage;
@@ -76,7 +78,7 @@ public class IntegratedServer extends QuantumServer {
         ServerPlayer player = this.getPlayer(localPlayer.getUuid());
 
         try {
-            // Check if the player exists on the server and player data file exists
+            // Check if the player exists on the server and the player data file exists
             if (player != null && player.getUuid().equals(localPlayer.getUuid()) && this.getStorage().exists("player.ubo")) {
                 // Load player data from storage
                 var playerData = this.getStorage().<MapType>read("player.ubo");
@@ -383,6 +385,24 @@ public class IntegratedServer extends QuantumServer {
                         clientWorld.removeGizmo(gizmo);
                     }
                 }, 10000L);
+            }
+        });
+    }
+
+    @Override
+    public void addGizmo(BoundingBox boundingBox, Color color) {
+        super.addGizmo(boundingBox, color);
+
+        QuantumClient.invoke(() -> {
+            @Nullable ClientWorldAccess world = this.client.world;
+            if (world instanceof ClientWorld clientWorld) {
+                Gizmo gizmo = new BoxGizmo("unloaded-chunk");
+                gizmo.color.set(1.0F, 0.5F, 1F, 1F);
+                gizmo.position.set(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
+                gizmo.size.set((float) boundingBox.getWidth(), (float) boundingBox.getHeight(), (float) boundingBox.getDepth());
+                gizmo.outline = false;
+
+                clientWorld.addGizmo(gizmo);
             }
         });
     }

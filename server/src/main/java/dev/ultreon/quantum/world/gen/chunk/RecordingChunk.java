@@ -1,15 +1,22 @@
 package dev.ultreon.quantum.world.gen.chunk;
 
 import dev.ultreon.quantum.block.state.BlockState;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
+import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The RecordingChunk class is an implementation of the ChunkAccess interface.
+ * It wraps a BuilderChunk and provides functionality to record changes to the chunk.
+ * Those recorded changes can then be used in another chunk to load it in.
+ */
+@Deprecated
 public class RecordingChunk implements ChunkAccess {
     private final BuilderChunk chunk;
     private final Set<ServerWorld.RecordedChange> deferredChanges = new HashSet<>();
@@ -26,8 +33,9 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public void set(BlockVec pos, BlockState block) {
-        this.deferredChanges.add(new ServerWorld.RecordedChange(pos.x, pos.y, pos.z, block));
+    public boolean set(Point pos, BlockState block) {
+        this.deferredChanges.add(new ServerWorld.RecordedChange(pos.getIntX(), pos.getIntY(), pos.getIntZ(), block));
+        return false;
     }
 
     @Override
@@ -38,7 +46,7 @@ public class RecordingChunk implements ChunkAccess {
             Chunk chunk = world.getChunkAtNoLoad(pos);
 
             if (chunk != null) {
-                return chunk.get(pos.chunkLocal());
+                return chunk.get((Point) pos.chunkLocal());
             }
 
             return BlockState.BARRIER;
@@ -52,7 +60,7 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public Vec3i getOffset() {
+    public BlockVec getOffset() {
         return this.chunk.getOffset();
     }
 
@@ -63,12 +71,21 @@ public class RecordingChunk implements ChunkAccess {
     }
 
     @Override
-    public BlockState get(BlockVec localize) {
-        return get(localize.getIntX(), localize.getIntY(), localize.getIntZ());
+    public BlockState get(Point vec) {
+        return get(vec.getIntX(), vec.getIntY(), vec.getIntZ());
     }
 
     @Override
     public boolean isDisposed() {
         return false;
+    }
+
+    @Override
+    public ServerWorld getWorld() {
+        return chunk.getWorld();
+    }
+
+    public ChunkVec getVec() {
+        return chunk.getVec();
     }
 }

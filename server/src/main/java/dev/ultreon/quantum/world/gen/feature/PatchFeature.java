@@ -2,16 +2,15 @@ package dev.ultreon.quantum.world.gen.feature;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.world.ChunkAccess;
+import dev.ultreon.quantum.world.Fork;
 import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.gen.WorldGenFeature;
+import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseInstance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PatchFeature extends WorldGenFeature {
+public class PatchFeature extends TerrainFeature {
     private final NoiseConfig settingsBase;
     private final Block patchBlock;
     private final float threshold;
@@ -56,15 +55,13 @@ public class PatchFeature extends WorldGenFeature {
     }
 
     @Override
-    public boolean handle(@NotNull World world, @NotNull ChunkAccess chunk, int x, int y, int z, int height) {
+    public boolean handle(@NotNull Fork setter, long seed, int x, int y, int z) {
         if (this.baseNoise == null) return false;
 
-        if (y != height) return false;
-
         boolean changed = false;
-        for (int ty = height - this.depth; ty < height; ty++) {
-            float value = (float) this.baseNoise.eval(x, ty, z);
-            changed |= value < this.threshold && chunk.set(x, ty, z, this.patchBlock.createMeta());
+        for (int blkY = -this.depth; blkY < 0; blkY++) {
+            float value = (float) this.baseNoise.eval(x, blkY + y, z);
+            changed |= value < this.threshold && setter.set(0, blkY, z, this.patchBlock.createMeta());
         }
 
         return changed;

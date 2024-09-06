@@ -29,7 +29,7 @@ public class ChunkCommand extends Command {
     public @Nullable CommandResult executeDumpData(CommandSender sender, CommandContext commandContext, String alias) {
         Location location = sender.getLocation();
 
-        ServerWorld serverWorld = location.getSeverWorld();
+        ServerWorld serverWorld = location.getServerWorld();
         QuantumServer server = serverWorld.getServer();
 
         server.execute(() -> {

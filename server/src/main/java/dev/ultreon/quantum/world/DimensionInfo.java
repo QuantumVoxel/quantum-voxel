@@ -10,9 +10,19 @@ import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 
 import java.util.Optional;
 
+/**
+ * This class represents information about a dimension in a game world.
+ * It includes the dimension's unique identifier, an optional seed value,
+ * and a key for the chunk generator.
+ *
+ * @param id           The unique namespace ID of the dimension.
+ * @param seed         An optional seed value for the dimension.
+ * @param generatorKey The key for the chunk generator associated with the dimension.
+ */
 public record DimensionInfo(NamespaceID id, Optional<Long> seed, RegistryKey<ChunkGenerator> generatorKey) {
     public static final RegistryKey<DimensionInfo> OVERWORLD = RegistryKey.of(RegistryKeys.DIMENSION, new NamespaceID("overworld"));
     public static final RegistryKey<DimensionInfo> TEST = RegistryKey.of(RegistryKeys.DIMENSION, new NamespaceID("test"));
+    public static final RegistryKey<DimensionInfo> SPACE = RegistryKey.of(RegistryKeys.DIMENSION, new NamespaceID("space"));
 
     public TextObject getName() {
         return TextObject.translation(this.id.getDomain() + ".dimension." + this.id.getPath().replace('/', '.'));

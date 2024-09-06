@@ -27,8 +27,9 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.ServerWorld.Region;
+import dev.ultreon.quantum.world.gen.StructureData;
 import dev.ultreon.quantum.world.particles.ParticleType;
+import dev.ultreon.quantum.world.structure.Structure;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -48,11 +49,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * Base class for client/server worlds.
- *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
- * @see Chunk
- * @see Region
+ * Represents the world (also known as a dimension) in the game with various attributes and manipulation methods.
  */
 @SuppressWarnings({"UnusedReturnValue", "unused", "GDXJavaUnsafeIterator"})
 @ApiStatus.NonExtendable
@@ -84,6 +81,7 @@ public abstract class World implements Disposable, WorldAccess {
     protected int spawnZ;
     private final Map<ChunkVec, Heightmap> motionBlockingHeightMaps = new ConcurrentHashMap<>();
     private final Map<ChunkVec, Heightmap> worldSurfaceHeightMaps = new ConcurrentHashMap<>();
+    protected StructureData structureData = new StructureData();
 
     protected World() {
         // Shh, the original seed was 512.
@@ -101,29 +99,6 @@ public abstract class World implements Disposable, WorldAccess {
     @Deprecated
     public static ChunkVec toChunkVec(int x, int y, int z) {
         return new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
-    }
-
-    @Override
-    public @NotNull List<ChunkVec> getChunksAround(BlockVec pos) {
-        int renderDistance = this.getRenderDistance();
-        int startX = pos.x - renderDistance * World.CHUNK_SIZE;
-        int startY = pos.y - renderDistance * World.CHUNK_SIZE;
-        int startZ = pos.z - renderDistance * World.CHUNK_SIZE;
-        int endX = pos.x + renderDistance * World.CHUNK_SIZE;
-        int endY = pos.y + renderDistance * World.CHUNK_SIZE;
-        int endZ = pos.z + renderDistance * World.CHUNK_SIZE;
-
-        List<ChunkVec> toCreate = new ArrayList<>();
-        for (int x = startX; x <= endX; x += World.CHUNK_SIZE) {
-            for (int y = startY; y <= endY; y += World.CHUNK_SIZE) {
-                for (int z = startZ; z <= endZ; z += World.CHUNK_SIZE) {
-                    ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
-                    toCreate.add(chunkVec);
-                }
-            }
-        }
-
-        return toCreate;
     }
 
     protected abstract int getRenderDistance();
@@ -294,7 +269,7 @@ public abstract class World implements Disposable, WorldAccess {
      * @param tmp a temporary vector to store the result
      * @return the block position in chunk space
      */
-    public static Vec3i toLocalBlockVec(int x, int y, int z, Vec3i tmp) {
+    public static BlockVec toLocalBlockVec(int x, int y, int z, Vec3i tmp) {
         BlockVec worldSpace = new BlockVec(x, y, z, BlockVecSpace.WORLD);
         return worldSpace.chunkLocal();
     }
@@ -949,4 +924,9 @@ public abstract class World implements Disposable, WorldAccess {
     }
 
     public abstract boolean isLoaded(@NotNull Chunk chunk);
+
+    public @Nullable Structure getClosebyStructureCoords(ServerWorld world, int x, int z) {
+        List<BlockVec> list = new ArrayList<>();
+        return this.structureData.getStructureAt(x, world.getHeight(x, z), z);
+    }
 }

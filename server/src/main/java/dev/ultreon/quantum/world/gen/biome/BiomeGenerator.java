@@ -2,72 +2,110 @@ package dev.ultreon.quantum.world.gen.biome;
 
 import com.badlogic.gdx.utils.Disposable;
 import com.google.common.base.Preconditions;
-import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.world.*;
-import dev.ultreon.quantum.world.gen.TreeData;
-import dev.ultreon.quantum.world.gen.TreeGenerator;
-import dev.ultreon.quantum.world.gen.WorldGenFeature;
-import dev.ultreon.quantum.world.gen.chunk.RecordingChunk;
+import dev.ultreon.quantum.world.gen.FeatureData;
+import dev.ultreon.quantum.world.gen.FeatureInfo;
+import dev.ultreon.quantum.world.gen.StructureInstance;
+import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
-import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.rng.RNG;
+import dev.ultreon.quantum.world.structure.BlockPoint;
+import dev.ultreon.quantum.world.structure.WorldSlice;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Collection;
 import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+/**
+ * The BiomeGenerator class is responsible for generating terrain and features for a given biome in the world.
+ * It applies various terrain layers and world generation features to specific chunk columns.
+ */
 public class BiomeGenerator implements Disposable {
     private final World world;
     private final List<TerrainLayer> layers;
-    private final List<WorldGenFeature> features;
-    @UnknownNullability
-    public TreeGenerator treeGenerator;
+    private final List<TerrainFeature> surfaceFeatures;
+    private final List<TerrainFeature> undergroundFeatures;
     private final Biome biome;
 
-    public BiomeGenerator(World world, Biome biome, DomainWarping domainWarping, List<TerrainLayer> layers, List<WorldGenFeature> features) {
+    /**
+     * Constructs a BiomeGenerator with the specified parameters.
+     *
+     * @param world the world in which the biome generator will operate
+     * @param biome the biome type to be generated
+     * @param layers the list of terrain layers to apply in the world generation
+     * @param surfaceFeatures the list of world generation surface features to include
+     */
+    public BiomeGenerator(World world, Biome biome, List<TerrainLayer> layers, List<TerrainFeature> surfaceFeatures, List<TerrainFeature> undergroundFeatures) {
         Preconditions.checkNotNull(biome, "biome");
         this.world = world;
         this.biome = biome;
         this.layers = layers;
-        this.features = features;
+        this.surfaceFeatures = surfaceFeatures;
+        this.undergroundFeatures = undergroundFeatures;
     }
 
-    public void processColumn(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
+    public void processColumn(BuilderChunk chunk, int x, int y, int z) {
 //        LightMap lightMap = chunk.getLightMap();
 
         this.generateTerrainLayers(chunk, x, z, y);
-
-        BiomeGenerator.setRecordedChanges(chunk, x, chunk.getOffset().y, z, recordedChanges);
-
-//        BiomeGenerator.updateLightMap(chunk, x, z, lightMap); // TODO
     }
 
-//    private static void updateLightMap(BuilderChunk chunk, int x, int z, LightMap lightMap) {
-//        int highest = chunk.getHeight(x, z, HeightmapType.WORLD_SURFACE);
-//        for (int y = chunk.getOffset().y; y < chunk.getOffset().y + CHUNK_HEIGHT; y++) {
-//            lightMap.setSunlight(x, y, z, y >= highest ? 15 : 7);
-//        }
-//    }
-
-    public void generateTerrainFeatures(RecordingChunk chunk, int x, int z, int groundPos) {
+    /**
+     * Generates terrain features for a specified chunk column by applying various world generation features.
+     *
+     * @param chunk the chunk in which to generate the terrain features
+     * @param x the x-coordinate within the chunk
+     * @param z the z-coordinate within the chunk
+     * @param groundPos the ground position at the specified coordinates
+     */
+    public void generateTerrainFeatures(BuilderChunk chunk, int x, int z, int groundPos) {
         for (int y = 0; y < CHUNK_SIZE; y++) {
-            for (var feature : this.features) {
-                if (feature.handle(this.world, chunk, x, y, z, groundPos)) {
-                    break;
-                }
+            BlockVec blockInWorld = chunk.getVec().blockInWorldSpace(x, y, z);
+
+            for (var feature : this.undergroundFeatures) {
+                if (genFeature(chunk, blockInWorld.x, blockInWorld.y, blockInWorld.z, feature)) break;
             }
+        }
+
+        for (var feature : this.surfaceFeatures) {
+            BlockVec blockInWorld = chunk.getVec().blockInWorldSpace(x, 0, z);
+
+            if (genFeature(chunk, blockInWorld.x, groundPos, blockInWorld.z, feature)) break;
         }
     }
 
-    private void generateTerrainLayers(BuilderChunk chunk, int x, int z, int groundPos) {
+    public boolean genFeature(BuilderChunk chunk, int x, int y, int z, TerrainFeature feature) {
+        BuilderFork fork = chunk.createFork(x, y, z);
+        long posSeed = ((long) x << 42L | (long) y << 21L | (long) z) ^ 0x3EFC_5E9A_3C1A_5C0CL;
+        BlockVec localVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
+        if (feature.shouldPlace(x, y, z, chunk.get(localVec.x, localVec.y, localVec.z))) {
+            if (feature.handle(fork, posSeed, 0, 0, 0)) {
+                List<BlockPoint> points = fork.getPositions();
+                ServerWorld serverWorld = chunk.getWorld();
+                FeatureData featureData = serverWorld.getFeatureData();
+                featureData.writeFeature(chunk, new FeatureInfo(points));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Generates terrain layers for a specified chunk column by applying various terrain layers.
+     *
+     * @param chunk the chunk in which to generate the terrain layers
+     * @param x the x-coordinate within the chunk
+     * @param z the z-coordinate within the chunk
+     * @param groundPos the ground position at the specified coordinates
+     */
+    public void generateTerrainLayers(BuilderChunk chunk, int x, int z, int groundPos) {
         RNG rng = chunk.getRNG();
         if (chunk.getVec().y > 256 / CHUNK_SIZE)
             return;
@@ -77,39 +115,25 @@ public class BiomeGenerator implements Disposable {
             if (chunk.get(x, y, z).isAir()) continue;
 
             for (var layer : this.layers) {
-                if (layer.handle(this.world, chunk, rng, offset.x + x, offset.y + y, offset.z + z, groundPos)) {
+                if (layer.handle(this.world, new WorldSlice(chunk), rng, offset.x + x, offset.y + y, offset.z + z, groundPos)) {
                     break;
                 }
             }
         }
     }
 
-    private static void setRecordedChanges(BuilderChunk chunk, int x, int y, int z, Collection<ServerWorld.RecordedChange> recordedChanges) {
-        for (ServerWorld.RecordedChange recordedChange : recordedChanges) {
-            boolean isWithinChunkBounds = recordedChange.x() >= chunk.getOffset().x && recordedChange.x() < chunk.getOffset().x + CHUNK_SIZE
-                                          && recordedChange.y() >= chunk.getOffset().y && recordedChange.y() < chunk.getOffset().y + CHUNK_SIZE
-                                          && recordedChange.z() >= chunk.getOffset().z && recordedChange.z() < chunk.getOffset().z + CHUNK_SIZE;
-            BlockVec localBlockVec = World.toLocalBlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z());
-            if (isWithinChunkBounds && localBlockVec.getIntX() == x && localBlockVec.getIntY() == y && localBlockVec.getIntZ() == z) {
-                chunk.set(new BlockVec(recordedChange.x(), recordedChange.y(), recordedChange.z(), BlockVecSpace.WORLD).chunkLocal().vec(), recordedChange.block());
-                if (WorldGenDebugContext.isActive()) {
-                    System.out.println("[DEBUG CHUNK-HASH " + System.identityHashCode(chunk) + "] Setting recorded change in chunk at " + recordedChange.x() + ", " + recordedChange.y() + ", " + recordedChange.z() + " of type " + recordedChange.block());
-                }
-            }
+    public void generateStructureFeatures(BuilderChunk recordingChunk) {
+        Collection<StructureInstance> structures = recordingChunk.getWorld().getStructuresAt(recordingChunk.getVec());
+
+        for (StructureInstance struc : structures) {
+            struc.placeSlice(recordingChunk);
         }
-    }
-
-    public TreeData createTreeData(Chunk chunk) {
-        if (this.treeGenerator == null)
-            return new TreeData();
-
-        return this.treeGenerator.generateTreeData(chunk);
     }
 
     @Override
     public void dispose() {
         this.layers.forEach(TerrainLayer::dispose);
-        this.features.forEach(WorldGenFeature::dispose);
+        this.surfaceFeatures.forEach(TerrainFeature::dispose);
     }
 
     public World getWorld() {
@@ -122,10 +146,6 @@ public class BiomeGenerator implements Disposable {
 
     public RegistryKey<Biome> getBiomeKey(QuantumServer server) {
         return server.getRegistries().get(RegistryKeys.BIOME).getKey(this.biome);
-    }
-
-    public void generateStructureFeatures(RecordingChunk recordingChunk, int x, int y, int z) {
-
     }
 
     public static class Index {

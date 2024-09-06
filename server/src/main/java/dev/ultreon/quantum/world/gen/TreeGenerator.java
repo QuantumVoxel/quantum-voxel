@@ -67,8 +67,6 @@ public class TreeGenerator {
     public TreeData generateTreeData(Chunk chunkData) {
         var noise = this.noise;
         var treeData = new TreeData();
-        var noiseMatrix = this.generateMatrix(chunkData, noise);
-        treeData.treePositions = TreeGenerator.findLocalMaxima(noiseMatrix, chunkData.getOffset().x, chunkData.getOffset().z);
 
         return treeData;
     }

@@ -17,6 +17,10 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Represents an abstract screen in the UI.
+ * This class provides a framework for managing and rendering a screen, including its title, background, and dialog if any.
+ */
 public abstract class Screen extends UIContainer<Screen> {
     private static final Color BACKGOUND_OVERLAY = new Color(0, 0, 0, 0.25f);
     private static final Color DIALOG_BACKGROUND = new Color(0, 0, 0, 0.45f);
@@ -65,6 +69,14 @@ public abstract class Screen extends UIContainer<Screen> {
 
     }
 
+    /**
+     * Renders the screen, including handling dialog and title widget rendering.
+     *
+     * @param renderer Renderer instance used for drawing the screen elements.
+     * @param mouseX The x-coordinate of the mouse cursor.
+     * @param mouseY The y-coordinate of the mouse cursor.
+     * @param deltaTime The time elapsed since the last frame, used for animations.
+     */
     @Override
     public final void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
         if (this.titleWidget != null) {
@@ -150,6 +162,12 @@ public abstract class Screen extends UIContainer<Screen> {
         else this.renderSolidBackground(renderer);
     }
 
+    /**
+     * Renders the background of the screen, including handling hovered states.
+     *
+     * @param renderer the renderer instance used for drawing the screen elements.
+     * @param deltaTime the time elapsed since the last frame, used for animations.
+     */
     @Override
     protected final void renderBackground(Renderer renderer, float deltaTime) {
         this.directHovered = null;

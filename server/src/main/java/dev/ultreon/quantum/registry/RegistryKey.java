@@ -2,8 +2,12 @@ package dev.ultreon.quantum.registry;
 
 import com.mojang.serialization.Codec;
 import dev.ultreon.quantum.util.NamespaceID;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public record RegistryKey<T>(dev.ultreon.quantum.registry.RegistryKey<Registry<T>> parent, NamespaceID id) {
+import java.util.Objects;
+
+public record RegistryKey<T>(@Nullable RegistryKey<Registry<T>> parent, @NotNull NamespaceID id) {
     public static final RegistryKey<Registry<Registry<?>>> ROOT = new RegistryKey<>(null, new NamespaceID("root"));
     public static final Codec<RegistryKey<Registry<?>>> REGISTRY_KEY_CODEC = NamespaceID.CODEC.xmap(RegistryKey::registry, RegistryKey::id);
 
@@ -26,5 +30,18 @@ public record RegistryKey<T>(dev.ultreon.quantum.registry.RegistryKey<Registry<T
     public String toString() {
         if (parent == null) return id.toString();
         return parent.id + " @ " + id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegistryKey<?> that = (RegistryKey<?>) o;
+        return id.equals(that.id) && Objects.equals(parent, that.parent);
+    }
+
+    @Override
+    public int hashCode() {
+        return (parent == null ? 0 : parent.hashCode()) * 31 + id.hashCode();
     }
 }

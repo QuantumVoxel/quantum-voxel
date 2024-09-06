@@ -3,11 +3,12 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Axis;
+import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -54,6 +55,10 @@ public enum CubicDirection {
         if (max == comps[0]) return max < 0 ? SOUTH : NORTH;
         else if (max == comps[1]) return max < 0 ? DOWN : UP;
         else return max < 0 ? WEST : EAST;
+    }
+
+    public static CubicDirection random(RNG random) {
+        return CubicDirection.values()[random.nextInt(6)];
     }
 
     public Vector3 getNormal() {

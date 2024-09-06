@@ -1,9 +1,6 @@
 package dev.ultreon.quantum.world.gen.chunk;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.debug.DebugFlags;
-import dev.ultreon.quantum.debug.WorldGenDebugContext;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -20,11 +17,20 @@ import java.util.Collection;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+/**
+ * An abstract class implementing the ChunkGenerator interface, providing a base
+ * for generating chunks in a world using biomes and domain warping layers.
+ */
 public abstract class SimpleChunkGenerator implements ChunkGenerator {
     private final Registry<Biome> biomesRegistry;
     private final Array<Biome> biomes = new Array<>();
     private DomainWarping layerDomain;
 
+    /**
+     * Constructs a SimpleChunkGenerator with a registry of biomes.
+     *
+     * @param biomeRegistry The Registry instance containing biome information. Must not be null.
+     */
     public SimpleChunkGenerator(Registry<Biome> biomeRegistry) {
         biomesRegistry = biomeRegistry;
     }
@@ -36,15 +42,14 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
     }
 
     @Override
-    public void generate(ServerWorld world, BuilderChunk chunk, Collection<ServerWorld.@NotNull RecordedChange> recordedChanges) {
+    public void generate(ServerWorld world, BuilderChunk chunk, Collection<ServerWorld.@NotNull RecordedChange> changes) {
         Carver carver = getCarver();
 
-        RecordingChunk recordingChunk = new RecordingChunk(chunk);
+        this.generateTerrain(chunk, carver);
+        world.getFeatureData().prepareChunk(chunk);
 
-        this.generateTerrain(chunk, carver, recordedChanges);
-        this.generateRecordedChanges(chunk, recordingChunk);
-        this.generateFeatures(chunk, recordingChunk);
-        this.generateStructures(chunk, recordingChunk);
+        this.generateFeatures(chunk);
+        this.generateStructures(chunk);
     }
 
     @Override
@@ -52,45 +57,60 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
         return layerDomain;
     }
 
-    protected abstract void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver, @NotNull Collection<ServerWorld.@NotNull RecordedChange> recordedChanges);
+    /**
+     * Generates terrain for a given chunk using a specified carver and records the changes.
+     *
+     * @param chunk The chunk in which the terrain generation is to be performed. Must not be null.
+     * @param carver The carver used to shape the terrain within the chunk. Must not be null.
+     */
+    protected abstract void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver);
 
-    protected void generateRecordedChanges(BuilderChunk chunk, RecordingChunk recordingChunk) {
-        for (ServerWorld.RecordedChange change : recordingChunk.deferredChanges()) {
-            if (WorldGenDebugContext.isActive()) {
-                CommonConstants.LOGGER.info("Recorded change: " + change);
-            }
-
-            if (DebugFlags.LOG_OUT_OF_BOUNDS.isEnabled() && (change.x() < 0 || change.x() >= CHUNK_SIZE || change.z() < 0 || change.z() >= CHUNK_SIZE)) {
-                QuantumServer.LOGGER.warn("Recorded change out of bounds: {}", change);
-            }
-
-            chunk.set(change.x(), change.y(), change.z(), change.block());
-        }
-    }
-
-    protected void generateFeatures(BuilderChunk builderChunk, RecordingChunk recordingChunk) {
+    /**
+     * Generates terrain features within a specified chunk based on biome and recording information.
+     *
+     * @param chunk The chunk for which the terrain features are being generated. Must not be null.
+     */
+    protected void generateFeatures(BuilderChunk chunk) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                int height = builderChunk.getWorld().getHeight(builderChunk.getOffset().x + x, builderChunk.getOffset().y + z, HeightmapType.WORLD_SURFACE);
-                builderChunk.getBiomeGenerator(x, z).generateTerrainFeatures(recordingChunk, x, z, height);
+                int height = chunk.getWorld().getHeight(chunk.getOffset().x + x, chunk.getOffset().z + z, HeightmapType.WORLD_SURFACE);
+                chunk.getBiomeGenerator(x, z).generateTerrainFeatures(chunk, x, z, height);
             }
         }
     }
 
-    protected void generateStructures(BuilderChunk chunk, RecordingChunk recordingChunk) {
+    /**
+     * Generates various structures within the provided chunk by leveraging the biome generator
+     * for the chunk's regions.
+     * It iterates through the X and Z coordinates of the chunk, determines
+     * the highest Y coordinate at each (X, Z) pair, and triggers the biome-specific structure
+     * generation at those points.
+     *
+     * @param chunk The BuilderChunk instance where the structures will be generated. Must not be null.
+     */
+    protected void generateStructures(BuilderChunk chunk) {
         for (var x = 0; x < CHUNK_SIZE; x++) {
             for (var z = 0; z < CHUNK_SIZE; z++) {
-                int highest = chunk.getWorld().getHeight(chunk.getOffset().x + x, chunk.getOffset().z + z, HeightmapType.WORLD_SURFACE);
-                chunk.getBiomeGenerator(x, z).generateStructureFeatures(recordingChunk, x, highest, z);
+                chunk.getBiomeGenerator(x, z).generateStructureFeatures(chunk);
             }
         }
     }
 
+    /**
+     * Adds a biome to the list of biomes managed by this chunk generator.
+     *
+     * @param biome The registry key of the biome to be added. Must not be null.
+     */
     protected final void addBiome(RegistryKey<Biome> biome) {
         biomes.add(biomesRegistry.get(biome));
     }
 
-    protected abstract @NotNull Carver getCarver();
+    /**
+     * Provides the Carver instance responsible for shaping and carving terrain within a chunk.
+     *
+     * @return An instance of Carver which is used for terrain generation. Must not be null.
+     */
+    public abstract @NotNull Carver getCarver();
 
     @Override
     public void dispose() {

@@ -31,7 +31,9 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.gen.TerrainGenerator;
+import dev.ultreon.quantum.world.gen.FeatureData;
+import dev.ultreon.quantum.world.gen.StructureData;
+import dev.ultreon.quantum.world.gen.StructureInstance;
 import dev.ultreon.quantum.world.gen.carver.CaveCarver;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
@@ -42,7 +44,6 @@ import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.vec.*;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.LongType;
 import dev.ultreon.ubo.types.MapType;
 import kotlin.system.TimingKt;
 import org.checkerframework.common.reflection.qual.NewInstance;
@@ -61,6 +62,11 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * The ServerWorld class represents a server-side world.
+ * It contains methods to manipulate and query chunks, blocks, and other
+ * world data.
+ */
 public class ServerWorld extends World {
     private final WorldStorage storage;
     private final ChunkGenerator generator;
@@ -85,9 +91,11 @@ public class ServerWorld extends World {
     private int spawnY;
     private long time;
     private final RegistryKey<DimensionInfo> key;
+    private final FeatureData featureData = new FeatureData();
+    private final StructureData structureData = new StructureData();
 
-    public ServerWorld(QuantumServer server, RegistryKey<DimensionInfo> key, WorldStorage storage, ChunkGenerator generator, MapType worldData) {
-        super((LongType) worldData.get("seed"));
+    public ServerWorld(QuantumServer server, RegistryKey<DimensionInfo> key, WorldStorage storage, ChunkGenerator generator, long seed, MapType worldData) {
+        super(seed);
 
         this.key = key;
 
@@ -109,6 +117,14 @@ public class ServerWorld extends World {
 //        }
 //
 //        this.terrainGen.create(this, this.seed);
+    }
+
+    public void recordChange(RecordedChange change) {
+        this.recordedChanges.add(change);
+    }
+
+    public void recordChange(int x, int y, int z, BlockState state) {
+        this.recordedChanges.add(new RecordedChange(x, y, z, state));
     }
 
     private void load(MapType worldData) {
@@ -1270,16 +1286,6 @@ public class ServerWorld extends World {
         // NO
     }
 
-    /**
-     * Retrieve the TerrainGenerator object.
-     *
-     * @return the TerrainGenerator object
-     */
-    @Deprecated(forRemoval = true)
-    public TerrainGenerator getTerrainGenerator() {
-        throw new DeprecationCheckException("Use getGenerator() instead.");
-    }
-
     public ChunkGenerator getGenerator() {
         return this.generator;
     }
@@ -1365,6 +1371,14 @@ public class ServerWorld extends World {
     @Override
     public RegistryKey<DimensionInfo> getDimension() {
         return key;
+    }
+
+    public Collection<StructureInstance> getStructuresAt(ChunkVec vec) {
+        return structureData.getStructuresAt(vec);
+    }
+
+    public FeatureData getFeatureData() {
+        return featureData;
     }
 
     /**

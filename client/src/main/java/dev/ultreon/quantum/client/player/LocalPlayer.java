@@ -44,6 +44,9 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
+/**
+ * Represents a local player entity in the game.
+ */
 public class LocalPlayer extends ClientPlayer {
     private final QuantumClient client = QuantumClient.get();
     private ClientWorldAccess world;
@@ -122,13 +125,14 @@ public class LocalPlayer extends ClientPlayer {
         }
     }
 
-    private @Nullable SoundEvent getWalkSound() {
+    @Nullable
+    protected SoundEvent getWalkSound() {
         BlockState state = this.getOnBlock();
         SoundType soundType = state.getBlock().getSoundType(state, this.world, this.getBlockVec());
         return soundType.getStepSound(getRng());
     }
 
-    private BlockState getOnBlock() {
+    protected BlockState getOnBlock() {
         if (this.world == null) return BlockState.AIR;
         return this.world.get(this.getBlockVec().below());
     }
@@ -137,7 +141,7 @@ public class LocalPlayer extends ClientPlayer {
     /**
      * Handles the player movement by sending the new coordinates to the server.
      */
-    private void handleMove() {
+    protected void handleMove() {
         // Send the player's new coordinates to the server
         if (this.client.connection != null) {
             if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
@@ -155,6 +159,21 @@ public class LocalPlayer extends ClientPlayer {
         this.refreshChunks();
     }
 
+    /**
+     * Refreshes the chunks around the player based on the current chunk position and render distance.
+     * This method is designed to be called periodically to ensure the player has the correct chunks loaded
+     * and unload any chunks that are no longer within the render distance.
+     * <p>
+     * The method performs the following steps:
+     * <ol>
+     *     <li>Checks if the world is being rendered by the client. If not, it exits early.</li>
+     *     <li>Ensures that the refresh operation is not performed more frequently than once per second.</li>
+     *     <li>Calculates the chunks that need to be loaded and unloaded based on the player's current position.</li>
+     *     <li>Unloads chunks that are outside the render distance.</li>
+     *     <li>Collects the chunks that need to be loaded.</li>
+     *     <li>Sorts the chunks to load based on their distance to the player and adds them to the send queue.</li>
+     * </ol>
+     */
     public void refreshChunks() {
         if (!this.client.renderWorld) return;
         if (lastRefresh + 1000 > System.currentTimeMillis()) return;
@@ -182,6 +201,8 @@ public class LocalPlayer extends ClientPlayer {
                     ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
                     if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null)
                         continue;
+
+                    // Add chunks when within range.
                     if (chunkPos.dst(relativePos) <= renderDistance && !this.world.isLoaded(relativePos)) {
                         chunksToLoad.add(relativePos);
                     }
@@ -213,7 +234,7 @@ public class LocalPlayer extends ClientPlayer {
         this.refreshChunks();
     }
 
-    private void unloadChunk(ClientChunkAccess chunk) {
+    public void unloadChunk(ClientChunkAccess chunk) {
         this.world.unloadChunk(chunk.getVec());
     }
 

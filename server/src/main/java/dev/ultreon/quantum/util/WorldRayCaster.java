@@ -77,7 +77,7 @@ public class WorldRayCaster {
                 continue;
             }
 
-            BlockState blockState = chunk.get(loc.cpy());
+            BlockState blockState = chunk.get(loc.x, loc.y, loc.z);
             if (blockState != null && !blockState.isAir() && predicate.test(blockState)) {
                 Block block = blockState.getBlock();
                 block.boundingBox(abs.x, abs.y, abs.z, blockState, box);

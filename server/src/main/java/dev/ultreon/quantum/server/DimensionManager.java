@@ -32,9 +32,10 @@ public class DimensionManager {
         Registry<ChunkGenerator> chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
         this.dimensions.put(DimensionInfo.OVERWORLD, new Dimension(dimRegistry.get(DimensionInfo.OVERWORLD), chunkGenRegistry.get(ChunkGenerator.OVERWORLD)));
         this.dimensions.put(DimensionInfo.TEST, new Dimension(dimRegistry.get(DimensionInfo.TEST), chunkGenRegistry.get(ChunkGenerator.TEST)));
+        this.dimensions.put(DimensionInfo.SPACE, new Dimension(dimRegistry.get(DimensionInfo.SPACE), chunkGenRegistry.get(ChunkGenerator.FLOATING_ISLANDS)));
     }
 
-    public void loadWorlds() {
+    public void loadWorlds(long seed) {
         for (Map.Entry<RegistryKey<DimensionInfo>, Dimension> e : this.dimensions.entrySet()) {
             RegistryKey<DimensionInfo> key = e.getKey();
             Dimension dimension = e.getValue();
@@ -44,7 +45,7 @@ public class DimensionManager {
                 MapType data = new MapType();
                 if (storage.exists("world.ubo"))
                     data = storage.read("world.ubo");
-                ServerWorld world = new ServerWorld(server, key, storage, dimension.generator(), data);
+                ServerWorld world = new ServerWorld(server, key, storage, dimension.generator(), e.getValue().info().seed().orElse(seed ^ key.hashCode()), data);
                 this.worlds.put(key, world);
 
                 world.load();

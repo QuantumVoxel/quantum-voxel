@@ -178,13 +178,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return super.set(x, y, z, block);
     }
 
-    public void set(Vec3i pos, BlockState block) {
-        if (!QuantumClient.isOnRenderThread())
-            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-
-        super.set(pos, block);
-    }
-
     @Override
     protected boolean setFast(int x, int y, int z, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
@@ -297,7 +290,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             inst.transform.setToTranslationAndScaling(renderOffset.x + pos.getIntX(), renderOffset.y + pos.getIntY(), renderOffset.z + pos.getIntZ(), 1 / 16f, 1 / 16f, 1 / 16f);
         }
 
-        for (BlockVec pos : this.removedModels) {
+        for (BlockVec pos : this.removedModels.toArray(BlockVec.class)) {
             this.removedModels.removeValue(pos, false);
             ModelInstance model = this.models.remove(pos);
             if (model != null)

@@ -71,7 +71,7 @@ public class ChatScreen extends Screen {
     }
 
     public ChatTextEntry getEntry() {
-        return (ChatTextEntry) this.entry;
+        return this.entry;
     }
 
     @Override

@@ -8,8 +8,8 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4
 import de.articdive.jnoise.pipeline.JNoise;
 
 /**
- * This class generates a terrain noise, which is used to generate terrain in a Chunk.
- * It combines multiple {@link NoiseSource}s to create a terrain with more details.
+ * The TerrainNoise class generates terrain noise using a combination of various simplex noise sources.
+ * It supports noise generation in one, two, three, and four dimensions.
  */
 public class TerrainNoise implements NoiseSource {
     private final NoiseSource noise;
