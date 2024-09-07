@@ -27,22 +27,6 @@ build_windows:
       - build/dist/*
     expire_in: 1 week
 
-build_macos:
-  stage: build
-  tags:
-    - saas-macos-medium-m1
-  image: macos-13-xcode-14
-  script:
-    - echo "Building on macOS with GraalVM 21.0.2 and Java 21..."
-    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-darwin-amd64-21.0.2.tar.gz
-    - tar -xzf graalvm.tar.gz
-    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/Contents/Home/bin:$PATH"
-    - ./gradlew jpackage
-  artifacts:
-    paths:
-      - build/dist/*
-    expire_in: 1 week
-
 build_linux:
   stage: build
   tags:
