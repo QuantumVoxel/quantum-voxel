@@ -20,7 +20,7 @@ build_windows:
     - echo "Building on Windows with GraalVM 21.0.2 and Java 21..."
     - pwsh -Command "curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip"
     - pwsh -Command "Expand-Archive graalvm.zip -DestinationPath ."
-    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/bin:$PATH"
+    - cmd.exe /c "set PATH=%CI_PROJECT_DIR%\graalvm-ce-java21-21.0.2\bin;%PATH%"
     - ./gradlew jpackage
   artifacts:
     paths:
@@ -34,7 +34,7 @@ build_macos:
   image: macos-13-xcode-14
   script:
     - echo "Building on macOS with GraalVM 21.0.2 and Java 21..."
-    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-darwin-amd64-21.0.2.tar.gz
+    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_macos-aarch64_bin.tar.gz
     - tar -xzf graalvm.tar.gz
     - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/Contents/Home/bin:$PATH"
     - ./gradlew jpackage
