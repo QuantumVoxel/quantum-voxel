@@ -1,4 +1,4 @@
-image: gradle:8.0-jdk21  # Base Docker image, updated for JDK 21
+image: gradle:8.8-jdk21  # Base Docker image, updated for JDK 21
 
 stages:
   - build
