@@ -18,7 +18,7 @@ build_windows:
     - saas-windows-medium-amd64
   script:
     - echo "Building on Windows with GraalVM 21.0.2 and Java 21..."
-    - pwsh -Command "curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-windows-amd64-21.0.2.zip"
+    - pwsh -Command "curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip"
     - pwsh -Command "Expand-Archive graalvm.zip -DestinationPath ."
     - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/bin:$PATH"
     - ./gradlew jpackage
@@ -33,7 +33,7 @@ build_linux:
     - saas-linux-small-amd64
   script:
     - echo "Building on Linux with GraalVM 21.0.2 and Java 21..."
-    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-linux-amd64-21.0.2.tar.gz
+    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
     - tar -xzf graalvm.tar.gz
     - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/bin:$PATH"
     - ./gradlew jpackage
