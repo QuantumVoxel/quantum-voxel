@@ -17,10 +17,10 @@ build_windows:
   tags:
     - saas-windows-medium-amd64
   script:
-    - echo "Building on Windows with GraalVM 24.0.2 and Java 21..."
-    - pwsh -Command "curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-24.0.2/graalvm-ce-java21-windows-amd64-24.0.2.zip"
+    - echo "Building on Windows with GraalVM 21.0.2 and Java 21..."
+    - pwsh -Command "curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-windows-amd64-21.0.2.zip"
     - pwsh -Command "Expand-Archive graalvm.zip -DestinationPath ."
-    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-24.0.2/bin:$PATH"
+    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/bin:$PATH"
     - ./gradlew jpackage
   artifacts:
     paths:
@@ -33,10 +33,10 @@ build_macos:
     - saas-macos-medium-m1
   image: macos-13-xcode-14
   script:
-    - echo "Building on macOS with GraalVM 24.0.2 and Java 21..."
-    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-24.0.2/graalvm-ce-java21-darwin-amd64-24.0.2.tar.gz
+    - echo "Building on macOS with GraalVM 21.0.2 and Java 21..."
+    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-darwin-amd64-21.0.2.tar.gz
     - tar -xzf graalvm.tar.gz
-    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-24.0.2/Contents/Home/bin:$PATH"
+    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/Contents/Home/bin:$PATH"
     - ./gradlew jpackage
   artifacts:
     paths:
@@ -48,10 +48,10 @@ build_linux:
   tags:
     - saas-linux-small-amd64
   script:
-    - echo "Building on Linux with GraalVM 24.0.2 and Java 21..."
-    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-24.0.2/graalvm-ce-java21-linux-amd64-24.0.2.tar.gz
+    - echo "Building on Linux with GraalVM 21.0.2 and Java 21..."
+    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.2/graalvm-ce-java21-linux-amd64-21.0.2.tar.gz
     - tar -xzf graalvm.tar.gz
-    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-24.0.2/bin:$PATH"
+    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/bin:$PATH"
     - ./gradlew jpackage
   artifacts:
     paths:
