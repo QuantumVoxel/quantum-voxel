@@ -1,0 +1,58 @@
+image: gradle:8.0-jdk21  # Base Docker image, updated for JDK 21
+
+stages:
+  - build
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+cache:
+  key: "$CI_PROJECT_ID-$CI_COMMIT_REF_SLUG"
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+build_windows:
+  stage: build
+  tags:
+    - windows
+  script:
+    - echo "Building on Windows with GraalVM 24.0.2 and Java 21..."
+    - pwsh -Command "curl -L -o graalvm.zip https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-24.0.2/graalvm-ce-java21-windows-amd64-24.0.2.zip"
+    - pwsh -Command "Expand-Archive graalvm.zip -DestinationPath ."
+    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-24.0.2/bin:$PATH"
+    - ./gradlew jpackage
+  artifacts:
+    paths:
+      - build/dist/*
+    expire_in: 1 week
+
+build_macos:
+  stage: build
+  tags:
+    - macos
+  script:
+    - echo "Building on macOS with GraalVM 24.0.2 and Java 21..."
+    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-24.0.2/graalvm-ce-java21-darwin-amd64-24.0.2.tar.gz
+    - tar -xzf graalvm.tar.gz
+    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-24.0.2/Contents/Home/bin:$PATH"
+    - ./gradlew jpackage
+  artifacts:
+    paths:
+      - build/dist/*
+    expire_in: 1 week
+
+build_linux:
+  stage: build
+  tags:
+    - linux
+  script:
+    - echo "Building on Linux with GraalVM 24.0.2 and Java 21..."
+    - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-24.0.2/graalvm-ce-java21-linux-amd64-24.0.2.tar.gz
+    - tar -xzf graalvm.tar.gz
+    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-24.0.2/bin:$PATH"
+    - ./gradlew jpackage
+  artifacts:
+    paths:
+      - build/dist/*
+    expire_in: 1 week
