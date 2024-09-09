@@ -25,3 +25,5 @@ include 'testmod'
 include 'mixinprovider'
 include 'kwantum-api'
 include 'quantum-api'
+include 'lang-gen'
+

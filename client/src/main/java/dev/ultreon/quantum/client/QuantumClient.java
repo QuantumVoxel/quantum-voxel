@@ -578,6 +578,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.materialManager = new MaterialManager(this.resourceManager, this.textureManager, this.cubemapManager);
         this.textureAtlasManager = new TextureAtlasManager(this);
 
+        // Initialize the game camera
+        this.camera = new GameCamera(67, this.getWidth(), this.getHeight());
+        this.camera.near = 0.1f;
+        this.camera.far = 2;
+
         // Load the configuration
         ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), () -> {
             this.newConfig = new ClientConfig();
@@ -609,11 +614,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.entityModelManager = new EntityModelRegistry(modelLoader, this);
         this.entityRendererManager = new EntityRendererRegistry(this.entityModelManager);
         this.modelLoader = modelLoader;
-
-        // Initialize the game camera
-        this.camera = new GameCamera(67, this.getWidth(), this.getHeight());
-        this.camera.near = 0.1f;
-        this.camera.far = 2;
 
         // Initialize the render pipeline
         this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
@@ -1884,6 +1884,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      * @param height The new height of the display
      */
     public void resize(int width, int height) {
+        if (this.spriteBatch == null
+            || this.renderer == null) return;
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invokeAndWait(() -> this.resize(width, height));
             return;
