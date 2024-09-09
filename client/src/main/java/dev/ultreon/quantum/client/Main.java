@@ -5,6 +5,7 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -14,9 +15,13 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ultreon.langgen.LangGenConfig;
+import dev.ultreon.langgen.LangGenListener;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
+import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import kotlin.OptIn;
@@ -26,8 +31,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 
@@ -40,6 +47,7 @@ import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumb
 @ApiStatus.Internal
 @OptIn(markerClass = InternalApi.class)
 public final class Main implements ApplicationListener {
+    public static final Color SEMI_TRANSPARENT_WHITE = new Color(.5f, .5f, .5f, 1);
     private static Main instance;
     private static CrashLog crashOverride;
     private final String[] argv;
@@ -53,6 +61,9 @@ public final class Main implements ApplicationListener {
     private final Logger logger = LoggerFactory.getLogger("GAME");
     private GameWindow window;
     private boolean windowVibrancyEnabled;
+    private float progress;
+    private boolean generated;
+    private String message;
 
     /**
      * Constructs a new GameLibGDXWrapper object.
@@ -134,12 +145,45 @@ public final class Main implements ApplicationListener {
                 this.client = new DataGeneratorClient();
             }
 
-            // Initialize QuantumClient with given arguments
-            this.client = new QuantumClient(this.argv);
+            AtomicBoolean preprocessing = new AtomicBoolean(true);
+            LangGenConfig.progressListener = new LangGenListener() {
+                @Override
+                public void onProgress(int progress, int total) {
+                    preprocessing.set(false);
+                    Main.this.progress = (float) progress / total;
+                    Main.this.message = "Generating bindings: " + progress + " / " + total;
+                }
+
+                @Override
+                public void onPreprocessProgress(int progress, int total) {
+                    preprocessing.set(true);
+                    Main.this.progress = (float) progress / total;
+                    Main.this.message = "Preprocessing bindings: " + progress + " / " + total;
+                }
+
+                @Override
+                public void onDone() {
+                    Main.this.generated = true;
+                }
+            };
+            Thread thread = new Thread(() -> {
+                try {
+                    LangGenMain.genBindings();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, "LangGen");
+
+            thread.start();
         } catch (ApplicationCrash t) {
             // Handle ApplicationCrash exception
             QuantumClient.crash(t);
         }
+    }
+
+    private void createClient() {
+        // Initialize QuantumClient with given arguments
+        this.client = new QuantumClient(this.argv);
     }
 
     /**
@@ -170,6 +214,29 @@ public final class Main implements ApplicationListener {
     @Override
     public void render() {
         try {
+            if (this.generated && QuantumClient.get() == null) {
+                this.createClient();
+            } else if (!this.generated) {
+                Gdx.gl.glClearColor(0, 0, 0, 1);
+                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+                this.batch.begin();
+                this.font.draw(batch, message == null ? "null" : message, 10, 40);
+                this.batch.end();
+
+                if (Gdx.graphics.getFrameId() == 2L) {
+                    GamePlatform.get().setVisible(true);
+                }
+
+                this.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                this.shapeRenderer.setColor(SEMI_TRANSPARENT_WHITE);
+                this.shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), 10);
+                this.shapeRenderer.setColor(Color.WHITE);
+                this.shapeRenderer.rect(0, 0, this.progress * Gdx.graphics.getWidth(), 10);
+                this.shapeRenderer.end();
+                return;
+            }
+
             if (crashOverride != null) {
                 CrashLog crashLog = crashOverride;
                 this.renderCrash(crashLog);

@@ -8,9 +8,9 @@ import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
-import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
@@ -305,14 +305,18 @@ public class DesktopLauncher {
 
         @Override
         public void focusLost() {
-            QuantumClient.get().pause();
+            QuantumClient quantumClient = QuantumClient.get();
+            if (quantumClient == null) return;
+            quantumClient.pause();
 
-            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(QuantumClient.get().getWindow(), false);
+            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(quantumClient.getWindow(), false);
         }
 
         @Override
         public void focusGained() {
-            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(QuantumClient.get().getWindow(), true);
+            QuantumClient quantumClient = QuantumClient.get();
+            if (quantumClient == null) return;
+            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(quantumClient.getWindow(), true);
         }
 
         @Override
@@ -322,9 +326,11 @@ public class DesktopLauncher {
 
         @Override
         public void filesDropped(String[] files) {
-            QuantumClient.get().filesDropped(files);
+            QuantumClient quantumClient = QuantumClient.get();
+            if (quantumClient == null) return;
+            quantumClient.filesDropped(files);
 
-            WindowEvents.WINDOW_FILES_DROPPED.factory().onWindowFilesDropped(QuantumClient.get().getWindow(), files);
+            WindowEvents.WINDOW_FILES_DROPPED.factory().onWindowFilesDropped(quantumClient.getWindow(), files);
         }
 
     }

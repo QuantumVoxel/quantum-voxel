@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.ultreon.quantum'
+version = '0.1.0-edge.2024.36.1.1'
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation "org.jetbrains:annotations:24.0.0"
+    implementation "org.reflections:reflections:0.10.2"
+    implementation "com.google.guava:guava:$guava_version"
+    implementation "com.badlogicgames.gdx:gdx:$gdx_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+}
+
+test {
+    useJUnitPlatform()
+}
