@@ -40,7 +40,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
 
 
         int u;
-        if (this.enabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
+        if (this.isEnabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
         else u = 42;
         int v = this.isPressed() ? 21 : 0;
 
@@ -56,7 +56,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
 
     @ApiStatus.OverrideOnly
     public boolean click() {
-        if (!this.enabled) return false;
+        if (!this.isEnabled) return false;
         if (!wasPressed) return false;
 
         this.wasPressed = false;
@@ -78,7 +78,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
 
     @Override
     public boolean mousePress(int x, int y, int button) {
-        if (!this.enabled) return false;
+        if (!this.isEnabled) return false;
 
         this.pressed = true;
         this.wasPressed = true;
@@ -97,7 +97,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     public boolean isPressed() {
-        return this.pressed && this.enabled;
+        return this.pressed && this.isEnabled;
     }
 
     @Override

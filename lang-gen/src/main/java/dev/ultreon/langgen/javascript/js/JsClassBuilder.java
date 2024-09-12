@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class JsClassBuilder implements AnyJsClassBuilder {
+public class JsClassBuilder extends AnyJsClassBuilder {
     public static final String CLASS_DEFINITION = """
             class DynamicJavaExtender {
                 constructor(javaType) {
@@ -277,15 +277,19 @@ public class JsClassBuilder implements AnyJsClassBuilder {
 
         if (clazz.isInterface()) {
             sw.append("\n");
+            Set<String> fields = new HashSet<>();
             for (Field field : clazz.getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
+                if (!fields.contains(field.getName()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
                     sw.append("export const ").append(field.getName()).append(" = Java.type('").append(className).append("')").append(".").append(field.getName()).append(";\n");
+                    fields.add(field.getName());
                 }
             }
 
+            Set<String> methods = new HashSet<>();
             for (Method method : clazz.getDeclaredMethods()) {
-                if (Modifier.isStatic(method.getModifiers())) {
+                if (!methods.contains(method.getName()) && Modifier.isStatic(method.getModifiers())) {
                     sw.append("export const ").append(method.getName()).append(" = Java.type('").append(className).append("')").append(".").append(method.getName()).append(";\n");
+                    methods.add(method.getName());
                 }
             }
         }

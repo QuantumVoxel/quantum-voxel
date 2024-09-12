@@ -35,7 +35,7 @@ public class ConfigsList extends SelectionList<ConfigsList.ListEntry> {
         if (renderer.pushScissors(this.getBounds())) {
             for (Entry<?> entry0 : this.entries) {
                 if (!(entry0 instanceof ListEntry entry)) continue;
-                if (entry.visible) {
+                if (entry.isVisible) {
                     entry.render(renderer, 0, mouseX, mouseY - (int) this.getScrollY(), this.isSelectable() && this.getSelected() == entry, deltaTime);
                 }
             }

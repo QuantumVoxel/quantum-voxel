@@ -99,25 +99,25 @@ public class ModListScreen extends Screen {
                 .position(() -> new Position(5, this.size.height - 26))
                 .callback(this::onSources)
                 .type(Button.Type.DARK_EMBED));
-        this.sourcesButton.visible = false;
+        this.sourcesButton.isVisible = false;
 
         this.issuesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.issues"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .callback(this::onIssues)
                 .type(Button.Type.DARK_EMBED));
-        this.issuesButton.visible = false;
+        this.issuesButton.isVisible = false;
 
         this.discordInviteButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.discord"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .callback(this::onDiscordInvite)
                 .type(Button.Type.DARK_EMBED));
-        this.discordInviteButton.visible = false;
+        this.discordInviteButton.isVisible = false;
 
         this.homepageButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.homepage"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .callback(this::onHomepage)
                 .type(Button.Type.DARK_EMBED));
-        this.homepageButton.visible = false;
+        this.homepageButton.isVisible = false;
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190)
                 .position(() -> new Position(5, this.size.height - 26))
@@ -246,30 +246,30 @@ public class ModListScreen extends Screen {
             renderer.textLeft("[cyan]Version: [light grey]" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
             renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
 
-            this.sourcesButton.visible = selected.getSources() != null;
-            this.homepageButton.visible = selected.getHomepage() != null;
-            this.issuesButton.visible = selected.getIssues() != null;
-            this.discordInviteButton.visible = selected.getDiscord() != null;
+            this.sourcesButton.isVisible = selected.getSources() != null;
+            this.homepageButton.isVisible = selected.getHomepage() != null;
+            this.issuesButton.isVisible = selected.getIssues() != null;
+            this.discordInviteButton.isVisible = selected.getDiscord() != null;
 
             renderer.textLeft("[cyan]License: [light grey]" + selected.getLicense(), xIcon, y + 72, RgbColor.rgb(0xa0a0a0));
 
             int btnX = x + 16;
-            if (this.sourcesButton.visible) {
+            if (this.sourcesButton.isVisible) {
                 this.sourcesButton.setX(btnX);
                 this.sourcesButton.setY(y + 95);
                 btnX += this.sourcesButton.getWidth() + 5;
             }
-            if (this.homepageButton.visible) {
+            if (this.homepageButton.isVisible) {
                 this.homepageButton.setX(btnX);
                 this.homepageButton.setY(y + 95);
                 btnX += this.homepageButton.getWidth() + 5;
             }
-            if (this.issuesButton.visible) {
+            if (this.issuesButton.isVisible) {
                 this.issuesButton.setX(btnX);
                 this.issuesButton.setY(y + 95);
                 btnX += this.issuesButton.getWidth() + 5;
             }
-            if (this.discordInviteButton.visible) {
+            if (this.discordInviteButton.isVisible) {
                 this.discordInviteButton.setX(btnX);
                 this.discordInviteButton.setY(y + 95);
                 btnX += this.discordInviteButton.getWidth() + 5;

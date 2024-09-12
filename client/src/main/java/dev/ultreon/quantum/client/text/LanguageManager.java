@@ -46,7 +46,6 @@ public class LanguageManager {
             Map<String, String> languageMap = new HashMap<>();
             for (byte[] asset : assets) {
                 String s = new String(asset, StandardCharsets.UTF_8);
-                System.out.println("s = " + s);
                 Json5Object object = gson.parse(new StringReader(s)).getAsJson5Object();
                 this.loadFile(languageMap, object);
             }

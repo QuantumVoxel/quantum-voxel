@@ -105,7 +105,7 @@ public class Tab extends Button<Tab> {
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        renderer.blit(TEXTURE, this.getX(), this.getY() - 3, 21, 21, (hovered ? 21 : 0), (bottom ? 42 : 0) + (selected ? 21 : 0), 21, 21, 63, 84);
+        renderer.blit(TEXTURE, this.getX(), this.getY() - 3, 21, 21, (isHovered ? 21 : 0), (bottom ? 42 : 0) + (selected ? 21 : 0), 21, 21, 63, 84);
 
         if (this.icon != null) {
             renderer.blit(this.icon.mapPath(s -> "textures/" + s + ".png"), this.getX() + 3, this.getY() + 3, 16, 16, 0, 0, 16, 16, 16, 16);

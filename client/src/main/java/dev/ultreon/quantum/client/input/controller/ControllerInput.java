@@ -40,9 +40,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
 
-import static io.github.libsdl4j.api.Sdl.SDL_Init;
 import static io.github.libsdl4j.api.Sdl.SDL_Quit;
-import static io.github.libsdl4j.api.SdlSubSystemConst.*;
 import static io.github.libsdl4j.api.event.SdlEventsConst.SDL_PRESSED;
 import static io.github.libsdl4j.api.gamecontroller.SdlGamecontroller.*;
 
@@ -62,8 +60,6 @@ public class ControllerInput extends GameInput {
 
     public ControllerInput(QuantumClient client, Camera camera) {
         super(client, camera);
-
-        SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS | SDL_INIT_HAPTIC);
     }
 
     private boolean pollEvents() {

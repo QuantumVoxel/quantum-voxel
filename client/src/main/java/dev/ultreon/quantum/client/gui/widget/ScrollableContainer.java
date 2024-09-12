@@ -74,7 +74,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         List<? extends Widget> entries = this.children();
         for (int i = entries.size() - 1; i >= 0; i--) {
             Widget widget = entries.get(i);
-            if (!widget.enabled || !widget.visible) continue;
+            if (!widget.isEnabled || !widget.isVisible) continue;
             if (widget.isWithinBounds(x, y)) return widget;
         }
         return null;
