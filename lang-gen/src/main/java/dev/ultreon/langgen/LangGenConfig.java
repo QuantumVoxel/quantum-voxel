@@ -21,4 +21,5 @@ public class LangGenConfig {
         }
     };
     public static Path stubPath = Path.of(".lang-stub");
+    public static String version = "0.0.0";
 }

@@ -43,7 +43,7 @@ public class MultiplayerScreen extends Screen {
     }
 
     private void joinServer(TextButton caller) {
-        caller.enabled = false;
+        caller.isEnabled = false;
         MessageScreen messageScreen = new MessageScreen(TextObject.translation("quantum.screen.message.joining_server"));
         this.client.showScreen(messageScreen);
 
@@ -63,17 +63,17 @@ public class MultiplayerScreen extends Screen {
         var text = caller.getValue();
         boolean matches = text.matches("[^:]+:\\d{1,5}");
         if (!matches) {
-            this.joinButton.enabled = false;
+            this.joinButton.isEnabled = false;
             return;
         }
         var split = text.split(":", 2);
         var port = Integer.parseInt(split[1]);
 
         if (port < 0 || port > 65535) {
-            this.joinButton.enabled = false;
+            this.joinButton.isEnabled = false;
             return;
         }
 
-        this.joinButton.enabled = true;
+        this.joinButton.isEnabled = true;
     }
 }

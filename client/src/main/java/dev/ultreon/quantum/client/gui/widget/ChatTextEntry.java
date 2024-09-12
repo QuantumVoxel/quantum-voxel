@@ -17,7 +17,7 @@ public class ChatTextEntry extends TextEntry {
     public ChatTextEntry(ChatScreen screen) {
         this.screen = screen;
         this.screen.focused = this;
-        this.focused = true;
+        this.isFocused = true;
     }
 
     @Override

@@ -119,7 +119,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     @Override
     public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         for (T entry : this.entries) {
-            if (entry.visible) {
+            if (entry.isVisible) {
                 entry.render(renderer, mouseX, mouseY, this.selectable && this.selected == entry, deltaTime);
             }
         }
@@ -136,7 +136,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         List<T> entries = this.entries;
         for (int i = entries.size() - 1; i >= 0; i--) {
             T entry = entries.get(i);
-            if (!entry.enabled || !entry.visible) continue;
+            if (!entry.isEnabled || !entry.isVisible) continue;
             if (entry.isWithinBounds(x, y)) return entry;
         }
         return null;

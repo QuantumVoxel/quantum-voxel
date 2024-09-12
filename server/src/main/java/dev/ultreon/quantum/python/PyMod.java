@@ -79,17 +79,17 @@ public final class PyMod implements Mod {
 
     @Override
     public @NotNull String getName() {
-        return name;
+        return id;
     }
 
     @Override
     public @NotNull String getDisplayName() {
-        return name;
+        return name == null ? id : name;
     }
 
     @Override
     public @NotNull String getVersion() {
-        return version;
+        return version == null ? "0.0.0" : version;
     }
 
     @Override
@@ -99,7 +99,7 @@ public final class PyMod implements Mod {
 
     @Override
     public @NotNull Collection<String> getAuthors() {
-        return List.of(author);
+        return List.of(author == null ? "Anonymous" : author);
     }
 
     @Override

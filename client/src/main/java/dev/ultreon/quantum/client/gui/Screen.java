@@ -49,7 +49,7 @@ public abstract class Screen extends UIContainer<Screen> {
         this.parentScreen = parent;
         this.root = this;
         this.title = title;
-        this.visible = true;
+        this.isVisible = true;
     }
 
     public final void resize(int width, int height) {
@@ -122,7 +122,7 @@ public abstract class Screen extends UIContainer<Screen> {
             this.dialog.revalidate();
         }
 
-        this.visible = true;
+        this.isVisible = true;
     }
 
     @Override

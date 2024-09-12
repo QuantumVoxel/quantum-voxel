@@ -16,25 +16,13 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.io.FileSystem;
 import org.graalvm.polyglot.io.IOAccess;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -88,10 +76,6 @@ public class JsLoader implements LangLoader {
                             throw new IllegalArgumentException("Invalid mod id!");
                         }
                         Path oldRoot = modRoot;
-                        modRoot = modRoot.getParent().resolve(jsMod.name);
-                        if (!oldRoot.equals(modRoot)) {
-                            Files.move(oldRoot, modRoot, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-                        }
                     } catch (IOException e) {
                         JsLang.LOGGER.error("Failed to extract Node.JS package!", e);
                         if (modRoot != null) {
@@ -121,11 +105,6 @@ public class JsLoader implements LangLoader {
                     JsMod jsMod = new Gson().fromJson(Files.readString(resolved), JsMod.class);
                     if (!Pattern.matches("[a-z0-9_]+", jsMod.name)) {
                         throw new IllegalArgumentException("Invalid mod id!");
-                    }
-                    Path oldRoot = modRoot;
-                    modRoot = modRoot.getParent().resolve(jsMod.name);
-                    if (!oldRoot.equals(modRoot)) {
-                        Files.move(oldRoot, modRoot, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
                     }
                     javascriptPath.add(jsModsPath.toString());
                     paths.put(jsMod.name, modRoot);

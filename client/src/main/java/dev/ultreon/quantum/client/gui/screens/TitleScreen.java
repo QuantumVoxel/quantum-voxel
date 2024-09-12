@@ -84,7 +84,7 @@ public class TitleScreen extends Screen {
                 .callback(this::quitGame));
 
         if (GamePlatform.get().isMobile()) {
-            this.quitButton.enabled = false;
+            this.quitButton.isEnabled = false;
         }
     }
 

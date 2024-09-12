@@ -231,11 +231,11 @@ public class PythonGen implements LangGenerator {
     }
 
     private void writeWrapper() throws IOException, InterruptedException {
-        Thread build = new DollarEscapingClasspathBuilder(".py", PyFinalClassBuilder::new, PyClassBuilder::new).build(Paths.get("src/main/python/src/pyquantum"));
+        Thread build = new DollarEscapingClasspathBuilder(".py", PyFinalClassBuilder::new, PyClassBuilder::new).build(Paths.get("mods/python/pyquantum"));
         build.start();
         build.join();
         if (LangGenConfig.generateStub) {
-            Thread build1 = new DollarEscapingClasspathBuilder(".py", clazz1 -> new PyFinalClassBuilder(clazz1, true), clazz -> new PyClassBuilder(clazz, true)).build(Paths.get("src/main/python/stub/pyquantum"));
+            Thread build1 = new DollarEscapingClasspathBuilder(".py", clazz1 -> new PyFinalClassBuilder(clazz1, true), clazz -> new PyClassBuilder(clazz, true)).build(LangGenConfig.stubPath.resolve("python/pyquantum"));
             build1.start();
             build1.join();
         }

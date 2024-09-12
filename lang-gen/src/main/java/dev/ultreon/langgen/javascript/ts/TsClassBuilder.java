@@ -6,7 +6,6 @@ import dev.ultreon.langgen.api.PackageExclusions;
 import dev.ultreon.langgen.javascript.api.AnyJsClassBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.*;
 import java.nio.file.Path;
@@ -15,16 +14,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TsClassBuilder implements AnyJsClassBuilder {
+public class TsClassBuilder extends AnyJsClassBuilder {
     protected static final Queue<Class<?>> queue = new ArrayDeque<>();
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TsClassBuilder.class);
 
     protected final Class<?> clazz;
     protected final LinkedHashSet<String> imports = new LinkedHashSet<>();
 
     private final Logger logger = Logger.getLogger("TypescriptClassBuilder");
     private final boolean isInterface;
-    private final boolean isAbstract;
     protected String name;
     @Nullable
     private Type forcedSuperclass = null;
@@ -38,7 +35,6 @@ public class TsClassBuilder implements AnyJsClassBuilder {
         name = classNameSplit[classNameSplit.length - 1];
 
         isInterface = clazz.isInterface() && !ClassCompat.isForcedAbstract(clazz);
-        isAbstract = Modifier.isAbstract(clazz.getModifiers()) && !isInterface;
     }
 
     public enum VisibilityLevel {
@@ -140,7 +136,6 @@ public class TsClassBuilder implements AnyJsClassBuilder {
 
         result.append("export default ");
 
-        if (Modifier.isProtected(clazz.getModifiers())) result.append("protected ");
         if (Modifier.isAbstract(clazz.getModifiers()) && !isInterface) result.append("abstract ");
 
         result.append(isInterface ? "interface " : "class ").append(name).append(" ");
@@ -272,7 +267,7 @@ public class TsClassBuilder implements AnyJsClassBuilder {
 
     private void writeInterfaceConstants(StringBuilder result) {
         if (!isInterface) return;
-        Field[] fields = clazz.getFields();
+        Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
                 result.append("export const ").append(field.getName()).append(": ").append(typeToString(field.getGenericType(), null)).append(" = ").append("undefined as any").append(";\n");
@@ -387,7 +382,7 @@ public class TsClassBuilder implements AnyJsClassBuilder {
                     superclass = classFromType;
                 }
 
-                Constructor<?>[] constructors = superclass.getDeclaredConstructors();
+                Constructor<?>[] constructors = superclass != null ? superclass.getDeclaredConstructors() : new Constructor[0];
                 if (constructors.length == 0) {
                     logger.log(Level.WARNING, "Superclass %s has no constructor! (in %s)".formatted(superclass, clazz));
                     result.append("/*").append(level.displayName).append("*/").append(" public constructor(...args: any[]) { super() };\n\n");
@@ -456,36 +451,54 @@ public class TsClassBuilder implements AnyJsClassBuilder {
         }
     }
 
-    private String typeToString(Type type, @Nullable Executable member) {
+    private String typeToString(Type type, @Nullable Executable exec) {
         switch (type) {
-            case Class<?> aClass -> {
-                if (aClass.getTypeParameters().length != 0) {
-                    StringBuilder result = new StringBuilder(toTsType(aClass));
-                    result.append('<');
-                    TypeVariable<? extends Class<?>>[] typeParameters = aClass.getTypeParameters();
-                    for (int i = 0, typeParametersLength = typeParameters.length; i < typeParametersLength; i++) {
-                        var param = typeParameters[i];
-                        result.append("any");
-                        if (i < typeParametersLength - 1) {
-                            result.append(", ");
+            case Class<?> cls -> {
+                if (PackageExclusions.isExcluded(cls)) return "any";
+
+                Class<?> componentType = cls;
+                String suffix = "";
+                if (cls.isArray()) {
+                    componentType = cls.getComponentType();
+                    suffix += "[]";
+                    if (componentType.isArray()) {
+                        componentType = componentType.getComponentType();
+                        suffix += "[]";
+                        if (componentType.isArray()) {
+                            componentType = componentType.getComponentType();
+                            suffix += "[]";
+                            if (componentType.isArray()) {
+                                return "any";
+                            }
                         }
                     }
-                    result.append('>');
-
-                    return result.toString();
                 }
-                return toTsType(aClass);
+
+                TypeVariable<? extends Class<?>>[] genericParams = componentType.getTypeParameters();
+                if (genericParams.length > 0) {
+                    StringBuilder sb = new StringBuilder(toTsType(componentType).replace(".", "$"));
+                    sb.append("<");
+                    for (TypeVariable<? extends Class<?>> ignored : genericParams) {
+                        sb.append("any, ");
+                    }
+                    sb.delete(sb.length() - 2, sb.length());
+                    sb.append(">");
+                    sb.append(suffix);
+                    return sb.toString();
+                }
+
+                return toTsType(cls) + suffix;
             }
             case TypeVariable<?> typeVariable -> {
-                for (TypeVariable<?> typeParameter : clazz.getTypeParameters()) {
-                    if (typeVariable.getName().equals(typeParameter.getName())) {
-                        return typeParameter.getName();
+                for (TypeVariable<?> clsTypeParam : clazz.getTypeParameters()) {
+                    if (typeVariable.getName().equals(clsTypeParam.getName())) {
+                        return clsTypeParam.getName();
                     }
                 }
-                if (member != null) {
-                    for (TypeVariable<?> typeParameter : member.getTypeParameters()) {
-                        if (typeVariable.getName().equals(typeParameter.getName())) {
-                            return typeParameter.getName();
+                if (exec != null) {
+                    for (TypeVariable<?> execTypeParam : exec.getTypeParameters()) {
+                        if (typeVariable.getName().equals(execTypeParam.getName())) {
+                            return execTypeParam.getName();
                         }
                     }
                     return "any";
@@ -495,21 +508,23 @@ public class TsClassBuilder implements AnyJsClassBuilder {
             }
             case ParameterizedType parameterizedType -> {
                 StringBuilder result = new StringBuilder();
-                Class<?> rawType = (Class<?>) parameterizedType.getRawType();
-                if (rawType == null) return "any";
-                if (!Modifier.isPublic(rawType.getModifiers()) && !Modifier.isProtected(rawType.getModifiers()))
-                    return "any";
-                if (rawType == Object.class) return "any";
-                if (rawType.getName().equals("?")) return "any";
-                if (PackageExclusions.isExcluded(rawType)) return "any";
+                Type genericType = parameterizedType.getRawType();
+                if (genericType == null) return "any";
 
-                result.append(toTsType(rawType));
-                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                if (actualTypeArguments.length > 0) {
+                String typeString = genericType instanceof Class<?> cls ? toTsType(cls) : typeToString(genericType, exec);
+                if (Objects.equals(typeString, "any")) return "any";
+                if (genericType instanceof Class<?> cls && !Modifier.isPublic(cls.getModifiers()) && !Modifier.isProtected(cls.getModifiers())) return "any";
+                if (genericType == Object.class) return "any";
+                if (genericType.getTypeName().equals("?")) return "any";
+                if (genericType instanceof Class<?> cls && PackageExclusions.isExcluded(cls)) return "any";
+
+                result.append(typeString);
+                Type[] genericArgs = parameterizedType.getActualTypeArguments();
+                if (genericArgs.length > 0) {
                     result.append("<");
-                    for (int i = 0; i < actualTypeArguments.length; i++) {
-                        result.append(typeToString(actualTypeArguments[i], member));
-                        if (i < actualTypeArguments.length - 1) {
+                    for (int i = 0; i < genericArgs.length; i++) {
+                        result.append(typeToString(genericArgs[i], exec));
+                        if (i < genericArgs.length - 1) {
                             result.append(", ");
                         }
                     }
@@ -521,7 +536,7 @@ public class TsClassBuilder implements AnyJsClassBuilder {
                 return "any";
             }
             case GenericArrayType genericArrayType -> {
-                return typeToString(genericArrayType.getGenericComponentType(), member) + "[]";
+                return typeToString(genericArrayType.getGenericComponentType(), exec) + "[]";
             }
             default -> {
                 logger.warning("Unknown type: " + type.getClass().getName());
@@ -654,12 +669,16 @@ public class TsClassBuilder implements AnyJsClassBuilder {
         if (isInterface && !Modifier.isStatic(modifiers)) return false;
 
         if (Modifier.isPublic(modifiers)) {
+            if (member instanceof Field) result.append("declare ");
+
             if (!isInterface) result.append("public ");
 
             if (Modifier.isStatic(modifiers) && !isInterface) {
                 result.append("static ");
             }
         } else if (Modifier.isProtected(modifiers)) {
+            if (member instanceof Field) result.append("declare ");
+
             if (dontComment) {
                 result.append("protected ");
             } else {
@@ -720,7 +739,7 @@ public class TsClassBuilder implements AnyJsClassBuilder {
             Type parameterType = parameter.getParameterizedType();
 
             // Convert the type to string
-            result.append(parameter.getName()).append(": ").append(typeToString(parameterType, null));
+            result.append("arg").append(i).append(": ").append(typeToString(parameterType, null));
 
             if (i < parameters.length - 1) {
                 result.append(", ");
@@ -739,7 +758,7 @@ public class TsClassBuilder implements AnyJsClassBuilder {
             Type parameterType = parameter.getParameterizedType();
 
             // Convert the type to string
-            result.append(parameter.getName()).append(": ").append(typeToString(parameterType, executable));
+            result.append("arg").append(i).append(": ").append(typeToString(parameterType, executable));
 
             if (i < parameters.length - 1) {
                 result.append(", ");

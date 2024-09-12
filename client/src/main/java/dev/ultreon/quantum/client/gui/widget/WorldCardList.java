@@ -143,7 +143,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
         public void renderEntry(Renderer renderer, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
             if (renderer.pushScissors(this.bounds)) {
                 int u;
-                if (this.enabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
+                if (this.isEnabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
                 else u = 42;
                 int v = this.isPressed() || selected ? 21 : 0;
 
@@ -212,7 +212,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @ApiStatus.OverrideOnly
         public boolean click() {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
             if (!wasPressed) return false;
 
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
@@ -227,7 +227,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public boolean mouseClick(int x, int y, int button, int count) {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
 
             if (this.button.isHovered() && isSelected()) {
                 this.button.mouseClick(x, y, button, count);
@@ -239,7 +239,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public boolean mousePress(int x, int y, int button) {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
 
             if (this.button.isHovered() && isSelected()) {
                 this.button.mousePress(x, y, button);
@@ -262,7 +262,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
         public boolean mouseRelease(int mouseX, int mouseY, int button) {
             this.pressed = false;
 
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
 
             if (this.button.isHovered() && isSelected()) {
                 this.button.mouseRelease(mouseX, mouseY, button);
@@ -274,7 +274,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
 
             if (this.button.isHovered() && isSelected()) {
                 this.button.mouseWheel(mouseX, mouseY, rotation);
@@ -286,7 +286,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public void mouseMove(int mouseX, int mouseY) {
-            if (!this.enabled) return;
+            if (!this.isEnabled) return;
             if (!this.isWithinBounds(mouseX, mouseY)) return;
 
             if (this.button.isHovered() && isSelected()) {
@@ -299,7 +299,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
 
             if (this.button.isHovered() && isSelected()) {
                 this.button.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
@@ -311,7 +311,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public boolean keyPress(int keyCode) {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
             if (this.list.getSelected() != this) return false;
 
             if (keyCode == Input.Keys.E) {
@@ -324,7 +324,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
         @Override
         public boolean keyRelease(int keyCode) {
-            if (!this.enabled) return false;
+            if (!this.isEnabled) return false;
             if (this.list.getSelected() != this) return false;
 
             if (keyCode == Input.Keys.E) {

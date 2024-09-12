@@ -1,21 +1,24 @@
 package dev.ultreon.langgen.javascript;
 
 import dev.ultreon.langgen.LangGenConfig;
-import dev.ultreon.langgen.api.ClassCompat;
-import dev.ultreon.langgen.api.Converters;
-import dev.ultreon.langgen.api.LangGenerator;
-import dev.ultreon.langgen.api.SimpleClasspathBuilder;
+import dev.ultreon.langgen.api.*;
 import dev.ultreon.langgen.javascript.js.JsClassBuilder;
 import dev.ultreon.langgen.javascript.ts.TsClassBuilder;
 import dev.ultreon.langgen.javascript.ts.TsFinalClassBuilder;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 
 public class JavascriptGen implements LangGenerator {
     private static boolean stub;
@@ -42,6 +45,10 @@ public class JavascriptGen implements LangGenerator {
         ClassCompat.forceAbstractClass("com.badlogic.gdx.graphics.GL30");
         ClassCompat.forceAbstractClass("com.badlogic.gdx.graphics.GL20");
 
+        PackageExclusions.addExclusion("com.esotericsoftware");
+        PackageExclusions.addExclusion("jetbrains.annotations");
+        PackageExclusions.addExclusion("org.jetbrains.annotations");
+
         Converters.register("de.marhali.json5", "json5");
         Converters.register("com.crashinvaders.vfx", "vfx");
         Converters.register("dev.ultreon.mixinprovider", "mixinprovider");
@@ -58,6 +65,48 @@ public class JavascriptGen implements LangGenerator {
         Converters.register("org.lwjgl.assimp", "assimp");
         Converters.register("org.lwjgl", "gl");
 
+        Converters.register("com.apple", "apple");
+        Converters.register("com.fasterxml", "fasterxml");
+        Converters.register("com.github.tommyettinger.textra", "textra");
+        Converters.register("com.jagrosh.discordipc", "discordipc");
+        Converters.register("com.jcraft", "jcraft");
+        Converters.register("com.kotcrab.vis.ui", "vis_ui");
+        Converters.register("com.mojang.serialization", "moj_serialization");
+        Converters.register("com.oracle.js", "oraclejs");
+        Converters.register("com.oracle", "oracle");
+        Converters.register("com.sun", "sun");
+        Converters.register("io.github.libsdl4j", "sdl");
+        Converters.register("java.rmi", "jrmi");
+        Converters.register("javagames.util", "javagames_util");
+        Converters.register("net.bytebuddy", "bytebuddy");
+        Converters.register("net.miginfocom", "miginfocom");
+        Converters.register("org.apache.arrow", "apache_arrow");
+        Converters.register("org.ietf.jgss", "ietf_jgss");
+        Converters.register("org.jcp.xml.dsig.internal", "xml_dsig");
+        Converters.register("org.objenesis", "objenesis");
+        Converters.register("oxbow.swingbits", "swingbits");
+        Converters.register("svm.core.annotate", "svm_annotate");
+        Converters.register("text.formic", "formic");
+        Converters.register("de.damios.guacamole", "guacamole");
+
+        Converters.register("jdk.dynalink", "dynalink");
+        Converters.register("jdk.editpad", "editpad");
+        Converters.register("jdk.graal", "graal");
+        Converters.register("jdk.javadoc", "javadoc");
+        Converters.register("jdk.jpackage", "jpackage");
+        Converters.register("jdk.management", "_management");
+        Converters.register("jdk.net", "_net");
+        Converters.register("jdk.nio", "_nio");
+        Converters.register("jdk.nio.zipfs", "_zipfs");
+        Converters.register("jdk.random", "_random");
+        Converters.register("jdk.security", "_security");
+        Converters.register("jdk.swing", "_swing");
+        Converters.register("jdk.tools", "_tools");
+        Converters.register("jdk.xml", "_xml");
+        Converters.register("dev.ultreon.langgen", "lang_gen");
+        Converters.register("com.google.errorprone", "gerrorprone");
+        Converters.register("com.google.flatbuffers", "gflatbuffers");
+        Converters.register("com.google.thirdparty", "gthrirdparty");
         Converters.register("com.google.gson", "gson");
         Converters.register("com.google.protobuf", "gprotobuf");
         Converters.register("com.google.common.collect", "gcollect");
@@ -244,13 +293,88 @@ public class JavascriptGen implements LangGenerator {
 
         try {
             Thread build = new SimpleClasspathBuilder(".mjs", JsClassBuilder::new, JsClassBuilder::new).build(output);
-            Thread build1 = new SimpleClasspathBuilder(".mts", TsFinalClassBuilder::new, TsClassBuilder::new).build(LangGenConfig.stubPath);
-
-            build1.start();
             build.start();
-
-            build1.join();
             build.join();
+            Thread build1 = new SimpleClasspathBuilder(".mts", TsFinalClassBuilder::new, TsClassBuilder::new).build(LangGenConfig.stubPath.resolve("typescript"));
+            build1.start();
+            build1.join();
+
+            // Package into NPM package (quantumjs.tgz)
+            Path packagePath = LangGenConfig.stubPath.resolve("quantumjs.tgz");
+            Files.deleteIfExists(packagePath);
+
+            @Language("JSON")
+            String packageJson = """
+                    {
+                        "name": "@ultreon/quantumjs",
+                        "displayName": "QuantumJS",
+                        "description": "Auto-generated Quantum Voxel bindings for Javascript",
+                        "version": "%s",
+                        "license": "Unknown",
+                        "author": "Unknown",
+                    
+                        "dependencies": {
+                    
+                        }
+                    }
+                    """;
+
+            Files.writeString(LangGenConfig.stubPath.resolve("typescript/package.json"), packageJson.formatted(LangGenConfig.version));
+
+            OutputStream os = Files.newOutputStream(packagePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            try (GZIPOutputStream gzip = new GZIPOutputStream(os)) {
+                try (TarArchiveOutputStream tgz = new TarArchiveOutputStream(gzip)) {
+                    tgz.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+                    tgz.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+                    tgz.setAddPaxHeadersForNonAsciiNames(true);
+                    Files.walk(LangGenConfig.stubPath.resolve("typescript")).filter(Files::isRegularFile).forEach(file -> {
+                        try {
+                            String path = file.toString();
+                            path = path.replace('\\', '/');
+
+                            String srcPath = LangGenConfig.stubPath.resolve("typescript").toString();
+                            srcPath = srcPath.replace('\\', '/');
+
+                            if (path.startsWith(srcPath)) {
+                                srcPath = path.substring(srcPath.length());
+                            } else {
+                                throw new IOException("Invalid path: " + path);
+                            }
+
+                            byte[] bytes = Files.readAllBytes(Path.of(path));
+                            TarArchiveEntry archiveEntry = new TarArchiveEntry("package" + srcPath);
+                            archiveEntry.setSize(bytes.length);
+                            archiveEntry.setUserName("quantum-voxel");
+                            archiveEntry.setGroupName("binding-gen");
+                            archiveEntry.setUserId(JavascriptGen.class.getName().hashCode());
+                            archiveEntry.setGroupId(LangGenerator.class.getName().hashCode());
+
+                            FileTime from = FileTime.from(Instant.now());
+                            archiveEntry.setCreationTime(from);
+                            archiveEntry.setLastAccessTime(from);
+                            archiveEntry.setLastModifiedTime(from);
+                            archiveEntry.setStatusChangeTime(from);
+
+                            tgz.putArchiveEntry(archiveEntry);
+
+                            tgz.write(bytes);
+                            tgz.flush();
+                            tgz.closeArchiveEntry();
+
+                            tgz.flush();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.exit(1);
+                        }
+                    });
+
+                    tgz.finish();
+                    tgz.flush();
+                }
+
+                gzip.finish();
+                gzip.flush();
+            }
 
             // Javascript
             @Language("json")

@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public interface AnyJsClassBuilder extends ClassBuilder {
-    default String convertImport(Class<?> owner, Class<?> target, String javaName, String targetName) {
+public abstract class AnyJsClassBuilder implements ClassBuilder {
+    public String convertImport(Class<?> owner, Class<?> target, String javaName, String targetName) {
         try {
             if (target.getName().equals(owner.getName())) return null;
 
@@ -45,7 +45,7 @@ public interface AnyJsClassBuilder extends ClassBuilder {
         }
     }
 
-    static @NotNull String prefix(Class<?> owner) {
+    public static @NotNull String prefix(Class<?> owner) {
         String convert = Converters.convert(owner.getName());
 
         if (convert == null) convert = owner.getName();

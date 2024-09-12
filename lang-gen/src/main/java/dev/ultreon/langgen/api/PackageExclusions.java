@@ -30,6 +30,7 @@ public class PackageExclusions {
         if (!(Modifier.isPublic(type.getModifiers())
               || Modifier.isProtected(type.getModifiers()))) return true;
 
+        if (ClassCompat.isExcluded(type)) return true;
         for (String name : packageNames) {
             if (type.getName().startsWith(name + "."))
                 return true;

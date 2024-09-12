@@ -1,6 +1,7 @@
 package dev.ultreon.langgen.api;
 
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -12,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SimpleClasspathBuilder extends ClasspathBuilder {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(SimpleClasspathBuilder.class);
     private final Logger logger;
     protected final String extension;
     private final Function<Class<?>, ClassBuilder> finalClassBuilder;

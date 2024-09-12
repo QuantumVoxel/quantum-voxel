@@ -105,6 +105,11 @@ public abstract class ClasspathBuilder extends ClasspathWrapper implements NameT
                 if (!Modifier.isPublic(clazz.getModifiers()) && !Modifier.isProtected(clazz.getModifiers())) return;
                 if ((clazz.getModifiers() & 0x0000100) != 0) return;
 
+                if (ClassCompat.isExcluded(clazz)) {
+                    getLogger().log(Level.WARNING, "Skipping ignored class: " + clazz.getName());
+                    return;
+                }
+
                 try {
                     StringBuilder sw = new StringBuilder();
                     String result = this.visitClass(output, clazz, sw);
