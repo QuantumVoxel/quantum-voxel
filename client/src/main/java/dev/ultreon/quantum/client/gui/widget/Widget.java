@@ -89,7 +89,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
         if (!this.isVisible) return;
 
         if (this.isWithinBounds(mouseX, mouseY)) {
-            this.root.directHovered = this;
+            if (this.root != null) this.root.directHovered = this;
             this.isHovered = true;
         } else {
             this.isHovered = false;
@@ -395,6 +395,10 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     public Vector2 getCenter() {
         return new Vector2(this.pos.x + this.size.width / 2f, this.pos.y + this.size.height / 2f);
+    }
+
+    public boolean isWithin(int mouseX, int mouseY) {
+        return Widget.isPosWithin(mouseX, mouseY, this.pos.x, this.pos.y, this.size.width, this.size.height);
     }
 
     @FunctionalInterface

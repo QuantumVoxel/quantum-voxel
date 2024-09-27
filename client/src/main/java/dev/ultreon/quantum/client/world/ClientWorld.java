@@ -61,7 +61,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public static final Color SUN_RISE_COLOR = new Color(0xff3000ff);
     public static final Color VOID_COLOR = new Color(0x0a0a0aff);
 
-    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
+    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x)), ATLAS_SIZE.get().y));
 
     public static Rot SKYBOX_ROTATION = deg(-60);
     public static int VOID_Y_START = 20;
@@ -508,7 +508,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         // Start from the top of the world and move downward
         for (int y = chunk.getOffset().y - 1; y >= 0; y--) {
             BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
-            int lightReduction = chunk.get((Point) new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
+            int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
                 setSunlight(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity); // Assuming maximum sunlight intensity is 15

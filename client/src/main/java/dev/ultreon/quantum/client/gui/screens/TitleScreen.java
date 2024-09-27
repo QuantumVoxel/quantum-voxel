@@ -43,7 +43,8 @@ public class TitleScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         this.client.setActivity(GameActivity.MAIN_MENU);
 
-        builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
+        if (!GamePlatform.get().hasBackPanelRemoved())
+            builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
 
         this.titleLabel = builder.add(Label.of(Formatter.format("[*]Quantum[grey][*]Voxel")).position(() -> new Position(this.size.width / 2, 40))
                 .alignment(Alignment.CENTER)
@@ -130,7 +131,7 @@ public class TitleScreen extends Screen {
     @Override
     protected void renderSolidBackground(Renderer renderer) {
 
-        if (!(ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled())) {
+        if (!GamePlatform.get().hasBackPanelRemoved()) {
             Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
             float drawWidth = thumbnail.x;

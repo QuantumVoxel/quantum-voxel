@@ -15,38 +15,38 @@ import static dev.ultreon.quantum.client.QuantumClient.id;
 @SuppressWarnings("SameParameterValue")
 public class Shaders {
     public static final Supplier<DepthShaderProvider> DEPTH = Shaders.register("depth", () -> new MyDepthShaderProvider(
-            new ResourceFileHandle(id("shaders/depth.vert")),
-            new ResourceFileHandle(id("shaders/depth.frag"))
+            QuantumClient.shader(id("depth.vert")),
+            QuantumClient.shader(id("depth.frag"))
     ));
 
     public static final Supplier<DefaultShaderProvider> DEFAULT = Shaders.register("default", MyDefaultShaderProvider::new);
     
     public static final Supplier<SceneShaders> SCENE = Shaders.register("world", () -> new SceneShaders(
-            new ResourceFileHandle(id("shaders/scene.vert")),
-            new ResourceFileHandle(id("shaders/scene.frag")),
-            new ResourceFileHandle(id("shaders/scene.geom"))));
+            QuantumClient.shader(id("scene.vert")),
+            QuantumClient.shader(id("scene.frag")),
+            QuantumClient.shader(id("scene.geom"))));
     public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaders(
-            new ResourceFileHandle(id("shaders/skybox.vert")),
-            new ResourceFileHandle(id("shaders/skybox.frag"))
+            QuantumClient.shader(id("skybox.vert")),
+            QuantumClient.shader(id("skybox.frag"))
     ));
     public static final Supplier<DefaultShaderProvider> SKYBOX_DEBUG = Shaders.register("skybox_debug", () -> new SkyboxShaders(
-            new ResourceFileHandle(id("shaders/skybox.vert")),
-            new ResourceFileHandle(id("shaders/skybox_debug.frag"))
+            QuantumClient.shader(id("skybox.vert")),
+            QuantumClient.shader(id("skybox_debug.frag"))
     ));
     public static final Supplier<ModelShaders> MODEL_VIEW = Shaders.register("model_view", () -> new ModelShaders(
-            new ResourceFileHandle(id("shaders/model.vert")),
-            new ResourceFileHandle(id("shaders/model.frag")),
-            new ResourceFileHandle(id("shaders/model.geom"))));
+            QuantumClient.shader(id("model.vert")),
+            QuantumClient.shader(id("model.frag")),
+            QuantumClient.shader(id("model.geom"))));
     public static final Supplier<GizmoShaders> GIZMO = Shaders.register("gizmo", () -> new GizmoShaders(
-            new ResourceFileHandle(id("shaders/gizmo.vert")),
-            new ResourceFileHandle(id("shaders/gizmo.frag")),
-            new ResourceFileHandle(id("shaders/gizmo.geom"))));
+            QuantumClient.shader(id("gizmo.vert")),
+            QuantumClient.shader(id("gizmo.frag")),
+            QuantumClient.shader(id("gizmo.geom"))));
     public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
-            new ResourceFileHandle(id("shaders/outline.vert")),
-            new ResourceFileHandle(id("shaders/outline.frag"))));
+            QuantumClient.shader(id("outline.vert")),
+            QuantumClient.shader(id("outline.frag"))));
     public static final Supplier<GizmoOutlineShaders> GIZMO_OUTLINE = Shaders.register("gizmo_outline", () -> new GizmoOutlineShaders(
-            new ResourceFileHandle(id("shaders/gizmo_outline.vert")),
-            new ResourceFileHandle(id("shaders/gizmo_outline.frag"))
+            QuantumClient.shader(id("gizmo_outline.vert")),
+            QuantumClient.shader(id("gizmo_outline.frag"))
     ));
 
     private static <T extends ShaderProvider> Supplier<T> register(String name, Supplier<T> provider) {

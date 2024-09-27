@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.shaders.provider;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -9,16 +10,16 @@ import dev.ultreon.quantum.client.shaders.GizmoOutlineShader;
 import dev.ultreon.quantum.client.shaders.Shaders;
 
 public class GizmoOutlineShaders extends OutlineShaderProvider {
-    public GizmoOutlineShaders(ResourceFileHandle resourceFileHandle, ResourceFileHandle resourceFileHandle1) {
+    public GizmoOutlineShaders(FileHandle resourceFileHandle, FileHandle resourceFileHandle1) {
         super(resourceFileHandle, resourceFileHandle1);
     }
 
     @Override
     public Shader createShader(Renderable renderable) {
         GizmoOutlineShader gizmoOutlineShader = new GizmoOutlineShader(new GeomShaderConfig(
-                QuantumClient.resource(QuantumClient.id("shaders/gizmo_outline.vert")).readString(),
-                QuantumClient.resource(QuantumClient.id("shaders/gizmo_outline.frag")).readString(),
-                QuantumClient.resource(QuantumClient.id("shaders/gizmo_outline.geom")).readString()
+                QuantumClient.shader(QuantumClient.id("gizmo_outline.vert")).readString(),
+                QuantumClient.shader(QuantumClient.id("gizmo_outline.frag")).readString(),
+                QuantumClient.shader(QuantumClient.id("gizmo_outline.geom")).readString()
         ), renderable);
 
         Shaders.checkShaderCompilation(gizmoOutlineShader.program, "GizmoOutlineShader");

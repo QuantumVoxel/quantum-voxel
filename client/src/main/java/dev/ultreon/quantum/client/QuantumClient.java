@@ -35,6 +35,7 @@ import com.google.gson.GsonBuilder;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -155,9 +156,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.badlogic.gdx.graphics.GL20.GL_CULL_FACE;
+import static com.badlogic.gdx.graphics.GL20.*;
 import static com.badlogic.gdx.math.MathUtils.ceil;
-import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
+import static dev.ultreon.mixinprovider.PlatformOS.isMac;
 
 /**
  * This class is the main entry point for the Quantum Voxel Client.
@@ -605,7 +606,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         RpcHandler.enable();
 
         // Initialize ImGui if necessary
-        this.imGui = !isMac && !SharedLibraryLoader.isAndroid && !SharedLibraryLoader.isARM && !SharedLibraryLoader.isIos;
+        this.imGui = !isMac && !PlatformOS.isAndroid && !PlatformOS.isARM && !PlatformOS.isIos;
         if (this.imGui)
             GamePlatform.get().preInitImGui();
 
@@ -693,6 +694,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             libGdxNode.create("version", Application::getVersion);
             libGdxNode.create("javaHeap", Application::getJavaHeap);
         }
+    }
+
+    public static @NotNull FileHandle shader(NamespaceID id) {
+        if (GamePlatform.get().isAngleGLES()) {
+            return resource(new NamespaceID(id.getDomain(), "shaders/angle/" + id.getPath()));
+        }
+
+        return resource(new NamespaceID(id.getDomain(), "shaders/" + id.getPath()));
     }
 
     /**
@@ -1381,7 +1390,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             return true;
         }
 
+        Gdx.gl.glEnable(GL_BLEND);
+        Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        Gdx.gl.glFlush();
         ScreenUtils.clear(0, 0, 0, 0, true);
+        Gdx.gl.glFlush();
 
         this.gameBounds.setPos(0, 0);
         this.gameBounds.setSize(getScaledWidth() + getDrawOffset().x / 2, getScaledHeight() + getDrawOffset().y / 2);
@@ -1402,7 +1415,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         renderer.begin();
         GridPoint2 drawOffset = this.getDrawOffset();
-        renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, Color.BLACK);
+        if (!GamePlatform.get().hasBackPanelRemoved()) {
+            renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, Color.BLACK);
+        }
         renderer.end();
 
         if (this.controllerInput != null && this.keyAndMouseInput != null) {
@@ -1446,7 +1461,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             renderer.pushMatrix();
             renderer.translate(this.getDrawOffset().x, this.getDrawOffset().y);
             renderer.scale(this.getGuiScale(), this.getGuiScale());
-            renderer.clearColor(0, 0, 0, 1);
+            if (!GamePlatform.get().hasBackPanelRemoved())
+                renderer.clearColor(0, 0, 0, 1);
+            else {
+                renderer.clearColor(0, 0, 0, 0);
+            }
             loading.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
             renderer.popMatrix();
             renderer.end();
@@ -1614,7 +1633,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     private void firstRender() {
-//        if (SharedLibraryLoader.isWindows) {
+//        if (PlatformOS.isWindows) {
 //            InputStream resourceAsStream = QuantumClient.class.getResourceAsStream("/assets/quantum/native/acrylic.dll");
 //            try {
 //                if (!Files.exists(Paths.get(".", "acrylic.dll")))

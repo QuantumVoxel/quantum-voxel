@@ -34,9 +34,11 @@ import static dev.ultreon.quantum.client.QuantumClient.crash;
 
 public abstract class DesktopPlatform extends GamePlatform {
     private final Map<String, FabricMod> mods = new IdentityHashMap<>();
+    private final boolean angleGLES;
 
-    DesktopPlatform() {
+    DesktopPlatform(boolean angleGLES) {
         super();
+        this.angleGLES = angleGLES;
     }
 
     @Override
@@ -118,14 +120,10 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public Env getEnv() {
-        switch (FabricLoader.getInstance().getEnvironmentType()) {
-            case CLIENT:
-                return Env.CLIENT;
-            case SERVER:
-                return Env.SERVER;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (FabricLoader.getInstance().getEnvironmentType()) {
+            case CLIENT -> Env.CLIENT;
+            case SERVER -> Env.SERVER;
+        };
     }
 
     @Override
@@ -242,7 +240,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void setVisible(boolean visible) {
-        ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(visible);
+        DesktopLauncher.getGameWindow().setVisible(visible);
     }
 
     @Override
@@ -288,5 +286,20 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void setTransparentFBO(boolean enable) {
 //        GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, enable ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+    }
+
+    @Override
+    public boolean isAngleGLES() {
+        return angleGLES;
+    }
+
+    @Override
+    public boolean isGLES() {
+        return angleGLES || isMacOSX();
+    }
+
+    @Override
+    public boolean hasBackPanelRemoved() {
+        return false;
     }
 }

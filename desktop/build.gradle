@@ -87,6 +87,12 @@ dependencies {
     implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
     implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion")
 
+    // --- Win32 Libraries ---
+    implementation(api('com.github.Dgzt:gdx-lwjgl3-angle-vulkan:1.0.0'))
+    implementation(api('org.lwjgl:lwjgl-opengles:3.3.0'))
+    implementation(api('org.lwjgl:lwjgl-opengles:3.3.0:natives-windows'))
+
+    // Others
     implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
 
     // Apache Log4J

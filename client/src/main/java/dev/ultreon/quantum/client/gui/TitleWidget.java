@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui;
 
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
@@ -34,7 +35,7 @@ public class TitleWidget extends Widget {
 
         NamespaceID texture = new NamespaceID("textures/gui/title.png");
 
-        if (ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled()) {
+        if (GamePlatform.get().hasBackPanelRemoved()) {
 //            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
             renderer.fill(0, 0, size.width, size.height, RgbColor.WHITE.withAlpha(0x20));
 

@@ -44,4 +44,19 @@ public class ServerPlatform extends ModdedPlatform {
     public DeviceType getDeviceType() {
         return DeviceType.SERVER;
     }
+
+    @Override
+    public boolean isAngleGLES() {
+        return false;
+    }
+
+    @Override
+    public boolean isGLES() {
+        return false;
+    }
+
+    @Override
+    public boolean hasBackPanelRemoved() {
+        return false;
+    }
 }

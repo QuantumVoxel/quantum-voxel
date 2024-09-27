@@ -165,6 +165,7 @@ allprojects {
                 includeGroup("com.github.jagrosh")
                 includeGroup("com.github.crykn.guacamole")
                 includeGroup("com.github.Ultreon")
+                includeGroup("com.github.Dgzt")
                 includeGroup("space.earlygrey")
             }
         }

@@ -24,7 +24,6 @@ public class WorldShader extends DefaultShader {
     private final int u_cameraUp0;
     private String log;
 
-
     public WorldShader(final Renderable renderable) {
         this(renderable, new GeomShaderConfig());
     }

@@ -123,7 +123,7 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
 
         TextObject textObject = this.text.get();
         if (textObject != null) {
-            renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height / 2 - this.font.getLineHeight() + (this.isPressed() ? 2 : 0)), this.isEnabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
+            renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height / 2 - this.font.getLineHeight() + getButtonContentOffset()), this.isEnabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
         }
     }
 

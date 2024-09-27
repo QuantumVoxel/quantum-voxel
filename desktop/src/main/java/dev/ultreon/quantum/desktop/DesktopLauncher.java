@@ -5,10 +5,11 @@ import com.badlogic.gdx.backends.lwjgl3.*;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
-import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.CrashHandler;
-import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.GameWindow;
+import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinDef;
+import dev.ultreon.mixinprovider.PlatformOS;
+import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -27,9 +28,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
+import org.lwjgl.glfw.GLFWNativeWin32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -44,9 +48,11 @@ import java.util.List;
 import java.util.Objects;
 
 public class DesktopLauncher {
+    public static final Logger LOGGER = LoggerFactory.getLogger("Quantum:Launcher");
     private static DesktopPlatform platform;
     private static DesktopWindow gameWindow;
-    private static final boolean windowVibrancyEnabled = false;
+    private static boolean windowVibrancyEnabled = false;
+    private static boolean fullVibrancyEnabled = false;
 
     /**
      * Launches the game.
@@ -99,7 +105,14 @@ public class DesktopLauncher {
     private static void launch(String[] argv) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
 
-        platform = new DesktopPlatform() {
+        LauncherConfig launcherConfig = LauncherConfig.get();
+        boolean useAngleGraphics = launcherConfig.useAngleGraphics;
+        windowVibrancyEnabled = launcherConfig.windowVibrancyEnabled;
+        fullVibrancyEnabled = launcherConfig.enableFullVibrancy;
+
+        LauncherConfig.save();
+
+        platform = new DesktopPlatform(useAngleGraphics) {
             @Override
             public GameWindow createWindow() {
                 return gameWindow;
@@ -114,6 +127,11 @@ public class DesktopLauncher {
             public Collection<Device> getGameDevices() {
                 return List.of();
             }
+
+            @Override
+            public boolean hasBackPanelRemoved() {
+                return fullVibrancyEnabled && windowVibrancyEnabled;
+            }
         };
 
         Log.setLogger(KyroSlf4jLogger.INSTANCE);
@@ -122,8 +140,9 @@ public class DesktopLauncher {
         CrashHandler.addHandler(crashLog -> {
             try {
                 KeyAndMouseInput.setCursorCaught(false);
-                Lwjgl3Graphics graphics = (Lwjgl3Graphics) Gdx.graphics;
-                graphics.getWindow().setVisible(false);
+                if (gameWindow != null) {
+                    gameWindow.setVisible(false);
+                }
             } catch (Exception e) {
                 QuantumClient.LOGGER.error("Failed to hide cursor", e);
             }
@@ -143,7 +162,8 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description))) {
             try {
-                new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
+                if (PlatformOS.isWindows && useAngleGraphics) new Lwjgl3VulkanApplication(Main.createInstance(argv), DesktopLauncher.createVulkanConfig());
+                else new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);
@@ -152,6 +172,24 @@ public class DesktopLauncher {
                 QuantumClient.crash(e);
             }
         }
+    }
+
+    private static com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration createVulkanConfig() {
+        var config = new com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration();
+        config.useVsync(false);
+        config.setForegroundFPS(0);
+        config.setIdleFPS(10);
+        config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
+        config.setHdpiMode(HdpiMode.Pixels);
+        config.setOpenGLEmulation(com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES32, 4, 1);
+        config.setInitialVisible(false);
+        config.setTitle("Quantum");
+        config.setWindowIcon(QuantumClient.getIcons());
+        config.setWindowedMode(1280, 720);
+        config.setWindowListener(new WindowAdapter());
+        config.setTransparentFramebuffer(LauncherConfig.get().enableFullVibrancy && LauncherConfig.get().windowVibrancyEnabled);
+
+        return config;
     }
 
     @NotNull
@@ -163,12 +201,11 @@ public class DesktopLauncher {
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
-//        config.setDecorated(false);
         config.setTitle("Quantum");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
-//        config.setTransparentFramebuffer(true);
+        config.setTransparentFramebuffer(LauncherConfig.get().enableFullVibrancy && LauncherConfig.get().windowVibrancyEnabled);
 
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -182,11 +219,15 @@ public class DesktopLauncher {
         return platform;
     }
 
+    public static GameWindow getGameWindow() {
+        return gameWindow;
+    }
+
     public boolean isWindowVibrancyEnabled() {
         return windowVibrancyEnabled;
     }
 
-    private static class WindowAdapter extends Lwjgl3WindowAdapter {
+    private static class WindowAdapter extends Lwjgl3WindowAdapter implements com.github.dgzt.gdx.lwjgl3.Lwjgl3WindowListener {
         public static MessageDigest SHA_256;
 
         static {
@@ -198,15 +239,78 @@ public class DesktopLauncher {
         }
 
         @Override
+        public void created(com.github.dgzt.gdx.lwjgl3.Lwjgl3Window window) {
+            gameWindow = new DesktopVulkanWindow(window);
+
+            if (SharedLibraryLoader.isMac) {
+                // Set the dock icon
+                InputStream iconStream = MacOSDockIcon.class.getResourceAsStream("/icon.icns");
+                if (iconStream == null) {
+                    throw new RuntimeException("Failed to extract icon.icns");
+                }
+
+                try {
+                    Path icon = Files.createTempDirectory("quantum-voxel");
+                    icon = icon.resolve("icon.icns");
+                    Files.copy(iconStream, icon);
+
+                    MacOSDockIcon.setDockIcon(Gdx.files.internal("icon.icns"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Taskbar taskbar = Taskbar.getTaskbar();
+
+                if (taskbar != null) {
+                    try {
+                        taskbar.setIconImage(ImageIO.read(DesktopLauncher.class.getResourceAsStream("/icon.png")));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    if (taskbar.isSupported(Taskbar.Feature.ICON_BADGE_TEXT)) {
+                        taskbar.setIconBadge("?");
+                    }
+                }
+            }
+
+            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+
+            extractAcrylicNative();
+
+            // Check for OS and apply acrylic/mica/vibrancy
+            if (GamePlatform.get().isWindows()) {
+                if (System.getProperty("os.name").startsWith("Windows 11") && (System.getProperty("os.arch").equals("x86_64") || System.getProperty("os.arch").equals("amd64"))) {
+                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
+                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
+                    }
+
+//                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
+//                    Dwmapi.setAcrylicBackground(hwnd);
+//                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
+//                    Dwmapi.removeBorder(hwnd);
+                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
+                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
+                    Dwmapi.setAcrylicBackground(hwnd);
+                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
+                    Dwmapi.removeBorder(hwnd);
+                } else {
+                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
+                }
+            }
+
+        }
+
+        @Override
         public void created(Lwjgl3Window window) {
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.NOTIFICATION, false);
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.LOW, false);
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.MEDIUM, true);
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.HIGH, true);
 
-            gameWindow = new DesktopWindow(window);
+            gameWindow = new DesktopGLWindow(window);
 
-            if (SharedLibraryLoader.isMac) {
+            if (PlatformOS.isMac) {
                 // Setup icons the mac way, using JNA.
                 // So this requires native interaction.
                 long l = GLFWNativeCocoa.glfwGetCocoaWindow(gameWindow.getHandle());
@@ -230,10 +334,19 @@ public class DesktopLauncher {
                     if (!Acrylic.applyMica(gameWindow.getPeer())) {
                         CommonConstants.LOGGER.warn("Unsupported Windows 11 build for mica background: {}", System.getProperty("os.name"));
                     }
+
+                    WindowUtils.makeWindowFrameless(gameWindow.getHandle());
+
+//                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
+//                    Dwmapi.setAcrylicBackground(hwnd);
+//                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
+//                    Dwmapi.removeBorder(hwnd);
                 } else if (System.getProperty("os.name").startsWith("Windows 10")) {
-                    if (!Acrylic.applyAcrylic(gameWindow.getPeer())) {
-                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
-                    }
+                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
+
+                    Dwmapi.setAcrylicBackground(hwnd);
+                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
+                    Dwmapi.removeBorder(hwnd);
                 } else {
                     CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
                 }

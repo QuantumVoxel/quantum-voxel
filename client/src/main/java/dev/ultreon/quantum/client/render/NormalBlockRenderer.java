@@ -9,8 +9,8 @@ import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
 
 public class NormalBlockRenderer implements BlockRenderer {
-    private static final float TEXTURE_PERCENTAGE = 16f / 512f;
-    private static final int BLOCKS_PER_WIDTH = 512 / 16;
+    private static final float TEXTURE_PERCENTAGE = 16f / 2048f;
+    private static final int BLOCKS_PER_WIDTH = 2048 / 16;
 
     private final VertexInfo c00 = new VertexInfo();
     private final VertexInfo c01 = new VertexInfo();

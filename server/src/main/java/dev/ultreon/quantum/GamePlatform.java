@@ -211,4 +211,17 @@ public abstract class GamePlatform {
     public void setTransparentFBO(boolean enable) {
 
     }
+
+    public abstract boolean isAngleGLES();
+
+    public abstract boolean isGLES();
+
+    /**
+     * Check if the window has no background (transparent framebuffer).
+     * <p>
+     * NOTE: The name is meant to be a joke.
+     *
+     * @return true if the window has no background, false otherwise
+     */
+    public abstract boolean hasBackPanelRemoved();
 }

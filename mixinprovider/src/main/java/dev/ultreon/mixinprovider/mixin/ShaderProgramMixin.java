@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.mixinprovider.NewShaderProgram;
+import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.mixinprovider.ShaderProgramAccess;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
@@ -53,7 +54,7 @@ public abstract class ShaderProgramMixin implements ShaderProgramAccess {
 
     @Redirect(method = "compileShaders", at = @At(value = "INVOKE", target = "Lcom/badlogic/gdx/graphics/glutils/ShaderProgram;loadShader(ILjava/lang/String;)I", ordinal = 0))
     public int quantum$shaderInjectFixMacOS(ShaderProgram instance, int type, String source) {
-        if (SharedLibraryLoader.isMac && !(vertexShaderSource.startsWith("#version ") || fragmentShaderSource.startsWith("#version "))) {
+        if (PlatformOS.isMac && !(vertexShaderSource.startsWith("#version ") || fragmentShaderSource.startsWith("#version "))) {
             vertexShaderSource = vertexShaderSource.replace("attribute", "in")
                     .replace("varying", "out");
             fragmentShaderSource = fragmentShaderSource.replace("varying", "in");
@@ -64,8 +65,8 @@ public abstract class ShaderProgramMixin implements ShaderProgramAccess {
             }
             fragmentShaderSource = fragmentShaderSource.replace("texture2D(", "texture(");
             fragmentShaderSource = fragmentShaderSource.replace("textureCube(", "texture(");
-            vertexShaderSource = "#version 150\n" + vertexShaderSource;
-            fragmentShaderSource = "#version 150\n" + fragmentShaderSource;
+            vertexShaderSource = "#version 300 es\n" + vertexShaderSource;
+            fragmentShaderSource = "#version 300 es\n" + fragmentShaderSource;
         }
 
         source = vertexShaderSource;
