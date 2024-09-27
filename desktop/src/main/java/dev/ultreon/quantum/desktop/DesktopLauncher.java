@@ -1,7 +1,10 @@
 package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.*;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
@@ -9,7 +12,10 @@ import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
 import dev.ultreon.mixinprovider.PlatformOS;
-import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.CrashHandler;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -350,6 +356,8 @@ public class DesktopLauncher {
                 } else {
                     CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
                 }
+            } else if (GamePlatform.get().isMacOSX()) {
+//                NSWindow.fromPtr(gameWindow.getPeer()).makeFrameless();
             }
         }
 

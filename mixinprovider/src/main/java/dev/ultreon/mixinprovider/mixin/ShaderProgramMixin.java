@@ -2,7 +2,6 @@ package dev.ultreon.mixinprovider.mixin;
 
 import com.badlogic.gdx.graphics.GL32;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.mixinprovider.NewShaderProgram;
 import dev.ultreon.mixinprovider.PlatformOS;
@@ -65,8 +64,8 @@ public abstract class ShaderProgramMixin implements ShaderProgramAccess {
             }
             fragmentShaderSource = fragmentShaderSource.replace("texture2D(", "texture(");
             fragmentShaderSource = fragmentShaderSource.replace("textureCube(", "texture(");
-            vertexShaderSource = "#version 300 es\n" + vertexShaderSource;
-            fragmentShaderSource = "#version 300 es\n" + fragmentShaderSource;
+            vertexShaderSource = "#version 150\n" + vertexShaderSource;
+            fragmentShaderSource = "#version 150\n" + fragmentShaderSource;
         }
 
         source = vertexShaderSource;
