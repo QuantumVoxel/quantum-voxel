@@ -39,6 +39,8 @@ public abstract class DesktopPlatform extends GamePlatform {
     DesktopPlatform(boolean angleGLES) {
         super();
         this.angleGLES = angleGLES;
+        if (angleGLES)
+            System.setProperty("quantum.platform.anglegles", "true");
     }
 
     @Override

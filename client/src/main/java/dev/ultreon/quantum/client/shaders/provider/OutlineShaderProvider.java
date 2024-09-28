@@ -6,13 +6,21 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.shaders.OutlineShader;
 
 public class OutlineShaderProvider extends DefaultShaderProvider implements GameShaders {
     public OutlineShaderProvider(FileHandle resourceFileHandle, FileHandle resourceFileHandle1) {
         
+    }
+
+    @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from default shader provider", e);
+        }
     }
 
     @Override

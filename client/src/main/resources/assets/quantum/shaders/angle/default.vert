@@ -1,3 +1,5 @@
+#version 320 es
+
 #if defined(diffuseTextureFlag) || defined(specularTextureFlag) || defined(emissiveTextureFlag)
 #define textureFlag
 #endif

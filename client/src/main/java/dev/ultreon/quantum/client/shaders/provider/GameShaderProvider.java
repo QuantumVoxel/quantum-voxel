@@ -7,10 +7,19 @@ import com.badlogic.gdx.graphics.g3d.utils.BaseShaderProvider;
 import dev.ultreon.quantum.client.render.ShaderContext;
 
 public class GameShaderProvider extends BaseShaderProvider {
-    private DepthShader.Config config;
+    private final DepthShader.Config config;
 
     public GameShaderProvider(DepthShader.Config config) {
         this.config = config;
+    }
+
+    @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from default shader provider", e);
+        }
     }
 
     @Override

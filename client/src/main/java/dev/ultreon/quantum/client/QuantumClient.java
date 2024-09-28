@@ -22,7 +22,10 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.github.tommyettinger.textra.Font;
@@ -148,7 +151,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -636,9 +638,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Initialize ModelBatch with GameShaderProvider
         this.modelBatch = deferDispose(new ModelBatch(new SceneShaders(
-                new ResourceFileHandle(id("shaders/scene.vert")),
-                new ResourceFileHandle(id("shaders/scene.frag")),
-                new ResourceFileHandle(id("shaders/scene.geom")))));
+                shader(id("scene.vert")),
+                shader(id("scene.frag")),
+                shader(id("scene.geom")))));
 
         // Initialize GameRenderer
         this.gameRenderer = new GameRenderer(this, this.modelBatch, this.pipeline);

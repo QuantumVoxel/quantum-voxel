@@ -74,8 +74,8 @@ float sh_light(vec3 normal, SHC l){
     );
 }
 
-vec3 gamma(float color){
-    return pow(color, vec3(1.0/2.0));
+float gamma(float color){
+    return pow(color, 1.0/2.0);
 }
 
 vec2 transformUV(vec2 uv) {

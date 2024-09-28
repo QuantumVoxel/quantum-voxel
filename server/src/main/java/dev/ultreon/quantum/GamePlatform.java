@@ -21,10 +21,6 @@ public abstract class GamePlatform {
 
     protected GamePlatform() {
         instance = this;
-
-        if (isAngleGLES()) {
-            System.setProperty("quantum.platform.anglegles", "true");
-        }
     }
 
     public static GamePlatform get() {

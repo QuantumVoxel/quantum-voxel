@@ -50,6 +50,15 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
         throw new NullPointerException("Renderable cannot be null");
     }
 
+    @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from scene shader provider", e);
+        }
+    }
+
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
         return switch (userData) {
             case Gizmo gizmo ->

@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.desktop;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.exception.Json5Exception;
@@ -22,14 +20,15 @@ public class LauncherConfig {
     public boolean windowVibrancyEnabled = PlatformOS.isWindows;
     public boolean enableFullVibrancy = false;
     public boolean useAngleGraphics = PlatformOS.isWindows;
+    public boolean frameless = false;
+    public boolean removeBorder = false;
 
     private LauncherConfig() {
 
     }
 
     private static void load() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        LauncherConfig config = null;
+        LauncherConfig config;
         try {
             Json5Object json = JSON5.parse(Files.readString(Path.of("config.json5"))).getAsJson5Object();
             int version = json.getAsJson5Primitive("schemaVersion").getAsInt();
@@ -39,11 +38,15 @@ public class LauncherConfig {
                 config.windowVibrancyEnabled = json.getAsJson5Primitive("windowVibrancyEnabled").getAsBoolean();
                 config.enableFullVibrancy = json.getAsJson5Primitive("enableFullVibrancy").getAsBoolean();
                 config.useAngleGraphics = json.getAsJson5Primitive("useAngleGraphics").getAsBoolean();
+                config.frameless = json.getAsJson5Primitive("frameless").getAsBoolean();
+                config.removeBorder = json.getAsJson5Primitive("removeBorder").getAsBoolean();
             } else {
                 config.schemaVersion = 1;
                 config.windowVibrancyEnabled = true;
                 config.enableFullVibrancy = false;
                 config.useAngleGraphics = true;
+                config.frameless = false;
+                config.removeBorder = false;
             }
         } catch (IOException | Json5Exception | NullPointerException e) {
             config = new LauncherConfig();
@@ -61,16 +64,22 @@ public class LauncherConfig {
     public static void save() {
         Json5Object json = new Json5Object();
         json.addProperty("schemaVersion", 1);
-        json.setComment("schemaVersion", "Version of the launcher config file. This would be incremented every time the config changes.");
+        json.setComment("schemaVersion", "Version of the launcher config file.\nThis would be incremented every time the config changes.");
 
         json.addProperty("windowVibrancyEnabled", LauncherConfig.get().windowVibrancyEnabled);
-        json.setComment("windowVibrancyEnabled", "Whether the window should be vibrancy enabled. This is only supported on Windows. On by default");
+        json.setComment("windowVibrancyEnabled", "Whether the window should be vibrancy enabled.\nThis is only supported on Windows.\nOn by default");
 
         json.addProperty("enableFullVibrancy", LauncherConfig.get().enableFullVibrancy);
-        json.setComment("enableFullVibrancy", "Whether to enable full vibrancy. This is only supported on Windows. Off by default");
+        json.setComment("enableFullVibrancy", "Whether to enable full vibrancy.\nThis is only supported on Windows.\nOff by default");
 
         json.addProperty("useAngleGraphics", LauncherConfig.get().useAngleGraphics);
-        json.setComment("useAngleGraphics", "Whether to use ANGLE graphics. This is only supported on Windows. On by default for performance.");
+        json.setComment("useAngleGraphics", "Whether to use ANGLE graphics.\nThis is only supported on Windows.\nOn by default for performance.");
+
+        json.addProperty("frameless", LauncherConfig.get().frameless);
+        json.setComment("frameless", "Whether the window should be frameless.\nThis is only supported on Windows for now.\nOff by default");
+
+        json.addProperty("removeBorder", LauncherConfig.get().removeBorder);
+        json.setComment("removeBorder", "Whether the border should be removed.\nThis is only supported on Windows for now.\nOff by default");
 
         try {
             Files.writeString(Path.of("config.json5"), JSON5.serialize(json));

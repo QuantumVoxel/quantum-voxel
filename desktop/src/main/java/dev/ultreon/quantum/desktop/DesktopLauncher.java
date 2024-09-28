@@ -16,7 +16,6 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
-import dev.ultreon.quantum.client.Acrylic;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.WindowEvents;
@@ -33,7 +32,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.lwjgl.glfw.GLFWNativeWin32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +43,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 public class DesktopLauncher {
     public static final Logger LOGGER = LoggerFactory.getLogger("Quantum:Launcher");
@@ -136,7 +131,7 @@ public class DesktopLauncher {
 
             @Override
             public boolean hasBackPanelRemoved() {
-                return fullVibrancyEnabled && windowVibrancyEnabled;
+                return fullVibrancyEnabled && windowVibrancyEnabled && !useAngleGraphics;
             }
         };
 
@@ -193,7 +188,7 @@ public class DesktopLauncher {
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
-        config.setTransparentFramebuffer(LauncherConfig.get().enableFullVibrancy && LauncherConfig.get().windowVibrancyEnabled);
+        config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
 
         return config;
     }
@@ -211,7 +206,7 @@ public class DesktopLauncher {
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
-        config.setTransparentFramebuffer(LauncherConfig.get().enableFullVibrancy && LauncherConfig.get().windowVibrancyEnabled);
+        config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
 
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -248,6 +243,49 @@ public class DesktopLauncher {
         public void created(com.github.dgzt.gdx.lwjgl3.Lwjgl3Window window) {
             gameWindow = new DesktopVulkanWindow(window);
 
+            setupMacIcon();
+            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+            setupVibrancy(window.getWindowHandle());
+        }
+
+        @Override
+        public void created(Lwjgl3Window window) {
+            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.NOTIFICATION, false);
+            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.LOW, false);
+            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.MEDIUM, true);
+            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.HIGH, true);
+
+            gameWindow = new DesktopGLWindow(window);
+
+            setupMacIcon();
+            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+            setupVibrancy(window.getWindowHandle());
+        }
+
+        private static void setupVibrancy(long handle) {
+            // Check for OS and apply acrylic/mica/vibrancy
+            if (GamePlatform.get().isWindows()) {
+                if (LauncherConfig.get().frameless) {
+                    WindowUtils.makeWindowFrameless(handle);
+                }
+
+                WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(handle)));
+                if (LauncherConfig.get().windowVibrancyEnabled) {
+                    Dwmapi.setAcrylicBackground(hwnd);
+                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
+                }
+
+                if (LauncherConfig.get().removeBorder) {
+                    Dwmapi.removeBorder(hwnd);
+                }
+            } else if (GamePlatform.get().isMacOSX()) {
+                // TODO: Implement vibrancy
+            } else if (GamePlatform.get().isLinux()) {
+                // TODO: Implement vibrancy
+            }
+        }
+
+        private void setupMacIcon() {
             if (SharedLibraryLoader.isMac) {
                 // Set the dock icon
                 InputStream iconStream = MacOSDockIcon.class.getResourceAsStream("/icon.icns");
@@ -269,8 +307,15 @@ public class DesktopLauncher {
 
                 if (taskbar != null) {
                     try {
-                        taskbar.setIconImage(ImageIO.read(DesktopLauncher.class.getResourceAsStream("/icon.png")));
-                    } catch (IOException e) {
+                        if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                            InputStream res = DesktopLauncher.class.getResourceAsStream("/icon.png");
+                            if (res != null) {
+                                taskbar.setIconImage(ImageIO.read(res));
+                            } else {
+                                LOGGER.warn("Failed to extract icon.png");
+                            }
+                        }
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
 
@@ -279,149 +324,6 @@ public class DesktopLauncher {
                     }
                 }
             }
-
-            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
-
-            extractAcrylicNative();
-
-            // Check for OS and apply acrylic/mica/vibrancy
-            if (GamePlatform.get().isWindows()) {
-                if (System.getProperty("os.name").startsWith("Windows 11") && (System.getProperty("os.arch").equals("x86_64") || System.getProperty("os.arch").equals("amd64"))) {
-                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
-                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
-                    }
-
-//                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
-//                    Dwmapi.setAcrylicBackground(hwnd);
-//                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
-//                    Dwmapi.removeBorder(hwnd);
-                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
-                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
-                    Dwmapi.setAcrylicBackground(hwnd);
-                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
-                    Dwmapi.removeBorder(hwnd);
-                } else {
-                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
-                }
-            }
-
-        }
-
-        @Override
-        public void created(Lwjgl3Window window) {
-            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.NOTIFICATION, false);
-            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.LOW, false);
-            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.MEDIUM, true);
-            Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.HIGH, true);
-
-            gameWindow = new DesktopGLWindow(window);
-
-            if (PlatformOS.isMac) {
-                // Setup icons the mac way, using JNA.
-                // So this requires native interaction.
-                long l = GLFWNativeCocoa.glfwGetCocoaWindow(gameWindow.getHandle());
-
-                try {
-//                    final Image image = QuantumClient.getIconImage();
-//                    Taskbar taskbar = Taskbar.getTaskbar();
-//                    taskbar.setIconImage(image);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-
-            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
-
-            extractAcrylicNative();
-
-            // Check for OS and apply acrylic/mica/vibrancy
-            if (GamePlatform.get().isWindows()) {
-                if (System.getProperty("os.name").startsWith("Windows 11") && (System.getProperty("os.arch").equals("x86_64") || System.getProperty("os.arch").equals("amd64"))) {
-                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
-                        CommonConstants.LOGGER.warn("Unsupported Windows 11 build for mica background: {}", System.getProperty("os.name"));
-                    }
-
-                    WindowUtils.makeWindowFrameless(gameWindow.getHandle());
-
-//                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
-//                    Dwmapi.setAcrylicBackground(hwnd);
-//                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
-//                    Dwmapi.removeBorder(hwnd);
-                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
-                    WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
-
-                    Dwmapi.setAcrylicBackground(hwnd);
-                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
-                    Dwmapi.removeBorder(hwnd);
-                } else {
-                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
-                }
-            } else if (GamePlatform.get().isMacOSX()) {
-//                NSWindow.fromPtr(gameWindow.getPeer()).makeFrameless();
-            }
-        }
-
-        private void extractAcrylicNative() {
-            if (!GamePlatform.get().isWindows() && !GamePlatform.get().isMacOSX()) {
-                return;
-            }
-
-            String osName = System.getProperty("os.name");
-            if (osName.startsWith("Windows 11") || osName.startsWith("Windows 10")) {
-                extractWindows();
-            } else if (GamePlatform.get().isMacOSX()) {
-                extractDarwin();
-            } else {
-                CommonConstants.LOGGER.warn("Unsupported operating system for blur background: {}", osName);
-            }
-        }
-
-        private static void extractDarwin() {
-            if (!System.getProperty("os.arch").equals("aarch64")) {
-                CommonConstants.LOGGER.warn("Unsupported macOS architecture for vibrancy: {}", System.getProperty("os.arch"));
-                return;
-            }
-            try {
-                extractFile("lib/arm64/libacrylic.dylib", "libacrylic.dylib");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private static void extractWindows() {
-            if (!System.getProperty("os.arch").equals("x86_64") && !System.getProperty("os.arch").equals("amd64")) {
-                CommonConstants.LOGGER.warn("Unsupported Windows architecture for acrylic/mica: {}", System.getProperty("os.arch"));
-                return;
-            }
-            try {
-                extractFile("lib/x64/acrylic.dll", "acrylic.dll");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private static void extractFile(String providedPath, String extractedPath) throws IOException {
-            String selfHash = getHash(DesktopLauncher.class.getResourceAsStream("/" + providedPath));
-            Path path = Paths.get(extractedPath);
-            if (Files.exists(path)) {
-                InputStream curHash = Files.newInputStream(path);
-                if (Objects.equals(selfHash, getHash(curHash))) {
-                    CommonConstants.LOGGER.info("File {} is up to date", extractedPath);
-                    return;
-                }
-            }
-            InputStream resourceAsStream = DesktopLauncher.class.getResourceAsStream("/" + providedPath);
-            if (resourceAsStream == null) {
-                throw new RuntimeException("Failed to extract " + providedPath + " to " + extractedPath + " because it does not exist.");
-            }
-            Files.copy(resourceAsStream, path, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        private static String getHash(InputStream path) throws IOException {
-            MessageDigest digest = SHA_256;
-
-            byte[] hash = digest.digest(path.readAllBytes());
-            return Base64.getEncoder().encodeToString(hash);
         }
 
         @Override

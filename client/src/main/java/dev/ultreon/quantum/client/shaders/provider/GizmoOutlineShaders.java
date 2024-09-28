@@ -4,7 +4,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.shaders.GizmoOutlineShader;
 import dev.ultreon.quantum.client.shaders.Shaders;
@@ -12,6 +11,15 @@ import dev.ultreon.quantum.client.shaders.Shaders;
 public class GizmoOutlineShaders extends OutlineShaderProvider {
     public GizmoOutlineShaders(FileHandle resourceFileHandle, FileHandle resourceFileHandle1) {
         super(resourceFileHandle, resourceFileHandle1);
+    }
+
+    @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from default shader provider", e);
+        }
     }
 
     @Override

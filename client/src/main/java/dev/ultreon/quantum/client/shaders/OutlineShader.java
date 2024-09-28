@@ -130,4 +130,13 @@ public class OutlineShader extends DefaultShader {
             QuantumClient.LOGGER.error("Failed to render renderable with mesh part ID: {}", renderable.meshPart.id, e);
         }
     }
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize outline shader", e);
+        }
+    }
 }
