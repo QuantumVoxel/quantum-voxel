@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.glutils.GLVersion;
 import com.badlogic.gdx.math.*;
 import dev.ultreon.quantum.client.player.ClientPlayer;
-import dev.ultreon.quantum.client.world.ChunkMesh;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.debug.inspect.DefaultInspections;
@@ -80,7 +79,6 @@ public class DebugRegistration {
         InspectionRoot.registerFormatter(ClientWorld.class, element -> "clientWorld");
         InspectionRoot.registerFormatter(ClientPlayer.class, element -> "clientPlayer[" + element.getUuid() + "]");
         InspectionRoot.registerFormatter(ClientChunk.class, element -> "clientChunk[" + element.getVec() + "]");
-        InspectionRoot.registerFormatter(ChunkMesh.class, element -> "chunkMesh[" + element.meshPart.mesh.getVertexSize() + "]");
         InspectionRoot.registerFormatter(Mesh.class, element -> "mesh[" + element.getVertexSize() + "]");
         InspectionRoot.registerFormatter(MeshPart.class, element -> "meshPart[" + element.mesh.getVertexSize() + "]");
         InspectionRoot.registerFormatter(TextureRegion.class, element -> "textureRegion[" + element.getRegionWidth() + "x" + element.getRegionHeight() + "]");

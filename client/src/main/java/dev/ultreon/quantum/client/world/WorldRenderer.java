@@ -57,6 +57,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lombok.Getter;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,8 +79,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final NamespaceID MOON_ID = id("generated/moon");
     public static final NamespaceID SUN_ID = id("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
+    @Getter
     private Material material;
+    @Getter
     private Material transparentMaterial;
+    @Getter
     private Texture breakingTex;
     private Environment environment;
     private int visibleChunks;
@@ -779,18 +783,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     @Override
     public boolean isDisposed() {
         return this.disposed;
-    }
-
-    public Texture getBreakingTex() {
-        return this.breakingTex;
-    }
-
-    public Material getMaterial() {
-        return this.material;
-    }
-
-    public Material getTransparentMaterial() {
-        return this.transparentMaterial;
     }
 
     @Override

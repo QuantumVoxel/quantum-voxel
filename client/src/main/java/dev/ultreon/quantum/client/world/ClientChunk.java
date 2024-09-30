@@ -66,6 +66,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
     private final Stack<Integer> stack = new Stack<>();
     public final ClientChunkInfo info = new ClientChunkInfo();
+    public int lod;
     private boolean empty = false;
 
     /**

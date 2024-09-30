@@ -180,6 +180,14 @@ allprojects {
             dirs = setOf(file("${rootProject.projectDir}/libs"))
         }
     }
+
+    dependencies {
+        compileOnly("org.jetbrains:annotations:23.0.0")
+
+        implementation(annotationProcessor("org.projectlombok:lombok:1.+")!!)
+        annotationProcessor("com.google.code.findbugs:jsr305:3.0.2")
+        annotationProcessor("org.ow2.asm:asm-tree:9.3")
+    }
 }
 
 subprojects {

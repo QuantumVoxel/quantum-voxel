@@ -53,9 +53,9 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.maxReflectDistance", comment = "Maximum distance for reflections (for example in water).")
     public static float maxReflectDistance = 80;
 
-    @ConfigEntry(path = "video.lodThreshold", comment = "The threshold in blocks for when a chunk is rendered at high or low level of detail.")
+    @ConfigEntry(path = "video.lodThreshold", comment = "The LOD threshold (distance at which chunks are rendered at different levels of detail).")
     @Ranged(min = 0, max = 128)
-    public static float lodThreshold = 16.0f;
+    public static float lodThreshold = 4.0f;
 
     @ConfigEntry(path = "generic.enable4xScreenshot", comment = "Whether 4× scaled screenshots are enabled.")
     public static boolean enable4xScreenshot = false;
@@ -173,4 +173,7 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "accessibility.enableVirtualKeyboard", comment = "Whether the virtual keyboard is enabled in the game.")
     public static boolean enableVirtualKeyboard = true;
+
+    @ConfigEntry(path = "performance.lodLevels", comment = "The level of detail (LOD) levels in the game.\nNote that the value is a power of 2.")
+    public static int lodLevels = 4;
 }

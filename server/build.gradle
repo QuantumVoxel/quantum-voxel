@@ -60,6 +60,9 @@ dependencies {
 
     annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
 
+    implementation api("org.projectlombok:lombok:1.18.34")
+    annotationProcessor "org.projectlombok:lombok:1.18.34"
+
     runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdx_version"
 
     // Language adapters

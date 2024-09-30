@@ -11,17 +11,19 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
+import lombok.Getter;
 
 import java.util.List;
 
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
+@Getter
 public class ChunkModel implements RenderableProvider {
     private static final Lazy<Model> gizmo = LazyKt.lazy(ChunkModel::createBorderGizmo);
     private static final Color CHUNK_GIZMO_COLOR = new Color(0.0f, 1.0f, 0.0f, 1.0f);
@@ -33,19 +35,14 @@ public class ChunkModel implements RenderableProvider {
     private ModelInstance modelInstance = null;
     private ModelInstance gizmoInstance = null;
 
+    private final Model[] lodModels = new Model[ClientConfig.lodLevels];
+    private final Vector3 relativePosition = new Vector3();
+
     public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
         this.material = renderer.getMaterial();
         this.transparentMaterial = renderer.getTransparentMaterial();
         this.pos = pos;
         this.chunk = chunk;
-    }
-
-    public Model getModel() {
-        return model;
-    }
-
-    public ModelInstance getModelInstance() {
-        return modelInstance;
     }
 
     public boolean build() {
@@ -61,7 +58,6 @@ public class ChunkModel implements RenderableProvider {
 
             chunk.whileLocked(() -> {
                 if (modelInstance == null) {
-                    ModelManager modelManager = ModelManager.INSTANCE;
                     ChunkVec pos = chunk.getVec();
                     ModelBuilder modelBuilder = new ModelBuilder();
                     MeshBuilder meshBuilder = new MeshBuilder();
@@ -156,18 +152,17 @@ public class ChunkModel implements RenderableProvider {
         return build();
     }
 
-    public ChunkVec getPos() {
-        return pos;
-    }
-
-    public ClientChunk getChunk() {
-        return chunk;
-    }
-
     @Override
     public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
         if (modelInstance == null || model == null) return;
         modelInstance.getRenderables(array, pool);
+
+        modelInstance.transform.getTranslation(relativePosition);
+
+        float lodThreshold = ClientConfig.lodThreshold * 16.0f;
+        float dst = relativePosition.dst(0, 0, 0);
+        chunk.lod = (int) (dst / lodThreshold);
+
         for (int i = 0; i < array.size; i++) {
             Renderable renderable = array.get(i);
             renderable.userData = chunk;
@@ -185,6 +180,10 @@ public class ChunkModel implements RenderableProvider {
         if (model != null) this.model = null;
         if (gizmoInstance != null) gizmoInstance = null;
         if (model != null) model.dispose();
+    }
+
+    public boolean isLoaded() {
+        return modelInstance!= null && model!= null;
     }
 
     public boolean needsRebuild(ClientWorld world) {

@@ -131,6 +131,7 @@ public class CommonConstants {
     public static final Vector2 VECTOR2_2_S = new Vector2();
     public static final Vector2 VECTOR2_3_S = new Vector2();
     public static final JavaRNG RANDOM = new JavaRNG();
+    public static final int DEFAULT_LOD_LEVEL = 0;
 
     private CommonConstants() {
 
