@@ -154,7 +154,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             breakingTexRegions.set(i, textureRegion);
         }
 
-        var boundingBox = Blocks.STONE.getBoundingBox(0, 0, 0, Blocks.STONE.createMeta());
+        var boundingBox = Blocks.STONE.getBoundingBox(0, 0, 0, Blocks.STONE.getDefaultState());
         float v = 0.001f;
         boundingBox.set(boundingBox);
         boundingBox.min.sub(v);
@@ -385,7 +385,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                     Material material = new Material();
                     material.id = id("generated/selection_outline_material").toString();
                     material.set(ColorAttribute.createDiffuse(1f, 1f, 1f, 1f));
-                    material.set(attribute);
                     material.set(IntAttribute.createCullFace(GL_FRONT));
 
 
@@ -403,6 +402,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
 
             attribute.opacity = MathUtils.sinDeg((System.currentTimeMillis() % 360) / 1000f) / 90f + 0.5f;
+            material.set(attribute);
 
             if (this.cursor != null) {
                 batch.render(this.cursor);

@@ -27,7 +27,7 @@ public class HellLandscapeCarver implements Carver {
         for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
             double noise = this.source.evaluateNoise(x, y, z);
             if (noise < 0.1) {
-                chunk.set(x, y, z, Blocks.COBBLESTONE.createMeta());
+                chunk.set(x, y, z, Blocks.COBBLESTONE.getDefaultState());
             }
         }
 

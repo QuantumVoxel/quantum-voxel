@@ -188,7 +188,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     @Override
     public @NotNull BlockState get(Point vec) {
         synchronized (this) {
-            if (this.disposed) return Blocks.AIR.createMeta();
+            if (this.disposed) return Blocks.AIR.getDefaultState();
             return this.get(vec.getIntX(), vec.getIntY(), vec.getIntZ());
         }
     }
@@ -206,7 +206,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         synchronized (this) {
             if (this.isOutOfBounds(x, y, z))
                 throw new IllegalArgumentException("Coordinates out of bounds: " + x + ", " + y + ", " + z);
-            if (this.disposed) return Blocks.AIR.createMeta();
+            if (this.disposed) return Blocks.AIR.getDefaultState();
             return this.getFast(x, y, z);
         }
     }
@@ -236,11 +236,12 @@ public abstract class Chunk implements Disposable, ChunkAccess {
     @NotNull
     protected BlockState getFast(int x, int y, int z) {
         synchronized (this) {
-            if (this.disposed) return Blocks.AIR.createMeta();
+            BlockState state = Blocks.AIR.getDefaultState();
+            if (this.disposed) return state;
             int dataIdx = this.getIndex(x, y, z);
 
             BlockState block = this.storage.get(dataIdx);
-            return block == null ? Blocks.AIR.createMeta() : block;
+            return block == null ? state : block;
         }
     }
 

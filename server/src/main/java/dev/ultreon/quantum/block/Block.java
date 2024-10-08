@@ -47,6 +47,7 @@ public class Block implements DataWriter<MapType> {
     private final @Nullable ToolLevel toolLevel;
     private final int lightReduction;
     private final SoundType soundType;
+    private BlockState state = new BlockState(this, Collections.emptyMap());
 
     public Block() {
         this(new Properties());
@@ -105,7 +106,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     public BoundingBox getBoundingBox(Vec3i pos) {
-        return this.getBoundingBox(pos.x, pos.y, pos.z, this.createMeta());
+        return this.getBoundingBox(pos.x, pos.y, pos.z, this.getDefaultState());
     }
 
     @Override
@@ -195,8 +196,8 @@ public class Block implements DataWriter<MapType> {
         // Used in implementations
     }
 
-    public @NotNull BlockState createMeta() {
-        return new BlockState(this, Collections.emptyMap());
+    public @NotNull BlockState getDefaultState() {
+        return state;
     }
 
     public BlockState onPlacedBy(BlockState blockMeta, BlockVec at, UseItemContext context) {

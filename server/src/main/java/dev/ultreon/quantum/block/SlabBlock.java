@@ -33,8 +33,8 @@ public class SlabBlock extends Block {
     }
 
     @Override
-    public @NotNull BlockState createMeta() {
-        return super.createMeta().withEntry("type", BlockDataEntry.ofEnum(Type.BOTTOM));
+    public @NotNull BlockState getDefaultState() {
+        return super.getDefaultState().withEntry("type", BlockDataEntry.ofEnum(Type.BOTTOM));
     }
 
     @Override

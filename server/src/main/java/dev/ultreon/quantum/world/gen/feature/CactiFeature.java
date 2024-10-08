@@ -43,7 +43,7 @@ public class CactiFeature extends TerrainFeature {
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
 
             for (int blkY = 1; blkY < trunkHeight; blkY++) {
-                setter.set(x, blkY, z, this.block.createMeta());
+                setter.set(x, blkY, z, this.block.getDefaultState());
             }
 
             if (WorldGenDebugContext.isActive()) {

@@ -238,8 +238,8 @@ public abstract class World implements Disposable, WorldAccess {
 
         Chunk chunkAt = this.getChunkAt(x, y, z);
         BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
-        if (chunkAt == null) return Blocks.BARRIER.createMeta();
-        if (!chunkAt.ready) return Blocks.BARRIER.createMeta();
+        if (chunkAt == null) return Blocks.BARRIER.getDefaultState();
+        if (!chunkAt.ready) return Blocks.BARRIER.getDefaultState();
 
         BlockVec cp = blockVec.chunkLocal();
         return chunkAt.getFast(cp.getIntX(), cp.getIntY(), cp.getIntZ());
@@ -899,12 +899,12 @@ public abstract class World implements Disposable, WorldAccess {
     public boolean destroyBlock(BlockVec breaking, @Nullable Player breaker) {
         BlockState blockState = get(breaking);
 
-        if (breaker != null && ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(this, breaking, blockState, Blocks.AIR.createMeta(), null, breaker))) {
+        if (breaker != null && ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(this, breaking, blockState, Blocks.AIR.getDefaultState(), null, breaker))) {
             stopBreaking(breaking, breaker);
         }
 
         blockState.onDestroy(this, breaking, breaker);
-        set(breaking, Blocks.AIR.createMeta(), BlockFlags.UPDATE);
+        set(breaking, Blocks.AIR.getDefaultState(), BlockFlags.UPDATE);
         return true;
     }
 

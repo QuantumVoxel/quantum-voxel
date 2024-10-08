@@ -32,7 +32,7 @@ public class FoliageFeature extends TerrainFeature {
         if (this.random.nextFloat() < this.threshold) {
             for (int xOffset = -1; xOffset < 1; xOffset++) {
                 for (int zOffset = -1; zOffset < 1; zOffset++) {
-                    setter.set(x + xOffset, y, z + zOffset, this.material.createMeta());
+                    setter.set(x + xOffset, y, z + zOffset, this.material.getDefaultState());
                 }
             }
             return true;

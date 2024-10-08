@@ -27,7 +27,7 @@ public class FloatingIslandsCarver implements Carver {
         for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
             double noise = this.source.evaluateNoise(x, y, z);
             if (noise > 0.7) {
-                chunk.set(x, y, z, Blocks.COBBLESTONE.createMeta());
+                chunk.set(x, y, z, Blocks.COBBLESTONE.getDefaultState());
             }
         }
 

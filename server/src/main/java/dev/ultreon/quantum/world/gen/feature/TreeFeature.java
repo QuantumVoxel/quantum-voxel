@@ -54,15 +54,15 @@ public class TreeFeature extends TerrainFeature {
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
 
             for (int ty = y; ty < y + trunkHeight; ty++) {
-                setter.set(x, ty, z, this.trunk.createMeta());
+                setter.set(x, ty, z, this.trunk.getDefaultState());
             }
 
-            setter.set(x, y - 1, z, Blocks.DIRT.createMeta());
+            setter.set(x, y - 1, z, Blocks.DIRT.getDefaultState());
             for (int xOffset = -1; xOffset <= 1; xOffset++) {
                 for (int zOffset = -1; zOffset <= 1; zOffset++) {
                     for (int ty = trunkHeight - 1; ty <= trunkHeight + 1; ty++) {
                         if (xOffset == 0 && zOffset == 0 && ty != trunkHeight + 1) continue;
-                        setter.set(x + xOffset, ty, z + zOffset, this.leaves.createMeta());
+                        setter.set(x + xOffset, ty, z + zOffset, this.leaves.getDefaultState());
 
                         if (WorldGenDebugContext.isActive()) {
                             System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Setting leaf at " + (x + xOffset) + ", " + ty + ", " + (z + zOffset));

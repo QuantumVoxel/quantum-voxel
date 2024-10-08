@@ -61,7 +61,7 @@ public class PatchFeature extends TerrainFeature {
         boolean changed = false;
         for (int blkY = -this.depth; blkY < 0; blkY++) {
             float value = (float) this.baseNoise.eval(x, blkY + y, z);
-            changed |= value < this.threshold && setter.set(0, blkY, z, this.patchBlock.createMeta());
+            changed |= value < this.threshold && setter.set(0, blkY, z, this.patchBlock.getDefaultState());
         }
 
         return changed;

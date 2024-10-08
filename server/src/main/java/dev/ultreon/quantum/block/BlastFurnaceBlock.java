@@ -13,8 +13,8 @@ public class BlastFurnaceBlock extends Block {
     }
 
     @Override
-    public @NotNull BlockState createMeta() {
-        return super.createMeta().withEntry("lit", BlockDataEntry.of(false)).withEntry("facing", BlockDataEntry.ofEnum(CubicDirection.NORTH));
+    public @NotNull BlockState getDefaultState() {
+        return super.getDefaultState().withEntry("lit", BlockDataEntry.of(false)).withEntry("facing", BlockDataEntry.ofEnum(CubicDirection.NORTH));
     }
 
     @Override

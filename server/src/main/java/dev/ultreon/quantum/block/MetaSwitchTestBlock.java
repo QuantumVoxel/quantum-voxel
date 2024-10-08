@@ -26,7 +26,7 @@ public class MetaSwitchTestBlock extends Block {
     }
 
     @Override
-    public @NotNull BlockState createMeta() {
-        return super.createMeta().withEntry("on", BlockDataEntry.of(false));
+    public @NotNull BlockState getDefaultState() {
+        return super.getDefaultState().withEntry("on", BlockDataEntry.of(false));
     }
 }

@@ -126,7 +126,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
 
                     double noise = VoxelTerrain.noise.eval(wx / 8.0f, wy / 8.0f, wz / 8.0f) + ((wy - 256) / 512.0f);
                     if (noise < 0) {
-                        materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.DIRT.createMeta());
+                        materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.DIRT.getDefaultState());
                     }
                 }
             }
