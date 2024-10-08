@@ -1255,10 +1255,10 @@ public class ServerWorld extends World {
      * The spawn point is set randomly.
      */
     public void setupSpawn() {
-        int spawnChunkX = MathUtils.random(-32, 31);
-        int spawnChunkZ = MathUtils.random(-32, 31);
-        int spawnX = MathUtils.random(spawnChunkX * 16, spawnChunkX * 16 + 15);
-        int spawnZ = MathUtils.random(spawnChunkZ * 16, spawnChunkZ * 16 + 15);
+        int spawnChunkX = MathUtils.random(-CHUNK_SIZE * 2, 31);
+        int spawnChunkZ = MathUtils.random(-CHUNK_SIZE * 2, 31);
+        int spawnX = MathUtils.random(spawnChunkX * CHUNK_SIZE, spawnChunkX * CHUNK_SIZE + 15);
+        int spawnZ = MathUtils.random(spawnChunkZ * CHUNK_SIZE, spawnChunkZ * CHUNK_SIZE + 15);
 
         QuantumServer.invokeAndWait(() -> this.setSpawnPoint(spawnX, spawnZ));
     }
@@ -1346,7 +1346,7 @@ public class ServerWorld extends World {
         return getOrOpenRegionAt(vec).caveCache.stream().filter(vec3d -> {
             BlockVec start = vec.start().regionLocal();
             return vec3d.x >= start.x && vec3d.y >= start.y && vec3d.z >= start.z &&
-                   vec3d.x < start.x + 16 && vec3d.y < start.y + 16 && vec3d.z < start.z + 16;
+                   vec3d.x < start.x + CHUNK_SIZE && vec3d.y < start.y + CHUNK_SIZE && vec3d.z < start.z + CHUNK_SIZE;
         });
     }
 

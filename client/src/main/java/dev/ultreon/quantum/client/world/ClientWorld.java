@@ -135,7 +135,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public int getRenderDistance() {
-        return ClientConfig.renderDistance;
+        return ClientConfig.renderDistance / CHUNK_SIZE;
     }
 
     /**
@@ -890,7 +890,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         QuantumClient.invoke(() -> {
             BoxGizmo gizmo = new BoxGizmo("chunk");
             gizmo.position.set(data.getOffset().vec().d().add(8.0, 8.0, 8.0));
-            gizmo.size.set(16, 16, 16);
+            gizmo.size.set(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
             gizmo.color.set(1.0F, 0.0F, 0.0F, 1.0F);
             gizmo.outline = true;
             this.addGizmo(gizmo);
@@ -898,7 +898,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
         // Calculate the distance between the chunk and the player
         synchronized (this.chunks) {
-            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance) {
+            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance / CHUNK_SIZE) {
                 player.pendingChunks.remove(pos);
 
                 // If the distance is greater than the render distance, send a skip chunk status packet and return
@@ -906,7 +906,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
                 return;
             }
 
-            player.pendingChunks.remove(pos);
+            QuantumClient.invoke(() -> player.pendingChunks.remove(pos));
 
             // Add the chunk to the map of chunks
             this.chunks.put(pos, chunk);
@@ -964,7 +964,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             ClientChunk clientChunk = entry.getValue();
 
             // Check if the distance between the chunk and the player's position is greater than the render distance
-            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance) {
+            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance / CHUNK_SIZE) {
                 // Remove the chunk from the map and dispose it
                 iterator.remove();
                 clientChunk.dispose();

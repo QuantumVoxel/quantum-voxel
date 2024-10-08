@@ -31,6 +31,8 @@ import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
     private final ModelBatch modelBatch;
@@ -90,7 +92,7 @@ public class GameRenderer implements Disposable {
                 }
 
                 this.client.camera.update(player);
-                this.client.camera.far = (ClientConfig.renderDistance - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
+                this.client.camera.far = ((float) ClientConfig.renderDistance / CHUNK_SIZE - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
 
                 var rotation = this.tmp.set(player.xHeadRot, player.yRot);
                 var quaternion = new Quaternion();

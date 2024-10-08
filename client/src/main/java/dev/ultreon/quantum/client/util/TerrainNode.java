@@ -45,7 +45,7 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
-    public static final int TERRAIN_SIZE = 16;
+    public static final int TERRAIN_SIZE = 32;
 
     static int nodes = 0;
 

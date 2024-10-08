@@ -16,6 +16,8 @@ import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import kotlin.ranges.IntRange;
 import org.jetbrains.annotations.NotNull;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 public class OreFeature extends TerrainFeature {
     private final Block ore;
     private final int chance;
@@ -26,7 +28,7 @@ public class OreFeature extends TerrainFeature {
         super();
 
         this.ore = ore;
-        this.chance = chance * 16;
+        this.chance = chance * CHUNK_SIZE;
         this.sizeRange = sizeRange;
         this.heightRange = heightRange;
     }

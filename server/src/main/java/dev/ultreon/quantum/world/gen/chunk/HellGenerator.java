@@ -10,6 +10,8 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 /**
  * HellGenerator is a specialized chunk generator designed to create a hellish
  * terrain in a Quantum Voxel world. It extends the SimpleChunkGenerator to leverage
@@ -35,8 +37,8 @@ public class HellGenerator extends SimpleChunkGenerator {
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
         BlockVec offset = chunk.getOffset();
 
-        for (int x = offset.x; x < offset.x + 16; x++) {
-            for (int z = offset.z; z < offset.z + 16; z++) {
+        for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
+            for (int z = offset.z; z < offset.z + CHUNK_SIZE; z++) {
                 this.carver.carve(chunk, x, z);
             }
         }

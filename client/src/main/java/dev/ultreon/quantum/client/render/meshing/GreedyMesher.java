@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 /**
  * Mesher using the "greedy meshing" technique.
  * <p>
@@ -100,9 +102,9 @@ public class GreedyMesher implements Mesher {
             bright.l11 = 1;
         }
 
-        int width = World.CHUNK_SIZE;
-        int depth = World.CHUNK_SIZE;
-        int height = World.CHUNK_SIZE;
+        int width = CHUNK_SIZE;
+        int depth = CHUNK_SIZE;
+        int height = CHUNK_SIZE;
         // Top, bottom
         for (int y = 0; y <= height; y++) {
             boolean[][] topMask = new boolean[width][depth];
@@ -134,11 +136,11 @@ public class GreedyMesher implements Mesher {
                         @Nullable ClientChunkAccess topNeighborChunk = this.chunk;
                         if (bottomNeighborY < 0) {
                             bottomNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY() - 1, this.chunk.getVec().getIntZ());
-                            bottomNeighborY += World.CHUNK_SIZE;
+                            bottomNeighborY += CHUNK_SIZE;
                         }
-                        if (topNeighborY >= World.CHUNK_SIZE) {
+                        if (topNeighborY >= CHUNK_SIZE) {
                             topNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY() + 1, this.chunk.getVec().getIntZ());
-                            topNeighborY -= World.CHUNK_SIZE;
+                            topNeighborY -= CHUNK_SIZE;
                         }
                         if (topNeighborChunk != null) {
                             BlockState westNeighborBlk = topNeighborChunk.get(x, topNeighborY, z);
@@ -217,11 +219,11 @@ public class GreedyMesher implements Mesher {
                         @Nullable ClientChunkAccess eastNeighborChunk = this.chunk;
                         if (westNeighborX < 0) {
                             westNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX() - 1, this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ());
-                            westNeighborX += World.CHUNK_SIZE;
+                            westNeighborX += CHUNK_SIZE;
                         }
-                        if (eastNeighborX >= World.CHUNK_SIZE) {
+                        if (eastNeighborX >= CHUNK_SIZE) {
                             eastNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX() + 1, this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ());
-                            eastNeighborX -= World.CHUNK_SIZE;
+                            eastNeighborX -= CHUNK_SIZE;
                         }
                         if (westNeighborChunk != null) {
                             BlockState westNeighborBlk = westNeighborChunk.get(westNeighborX, y, z);
@@ -299,12 +301,12 @@ public class GreedyMesher implements Mesher {
                         int southNeighborZ = z - 1;
                         @Nullable ClientChunkAccess northNeighborChunk = this.chunk;
                         @Nullable ClientChunkAccess southNeighborChunk = this.chunk;
-                        if (northNeighborZ >= World.CHUNK_SIZE) {
+                        if (northNeighborZ >= CHUNK_SIZE) {
                             northNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ() + 1);
-                            northNeighborZ -= World.CHUNK_SIZE;
+                            northNeighborZ -= CHUNK_SIZE;
                         } else if (southNeighborZ < 0) {
                             southNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ() - 1);
-                            southNeighborZ += World.CHUNK_SIZE;
+                            southNeighborZ += CHUNK_SIZE;
                         }
 
                         if (northNeighborChunk != null) {
@@ -391,7 +393,7 @@ public class GreedyMesher implements Mesher {
         }
 
         ClientWorldAccess world = Objects.requireNonNull(this.chunk).getWorld();
-        int chunkSize = World.CHUNK_SIZE;
+        int chunkSize = CHUNK_SIZE;
         @Nullable ClientChunkAccess sChunk = this.chunk;
         if (z < 0) {
             sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
@@ -604,24 +606,24 @@ public class GreedyMesher implements Mesher {
                     int fixedSy = sy;
                     int fixedSx = sx;
                     if (sz < 0) {
-                        fixedSz = World.CHUNK_SIZE + sz;
+                        fixedSz = CHUNK_SIZE + sz;
                         getChunk = true;
-                    } else if (sz >= World.CHUNK_SIZE) {
-                        fixedSz = sz - World.CHUNK_SIZE;
+                    } else if (sz >= CHUNK_SIZE) {
+                        fixedSz = sz - CHUNK_SIZE;
                         getChunk = true;
                     }
                     if (sy < 0) {
-                        fixedSy = World.CHUNK_SIZE + sy;
+                        fixedSy = CHUNK_SIZE + sy;
                         getChunk = true;
-                    } else if (sy >= World.CHUNK_SIZE) {
-                        fixedSy = sy - World.CHUNK_SIZE;
+                    } else if (sy >= CHUNK_SIZE) {
+                        fixedSy = sy - CHUNK_SIZE;
                         getChunk = true;
                     }
                     if (sx < 0) {
-                        fixedSx = World.CHUNK_SIZE + sx;
+                        fixedSx = CHUNK_SIZE + sx;
                         getChunk = true;
-                    } else if (sx >= World.CHUNK_SIZE) {
-                        fixedSx = sx - World.CHUNK_SIZE;
+                    } else if (sx >= CHUNK_SIZE) {
+                        fixedSx = sx - CHUNK_SIZE;
                         getChunk = true;
                     }
                     if (getChunk) {
@@ -701,24 +703,24 @@ public class GreedyMesher implements Mesher {
                     int fixedSy = sy;
                     int fixedSx = sx;
                     if (sz < 0) {
-                        fixedSz = World.CHUNK_SIZE + sz;
+                        fixedSz = CHUNK_SIZE + sz;
                         getChunk = true;
-                    } else if (sz >= World.CHUNK_SIZE) {
-                        fixedSz = sz - World.CHUNK_SIZE;
+                    } else if (sz >= CHUNK_SIZE) {
+                        fixedSz = sz - CHUNK_SIZE;
                         getChunk = true;
                     }
                     if (sy < 0) {
-                        fixedSy = World.CHUNK_SIZE + sy;
+                        fixedSy = CHUNK_SIZE + sy;
                         getChunk = true;
-                    } else if (sy >= World.CHUNK_SIZE) {
-                        fixedSy = sy - World.CHUNK_SIZE;
+                    } else if (sy >= CHUNK_SIZE) {
+                        fixedSy = sy - CHUNK_SIZE;
                         getChunk = true;
                     }
                     if (sx < 0) {
-                        fixedSx = World.CHUNK_SIZE + sx;
+                        fixedSx = CHUNK_SIZE + sx;
                         getChunk = true;
-                    } else if (sx >= World.CHUNK_SIZE) {
-                        fixedSx = sx - World.CHUNK_SIZE;
+                    } else if (sx >= CHUNK_SIZE) {
+                        fixedSx = sx - CHUNK_SIZE;
                         getChunk = true;
                     }
                     if (getChunk) {
@@ -904,7 +906,7 @@ public class GreedyMesher implements Mesher {
 
     private BlockState block(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
-        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(16).add(x, y, z);
+        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
         @NotNull ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
         if (chunkAt != null)
             return chunkAt.get(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
@@ -913,7 +915,7 @@ public class GreedyMesher implements Mesher {
 
     private int blockLight(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
-        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(16).add(x, y, z);
+        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
         @NotNull ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
         if (chunkAt != null)
             return chunkAt.getBlockLight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
@@ -922,7 +924,7 @@ public class GreedyMesher implements Mesher {
 
     private int sunlight(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
-        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(16).add(x, y, z);
+        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
         @NotNull ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
         if (chunkAt != null)
             return chunkAt.getSunlight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));

@@ -44,6 +44,8 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 /**
  * Represents a local player entity in the game.
  */
@@ -183,7 +185,7 @@ public class LocalPlayer extends ClientPlayer {
         ChunkVec chunkVec = this.getChunkVec();
 
         if (connection == null) return;
-        int renderDistance = ClientConfig.renderDistance;
+        int renderDistance = Math.max(2, ClientConfig.renderDistance / CHUNK_SIZE);
 
         for (ClientChunkAccess chunk : this.world.getLoadedChunks()) {
             if (chunk.getVec().dst(chunkVec) > renderDistance) {

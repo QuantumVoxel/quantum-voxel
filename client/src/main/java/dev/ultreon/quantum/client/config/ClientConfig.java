@@ -7,6 +7,8 @@ import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.config.crafty.Ranged;
 import dev.ultreon.quantum.util.NamespaceID;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 /**
  * This is the client configuration.
  *
@@ -15,9 +17,9 @@ import dev.ultreon.quantum.util.NamespaceID;
  */
 @ConfigInfo(fileName = "quantum-client")
 public class ClientConfig extends CraftyConfig {
-    @ConfigEntry(path = "video.renderDistance", comment = "The render distance of chunks in the game.")
-    @Ranged(min = 4, max = 32)
-    public static int renderDistance = 8;
+    @ConfigEntry(path = "video.renderDistance", comment = "The render distance of blocks in the game.")
+    @Ranged(min = CHUNK_SIZE * 2, max = 256)
+    public static int renderDistance = 128;
 
     @ConfigEntry(path = "video.entityRenderDistance", comment = "The render distance of entities.")
     @Ranged(min = 4, max = 32)
