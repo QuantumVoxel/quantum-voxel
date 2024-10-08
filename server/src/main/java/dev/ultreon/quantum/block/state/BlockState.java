@@ -38,8 +38,8 @@ import java.util.Objects;
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class BlockState {
-    public static final BlockState AIR = Blocks.AIR.createMeta();
-    public static final BlockState BARRIER = Blocks.BARRIER.createMeta();
+    public static final BlockState AIR = Blocks.AIR.getDefaultState();
+    public static final BlockState BARRIER = Blocks.BARRIER.getDefaultState();
     private final @NotNull Block block;
     private final @NotNull Map<String, BlockDataEntry<?>> entries;
 
@@ -67,7 +67,7 @@ public class BlockState {
         if (block == null)
             throw new DecoderException("Block " + rawId + " does not exist");
 
-        BlockState meta = block.createMeta();
+        BlockState meta = block.getDefaultState();
         meta.entries.putAll(meta.readEntries(packetBuffer));
 
         return meta;
@@ -111,7 +111,7 @@ public class BlockState {
      */
     public static BlockState load(MapType data) {
         Block block = Registries.BLOCK.get(NamespaceID.parse(data.getString("block")));
-        BlockState meta = block.createMeta();
+        BlockState meta = block.getDefaultState();
         meta.entries.putAll(meta.loadEntries(data.getMap("entries", new MapType())));
 
         return meta;
