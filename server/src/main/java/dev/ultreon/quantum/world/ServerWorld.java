@@ -11,6 +11,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.config.QuantumServerConfig;
@@ -300,7 +301,7 @@ public class ServerWorld extends World {
         boolean broken = super.destroyBlock(breaking, breaker);
 
         ItemStack stack = breaker != null ? breaker.getSelectedItem() : ItemStack.empty();
-        ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(this, breaking, blockState, BlockState.AIR, stack, breaker));
+        ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(this, breaking, blockState, Blocks.AIR.getDefaultState(), stack, breaker));
 
         if (broken) {
             if (blockState.isToolRequired()

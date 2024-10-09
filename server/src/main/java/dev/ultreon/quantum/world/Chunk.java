@@ -74,7 +74,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
                     int size,
                     int height,
                     @NotNull ChunkVec vec) {
-        this(world, size, height, vec, new PaletteStorage<>(size * height * size, BlockState.AIR));
+        this(world, size, height, vec, new PaletteStorage<>(size * height * size, Blocks.AIR.getDefaultState()));
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class Chunk implements Disposable, ChunkAccess {
      */
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec) {
-        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockState.AIR));
+        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Blocks.AIR.getDefaultState()));
     }
 
     /**

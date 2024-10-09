@@ -1130,11 +1130,11 @@ public class PacketIO {
         this.writeByte(value.ordinal());
     }
 
-    public BlockState readBlockMeta() {
+    public BlockState readBlockState() {
         return BlockState.read(this);
     }
 
-    public void writeBlockMeta(BlockState blockMeta) {
+    public void writeBlockState(BlockState blockMeta) {
         blockMeta.write(this);
     }
 

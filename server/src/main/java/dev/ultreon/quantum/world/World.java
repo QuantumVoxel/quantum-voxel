@@ -55,7 +55,7 @@ import java.util.stream.Stream;
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
 public abstract class World implements Disposable, WorldAccess {
-    public static final int CHUNK_SIZE = 32;
+    public static final int CHUNK_SIZE = 16;
     public static final int REGION_SIZE = 32;
     public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;

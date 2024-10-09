@@ -10,7 +10,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 public record S2CBlockSetPacket(BlockVec pos, BlockState blockState) implements Packet<InGameClientPacketHandler> {
     public static S2CBlockSetPacket read(PacketIO buffer) {
         var pos = buffer.readBlockVec();
-        var blockState = buffer.readBlockMeta();
+        var blockState = buffer.readBlockState();
 
         return new S2CBlockSetPacket(pos, blockState);
     }
@@ -18,7 +18,7 @@ public record S2CBlockSetPacket(BlockVec pos, BlockState blockState) implements 
     @Override
     public void toBytes(PacketIO buffer) {
         buffer.writeBlockVec(this.pos);
-        buffer.writeBlockMeta(this.blockState);
+        buffer.writeBlockState(this.blockState);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class BlockHit implements Hit {
     protected Vec position = new Vec();
     protected Vec normal = new Vec();
     protected BlockVec vec = new BlockVec(BlockVecSpace.WORLD);
-    protected BlockState blockMeta = BlockState.AIR;
+    protected BlockState blockMeta = Blocks.AIR.getDefaultState();
     protected Block block = Blocks.AIR;
     protected boolean collide;
     protected float distance;
@@ -48,7 +48,7 @@ public class BlockHit implements Hit {
         this.position.set(buffer.readVec3d());
         this.normal.set(buffer.readVec3d());
         this.vec.set(buffer.readVec3i());
-        this.blockMeta = buffer.readBlockMeta();
+        this.blockMeta = buffer.readBlockState();
         this.block = Registries.BLOCK.byId(buffer.readVarInt());
         this.collide = buffer.readBoolean();
         this.distance = buffer.readFloat();
@@ -73,7 +73,7 @@ public class BlockHit implements Hit {
         buffer.writeVec3d(this.position);
         buffer.writeVec3d(this.normal);
         buffer.writeVec3i(this.vec);
-        buffer.writeBlockMeta(this.getBlockMeta());
+        buffer.writeBlockState(this.getBlockMeta());
         buffer.writeVarInt(Registries.BLOCK.getRawId(this.getBlock()));
         buffer.writeBoolean(this.collide);
         buffer.writeFloat(this.getDistance());

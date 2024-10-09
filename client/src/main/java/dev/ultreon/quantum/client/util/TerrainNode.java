@@ -56,7 +56,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     public TerrainNode parent;
     public TerrainNode[] children = new TerrainNode[8];
 
-    public FlatStorage<BlockState> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, BlockState.AIR);
+    public FlatStorage<BlockState> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.AIR.getDefaultState());
 
     public ModelInstance modelInstance;
     public Mesh mesh;

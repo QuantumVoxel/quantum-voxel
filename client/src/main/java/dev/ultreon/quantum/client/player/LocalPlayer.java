@@ -6,6 +6,7 @@ import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -135,7 +136,7 @@ public class LocalPlayer extends ClientPlayer {
     }
 
     protected BlockState getOnBlock() {
-        if (this.world == null) return BlockState.AIR;
+        if (this.world == null) return Blocks.AIR.getDefaultState();
         return this.world.get(this.getBlockVec().below());
     }
 
@@ -165,16 +166,6 @@ public class LocalPlayer extends ClientPlayer {
      * Refreshes the chunks around the player based on the current chunk position and render distance.
      * This method is designed to be called periodically to ensure the player has the correct chunks loaded
      * and unload any chunks that are no longer within the render distance.
-     * <p>
-     * The method performs the following steps:
-     * <ol>
-     *     <li>Checks if the world is being rendered by the client. If not, it exits early.</li>
-     *     <li>Ensures that the refresh operation is not performed more frequently than once per second.</li>
-     *     <li>Calculates the chunks that need to be loaded and unloaded based on the player's current position.</li>
-     *     <li>Unloads chunks that are outside the render distance.</li>
-     *     <li>Collects the chunks that need to be loaded.</li>
-     *     <li>Sorts the chunks to load based on their distance to the player and adds them to the send queue.</li>
-     * </ol>
      */
     public void refreshChunks() {
         if (!this.client.renderWorld) return;

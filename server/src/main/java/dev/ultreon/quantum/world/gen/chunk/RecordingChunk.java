@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world.gen.chunk;
 
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.world.*;
@@ -49,7 +50,7 @@ public class RecordingChunk implements ChunkAccess {
                 return chunk.get((Point) pos.chunkLocal());
             }
 
-            return BlockState.BARRIER;
+            return Blocks.AIR.getDefaultState();
         }
 
         return this.chunk.get(x, y, z);

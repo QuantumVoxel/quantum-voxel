@@ -55,6 +55,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import kotlin.system.TimingKt;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,6 +74,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     private final Map<NamespaceID, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final QuantumClient client = QuantumClient.get();
+    @Getter
     private long ping = 0;
     private boolean disconnected;
 
@@ -139,7 +141,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 }
 
                 double dst = pos.dst(player.getChunkVec());
-                if (dst > ClientConfig.renderDistance / CHUNK_SIZE) {
+                if (dst > (double) ClientConfig.renderDistance / CHUNK_SIZE) {
                     this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                     return;
                 }
@@ -417,10 +419,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         }
     }
 
-    public long getPing() {
-        return this.ping;
-    }
-
     @Override
     public void onPing(long serverTime, long time) {
         this.ping = System.currentTimeMillis() - time;
@@ -514,7 +512,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet) {
-        ClientWorldAccess world = this.client.world;
+        ClientWorld world = this.client.world;
         if (world != null) world.dispose();
         this.client.world = world = new ClientWorld(this.client, packet.dimension());
 

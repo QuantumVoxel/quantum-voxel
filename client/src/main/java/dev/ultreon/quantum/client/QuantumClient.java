@@ -366,8 +366,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public KeyAndMouseInput keyAndMouseInput;
 
     // World
-    @Nullable
-    public ClientWorldAccess world;
+    public ClientWorld world;
 
     // Screenshots
     private CompletableFuture<Screenshot> screenshotFuture;
@@ -2401,8 +2400,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
-        ClientWorld clientWorld = new ClientWorld(this, DimensionInfo.OVERWORLD);
-        this.world = clientWorld;
+        this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
         this.integratedServer.start();
 
@@ -2414,8 +2412,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void connectToServer(String host, int port) {
-        ClientWorld clientWorld = new ClientWorld(this, DimensionInfo.OVERWORLD);
-        this.world = clientWorld;
+        this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
         this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {
             this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e.getMessage(), true));

@@ -3,6 +3,8 @@ package dev.ultreon.quantum.block;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.state.BlockStateDefinition;
+import dev.ultreon.quantum.block.state.StatePropertyKey;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -22,12 +24,12 @@ import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
+import lombok.Getter;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class Block implements DataWriter<MapType> {
@@ -47,7 +49,9 @@ public class Block implements DataWriter<MapType> {
     private final @Nullable ToolLevel toolLevel;
     private final int lightReduction;
     private final SoundType soundType;
-    private BlockState state = new BlockState(this, Collections.emptyMap());
+    private BlockState defaultState;
+    @Getter
+    private BlockStateDefinition definition;
 
     public Block() {
         this(new Properties());
@@ -69,6 +73,17 @@ public class Block implements DataWriter<MapType> {
         this.toolLevel = properties.toolLevel;
         this.lightReduction = properties.lightReduction;
         this.soundType = properties.soundType;
+
+        this.definition = new BlockStateDefinition(this);
+        this.defineState(definition);
+        this.defaultState = definition.build();
+    }
+
+    public void onStateReload() {
+    }
+
+    protected void defineState(BlockStateDefinition definition) {
+
     }
 
     public NamespaceID getId() {
@@ -196,8 +211,8 @@ public class Block implements DataWriter<MapType> {
         // Used in implementations
     }
 
-    public @NotNull BlockState getDefaultState() {
-        return state;
+    public final @NotNull BlockState getDefaultState() {
+        return defaultState;
     }
 
     public BlockState onPlacedBy(BlockState blockMeta, BlockVec at, UseItemContext context) {
@@ -239,6 +254,23 @@ public class Block implements DataWriter<MapType> {
 
     public SoundType getSoundType(BlockState state, WorldAccess world, BlockVec blockVec) {
         return this.soundType;
+    }
+
+    public BlockState readBlockState(@NotNull PacketIO buffer) {
+        return definition.read(buffer);
+    }
+
+    public void writeBlockState(PacketIO buffer, BlockState state) {
+        definition.write(state, buffer);
+    }
+
+    public BlockState loadBlockState(MapType data) {
+        MapType entriesData = data.getMap("entries");
+        return definition.load(entriesData);
+    }
+
+    public void saveBlockState(MapType entriesData, BlockState blockState) {
+        definition.save(blockState, entriesData);
     }
 
     public static class Properties {
