@@ -67,7 +67,6 @@ public class Renderer implements Disposable {
     private final TextureManager textureManager;
     private final VfxManager vfxManager;
     private final ShaderProgram blurShader;
-    private final ShaderProgram gridShader;
     private float strokeWidth = 1;
     private GameFont font;
     private final Matrices matrices;
@@ -85,7 +84,6 @@ public class Renderer implements Disposable {
 
     public static final int FBO_SIZE = 1024;
 
-    private FrameBuffer grid;
     private final RenderablePool renderablePool = new RenderablePool();
     private final com.badlogic.gdx.graphics.Color tmpC = new com.badlogic.gdx.graphics.Color();
     private float iTime;
@@ -157,20 +155,6 @@ public class Renderer implements Disposable {
         blurShader.bind();
         blurShader.setUniformf("iBlurDirection", 0f, 0f);
         blurShader.setUniformf("radius", 1f);
-
-        gridShader = new ShaderProgram(VERT, GRID_FRAG);
-        String log1 = gridShader.getLog();
-        if (!gridShader.isCompiled()) {
-            for (String line : log1.lines().toList()) {
-                CommonConstants.LOGGER.error(line);
-            }
-            QuantumClient.crash(new IllegalStateException("Failed to compile grid shader!"));
-        }
-        if (!log1.isEmpty()) {
-            for (String line : log1.lines().toList()) {
-                CommonConstants.LOGGER.warn(line);
-            }
-        }
     }
 
     public Matrices getMatrices() {
@@ -2867,88 +2851,6 @@ public class Renderer implements Disposable {
                     }
                     """;
 
-
-    @Language("GLSL")
-    final String GRID_FRAG =
-            """
-                    #ifdef GL_ES
-                    precision mediump float;
-                    #endif
-
-                    varying vec2 vTexCoord;
-                    varying vec4 vColor;
-                    uniform sampler2D u_texture;
-                    uniform vec2 iResolution;
-                    uniform vec3 hexagonColor;
-                    uniform float hexagonTransparency;
-
-                    float rng( in vec2 pos )
-                    {
-                        return fract(sin( pos.y + pos.x*78.233 )*43758.5453)*2.0 - 1.0;
-                    }
-
-                    float simplexValue1DPart(vec2 uv, float ix) {
-                        float x = uv.x - ix;
-                        float f = 1.0 - x * x;
-                        float f2 = f * f;
-                        float f3 = f * f2;
-                        return f3;
-                    }
-
-                    float simplexValue1D(vec2 uv) {
-                        vec2 iuv = floor(uv);   \s
-                        float n = simplexValue1DPart(uv, iuv.x);
-                        n += simplexValue1DPart(uv, iuv.x + 1.0);
-                        return rng(vec2(n * 2.0 - 1.0, 0.0));
-                    }
-
-                    float perlin( in float pos )
-                    {
-                        // Get node values
-                       \s
-                        float a = rng( vec2(floor(pos), 1.0) );
-                        float b = rng( vec2(ceil( pos), 1.0) );
-                       \s
-                        float a_x = rng( vec2(floor(pos), 2.0) );
-                        float b_x = rng( vec2(ceil( pos), 2.0) );
-                       \s
-                        a += a_x*fract(pos);
-                        b += b_x*(fract(pos)-1.0);
-                       \s
-                       \s
-                       \s
-                        // Interpolate values
-                       \s
-                        return a + (b-a)*smoothstep(0.0,1.0,fract(pos));
-                    }
-
-                    void main() {\s
-                      vec2 uv = gl_FragCoord.xy;
-                      uv /= 24.0;
-
-                      vec4 color = texture2D(u_texture, vTexCoord);
-                      const float A = 0.0;
-                      const float B = 0.15;
-
-                      float x = uv.x;
-                      float y = (uv.y) * (1.5 / 3.0);
-
-                      float val = (0.5 + 0.5 * x + 0.5 * y);
-
-                      float noise = perlin(val);
-                      if (noise > 0.1) {
-                          noise = -1.0;
-                      }
-
-                      noise = 1.0 - (noise + 1.0) / 2.0;
-
-                      color.rgb = vec3(1.0);
-                      color.a = color.a * (noise * (B - A)) + A;
-
-                      gl_FragColor = color;
-                    }
-                    """;
-
     @ApiStatus.Experimental
     public void blurred(Runnable block) {
         blurred(true, block);
@@ -3069,16 +2971,6 @@ public class Renderer implements Disposable {
             this.flush();
 
             this.batch.setColor(1, 1, 1, 1);
-            if (grid) {
-                //getConfig the texture for the hexagon grid
-                Texture colorBufferTexture = this.grid.getColorBufferTexture();
-
-                //render the grid to the screen
-                blurred(32, false, 1, () -> {
-                    this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-                    this.batch.draw(colorBufferTexture, 0, 0, (float) Gdx.graphics.getWidth() / guiScale, (float) Gdx.graphics.getHeight() / guiScale);
-                });
-            }
 
             //dispose of the FBOs
             blurTargetA.dispose();
@@ -3093,41 +2985,6 @@ public class Renderer implements Disposable {
     public void resize(int width, int height) {
         this.width = width;
         this.height = height;
-
-        this.resizeGrid(width, height);
-    }
-
-    public void resetGrid() {
-        this.resizeGrid(width, height);
-    }
-
-    private void resizeGrid(int width, int height) {
-        if (width == 0 || height == 0) return;
-
-        if (grid != null) this.grid.dispose();
-
-        this.grid = new FrameBuffer(Format.RGBA8888, width, height, false);
-        this.grid.begin();
-        Gdx.gl.glClearColor(1, 1, 1, 0);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        Color hexagonColor;
-
-        float hexagonTransparency = ClientConfig.hexagonTransparency;
-
-        this.batch.begin();
-        this.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        this.batch.setShader(gridShader);
-        this.gridShader.setUniformf("iResolution", width, height);
-//        this.gridShader.setUniformf("iColor", hexagonColor.getRed() / 255f, hexagonColor.getGreen() / 255f, hexagonColor.getBlue() / 255f, hexagonTransparency);
-
-        this.shapes.filledRectangle(0, 0, width, height, RgbColor.WHITE.toGdx());
-
-        this.batch.setShader(null);
-        this.batch.end();
-        this.grid.end();
-
-        var old = this.grid;
     }
 
     @Override
@@ -3275,7 +3132,7 @@ public class Renderer implements Disposable {
             textHeight -= 3;
         }
         if (subTitle != null) {
-            textHeight += 1 + this.font.getLineHeight();
+            textHeight += (int) (1 + this.font.getLineHeight());
         }
 
         this.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));

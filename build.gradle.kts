@@ -50,8 +50,8 @@ plugins {
 apply(plugin = "gameutils")
 
 
-//val gameVersion = "0.1.0"
-val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
+val gameVersion = "0.1.0"
+//val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 
 println("Current version: $gameVersion")
@@ -160,6 +160,7 @@ allprojects {
         maven("https://jitpack.io") {
             content {
                 includeGroup("dev.ultreon")
+                includeGroup("dev.ultreon.quantum-fabric-loader")
                 includeGroup("com.github.mgsx-dev.gdx-gltf")
                 includeGroup("com.github.JnCrMx")
                 includeGroup("com.github.jagrosh")

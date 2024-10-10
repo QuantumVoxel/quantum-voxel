@@ -776,9 +776,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             int fpsLimit = ClientConfig.fpsLimit;
             if (fpsLimit >= 240) QuantumClient.setFpsLimit(240);
             else QuantumClient.setFpsLimit(fpsLimit < 10 ? 60 : fpsLimit);
-
-            // Reset grid
-            this.renderer.resetGrid();
         });
     }
 

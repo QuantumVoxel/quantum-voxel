@@ -176,7 +176,7 @@ dependencies {
     pack api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     pack api('net.fabricmc:access-widener:2.1.0')
 
-    pack api("dev.ultreon.quantum:fabric-loader:$fabric_version")
+    pack api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version")
     
     natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows")
     natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")

@@ -78,7 +78,7 @@ dependencies {
     implementation api("dev.ultreon:ubo:$ultreon_data_version")
 
     // Quantum Fabric Loader
-    implementation api("dev.ultreon.quantum:fabric-loader:$fabric_version")
+    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version")
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
 
     // KryoNet

@@ -83,7 +83,8 @@ public class BiomeGenerator implements Disposable {
 
     public boolean genFeature(BuilderChunk chunk, int x, int y, int z, TerrainFeature feature) {
         BuilderFork fork = chunk.createFork(x, y, z);
-        long posSeed = ((long) x << 42L | (long) y << 21L | (long) z) ^ 0x3EFC_5E9A_3C1A_5C0CL;
+        RNG rng = chunk.getRNG();
+        long posSeed = rng.nextLong();
         BlockVec localVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
         if (feature.shouldPlace(x, y, z, chunk.get(localVec.x, localVec.y, localVec.z))) {
             if (feature.handle(fork, posSeed, 0, 0, 0)) {
