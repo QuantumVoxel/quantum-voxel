@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.state.*;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -33,8 +32,10 @@ public class SlabBlock extends Block {
     }
 
     @Override
-    public @NotNull BlockState createMeta() {
-        return super.createMeta().withEntry("type", BlockDataEntry.ofEnum(Type.BOTTOM));
+    protected void defineState(BlockStateDefinition definition) {
+        super.defineState(definition);
+
+        definition.set(StateProperties.SLAB_TYPE, Type.BOTTOM);
     }
 
     @Override
@@ -43,9 +44,14 @@ public class SlabBlock extends Block {
         return blockMeta.withEntry("type", y < 0.5 ? Type.TOP : Type.BOTTOM);
     }
 
-    public enum Type {
+    public enum Type implements StringSerializable {
         BOTTOM,
         TOP,
-        DOUBLE
+        DOUBLE;
+
+        @Override
+        public String serialize() {
+            return name().toLowerCase();
+        }
     }
 }

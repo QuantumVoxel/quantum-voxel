@@ -12,7 +12,7 @@ public record C2SPlaceBlockPacket(int x, int y, int z, BlockState block) impleme
         var x = buffer.readVarInt();
         var y = buffer.readVarInt();
         var z = buffer.readVarInt();
-        var block = BlockState.read(buffer);
+        var block = buffer.readBlockState();
 
         return new C2SPlaceBlockPacket(x, y, z, block);
     }
@@ -22,7 +22,7 @@ public record C2SPlaceBlockPacket(int x, int y, int z, BlockState block) impleme
         buffer.writeVarInt(x);
         buffer.writeVarInt(y);
         buffer.writeVarInt(z);
-        block.write(buffer);
+        buffer.writeBlockState(block);
     }
 
     @Override

@@ -24,7 +24,7 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
  * It uses various noise sources and domain warping to determine terrain features like caves and surface height.
  */
 public class OverworldCarver implements Carver {
-    private final @NotNull BlockState stoneState = Blocks.STONE.createMeta();
+    private final @NotNull BlockState stoneState = Blocks.STONE.getDefaultState();
     private final DomainWarping domainWarping;
     private final NoiseSource biomeNoise;
     private final CaveNoiseGenerator caveNoise;
@@ -59,7 +59,7 @@ public class OverworldCarver implements Carver {
                         boolean cave;
                         double v1 = caveNoise.evaluateNoise(x, y, z);
                         cave = v1 > 0.0;
-                        chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.createMeta() : stoneState);
+                        chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.getDefaultState() : stoneState);
                     } else {
                         chunk.set(vec.x, vec.y, vec.z, stoneState);
                     }
@@ -67,12 +67,12 @@ public class OverworldCarver implements Carver {
                     boolean cave;
                     double v1 = caveNoise.evaluateNoise(x, y, z);
                     cave = v1 > 0.0;
-                    chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.createMeta() : stoneState);
+                    chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.getDefaultState() : stoneState);
                 }
             } else if (y <= World.SEA_LEVEL) {
-                chunk.set(vec.x, vec.y, vec.z, Blocks.WATER.createMeta());
+                chunk.set(vec.x, vec.y, vec.z, Blocks.WATER.getDefaultState());
             } else {
-                chunk.set(vec.x, vec.y, vec.z, Blocks.AIR.createMeta());
+                chunk.set(vec.x, vec.y, vec.z, Blocks.AIR.getDefaultState());
             }
         }
 

@@ -17,7 +17,7 @@ public class WorldGenTestScreen extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         focused = this.panel = (WorldGenTestPanel) builder.add(WorldGenTestPanel.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)));
-        focused.focused = true;
+        focused.isFocused = true;
     }
 
     @Override

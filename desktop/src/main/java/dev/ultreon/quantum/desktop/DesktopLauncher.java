@@ -1,16 +1,22 @@
 package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.*;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
+import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinDef;
+import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.Acrylic;
-import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.GameWindow;
+import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
@@ -26,27 +32,28 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWNativeCocoa;
+import org.lwjgl.glfw.GLFWNativeWin32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 public class DesktopLauncher {
+    public static final Logger LOGGER = LoggerFactory.getLogger("Quantum:Launcher");
     private static DesktopPlatform platform;
     private static DesktopWindow gameWindow;
-    private static final boolean windowVibrancyEnabled = false;
+    private static boolean windowVibrancyEnabled = false;
+    private static boolean fullVibrancyEnabled = false;
 
     /**
      * Launches the game.
@@ -99,7 +106,14 @@ public class DesktopLauncher {
     private static void launch(String[] argv) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
 
-        platform = new DesktopPlatform() {
+        LauncherConfig launcherConfig = LauncherConfig.get();
+        boolean useAngleGraphics = launcherConfig.useAngleGraphics;
+        windowVibrancyEnabled = launcherConfig.windowVibrancyEnabled;
+        fullVibrancyEnabled = launcherConfig.enableFullVibrancy;
+
+        LauncherConfig.save();
+
+        platform = new DesktopPlatform(useAngleGraphics) {
             @Override
             public GameWindow createWindow() {
                 return gameWindow;
@@ -114,6 +128,11 @@ public class DesktopLauncher {
             public Collection<Device> getGameDevices() {
                 return List.of();
             }
+
+            @Override
+            public boolean hasBackPanelRemoved() {
+                return fullVibrancyEnabled && windowVibrancyEnabled && !useAngleGraphics;
+            }
         };
 
         Log.setLogger(KyroSlf4jLogger.INSTANCE);
@@ -122,8 +141,9 @@ public class DesktopLauncher {
         CrashHandler.addHandler(crashLog -> {
             try {
                 KeyAndMouseInput.setCursorCaught(false);
-                Lwjgl3Graphics graphics = (Lwjgl3Graphics) Gdx.graphics;
-                graphics.getWindow().setVisible(false);
+                if (gameWindow != null) {
+                    gameWindow.setVisible(false);
+                }
             } catch (Exception e) {
                 QuantumClient.LOGGER.error("Failed to hide cursor", e);
             }
@@ -143,7 +163,8 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description))) {
             try {
-                new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
+                if (GamePlatform.get().isAngleGLES()) new Lwjgl3VulkanApplication(Main.createInstance(argv), DesktopLauncher.createVulkanConfig());
+                else new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);
@@ -152,6 +173,24 @@ public class DesktopLauncher {
                 QuantumClient.crash(e);
             }
         }
+    }
+
+    private static com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration createVulkanConfig() {
+        var config = new com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration();
+        config.useVsync(false);
+        config.setForegroundFPS(0);
+        config.setIdleFPS(10);
+        config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
+        config.setHdpiMode(HdpiMode.Pixels);
+        config.setOpenGLEmulation(com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES32, 4, 1);
+        config.setInitialVisible(false);
+        config.setTitle("Quantum Voxel (Vulkan Backend)");
+        config.setWindowIcon(QuantumClient.getIcons());
+        config.setWindowedMode(1280, 720);
+        config.setWindowListener(new WindowAdapter());
+        config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
+
+        return config;
     }
 
     @NotNull
@@ -163,12 +202,11 @@ public class DesktopLauncher {
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
-//        config.setDecorated(false);
-        config.setTitle("Quantum");
+        config.setTitle("Quantum Voxel");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
-//        config.setTransparentFramebuffer(true);
+        config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
 
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -182,11 +220,15 @@ public class DesktopLauncher {
         return platform;
     }
 
+    public static GameWindow getGameWindow() {
+        return gameWindow;
+    }
+
     public boolean isWindowVibrancyEnabled() {
         return windowVibrancyEnabled;
     }
 
-    private static class WindowAdapter extends Lwjgl3WindowAdapter {
+    private static class WindowAdapter extends Lwjgl3WindowAdapter implements com.github.dgzt.gdx.lwjgl3.Lwjgl3WindowListener {
         public static MessageDigest SHA_256;
 
         static {
@@ -198,121 +240,106 @@ public class DesktopLauncher {
         }
 
         @Override
+        public void created(com.github.dgzt.gdx.lwjgl3.Lwjgl3Window window) {
+            gameWindow = new DesktopVulkanWindow(window);
+
+            setupMacIcon();
+            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+            setupVibrancy(window.getWindowHandle());
+        }
+
+        @Override
         public void created(Lwjgl3Window window) {
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.NOTIFICATION, false);
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.LOW, false);
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.MEDIUM, true);
             Lwjgl3Application.setGLDebugMessageControl(Lwjgl3Application.GLDebugMessageSeverity.HIGH, true);
 
-            gameWindow = new DesktopWindow(window);
+            gameWindow = new DesktopGLWindow(window);
 
-            if (SharedLibraryLoader.isMac) {
-                // Setup icons the mac way, using JNA.
-                // So this requires native interaction.
-                long l = GLFWNativeCocoa.glfwGetCocoaWindow(gameWindow.getHandle());
-
-                try {
-//                    final Image image = QuantumClient.getIconImage();
-//                    Taskbar taskbar = Taskbar.getTaskbar();
-//                    taskbar.setIconImage(image);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-
+            setupMacIcon();
             WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+            setupVibrancy(window.getWindowHandle());
+        }
 
-            extractAcrylicNative();
-
+        private static void setupVibrancy(long handle) {
             // Check for OS and apply acrylic/mica/vibrancy
             if (GamePlatform.get().isWindows()) {
-                if (System.getProperty("os.name").startsWith("Windows 11") && (System.getProperty("os.arch").equals("x86_64") || System.getProperty("os.arch").equals("amd64"))) {
-                    if (!Acrylic.applyMica(gameWindow.getPeer())) {
-                        CommonConstants.LOGGER.warn("Unsupported Windows 11 build for mica background: {}", System.getProperty("os.name"));
-                    }
-                } else if (System.getProperty("os.name").startsWith("Windows 10")) {
-                    if (!Acrylic.applyAcrylic(gameWindow.getPeer())) {
-                        CommonConstants.LOGGER.warn("Unsupported Windows version for acrylic background: {}", System.getProperty("os.name"));
-                    }
-                } else {
-                    CommonConstants.LOGGER.warn("Unsupported Windows version for blur background: {}", System.getProperty("os.name"));
+                if (LauncherConfig.get().frameless) {
+                    WindowUtils.makeWindowFrameless(handle);
                 }
-            }
-        }
 
-        private void extractAcrylicNative() {
-            if (!GamePlatform.get().isWindows() && !GamePlatform.get().isMacOSX()) {
-                return;
-            }
+                WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(handle)));
+                if (LauncherConfig.get().windowVibrancyEnabled) {
+                    Dwmapi.setAcrylicBackground(hwnd);
+                    Dwmapi.setUseImmersiveDarkMode(hwnd, true);
+                }
 
-            String osName = System.getProperty("os.name");
-            if (osName.startsWith("Windows 11") || osName.startsWith("Windows 10")) {
-                extractWindows();
+                if (LauncherConfig.get().removeBorder) {
+                    Dwmapi.removeBorder(hwnd);
+                }
             } else if (GamePlatform.get().isMacOSX()) {
-                extractDarwin();
+                // TODO: Implement vibrancy
+            } else if (GamePlatform.get().isLinux()) {
+                // TODO: Implement vibrancy
+            }
+        }
+
+        private void setupMacIcon() {
+            if (SharedLibraryLoader.isMac) {
+//                // Set the dock icon
+//                InputStream iconStream = MacOSDockIcon.class.getResourceAsStream("/icon.icns");
+//                if (iconStream == null) {
+//                    throw new RuntimeException("Failed to extract icon.icns");
+//                }
+//
+//                try {
+//                    Path icon = Files.createTempDirectory("quantum-voxel");
+//                    icon = icon.resolve("icon.icns");
+//                    Files.copy(iconStream, icon);
+//
+//                    MacOSDockIcon.setDockIcon(Gdx.files.internal("icon.icns"));
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
             } else {
-                CommonConstants.LOGGER.warn("Unsupported operating system for blur background: {}", osName);
-            }
-        }
+                Taskbar taskbar = Taskbar.getTaskbar();
 
-        private static void extractDarwin() {
-            if (!System.getProperty("os.arch").equals("aarch64")) {
-                CommonConstants.LOGGER.warn("Unsupported macOS architecture for vibrancy: {}", System.getProperty("os.arch"));
-                return;
-            }
-            try {
-                extractFile("lib/arm64/libacrylic.dylib", "libacrylic.dylib");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+                if (taskbar != null) {
+                    try {
+                        if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                            InputStream res = DesktopLauncher.class.getResourceAsStream("/icon.png");
+                            if (res != null) {
+                                taskbar.setIconImage(ImageIO.read(res));
+                            } else {
+                                LOGGER.warn("Failed to extract icon.png");
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
 
-        private static void extractWindows() {
-            if (!System.getProperty("os.arch").equals("x86_64") && !System.getProperty("os.arch").equals("amd64")) {
-                CommonConstants.LOGGER.warn("Unsupported Windows architecture for acrylic/mica: {}", System.getProperty("os.arch"));
-                return;
-            }
-            try {
-                extractFile("lib/x64/acrylic.dll", "acrylic.dll");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private static void extractFile(String providedPath, String extractedPath) throws IOException {
-            String selfHash = getHash(DesktopLauncher.class.getResourceAsStream("/" + providedPath));
-            Path path = Paths.get(extractedPath);
-            if (Files.exists(path)) {
-                InputStream curHash = Files.newInputStream(path);
-                if (Objects.equals(selfHash, getHash(curHash))) {
-                    CommonConstants.LOGGER.info("File {} is up to date", extractedPath);
-                    return;
+                    if (taskbar.isSupported(Taskbar.Feature.ICON_BADGE_TEXT)) {
+                        taskbar.setIconBadge("?");
+                    }
                 }
             }
-            InputStream resourceAsStream = DesktopLauncher.class.getResourceAsStream("/" + providedPath);
-            if (resourceAsStream == null) {
-                throw new RuntimeException("Failed to extract " + providedPath + " to " + extractedPath + " because it does not exist.");
-            }
-            Files.copy(resourceAsStream, path, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        private static String getHash(InputStream path) throws IOException {
-            MessageDigest digest = SHA_256;
-
-            byte[] hash = digest.digest(path.readAllBytes());
-            return Base64.getEncoder().encodeToString(hash);
         }
 
         @Override
         public void focusLost() {
-            QuantumClient.get().pause();
+            QuantumClient quantumClient = QuantumClient.get();
+            if (quantumClient == null) return;
+            quantumClient.pause();
 
-            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(QuantumClient.get().getWindow(), false);
+            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(quantumClient.getWindow(), false);
         }
 
         @Override
         public void focusGained() {
-            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(QuantumClient.get().getWindow(), true);
+            QuantumClient quantumClient = QuantumClient.get();
+            if (quantumClient == null) return;
+            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(quantumClient.getWindow(), true);
         }
 
         @Override
@@ -322,9 +349,11 @@ public class DesktopLauncher {
 
         @Override
         public void filesDropped(String[] files) {
-            QuantumClient.get().filesDropped(files);
+            QuantumClient quantumClient = QuantumClient.get();
+            if (quantumClient == null) return;
+            quantumClient.filesDropped(files);
 
-            WindowEvents.WINDOW_FILES_DROPPED.factory().onWindowFilesDropped(QuantumClient.get().getWindow(), files);
+            WindowEvents.WINDOW_FILES_DROPPED.factory().onWindowFilesDropped(quantumClient.getWindow(), files);
         }
 
     }

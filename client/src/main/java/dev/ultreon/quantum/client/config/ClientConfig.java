@@ -7,6 +7,8 @@ import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.config.crafty.Ranged;
 import dev.ultreon.quantum.util.NamespaceID;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 /**
  * This is the client configuration.
  *
@@ -15,9 +17,9 @@ import dev.ultreon.quantum.util.NamespaceID;
  */
 @ConfigInfo(fileName = "quantum-client")
 public class ClientConfig extends CraftyConfig {
-    @ConfigEntry(path = "video.renderDistance", comment = "The render distance of chunks in the game.")
-    @Ranged(min = 4, max = 32)
-    public static int renderDistance = 8;
+    @ConfigEntry(path = "video.renderDistance", comment = "The render distance of blocks in the game.")
+    @Ranged(min = CHUNK_SIZE * 2, max = 256)
+    public static int renderDistance = 128;
 
     @ConfigEntry(path = "video.entityRenderDistance", comment = "The render distance of entities.")
     @Ranged(min = 4, max = 32)
@@ -53,9 +55,9 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.maxReflectDistance", comment = "Maximum distance for reflections (for example in water).")
     public static float maxReflectDistance = 80;
 
-    @ConfigEntry(path = "video.lodThreshold", comment = "The threshold in blocks for when a chunk is rendered at high or low level of detail.")
+    @ConfigEntry(path = "video.lodThreshold", comment = "The LOD threshold (distance at which chunks are rendered at different levels of detail).")
     @Ranged(min = 0, max = 128)
-    public static float lodThreshold = 16.0f;
+    public static float lodThreshold = 4.0f;
 
     @ConfigEntry(path = "generic.enable4xScreenshot", comment = "Whether 4× scaled screenshots are enabled.")
     public static boolean enable4xScreenshot = false;
@@ -89,10 +91,6 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "personalisation.backgroundTransparency", comment = "The transparency of in-game menu backgrounds.")
     @Ranged(min = 0, max = 1)
     public static float backgroundTransparency = 0.5F;
-
-    @ConfigEntry(path = "personalisation.useFullWindowVibrancy", comment = "Uses Acrylic on Windows 10, Mica on Windows 11 and Vibrancy on macOS but for the entire background of menus.")
-    @Ranged(min = 0, max = 1)
-    public static boolean useFullWindowVibrancy = false;
 
     @ConfigEntry(path = "crafting.showOnlyCraftable", comment = "Whether only craftable items are shown in the inventory.")
     @Ranged(min = 0, max = 1)
@@ -177,4 +175,7 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "accessibility.enableVirtualKeyboard", comment = "Whether the virtual keyboard is enabled in the game.")
     public static boolean enableVirtualKeyboard = true;
+
+    @ConfigEntry(path = "performance.lodLevels", comment = "The level of detail (LOD) levels in the game.\nNote that the value is a power of 2.")
+    public static int lodLevels = 4;
 }

@@ -66,6 +66,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
     private final Stack<Integer> stack = new Stack<>();
     public final ClientChunkInfo info = new ClientChunkInfo();
+    public int lod;
     private boolean empty = false;
 
     /**
@@ -188,6 +189,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         boolean isBlockSet = super.setFast(x, y, z, block);
 
         this.dirty = true;
+        this.immediateRebuild = true;
         this.clientWorld.updateChunkAndNeighbours(this);
 
         if (!block.isAir())

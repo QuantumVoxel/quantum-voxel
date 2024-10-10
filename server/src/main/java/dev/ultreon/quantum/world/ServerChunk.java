@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
@@ -58,7 +59,7 @@ public final class ServerChunk extends Chunk {
                                    @NotNull ChunkVec pos,
                                    @NotNull MapType chunkData,
                                    @NotNull ServerWorld.Region region) {
-        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockState.AIR);
+        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Blocks.AIR.getDefaultState());
         var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, world.getServer().getBiomes().getDefaultKey());
 
         MapType blockData = chunkData.getMap("Blocks");

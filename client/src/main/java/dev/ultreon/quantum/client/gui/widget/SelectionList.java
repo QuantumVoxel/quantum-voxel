@@ -77,7 +77,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         if (renderer.pushScissors(this.getBounds())) {
             for (Entry<T> entry : this.entries) {
-                if (entry.visible) {
+                if (entry.isVisible) {
                     entry.render(renderer, 0, mouseX, mouseY - (int) this.scrollY, this.selectable && this.selected == entry, deltaTime);
                 }
             }
@@ -96,7 +96,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         List<Entry<T>> entries = this.entries;
         for (int i = entries.size() - 1; i >= 0; i--) {
             Entry<T> entry = entries.get(i);
-            if (!entry.enabled || !entry.visible) continue;
+            if (!entry.isEnabled || !entry.isVisible) continue;
             if (entry.isWithinBounds(x, y)) return entry;
         }
         return null;

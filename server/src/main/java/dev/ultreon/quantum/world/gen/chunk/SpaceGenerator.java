@@ -10,6 +10,8 @@ import dev.ultreon.quantum.world.gen.carver.FloatingIslandsCarver;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 /**
  * The SpaceGenerator class extends the functionality of SimpleChunkGenerator to create
  * a custom terrain generator that produces space-like floating islands.
@@ -34,11 +36,11 @@ public class SpaceGenerator extends SimpleChunkGenerator {
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
         BlockVec offset = chunk.getOffset();
 
-        for (int x = offset.x; x < offset.x + 16; x++) {
-            for (int z = offset.z; z < offset.z + 16; z++) {
+        for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
+            for (int z = offset.z; z < offset.z + CHUNK_SIZE; z++) {
                 carver.carve(chunk, x, z);
 
-                for (int y = offset.y; y < offset.y + 16; y++) {
+                for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
                     // Set biomes to registry key "quantum:space"
                     chunk.setBiomeGenerator(x, z, space);
                 }

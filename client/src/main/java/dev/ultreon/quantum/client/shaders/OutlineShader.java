@@ -20,7 +20,6 @@ public class OutlineShader extends DefaultShader {
     public static final Vector3 CAMERA_UP = new Vector3();
     public final int u_globalSunlight;
     public final int u_atlasSize;
-    public final int u_atlasOffset;
     public final int u_lodThreshold;
     public final int u_cameraUp0;
     public final int u_viewportSize;
@@ -59,7 +58,6 @@ public class OutlineShader extends DefaultShader {
 
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
         this.u_atlasSize = this.register(Inputs.atlasSize, Setters.atlasSize);
-        this.u_atlasOffset = this.register(Inputs.atlasOffset, Setters.atlasOffset);
         this.u_lodThreshold = this.register(Inputs.lodThreshold, Setters.lodThreshold);
         this.u_cameraUp0 = this.register(Inputs.cameraUp, Setters.cameraUp);
         this.u_viewportSize = this.register(Inputs.viewportSize, Setters.viewportSize);
@@ -91,14 +89,6 @@ public class OutlineShader extends DefaultShader {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Vec2f f = ClientWorld.ATLAS_SIZE.get().f();
-                shader.set(inputID, new Vector2(f.x, f.y));
-            }
-        };
-
-        public final static Setter atlasOffset = new LocalSetter() {
-            @Override
-            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                Vec2f f = ClientWorld.ATLAS_OFFSET.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
             }
         };
@@ -138,6 +128,15 @@ public class OutlineShader extends DefaultShader {
             super.render(renderable);
         } catch (GdxRuntimeException e) {
             QuantumClient.LOGGER.error("Failed to render renderable with mesh part ID: {}", renderable.meshPart.id, e);
+        }
+    }
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize outline shader", e);
         }
     }
 }

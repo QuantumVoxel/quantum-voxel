@@ -31,7 +31,12 @@ public class ModelViewShader extends DefaultShader {
     @Override
     public void init() {
         if (!program.isCompiled()) return;
-        super.init();
+
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize model view shader", e);
+        }
     }
 
     @Override

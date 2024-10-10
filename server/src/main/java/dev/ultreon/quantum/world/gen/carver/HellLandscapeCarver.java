@@ -9,6 +9,8 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 public class HellLandscapeCarver implements Carver {
     private final NoiseSource source;
 
@@ -22,10 +24,10 @@ public class HellLandscapeCarver implements Carver {
     @Override
     public int carve(BuilderChunk chunk, int x, int z) {
         BlockVec offset = chunk.getOffset();
-        for (int y = offset.y; y < offset.y + 16; y++) {
+        for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
             double noise = this.source.evaluateNoise(x, y, z);
             if (noise < 0.1) {
-                chunk.set(x, y, z, Blocks.COBBLESTONE.createMeta());
+                chunk.set(x, y, z, Blocks.COBBLESTONE.getDefaultState());
             }
         }
 

@@ -42,4 +42,13 @@ public class GizmoShader extends ModelViewShader {
             }
         };
     }
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize gizmo shader", e);
+        }
+    }
 }

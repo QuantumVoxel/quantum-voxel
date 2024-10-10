@@ -51,7 +51,7 @@ apply(plugin = "gameutils")
 
 
 //val gameVersion = "0.1.0"
-val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now()) + ".1"
+val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 
 println("Current version: $gameVersion")
@@ -165,6 +165,7 @@ allprojects {
                 includeGroup("com.github.jagrosh")
                 includeGroup("com.github.crykn.guacamole")
                 includeGroup("com.github.Ultreon")
+                includeGroup("com.github.Dgzt")
                 includeGroup("space.earlygrey")
             }
         }
@@ -178,6 +179,14 @@ allprojects {
             name = "Project Libraries"
             dirs = setOf(file("${rootProject.projectDir}/libs"))
         }
+    }
+
+    dependencies {
+        compileOnly("org.jetbrains:annotations:23.0.0")
+
+        implementation(annotationProcessor("org.projectlombok:lombok:1.+")!!)
+        annotationProcessor("com.google.code.findbugs:jsr305:3.0.2")
+        annotationProcessor("org.ow2.asm:asm-tree:9.3")
     }
 }
 

@@ -18,8 +18,9 @@ import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
+import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderLayer;
@@ -29,6 +30,8 @@ import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
@@ -68,7 +71,7 @@ public class GameRenderer implements Disposable {
         var worldRenderer = this.client.worldRenderer;
 
         LocalPlayer player = this.client.player;
-        if (!(client.isWindowVibrancyEnabled() && ClientConfig.useFullWindowVibrancy)) {
+        if (!(GamePlatform.get().hasBackPanelRemoved())) {
             renderer.clearColor(0, 0, 0, 1);
         }
 
@@ -89,7 +92,7 @@ public class GameRenderer implements Disposable {
                 }
 
                 this.client.camera.update(player);
-                this.client.camera.far = (ClientConfig.renderDistance - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
+                this.client.camera.far = ((float) ClientConfig.renderDistance / CHUNK_SIZE - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
 
                 var rotation = this.tmp.set(player.xHeadRot, player.yRot);
                 var quaternion = new Quaternion();
@@ -135,7 +138,7 @@ public class GameRenderer implements Disposable {
         renderer.translate(this.client.getDrawOffset().x, this.client.getDrawOffset().y);
         renderer.scale(this.client.getGuiScale(), this.client.getGuiScale());
         try (var ignored = QuantumClient.PROFILER.start("overlay")) {
-            if (!(this.client.isWindowVibrancyEnabled() && ClientConfig.useFullWindowVibrancy) && !(this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed())) {
+            if (!GamePlatform.get().hasBackPanelRemoved() && !(this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed())) {
                 renderer.clearColor(1 / 255f, 1 / 255f, 1 / 255f, 1);
             }
 
@@ -215,6 +218,7 @@ public class GameRenderer implements Disposable {
                 renderer.getBatch().enableBlending();
                 renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
                 screen.render(renderer, (int) x, (int) y, deltaTime);
+                WindowManager.render(renderer, (int) x, (int) y, deltaTime);
                 renderer.getBatch().enableBlending();
                 renderer.flush();
 

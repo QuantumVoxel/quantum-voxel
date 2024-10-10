@@ -34,7 +34,7 @@ public class RockFeature extends TerrainFeature {
             for (int xOffset = -1; xOffset < 1; xOffset++) {
                 for (int zOffset = -1; zOffset < 1; zOffset++) {
                     for (int blkY = 0; blkY <= 1; blkY++) {
-                        setter.set(x + xOffset, blkY, z + zOffset, this.material.createMeta());
+                        setter.set(x + xOffset, blkY, z + zOffset, this.material.getDefaultState());
                     }
                 }
             }

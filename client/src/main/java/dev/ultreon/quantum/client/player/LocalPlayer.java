@@ -6,6 +6,7 @@ import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
@@ -43,6 +44,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
+
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 /**
  * Represents a local player entity in the game.
@@ -133,7 +136,7 @@ public class LocalPlayer extends ClientPlayer {
     }
 
     protected BlockState getOnBlock() {
-        if (this.world == null) return BlockState.AIR;
+        if (this.world == null) return Blocks.AIR.getDefaultState();
         return this.world.get(this.getBlockVec().below());
     }
 
@@ -163,16 +166,6 @@ public class LocalPlayer extends ClientPlayer {
      * Refreshes the chunks around the player based on the current chunk position and render distance.
      * This method is designed to be called periodically to ensure the player has the correct chunks loaded
      * and unload any chunks that are no longer within the render distance.
-     * <p>
-     * The method performs the following steps:
-     * <ol>
-     *     <li>Checks if the world is being rendered by the client. If not, it exits early.</li>
-     *     <li>Ensures that the refresh operation is not performed more frequently than once per second.</li>
-     *     <li>Calculates the chunks that need to be loaded and unloaded based on the player's current position.</li>
-     *     <li>Unloads chunks that are outside the render distance.</li>
-     *     <li>Collects the chunks that need to be loaded.</li>
-     *     <li>Sorts the chunks to load based on their distance to the player and adds them to the send queue.</li>
-     * </ol>
      */
     public void refreshChunks() {
         if (!this.client.renderWorld) return;
@@ -183,7 +176,7 @@ public class LocalPlayer extends ClientPlayer {
         ChunkVec chunkVec = this.getChunkVec();
 
         if (connection == null) return;
-        int renderDistance = ClientConfig.renderDistance;
+        int renderDistance = Math.max(2, ClientConfig.renderDistance / CHUNK_SIZE);
 
         for (ClientChunkAccess chunk : this.world.getLoadedChunks()) {
             if (chunk.getVec().dst(chunkVec) > renderDistance) {
@@ -195,17 +188,18 @@ public class LocalPlayer extends ClientPlayer {
         Set<ChunkVec> chunksToLoad = this.chunksToLoad;
         chunksToLoad.clear();
         ChunkVec chunkPos = this.getChunkVec();
+        int renderDistanceSquared = renderDistance * renderDistance;
         for (int x = -renderDistance; x <= renderDistance; x++) {
             for (int y = -renderDistance; y <= renderDistance; y++) {
                 for (int z = -renderDistance; z <= renderDistance; z++) {
+                    int distanceSquared = x * x + y * y + z * z;
+                    if (distanceSquared > renderDistanceSquared) continue;
+
                     ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
-                    if (this.pendingChunks.contains(relativePos) || this.world.getChunk(relativePos) != null)
+                    if (this.world.getChunk(relativePos) != null || this.pendingChunks.contains(relativePos))
                         continue;
 
-                    // Add chunks when within range.
-                    if (chunkPos.dst(relativePos) <= renderDistance && !this.world.isLoaded(relativePos)) {
-                        chunksToLoad.add(relativePos);
-                    }
+                    chunksToLoad.add(relativePos);
                 }
             }
         }
@@ -441,7 +435,7 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public BlockState getBuriedBlock() {
         Vec3d add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
-        return this.world.get((int) add.x, (int) add.y, (int) add.z);
+        return this.world.get((int) Math.floor(add.x), (int) Math.floor(add.y), (int) Math.floor(add.z));
     }
 
     @DoNotCall

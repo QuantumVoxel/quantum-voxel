@@ -22,7 +22,7 @@ public class GroundTerrainLayer extends TerrainLayer {
     @Override
     public boolean handle(World world, BlockSetter chunk, RNG rng, int x, int y, int z, int height) {
         if (y > height - this.offset - this.height && y <= height - this.offset) {
-            chunk.set(x, y, z, this.block.createMeta());
+            chunk.set(x, y, z, this.block.getDefaultState());
             return true;
         }
         return false;

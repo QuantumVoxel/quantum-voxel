@@ -14,9 +14,9 @@ public class ControlButton extends IconButton {
 
     @Override
     public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        if (!this.visible) return;
+        if (!this.isVisible) return;
 
-        this.hovered = this.isWithinBounds(mouseX, mouseY);
+        this.isHovered = this.isWithinBounds(mouseX, mouseY);
 
         this.renderBackground(renderer, deltaTime);
         this.renderWidget(renderer, mouseX, mouseY, deltaTime);

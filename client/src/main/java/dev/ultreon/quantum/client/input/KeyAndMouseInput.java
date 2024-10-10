@@ -12,6 +12,7 @@ import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.JavascriptDebuggerScreen;
 import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
@@ -158,6 +159,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     @Override
     public boolean keyDown(int keyCode) {
         GameInput.switchTo(this);
+
+        if (WindowManager.keyPress(keyCode)) {
+            return true;
+        }
 
         if (!isActive()) return false;
 
@@ -437,6 +442,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean keyTyped(char character) {
+        if (WindowManager.keyTyped(character)) return true;
+
         // Check if there is a current screen and if so, trigger the CHAR_TYPE event
         Screen currentScreen = this.client.screen;
         if (currentScreen != null) {
@@ -461,6 +468,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Adjust screen coordinates based on draw offset
         screenX -= this.client.getDrawOffset().x;
         screenY -= this.client.getDrawOffset().y;
+
+        if (WindowManager.mouseMoved(screenX, screenY)) {
+            return true;
+        }
 
         // Check if the cursor is already caught
         if (Gdx.input.isCursorCatched())
@@ -492,6 +503,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         screenX -= this.client.getDrawOffset().x;
         screenY -= this.client.getDrawOffset().y;
 
+        if (WindowManager.mouseDragged(screenX, screenY)) {
+            return true;
+        }
+
         // Check if the cursor is not caught
         if (!Gdx.input.isCursorCatched()) {
             Screen currentScreen = this.client.screen;
@@ -517,6 +532,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Adjust for draw offset
         screenX -= this.client.getDrawOffset().x;
         screenY -= this.client.getDrawOffset().y;
+
+        if (WindowManager.mousePress(screenX, screenY, button)) {
+            return true;
+        }
 
         Screen currentScreen = this.client.screen;
         @Nullable ClientWorldAccess world = this.client.world;
@@ -614,6 +633,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         screenX -= this.client.getDrawOffset().x;
         screenY -= this.client.getDrawOffset().y;
 
+        if (WindowManager.mouseRelease(screenX, screenY, button)) {
+            return true;
+        }
+
         // Stop breaking action
         this.client.stopBreaking();
 
@@ -656,6 +679,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     @Override
     public boolean scrolled(float amountX, float amountY) {
         Screen currentScreen = this.client.screen;
+
+        if (WindowManager.mouseScroll(Gdx.input.getX(), Gdx.input.getY(), amountY)) {
+            return true;
+        }
 
         // Check if the ImGui overlay is shown and return false if it is
         if (GamePlatform.get().isShowingImGui()) return false;

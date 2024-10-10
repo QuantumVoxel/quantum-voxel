@@ -55,6 +55,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
 import kotlin.system.TimingKt;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,12 +65,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler {
     private final IConnection<ClientPacketHandler, ServerPacketHandler> connection;
     private final Map<NamespaceID, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final QuantumClient client = QuantumClient.get();
+    @Getter
     private long ping = 0;
     private boolean disconnected;
 
@@ -127,63 +132,67 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
-        try {
-            LocalPlayer player = this.client.player;
-            if (player == null/* || new Vec2d(pos.setX(), pos.z()).dst(new Vec2d(player.getChunkVec().setX(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
-                return;
-            }
-
-            double dst = pos.dst(player.getChunkVec());
-            if (dst > ClientConfig.renderDistance) {
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
-                return;
-            }
-
+        CompletableFuture.runAsync(() -> {
             try {
-                var ref = new Object() {
-                    @Nullable
-                    ClientChunk data;
-                };
-
-                long l = TimingKt.measureTimeMillis(() -> {
-                    @Nullable ClientWorldAccess worldAccess = this.client.world;
-
-                    if (worldAccess == null) {
-                        this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
-                        return null;
-                    }
-
-                    if (!(worldAccess instanceof ClientWorld world)) {
-                        this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
-                        return null;
-                    }
-
-                    ref.data = new ClientChunk(world, pos, storage, biomeStorage, blockEntities);
-                    ClientChunkEvents.RECEIVED.factory().onClientChunkReceived(ref.data);
-                    world.loadChunk(pos, ref.data);
-                    return null;
-                });
-
-                ClientChunk data = ref.data;
-                if (data != null) {
-                    data.info.loadDuration = l;
-                    data.info.build = info;
-
-                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
+                LocalPlayer player = this.client.player;
+                if (player == null/* || new Vec2d(pos.setX(), pos.z()).dst(new Vec2d(player.getChunkVec().setX(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
+                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
+                    return;
                 }
-            } catch (Throwable throwable) {
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
-                QuantumClient.LOGGER.error("Failed to load chunk:", throwable);
-                QuantumClient.crash(throwable);
-            }
-        } catch (Exception e) {
-            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
-            QuantumClient.LOGGER.error("Hard error while loading chunk:", e);
-            QuantumClient.LOGGER.debug("What, why? Pls no!!!");
 
-            QuantumClient.crash(e);
-        }
+                double dst = pos.dst(player.getChunkVec());
+                if (dst > (double) ClientConfig.renderDistance / CHUNK_SIZE) {
+                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
+                    return;
+                }
+
+                try {
+                    var ref = new Object() {
+                        @Nullable
+                        ClientChunk data;
+                    };
+
+                    long l = TimingKt.measureTimeMillis(() -> {
+                        @Nullable ClientWorldAccess worldAccess = this.client.world;
+
+                        if (worldAccess == null) {
+                            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
+                            return null;
+                        }
+
+                        if (!(worldAccess instanceof ClientWorld world)) {
+                            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
+                            return null;
+                        }
+
+                        ref.data = new ClientChunk(world, pos, storage, biomeStorage, blockEntities);
+                        QuantumClient.invoke(() -> {
+                            ClientChunkEvents.RECEIVED.factory().onClientChunkReceived(ref.data);
+                            world.loadChunk(pos, ref.data);
+                        });
+                        return null;
+                    });
+
+                    ClientChunk data = ref.data;
+                    if (data != null) {
+                        data.info.loadDuration = l;
+                        data.info.build = info;
+
+                        this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
+                    }
+                } catch (Throwable throwable) {
+                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
+                    QuantumClient.LOGGER.error("Failed to load chunk:", throwable);
+                    QuantumClient.crash(throwable);
+                }
+            } catch (Exception e) {
+                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
+                QuantumClient.LOGGER.error("Hard error while loading chunk:", e);
+                QuantumClient.LOGGER.debug("What, why? Pls no!!!");
+
+                QuantumClient.crash(e);
+            }
+        });
     }
 
     @Override
@@ -410,10 +419,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         }
     }
 
-    public long getPing() {
-        return this.ping;
-    }
-
     @Override
     public void onPing(long serverTime, long time) {
         this.ping = System.currentTimeMillis() - time;
@@ -507,7 +512,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet) {
-        ClientWorldAccess world = this.client.world;
+        ClientWorld world = this.client.world;
         if (world != null) world.dispose();
         this.client.world = world = new ClientWorld(this.client, packet.dimension());
 

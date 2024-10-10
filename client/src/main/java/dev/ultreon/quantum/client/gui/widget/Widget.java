@@ -29,10 +29,10 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     protected boolean ignoreBounds = false;
     private final Position preferredPos = new Position(0, 0);
     private final Size preferredSize = new Size(0, 0);
-    public boolean visible = true;
-    public boolean enabled = true;
-    public boolean hovered = false;
-    public boolean focused = false;
+    public boolean isVisible = true;
+    public boolean isEnabled = true;
+    public boolean isHovered = false;
+    public boolean isFocused = false;
 
     @ApiStatus.Internal
     protected Screen root;
@@ -86,13 +86,13 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     @Override
     @ApiStatus.Internal
     public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        if (!this.visible) return;
+        if (!this.isVisible) return;
 
         if (this.isWithinBounds(mouseX, mouseY)) {
-            this.root.directHovered = this;
-            this.hovered = true;
+            if (this.root != null) this.root.directHovered = this;
+            this.isHovered = true;
         } else {
-            this.hovered = false;
+            this.isHovered = false;
         }
 
         this.renderBackground(renderer, deltaTime);
@@ -220,43 +220,43 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     @CanIgnoreReturnValue
     public void setVisible(boolean visible) {
-        this.visible = visible;
+        this.isVisible = visible;
     }
 
     public void show() {
-        this.visible = true;
+        this.isVisible = true;
     }
 
     public void hide() {
-        this.visible = false;
+        this.isVisible = false;
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        this.isEnabled = enabled;
     }
 
     public void enable() {
-        this.enabled = true;
+        this.isEnabled = true;
     }
 
     public void disable() {
-        this.enabled = false;
+        this.isEnabled = false;
     }
 
     public boolean isVisible() {
-        return this.visible;
+        return this.isVisible;
     }
 
     public boolean isEnabled() {
-        return this.enabled;
+        return this.isEnabled;
     }
 
     public boolean isHovered() {
-        return this.hovered;
+        return this.isHovered;
     }
 
     public boolean isFocused() {
-        return this.focused;
+        return this.isFocused;
     }
 
     /**
@@ -314,17 +314,17 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     @CanIgnoreReturnValue
     public boolean keyPress(int keyCode) {
-        return this.focused;
+        return this.isFocused;
     }
 
     @CanIgnoreReturnValue
     public boolean keyRelease(int keyCode) {
-        return this.focused;
+        return this.isFocused;
     }
 
     @CanIgnoreReturnValue
     public boolean charType(char character) {
-        return this.focused;
+        return this.isFocused;
     }
 
     public void revalidate() {
@@ -371,11 +371,11 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     public void onFocusLost() {
-        this.focused = false;
+        this.isFocused = false;
     }
 
     public void onFocusGained() {
-        this.focused = true;
+        this.isFocused = true;
     }
 
     final <T extends UIContainer<T>> void disconnect(UIContainer<T> from) {
@@ -395,6 +395,10 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     public Vector2 getCenter() {
         return new Vector2(this.pos.x + this.size.width / 2f, this.pos.y + this.size.height / 2f);
+    }
+
+    public boolean isWithin(int mouseX, int mouseY) {
+        return Widget.isPosWithin(mouseX, mouseY, this.pos.x, this.pos.y, this.size.width, this.size.height);
     }
 
     @FunctionalInterface

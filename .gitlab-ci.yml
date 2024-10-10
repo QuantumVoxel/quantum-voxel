@@ -36,7 +36,8 @@ build_macos:
     - echo "Building on macOS with GraalVM 21.0.2 and Java 21..."
     - curl -L -o graalvm.tar.gz https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_macos-aarch64_bin.tar.gz
     - tar -xzf graalvm.tar.gz
-    - export PATH="$CI_PROJECT_DIR/graalvm-ce-java21-21.0.2/Contents/Home/bin:$PATH"
+    - export PATH="$CI_PROJECT_DIR/graalvm-community-openjdk-21.0.2+13.1/Contents/Home/bin:$PATH"
+    - export JAVA_HOME="$CI_PROJECT_DIR/graalvm-community-openjdk-21.0.2+13.1/Contents/Home"
     - ./gradlew jpackage
   artifacts:
     paths:

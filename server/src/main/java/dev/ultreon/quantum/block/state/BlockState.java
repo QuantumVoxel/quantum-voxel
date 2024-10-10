@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.block.state;
 
-import dev.ultreon.quantum.UnsafeApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.entity.player.Player;
@@ -16,11 +15,11 @@ import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 import io.netty.handler.codec.DecoderException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
@@ -36,21 +35,21 @@ import java.util.Objects;
  * @author XyperCode
  * @since 0.1.0
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class BlockState {
-    public static final BlockState AIR = Blocks.AIR.createMeta();
-    public static final BlockState BARRIER = Blocks.BARRIER.createMeta();
     private final @NotNull Block block;
-    private final @NotNull Map<String, BlockDataEntry<?>> entries;
+    private final StatePropertyKey<?>[] keys;
+    private final Object[] entries;
 
     /**
      * Constructs a new {@link BlockState} object.
      *
      * @param block   the block associated with these properties
-     * @param entries a map of property names to their corresponding values
+     * @param keys    the mapping of property keys to their indices
+     * @param entries the entries of the properties
      */
-    public BlockState(@NotNull Block block, @NotNull Map<String, BlockDataEntry<?>> entries) {
+    public BlockState(@NotNull Block block, StatePropertyKey<?>[] keys, Object[] entries) {
         this.block = block;
+        this.keys = keys;
         this.entries = entries;
     }
 
@@ -67,40 +66,18 @@ public class BlockState {
         if (block == null)
             throw new DecoderException("Block " + rawId + " does not exist");
 
-        BlockState meta = block.createMeta();
-        meta.entries.putAll(meta.readEntries(packetBuffer));
-
-        return meta;
-    }
-
-    private Map<String, BlockDataEntry<?>> readEntries(PacketIO packetBuffer) {
-        int size = packetBuffer.readMedium();
-        for (int i = 0; i < size; i++) {
-            String key = packetBuffer.readString(64);
-            BlockDataEntry<?> blockDataEntry = this.entries.get(key);
-            if (blockDataEntry == null)
-                throw new DecoderException("Entry " + key + " does not exist in block " + block);
-
-            BlockDataEntry<?> property = blockDataEntry.read(packetBuffer);
-            entries.put(key, property);
-        }
-        return entries;
+        return block.readBlockState(packetBuffer);
     }
 
     /**
      * Writes the block properties to the given {@link PacketIO} buffer.
      *
      * @param encode the buffer to write to
-     * @return the number of bytes written
      */
-    public int write(PacketIO encode) {
+    public void write(PacketIO encode) {
         encode.writeVarInt(Registries.BLOCK.getRawId(block));
-        encode.writeMedium(entries.size());
-        for (Map.Entry<String, BlockDataEntry<?>> entry : entries.entrySet()) {
-            encode.writeUTF(entry.getKey(), 64);
-            entry.getValue().write(encode);
-        }
-        return entries.size();
+
+        block.writeBlockState(encode, this);
     }
 
     /**
@@ -111,18 +88,7 @@ public class BlockState {
      */
     public static BlockState load(MapType data) {
         Block block = Registries.BLOCK.get(NamespaceID.parse(data.getString("block")));
-        BlockState meta = block.createMeta();
-        meta.entries.putAll(meta.loadEntries(data.getMap("entries", new MapType())));
-
-        return meta;
-    }
-
-    private Map<String, ? extends BlockDataEntry<?>> loadEntries(MapType data) {
-        for (Map.Entry<String, ? extends BlockDataEntry<?>> entry : this.getEntries().entrySet()) {
-            BlockDataEntry<?> property = entry.getValue().load(data.get(entry.getKey()));
-            entries.put(entry.getKey(), property);
-        }
-        return entries;
+        return block.loadBlockState(data);
     }
 
     /**
@@ -136,18 +102,6 @@ public class BlockState {
 
 
     /**
-     * Returns an immutable {@link Map} containing the entries of this {@link BlockState} object.
-     * The entries are represented as key-value pairs, where the key is a {@link String}
-     * representing the name of the entry, and the value is a {@link BlockDataEntry} object
-     * representing the value of the entry.
-     *
-     * @return an immutable {@link Map} containing the entries of this {@link BlockState} object
-     */
-    public @NotNull Map<String, BlockDataEntry<?>> getEntries() {
-        return Collections.unmodifiableMap(entries);
-    }
-
-    /**
      * Returns the {@link BlockDataEntry} with the specified name cast to the specified type.
      *
      * @param name       the name of the entry to retrieve
@@ -157,17 +111,27 @@ public class BlockState {
      * @throws IllegalArgumentException if the entry with the specified name does not exist, or if the entry
      *                                  is not of the specified type
      */
+    @Deprecated
     @SafeVarargs
     @SuppressWarnings("unchecked")
-    public final <T> BlockDataEntry<T> getProperty(String name, T... typeGetter) {
+    public final <T> T getProperty(String name, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
 
-        BlockDataEntry<?> property = entries.get(name);
-        if (property == null)
-            throw new IllegalArgumentException("Entry '" + name + "' does not exist in block " + block);
-        if (!type.isAssignableFrom(property.value.getClass()))
-            throw new IllegalArgumentException("Entry '" + name + "' is not of type " + type.getSimpleName() + " in block " + block);
-        return property.cast(type);
+        int idx = -1;
+        for (int i = 0; i < keys.length; i++) {
+            if (keys[i].name.equals(name)) {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx == -1)
+            throw new IllegalArgumentException("No entry named '" + name + "'");
+
+        if (!type.isInstance(entries[idx]))
+            throw new IllegalArgumentException("Entry '" + name + "' is not of type " + type.getSimpleName());
+
+        return (T) entries[idx];
     }
 
     /**
@@ -184,7 +148,7 @@ public class BlockState {
      */
     @SuppressWarnings("unchecked")
     public final <T> T get(String name, T... typeGetter) {
-        return this.getProperty(name, typeGetter).getValue();
+        return this.getProperty(name, typeGetter);
     }
 
     /**
@@ -197,27 +161,28 @@ public class BlockState {
      * @throws IllegalArgumentException if the entry with the specified name does not exist, or if the entry
      *                                  is not of the specified type
      */
-    public final <T> BlockDataEntry<T> with(String name, T value) {
-        return this.getProperty(name, value).with(value);
-    }
-
-    /**
-     * Returns the entry with the specified name without checking if the entry exists.
-     * <p>
-     * This method is a shortcut for {@link #getProperty(String, Object[])}.
-     * <p>
-     * Note: This method should only be used if you know what you are doing.
-     *
-     * @param name the name of the entry to retrieve
-     * @return the entry with the specified name
-     * @throws IllegalArgumentException if the entry with the specified name does not exist
-     */
-    @UnsafeApi
-    public final BlockDataEntry<?> getEntryUnsafe(String name) {
-        BlockDataEntry<?> property = entries.get(name);
-        if (property == null)
+    public final <T> BlockState with(String name, T value) {
+        int i = ArrayUtils.indexOf(keys, name);
+        if (i == -1)
             throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
-        return property;
+
+        StatePropertyKey<T> key = null;
+        for (StatePropertyKey<?> keyEntry : keys) {
+            if (keyEntry.name.equals(name)) {
+                key = (StatePropertyKey<T>) keyEntry;
+                break;
+            }
+        }
+
+        if (key == null)
+            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
+
+        if (!key.type.isInstance(value))
+            throw new IllegalArgumentException("Value must be of type " + key.type.getSimpleName());
+
+        Object[] newEntries = Arrays.copyOf(entries, entries.length);
+        newEntries[i] = value;
+        return new BlockState(block, keys, newEntries);
     }
 
     /**
@@ -227,11 +192,12 @@ public class BlockState {
      * @param entry the entry to set
      * @throws IllegalArgumentException if the entry with the specified name does not exist
      */
-    public void setEntry(String name, BlockDataEntry<?> entry) {
-        if (!entries.containsKey(name))
+    public <T> void setEntry(StatePropertyKey<T> name, T entry) {
+        int i = ArrayUtils.indexOf(keys, name);
+        if (i == -1)
             throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
 
-        entries.put(name, entry);
+        entries[i] = entry;
     }
 
     /**
@@ -240,8 +206,8 @@ public class BlockState {
      * @param name the name of the entry to check
      * @return true if the block has the specified entry, false otherwise
      */
-    public boolean hasEntry(String name) {
-        return entries.containsKey(name);
+    public boolean hasEntry(StatePropertyKey<?> name) {
+        return ArrayUtils.contains(keys, name);
     }
 
     /**
@@ -267,9 +233,7 @@ public class BlockState {
         map.putString("block", id.toString());
 
         MapType entriesData = new MapType();
-        for (Map.Entry<String, BlockDataEntry<?>> entry : this.entries.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().save());
-        }
+        block.saveBlockState(entriesData, this);
 
         map.put("Entries", entriesData);
         return map;
@@ -379,54 +343,78 @@ public class BlockState {
     }
 
     /**
-     * Creates a new copy of this properties with the given entry overridden.
+     * Creates a new copy of this block state with the given entry overridden.
      *
      * @param name  the name of the entry
      * @param value the value of the entry
-     * @return a new copy of this properties with the given entry overridden
+     * @return a new copy of this block state with the given entry overridden
      */
-    public <T> @NotNull BlockState withEntry(@NotNull String name, @NotNull BlockDataEntry<T> value) {
-        HashMap<String, BlockDataEntry<?>> entries = new HashMap<>(this.entries);
-        entries.put(name, value);
-        return new BlockState(block, entries);
+    public <T> @NotNull BlockState withEntry(@NotNull StatePropertyKey<T> name, @NotNull T value) {
+        StatePropertyKey<?>[] keys = this.keys;
+        int index = ArrayUtils.indexOf(keys, name);
+
+        if (index == -1)
+            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
+
+        Object[] newEntries = Arrays.copyOf(entries, entries.length);
+        newEntries[index] = value;
+
+        return new BlockState(block, keys, newEntries);
     }
 
     /**
-     * Creates a new copy of this properties with the given entry overridden.
+     * Creates a new copy of this block state with the given entry overridden.
      *
      * @param name  the name of the entry
      * @param value the value of the entry
-     * @return a new copy of this properties with the given entry overridden
+     * @return a new copy of this block state with the given entry overridden
      */
     @SuppressWarnings("unchecked")
     public <T> @NotNull BlockState withEntry(@NotNull String name, @NotNull T value) {
-        HashMap<String, BlockDataEntry<?>> entries = new HashMap<>(this.entries);
-        entries.put(name, entries.get(name).cast((Class<T>) value.getClass()).with(value));
-        return new BlockState(block, entries);
+        StatePropertyKey<T> key = (StatePropertyKey<T>) block.getDefinition().byName(name);
+
+        if (key == null)
+            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
+
+        return withEntry(key, value);
     }
 
     /**
-     * Returns a string representation of this properties.
+     * Returns a string representation of this block state.
      *
-     * @return a string representation of this properties
+     * @return a string representation of this block state
      */
     @Override
     public @NotNull String toString() {
-        return block.getId() + " #" + entries;
+        StringBuilder builder = new StringBuilder();
+        builder.append(Registries.BLOCK.getId(block)).append("[");
+
+        for (int i = 0; i < keys.length; i++) {
+            if (entries[i] instanceof StringSerializable serializable)
+                builder.append(keys[i].name).append("=").append(serializable.serialize());
+            else
+                builder.append(keys[i].name).append("=").append(entries[i]);
+            if (i < keys.length - 1)
+                builder.append(", ");
+        }
+
+        builder.append("]");
+
+        return builder.toString();
     }
 
     /**
-     * Checks if another object is equal to this properties.
+     * Checks if another object is equal to this block state.
      *
      * @param o the object to check
-     * @return true if the object is equal to this properties, false otherwise
+     * @return true if the object is equal to this block state, false otherwise
      */
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BlockState that = (BlockState) o;
-        return Objects.equals(block, that.block) && Objects.equals(entries, that.entries);
+        return Objects.equals(block, that.block) && Arrays.equals(entries, that.entries);
     }
 
     /**
@@ -436,7 +424,7 @@ public class BlockState {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(block, entries);
+        return Objects.hash(block, Arrays.hashCode(entries));
     }
 
     /**
@@ -472,9 +460,9 @@ public class BlockState {
     /**
      * Called when the block represented by this {@code BlockProperties} is destroyed in the given {@code World} at the given {@code BlockVec}.
      *
-     * @param world   the {@code World} where the block is destroyed
+     * @param world    the {@code World} where the block is destroyed
      * @param breaking the {@code BlockVec} where the block is destroyed
-     * @param breaker the {@code Player} who destroyed the block
+     * @param breaker  the {@code Player} who destroyed the block
      */
     public void onDestroy(World world, BlockVec breaking, Player breaker) {
         this.block.onDestroy(world, breaking, this, breaker);
@@ -496,5 +484,9 @@ public class BlockState {
      */
     public int getLightReduction() {
         return block.getLightReduction(this);
+    }
+
+    public Object get(int i) {
+        return entries[i];
     }
 }

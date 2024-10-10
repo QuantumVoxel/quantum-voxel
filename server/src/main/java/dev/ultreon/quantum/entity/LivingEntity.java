@@ -382,12 +382,12 @@ public abstract class LivingEntity extends Entity {
     }
 
     public boolean isBuried() {
-        return !getBuriedBlock().isAir();
+        return getBuriedBlock().hasCollider();
     }
 
     public BlockState getBuriedBlock() {
         Vec3d add = getPosition().add(0, getEyeHeight(), 0);
-        return world.get((int) add.x, (int) add.y, (int) add.z);
+        return world.get((int) Math.floor(add.x), (int) Math.floor(add.y), (int) Math.floor(add.z));
     }
 
     public float getEyeHeight() {

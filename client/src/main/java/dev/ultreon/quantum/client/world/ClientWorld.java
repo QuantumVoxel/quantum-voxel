@@ -61,7 +61,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public static final Color SUN_RISE_COLOR = new Color(0xff3000ff);
     public static final Color VOID_COLOR = new Color(0x0a0a0aff);
 
-    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f((float) (1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x - (7.5 * 6.128)))), 1 - (1 - 1.03125f) / 256 * ATLAS_SIZE.get().y));
+    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x)), ATLAS_SIZE.get().y));
 
     public static Rot SKYBOX_ROTATION = deg(-60);
     public static int VOID_Y_START = 20;
@@ -135,7 +135,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public int getRenderDistance() {
-        return ClientConfig.renderDistance;
+        return ClientConfig.renderDistance / CHUNK_SIZE;
     }
 
     /**
@@ -508,7 +508,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         // Start from the top of the world and move downward
         for (int y = chunk.getOffset().y - 1; y >= 0; y--) {
             BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
-            int lightReduction = chunk.get((Point) new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
+            int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
                 setSunlight(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity); // Assuming maximum sunlight intensity is 15
@@ -890,7 +890,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         QuantumClient.invoke(() -> {
             BoxGizmo gizmo = new BoxGizmo("chunk");
             gizmo.position.set(data.getOffset().vec().d().add(8.0, 8.0, 8.0));
-            gizmo.size.set(16, 16, 16);
+            gizmo.size.set(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
             gizmo.color.set(1.0F, 0.0F, 0.0F, 1.0F);
             gizmo.outline = true;
             this.addGizmo(gizmo);
@@ -898,7 +898,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
         // Calculate the distance between the chunk and the player
         synchronized (this.chunks) {
-            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance) {
+            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance / CHUNK_SIZE) {
                 player.pendingChunks.remove(pos);
 
                 // If the distance is greater than the render distance, send a skip chunk status packet and return
@@ -906,7 +906,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
                 return;
             }
 
-            player.pendingChunks.remove(pos);
+            QuantumClient.invoke(() -> player.pendingChunks.remove(pos));
 
             // Add the chunk to the map of chunks
             this.chunks.put(pos, chunk);
@@ -964,7 +964,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             ClientChunk clientChunk = entry.getValue();
 
             // Check if the distance between the chunk and the player's position is greater than the render distance
-            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance) {
+            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance / CHUNK_SIZE) {
                 // Remove the chunk from the map and dispose it
                 iterator.remove();
                 clientChunk.dispose();

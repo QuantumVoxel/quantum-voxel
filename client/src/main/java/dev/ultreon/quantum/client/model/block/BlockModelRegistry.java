@@ -158,7 +158,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                     if (load != null) {
                         customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> true, () -> load));
 
-                        load.getOverrides().cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.getEntryUnsafe(cell.getRowKey()).equals(cell.getColumnKey()), cell::getValue)));
+                        load.getOverrides().cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.get(cell.getRowKey()).equals(cell.getColumnKey()), cell::getValue)));
                     } else if (value.doesRender()) {
                         this.registerDefault(value);
                     }

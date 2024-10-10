@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
@@ -49,7 +50,7 @@ public abstract class Screen extends UIContainer<Screen> {
         this.parentScreen = parent;
         this.root = this;
         this.title = title;
-        this.visible = true;
+        this.isVisible = true;
     }
 
     public final void resize(int width, int height) {
@@ -122,7 +123,7 @@ public abstract class Screen extends UIContainer<Screen> {
             this.dialog.revalidate();
         }
 
-        this.visible = true;
+        this.isVisible = true;
     }
 
     @Override
@@ -187,7 +188,8 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderSolidBackground(Renderer renderer) {
-        if (ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled()) {
+        if (GamePlatform.get().hasBackPanelRemoved()) {
+            renderer.enableBlend();
             renderer.clearColor(0, 0, 0, 0);
             renderer.clear();
         } else {

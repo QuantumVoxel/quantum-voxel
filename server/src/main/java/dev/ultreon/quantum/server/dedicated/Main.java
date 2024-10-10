@@ -1,9 +1,12 @@
 package dev.ultreon.quantum.server.dedicated;
 
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
+import dev.ultreon.langgen.LangGenConfig;
+import dev.ultreon.langgen.LangGenListener;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -30,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Dedicated server main class.
@@ -60,6 +64,51 @@ public class Main {
         try {
             Log.setLogger(KyroSlf4jLogger.INSTANCE);
             com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
+
+            AtomicBoolean waitingForLanguageBindings = new AtomicBoolean(true);
+            JDialog progressDialog = new JDialog();
+            progressDialog.setModal(true);
+
+            progressDialog.setLayout(new BoxLayout(progressDialog.getContentPane(), BoxLayout.Y_AXIS));
+
+            JLabel messageLabel = new JLabel();
+            progressDialog.add(messageLabel);
+
+            JProgressBar progressBar = new JProgressBar();
+            progressDialog.add(progressBar);
+
+            progressDialog.pack();
+
+            AtomicBoolean preprocessing = new AtomicBoolean(true);
+
+            LangGenConfig.progressListener = new LangGenListener() {
+                @Override
+                public void onProgress(int progress, int total) {
+                    preprocessing.set(false);
+                    messageLabel.setText("Generating language bindings: " + progress + "/" + total);
+                    progressBar.setValue(progress);
+                    progressBar.setMaximum(total);
+                }
+
+                @Override
+                public void onPreprocessProgress(int progress, int total) {
+                    if (!preprocessing.get()) return;
+                    messageLabel.setText("Preprocessing language bindings: " + progress + "/" + total);
+                    progressBar.setValue(progress);
+                    progressBar.setMaximum(total);
+                }
+
+                @Override
+                public void onDone() {
+                    waitingForLanguageBindings.set(false);
+                    progressDialog.dispose();
+                }
+            };
+            LangGenMain.genBindings();
+
+            while (waitingForLanguageBindings.get()) {
+                Thread.sleep(100);
+            }
 
             ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), Main::initConfig);
 

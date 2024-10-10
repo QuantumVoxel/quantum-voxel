@@ -11,7 +11,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.events.server.ServerStartedEvent;
@@ -138,7 +137,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     protected final DimensionManager dimManager = new DimensionManager(this);
     private final Biomes biomes;
     private final NoiseConfigs noiseConfigs;
-    private long seed = CommonConstants.RANDOM.nextLong();
+    private long seed;
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -148,6 +147,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     protected QuantumServer(WorldStorage storage, Profiler profiler, InspectionNode<?> parentNode) {
         super(profiler);
+
+        WorldSaveInfo worldSaveInfo = storage.loadInfo();
+        seed = worldSaveInfo.seed();
 
         ModApi.getGlobalEventHandler().call(new ServerStartingEvent(this));
 

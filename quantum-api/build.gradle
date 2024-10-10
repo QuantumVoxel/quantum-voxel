@@ -50,7 +50,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = "dev.ultreon"
-            artifactId = "mixinprovider"
+            artifactId = "quantum-api"
             version = project.version
             from components.java
         }

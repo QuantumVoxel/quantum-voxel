@@ -22,7 +22,10 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.github.tommyettinger.textra.Font;
@@ -35,6 +38,7 @@ import com.google.gson.GsonBuilder;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -147,7 +151,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -155,9 +158,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.badlogic.gdx.graphics.GL20.GL_CULL_FACE;
+import static com.badlogic.gdx.graphics.GL20.*;
 import static com.badlogic.gdx.math.MathUtils.ceil;
-import static com.badlogic.gdx.utils.SharedLibraryLoader.isMac;
+import static dev.ultreon.mixinprovider.PlatformOS.isMac;
 
 /**
  * This class is the main entry point for the Quantum Voxel Client.
@@ -363,8 +366,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public KeyAndMouseInput keyAndMouseInput;
 
     // World
-    @Nullable
-    public ClientWorldAccess world;
+    public ClientWorld world;
 
     // Screenshots
     private CompletableFuture<Screenshot> screenshotFuture;
@@ -578,6 +580,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.materialManager = new MaterialManager(this.resourceManager, this.textureManager, this.cubemapManager);
         this.textureAtlasManager = new TextureAtlasManager(this);
 
+        // Initialize the game camera
+        this.camera = new GameCamera(67, this.getWidth(), this.getHeight());
+        this.camera.near = 0.1f;
+        this.camera.far = 2;
+
         // Load the configuration
         ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), () -> {
             this.newConfig = new ClientConfig();
@@ -600,7 +607,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         RpcHandler.enable();
 
         // Initialize ImGui if necessary
-        this.imGui = !isMac && !SharedLibraryLoader.isAndroid && !SharedLibraryLoader.isARM && !SharedLibraryLoader.isIos;
+        this.imGui = !isMac && !PlatformOS.isAndroid && !PlatformOS.isARM && !PlatformOS.isIos;
         if (this.imGui)
             GamePlatform.get().preInitImGui();
 
@@ -609,11 +616,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.entityModelManager = new EntityModelRegistry(modelLoader, this);
         this.entityRendererManager = new EntityRendererRegistry(this.entityModelManager);
         this.modelLoader = modelLoader;
-
-        // Initialize the game camera
-        this.camera = new GameCamera(67, this.getWidth(), this.getHeight());
-        this.camera.near = 0.1f;
-        this.camera.far = 2;
 
         // Initialize the render pipeline
         this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
@@ -635,9 +637,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Initialize ModelBatch with GameShaderProvider
         this.modelBatch = deferDispose(new ModelBatch(new SceneShaders(
-                new ResourceFileHandle(id("shaders/scene.vert")),
-                new ResourceFileHandle(id("shaders/scene.frag")),
-                new ResourceFileHandle(id("shaders/scene.geom")))));
+                resource(id("shaders/scene.vert")),
+                resource(id("shaders/scene.frag")),
+                resource(id("shaders/scene.geom")))));
 
         // Initialize GameRenderer
         this.gameRenderer = new GameRenderer(this, this.modelBatch, this.pipeline);
@@ -693,6 +695,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             libGdxNode.create("version", Application::getVersion);
             libGdxNode.create("javaHeap", Application::getJavaHeap);
         }
+    }
+
+    public static @NotNull FileHandle shader(NamespaceID id) {
+        if (GamePlatform.get().isAngleGLES()) {
+            return resource(new NamespaceID(id.getDomain(), "shaders/angle/" + id.getPath()));
+        }
+
+        return resource(new NamespaceID(id.getDomain(), "shaders/" + id.getPath()));
     }
 
     /**
@@ -1381,7 +1391,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             return true;
         }
 
+        Gdx.gl.glEnable(GL_BLEND);
+        Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        Gdx.gl.glFlush();
         ScreenUtils.clear(0, 0, 0, 0, true);
+        Gdx.gl.glFlush();
 
         this.gameBounds.setPos(0, 0);
         this.gameBounds.setSize(getScaledWidth() + getDrawOffset().x / 2, getScaledHeight() + getDrawOffset().y / 2);
@@ -1402,7 +1416,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         renderer.begin();
         GridPoint2 drawOffset = this.getDrawOffset();
-        renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, Color.BLACK);
+        if (!GamePlatform.get().hasBackPanelRemoved()) {
+            renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, Color.BLACK);
+        }
         renderer.end();
 
         if (this.controllerInput != null && this.keyAndMouseInput != null) {
@@ -1446,7 +1462,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             renderer.pushMatrix();
             renderer.translate(this.getDrawOffset().x, this.getDrawOffset().y);
             renderer.scale(this.getGuiScale(), this.getGuiScale());
-            renderer.clearColor(0, 0, 0, 1);
+            if (!GamePlatform.get().hasBackPanelRemoved())
+                renderer.clearColor(0, 0, 0, 1);
+            else {
+                renderer.clearColor(0, 0, 0, 0);
+            }
             loading.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
             renderer.popMatrix();
             renderer.end();
@@ -1614,7 +1634,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     private void firstRender() {
-//        if (SharedLibraryLoader.isWindows) {
+//        if (PlatformOS.isWindows) {
 //            InputStream resourceAsStream = QuantumClient.class.getResourceAsStream("/assets/quantum/native/acrylic.dll");
 //            try {
 //                if (!Files.exists(Paths.get(".", "acrylic.dll")))
@@ -1884,6 +1904,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      * @param height The new height of the display
      */
     public void resize(int width, int height) {
+        if (this.spriteBatch == null
+            || this.renderer == null) return;
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invokeAndWait(() -> this.resize(width, height));
             return;
@@ -2378,8 +2400,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
-        ClientWorld clientWorld = new ClientWorld(this, DimensionInfo.OVERWORLD);
-        this.world = clientWorld;
+        this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
         this.integratedServer.start();
 
@@ -2391,8 +2412,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public void connectToServer(String host, int port) {
-        ClientWorld clientWorld = new ClientWorld(this, DimensionInfo.OVERWORLD);
-        this.world = clientWorld;
+        this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
         this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {
             this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e.getMessage(), true));

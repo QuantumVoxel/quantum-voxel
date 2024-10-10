@@ -24,6 +24,15 @@ public class GizmoShaders extends ModelShaders {
     }
 
     @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from default shader provider", e);
+        }
+    }
+
+    @Override
     public Shader createShader(Renderable renderable) {
         GizmoShader gizmoShader = new GizmoShader(renderable, this.config);
         Shaders.checkShaderCompilation(gizmoShader.program, "GizmoShader");

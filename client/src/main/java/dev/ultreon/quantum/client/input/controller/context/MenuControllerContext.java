@@ -68,8 +68,8 @@ public class MenuControllerContext extends ControllerContext {
         }
 
         if (focused instanceof Widget widget) {
-            if (!widget.visible) return false;
-            return widget.enabled;
+            if (!widget.isVisible) return false;
+            return widget.isEnabled;
         }
 
         return true;

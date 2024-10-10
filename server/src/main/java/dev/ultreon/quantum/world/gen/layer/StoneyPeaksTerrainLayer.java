@@ -17,7 +17,7 @@ public class StoneyPeaksTerrainLayer extends TerrainLayer {
     @Override
     public boolean handle(World world, BlockSetter chunk, RNG rng, int x, int y, int z, int height) {
         if (y >= this.height && y <= this.height + 4 && rng.chance(y - this.height + 1)) {
-            chunk.set(x, y, z, this.stone.createMeta());
+            chunk.set(x, y, z, this.stone.getDefaultState());
             return true;
         }
         return false;

@@ -80,7 +80,8 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
+        if (!GamePlatform.get().hasBackPanelRemoved())
+            renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
 
         Vector2 vector2 = this.client.touchPosStartScl[0];
         if (vector2 != null && vector2.dst(mouseX, mouseY) > 10 && this.startedDragging) {
@@ -119,7 +120,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     @Override
     public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         for (T entry : this.entries) {
-            if (entry.visible) {
+            if (entry.isVisible) {
                 entry.render(renderer, mouseX, mouseY, this.selectable && this.selected == entry, deltaTime);
             }
         }
@@ -136,7 +137,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         List<T> entries = this.entries;
         for (int i = entries.size() - 1; i >= 0; i--) {
             T entry = entries.get(i);
-            if (!entry.enabled || !entry.visible) continue;
+            if (!entry.isEnabled || !entry.isVisible) continue;
             if (entry.isWithinBounds(x, y)) return entry;
         }
         return null;

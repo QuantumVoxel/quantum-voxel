@@ -77,7 +77,7 @@ public class TextEntry extends Widget {
 
     @Override
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        final int u = this.enabled ? this.focused ? 12 : 0 : 24;
+        final int u = this.isEnabled ? this.isFocused ? 12 : 0 : 24;
 
         final int v = 0;
         final int tx = this.pos.x;
@@ -121,7 +121,7 @@ public class TextEntry extends Widget {
                 renderer.textLeft(hintObj, this.pos.x + 5, this.pos.y + 6, RgbColor.WHITE.withAlpha(0x80), false);
             }
 
-            if (this.focused) {
+            if (this.isFocused) {
                 renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
             }
 

@@ -105,6 +105,6 @@ public class BlockItem extends Item {
     }
 
     public BlockState createBlockMeta() {
-        return this.block.get().createMeta();
+        return this.block.get().getDefaultState();
     }
 }

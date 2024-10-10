@@ -131,11 +131,11 @@ public abstract class Biome {
     }
 
     public BlockState getTopMaterial() {
-        return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer ? layer.surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer ? layer.surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
     }
 
     public BlockState getFillerMaterial() {
-        return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::createMeta).orElse(null);
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
     }
 
     public float getHumidityStart() {

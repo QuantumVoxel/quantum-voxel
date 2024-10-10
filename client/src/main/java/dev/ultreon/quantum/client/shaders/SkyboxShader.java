@@ -85,4 +85,13 @@ public class SkyboxShader extends DefaultShader {
             };
         }
     }
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize skybox shader", e);
+        }
+    }
 }

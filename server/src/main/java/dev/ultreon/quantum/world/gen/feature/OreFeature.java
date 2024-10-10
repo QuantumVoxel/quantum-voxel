@@ -16,6 +16,8 @@ import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import kotlin.ranges.IntRange;
 import org.jetbrains.annotations.NotNull;
 
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+
 public class OreFeature extends TerrainFeature {
     private final Block ore;
     private final int chance;
@@ -26,7 +28,7 @@ public class OreFeature extends TerrainFeature {
         super();
 
         this.ore = ore;
-        this.chance = chance * 16;
+        this.chance = chance * CHUNK_SIZE;
         this.sizeRange = sizeRange;
         this.heightRange = heightRange;
     }
@@ -42,7 +44,7 @@ public class OreFeature extends TerrainFeature {
 
         if (random.chance(this.chance)) {
             int size = random.randint(sizeRange.getStart(), sizeRange.getEndInclusive());
-            setter.set(x, y, z, this.ore.createMeta());
+            setter.set(x, y, z, this.ore.getDefaultState());
 
             if (DebugFlags.ORE_FEATURE.isEnabled()) {
                 QuantumServer.LOGGER.warn("Generating ore feature at: " + x + ", " + y + ", " + z);
@@ -53,7 +55,7 @@ public class OreFeature extends TerrainFeature {
             for (int i = 0; i < size; i++) {
                 vec = vec.relative(dir);
                 if (!setter.isAir(x, y, z))
-                    setter.set(vec.x, vec.y, vec.z, this.ore.createMeta());
+                    setter.set(vec.x, vec.y, vec.z, this.ore.getDefaultState());
                 if (random.chance(.5f))
                     dir = CubicDirection.random(random);
             }

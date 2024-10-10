@@ -29,6 +29,15 @@ public class ModelShaders extends DefaultShaderProvider implements GameShaders {
     }
 
     @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from default shader provider", e);
+        }
+    }
+
+    @Override
     public Shader createShader(Renderable renderable) {
         ModelViewShader modelViewShader = new ModelViewShader(renderable, this.config);
         Shaders.checkShaderCompilation(modelViewShader.program, "ModelViewShader");

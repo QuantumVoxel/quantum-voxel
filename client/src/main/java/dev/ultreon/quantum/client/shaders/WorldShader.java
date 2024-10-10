@@ -7,12 +7,14 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.mixinprovider.GeomShaderProgram;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.util.Vec2f;
 import org.jetbrains.annotations.Nullable;
 
 public class WorldShader extends DefaultShader {
@@ -20,10 +22,11 @@ public class WorldShader extends DefaultShader {
     public final int u_globalSunlight;
     public final int u_atlasSize;
     public final int u_atlasOffset;
-    private final int u_lodThreshold;
-    private final int u_cameraUp0;
-    private String log;
-
+    public final int u_lod;
+    public final int u_lodThreshold;
+    public final int u_cameraUp0;
+    private int lod = -1;
+    protected String log;
 
     public WorldShader(final Renderable renderable) {
         this(renderable, new GeomShaderConfig());
@@ -38,6 +41,31 @@ public class WorldShader extends DefaultShader {
                 config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
                 config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
                 config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+    }
+
+    public WorldShader(Renderable renderable, GeomShaderConfig config, int lod) {
+        this(renderable, config, """
+                #version %s
+                #define LOD_LEVEL %s
+                """.formatted(version(), lod));
+        this.lod = lod;
+    }
+
+    @Override
+    public boolean canRender(Renderable renderable) {
+        boolean b = super.canRender(renderable);
+        if (!b) return false;
+        if (renderable.userData instanceof ClientChunk clientChunk) {
+            return clientChunk.lod == lod;
+        }
+        return lod == -1;
+    }
+
+    private static String version() {
+        if (GamePlatform.get().isAngleGLES()) {
+            return "320 es";
+        }
+        return "410";
     }
 
     public static String getDefaultGeometryShader() {
@@ -59,13 +87,16 @@ public class WorldShader extends DefaultShader {
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
         this.u_atlasSize = this.register(Inputs.atlasSize, Setters.atlasSize);
         this.u_atlasOffset = this.register(Inputs.atlasOffset, Setters.atlasOffset);
+        this.u_lod = this.register(Inputs.lod, Setters.lod);
         this.u_lodThreshold = this.register(Inputs.lodThreshold, Setters.lodThreshold);
         this.u_cameraUp0 = this.register(Inputs.cameraUp, Setters.cameraUp);
     }
+
     public static class Inputs extends DefaultShader.Inputs {
         public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
         public final static Uniform atlasSize = new Uniform("u_atlasSize");
         public final static Uniform atlasOffset = new Uniform("u_atlasOffset");
+        public final static Uniform lod = new Uniform("u_lod");
         public final static Uniform lodThreshold = new Uniform("u_lodThreshold");
         public final static Uniform cameraUp = new Uniform("u_cameraUp0");
 
@@ -106,6 +137,15 @@ public class WorldShader extends DefaultShader {
             }
         };
 
+        public final static Setter lod = new LocalSetter() {
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                if (renderable.userData instanceof ClientChunk clientChunk) {
+                    shader.set(inputID, clientChunk.lod);
+                }
+            }
+        };
+
         public final static Setter cameraUp = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
@@ -120,6 +160,15 @@ public class WorldShader extends DefaultShader {
             super.render(renderable);
         } catch (GdxRuntimeException e) {
             QuantumClient.LOGGER.error("Failed to render renderable with mesh part ID: {}", renderable.meshPart.id, e);
+        }
+    }
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize world shader", e);
         }
     }
 }

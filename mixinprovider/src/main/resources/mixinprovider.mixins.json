@@ -5,9 +5,13 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BaseShaderMixin",
+    "GLFWMixin",
     "ImmediateModeRenderer20Mixin",
     "KnownFontsMixin",
-    "Lwjgl3GL20Mixin"
+    "Lwjgl3GL20Mixin",
+    "accessors.Lwjgl3ApplicationConfigurationAccessor",
+    "accessors.Lwjgl3WindowAccessor",
+    "accessors.SyncAccessor"
   ],
   "client": [
     "ShaderCompatibilityHelperMixin",
