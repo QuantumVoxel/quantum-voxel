@@ -8,7 +8,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
 /**
  * Represents the position of a chunk in the world.
@@ -383,14 +384,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
 
         BlockVec curSpaceBlock = new BlockVec(x, y, z, this.space.block());
         return curSpaceBlock.toSpace(targetSpace);
-    }
-
-    public SectionVec section(int sectionY) {
-        return new SectionVec(this.x, sectionY, this.z);
-    }
-
-    public SectionVec section() {
-        return new SectionVec(this.x, this.y, this.z);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.Position;
@@ -19,6 +21,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     private Type type;
     private boolean pressed;
     private boolean wasPressed;
+    private Color tmp = new Color();
 
     protected Button(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         this(width, height, Type.DARK);
@@ -38,6 +41,20 @@ public abstract class Button<T extends Button<T>> extends Widget {
             this.pressed = false;
         }
 
+        if (shouldBeTransparent()) {
+            Color color = tmp;
+            if (this.isWithinBounds(mouseX, mouseY)) {
+                color.set(1, 1, 1, 0.25f);
+            } else if (this.pressed) {
+                color.set(1, 1, 1, 0.4f);
+            } else if (this.isEnabled) {
+                color.set(1, 1, 1, 0.1f);
+            } else {
+                color.set(1, 1, 1, 0.05f);
+            }
+            renderer.fill(x, y, this.size.width, this.size.height, color);
+            return;
+        }
 
         int u;
         if (this.isEnabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
@@ -52,6 +69,10 @@ public abstract class Button<T extends Button<T>> extends Widget {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
         }
+    }
+
+    private boolean shouldBeTransparent() {
+        return GamePlatform.get().hasBackPanelRemoved() && client.world == null && !client.renderWorld && client.worldRenderer == null;
     }
 
     @ApiStatus.OverrideOnly
@@ -124,6 +145,11 @@ public abstract class Button<T extends Button<T>> extends Widget {
 
     public Type type() {
         return this.type;
+    }
+
+    protected float getButtonContentOffset() {
+        if (shouldBeTransparent()) return 1;
+        return isPressed() ? 2 : 0;
     }
 
     public enum Type {

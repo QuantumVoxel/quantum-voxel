@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.CameraPlayer;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
@@ -13,8 +11,6 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.TitleButton;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
-import dev.ultreon.quantum.client.util.VoxelTerrain;
-import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
@@ -43,7 +39,8 @@ public class TitleScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         this.client.setActivity(GameActivity.MAIN_MENU);
 
-        builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
+        if (!GamePlatform.get().hasBackPanelRemoved())
+            builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
 
         this.titleLabel = builder.add(Label.of(Formatter.format("[*]Quantum[grey][*]Voxel")).position(() -> new Position(this.size.width / 2, 40))
                 .alignment(Alignment.CENTER)
@@ -58,9 +55,6 @@ public class TitleScreen extends Screen {
             this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
                     .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, this.size.height / 2 - 125))
                     .callback(this::openTest));
-            this.newWorldTestButton = builder.add(TextButton.of(TextObject.literal("NEW-WORLD TEST"), 100)
-                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100, this.size.height / 2 - 125))
-                    .callback(this::openNewWorldTest));
         }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
@@ -86,21 +80,6 @@ public class TitleScreen extends Screen {
         if (GamePlatform.get().isMobile()) {
             this.quitButton.isEnabled = false;
         }
-    }
-
-    private void openNewWorldTest(TextButton textButton) {
-        VoxelTerrain voxelTerrain = new VoxelTerrain(client.camera);
-        voxelTerrain.create();
-
-        client.world = voxelTerrain;
-        client.worldRenderer = voxelTerrain;
-
-        client.player = new CameraPlayer(voxelTerrain, Utils.ZEROED_UUID);
-        client.player.setPosition(2000, 2000, 2000);
-
-        client.renderWorld = true;
-
-        client.showScreen(null);
     }
 
     private void openTest(TextButton textButton) {
@@ -130,7 +109,7 @@ public class TitleScreen extends Screen {
     @Override
     protected void renderSolidBackground(Renderer renderer) {
 
-        if (!(ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled())) {
+        if (!GamePlatform.get().hasBackPanelRemoved()) {
             Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
             float drawWidth = thumbnail.x;

@@ -22,9 +22,9 @@ public class FlatWorldCarver implements Carver {
         for (int y = chunk.getOffset().y; y < CHUNK_SIZE; y++) {
             BlockVec vec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
 
-            if (y < 0) chunk.set(vec.x, vec.y, vec.z, Blocks.STONE.createMeta());
-            else if (y < 3) chunk.set(vec.x, vec.y, vec.z, Blocks.DIRT.createMeta());
-            else if (y == 3) chunk.set(vec.x, vec.y, vec.z, Blocks.GRASS_BLOCK.createMeta());
+            if (y < 0) chunk.set(vec.x, vec.y, vec.z, Blocks.STONE.getDefaultState());
+            else if (y < 3) chunk.set(vec.x, vec.y, vec.z, Blocks.DIRT.getDefaultState());
+            else if (y == 3) chunk.set(vec.x, vec.y, vec.z, Blocks.GRASS_BLOCK.getDefaultState());
         }
 
         BlockVec vec = new BlockVec(x, 3, z, BlockVecSpace.WORLD).chunkLocal();

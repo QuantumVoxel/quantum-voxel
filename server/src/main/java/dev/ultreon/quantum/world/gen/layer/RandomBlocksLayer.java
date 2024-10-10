@@ -57,7 +57,7 @@ public abstract class RandomBlocksLayer extends TerrainLayer {
     public boolean handle(@NotNull World world, BlockSetter chunk, @NotNull RNG rng, int x, int y, int z, int height) {
         if (from <= y && y <= to && y < height && shouldGenerate(x, y, z, height)) {
             Block block = blocks[rng.nextInt(blocks.length)];
-            chunk.set(x, y, z, block.createMeta());
+            chunk.set(x, y, z, block.getDefaultState());
             return true;
         }
 

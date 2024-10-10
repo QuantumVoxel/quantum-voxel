@@ -30,4 +30,13 @@ public class GizmoOutlineShader extends OutlineShader {
             }
         };
     }
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize gizmo outline shader", e);
+        }
+    }
 }

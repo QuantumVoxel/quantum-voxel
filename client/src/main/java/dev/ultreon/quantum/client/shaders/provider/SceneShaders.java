@@ -37,8 +37,8 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
 
     @Override
     public Shader createShader(Renderable renderable) {
-        if (renderable != null && renderable.userData instanceof ClientChunk) {
-            WorldShader worldShader = new WorldShader(renderable, this.config);
+        if (renderable != null && renderable.userData instanceof ClientChunk chunk) {
+            WorldShader worldShader = new WorldShader(renderable, this.config, chunk.lod);
             Shaders.checkShaderCompilation(worldShader.program, "WorldShader");
             return worldShader;
         }
@@ -50,6 +50,15 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
         throw new NullPointerException("Renderable cannot be null");
     }
 
+    @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from scene shader provider", e);
+        }
+    }
+
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
         return switch (userData) {
             case Gizmo gizmo ->
@@ -57,8 +66,8 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
             case QVModel qvModel -> qvModel.getShaderProvider().createShader(renderable);
             case SkyboxShaders provider -> provider.createShader(renderable);
             case GameShaders provider -> provider.createShader(renderable);
-            case ItemModel itemModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case BlockModel blockModel -> Shaders.MODEL_VIEW.get().createShader(renderable);
+            case ItemModel ignored -> Shaders.MODEL_VIEW.get().createShader(renderable);
+            case BlockModel ignored -> Shaders.MODEL_VIEW.get().createShader(renderable);
             case Shader shader -> shader;
             case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
             case null, default -> new DefaultShader(renderable, new DefaultShader.Config());

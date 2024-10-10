@@ -24,6 +24,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.input.GameCamera;
@@ -671,9 +672,9 @@ public class VoxelTerrain implements TerrainRenderer, ClientWorldAccess {
     public @NotNull BlockState get(BlockVec pos) {
         ChunkAccess chunkAt = getChunkAt(pos);
         if (chunkAt == null) {
-            return BlockState.AIR;
+            return Blocks.AIR.getDefaultState();
         }
-        return chunkAt.get((Point) localize(pos));
+        return chunkAt.get(localize(pos));
     }
 
     private BlockVec localize(BlockVec pos) {

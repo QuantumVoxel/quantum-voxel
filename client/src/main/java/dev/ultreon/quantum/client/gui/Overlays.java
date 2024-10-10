@@ -12,6 +12,8 @@ public class Overlays {
     public static final MemoryUsageOverlay MEMORY = OverlayManager.registerTop(new NamespaceID("memory"), new MemoryUsageOverlay());
     public static final ControllerOverlay CONTROLLER = OverlayManager.registerTop(new NamespaceID("controller"), new ControllerOverlay());
 
+    public static final DebugWMOverlay DEBUG = OverlayManager.registerTop(new NamespaceID("debug_window_manager"), new DebugWMOverlay());
+
     public static void init() {
 
     }

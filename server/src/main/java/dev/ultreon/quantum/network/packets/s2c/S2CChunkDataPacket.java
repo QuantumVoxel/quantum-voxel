@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -42,7 +43,7 @@ public record S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<Bloc
     public static S2CChunkDataPacket read(PacketIO buffer) {
         var pos = buffer.readChunkVec();
         var info = new ChunkBuildInfo(buffer);
-        var storage = new PaletteStorage<>(BlockState.AIR, buffer, PacketIO::readBlockMeta);
+        var storage = new PaletteStorage<>(Blocks.AIR.getDefaultState(), buffer, PacketIO::readBlockState);
         var biomeStorage = new PaletteStorage<>(RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("unknown")), buffer, buf -> RegistryKey.of(RegistryKeys.BIOME, buf.readId()));
 
         var blockEntityPositions = new IntArrayList();

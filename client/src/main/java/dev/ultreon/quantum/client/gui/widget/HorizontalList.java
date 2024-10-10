@@ -80,7 +80,8 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
+        if (!GamePlatform.get().hasBackPanelRemoved())
+            renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
 
         Vector2 vector2 = this.client.touchPosStartScl[0];
         if (vector2 != null && vector2.dst(mouseX, mouseY) > 10 && this.startedDragging) {

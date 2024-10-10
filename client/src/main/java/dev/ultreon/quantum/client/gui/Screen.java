@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
@@ -187,7 +188,8 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderSolidBackground(Renderer renderer) {
-        if (ClientConfig.useFullWindowVibrancy && client.isWindowVibrancyEnabled()) {
+        if (GamePlatform.get().hasBackPanelRemoved()) {
+            renderer.enableBlend();
             renderer.clearColor(0, 0, 0, 0);
             renderer.clear();
         } else {

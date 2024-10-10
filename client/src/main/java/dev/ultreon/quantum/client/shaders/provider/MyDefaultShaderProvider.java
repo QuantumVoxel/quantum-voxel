@@ -27,4 +27,12 @@ public class MyDefaultShaderProvider extends DefaultShaderProvider implements Ga
         return super.createShader(renderable);
     }
 
+    @Override
+    public Shader getShader(Renderable renderable) {
+        try {
+            return super.getShader(renderable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get shader from default shader provider", e);
+        }
+    }
 }

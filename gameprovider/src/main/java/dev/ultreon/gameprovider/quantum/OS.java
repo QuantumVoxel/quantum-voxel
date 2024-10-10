@@ -61,27 +61,27 @@ public class OS {
      */
     private static OSType getOSType() {
         // Check if the code is running on Android
-        if (SharedLibraryLoader.isAndroid) {
+        if (PlatformOS.isAndroid) {
             return OSType.Android;
         }
 
         // Check if the code is running on iOS
-        if (SharedLibraryLoader.isIos) {
+        if (PlatformOS.isIos) {
             return OSType.Linux;
         }
 
         // Check if the code is running on Windows
-        if (SharedLibraryLoader.isWindows) {
+        if (PlatformOS.isWindows) {
             return OSType.Windows;
         }
 
         // Check if the code is running on Mac
-        if (SharedLibraryLoader.isMac) {
+        if (PlatformOS.isMac) {
             return OSType.Mac;
         }
 
         // Check if the code is running on Linux
-        if (SharedLibraryLoader.isLinux) {
+        if (PlatformOS.isLinux) {
             return OSType.Linux;
         }
 

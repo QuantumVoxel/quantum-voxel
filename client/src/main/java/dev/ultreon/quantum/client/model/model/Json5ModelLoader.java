@@ -110,7 +110,7 @@ public class Json5ModelLoader {
     private Table<String, BlockDataEntry<?>, Json5Model> loadOverrides(RegistryKey<Block> key, Json5Object overridesJson5) {
         Table<String, BlockDataEntry<?>, Json5Model> overrides = HashBasedTable.create();
         Block block = Registries.BLOCK.get(key);
-        BlockState meta = block.createMeta();
+        BlockState meta = block.getDefaultState();
         for (Map.Entry<String, Json5Element> entry : overridesJson5.entrySet()) {
             String keyName = entry.getKey();
             Json5Element overrideElem = entry.getValue();

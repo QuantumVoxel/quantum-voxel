@@ -57,6 +57,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lombok.Getter;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,8 +79,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final NamespaceID MOON_ID = id("generated/moon");
     public static final NamespaceID SUN_ID = id("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
+    @Getter
     private Material material;
+    @Getter
     private Material transparentMaterial;
+    @Getter
     private Texture breakingTex;
     private Environment environment;
     private int visibleChunks;
@@ -107,6 +111,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private boolean wasSunMoonShown = true;
     private final Vector3 sunDirection = new Vector3();
     private final Vector3 tmp2 = new Vector3();
+    private BlendingAttribute attribute = new BlendingAttribute(0.5f);
 
     public WorldRenderer(@Nullable ClientWorld world) {
         this.world = world;
@@ -149,7 +154,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             breakingTexRegions.set(i, textureRegion);
         }
 
-        var boundingBox = Blocks.STONE.getBoundingBox(0, 0, 0, Blocks.STONE.createMeta());
+        var boundingBox = Blocks.STONE.getBoundingBox(0, 0, 0, Blocks.STONE.getDefaultState());
         float v = 0.001f;
         boundingBox.set(boundingBox);
         boundingBox.min.sub(v);
@@ -311,7 +316,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param batch the ModelBatch to render with
+     * @param batch     the ModelBatch to render with
      * @param deltaTime the time between the last and current frame
      */
     @Override
@@ -326,9 +331,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param batch the ModelBatch to render with
+     * @param batch       the ModelBatch to render with
      * @param renderLayer the RenderLayer to render with
-     * @param deltaTime the time between the last and current frame
+     * @param deltaTime   the time between the last and current frame
      */
     @Override
     public void render(ModelBatch batch, @Deprecated RenderLayer renderLayer, float deltaTime) {
@@ -365,33 +370,39 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
 
                 // Render the outline.
-                if (lastHitResult != null && this.lastHitResult.equals(blockHit))
-                    return;
+                if (lastHitResult != null && this.lastHitResult.equals(blockHit)) {
+                    ModelManager.INSTANCE.unloadModel(id("generated/selection_outline"));
+                    cursor = null;
+                }
 
                 this.lastHitResult = blockHit;
 
                 if (this.cursor != null) {
-                    RenderLayer.WORLD.destroy(this.cursor);
                     ModelManager.INSTANCE.unloadModel(id("generated/selection_outline"));
                 }
 
                 Model model = ModelManager.INSTANCE.generateModel(id("generated/selection_outline"), modelBuilder -> {
                     Material material = new Material();
                     material.id = id("generated/selection_outline_material").toString();
-                    material.set(ColorAttribute.createDiffuse(0, 0, 0, 1f));
-                    material.set(new BlendingAttribute(1.0f));
-                    material.set(IntAttribute.createCullFace(GL_BACK));
+                    material.set(ColorAttribute.createDiffuse(1f, 1f, 1f, 1f));
+                    material.set(IntAttribute.createCullFace(GL_FRONT));
+
 
                     var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
                     var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                     var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-                    WorldRenderer.buildOutlineBox(sizeX + 0.01f, sizeY + 0.01f, sizeZ + 0.01f, modelBuilder.part("outline", GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked, material));
+                    Gdx.gl32.glLineWidth(2f);
+
+                    WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, material));
                 });
 
-                this.cursor = RenderLayer.WORLD.create(model, renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-                this.cursor.userData = Shaders.OUTLINE.get();
+                this.cursor = new ModelInstance(model, renderOffsetC.x - 0.05f, renderOffsetC.y - 0.05f, renderOffsetC.z - 0.05f);
+                this.cursor.userData = Shaders.DEFAULT.get();
             }
+
+            attribute.opacity = MathUtils.sinDeg((System.currentTimeMillis() % 360) / 1000f) / 90f + 0.5f;
+            material.set(attribute);
 
             if (this.cursor != null) {
                 batch.render(this.cursor);
@@ -779,18 +790,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     @Override
     public boolean isDisposed() {
         return this.disposed;
-    }
-
-    public Texture getBreakingTex() {
-        return this.breakingTex;
-    }
-
-    public Material getMaterial() {
-        return this.material;
-    }
-
-    public Material getTransparentMaterial() {
-        return this.transparentMaterial;
     }
 
     @Override

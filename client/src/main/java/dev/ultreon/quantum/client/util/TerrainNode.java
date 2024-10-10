@@ -45,7 +45,7 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 
 public class TerrainNode implements Disposable, RenderableProvider, ClientChunkAccess {
-    public static final int TERRAIN_SIZE = 16;
+    public static final int TERRAIN_SIZE = 32;
 
     static int nodes = 0;
 
@@ -56,7 +56,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     public TerrainNode parent;
     public TerrainNode[] children = new TerrainNode[8];
 
-    public FlatStorage<BlockState> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, BlockState.AIR);
+    public FlatStorage<BlockState> materials = new FlatStorage<>(TERRAIN_SIZE * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.AIR.getDefaultState());
 
     public ModelInstance modelInstance;
     public Mesh mesh;
@@ -126,7 +126,7 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
 
                     double noise = VoxelTerrain.noise.eval(wx / 8.0f, wy / 8.0f, wz / 8.0f) + ((wy - 256) / 512.0f);
                     if (noise < 0) {
-                        materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.DIRT.createMeta());
+                        materials.set(x + y * TERRAIN_SIZE + z * TERRAIN_SIZE * TERRAIN_SIZE, Blocks.DIRT.getDefaultState());
                     }
                 }
             }

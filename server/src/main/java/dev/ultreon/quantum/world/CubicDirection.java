@@ -3,6 +3,7 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.block.state.StringSerializable;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.Vec3d;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public enum CubicDirection {
+public enum CubicDirection implements StringSerializable {
     UP(new Vector3(0, 1, 0), -1, new Quaternion(Vector3.Y, 90 * MathUtils.degRad)),
     DOWN(new Vector3(0, -1, 0), -1, new Quaternion(Vector3.Y, -90 * MathUtils.degRad)),
     NORTH(new Vector3(0, 0, 1), 0, new Quaternion(Vector3.Y, 0 * MathUtils.degRad)),
@@ -146,5 +147,10 @@ public enum CubicDirection {
             case NORTH -> new Vec3i(0, 0, -1);
             case SOUTH -> new Vec3i(0, 0, 1);
         };
+    }
+
+    @Override
+    public String serialize() {
+        return name().toLowerCase();
     }
 }
