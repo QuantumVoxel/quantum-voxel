@@ -52,6 +52,10 @@ apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
 //    type ProjectType.Desktop
 //}
 
+evaluationDependsOn(":gameprovider")
+evaluationDependsOn(":server")
+evaluationDependsOn(":client")
+
 java {
     withSourcesJar()
     withJavadocJar()

@@ -2,6 +2,10 @@ import dev.ultreon.gameutils.GameUtilsExt
 import org.jetbrains.gradle.ext.Application
 import org.jetbrains.gradle.ext.runConfigurations
 import org.jetbrains.gradle.ext.settings
+import org.jreleaser.gradle.plugin.JReleaserExtension
+import org.jreleaser.model.Active
+import org.jreleaser.model.api.deploy.maven.MavenCentralMavenDeployer.Stage
+import org.jreleaser.model.api.signing.Signing
 import java.lang.System.getenv
 import java.nio.file.Files
 import java.nio.file.Path
@@ -44,14 +48,14 @@ plugins {
     id("maven-publish")
     id("java")
     id("application")
+    id("org.jreleaser") version "1.14.0" apply false
     id("io.freefair.javadoc-links") version "8.3"
 }
 
 apply(plugin = "gameutils")
 
-
-val gameVersion = "0.1.0"
-//val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
+val gameVersion = property("project_version")?.toString() ?: throw IllegalStateException("project_version is not set")
+//val gameVersion = "0.1.0+edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 version = gameVersion
 
@@ -187,7 +191,7 @@ allprojects {
     dependencies {
         compileOnly("org.jetbrains:annotations:23.0.0")
 
-        implementation(annotationProcessor("org.projectlombok:lombok:1.+")!!)
+        implementation(annotationProcessor("org.projectlombok:lombok:1.18.34")!!)
         annotationProcessor("com.google.code.findbugs:jsr305:3.0.2")
         annotationProcessor("org.ow2.asm:asm-tree:9.3")
     }
@@ -270,14 +274,76 @@ artifacts {
 }
 
 val publishProjects =
-    listOf(project(":client"), project(":desktop"), project(":server"), project(":gameprovider"))
+    listOf(project(":client"), project(":desktop"), project(":launcher"), project(":server"), project(":gameprovider"), project(":mixinprovider"), project(":lang-gen"))
 
 publishProjects.forEach {
     if (it.name == "android") return@forEach
+    it.mkdir("build/jreleaser")
     it.apply(plugin = "maven-publish")
     it.apply(plugin = "java-library")
+    it.apply(plugin = "org.jreleaser")
+
+    it.extensions.configure<JReleaserExtension>("jreleaser") {
+        project {
+            group = "dev.ultreon.quantum"
+            authors.set(listOf("XyperCode"))
+            license = "Ultreon-PSL-1.0"
+            description = "Quantum Voxel is a voxel game that focuses on technology based survival (currently in development)."
+            copyright.set("(C) Copyright 2023 Quinten Jungblut. All rights reserved.")
+            links {
+                homepage = "https://ultreon.dev"
+            }
+            inceptionYear = "2023"
+        }
+
+        gitRootSearch = true
+
+        release {
+            gitlab {
+                branch.set("dev")
+            }
+        }
+
+        signing {
+            active.set(Active.ALWAYS)
+            armored = true
+        }
+
+        deploy {
+            maven {
+                this@maven.active.set(Active.ALWAYS)
+
+//                nexus2 {
+//                    create("maven-central") {
+//                        active.set(Active.SNAPSHOT)
+//                        url.set("https://s01.oss.sonatype.org/service/local")
+//                        snapshotUrl.set("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+//                        closeRepository = true
+//                        releaseRepository = true
+//                        stagingRepository("build/staging-deploy")
+//                    }
+//                }
+
+                mavenCentral {
+                    create("sonatype") {
+                        active.set(Active.ALWAYS)
+                        url.set("https://central.sonatype.com/api/v1/publisher")
+                        stagingRepository(projectDir.path + "/build/staging-deploy")
+                    }
+                }
+            }
+        }
+    }
 
     it.publishing {
+        repositories {
+            maven {
+                it.mkdir("build/staging-deploy")
+                name = "Staging"
+                url = uri("file://${projectDir.path.replace("\\", "/")}/build/staging-deploy")
+            }
+        }
+
         publications {
             create<MavenPublication>("mavenJava") {
                 from(it.components["java"])
@@ -357,21 +423,6 @@ publishProjects.forEach {
 
                             roles.set(listOf("Tester", "Modeler"))
                         }
-                    }
-                }
-            }
-
-            repositories {
-                maven {
-                    name = "GitLabMaven"
-                    url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
-                    credentials(HttpHeaderCredentials::class) {
-                        name = "Private-Token"
-                        value =
-                            findProperty("gitLabPrivateToken") as String? // the variable resides in $GRADLE_USER_HOME/gradle.properties
-                    }
-                    authentication {
-                        create("header", HttpHeaderAuthentication::class)
                     }
                 }
             }

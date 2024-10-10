@@ -46,6 +46,17 @@ group project_group // https://maven.apache.org/guides/mini/guide-naming-convent
 
 java {
     withSourcesJar()
+    withJavadocJar()
+}
+
+evaluationDependsOn(":gameprovider")
+evaluationDependsOn(":mixinprovider")
+evaluationDependsOn(":lang-gen")
+evaluationDependsOn(":server")
+
+javadoc {
+    dependsOn(":gameprovider:javadocJar")
+    dependsOn(":gameprovider:sourcesJar")
 }
 
 configurations {
@@ -71,7 +82,7 @@ dependencies {
     api("dev.ultreon.corelibs:translations-v1:$corelibs_version")
     api("dev.ultreon:ubo:$ultreon_data_version")
 
-    api("com.jagrosh:DiscordIPC:+")
+    shadow(compileOnly("com.jagrosh:DiscordIPC:+"))
 
     // LibGDX
     api("com.badlogicgames.gdx:gdx:$gdx_version")

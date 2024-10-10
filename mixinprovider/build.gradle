@@ -10,6 +10,11 @@ base {
     archivesName = 'mixinprovider'
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 repositories {
     // Add repositories to retrieve artifacts from in here.
     // You should only use this when depending on other mods because
@@ -48,33 +53,5 @@ processResources {
     inputs.property "version", project.version
     filesMatching("fabric.mod.json") {
         expand "version": project.version
-    }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = "dev.ultreon"
-            artifactId = "mixinprovider"
-            version = project.version
-            from components.java
-        }
-    }
-
-    repositories {
-        if (findProperty("gitLabPrivateToken") != null) {
-            maven {
-                name = "GitLabMaven"
-                url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
-                credentials(HttpHeaderCredentials) {
-                    name = "Private-Token"
-                    value = findProperty("gitLabPrivateToken").toString()
-                    // the variable resides in $GRADLE_USER_HOME/gradle.properties
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
-            }
-        }
     }
 }

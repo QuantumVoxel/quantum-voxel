@@ -10,6 +10,11 @@ repositories {
     mavenCentral()
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 sourceSets {
     create("api") {
         java {

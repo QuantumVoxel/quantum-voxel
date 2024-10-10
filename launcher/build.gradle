@@ -52,7 +52,7 @@ apply plugin: 'maven-publish'
 group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
 group = project_group
-def packageVersion = "1.0.0"
+def packageVersion = rootProject.version
 
 base {
     archivesName = archives_base_name + "-launcher"

@@ -1,6 +1,6 @@
 package dev.ultreon.quantum;
 
-import dev.ultreon.mixinprovider.PlatformOS;
+import dev.ultreon.quantum.server.PlatformOS;
 
 /**
  * Class used to check for which operating system the game is running on.

@@ -20,6 +20,8 @@ import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -30,12 +32,15 @@ public class WorldLoadScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorldLoadScreen.class);
     public static final @NotNull Color PROGRESS_BG = new Color(0xffffff80);
     public static final @NotNull Color PROGRESS_FG = new Color(0xff0040ff);
+    @Getter
     private Label titleLabel;
+    @Getter
     private Label descriptionLabel;
     private Label subTitleLabel;
     private final WorldStorage storage;
     private long nextLog;
     private ServerWorld world;
+    @Setter
     private DeathScreen closeScreen;
     private boolean done = false;
     private volatile boolean loggedIn;
@@ -172,7 +177,7 @@ public class WorldLoadScreen extends Screen {
             if (chunksToLoad == -1) {
                 this.subTitleLabel.text().set(TextObject.translation(this.client.integratedServer == null ? "quantum.screen.worldLoad.enteringWorld" : "quantum.screen.worldLoad.enteringServer"));
             } else if (chunksToLoad != 0) {
-                ClientWorldAccess worldAccess = this.client.world;
+                ClientWorld worldAccess = this.client.world;
                 if (worldAccess == null) {
                     this.titleLabel.text().set(TextObject.translation(this.client.integratedServer == null ? "quantum.screen.worldLoad.loading" : "quantum.screen.worldLoad.loadingFromServer"));
                     this.subTitleLabel.text().set(TextObject.translation("quantum.screen.worldLoad.preparingChunks"));
@@ -181,11 +186,7 @@ public class WorldLoadScreen extends Screen {
                 if (world.getChunksLoaded() == chunksToLoad) {
                     this.done = true;
 
-                    if (worldAccess instanceof ClientWorld clientWorld) {
-                        this.client.worldRenderer = new WorldRenderer(clientWorld);
-                    } else if (worldAccess instanceof VoxelTerrain terrain) {
-                        this.client.worldRenderer = terrain;
-                    }
+                    this.client.worldRenderer = new WorldRenderer(worldAccess);
 
                     this.client.renderWorld = true;
                     this.client.showScreen(null);
@@ -224,18 +225,6 @@ public class WorldLoadScreen extends Screen {
         return this.done;
     }
 
-    public void setCloseScreen(DeathScreen screen) {
-        this.closeScreen = screen;
-    }
-
-    public Label getTitleLabel() {
-        return this.titleLabel;
-    }
-
-    public Label getDescriptionLabel() {
-        return this.descriptionLabel;
-    }
-
     @Override
     public boolean canCloseWithEsc() {
         return false;
@@ -250,7 +239,7 @@ public class WorldLoadScreen extends Screen {
         if (world1 instanceof ClientWorld clientWorld) {
             this.client.worldRenderer = new WorldRenderer(clientWorld);
         } else {
-            throw new IllegalStateException("Unexpected world type: " + (world1 == null ? null : world1.getClass().getName()));
+            throw new IllegalStateException("Unexpected world type: " + null);
         }
         this.client.showScreen(null);
     }

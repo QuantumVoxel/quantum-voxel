@@ -14,6 +14,12 @@ cache:
 
 build_windows:
   stage: build
+  only:
+    - dev
+    - alpha
+    - beta
+    - release
+    - snapshot
   tags:
     - saas-windows-medium-amd64
   script:
@@ -29,6 +35,12 @@ build_windows:
 
 build_macos:
   stage: build
+  only:
+    - dev
+    - alpha
+    - beta
+    - release
+    - snapshot
   tags:
     - macos
   image: macos-13-xcode-14
@@ -46,6 +58,12 @@ build_macos:
 
 build_linux:
   stage: build
+  only:
+    - dev
+    - alpha
+    - beta
+    - release
+    - snapshot
   tags:
     - saas-linux-small-amd64
   script:
