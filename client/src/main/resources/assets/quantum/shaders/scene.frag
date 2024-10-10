@@ -4,28 +4,28 @@
 #define LOW lowp
 #define MED mediump
 #define HIGH highp
-precision mediump float;
+precision highp float;
 #else
 #define MED
 #define LOW
 #define HIGH
 #endif
 
-in vec3 v_normal;
-in vec3 v_modelNormal;
+MED in vec3 v_normal;
+MED in vec3 v_modelNormal;
 
-in vec4 v_color;
+LOW in vec4 v_color;
 
 #if LOD_LEVEL == 0
+in HIGH vec2 v_diffuseUV;
+in HIGH vec2 v_emissiveUV;
+in HIGH vec2 v_normalUV;
+in HIGH vec2 v_specularUV;
+#elif LOD_LEVEL >= 2
 in MED vec2 v_diffuseUV;
 in MED vec2 v_emissiveUV;
 in MED vec2 v_normalUV;
 in MED vec2 v_specularUV;
-#elif LOD_LEVEL == 1
-in LOW vec2 v_diffuseUV;
-in LOW vec2 v_emissiveUV;
-in LOW vec2 v_normalUV;
-in LOW vec2 v_specularUV;
 #else
 in MED vec2 v_diffuseUV;
 in MED vec2 v_emissiveUV;
@@ -37,16 +37,16 @@ uniform sampler2D u_emissiveTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_specularTexture;
 uniform vec4 u_fogColor;
-in float v_fog;
+MED in float v_fog;
 
 #if LOD_LEVEL == 0
 in HIGH vec3 v_position;
 #elif LOD_LEVEL == 1
-in MED vec3 v_position;
+in HIGH vec3 v_position;
 #elif LOD_LEVEL == 2
-in LOW vec3 v_position;
+in HIGH vec3 v_position;
 #elif LOD_LEVEL == 3
-in LOW vec3 v_position;
+in MED vec3 v_position;
 #else
 in MED vec3 v_position;
 #endif

@@ -163,7 +163,7 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description))) {
             try {
-                if (PlatformOS.isWindows && useAngleGraphics) new Lwjgl3VulkanApplication(Main.createInstance(argv), DesktopLauncher.createVulkanConfig());
+                if (GamePlatform.get().isAngleGLES()) new Lwjgl3VulkanApplication(Main.createInstance(argv), DesktopLauncher.createVulkanConfig());
                 else new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
@@ -184,7 +184,7 @@ public class DesktopLauncher {
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES32, 4, 1);
         config.setInitialVisible(false);
-        config.setTitle("Quantum");
+        config.setTitle("Quantum Voxel (Vulkan Backend)");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
@@ -202,7 +202,7 @@ public class DesktopLauncher {
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
-        config.setTitle("Quantum");
+        config.setTitle("Quantum Voxel");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());

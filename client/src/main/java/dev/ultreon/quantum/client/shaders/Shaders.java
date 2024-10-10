@@ -22,9 +22,9 @@ public class Shaders {
     public static final Supplier<DefaultShaderProvider> DEFAULT = Shaders.register("default", MyDefaultShaderProvider::new);
     
     public static final Supplier<SceneShaders> SCENE = Shaders.register("world", () -> new SceneShaders(
-            QuantumClient.shader(id("scene.vert")),
-            QuantumClient.shader(id("scene.frag")),
-            QuantumClient.shader(id("scene.geom"))));
+            QuantumClient.resource(id("shaders/scene.vert")),
+            QuantumClient.resource(id("shaders/scene.frag")),
+            QuantumClient.resource(id("shaders/scene.geom"))));
     public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaders(
             QuantumClient.shader(id("skybox.vert")),
             QuantumClient.shader(id("skybox.frag"))

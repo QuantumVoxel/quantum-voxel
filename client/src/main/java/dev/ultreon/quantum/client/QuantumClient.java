@@ -637,9 +637,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Initialize ModelBatch with GameShaderProvider
         this.modelBatch = deferDispose(new ModelBatch(new SceneShaders(
-                shader(id("scene.vert")),
-                shader(id("scene.frag")),
-                shader(id("scene.geom")))));
+                resource(id("shaders/scene.vert")),
+                resource(id("shaders/scene.frag")),
+                resource(id("shaders/scene.geom")))));
 
         // Initialize GameRenderer
         this.gameRenderer = new GameRenderer(this, this.modelBatch, this.pipeline);
