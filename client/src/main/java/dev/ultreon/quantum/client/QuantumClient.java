@@ -292,7 +292,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     boolean imGui = false;
     boolean isDevMode;
 
-    private boolean startDevLoading = true;
+    private boolean startDevLoading = false;
 
     public InspectionRoot<QuantumClient> inspection;
 
@@ -314,7 +314,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private final Texture libGDXLogoTex;
     private final Resizer resizer;
     private boolean showUltreonSplash = false;
-    private boolean showLibGDXSplash = !GamePlatform.get().isDevEnvironment();
+    private boolean showLibGDXSplash = true;
+//    private boolean showLibGDXSplash = !GamePlatform.get().isDevEnvironment();
     private long ultreonSplashTime;
     private long libGDXSplashTime;
 
@@ -632,6 +633,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Initialize the sprite batch, shape drawer, and renderer
         this.spriteBatch = deferDispose(new SpriteBatch());
+
+        // Set the projection matrix for the spriteBatch
+        this.spriteBatch.getProjectionMatrix().setToOrtho(0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1000000);
+
         this.shapes = new ShapeDrawer(this.spriteBatch, white);
         this.renderer = new Renderer(this.shapes);
 

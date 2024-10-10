@@ -53,6 +53,8 @@ apply(plugin = "gameutils")
 val gameVersion = "0.1.0"
 //val gameVersion = "0.1.0-edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
+version = gameVersion
+
 
 println("Current version: $gameVersion")
 if (ghBuildNumber != null) println("Build number: $ghBuildNumber")
