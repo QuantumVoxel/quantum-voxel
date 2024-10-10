@@ -87,7 +87,7 @@ public final class Launcher {
             }
 
             System.out.println("Setting directory to " + launchPath);
-            StartupHelper.startNewJvmIfRequired(true, launchPath);
+            StartupHelper.startNewJvmIfRequired(false, launchPath);
             System.out.println("Exiting");
             System.exit(0);
         } else {

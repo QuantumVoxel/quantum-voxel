@@ -828,15 +828,15 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public static String[] getIcons() {
         int[] sizes = QuantumClient.SIZES;
         if (!isMac) {
-            sizes = new int[]{16, 32, 64, 128, 256, 512, 1024};
+            sizes = new int[]{1024};
         }
         String[] icons = new String[sizes.length];
         for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
             var size = sizes[i];
             if (isMac) {
-                icons[i] = "icons/" + size + "-mac.png";
+                icons[i] = "icons/mac.png";
             } else {
-                icons[i] = "icons/icon_" + size + ".png";
+                icons[i] = "icons/icon.png";
             }
         }
 

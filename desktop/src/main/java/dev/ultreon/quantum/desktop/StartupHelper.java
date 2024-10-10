@@ -163,9 +163,22 @@ public class StartupHelper {
                 throw new RuntimeException(e);
             }
 
-            if (System.getProperty("os.name").toLowerCase().contains("mac"))
-                jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
-            else if (osName.contains("windows"))
+            if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+                if (Files.exists(Path.of("../runtime/Contents/Home/bin/java"))) {
+                    jvmArgs.add(new File("../runtime/Contents/Home/bin/java").getAbsolutePath());
+                } else if (Files.exists(Path.of("runtime/Contents/Home/bin/java"))) {
+                    jvmArgs.add(new File("runtime/Contents/Home/bin/java").getAbsolutePath());
+                } else if (Files.exists(Path.of("Contents/runtime/Contents/Home/bin/java"))) {
+                    jvmArgs.add(new File("Contents/runtime/Contents/Home/bin/java").getAbsolutePath());
+                } else if (Files.exists(Path.of("runtime/bin/java"))) {
+                    jvmArgs.add(new File("runtime/bin/java").getAbsolutePath());
+                } else if (Files.exists(Path.of(System.getProperty("java.home"), "bin/java"))) {
+                    jvmArgs.add(new File(System.getProperty("java.home"), "bin/java").getAbsolutePath());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Could not find Java executable.", "Error", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
+            } else if (osName.contains("windows"))
                 jvmArgs.add(new File("runtime/bin/java.exe").getAbsolutePath());
             else if (osName.contains("linux")) {
                 Path file = Path.of(javaExecPath).toAbsolutePath().getParent().resolve("lib/runtime/bin/java");
@@ -199,7 +212,11 @@ public class StartupHelper {
         } else {
             jvmArgs.add(javaExecPath);
         }
-        if (System.getProperty("os.name").toLowerCase().contains("mac")) jvmArgs.add("-XstartOnFirstThread");
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            jvmArgs.add("-XstartOnFirstThread");
+            jvmArgs.add("-Xdock:name=Quantum Voxel");
+            jvmArgs.add("-Xdock:icon=Resources/Quantum Voxel.icns");
+        }
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(v -> !v.startsWith("-Xmx") && !v.startsWith("-Xms")).toList());
 
         Gson gson = new Gson();
