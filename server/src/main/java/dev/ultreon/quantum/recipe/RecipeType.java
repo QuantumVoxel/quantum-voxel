@@ -11,6 +11,7 @@ import java.util.Objects;
  */
 public final class RecipeType<T extends Recipe> {
     public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<>(CraftingRecipe::deserialize));
+    public static final RecipeType<BlastingRecipe> BLASTING = RecipeType.register("blasting", new RecipeType<>(BlastingRecipe::deserialize)); // TODO: Add blasting
     private final RecipeDeserializer<T> deserializer;
 
     public RecipeType(RecipeDeserializer<T> deserializer) {

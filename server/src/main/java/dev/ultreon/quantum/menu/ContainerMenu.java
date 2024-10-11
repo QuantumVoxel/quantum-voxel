@@ -15,6 +15,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.ApiStatus;
@@ -31,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see ItemStack
  * @see MenuType
  */
-public abstract class ContainerMenu {
+public abstract class ContainerMenu implements Menu {
     private final @NotNull MenuType<?> type;
     private final @NotNull WorldAccess world;
     private final @NotNull Entity entity;
@@ -42,6 +43,7 @@ public abstract class ContainerMenu {
 
     protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
+    private Container<?> container;
 
     /**
      * Creates a new {@link ContainerMenu}
@@ -52,7 +54,8 @@ public abstract class ContainerMenu {
      * @param pos    the position where the menu is opened.
      * @param size   the number of slots.
      */
-    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size) {
+    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, Container<?> container) {
+        this.container = container;
         Preconditions.checkNotNull(type, "Menu type cannot be null!");
         Preconditions.checkNotNull(world, "World cannot be null!");
         Preconditions.checkNotNull(entity, "Entity cannot be null!");
@@ -276,5 +279,9 @@ public abstract class ContainerMenu {
         }
 
         return idx;
+    }
+
+    public Container<?> getContainer() {
+        return container;
     }
 }

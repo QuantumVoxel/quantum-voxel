@@ -5,6 +5,7 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 
@@ -61,5 +62,10 @@ public abstract class BlockEntity implements CapabilityHolder {
 
     public void tick() {
         // For override
+    }
+
+
+     public int getCapacity(CapabilityType<?, ?> capability) {
+        return 0;
     }
 }

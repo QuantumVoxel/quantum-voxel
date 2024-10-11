@@ -5,6 +5,7 @@ import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.registry.AbstractRegistryMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
+import dev.ultreon.quantum.world.container.Container;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -79,5 +80,10 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
 
     public Class<T> getType() {
         return type;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends Container<?>> T[] findRecipe(C menu) {
+        return (T[]) this.registry.values().stream().filter(t -> t.canCraft(menu)).toArray();
     }
 }

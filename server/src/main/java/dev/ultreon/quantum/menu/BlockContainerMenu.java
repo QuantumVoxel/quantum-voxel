@@ -22,7 +22,7 @@ public abstract class BlockContainerMenu extends ContainerMenu {
      * @param pos         the position where the menu is opened.
      * @param size        the number of slots.
      */
-    protected BlockContainerMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockEntity blockEntity, @Nullable BlockVec pos, int size) {
+    protected BlockContainerMenu(@NotNull MenuType<? extends BlockContainerMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockEntity blockEntity, @Nullable BlockVec pos, int size) {
         super(type, world, entity, pos, size);
         this.blockEntity = blockEntity;
     }

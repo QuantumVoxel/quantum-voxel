@@ -14,6 +14,10 @@ public class CrateBlockEntity extends ContainerBlockEntity<CrateMenu> {
         super(type, world, pos, ITEM_CAPACITY);
     }
 
+    public CrateBlockEntity(World world, BlockVec pos) {
+        this(BlockEntityTypes.CRATE, world, pos);
+    }
+
     @Override
     public @NotNull CrateMenu createMenu(Player player) {
         return new CrateMenu(MenuTypes.CRATE, this.world, player, this, this.pos);

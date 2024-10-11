@@ -310,6 +310,7 @@ class QuantumClientLoader implements Runnable {
     private void registerMenuScreens() {
         MenuRegistry.registerScreen(MenuTypes.INVENTORY, InventoryScreen::new);
         MenuRegistry.registerScreen(MenuTypes.CRATE, CrateScreen::new);
+        MenuRegistry.registerScreen(MenuTypes.BLAST_FURNACE, BlastFurnaceScreen::new);
     }
 
     private void stitchTextures() {

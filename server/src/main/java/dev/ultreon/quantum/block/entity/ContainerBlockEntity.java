@@ -3,6 +3,11 @@ package dev.ultreon.quantum.block.entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.world.Audience;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
@@ -13,11 +18,14 @@ import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public abstract class ContainerBlockEntity<T extends ContainerMenu> extends BlockEntity implements ItemContainer<T> {
+public abstract class ContainerBlockEntity<T extends ContainerMenu> extends BlockEntity implements ItemContainer<T>, Audience {
     private final ItemStack[] items;
     private T menu;
+    private final List<Player> watchers = new ArrayList<>();
 
     public ContainerBlockEntity(BlockEntityType<?> type, World world, BlockVec pos, int itemCapacity) {
         super(type, world, pos);
@@ -104,7 +112,7 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
 
     @Override
     public void onGainedViewer(Player player, T menu) {
-        // Implementation purposes
+        this.watchers.add(player);
     }
 
     @Override
@@ -132,5 +140,32 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
         }
 
         return -1;
+    }
+
+    @Override
+    public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
+        for (Player player : watchers) { {
+            if (player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.connection.send(packet);
+            }
+        }}
+    }
+
+    @Override
+    public void sendMessage(String message) {
+        for (Player player : watchers) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.sendMessage(message);
+            }
+        }
+    }
+
+    @Override
+    public void sendMessage(TextObject message) {
+        for (Player player : watchers) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.sendMessage(message);
+            }
+        }
     }
 }

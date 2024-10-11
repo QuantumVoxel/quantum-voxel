@@ -13,6 +13,7 @@ import dev.ultreon.quantum.resources.StaticResource;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
+import dev.ultreon.quantum.world.container.Container;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -145,5 +146,9 @@ public class RecipeManager {
     public void reload(ReloadContext context) {
         this.registryMap.clear();
         this.load(context.getResourceManager());
+    }
+
+    public <T extends Container<?>> BlastingRecipe[] findRecipe(RecipeType<? extends Recipe<T>> blasting, T menu) {
+        return (BlastingRecipe[]) this.registryMap.get(blasting).findRecipe(menu);
     }
 }
