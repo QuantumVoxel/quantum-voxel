@@ -7,6 +7,9 @@ import dev.ultreon.quantum.world.vec.RegionVec;
 import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
+import kotlin.io.FilesKt;
+import lombok.Getter;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -18,13 +21,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Comparator;
 
 /**
  * The WorldStorage class represents a storage system for world data.
  * It provides methods to read, write, and manage data within a given world directory.
  */
 public final class WorldStorage {
+    /**
+     * -- GETTER --
+     *
+     * @return the world directory.
+     */
+    @Getter
     private final Path directory;
     private final Path infoFile;
     private boolean infoLoaded;
@@ -133,19 +141,7 @@ public final class WorldStorage {
             }
         }
 
-        // Create parent directories if necessary
-        if (Files.notExists(worldPath.getParent(), LinkOption.NOFOLLOW_LINKS)) {
-            Files.createDirectories(worldPath.getParent());
-        }
-
         return worldPath;
-    }
-
-    /**
-     * @return the world directory.
-     */
-    public Path getDirectory() {
-        return this.directory;
     }
 
     /**
@@ -178,15 +174,11 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     @CanIgnoreReturnValue
-    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     public boolean delete() throws IOException {
         if (Files.notExists(this.directory)) return false;
-        try (var stream = Files.walk(this.directory)) {
-            stream.sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-            return true;
-        }
+        FilesKt.deleteRecursively(this.directory.toFile());
+        FileUtils.deleteDirectory(this.directory.toFile());
+        return true;
     }
 
     /**
