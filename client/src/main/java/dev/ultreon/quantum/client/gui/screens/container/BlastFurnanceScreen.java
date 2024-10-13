@@ -11,13 +11,13 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class CrateScreen extends ContainerScreen {
-    private static final int CONTAINER_SIZE = 40;
+public class BlastFurnanceScreen extends ContainerScreen {
+    private static final int CONTAINER_SIZE = 36;
     private static final NamespaceID BACKGROUND = QuantumClient.id("textures/gui/container/crate.png");
     private final CrateMenu menu;
 
-    public CrateScreen(CrateMenu menu, TextObject title) {
-        super(menu, title, CrateScreen.CONTAINER_SIZE);
+    public BlastFurnanceScreen(CrateMenu menu, TextObject title) {
+        super(menu, title, BlastFurnanceScreen.CONTAINER_SIZE);
         this.menu = menu;
     }
 
@@ -33,7 +33,7 @@ public class CrateScreen extends ContainerScreen {
 
     @Override
     public NamespaceID getBackground() {
-        return CrateScreen.BACKGROUND;
+        return BlastFurnanceScreen.BACKGROUND;
     }
 
     @Override

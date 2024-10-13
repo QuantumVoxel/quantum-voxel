@@ -668,9 +668,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Set current language
         LanguageManager.setCurrentLanguage(Locale.of("en", "us"));
 
-        // Start memory monitor
-        HardwareMonitor.start();
-
         this.closeButton = new ControlButton(ControlIcon.Close);
         this.maximizeButton = new ControlButton(ControlIcon.Maximize);
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);

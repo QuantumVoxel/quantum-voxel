@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui.screens.container;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.CrateMenu;
+import dev.ultreon.quantum.menu.BlastFurnaceMenu;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import lombok.Getter;
@@ -14,9 +14,9 @@ import java.util.List;
 public class BlastFurnaceScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
     private static final NamespaceID BACKGROUND = QuantumClient.id("textures/gui/container/blast_furnace.png");
-    private final CrateMenu menu;
+    private final BlastFurnaceMenu menu;
 
-    public BlastFurnaceScreen(CrateMenu menu, TextObject title) {
+    public BlastFurnaceScreen(BlastFurnaceMenu menu, TextObject title) {
         super(menu, title, BlastFurnaceScreen.CONTAINER_SIZE);
         this.menu = menu;
     }

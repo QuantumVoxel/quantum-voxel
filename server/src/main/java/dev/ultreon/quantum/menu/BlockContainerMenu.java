@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -21,9 +22,10 @@ public abstract class BlockContainerMenu extends ContainerMenu {
      * @param blockEntity the block entity where the menu is opened in.
      * @param pos         the position where the menu is opened.
      * @param size        the number of slots.
+     * @param container
      */
-    protected BlockContainerMenu(@NotNull MenuType<? extends BlockContainerMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockEntity blockEntity, @Nullable BlockVec pos, int size) {
-        super(type, world, entity, pos, size);
+    protected BlockContainerMenu(@NotNull MenuType<? extends BlockContainerMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockEntity blockEntity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
+        super(type, world, entity, pos, size, container);
         this.blockEntity = blockEntity;
     }
 

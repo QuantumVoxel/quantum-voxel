@@ -60,6 +60,6 @@ public class BlastFurnaceBlockEntity extends ContainerBlockEntity<BlastFurnaceMe
 
     @Override
     public @NotNull BlastFurnaceMenu createMenu(Player player) {
-        return new BlastFurnaceMenu(MenuTypes.BLAST_FURNACE, this.world, player, this, this.pos);
+        return new BlastFurnaceMenu(MenuTypes.BLAST_FURNACE, this.world, player, this, this.pos, this);
     }
 }

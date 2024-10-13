@@ -18,6 +18,7 @@ import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.debug.*;
 import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
+import dev.ultreon.quantum.client.gui.screens.container.BlastFurnaceScreen;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;

@@ -5,6 +5,7 @@ import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,13 +21,14 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
     /**
      * Creates a new {@link BlastFurnaceMenu}
      *
-     * @param type   the type of the menu.
-     * @param world  the world where the menu is opened in.
-     * @param entity the entity that opened the menu.
-     * @param pos    the position where the menu is opened.
+     * @param type      the type of the menu.
+     * @param world     the world where the menu is opened in.
+     * @param entity    the entity that opened the menu.
+     * @param pos       the position where the menu is opened.
+     * @param container
      */
-    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos) {
-        this(type, world, entity, BlastFurnaceMenu.getBlockEntity(world, pos), pos);
+    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos, @Nullable Container<?> container) {
+        this(type, world, entity, BlastFurnaceMenu.getBlockEntity(world, pos), pos, container);
     }
 
     /**
@@ -46,13 +48,14 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
     /**
      * Creates a new {@link BlastFurnaceMenu}
      *
-     * @param type   the type of the menu.
-     * @param world  the world where the menu is opened in.
-     * @param entity the entity that opened the menu.
-     * @param pos    the position where the menu is opened.
+     * @param type      the type of the menu.
+     * @param world     the world where the menu is opened in.
+     * @param entity    the entity that opened the menu.
+     * @param pos       the position where the menu is opened.
+     * @param container
      */
-    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlastFurnaceBlockEntity blockEntity, @Nullable BlockVec pos) {
-        super(type, world, entity, blockEntity, pos, 63);
+    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlastFurnaceBlockEntity blockEntity, @Nullable BlockVec pos, @Nullable Container<?> container) {
+        super(type, world, entity, blockEntity, pos, 63, container);
 
         this.blockEntity = blockEntity;
 

@@ -122,8 +122,8 @@ public final class WorldStorage {
         var worldPath = this.validatePath(path);
 
         // Create the directory if it doesn't exist
-        if (Files.notExists(worldPath.getParent(), LinkOption.NOFOLLOW_LINKS)) {
-            Files.createDirectories(worldPath.getParent());
+        if (Files.notExists(worldPath, LinkOption.NOFOLLOW_LINKS)) {
+            Files.createDirectories(worldPath);
         }
     }
 

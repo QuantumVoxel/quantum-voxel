@@ -43,7 +43,7 @@ public abstract class ContainerMenu implements Menu {
 
     protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
-    private Container<?> container;
+    private final Container<?> container;
 
     /**
      * Creates a new {@link ContainerMenu}
@@ -54,7 +54,7 @@ public abstract class ContainerMenu implements Menu {
      * @param pos    the position where the menu is opened.
      * @param size   the number of slots.
      */
-    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, Container<?> container) {
+    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
         this.container = container;
         Preconditions.checkNotNull(type, "Menu type cannot be null!");
         Preconditions.checkNotNull(world, "World cannot be null!");

@@ -77,11 +77,14 @@ public class WorldCreationScreen extends Screen {
         String folderName = WorldStorage.createFolderName();
         WorldStorage storage = new WorldStorage(QuantumClient.data("worlds").child(folderName).file());
 
+
         try {
             if (storage.exists(".")) {
                 this.client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal("World already exists")).icon(MessageIcon.ERROR).build());
                 return;
             }
+
+            storage.createDir(".");
 
             try {
                 storage.saveInfo(new WorldSaveInfo(
@@ -93,6 +96,7 @@ public class WorldCreationScreen extends Screen {
                         DateTime.current()
                 ));
             } catch (IOException e) {
+                e.printStackTrace();
                 String localizedMessage = e.getLocalizedMessage();
                 this.client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal(localizedMessage.substring(0, Math.min(localizedMessage.length() - 1, 50)))).icon(MessageIcon.ERROR).build());
                 return;

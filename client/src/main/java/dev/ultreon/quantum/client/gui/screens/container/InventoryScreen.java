@@ -140,7 +140,7 @@ public class InventoryScreen extends ContainerScreen {
         }
     }
 
-    private List<TextObject> withRecipeInfo(Recipe recipe, List<TextObject> description) {
+    private List<TextObject> withRecipeInfo(Recipe<?> recipe, List<TextObject> description) {
         var result = new ArrayList<TextObject>();
         var ingredients = recipe.ingredients();
         if (!ingredients.isEmpty()) {

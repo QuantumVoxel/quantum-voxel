@@ -25,7 +25,7 @@ public class Inventory extends ContainerMenu {
     private final Player holder;
 
     public Inventory(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos) {
-        super(type, world, entity, pos, MAX_SLOTS);
+        super(type, world, entity, pos, MAX_SLOTS, null);
 
         if (!(entity instanceof Player player)) {
             throw new IllegalArgumentException("Entity must be a player!");
