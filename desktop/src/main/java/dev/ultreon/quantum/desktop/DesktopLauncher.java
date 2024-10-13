@@ -286,23 +286,7 @@ public class DesktopLauncher {
         }
 
         private void setupMacIcon() {
-            if (SharedLibraryLoader.isMac) {
-//                // Set the dock icon
-//                InputStream iconStream = MacOSDockIcon.class.getResourceAsStream("/icon.icns");
-//                if (iconStream == null) {
-//                    throw new RuntimeException("Failed to extract icon.icns");
-//                }
-//
-//                try {
-//                    Path icon = Files.createTempDirectory("quantum-voxel");
-//                    icon = icon.resolve("icon.icns");
-//                    Files.copy(iconStream, icon);
-//
-//                    MacOSDockIcon.setDockIcon(Gdx.files.internal("icon.icns"));
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-            } else {
+            if (Taskbar.isTaskbarSupported()) {
                 Taskbar taskbar = Taskbar.getTaskbar();
 
                 if (taskbar != null) {
