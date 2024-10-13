@@ -110,36 +110,7 @@ public class WorldLoadScreen extends Screen {
                 Thread.sleep(100);
             }
 
-            if (this.client.screen != null) {
-                return;
-            }
             ChunkVec chunkVec = Objects.requireNonNull(this.client.player, "Player is null").getChunkVec();
-            int chunks = 0;
-            for (int x = -world.getRenderDistance(); x <= world.getRenderDistance(); x++) {
-                for (int y = -world.getRenderDistance(); y <= world.getRenderDistance(); y++) {
-                    for (int z = -world.getRenderDistance(); z <= world.getRenderDistance(); z++) {
-                        ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + x, chunkVec.getIntY() + y, chunkVec.getIntZ() + z, ChunkVecSpace.WORLD);
-                        this.client.connection.send(new C2SRequestChunkLoadPacket(relativePos));
-
-                        if (this.client.screen != null) {
-                            return;
-                        }
-                        chunks++;
-
-                        if (chunks % 10 == 0) {
-                            // Wait half a second to avoid spamming
-                            Thread.sleep(500);
-                        }
-                    }
-                }
-            }
-
-            if (this.client.screen != null) {
-                return;
-            }
-
-            this.chunksToLoadCount = chunks;
-
             this.client.connection.send(new C2SRequestChunkLoadPacket(chunkVec));
 
             this.message("Waiting for server to finalize...");
@@ -163,7 +134,6 @@ public class WorldLoadScreen extends Screen {
     }
 
     private void message(String message) {
-        WorldLoadScreen.LOGGER.debug(message);
         this.descriptionLabel.text().setRaw(message);
     }
 
