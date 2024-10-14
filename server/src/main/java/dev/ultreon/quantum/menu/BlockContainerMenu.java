@@ -2,6 +2,7 @@ package dev.ultreon.quantum.menu;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.block.entity.BlockEntity;
+import dev.ultreon.quantum.block.entity.ContainerBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.world.container.Container;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BlockContainerMenu extends ContainerMenu {
-    private final BlockEntity blockEntity;
+    private final ContainerBlockEntity<?> blockEntity;
 
     /**
      * Creates a new {@link BlockContainerMenu}
@@ -24,7 +25,7 @@ public abstract class BlockContainerMenu extends ContainerMenu {
      * @param size        the number of slots.
      * @param container
      */
-    protected BlockContainerMenu(@NotNull MenuType<? extends BlockContainerMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockEntity blockEntity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
+    protected BlockContainerMenu(@NotNull MenuType<? extends BlockContainerMenu> type, @NotNull World world, @NotNull Entity entity, ContainerBlockEntity<?> blockEntity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
         super(type, world, entity, pos, size, container);
         this.blockEntity = blockEntity;
     }
@@ -33,11 +34,37 @@ public abstract class BlockContainerMenu extends ContainerMenu {
         return this.blockEntity;
     }
 
+    @Override
+    public void build() {
+        super.build();
+
+        if (blockEntity instanceof ContainerBlockEntity<?> containerBlock && !containerBlock.getWorld().isClientSide()) {
+            for (int i = 0; i < containerBlock.getItemCapacity(); i++) {
+                this.slots[i] = containerBlock.getSlot(i);
+            }
+        }
+    }
+
+    @Override
+    public void addWatcher(Player player) {
+        super.addWatcher(player);
+
+        this.blockEntity.onGainedViewer(player);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void removeWatcher(Player player) {
+        super.removeWatcher(player);
+
+        this.blockEntity.onLostViewer(player);
+    }
+
     @CanIgnoreReturnValue
     protected int inventoryMenu(int idx, int offX, int offY) {
         if (getEntity() instanceof Player player) {
             for (int x = 0; x < 9; x++) {
-                this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 70));
+                this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 7, offY + 70));
             }
 
             for (int x = 0; x < 9; x++) {

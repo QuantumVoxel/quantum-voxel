@@ -1,34 +1,31 @@
 package dev.ultreon.quantum.menu;
 
+import com.google.common.collect.Iterators;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class BlastFurnaceMenu extends BlockContainerMenu {
-    public final ItemSlot input = new ItemSlot(0, this, new ItemStack(), 56, 6);
-    public final OutputSlot output = new OutputSlot(1, this, new ItemStack(), 110, 25);
-    public final ItemSlot fuel = new ItemSlot(2, this, new ItemStack(), 56, 44);
     private final BlastFurnaceBlockEntity blockEntity;
 
     /**
      * Creates a new {@link BlastFurnaceMenu}
      *
-     * @param type      the type of the menu.
-     * @param world     the world where the menu is opened in.
-     * @param entity    the entity that opened the menu.
-     * @param pos       the position where the menu is opened.
-     * @param container
+     * @param type   the type of the menu.
+     * @param world  the world where the menu is opened in.
+     * @param entity the entity that opened the menu.
+     * @param pos    the position where the menu is opened.
      */
-    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos, @Nullable Container<?> container) {
-        this(type, world, entity, BlastFurnaceMenu.getBlockEntity(world, pos), pos, container);
+    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos) {
+        this(type, world, entity, BlastFurnaceMenu.getBlockEntity(world, pos), pos);
     }
 
     /**
@@ -48,14 +45,13 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
     /**
      * Creates a new {@link BlastFurnaceMenu}
      *
-     * @param type      the type of the menu.
-     * @param world     the world where the menu is opened in.
-     * @param entity    the entity that opened the menu.
-     * @param pos       the position where the menu is opened.
-     * @param container
+     * @param type   the type of the menu.
+     * @param world  the world where the menu is opened in.
+     * @param entity the entity that opened the menu.
+     * @param pos    the position where the menu is opened.
      */
-    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlastFurnaceBlockEntity blockEntity, @Nullable BlockVec pos, @Nullable Container<?> container) {
-        super(type, world, entity, blockEntity, pos, 63, container);
+    public BlastFurnaceMenu(@NotNull MenuType<? extends BlastFurnaceMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlastFurnaceBlockEntity blockEntity, @Nullable BlockVec pos) {
+        super(type, world, entity, blockEntity, pos, 63, blockEntity);
 
         this.blockEntity = blockEntity;
 
@@ -64,11 +60,16 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
 
     @Override
     public void build() {
-        int idx = 0;
+        final ItemSlot input = new ItemSlot(0, this, blockEntity.getInput(), 56, 6);
+        final OutputSlot output = new OutputSlot(1, this, blockEntity.getOutput(), 110, 25);
+        final ItemSlot fuel = new ItemSlot(2, this, blockEntity.getFuel(), 56, 44);
         this.addSlot(input);
         this.addSlot(output);
         this.addSlot(fuel);
-        
+        int idx = 3;
+
+        super.build();
+
         this.inventoryMenu(idx, 0, 89);
     }
 
@@ -77,7 +78,7 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
         super.onItemChanged(slot);
 
         int index = slot.getIndex();
-        if (index >= 27) return;
+        if (index >= 3) return;
         BlastFurnaceBlockEntity crate = getBlockEntity();
         if (crate == null) return;
 
@@ -94,5 +95,20 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
             if (slot == null) continue;
             slot.setItem(items.get(i), false);
         }
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return Iterators.forArray(this.get(0).getItem(), this.get(1).getItem(), this.get(2).getItem());
+    }
+
+    @Override
+    public List<ItemSlot> getInputs() {
+        return List.of(this.get(0));
+    }
+
+    @Override
+    public List<ItemSlot> getOutputs() {
+        return List.of(this.get(1));
     }
 }

@@ -14,6 +14,8 @@ import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class Inventory extends ContainerMenu {
@@ -114,5 +116,20 @@ public class Inventory extends ContainerMenu {
 
     public Player getHolder() {
         return this.holder;
+    }
+
+    @Override
+    public List<ItemSlot> getInputs() {
+        return List.of(this.slots);
+    }
+
+    @Override
+    public List<ItemSlot> getOutputs() {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return Arrays.stream(this.slots).map(ItemSlot::getItem).iterator();
     }
 }

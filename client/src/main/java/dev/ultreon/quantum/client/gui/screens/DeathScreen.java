@@ -32,12 +32,12 @@ public class DeathScreen extends Screen {
 
         this.respawnButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.death.respawn"))
                 .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3))
-                .callback(this::respawn)
+                .getCallback(this::respawn)
                 .translation("quantum.screen.death.respawn"));
 
         this.exitWorldButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"))
                         .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3 + 25)))
-                .callback(this::exitWorld)
+                .getCallback(this::exitWorld)
                 .translation("quantum.ui.exitWorld");
     }
 

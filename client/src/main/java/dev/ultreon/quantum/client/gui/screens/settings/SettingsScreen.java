@@ -33,18 +33,18 @@ public class SettingsScreen extends TabbedUI {
 
         builder.add(TextButton.of(UITranslations.BACK, 50))
                 .bounds(() -> new Bounds(20, 29, 48, 19))
-                .callback(button -> back());
+                .getCallback(button -> back());
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.settings.configs"), 50))
                 .bounds(() -> new Bounds(70, 29, 48, 19))
-                .callback(button -> this.client.showScreen(new CraftyConfigGui(this)));
+                .getCallback(button -> this.client.showScreen(new CraftyConfigGui(this)));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.language"), 50))
                 .bounds(() -> new Bounds(120, 29, 48, 19))
-                .callback(button -> this.client.showScreen(new LanguageScreen(this)));
+                .getCallback(button -> this.client.showScreen(new LanguageScreen(this)));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.credits"), 50))
                 .bounds(() -> new Bounds(170, 29, 48, 19))
-                .callback(button -> this.client.showScreen(new CreditsScreen(this)));
+                .getCallback(button -> this.client.showScreen(new CreditsScreen(this)));
     }
 }

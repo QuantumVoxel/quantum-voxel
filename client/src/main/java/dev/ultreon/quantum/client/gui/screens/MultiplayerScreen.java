@@ -37,8 +37,8 @@ public class MultiplayerScreen extends Screen {
 
         this.joinButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98)
                 .position(() -> new Position(this.size.width / 2 + 2, this.size.height / 2 + 15))
-                .type(Button.Type.DARK_EMBED)
-                .callback(this::joinServer));
+                .getType(Button.Type.DARK_EMBED)
+                .getCallback(this::joinServer));
         this.joinButton.disable();
     }
 

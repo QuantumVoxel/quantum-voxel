@@ -34,11 +34,11 @@ public class WorldEditScreen extends Screen {
                 .callback(this::updateName);
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.worlds.edit.save")))
-                .callback(this::save)
+                .getCallback(this::save)
                 .bounds(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 100, 200, 20));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.worlds.edit.cancel")))
-                .callback(this::cancel)
+                .getCallback(this::cancel)
                 .bounds(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 130, 200, 20));
 
     }

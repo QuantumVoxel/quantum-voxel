@@ -51,29 +51,29 @@ public class WorldSelectionScreen extends Screen {
 
         this.prevButton = builder.add(TextButton.of(TextObject.literal("<"), 150)
                 .bounds(() -> new Bounds(20, this.getHeight() / 2 - (this.getHeight() / 2 - 40) - 20, 20, this.getHeight() - 80))
-                .callback(caller -> scrollLeft()));
+                .getCallback(caller -> scrollLeft()));
 
         this.nextButton = builder.add(TextButton.of(TextObject.literal(">"), 150)
                 .bounds(() -> new Bounds(this.getWidth() - 40, this.getHeight() / 2 - (this.getHeight() / 2 - 40) - 20, 20, this.getHeight() - 80))
-                .callback(caller -> scrollRight()));
+                .getCallback(caller -> scrollRight()));
 
         builder.add(Panel.create()
                 .bounds(() -> new Bounds(-5, this.getHeight() - 41, this.getWidth() + 10, 46)));
 
         this.createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
                 .position(() -> new Position(this.getWidth() / 2 - 227, this.getHeight() - 31))
-                .callback(this::createWorld)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::createWorld)
+                .getType(Button.Type.DARK_EMBED));
 
         this.playButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.play"), 150)
                 .position(() -> new Position(this.getWidth() / 2 - 75, this.getHeight() - 31))
-                .callback(this::playWorld)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::playWorld)
+                .getType(Button.Type.DARK_EMBED));
 
         this.deleteWorld = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
                 .position(() -> new Position(this.getWidth() / 2 + 77, this.getHeight() - 31))
-                .callback(this::deleteWorld)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::deleteWorld)
+                .getType(Button.Type.DARK_EMBED));
     }
 
     private void selectWorld(WorldCardList.Entry entry) {

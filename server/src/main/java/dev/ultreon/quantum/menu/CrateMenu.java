@@ -9,6 +9,8 @@ import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class CrateMenu extends BlockContainerMenu {
@@ -66,6 +68,7 @@ public class CrateMenu extends BlockContainerMenu {
             }
         }
 
+        super.build();
 
         this.inventoryMenu(idx, 0, 89);
     }
@@ -92,5 +95,20 @@ public class CrateMenu extends BlockContainerMenu {
             if (slot == null) continue;
             slot.setItem(items.get(i), false);
         }
+    }
+
+    @Override
+    public List<ItemSlot> getInputs() {
+        return List.of();
+    }
+
+    @Override
+    public List<ItemSlot> getOutputs() {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return Arrays.stream(slots).map(ItemSlot::getItem).iterator();
     }
 }

@@ -28,11 +28,11 @@ public class RestartConfirmScreen extends Screen {
 
         builder.add(TextButton.of(UITranslations.YES, 95)
                 .position(() -> new Position(this.getWidth() / 2 - 100, this.getHeight() / 2 + 50))
-                .callback(this::restart));
+                .getCallback(this::restart));
 
         builder.add(TextButton.of(UITranslations.NO, 95)
                 .position(() -> new Position(this.getWidth() / 2 + 5, this.getHeight() / 2 + 50))
-                .callback(this::onBack));
+                .getCallback(this::onBack));
     }
 
     private void restart(TextButton caller) {

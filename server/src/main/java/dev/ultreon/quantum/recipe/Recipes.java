@@ -65,5 +65,15 @@ public class Recipes {
         recipes.register(new NamespaceID("stone_axe"), new CraftingRecipe(
                 List.of(new ItemStack(Items.ROCK, 2), new ItemStack(Items.STICK, 1)),
                 new ItemStack(Items.STONE_AXE)));
+
+        recipes.register(new NamespaceID("smelt_iron"), new BlastingRecipe(
+                new ItemStack(Items.RAW_IRON, 1),
+                1000,
+                200, new ItemStack(Items.IRON_INGOT)));
+
+        recipes.register(new NamespaceID("smelt_iron"), new BlastingRecipe(
+                new ItemStack(Items.IRON_ORE, 1),
+                1000,
+                200, new ItemStack(Items.IRON_INGOT)));
     }
 }

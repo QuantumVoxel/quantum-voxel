@@ -2,9 +2,12 @@ package dev.ultreon.quantum.block.entity;
 
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.menu.BlockEntitySlot;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChanged;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.Audience;
@@ -16,14 +19,14 @@ import dev.ultreon.quantum.world.capability.ItemStorageCapability;
 import dev.ultreon.quantum.world.container.ItemContainer;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
+import org.codehaus.groovy.util.ArrayIterator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class ContainerBlockEntity<T extends ContainerMenu> extends BlockEntity implements ItemContainer<T>, Audience {
     private final ItemStack[] items;
+    private final ItemSlot[] slots;
     private T menu;
     private final List<Player> watchers = new ArrayList<>();
 
@@ -34,6 +37,12 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
 
         for (int i = 0; i < items.length; i++) {
             items[i] = ItemStack.empty();
+        }
+
+        this.slots = new ItemSlot[itemCapacity];
+
+        for (int i = 0; i < slots.length; i++) {
+            slots[i] = new BlockEntitySlot(i, this, this::getItem, this::setItem, this::update);
         }
     }
 
@@ -72,28 +81,19 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     @Override
     public void set(int slot, ItemStack item) {
         items[slot] = item;
+        update(slot);
     }
 
     @Override
     public ItemStack remove(int slot) {
         ItemStack item = items[slot];
         items[slot] = ItemStack.empty();
+        update(slot);
         return item;
     }
 
-    @Override
-    public ItemStack get(int x, int y) {
-        return get(y * 3 + x);
-    }
-
-    @Override
-    public void set(int x, int y, ItemStack item) {
-        set(y * 3 + x, item);
-    }
-
-    @Override
-    public ItemStack remove(int x, int y) {
-        return remove(y * 3 + x);
+    public void update(int slot) {
+        this.sendPacket(new S2CMenuItemChanged(slot, items[slot]));
     }
 
     @Override
@@ -111,15 +111,13 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     public abstract T createMenu(Player player);
 
     @Override
-    public void onGainedViewer(Player player, T menu) {
+    public void onGainedViewer(Player player) {
         this.watchers.add(player);
     }
 
     @Override
-    public void onLostViewer(Player player, T menu) {
-        if (this.menu != menu) return;
-
-        if (this.menu.isOnItsOwn()) {
+    public void onLostViewer(Player player) {
+        if (this.menu != null && this.menu.isOnItsOwn()) {
             this.menu = null;
         }
     }
@@ -167,5 +165,14 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
                 serverPlayer.sendMessage(message);
             }
         }
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return new ArrayIterator<>(this.items);
+    }
+
+    public ItemSlot getSlot(int slot) {
+        return this.slots[slot];
     }
 }

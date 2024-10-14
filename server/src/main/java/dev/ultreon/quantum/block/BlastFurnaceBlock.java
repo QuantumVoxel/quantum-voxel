@@ -1,15 +1,21 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockDataEntry;
+import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
+import dev.ultreon.quantum.block.entity.BlockEntity;
+import dev.ultreon.quantum.block.entity.CrateBlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.block.state.BlockStateDefinition;
 import dev.ultreon.quantum.block.state.StateProperties;
+import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
-public class BlastFurnaceBlock extends Block {
+public class BlastFurnaceBlock extends EntityBlock {
     public BlastFurnaceBlock(Properties properties) {
         super(properties);
     }
@@ -25,5 +31,24 @@ public class BlastFurnaceBlock extends Block {
     @Override
     public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockState blockState) {
         super.onPlace(world, pos, blockState);
+    }
+
+    @Override
+    protected @NotNull BlockEntity createBlockEntity(World world, BlockVec pos) {
+        return new BlastFurnaceBlockEntity(world, pos);
+    }
+
+
+    @Override
+    public @NotNull UseResult use(@NotNull WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
+        super.use(world, player, item, pos);
+
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof BlastFurnaceBlockEntity blastFurnace && world.isClientSide()) {
+            blastFurnace.open(player);
+            return UseResult.ALLOW;
+        }
+
+        return UseResult.SKIP;
     }
 }

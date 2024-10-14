@@ -43,7 +43,7 @@ public class LanguageScreen extends Screen {
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK)
                 .bounds(() -> new Bounds(this.size.width / 2 - 75, this.size.height - 30, 150, 21))
-                .callback(caller -> this.back()));
+                .getCallback(caller -> this.back()));
     }
 
     private void renderItem(Renderer renderer, Locale locale, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {

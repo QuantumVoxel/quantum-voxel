@@ -1,30 +1,30 @@
 package dev.ultreon.quantum.recipe;
 
 import de.marhali.json5.Json5Object;
-import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.BlastFurnaceMenu;
-import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
+import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.container.BlastFurnaceContainer;
-import dev.ultreon.quantum.world.container.ItemContainer;
+import dev.ultreon.quantum.world.container.Container;
 import lombok.Getter;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public final class BlastingRecipe implements Recipe<BlastFurnaceContainer> {
+@Getter
+public final class BlastingRecipe implements Recipe {
     private final ItemStack input;
-    @Getter
     private final int minTemperature;
+    private final int cookTime;
     private final ItemStack result;
 
-    public BlastingRecipe(ItemStack input, int minTemperature, ItemStack result) {
+    public BlastingRecipe(ItemStack input, int minTemperature, int cookTime, ItemStack result) {
         this.input = input;
         this.minTemperature = minTemperature;
+        this.cookTime = cookTime;
         this.result = result;
     }
 
@@ -36,11 +36,11 @@ public final class BlastingRecipe implements Recipe<BlastFurnaceContainer> {
     }
 
     @Override
-    public ItemStack craft(Inventory inventory) {
+    public ItemStack craft(Menu inventory) {
         var result = this.result.copy();
         var input = this.input.copy();
 
-        for (ItemSlot slot : inventory.slots) {
+        for (ItemSlot slot : inventory.getInputs()) {
             if (slot.isEmpty()) {
                 continue;
             }
@@ -56,10 +56,10 @@ public final class BlastingRecipe implements Recipe<BlastFurnaceContainer> {
     }
 
     @Override
-    public boolean canCraft(Inventory inventory) {
+    public boolean canCraft(Menu menu) {
         var input = this.input.copy();
 
-        for (ItemSlot slot : inventory.slots) {
+        for (ItemSlot slot : menu.getInputs()) {
             if (slot.isEmpty()) {
                 continue;
             }
@@ -75,7 +75,6 @@ public final class BlastingRecipe implements Recipe<BlastFurnaceContainer> {
     }
 
     private static void collectItems(ItemSlot slot, ItemStack copy, boolean simulate) {
-        int i = 0;
         if (copy.sameItemSameData(slot.getItem())) {
             int count = slot.getItem().getCount();
             int actualAmount = copy.shrink(count);
@@ -97,7 +96,7 @@ public final class BlastingRecipe implements Recipe<BlastFurnaceContainer> {
         int minTemperature = object.getAsJson5Primitive("min_temperature").getAsInt();
         ItemStack result = ItemStack.deserialize(object.getAsJson5Object("result"));
 
-        return new BlastingRecipe(input, minTemperature, result);
+        return new BlastingRecipe(input, minTemperature, 200, result);
     }
 
     @Override

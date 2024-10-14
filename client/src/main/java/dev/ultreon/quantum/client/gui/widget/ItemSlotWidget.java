@@ -1,24 +1,31 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.menu.ItemSlot;
 import org.checkerframework.common.value.qual.IntRange;
 
 public class ItemSlotWidget extends Widget {
     public final ItemSlot slot;
+    private static final Color COLOR = new Color(1, 1, 1, .5f);
 
-    public ItemSlotWidget(ItemSlot slot, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
-        super(width, height);
+    public ItemSlotWidget(ItemSlot slot, @IntRange(from = 0) int x, @IntRange(from = 0) int y) {
+        super(16, 16);
         this.slot = slot;
+        this.setPos(x, y);
     }
 
     @Override
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        renderer.drawItemStack(slot.getItem(), this.pos.x + 8, this.pos.y + 8);
+        renderer.drawItemStack(slot.getItem(), this.pos.x, this.pos.y);
 
-        if (isWithinBounds(mouseX, mouseY)) {
+        if (isHovered && slot.mayPickup(client.player)) {
+            renderer.fill(pos.x, pos.y, size.width, size.height, COLOR);
+        }
+
+        if (isWithinBounds(mouseX, mouseY) && !slot.isEmpty()) {
             renderer.renderTooltip(slot.getItem(), mouseX, mouseY);
         }
     }

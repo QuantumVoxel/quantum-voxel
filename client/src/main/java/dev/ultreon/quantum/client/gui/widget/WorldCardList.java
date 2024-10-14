@@ -119,8 +119,8 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
 
             this.button = TextButton.of(TextObject.translation("quantum.screen.worlds.edit"))
                     .bounds(() -> new Bounds(this.pos.x + 5, this.pos.y + this.size.height - 25, this.size.width - 10, 21))
-                    .type(Button.Type.DARK_EMBED)
-                    .callback(this::openWorldEditScreen);
+                    .getType(Button.Type.DARK_EMBED)
+                    .getCallback(this::openWorldEditScreen);
 
             this.list.defineRoot(this.button);
         }

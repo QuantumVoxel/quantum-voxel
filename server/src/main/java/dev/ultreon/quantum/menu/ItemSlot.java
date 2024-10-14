@@ -4,7 +4,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Item slot for {@link ContainerMenu}.
@@ -64,7 +63,7 @@ public class ItemSlot {
         ItemStack old = this.item;
         this.item = item;
 
-        if (emitEvent) this.container.onItemChanged(this);
+        if (emitEvent) update();
         return old;
     }
 
@@ -78,10 +77,13 @@ public class ItemSlot {
      * @return the item in the slot.
      */
     public ItemStack takeItem() {
-        var copy = this.item;
-        this.item = new ItemStack();
-        this.container.onItemChanged(this);
+        var copy = this.getItem();
+        this.setItem(new ItemStack());
         return copy;
+    }
+
+    public void update() {
+        this.container.onItemChanged(this);
     }
 
     @Override
@@ -90,33 +92,29 @@ public class ItemSlot {
     }
 
     public ItemStack split() {
-        var remainder = this.item.split();
-        this.container.onItemChanged(this);
+        var remainder = this.getItem().split();
+        update();
         return remainder;
     }
 
     public ItemStack split(int amount) {
-        var remainder = this.item.split(amount);
-        this.container.onItemChanged(this);
+        var remainder = this.getItem().split(amount);
+        update();
         return remainder;
     }
 
-    public void update() {
-        this.container.onItemChanged(this);
-    }
-
     public boolean isEmpty() {
-        return this.item.isEmpty();
+        return this.getItem().isEmpty();
     }
 
     public void shrink(int amount) {
-        this.item.shrink(amount);
-        this.container.onItemChanged(this);
+        this.getItem().shrink(amount);
+        update();
     }
 
     public void grow(int amount) {
-        this.item.grow(amount);
-        this.container.onItemChanged(this);
+        this.getItem().grow(amount);
+        update();
     }
 
     public boolean mayPickup(Player player) {

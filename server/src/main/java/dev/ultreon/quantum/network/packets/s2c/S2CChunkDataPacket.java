@@ -72,8 +72,10 @@ public record S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<Bloc
         });
 
         buffer.writeVarInt(this.blockEntities.size());
-        for (int blockEntity : this.blockEntities) {
-            buffer.writeMedium(blockEntityPositions.getInt(blockEntity));
+        IntList blockEntitiesBck = this.blockEntities;
+        for (int beIdx = 0, entitiesSize = blockEntitiesBck.size(); beIdx < entitiesSize; beIdx++) {
+            int blockEntity = blockEntitiesBck.getInt(beIdx);
+            buffer.writeMedium(blockEntityPositions.getInt(beIdx));
             buffer.writeVarInt(blockEntity);
         }
     }

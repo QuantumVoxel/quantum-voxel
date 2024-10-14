@@ -3,6 +3,7 @@ package dev.ultreon.quantum.menu;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import dev.ultreon.quantum.block.entity.ContainerBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.MenuEvents;
@@ -92,7 +93,9 @@ public abstract class ContainerMenu implements Menu {
     /**
      * Builds the menu and fills it with item slots.
      */
-    public abstract void build();
+    public void build() {
+
+    }
 
     public ItemSlot get(int index) {
         Preconditions.checkElementIndex(index, this.slots.length, "Slot index out of chance");
@@ -122,8 +125,8 @@ public abstract class ContainerMenu implements Menu {
     }
 
     @CanIgnoreReturnValue
-    public ItemStack setItem(int index, ItemStack stack) {
-        return this.slots[index].setItem(stack, false);
+    public void setItem(int index, ItemStack stack) {
+        this.slots[index].setItem(stack, false);
     }
 
     public ItemStack getItem(int index) {

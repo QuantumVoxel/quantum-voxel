@@ -1,18 +1,20 @@
 package dev.ultreon.quantum.recipe;
 
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.container.Container;
 
 import java.util.List;
 
-public interface Recipe<T extends Container<?>> {
+public interface Recipe {
     @Deprecated
-    ItemStack craft(Inventory inventory);
+    default ItemStack craft(Inventory inventory) {
+        return null;
+    }
 
-    default ItemStack craft(T input) {
+    default ItemStack craft(Menu input) {
         if (input instanceof Inventory inventory) {
             return craft(inventory);
         }
@@ -20,7 +22,7 @@ public interface Recipe<T extends Container<?>> {
         return null;
     }
 
-    default boolean canCraft(T input) {
+    default boolean canCraft(Menu input) {
         if (input instanceof Inventory inventory) {
             return canCraft(inventory);
         }
@@ -29,7 +31,9 @@ public interface Recipe<T extends Container<?>> {
     }
 
     @Deprecated
-    boolean canCraft(Inventory inventory);
+    default boolean canCraft(Inventory inventory) {
+        return false;
+    }
 
     RecipeType<?> getType();
 

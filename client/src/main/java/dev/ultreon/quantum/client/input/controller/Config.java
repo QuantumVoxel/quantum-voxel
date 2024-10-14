@@ -138,7 +138,7 @@ public class Config {
         public ConfigButton(@IntRange(from = 21) int w, Config config) {
             super(w, 21);
             this.text().set(TextObject.translation("quantum.open_config"));
-            this.callback(button -> new BindingsConfigScreen(QuantumClient.get().screen, config).open());
+            this.getCallback(button -> new BindingsConfigScreen(QuantumClient.get().screen, config).open());
         }
     }
 

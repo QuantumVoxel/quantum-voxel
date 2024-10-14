@@ -29,14 +29,14 @@ public class PersonalSettingsUI {
                 .value(ClientConfig.diagonalFontShadow ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setDiagonalFontShadow));
+                .getCallback(this::setDiagonalFontShadow));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.enforceUnicode"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.enforceUnicode ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setEnforceUnicode));
+                .getCallback(this::setEnforceUnicode));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.blurRadius"), new Slider(ClientConfig.blurRadius == 0 ? 32 : (int) ClientConfig.blurRadius, 4, 128)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))

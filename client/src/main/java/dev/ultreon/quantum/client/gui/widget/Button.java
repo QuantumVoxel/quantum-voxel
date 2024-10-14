@@ -9,6 +9,8 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.sound.event.SoundEvents;
+import lombok.Getter;
+import lombok.Setter;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -16,6 +18,8 @@ import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.client.QuantumClient.id;
 
+@Getter
+@Setter
 public abstract class Button<T extends Button<T>> extends Widget {
     protected final CallbackComponent<T> callback;
     private Type type;
@@ -128,23 +132,15 @@ public abstract class Button<T extends Button<T>> extends Widget {
     public abstract Button<T> bounds(Supplier<Bounds> position);
 
     @SuppressWarnings("unchecked")
-    public T callback(Callback<T> callback) {
+    public T getCallback(Callback<T> callback) {
         this.callback.set(callback);
         return (T) this;
     }
 
-    public CallbackComponent<T> callback() {
-        return this.callback;
-    }
-
     @SuppressWarnings("unchecked")
-    public T type(Type type) {
+    public T getType(Type type) {
         this.type = type;
         return (T) this;
-    }
-
-    public Type type() {
-        return this.type;
     }
 
     protected float getButtonContentOffset() {

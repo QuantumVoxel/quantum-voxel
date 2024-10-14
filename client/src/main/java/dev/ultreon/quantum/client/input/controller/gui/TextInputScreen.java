@@ -86,7 +86,7 @@ public class TextInputScreen extends Screen {
     }
 
     private void addButton(char c, int x, int rowIdx, KeyMappingIcon icon) {
-        Keycap imageButton = this.add(new Keycap(icon, x, rowIdx * 16 + size.height - 85 - getYOffset()).callback(button -> {
+        Keycap imageButton = this.add(new Keycap(icon, x, rowIdx * 16 + size.height - 85 - getYOffset()).getCallback(button -> {
             if (c >= 0x20) {
                 setInput(getInput() + c);
                 return;

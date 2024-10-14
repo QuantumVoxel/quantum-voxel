@@ -12,7 +12,7 @@ public class MenuTypes {
         } else return null;
     });
     public static final MenuType<CrateMenu> CRATE = MenuTypes.register("crate", CrateMenu::new);
-    public static final MenuType<BlastFurnaceMenu> BLAST_FURNACE = MenuTypes.register("blast_furnace", (type, world, entity, pos) -> new BlastFurnaceMenu(type, world, entity, pos, null));
+    public static final MenuType<BlastFurnaceMenu> BLAST_FURNACE = MenuTypes.register("blast_furnace", BlastFurnaceMenu::new);
 
     private static <T extends ContainerMenu> MenuType<T> register(String name, MenuType.MenuBuilder<T> menuBuilder) {
         MenuType<T> menuType = new MenuType<>(menuBuilder);

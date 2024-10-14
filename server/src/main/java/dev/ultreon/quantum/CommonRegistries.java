@@ -4,6 +4,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntityTypes;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.item.Items;
+import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.server.GameCommands;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.world.capability.Capabilities;
@@ -18,6 +19,8 @@ public class CommonRegistries {
         SoundEvents.init();
         ParticleTypes.init();
         Capabilities.init();
+
+        RecipeType.nopInit();
 
         GameCommands.register();
     }

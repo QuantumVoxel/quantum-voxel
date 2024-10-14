@@ -75,7 +75,7 @@ public class ModListScreen extends Screen {
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
                 .position(() -> new Position(5, this.size.height - 51))
-                .callback(button -> {
+                .getCallback(button -> {
                     Mod mod = this.list.getSelected();
                     if (mod != null) {
                         try {
@@ -92,37 +92,37 @@ public class ModListScreen extends Screen {
                         }
                     }
                 })
-                .type(Button.Type.DARK_EMBED));
+                .getType(Button.Type.DARK_EMBED));
         this.configButton.disable();
 
         this.sourcesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.sources"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .callback(this::onSources)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::onSources)
+                .getType(Button.Type.DARK_EMBED));
         this.sourcesButton.isVisible = false;
 
         this.issuesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.issues"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .callback(this::onIssues)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::onIssues)
+                .getType(Button.Type.DARK_EMBED));
         this.issuesButton.isVisible = false;
 
         this.discordInviteButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.discord"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .callback(this::onDiscordInvite)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::onDiscordInvite)
+                .getType(Button.Type.DARK_EMBED));
         this.discordInviteButton.isVisible = false;
 
         this.homepageButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.homepage"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .callback(this::onHomepage)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::onHomepage)
+                .getType(Button.Type.DARK_EMBED));
         this.homepageButton.isVisible = false;
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190)
                 .position(() -> new Position(5, this.size.height - 26))
-                .callback(this::onBack)
-                .type(Button.Type.DARK_EMBED));
+                .getCallback(this::onBack)
+                .getType(Button.Type.DARK_EMBED));
     }
 
     private void onSources(TextButton textButton) {

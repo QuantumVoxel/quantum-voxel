@@ -40,7 +40,7 @@ public class DevPreviewScreen extends Screen {
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.dev.close"))
                 .bounds(() -> new Bounds(client.getScaledWidth() / 2 - 50, size.height - 40, 100, 20))
-                .callback(caller -> this.close()));
+                .getCallback(caller -> this.close()));
     }
 
     /**

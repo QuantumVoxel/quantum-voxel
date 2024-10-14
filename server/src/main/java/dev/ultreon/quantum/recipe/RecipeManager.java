@@ -5,6 +5,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.menu.Inventory;
+import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceCategory;
@@ -14,6 +15,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import dev.ultreon.quantum.world.container.Container;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -21,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RecipeManager {
+    @Getter
     private final QuantumServer server;
     private IdentityMap<RecipeType<?>, RecipeRegistry<Recipe>> registryMap = new IdentityMap<>();
 
@@ -30,6 +33,11 @@ public class RecipeManager {
 
     public void load(ResourceManager resourceManager) {
         List<ResourceCategory> resourceCategory = resourceManager.getResourceCategory(RecipeRegistry.CATEGORY);
+
+        for (RecipeType<?> recipeType : Registries.RECIPE_TYPE.values()) {
+            this.registryMap.put(recipeType, new RecipeRegistry<>());
+        }
+
         for (ResourceCategory cat : resourceCategory) {
             for (StaticResource resource : cat.resources()) {
                 try {
@@ -139,16 +147,15 @@ public class RecipeManager {
         LoadingEvent.UNLOAD_RECIPES.factory().onRecipeState(this);
     }
 
-    public QuantumServer getServer() {
-        return server;
-    }
-
     public void reload(ReloadContext context) {
         this.registryMap.clear();
         this.load(context.getResourceManager());
     }
 
-    public <T extends Container<?>> BlastingRecipe[] findRecipe(RecipeType<? extends Recipe<T>> blasting, T menu) {
-        return (BlastingRecipe[]) this.registryMap.get(blasting).findRecipe(menu);
+    @SuppressWarnings("unchecked")
+    public <T extends Menu, R extends Recipe> List<R> findRecipe(RecipeType<? extends R> blasting, T menu) {
+        RecipeRegistry<?> recipeRegistry = this.registryMap.get(blasting);
+        if (recipeRegistry == null) throw new IllegalArgumentException("Unknown recipe type!");
+        return (List<R>) recipeRegistry.findRecipe(menu);
     }
 }
