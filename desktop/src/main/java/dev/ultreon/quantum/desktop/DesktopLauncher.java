@@ -286,7 +286,7 @@ public class DesktopLauncher {
         }
 
         private void setupMacIcon() {
-            if (Taskbar.isTaskbarSupported()) {
+            if (!SharedLibraryLoader.isMac && Taskbar.isTaskbarSupported()) {
                 Taskbar taskbar = Taskbar.getTaskbar();
 
                 if (taskbar != null) {

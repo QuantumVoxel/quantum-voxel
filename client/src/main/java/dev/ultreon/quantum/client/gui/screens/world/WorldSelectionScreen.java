@@ -101,6 +101,8 @@ public class WorldSelectionScreen extends Screen {
                 .button(TextObject.translation("quantum.ui.yes"), () -> {
                     try {
                         selected.delete();
+                        worldList.clear();
+                        worldList.worlds(this.locateWorlds());
                     } catch (IOException e) {
                         CommonConstants.LOGGER.error("Failed to delete world", e);
                     } finally {

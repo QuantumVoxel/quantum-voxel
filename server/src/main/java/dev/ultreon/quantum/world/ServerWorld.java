@@ -61,7 +61,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * The ServerWorld class represents a server-side world.
@@ -1056,14 +1055,12 @@ public class ServerWorld extends World {
     @Blocking
     public void saveRegion(Region region, boolean dispose) {
         var file = this.storage.regionFile(region.getPos());
-        try (var stream = new GZIPOutputStream(new FileOutputStream(file, false), true)) {
-            var dataStream = new DataOutputStream(stream);
-
-            this.regionStorage.save(region, dataStream, dispose);
+        try {
+            this.regionStorage.save(region, file, dispose);
             if (!region.dirtyWhileSaving) region.dirty = false;
             else region.dirtyWhileSaving = false;
         } catch (IOException e) {
-            World.LOGGER.error(String.format("Failed to save region %s", region.getPos()), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -1897,12 +1894,12 @@ public class ServerWorld extends World {
          * Saves a region to an output stream.
          *
          * @param region  the region to save.
-         * @param stream  the output stream to save to.
+         * @param file  the output stream to save to.
          * @param dispose if true, the region will be disposed after saving.
          * @throws IOException if an I/O error occurs.
          */
         @ApiStatus.Internal
-        public void save(Region region, DataOutputStream stream, boolean dispose) throws IOException {
+        public void save(Region region, File file, boolean dispose) throws IOException {
             synchronized (this) {
                 var pos = region.pos();
 
@@ -1918,16 +1915,16 @@ public class ServerWorld extends World {
                 var idx = 0;
                 CommonConstants.LOGGER.info("Saving " + chunks.size() + " chunks in region " + pos);
                 for (var chunk : chunks) {
-                    if (idx >= World.REGION_SIZE * World.REGION_SIZE)
+                    if (idx >= World.REGION_SIZE * World.REGION_SIZE * World.REGION_SIZE)
                         throw new IllegalArgumentException("Too many chunks in region!");
                     if (chunk.isOriginal()) continue;
                     var localChunkVec = World.toLocalChunkVec(chunk.getVec());
-                    mapType.put("c" + localChunkVec.getIntX() + ";" + localChunkVec.getIntZ(), chunk.save());
+                    mapType.put("c" + localChunkVec.getIntX() + ";" + localChunkVec.getIntY() + ";" + localChunkVec.getIntZ(), chunk.save());
                     idx++;
                 }
 
                 // Write region metadata.
-                DataIo.write(mapType, (DataOutput) stream);
+                DataIo.writeCompressed(mapType, file);
 
                 // Dispose the region if requested.
                 if (dispose) {
