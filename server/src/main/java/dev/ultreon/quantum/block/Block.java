@@ -265,7 +265,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     public BlockState loadBlockState(MapType data) {
-        MapType entriesData = data.getMap("entries");
+        MapType entriesData = data.getMap("Entries");
         return definition.load(entriesData);
     }
 
