@@ -78,6 +78,12 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         super.revalidate();
     }
 
+    public void clear() {
+        entries.clear();
+        this.scrollGoal = 0;
+        this.scrollX = 0;
+    }
+
     @Override
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         if (!GamePlatform.get().hasBackPanelRemoved())
