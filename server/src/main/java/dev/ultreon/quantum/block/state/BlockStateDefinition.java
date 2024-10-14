@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.block.state;
 
+import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.ubo.types.*;
@@ -91,6 +92,17 @@ public class BlockStateDefinition {
                         String value = type.getValue();
                         properties[idx] = value;
                     }
+                    case ByteType type -> {
+                        Byte value = type.getValue();
+
+                        for (Object e : propertyKey.type.getEnumConstants()) {
+                            if (((Enum)e).ordinal() == value) {
+                                properties[idx] = e;
+                                break;
+                            }
+                        }
+                        properties[idx] = defaults[idx];
+                    }
                     case null, default ->
                             throw new IllegalArgumentException("Unsupported property data type: " + (dataType == null ? "null" : dataType.getClass().getSimpleName()));
                 }
@@ -110,6 +122,7 @@ public class BlockStateDefinition {
                     case Integer ignored -> new IntType((int) value);
                     case Boolean ignored -> new BooleanType((boolean) value);
                     case String string -> new StringType(string);
+                    case Enum<?> enum_ -> new ByteType(enum_.ordinal());
                     default ->
                             throw new IllegalArgumentException("Unsupported property value type: " + value.getClass().getName());
                 };
