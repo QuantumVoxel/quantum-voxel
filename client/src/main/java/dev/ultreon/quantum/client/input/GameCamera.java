@@ -13,6 +13,7 @@ import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
+import lombok.Getter;
 
 /**
  * The camera used for the game.
@@ -28,6 +29,12 @@ public class GameCamera extends PerspectiveCamera {
     private float fovModifierGoal = 1;
     private InspectionNode<GameCamera> node;
     private Vector3 hitPosition;
+    /**
+     * -- GETTER --
+     *
+     * @return the eye position in world-coordinates.
+     */
+    @Getter
     private Vec3d camPos;
     private BlockHit hitResult;
     private LocalPlayer player;
@@ -78,10 +85,10 @@ public class GameCamera extends PerspectiveCamera {
         float deltaTime = Gdx.graphics.getDeltaTime();
         if (fovModifierGoal != fovModifier) {
             if (fovModifierGoal > fovModifier) {
-                fovModifier += deltaTime * 2;
+                fovModifier += deltaTime * 12f * Math.abs(fovModifier - fovModifierGoal);
                 if (fovModifier > fovModifierGoal) fovModifier = fovModifierGoal;
             } else {
-                fovModifier -= deltaTime * 2;
+                fovModifier -= deltaTime * 12f * Math.abs(fovModifier - fovModifierGoal);
                 if (fovModifier < fovModifierGoal) fovModifier = fovModifierGoal;
             }
         }
@@ -102,11 +109,10 @@ public class GameCamera extends PerspectiveCamera {
             this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
         }
 
-        float delta = deltaTime;
         float duration = 0.5f;
         if (player.isWalking()) this.walking = true;
         if (!this.walking) this.cameraBop = 0;
-        else this.updateWalkAnim(player, this.cameraBop, delta, duration);
+        else this.updateWalkAnim(player, this.cameraBop, deltaTime, duration);
 
         super.update(true);
     }
@@ -170,13 +176,6 @@ public class GameCamera extends PerspectiveCamera {
                 this.position.set(this.hitPosition.x, this.hitPosition.y, this.hitPosition.z);
             }
         }
-    }
-
-    /**
-     * @return the eye position in world-coordinates.
-     */
-    public Vec3d getCamPos() {
-        return this.camPos;
     }
 
     public Vector3 relative(Vec3d position, Vector3 tmp) {
