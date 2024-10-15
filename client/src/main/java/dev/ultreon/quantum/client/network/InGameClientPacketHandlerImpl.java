@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.network;
 
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -527,6 +528,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 player.refreshChunks();
             }
         });
+    }
+
+    @Override
+    public void onBlockEntityUpdate(BlockVec pos, MapType data) {
+        BlockEntity blockEntity = this.client.world.getBlockEntity(pos);
+        if (blockEntity != null) {
+            blockEntity.onUpdate(data);
+        }
     }
 
     @Override

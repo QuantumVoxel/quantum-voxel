@@ -105,7 +105,7 @@ public class MenuControllerContext extends ControllerContext {
 
         ItemStack carried = client.player.getCursor();
         if (carried.isEmpty()) return false;
-        return slot.slot.mayPlace(carried);
+        return slot.slot.mayPlace(carried.getItem());
     }
 
     private boolean canSplit(QuantumClient client) {
@@ -125,7 +125,7 @@ public class MenuControllerContext extends ControllerContext {
 
         ItemStack carried = client.player.getCursor();
         if (!carried.isEmpty()) return false;
-        return slot.slot.mayPlace(carried);
+        return slot.slot.mayPlace(carried.getItem());
     }
 
     private boolean canDrop(QuantumClient client) {

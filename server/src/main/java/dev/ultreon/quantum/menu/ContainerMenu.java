@@ -184,12 +184,12 @@ public abstract class ContainerMenu implements Menu {
 
         if (rightClick) {
             // Right click transfer
-            if (player.getCursor().isEmpty()) {
+            if (slot.mayPickup(player) && player.getCursor().isEmpty()) {
                 // Split item from slot and put it in the cursor
                 ItemStack item = slot.split();
                 slot.update();
                 player.setCursor(item);
-            } else {
+            } else if (slot.mayPlace(player.getCursor().getItem())) {
                 // Transfer one item from cursor to slot
                 int i = player.getCursor().transferTo(slot.getItem(), 1);
                 if (i == 0) {
@@ -204,7 +204,7 @@ public abstract class ContainerMenu implements Menu {
         ItemStack cursor = player.getCursor();
         ItemStack slotItem = slot.getItem();
 
-        if (!cursor.isEmpty() && cursor.sameItemSameData(slotItem)) {
+        if (slot.mayPlace(cursor.getItem()) && !cursor.isEmpty() && cursor.sameItemSameData(slotItem)) {
             // Take item from cursor and put it in the slot, remaining items are left in the cursor.
             cursor.transferTo(slotItem, cursor.getCount());
             slot.update();
@@ -212,11 +212,11 @@ public abstract class ContainerMenu implements Menu {
             return;
         }
 
-        if (cursor.isEmpty()) {
+        if (slot.mayPickup(player) && cursor.isEmpty()) {
             // Take item from slot and put it in the cursor
             ItemStack toSet = slot.takeItem();
             player.setCursor(toSet);
-        } else {
+        } else if (slot.mayPickup(player)) {
             // Swap items between cursor and slot
             slot.setItem(cursor);
             player.setCursor(slotItem);

@@ -2,6 +2,7 @@ package dev.ultreon.quantum.menu;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import lombok.Getter;
 
@@ -121,7 +122,7 @@ public class ItemSlot {
         return true;
     }
 
-    public boolean mayPlace(ItemStack carried) {
+    public boolean mayPlace(Item carried) {
         return true;
     }
 }

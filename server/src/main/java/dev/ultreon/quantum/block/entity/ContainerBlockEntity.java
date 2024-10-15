@@ -7,6 +7,7 @@ import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.s2c.S2CBlockEntityUpdatePacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChanged;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
@@ -42,7 +43,7 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
         this.slots = new ItemSlot[itemCapacity];
 
         for (int i = 0; i < slots.length; i++) {
-            slots[i] = new BlockEntitySlot(i, this, this::getItem, this::setItem, this::update);
+            slots[i] = new BlockEntitySlot(i, this, this::getItem, this::setItem, this::sendUpdate);
         }
     }
 
@@ -81,18 +82,18 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     @Override
     public void set(int slot, ItemStack item) {
         items[slot] = item;
-        update(slot);
+        sendUpdate(slot);
     }
 
     @Override
     public ItemStack remove(int slot) {
         ItemStack item = items[slot];
         items[slot] = ItemStack.empty();
-        update(slot);
+        sendUpdate(slot);
         return item;
     }
 
-    public void update(int slot) {
+    public void sendUpdate(int slot) {
         this.sendPacket(new S2CMenuItemChanged(slot, items[slot]));
     }
 
@@ -142,11 +143,13 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
 
     @Override
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
-        for (Player player : watchers) { {
-            if (player instanceof ServerPlayer serverPlayer) {
-                serverPlayer.connection.send(packet);
+        for (Player player : watchers) {
+            {
+                if (player instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.connection.send(packet);
+                }
             }
-        }}
+        }
     }
 
     @Override
@@ -174,5 +177,13 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
 
     public ItemSlot getSlot(int slot) {
         return this.slots[slot];
+    }
+
+    protected void sendUpdate() {
+        this.sendPacket(new S2CBlockEntityUpdatePacket(pos, this.getUpdateData()));
+    }
+
+    protected MapType getUpdateData() {
+        return new MapType();
     }
 }

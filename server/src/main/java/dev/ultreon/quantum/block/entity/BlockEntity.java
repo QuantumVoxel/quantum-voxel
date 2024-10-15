@@ -8,11 +8,14 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
+import lombok.Getter;
 
 import java.util.Objects;
 
 public abstract class BlockEntity implements CapabilityHolder {
+    @Getter
     private final BlockEntityType<?> type;
+    @Getter
     protected final World world;
     protected final BlockVec pos;
 
@@ -30,16 +33,8 @@ public abstract class BlockEntity implements CapabilityHolder {
         return world.get(pos);
     }
 
-    public World getWorld() {
-        return world;
-    }
-
     public BlockVec pos() {
         return pos;
-    }
-
-    public BlockEntityType<?> getType() {
-        return type;
     }
 
     public static BlockEntity fullyLoad(World world, BlockVec pos, MapType mapType) {
@@ -65,7 +60,11 @@ public abstract class BlockEntity implements CapabilityHolder {
     }
 
 
-     public int getCapacity(CapabilityType<?, ?> capability) {
+    public int getCapacity(CapabilityType<?, ?> capability) {
         return 0;
+    }
+
+    public void onUpdate(MapType data) {
+
     }
 }

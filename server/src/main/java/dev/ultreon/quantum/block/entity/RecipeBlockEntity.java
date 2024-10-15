@@ -23,9 +23,15 @@ public abstract class RecipeBlockEntity<C extends ContainerMenu, T extends Recip
     public void tick() {
         super.tick();
 
+        if (world.isClientSide()) return;
+
         T currentRecipe = this.getRecipe();
-        if (currentRecipe == null && canRun()) {
-            this.recipe = findRecipe();
+        if (currentRecipe == null) {
+            if (canRun()) {
+                this.recipe = findRecipe();
+            } else {{
+                this.recipe = null;
+            }}
         }
 
         if (recipe != null && !recipe.canCraft(this)) {
@@ -34,6 +40,7 @@ public abstract class RecipeBlockEntity<C extends ContainerMenu, T extends Recip
 
         if (shouldRunTask()) {
             runTask();
+            this.sendUpdate();
         }
     }
 

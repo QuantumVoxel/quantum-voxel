@@ -8,6 +8,7 @@ import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.server.GameCommands;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.world.capability.Capabilities;
+import dev.ultreon.quantum.world.container.FuelRegistry;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 
 public class CommonRegistries {
@@ -22,6 +23,19 @@ public class CommonRegistries {
 
         RecipeType.nopInit();
 
+        registerFuels();
+
         GameCommands.register();
+    }
+
+    private static void registerFuels() {
+        FuelRegistry.register(Items.CRATE, 300);
+        FuelRegistry.register(Items.LOG, 300);
+        FuelRegistry.register(Items.PLANKS, 200);
+        FuelRegistry.register(Items.PLANK, 100);
+        FuelRegistry.register(Items.STICK, 50);
+        FuelRegistry.register(Items.WOODEN_AXE, 150);
+        FuelRegistry.register(Items.WOODEN_SHOVEL, 150);
+        FuelRegistry.register(Items.WOODEN_PICKAXE, 150);
     }
 }

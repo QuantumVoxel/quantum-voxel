@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.menu;
 
+import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 
 public class OutputSlot extends ItemSlot {
@@ -8,7 +9,7 @@ public class OutputSlot extends ItemSlot {
     }
 
     @Override
-    public boolean mayPlace(ItemStack carried) {
+    public boolean mayPlace(Item carried) {
         return false;
     }
 }
