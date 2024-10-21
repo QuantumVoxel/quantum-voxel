@@ -228,7 +228,7 @@ public class ServerWorld extends World {
         block.onPlace(this, blockVec);
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
-            for (CubicDirection direction : CubicDirection.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockVec offset = blockVec.offset(direction);
                 BlockState blockState = this.get(offset);
                 blockState.update(this, offset);
@@ -259,7 +259,7 @@ public class ServerWorld extends World {
         block.onPlace(this, blockVec);
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
-            for (CubicDirection direction : CubicDirection.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockVec offset = blockVec.offset(direction);
                 BlockState blockState = this.get(offset);
                 blockState.update(this, offset);

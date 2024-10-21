@@ -157,9 +157,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     protected @NotNull BlockState getFast(int x, int y, int z) {
-        if (!QuantumClient.isOnRenderThread())
-            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-
         return super.getFast(x, y, z);
     }
 

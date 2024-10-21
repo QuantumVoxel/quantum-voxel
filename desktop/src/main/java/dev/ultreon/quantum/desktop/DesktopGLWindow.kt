@@ -1,161 +1,64 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
-import dev.ultreon.mixinprovider.PlatformOS;
-import dev.ultreon.quantum.GameWindow;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWNativeCocoa;
-import org.lwjgl.glfw.GLFWNativeWin32;
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window
+import dev.ultreon.mixinprovider.PlatformOS
+import org.lwjgl.glfw.GLFW
+import org.lwjgl.glfw.GLFWNativeCocoa
+import org.lwjgl.glfw.GLFWNativeWin32
 
-public class DesktopGLWindow extends DesktopWindow {
-    private final Lwjgl3Window window;
-    private String title;
-    private final int[] xPos = new int[1];
-    private final int[] yPos = new int[1];
+class DesktopGLWindow(private val window: Lwjgl3Window) : DesktopWindow() {
+  private var title: String? = null
+  private val xPos = IntArray(1)
+  private val yPos = IntArray(1)
 
-    public DesktopGLWindow(Lwjgl3Window window) {
-        this.window = window;
+  override fun update() {
+    super.update()
+
+    if (isDragging) {
+      GLFW.glfwGetWindowPos(handle, xPos, yPos)
+    }
+  }
+
+  override fun getHandle(): Long = window.windowHandle
+  override fun isHovered(): Boolean = true
+  override fun isMinimized(): Boolean = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE
+  override fun isMaximized(): Boolean =
+    !PlatformOS.isMac && GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE
+
+  override fun isFocused(): Boolean = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE
+  override fun close() = GLFW.glfwSetWindowShouldClose(handle, true)
+  override fun setVisible(visible: Boolean) = if (visible) GLFW.glfwShowWindow(handle) else GLFW.glfwHideWindow(handle)
+  override fun minimize() = GLFW.glfwIconifyWindow(handle)
+  override fun maximize() = GLFW.glfwMaximizeWindow(handle)
+
+  override fun restore() {
+    if (!PlatformOS.isMac) {
+      GLFW.glfwSetWindowAttrib(handle, GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE)
+      GLFW.glfwSetWindowAttrib(handle, GLFW.GLFW_ICONIFIED, GLFW.GLFW_FALSE)
     }
 
-    @Override
-    public void update() {
-        super.update();
+    GLFW.glfwRestoreWindow(handle)
+  }
 
-        if (isDragging()) {
-            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//            int setX = dragX;
-//            int setY = dragY;
-//
-//            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-//            Point location = pointerInfo.getLocation();
-//            int nx = location.setX;
-//            int ny = location.setY;
-//
-//            int i = nx - setX;
-//            int i1 = ny - setY;
-//
-//            GLFW.glfwSetWindowPos(getHandle(), i + setX - dragOffX, i1 + setY - dragOffY);
-        }
-    }
+  override fun focus() = GLFW.glfwFocusWindow(handle)
+  override fun requestAttention() = GLFW.glfwRequestWindowAttention(handle)
+  override fun setResizable(resizable: Boolean) =
+    GLFW.glfwSetWindowAttrib(handle, GLFW.GLFW_RESIZABLE, if (resizable) GLFW.GLFW_TRUE else GLFW.GLFW_FALSE)
 
-    @Override
-    public long getHandle() {
-        return window.getWindowHandle();
-    }
+  override fun getPeer(): Long =
+    if (PlatformOS.isWindows) GLFWNativeWin32.glfwGetWin32Window(this.handle)
+    else if (PlatformOS.isMac) GLFWNativeCocoa.glfwGetCocoaWindow(this.handle)
+    else -1L
 
-    @Override
-    public boolean isHovered() {
-//        booleanPointerInfo pointerInfo = MouseInfo.getPointerInfo();
-//        Point location = pointerInfo.getLocation();
-//        GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//        int setX = location.setX - xPos[0];
-//        int setY = location.setY - yPos[0];
-//
-//        return setX >= 0 && setX < Gdx.graphics.getWidth() && setY >= 0 && setY < Gdx.graphics.getHeight();
-        return true;
-    }
+  override fun setTitle(title: String) {
+    Gdx.graphics.setTitle(title)
+    this.title = title
+  }
 
-    @Override
-    public boolean isMinimized() {
-        return GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
-    }
+  override fun getTitle(): String = title!!
 
-    @Override
-    public boolean isMaximized() {
-        return !PlatformOS.isMac && GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
-    }
+  override fun setDragging(dragging: Boolean) {
 
-    @Override
-    public boolean isFocused() {
-        return GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE;
-    }
-
-    @Override
-    public void close() {
-        GLFW.glfwSetWindowShouldClose(getHandle(), true);
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        if (visible) {
-            GLFW.glfwShowWindow(getHandle());
-        } else {
-            GLFW.glfwHideWindow(getHandle());
-        }
-    }
-
-    @Override
-    public void minimize() {
-        GLFW.glfwIconifyWindow(getHandle());
-    }
-
-    @Override
-    public void maximize() {
-        GLFW.glfwMaximizeWindow(getHandle());
-    }
-
-    @Override
-    public void restore() {
-        if (!PlatformOS.isMac) {
-            GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
-            GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_ICONIFIED, GLFW.GLFW_FALSE);
-        }
-
-        GLFW.glfwRestoreWindow(getHandle());
-    }
-
-    @Override
-    public void focus() {
-        GLFW.glfwFocusWindow(getHandle());
-    }
-
-    @Override
-    public void requestAttention() {
-        GLFW.glfwRequestWindowAttention(getHandle());
-    }
-
-    @Override
-    public void setResizable(boolean resizable) {
-        GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_RESIZABLE, resizable ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
-    }
-
-    @Override
-    public long getPeer() {
-        if (PlatformOS.isWindows) {
-            return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
-        } else if (PlatformOS.isMac) {
-            return GLFWNativeCocoa.glfwGetCocoaWindow(this.getHandle());
-        } else {
-            return -1L;
-        }
-    }
-
-    @Override
-    public void setTitle(String title) {
-        Gdx.graphics.setTitle(title);
-        this.title = title;
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
-    public void setDragging(boolean dragging) {
-        if (dragging != this.dragging) {
-//            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//            this.dragging = dragging;
-//            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-//            Point location = pointerInfo.getLocation();
-//            int nx = location.setX;
-//            int ny = location.setY;
-//            this.dragX = nx;
-//            this.dragY = ny;
-//            this.dragOffX = nx - xPos[0];
-//            this.dragOffY = ny - yPos[0];
-        }
-    }
+  }
 }

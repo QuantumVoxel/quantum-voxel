@@ -4,7 +4,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.block.state.BlockStateDefinition;
-import dev.ultreon.quantum.block.state.StatePropertyKey;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -203,7 +202,7 @@ public class Block implements DataWriter<MapType> {
         return this.replaceable;
     }
 
-    public boolean shouldOcclude(@NotNull CubicDirection face, @NotNull Chunk chunk, int x, int y, int z) {
+    public boolean shouldOcclude(@NotNull Direction face, @NotNull Chunk chunk, int x, int y, int z) {
         return this.occlude;
     }
 
@@ -223,7 +222,7 @@ public class Block implements DataWriter<MapType> {
         this.onPlace(serverWorld, offset, meta);
     }
 
-    public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable CubicDirection direction) {
+    public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable Direction direction) {
         return true;
     }
 

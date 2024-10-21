@@ -82,6 +82,9 @@ public class Renderer implements Disposable {
     private int scissorOffsetY;
     private boolean blurred;
 
+    private FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+    private FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+
     public static final int FBO_SIZE = 1024;
 
     private final RenderablePool renderablePool = new RenderablePool();
@@ -2895,8 +2898,6 @@ public class Renderer implements Disposable {
 
         this.blurred = true;
         try {
-            FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-            FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
             TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
 
             //Start rendering to an offscreen color buffer
@@ -2971,10 +2972,6 @@ public class Renderer implements Disposable {
             this.flush();
 
             this.batch.setColor(1, 1, 1, 1);
-
-            //dispose of the FBOs
-            blurTargetA.dispose();
-            blurTargetB.dispose();
             this.batch.setColor(1f, 1f, 1f, 1f);
         } finally {
             this.batch.setColor(1, 1, 1, 1);
@@ -2985,11 +2982,20 @@ public class Renderer implements Disposable {
     public void resize(int width, int height) {
         this.width = width;
         this.height = height;
+
+        if (blurTargetA != null) blurTargetA.dispose();
+        if (blurTargetB != null) blurTargetB.dispose();
+
+        blurTargetA = new FrameBuffer(Format.RGBA8888, width, height, false);
+        blurTargetB = new FrameBuffer(Format.RGBA8888, width, height, false);
     }
 
     @Override
     public void dispose() {
         vfxManager.dispose();
+
+        if (blurTargetA != null) blurTargetA.dispose();
+        if (blurTargetB != null) blurTargetB.dispose();
     }
 
     public int getWidth() {

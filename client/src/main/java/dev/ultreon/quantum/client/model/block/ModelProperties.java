@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.model.block;
 
 import dev.ultreon.quantum.client.world.FaceProperties;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 
 import java.util.Objects;
 
@@ -12,9 +12,9 @@ public class ModelProperties {
     public final FaceProperties right;
     public final FaceProperties front;
     public final FaceProperties back;
-    public final CubicDirection rotation;
+    public final Direction rotation;
 
-    public ModelProperties(FaceProperties top, FaceProperties bottom, FaceProperties left, FaceProperties right, FaceProperties front, FaceProperties back, CubicDirection rotation) {
+    public ModelProperties(FaceProperties top, FaceProperties bottom, FaceProperties left, FaceProperties right, FaceProperties front, FaceProperties back, Direction rotation) {
         this.top = top;
         this.bottom = bottom;
         this.left = left;
@@ -24,7 +24,7 @@ public class ModelProperties {
         this.rotation = rotation;
     }
 
-    public ModelProperties(FaceProperties all, CubicDirection rotation) {
+    public ModelProperties(FaceProperties all, Direction rotation) {
         this(all, all, all, all, all, all, rotation);
     }
 
@@ -59,7 +59,7 @@ public class ModelProperties {
         private FaceProperties right = new FaceProperties();
         private FaceProperties front = new FaceProperties();
         private FaceProperties back = new FaceProperties();
-        private CubicDirection horizontalRotation = CubicDirection.NORTH;
+        private Direction horizontalRotation = Direction.NORTH;
 
         public Builder top(FaceProperties top) {
             this.top = top;
@@ -95,7 +95,7 @@ public class ModelProperties {
             return new ModelProperties(this.top, this.bottom, this.left, this.right, this.front, this.back, this.horizontalRotation);
         }
 
-        public Builder rotateHorizontal(CubicDirection direction) {
+        public Builder rotateHorizontal(Direction direction) {
             this.horizontalRotation = direction;
             return this;
         }

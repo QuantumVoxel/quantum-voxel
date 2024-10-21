@@ -2800,4 +2800,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         LOGGER.info("Shutting down Quantum Client");
         Gdx.app.exit();
     }
+
+    public CompletableFuture<Void> runAsyncTask(Runnable o) {
+        return CompletableFuture.runAsync(o, executor);
+    }
 }

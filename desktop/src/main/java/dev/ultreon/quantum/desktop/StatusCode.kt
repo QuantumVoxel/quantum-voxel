@@ -1,20 +1,22 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import dev.ultreon.quantum.OS;
+import dev.ultreon.quantum.OS
 
-public class StatusCode {
-    public static int forAbort() {
-        if (OS.isWindows()) {
-            return 3;
-        } else if (OS.isMac()) {
-            return 6;
-        } else if (OS.isLinux()) {
-            return 6;
-        }
-        return -1;
+object StatusCode {
+  @JvmStatic
+  fun forAbort(): Int {
+    if (OS.isWindows()) {
+      return 3
+    } else if (OS.isMac()) {
+      return 6
+    } else if (OS.isLinux()) {
+      return 6
     }
+    return -1
+  }
 
-    public static int forException() {
-        return OS.isWindows() ? -1 : 1;
-    }
+  @JvmStatic
+  fun forException(): Int {
+    return if (OS.isWindows()) -1 else 1
+  }
 }

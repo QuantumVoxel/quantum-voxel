@@ -1,80 +1,67 @@
-package dev.ultreon.quantum.network.system;
+package dev.ultreon.quantum.network.system
 
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Server;
-import dev.ultreon.quantum.network.PacketData;
-import dev.ultreon.quantum.network.client.ClientPacketHandler;
-import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.packets.s2c.S2CDisconnectPacket;
-import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.stage.PacketStage;
-import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Result;
+import com.esotericsoftware.kryonet.Connection
+import com.esotericsoftware.kryonet.Server
+import dev.ultreon.quantum.network.PacketData
+import dev.ultreon.quantum.network.client.ClientPacketHandler
+import dev.ultreon.quantum.network.packets.Packet
+import dev.ultreon.quantum.network.packets.s2c.S2CDisconnectPacket
+import dev.ultreon.quantum.network.server.ServerPacketHandler
+import dev.ultreon.quantum.network.stage.PacketStage
+import dev.ultreon.quantum.server.QuantumServer
+import dev.ultreon.quantum.server.player.ServerPlayer
+import dev.ultreon.quantum.util.Result
+import java.io.IOException
 
-import java.io.IOException;
+class ServerTcpConnection(connection: Connection, private val kryoServer: Server, val server: QuantumServer) :
+  TcpConnection<ServerPacketHandler, ClientPacketHandler>(
+    connection,
+    server
+  ) {
+  private var player: ServerPlayer? = null
 
-public class ServerTcpConnection extends TcpConnection<ServerPacketHandler, ClientPacketHandler> {
-    private final Server kryoServer;
-    private final QuantumServer server;
-    private ServerPlayer player;
+  init {
+    this.start()
+  }
 
-    public ServerTcpConnection(Connection connection, Server kryoServer, QuantumServer server) {
-        super(connection, server);
-        this.kryoServer = kryoServer;
-        this.server = server;
+  override fun getDisconnectPacket(message: String): Packet<ClientPacketHandler> {
+    return S2CDisconnectPacket(message)
+  }
 
-        this.start();
+  override val isRunning: Boolean
+    get() {
+      return server.isRunning
     }
 
-    @Override
-    protected Packet<ClientPacketHandler> getDisconnectPacket(String message) {
-        return new S2CDisconnectPacket<>(message);
+  override fun on3rdPartyDisconnect(message: String): Result<Void> {
+    try {
+      this.close()
+    } catch (e: IOException) {
+      return Result.failure(e)
     }
+    return Result.ok(null)
+  }
 
-    @Override
-    protected boolean isRunning() {
-        return server.isRunning();
-    }
+  override fun getOurData(stage: PacketStage): PacketData<ServerPacketHandler> {
+    return stage.serverPackets
+  }
 
-    @Override
-    public Result<Void> on3rdPartyDisconnect(String message) {
-        try {
-            this.close();
-        } catch (IOException e) {
-            return Result.failure(e);
-        }
-        return Result.ok(null);
-    }
+  override fun getTheirData(stage: PacketStage): PacketData<ClientPacketHandler> {
+    return stage.clientPackets
+  }
 
-    @Override
-    protected PacketData<ServerPacketHandler> getOurData(PacketStage stage) {
-        return stage.getServerPackets();
-    }
+  public override fun getPlayer(): ServerPlayer {
+    var player = this.player
+    if (player == null) player = server.playerManager.byConnection(this.connection)
 
-    @Override
-    protected PacketData<ClientPacketHandler> getTheirData(PacketStage stage) {
-        return stage.getClientPackets();
-    }
+    return player!!
+  }
 
-    public ServerPlayer getPlayer() {
-        ServerPlayer player = this.player;
-        if (player == null)
-            player = server.getPlayerManager().byConnection(this.getConnection());
+  override fun setPlayer(player: ServerPlayer?) {
+    this.player = player
+  }
 
-        return player;
-    }
-
-    public void setPlayer(ServerPlayer player) {
-        this.player = player;
-    }
-
-    @Override
-    public void onPing(long ping) {
-        this.ping = ping;
-    }
-
-    public QuantumServer getServer() {
-        return server;
-    }
+  override fun onPing(ping: Long) {
+    this.ping = ping
+  }
 }

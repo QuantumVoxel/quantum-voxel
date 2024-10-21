@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.energy;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 
 public class EnergyNetwork {
     private final Array<EnergyNode> nodes = new Array<>();
@@ -13,7 +13,7 @@ public class EnergyNetwork {
         return nodes;
     }
 
-    public void addNode(EnergyNode node, CubicDirection connect, EnergyNode other) {
+    public void addNode(EnergyNode node, Direction connect, EnergyNode other) {
         if (node == other) throw new IllegalArgumentException("Cannot connect node to itself");
         if (nodes.contains(node, true)) throw new IllegalArgumentException("Node already exists: " + node);
         if (!nodes.contains(other, true)) throw new IllegalArgumentException("Node does not exist: " + other);

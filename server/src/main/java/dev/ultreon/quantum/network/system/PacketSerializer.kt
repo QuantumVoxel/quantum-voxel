@@ -1,40 +1,36 @@
-package dev.ultreon.quantum.network.system;
+package dev.ultreon.quantum.network.system
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.quantum.network.packets.Packet;
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.Serializer
+import com.esotericsoftware.kryo.io.Input
+import com.esotericsoftware.kryo.io.Output
+import dev.ultreon.quantum.network.PacketIO
+import dev.ultreon.quantum.network.packets.Packet
+import java.lang.reflect.InvocationTargetException
 
-import java.lang.reflect.InvocationTargetException;
+class PacketSerializer(val kryo: Kryo) :
+  Serializer<Packet<*>>() {
+  override fun write(kryo: Kryo, output: Output, o: Packet<*>) {
+    val packetIO = PacketIO(null, output)
+    o.toBytes(packetIO)
+  }
 
-public class PacketSerializer extends Serializer<Packet<?>> {
-    private final Kryo kryo;
-
-    public PacketSerializer(Kryo kryo) {
-        this.kryo = kryo;
+  override fun read(kryo: Kryo, input: Input, aClass: Class<Packet<*>>): Packet<*> {
+    require(Packet::class.java.isAssignableFrom(aClass)) { "Class " + aClass.name + " is not a valid packet class" }
+    try {
+      val constructor = aClass.getConstructor(
+        PacketIO::class.java
+      )
+      constructor.isAccessible = true
+      return constructor.newInstance(PacketIO(input, null))
+    } catch (e: NoSuchMethodException) {
+      throw RuntimeException(e)
+    } catch (e: IllegalAccessException) {
+      throw RuntimeException(e)
+    } catch (e: InstantiationException) {
+      throw RuntimeException(e)
+    } catch (e: InvocationTargetException) {
+      throw RuntimeException(e)
     }
-
-    @Override
-    public void write(Kryo kryo, Output output, Packet<?> o) {
-        PacketIO packetIO = new PacketIO(null, output);
-        o.toBytes(packetIO);
-    }
-
-    @Override
-    public Packet<?> read(Kryo kryo, Input input, Class<Packet<?>> aClass) {
-        if (!Packet.class.isAssignableFrom(aClass)) throw new IllegalArgumentException("Class " + aClass.getName() + " is not a valid packet class");
-        try {
-            var constructor = aClass.getConstructor(PacketIO.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(new PacketIO(input, null));
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Kryo getKryo() {
-        return kryo;
-    }
+  }
 }

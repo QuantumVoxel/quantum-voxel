@@ -1,7 +1,5 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import dev.ultreon.quantum.GameWindow;
+import dev.ultreon.quantum.GameWindow
 
-public abstract class DesktopWindow extends GameWindow {
-
-}
+abstract class DesktopWindow : GameWindow()

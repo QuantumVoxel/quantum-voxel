@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.energy;
 
 import com.google.common.collect.Iterators;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
 import dev.ultreon.quantum.world.capability.Capability;
@@ -38,7 +38,7 @@ public class EnergyNode implements Capability<EnergyConnection>, Iterable<Energy
         return self;
     }
 
-    public void set(CubicDirection connect, EnergyNode other) {
+    public void set(Direction connect, EnergyNode other) {
         switch (connect) {
             case NORTH -> this.north = other;
             case SOUTH -> this.south = other;

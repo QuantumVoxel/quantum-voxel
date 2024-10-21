@@ -1,17 +1,16 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import com.badlogic.gdx.files.FileHandle;
-import dev.ultreon.quantum.desktop.darwin.foundation.NSApplication;
-import dev.ultreon.quantum.desktop.darwin.foundation.NSImage;
+import com.badlogic.gdx.files.FileHandle
+import dev.ultreon.quantum.desktop.darwin.foundation.NSApplication
+import dev.ultreon.quantum.desktop.darwin.foundation.NSImage
+import java.io.IOException
 
-import java.io.IOException;
+object MacOSDockIcon {
+  @Throws(IOException::class)
+  fun setDockIcon(imagePath: FileHandle?) {
+    val icon = NSImage(imagePath)
 
-public class MacOSDockIcon {
-    public static void setDockIcon(FileHandle imagePath) throws IOException {
-        NSImage icon = new NSImage(imagePath);
-
-        NSApplication application = NSApplication.sharedApplication();
-        application.setApplicationIconImage(icon);
-    }
-
+    val application = NSApplication.sharedApplication()
+    application.applicationIconImage = icon
+  }
 }

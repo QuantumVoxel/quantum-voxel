@@ -16,7 +16,7 @@ import dev.ultreon.quantum.client.model.ModelImporter;
 import dev.ultreon.quantum.client.model.blockbench.anim.*;
 import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -391,7 +391,7 @@ public class BBModelLoader implements ModelImporter {
 
     private BBModelFace loadFace(Map.Entry<String, JsonElement> faceData) {
         String face = faceData.getKey();
-        CubicDirection blockFace = CubicDirection.valueOf(face.toUpperCase(Locale.ROOT));
+        Direction blockFace = Direction.valueOf(face.toUpperCase(Locale.ROOT));
 
         JsonObject faceJson = faceData.getValue().getAsJsonObject();
         Vec4f uv = loadVec4(faceJson.getAsJsonArray("uv"));

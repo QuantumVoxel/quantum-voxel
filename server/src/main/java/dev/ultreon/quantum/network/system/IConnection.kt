@@ -1,74 +1,75 @@
-package dev.ultreon.quantum.network.system;
+package dev.ultreon.quantum.network.system
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.network.PacketHandler;
-import dev.ultreon.quantum.network.PacketListener;
-import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.stage.PacketStage;
-import dev.ultreon.quantum.network.stage.PacketStages;
-import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Result;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
+import com.google.errorprone.annotations.CanIgnoreReturnValue
+import dev.ultreon.quantum.log.Logger
+import dev.ultreon.quantum.log.LoggerFactory
+import dev.ultreon.quantum.network.PacketHandler
+import dev.ultreon.quantum.network.PacketListener
+import dev.ultreon.quantum.network.packets.Packet
+import dev.ultreon.quantum.network.stage.PacketStage
+import dev.ultreon.quantum.network.stage.PacketStages
+import dev.ultreon.quantum.server.player.ServerPlayer
+import dev.ultreon.quantum.text.TextObject
+import dev.ultreon.quantum.util.Result
+import java.io.Closeable
+import java.util.concurrent.atomic.AtomicInteger
 
-import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.util.concurrent.atomic.AtomicInteger;
+interface IConnection<OurHandler : PacketHandler, TheirHandler : PacketHandler> :
+  Closeable {
+  @CanIgnoreReturnValue
+  fun send(packet: Packet<out TheirHandler>) {
+    send(packet, null)
+  }
 
-public interface IConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> extends Closeable {
-    Logger LOGGER = LoggerFactory.getLogger("NetConnections");
-    AtomicInteger rx = new AtomicInteger();
-    AtomicInteger tx = new AtomicInteger();
+  @Deprecated("")
+  @CanIgnoreReturnValue
+  fun send(packet: Packet<out TheirHandler>, resultListener: PacketListener?)
 
-    @CanIgnoreReturnValue
-    default void send(Packet<? extends TheirHandler> packet) {
-        send(packet, null);
-    }
+  val isCompressed: Boolean
 
-    @Deprecated
-    @CanIgnoreReturnValue
-    void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener);
+  fun disconnect(message: String)
 
-    boolean isCompressed();
+  fun on3rdPartyDisconnect(message: String): Result<Void>
 
-    void disconnect(String message);
+  fun queue(handler: Runnable)
 
-    Result<Void> on3rdPartyDisconnect(String message);
+  fun start()
 
-    void queue(Runnable handler);
+  fun moveTo(stage: PacketStage, handler: OurHandler)
 
-    void start();
+  val isConnecting: Boolean
+    get() = false
 
-    void moveTo(PacketStage stage, OurHandler handler);
+  val isConnected: Boolean
 
-    default boolean isConnecting() {
-        return false;
-    }
+  fun tick() {
+  }
 
-    boolean isConnected();
+  val isMemoryConnection: Boolean
 
-    default void tick() {
+  fun initiate(handler: OurHandler, packetToThem: Packet<out TheirHandler>?) {
+    this.moveTo(PacketStages.LOGIN, handler)
+    if (packetToThem != null) this.send(packetToThem)
+  }
 
-    }
+  fun setReadOnly()
 
-    boolean isMemoryConnection();
+  fun setPlayer(player: ServerPlayer?)
 
-    default void initiate(OurHandler handler, @Nullable Packet<? extends TheirHandler> packetToThem) {
-        this.moveTo(PacketStages.LOGIN, handler);
-        if (packetToThem != null)
-            this.send(packetToThem);
-    }
+  fun disconnect(message: TextObject) {
+    disconnect(message.text)
+  }
 
-    void setReadOnly();
+  val ping: Long
 
-    void setPlayer(ServerPlayer player);
+  fun onPing(ping: Long)
 
-    default void disconnect(TextObject message) {
-        disconnect(message.getText());
-    }
-
-    long getPing();
-
-    void onPing(long ping);
+  companion object {
+    @JvmStatic
+    val logger: Logger = LoggerFactory.getLogger("NetConnections")
+    @JvmStatic
+    val rx: AtomicInteger = AtomicInteger()
+    @JvmStatic
+    val tx: AtomicInteger = AtomicInteger()
+  }
 }

@@ -1,15 +1,16 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import oshi.SystemInfo;
+import oshi.SystemInfo
 
-public class LaunchConfig {
-    public long maxMemoryMB = 4096;
+class LaunchConfig {
+  @JvmField
+  var maxMemoryMB: Long = 4096
 
-    public void fix(SystemInfo systemInfo) {
-        if (maxMemoryMB <= 1024) maxMemoryMB = 4096;
+  fun fix(systemInfo: SystemInfo) {
+    if (maxMemoryMB <= 1024) maxMemoryMB = 4096
 
-        if (maxMemoryMB >= systemInfo.getHardware().getMemory().getTotal() / 1572864) {
-            maxMemoryMB = systemInfo.getHardware().getMemory().getTotal() / 1572864;
-        }
+    if (maxMemoryMB >= systemInfo.hardware.memory.total / 1572864) {
+      maxMemoryMB = systemInfo.hardware.memory.total / 1572864
     }
+  }
 }

@@ -15,7 +15,7 @@ import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 
 import java.io.IOException;
 import java.util.*;
@@ -201,7 +201,7 @@ public final class BBCubeModelElement extends BBModelElement {
         elementBuilder.begin();
         Map<Integer, MeshBuilder> texture2builder = new HashMap<>();
         for (BBModelFace entry : faces) {
-            CubicDirection blockFace = entry.blockFace();
+            Direction blockFace = entry.blockFace();
             int texRef = entry.texture();
             if (texRef == -1) continue;
             MeshBuilder parent = texture2builder.computeIfAbsent(texRef, integer -> {

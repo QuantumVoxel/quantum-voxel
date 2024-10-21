@@ -1,10 +1,9 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.block.state.BlockStateDefinition;
 import dev.ultreon.quantum.block.state.StateProperties;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,7 @@ public class BlastFurnaceBlock extends Block {
         super.defineState(definition);
 
         definition.set(StateProperties.LIT, false);
-        definition.set(StateProperties.FACING, CubicDirection.NORTH);
+        definition.set(StateProperties.FACING, Direction.NORTH);
     }
 
     @Override

@@ -373,7 +373,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             this.updateChunkAndNeighbours(chunk);
 
             // Update the blocks in each direction of the block
-            for (CubicDirection direction : CubicDirection.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockVec offset = blockVec.offset(direction);
                 BlockState blockState = this.get(offset);
                 blockState.update(this, offset);
@@ -425,7 +425,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             this.updateChunkAndNeighbours(chunk);
 
             // Update the blocks in each direction of the block
-            for (CubicDirection direction : CubicDirection.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockVec offset = pos.offset(direction);
                 BlockState blockState = this.get(offset);
                 blockState.update(this, offset);

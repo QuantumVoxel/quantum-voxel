@@ -1,231 +1,203 @@
-package dev.ultreon.quantum.network.system;
+@file:Suppress("UNCHECKED_CAST")
 
-import com.google.errorprone.annotations.concurrent.LazyInit;
-import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.crash.ApplicationCrash;
-import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.network.*;
-import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.stage.PacketStage;
-import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Result;
-import dev.ultreon.quantum.util.SanityCheckException;
-import org.jetbrains.annotations.Nullable;
+package dev.ultreon.quantum.network.system
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
+import dev.ultreon.quantum.CommonConstants
+import dev.ultreon.quantum.crash.ApplicationCrash
+import dev.ultreon.quantum.crash.CrashLog
+import dev.ultreon.quantum.network.*
+import dev.ultreon.quantum.network.packets.Packet
+import dev.ultreon.quantum.network.stage.PacketStage
+import dev.ultreon.quantum.server.player.ServerPlayer
+import dev.ultreon.quantum.util.Result
+import dev.ultreon.quantum.util.SanityCheckException
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executor
 
-public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
-    @LazyInit
-    private MemoryConnection<TheirHandler, OurHandler> otherSide;
-    private final Executor executor;
-    private OurHandler handler;
+abstract class MemoryConnection<OurHandler : PacketHandler, TheirHandler : PacketHandler>(
+  private var otherSide: MemoryConnection<TheirHandler, OurHandler>?,
+  private val executor: Executor,
+  private val thread: Thread
+) :
+  IConnection<OurHandler, TheirHandler> {
+  private var handler: OurHandler? = null
 
-    private PacketData<OurHandler> ourPacketData;
-    private PacketData<TheirHandler> theirPacketData;
-    private boolean readOnly;
+  private var ourPacketData: PacketData<OurHandler>? = null
+  var theirPacketData: PacketData<TheirHandler>? = null
+    private set
+  private var readOnly = false
 
-    private final Queue<Packet<? extends TheirHandler>> sendQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<Packet<? extends OurHandler>> receiveQueue = new ConcurrentLinkedQueue<>();
+  private val sendQueue: Queue<Packet<out TheirHandler>> = ConcurrentLinkedQueue()
+  private val receiveQueue: Queue<Packet<out OurHandler>> = ConcurrentLinkedQueue()
 
-    public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
-        this.otherSide = otherSide;
-        this.executor = executor;
+  init {
+    val receiver = Thread {
+      try {
+        while (true) {
+          val packet = receiveQueue.poll() ?: continue
+          this.received(packet, null)
 
-        Thread receiver = new Thread(() -> {
-            try {
-                while (true) {
-                    Packet<? extends OurHandler> packet = this.receiveQueue.poll();
-                    if (packet == null) continue;
-                    this.received(packet, null);
-
-                    Thread.sleep(5);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        Thread sender = new Thread(() -> {
-            while (true) {
-                Packet<? extends TheirHandler> packet = this.sendQueue.poll();
-                if (packet == null) continue;
-
-                try {
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    PacketIO io = new PacketIO(null, bos);
-                    packet.toBytes(io);
-                    bos.close();
-
-                    theirPacketData.encode(packet, io);
-
-                    int id = theirPacketData.getId(packet);
-
-                    this.otherSide.receive(id, bos.toByteArray());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                tx.decrementAndGet();
-            }
-        });
-
-        receiver.setDaemon(true);
-        sender.setDaemon(true);
-
-        receiver.start();
-        sender.start();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void receive(int id, byte[] ourPacket) {
-        rx.incrementAndGet();
-        ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
-        PacketIO io = new PacketIO(bis, null);
-        Packet<?> packet = ourPacketData.decode(id, io);
-        this.received((Packet<? extends OurHandler>) packet, null);
-    }
-
-    public static int getRx() {
-        return rx.get();
-    }
-
-    @Override
-    public void onPing(long ping) {
-        // No-op
-    }
-
-    @Override
-    public void send(Packet<? extends TheirHandler> packet) {
-        if (otherSide == null || this.readOnly)
-            throw new ReadOnlyConnectionException();
-        final int id = theirPacketData.getId(packet);
-        if (id < 0)
-            throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
-
-        tx.incrementAndGet();
-        this.sendQueue.add(packet);
-
-        if (sendQueue.size() >= 5000) {
-            CrashLog crashLog = new CrashLog("Too many packets in send queue", new Throwable(":("));
-            crashLog.add("Send queue size", sendQueue.size());
-            throw new ApplicationCrash(crashLog);
+          Thread.sleep(5)
         }
+      } catch (e: InterruptedException) {
+        Thread.currentThread().interrupt()
+      }
     }
 
-    @Override
-    @Deprecated
-    public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
-        this.send(packet);
-    }
+    val sender = Thread {
+      while (true) {
+        val packet = sendQueue.poll() ?: continue
 
-    @Override
-    public void queue(Runnable handler) {
-        this.executor.execute(handler);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void received(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
         try {
-            if (handler == null) throw new SanityCheckException("No handler set");
-            if (ourPacketData.getId(packet) < 0) {
-                throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
-            }
-            ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
-            rx.decrementAndGet();
-        } catch (Throwable e) {
-            if (resultListener != null) {
-                resultListener.onFailure();
-            }
-            CommonConstants.LOGGER.error("Failed to handle packet", e);
-            rx.decrementAndGet();
-            return;
+        } catch (e: IOException) {
+          throw RuntimeException(e)
         }
-
-        if (resultListener != null)
-            resultListener.onSuccess();
+        IConnection.tx.decrementAndGet()
+      }
     }
 
-    @Override
-    public void disconnect(String message) {
-        this.otherSide.on3rdPartyDisconnect(message);
+    receiver.isDaemon = true
+    sender.isDaemon = true
+
+    receiver.start()
+    sender.start()
+  }
+
+  private fun receive(id: Int, ourPacket: ByteArray) {
+    IConnection.rx.incrementAndGet()
+    val bis = ByteArrayInputStream(ourPacket)
+    val io = PacketIO(bis, null)
+    val packet = ourPacketData!!.decode(id, io)
+    this.received(packet as Packet<out OurHandler>, null)
+  }
+
+  override fun onPing(ping: Long) {
+    // No-op
+  }
+
+  override fun send(packet: Packet<out TheirHandler>) {
+    if (!handler!!.isAsync && isRunningAsync) if (otherSide == null || this.readOnly) throw ReadOnlyConnectionException()
+    val id = theirPacketData!!.getId(packet)
+    require(id >= 0) { "Invalid packet: " + packet.javaClass.name }
+
+    IConnection.tx.incrementAndGet()
+    val bos = ByteArrayOutputStream()
+    val io = PacketIO(null, bos)
+    packet.toBytes(io)
+    bos.close()
+
+    theirPacketData!!.encode(packet, io)
+
+    otherSide!!.receive(id, bos.toByteArray())
+
+    if (sendQueue.size >= 5000) {
+      val crashLog = CrashLog("Too many packets in send queue", Throwable(":("))
+      crashLog.add("Send queue size", sendQueue.size)
+      throw ApplicationCrash(crashLog)
+    }
+  }
+
+  private val isRunningAsync: Boolean
+    get() = thread.threadId() == Thread.currentThread().threadId()
+
+  @Deprecated("", ReplaceWith("this.send(packet)"))
+  override fun send(packet: Packet<out TheirHandler>, resultListener: PacketListener?) {
+    this.send(packet)
+  }
+
+  override fun queue(handler: Runnable) {
+    executor.execute(handler)
+  }
+
+  protected open fun received(packet: Packet<out OurHandler>, resultListener: PacketListener?) {
+    try {
+      if (handler == null) throw SanityCheckException("No handler set")
+      require(ourPacketData!!.getId(packet) >= 0) { "Invalid packet: " + packet.javaClass.name }
+      (packet as Packet<OurHandler>).handle(createPacketContext(), handler)
+      IConnection.rx.decrementAndGet()
+    } catch (e: Throwable) {
+      resultListener?.onFailure()
+      CommonConstants.LOGGER.error("Failed to handle packet", e)
+      IConnection.rx.decrementAndGet()
+      return
     }
 
-    public abstract Result<Void> on3rdPartyDisconnect(String message);
+    resultListener?.onSuccess()
+  }
 
-    protected abstract PacketContext createPacketContext();
+  override fun disconnect(message: String) {
+    otherSide!!.on3rdPartyDisconnect(message)
+  }
 
-    protected ServerPlayer getPlayer() {
-        return null;
+  abstract override fun on3rdPartyDisconnect(message: String): Result<Void>
+
+  protected abstract fun createPacketContext(): PacketContext
+
+  protected fun getPlayer(): ServerPlayer? {
+    return null
+  }
+
+  fun setHandler(handler: OurHandler) {
+    this.handler = handler
+  }
+
+  override val isCompressed: Boolean
+    get() {
+      return false
     }
 
-    public void setHandler(OurHandler handler) {
-        this.handler = handler;
+  override fun start() {
+    checkNotNull(otherSide) { "Cannot start connection without the other side" }
+
+    // TODO: Implement
+  }
+
+  override fun moveTo(stage: PacketStage, handler: OurHandler) {
+    this.ourPacketData = this.getOurData(stage)
+    this.theirPacketData = this.getTheirData(stage)
+
+    this.handler = handler
+  }
+
+  override val isConnected: Boolean
+    get() {
+      return otherSide != null && otherSide!!.isConnected
     }
 
-    @Override
-    public boolean isCompressed() {
-        return false;
+  override val isMemoryConnection: Boolean
+    get() {
+      return true
     }
 
-    @Override
-    public void start() {
-        if (otherSide == null) {
-            throw new IllegalStateException("Cannot start connection without the other side");
-        }
+  protected abstract fun getOurData(stage: PacketStage): PacketData<OurHandler>
 
-        // TODO: Implement
+  protected abstract fun getTheirData(stage: PacketStage): PacketData<TheirHandler>
+
+  fun setOtherSide(otherSide: MemoryConnection<TheirHandler, OurHandler>) {
+    this.otherSide = otherSide
+  }
+
+  override fun close() {
+  }
+
+  override fun setReadOnly() {
+    this.readOnly = true
+  }
+
+  override fun setPlayer(player: ServerPlayer?) {
+  }
+
+  override val ping: Long
+    get() {
+      return 0
     }
 
-    @Override
-    public void moveTo(PacketStage stage, OurHandler handler) {
-        this.ourPacketData = this.getOurData(stage);
-        this.theirPacketData = this.getTheirData(stage);
-
-        this.handler = handler;
-    }
-
-    @Override
-    public boolean isConnected() {
-        return otherSide != null && otherSide.isConnected();
-    }
-
-    @Override
-    public boolean isMemoryConnection() {
-        return true;
-    }
-
-    protected abstract PacketData<OurHandler> getOurData(PacketStage stage);
-
-    protected abstract PacketData<TheirHandler> getTheirData(PacketStage stage);
-
-    public void setOtherSide(MemoryConnection<TheirHandler, OurHandler> otherSide) {
-        this.otherSide = otherSide;
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    public void setReadOnly() {
-        this.readOnly = true;
-    }
-
-    @Override
-    public void setPlayer(ServerPlayer player) {
-
-    }
-
-    @Override
-    public long getPing() {
-        return 0;
-    }
-
-    public PacketData<TheirHandler> getTheirPacketData() {
-        return theirPacketData;
-    }
+  companion object {
+    val rx: Int
+      get() = IConnection.rx.get()
+  }
 }

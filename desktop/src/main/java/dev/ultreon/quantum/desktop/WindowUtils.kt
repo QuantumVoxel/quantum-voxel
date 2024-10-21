@@ -1,34 +1,33 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinUser;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.glfw.GLFWNativeWin32;
+import com.sun.jna.Pointer
+import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinDef.HWND
+import com.sun.jna.platform.win32.WinUser
+import org.lwjgl.glfw.GLFWNativeWin32
 
-import java.nio.IntBuffer;
+object WindowUtils {
+  private val user32: User32 = User32.INSTANCE
 
-public class WindowUtils {
-    private static final User32 user32 = User32.INSTANCE;
+  // Constants for window styles
+  const val GWL_STYLE: Int = -16
+  const val WS_BORDER: Int = 0x00800000
+  const val WS_CAPTION: Int = 0x00C00000
 
-    // Constants for window styles
-    public static final int GWL_STYLE = -16;
-    public static final int WS_BORDER = 0x00800000;
-    public static final int WS_CAPTION = 0x00C00000;
+  @JvmStatic
+  fun makeWindowFrameless(glfwWindowHandle: Long) {
+    val hwnd = HWND(Pointer(GLFWNativeWin32.glfwGetWin32Window(glfwWindowHandle)))
 
-    public static void makeWindowFrameless(long glfwWindowHandle) {
-        WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(glfwWindowHandle)));
+    val currentStyle = user32.GetWindowLong(hwnd, GWL_STYLE)
+    val newStyle = currentStyle and WS_BORDER.inv() and WS_CAPTION.inv()
 
-        int currentStyle = user32.GetWindowLong(hwnd, GWL_STYLE);
-        int newStyle = currentStyle & ~WS_BORDER & ~WS_CAPTION;
+    // Apply the new style
+    user32.SetWindowLong(hwnd, GWL_STYLE, newStyle)
 
-        // Apply the new style
-        user32.SetWindowLong(hwnd, GWL_STYLE, newStyle);
-
-        // Redraw window
-        user32.SetWindowPos(hwnd, null, 0, 0, 0, 0,
-            WinUser.SWP_NOMOVE | WinUser.SWP_NOSIZE | WinUser.SWP_NOZORDER | WinUser.SWP_FRAMECHANGED);
-    }
+    // Redraw window
+    user32.SetWindowPos(
+      hwnd, null, 0, 0, 0, 0,
+      WinUser.SWP_NOMOVE or WinUser.SWP_NOSIZE or WinUser.SWP_NOZORDER or WinUser.SWP_FRAMECHANGED
+    )
+  }
 }

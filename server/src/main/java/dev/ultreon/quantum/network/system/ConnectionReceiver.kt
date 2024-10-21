@@ -1,9 +1,10 @@
-package dev.ultreon.quantum.network.system;
+package dev.ultreon.quantum.network.system
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.Socket;
+import java.io.Closeable
+import java.io.IOException
+import java.net.Socket
 
-public interface ConnectionReceiver extends Closeable {
-    Socket accept() throws IOException;
+interface ConnectionReceiver : Closeable {
+  @Throws(IOException::class)
+  fun accept(): Socket?
 }

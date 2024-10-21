@@ -1,119 +1,39 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
+
+import com.github.dgzt.gdx.lwjgl3.Lwjgl3Window
+import dev.ultreon.mixinprovider.PlatformOS
+import org.lwjgl.glfw.GLFWNativeCocoa
+import org.lwjgl.glfw.GLFWNativeWin32
 
 
-import com.github.dgzt.gdx.lwjgl3.Lwjgl3Window;
-import dev.ultreon.mixinprovider.PlatformOS;
-import org.lwjgl.glfw.GLFWNativeCocoa;
-import org.lwjgl.glfw.GLFWNativeWin32;
+class DesktopVulkanWindow(private val window: Lwjgl3Window) : DesktopWindow() {
+  private var title: String? = null
 
-public class DesktopVulkanWindow extends DesktopWindow {
-    private final Lwjgl3Window window;
-    private String title;
+  override fun isHovered(): Boolean = window.isFocused
+  override fun isFocused(): Boolean = window.isFocused
+  override fun isMaximized(): Boolean = false
+  override fun isMinimized(): Boolean = window.isIconified
+  override fun setVisible(visible: Boolean) = window.setVisible(visible)
+  override fun close() = window.flash()
+  override fun requestAttention() = window.flash()
+  override fun focus() = window.focusWindow()
+  override fun minimize() = window.iconifyWindow()
+  override fun maximize() = window.maximizeWindow()
+  override fun restore() = window.restoreWindow()
+  override fun getTitle(): String = title!!
+  override fun setTitle(title: String) {
+    this.title = title
+    window.setTitle(title)
+  }
 
-    public DesktopVulkanWindow(Lwjgl3Window window) {
-        super();
-        this.window = window;
-    }
+  override fun isDragging(): Boolean = false
+  override fun setDragging(dragging: Boolean) = Unit
+  override fun setResizable(resizable: Boolean) = Unit // Not supported
+  override fun isResizable(): Boolean = true
+  override fun getPeer(): Long =
+    if (PlatformOS.isWindows) GLFWNativeWin32.glfwGetWin32Window(this.handle)
+    else if (PlatformOS.isMac) GLFWNativeCocoa.glfwGetCocoaWindow(this.handle)
+    else -1L
 
-    @Override
-    public boolean isHovered() {
-        return window.isFocused();
-    }
-
-    @Override
-    public boolean isFocused() {
-        return window.isFocused();
-    }
-
-    @Override
-    public boolean isMaximized() {
-        return false;
-    }
-
-    @Override
-    public boolean isMinimized() {
-        return window.isIconified();
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        window.setVisible(visible);
-    }
-
-    @Override
-    public void close() {
-        window.flash();
-    }
-
-    @Override
-    public void requestAttention() {
-        window.flash();
-    }
-
-    @Override
-    public void focus() {
-        window.focusWindow();
-    }
-
-    @Override
-    public void minimize() {
-        window.iconifyWindow();
-    }
-
-    @Override
-    public void maximize() {
-        window.maximizeWindow();
-    }
-
-    @Override
-    public void restore() {
-        window.restoreWindow();
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
-    public void setTitle(String title) {
-        this.title = title;
-        window.setTitle(title);
-    }
-
-    @Override
-    public boolean isDragging() {
-        return false;
-    }
-
-    @Override
-    public void setDragging(boolean dragging) {
-
-    }
-
-    @Override
-    public void setResizable(boolean resizable) {
-        // Not supported
-    }
-
-    @Override
-    public boolean isResizable() {
-        return true;
-    }
-
-    @Override
-    public long getPeer() {
-        if (PlatformOS.isWindows) {
-            return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
-        } else if (PlatformOS.isMac) {
-            return GLFWNativeCocoa.glfwGetCocoaWindow(this.getHandle());
-        } else {
-            return -1L;
-        }
-    }
-
-    @Override
-    public long getHandle() {
-        return window.getWindowHandle();
-    }
+  override fun getHandle(): Long = window.windowHandle
 }

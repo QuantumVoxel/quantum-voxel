@@ -1,110 +1,165 @@
-package dev.ultreon.quantum.desktop.imgui;
+package dev.ultreon.quantum.desktop.imgui
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.gui.widget.UIContainer;
-import dev.ultreon.quantum.client.gui.widget.Widget;
-import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
-import dev.ultreon.quantum.util.NamespaceID;
-import imgui.ImGui;
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import dev.ultreon.quantum.client.QuantumClient
+import dev.ultreon.quantum.client.gui.Screen
+import dev.ultreon.quantum.client.gui.widget.UIContainer
+import dev.ultreon.quantum.client.gui.widget.Widget
+import dev.ultreon.quantum.desktop.imgui.ImGuiEx.button
+import dev.ultreon.quantum.desktop.imgui.ImGuiEx.editBool
+import dev.ultreon.quantum.desktop.imgui.ImGuiEx.editInt
+import dev.ultreon.quantum.desktop.imgui.ImGuiEx.editString
+import dev.ultreon.quantum.desktop.imgui.ImGuiEx.text
+import imgui.ImGui
+import java.util.function.Supplier
 
-import java.util.List;
-import java.util.Map;
+class GuiEditor {
+  fun render(client: QuantumClient) {
+    val currentScreen = client.screen
 
-public class GuiEditor {
-    public void render(QuantumClient client) {
-        var currentScreen = client.screen;
-
-        ImGuiEx.text("Classname:", () -> currentScreen == null ? null : currentScreen.getClass().getSimpleName());
-        if (currentScreen != null) {
-            var widgets = currentScreen.getWidgetsAt((int) (Gdx.input.getX() / client.getGuiScale()), (int) (Gdx.input.getY() / client.getGuiScale()));
-            for (var widget : widgets) {
-                if (widget != null) {
-                    client.shapes.getBatch().begin();
-                    if (widget instanceof UIContainer<?>) {
-                        client.shapes.setColor(Color.CYAN);
-                    } else {
-                        client.shapes.setColor(Color.MAGENTA);
-                    }
-                    client.shapes.rectangle(
-                            widget.getX() * client.getGuiScale(), widget.getY() * client.getGuiScale() - 1,
-                            widget.getWidth() * client.getGuiScale() + 1, widget.getHeight() * client.getGuiScale() + 1);
-                    client.shapes.getBatch().end();
-                }
-            }
-            ImGuiEx.text("Widget:", () -> widgets.stream().findFirst().map(widget -> widget.path().getFileName()).orElse(null));
+    text("Classname:", Supplier { currentScreen!!.javaClass.simpleName })
+    if (currentScreen != null) {
+      val widgets =
+        currentScreen.getWidgetsAt((Gdx.input.x / client.guiScale).toInt(), (Gdx.input.y / client.guiScale).toInt())
+      for (widget in widgets) {
+        if (widget != null) {
+          client.shapes.batch.begin()
+          if (widget is UIContainer<*>) {
+            client.shapes.setColor(Color.CYAN)
+          } else {
+            client.shapes.setColor(Color.MAGENTA)
+          }
+          client.shapes.rectangle(
+            widget.x * client.guiScale, widget.y * client.guiScale - 1,
+            widget.width * client.guiScale + 1, widget.height * client.guiScale + 1
+          )
+          client.shapes.batch.end()
         }
-
-        if (currentScreen != null) {
-            GuiEditor.renderTools(currentScreen);
-        }
+      }
+      text("Widget:",
+        Supplier {
+          widgets.stream().findFirst().map { widget: Widget -> widget.path().fileName }
+            .orElse(null)
+        })
     }
 
-    private static void renderTools(Screen screen) {
-        ImGuiEx.editBool("Enabled", "::enabled", screen::isEnabled, screen::setEnabled);
-        ImGuiEx.editBool("Visible", "::visible", screen::isVisible, screen::setVisible);
-        ImGuiEx.editString("Title", "::title", screen::getRawTitle, screen::title);
-        ImGuiEx.button("Back", "::back", screen::back);
+    if (currentScreen != null) {
+      renderTools(currentScreen)
+    }
+  }
 
-        if (ImGui.collapsingHeader("Widgets")) {
-            ImGui.treePush();
+  companion object {
+    private fun renderTools(screen: Screen) {
+      editBool("Enabled", "::enabled",
+        { screen.isEnabled() },
+        { enabled: Boolean? ->
+          screen.setEnabled(
+            enabled!!
+          )
+        })
+      editBool("Visible", "::visible",
+        { screen.isVisible() },
+        { visible: Boolean? ->
+          screen.setVisible(
+            visible!!
+          )
+        })
+      editString("Title", "::title",
+        { screen.rawTitle },
+        { title: String? -> screen.title(title!!) })
+      button("Back", "::back") { screen.back() }
 
-            var children = screen.children();
-            for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
-                var component = children.get(i);
-                if (component == null) continue;
+      if (ImGui.collapsingHeader("Widgets")) {
+        ImGui.treePush()
 
-                GuiEditor.renderWidgetTools(i, component);
-            }
+        val children = screen.children()
+        var i = 0
+        val childrenSize = children.size
+        while (i < childrenSize) {
+          val component = children[i]
+          if (component == null) {
+            i++
+            continue
+          }
 
-            ImGui.treePop();
+          renderWidgetTools(i, component)
+          i++
         }
+
+        ImGui.treePop()
+      }
     }
 
-    private static void renderWidgetTools(int index, Widget widget) {
-        if (ImGui.collapsingHeader("Widget #" + index + ": " + widget.path().getFileName())) {
-            ImGui.treePush();
-            var path = widget.path().toString();
+    private fun renderWidgetTools(index: Int, widget: Widget) {
+      if (ImGui.collapsingHeader("Widget #" + index + ": " + widget.path().fileName)) {
+        ImGui.treePush()
+        val path = widget.path().toString()
 
-            ImGuiEx.text("Package: ", () -> widget.getClass().getPackageName());
-            ImGuiEx.text("Classname: ", () -> widget.getClass().getSimpleName());
-            ImGuiEx.editBool("Enabled: ", path + "::enabled", widget::isEnabled, widget::setEnabled);
-            ImGuiEx.editBool("Visible: ", path + "::visible", widget::isVisible, widget::setVisible);
+        text("Package: ") { widget.javaClass.packageName }
+        text("Classname: ") { widget.javaClass.simpleName }
+        editBool("Enabled: ", "$path::enabled",
+          { widget.isEnabled() },
+          { enabled: Boolean? ->
+            widget.setEnabled(
+              enabled!!
+            )
+          })
+        editBool("Visible: ", "$path::visible",
+          { widget.isVisible() },
+          { visible: Boolean? ->
+            widget.setVisible(
+              visible!!
+            )
+          })
 
-            // Properties
-            var components = widget.componentRegistry();
-            for (Map.Entry<NamespaceID, UIComponent> component : components.entrySet()) {
-                component.getValue().handleImGui(path + "::" + component.getKey(), component.getKey(), widget);
-            }
-
-            if (ImGui.collapsingHeader("Position")) {
-                ImGui.treePush();
-                ImGuiEx.editInt("X: ", path + "::pos::x", widget::getX, widget::setX);
-                ImGuiEx.editInt("Y: ", path + "::pos::y", widget::getY, widget::setY);
-                ImGui.treePop();
-            }
-            if (ImGui.collapsingHeader("Size")) {
-                ImGui.treePush();
-                ImGuiEx.editInt("Width: ", path + "::size::width", widget::getWidth, widget::width);
-                ImGuiEx.editInt("Height: ", path + "::size::height", widget::getHeight, widget::height);
-                ImGui.treePop();
-            }
-
-            if (widget instanceof UIContainer<?> container && ImGui.collapsingHeader("Children")) {
-                ImGui.treePush();
-                List<? extends Widget> children = container.children();
-                for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
-                    var child = children.get(i);
-                    if (child == null) continue;
-
-                    GuiEditor.renderWidgetTools(i, child);
-                }
-                ImGui.treePop();
-            }
-
-            ImGui.treePop();
+        // Properties
+        val components = widget.componentRegistry()
+        for ((key, value) in components) {
+          value.handleImGui("$path::$key", key, widget)
         }
+
+        if (ImGui.collapsingHeader("Position")) {
+          ImGui.treePush()
+          editInt("X: ", "$path::pos::x",
+            { widget.x },
+            { x: Int? -> widget.x = x!! })
+          editInt("Y: ", "$path::pos::y",
+            { widget.y },
+            { y: Int? -> widget.y = y!! })
+          ImGui.treePop()
+        }
+        if (ImGui.collapsingHeader("Size")) {
+          ImGui.treePush()
+          editInt("Width: ", "$path::size::width",
+            { widget.width },
+            { width: Int? -> widget.width(width!!) })
+          editInt("Height: ", "$path::size::height",
+            { widget.height },
+            { height: Int? -> widget.height(height!!) })
+          ImGui.treePop()
+        }
+
+        if (widget is UIContainer<*> && ImGui.collapsingHeader("Children")) {
+          ImGui.treePush()
+          val children = widget.children()
+          var i = 0
+          val childrenSize = children.size
+          while (i < childrenSize) {
+            val child = children[i]
+            if (child == null) {
+              i++
+              continue
+            }
+
+            renderWidgetTools(i, child)
+            i++
+          }
+          ImGui.treePop()
+        }
+
+        ImGui.treePop()
+      }
     }
+  }
 }

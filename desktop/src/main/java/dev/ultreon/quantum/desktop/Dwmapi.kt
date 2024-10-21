@@ -1,35 +1,43 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop
 
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-import com.sun.jna.PointerType;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinDef.HWND;
-import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.Library
+import com.sun.jna.Native
+import com.sun.jna.PointerType
+import com.sun.jna.platform.win32.WinDef.*
+import com.sun.jna.ptr.IntByReference
 
-public interface Dwmapi extends Library {
-    Dwmapi INSTANCE = Native.load("dwmapi", Dwmapi.class);
+interface Dwmapi : Library {
+  fun DwmSetWindowAttribute(hwnd: HWND?, dwAttribute: UINT?, pvAttribute: PointerType?, cbAttribute: Int): Int
 
-    int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-    int DWMWA_SYSTEMBACKDROP_TYPE = 38;
-    int DWMWA_BORDER_COLOR = 34;
-
-    @SuppressWarnings("UnusedReturnValue")
-    int DwmSetWindowAttribute(HWND hwnd, WinDef.UINT dwAttribute, PointerType pvAttribute, int cbAttribute);
-
-    static void setUseImmersiveDarkMode(HWND hwnd, boolean enabled) {
-        INSTANCE.DwmSetWindowAttribute(hwnd, new WinDef.UINT(DWMWA_USE_IMMERSIVE_DARK_MODE), new WinDef.BOOLByReference(new WinDef.BOOL(enabled)), 4);
+  companion object {
+    @JvmStatic
+    fun setUseImmersiveDarkMode(hwnd: HWND?, enabled: Boolean) {
+      INSTANCE.DwmSetWindowAttribute(
+        hwnd,
+        UINT(DWMWA_USE_IMMERSIVE_DARK_MODE.toLong()),
+        BOOLByReference(BOOL(enabled)),
+        4
+      )
     }
 
-    static void setAcrylicBackground(HWND hwnd) {
-        INSTANCE.DwmSetWindowAttribute(hwnd, new WinDef.UINT(DWMWA_SYSTEMBACKDROP_TYPE), new IntByReference(3), 4);
+    @JvmStatic
+    fun setAcrylicBackground(hwnd: HWND?) {
+      INSTANCE.DwmSetWindowAttribute(hwnd, UINT(DWMWA_SYSTEMBACKDROP_TYPE.toLong()), IntByReference(3), 4)
     }
 
-    static void removeBorder(HWND hwnd) {
-        setBorderColor(hwnd, 4294967294L);
+    @JvmStatic
+    fun removeBorder(hwnd: HWND?) {
+      setBorderColor(hwnd, 4294967294L)
     }
 
-    static void setBorderColor(HWND hwnd, long color) {
-        INSTANCE.DwmSetWindowAttribute(hwnd, new WinDef.UINT(DWMWA_BORDER_COLOR), new WinDef.UINTByReference(new WinDef.UINT(color)), 4);
+    fun setBorderColor(hwnd: HWND?, color: Long) {
+      INSTANCE.DwmSetWindowAttribute(hwnd, UINT(DWMWA_BORDER_COLOR.toLong()), UINTByReference(UINT(color)), 4)
     }
+
+    val INSTANCE: Dwmapi = Native.load("dwmapi", Dwmapi::class.java)
+
+    const val DWMWA_USE_IMMERSIVE_DARK_MODE: Int = 20
+    const val DWMWA_SYSTEMBACKDROP_TYPE: Int = 38
+    const val DWMWA_BORDER_COLOR: Int = 34
+  }
 }

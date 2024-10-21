@@ -15,7 +15,7 @@ public abstract class ModPacket<T extends ModPacket<T>> {
         try {
             this.handle(context);
         } catch (Throwable throwable) {
-            IConnection.LOGGER.error("Couldn't handle packet:", throwable);
+            IConnection.getLogger().error("Couldn't handle packet:", throwable);
         }
         return true;
     }

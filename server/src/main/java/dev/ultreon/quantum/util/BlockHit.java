@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class BlockHit implements Hit {
     public static final BlockHit MISS = new BlockHit();
-    protected CubicDirection direction;
+    protected Direction direction;
     // input
     protected Ray ray;
     protected float distanceMax = 5.0F;
@@ -144,11 +144,11 @@ public class BlockHit implements Hit {
         return Objects.hash(getDirection(), ray, distanceMax, position, normal, vec, getBlockMeta(), getBlock(), collide, getDistance());
     }
 
-    public CubicDirection getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 
-    public void setDirection(CubicDirection direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 }

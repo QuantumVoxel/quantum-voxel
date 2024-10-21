@@ -1,11 +1,7 @@
-package dev.ultreon.quantum.network.system;
+package dev.ultreon.quantum.network.system
 
-public class ReadOnlyConnectionException extends RuntimeException {
-    public ReadOnlyConnectionException() {
-        super("Connection is read-only");
-    }
+class ReadOnlyConnectionException : RuntimeException {
+  constructor() : super("Connection is read-only")
 
-    public ReadOnlyConnectionException(String message) {
-        super(message);
-    }
+  constructor(message: String?) : super(message)
 }
