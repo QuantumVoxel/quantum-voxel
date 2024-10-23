@@ -460,7 +460,17 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
+    public int getSunlight(int x, int y, int z) {
+        return 15;
+    }
+
+    @Override
     public int getBlockLight(Vec3i pos) {
+        return 0;
+    }
+
+    @Override
+    public int getBlockLight(int x, int y, int z) {
         return 0;
     }
 

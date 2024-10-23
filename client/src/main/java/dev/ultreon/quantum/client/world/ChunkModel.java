@@ -21,7 +21,6 @@ import kotlin.LazyKt;
 import lombok.Getter;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
@@ -34,9 +33,9 @@ public class ChunkModel implements RenderableProvider {
     private final ClientChunk chunk;
     private final Material material;
     private final Material transparentMaterial;
-    private Model model = null;
-    private ModelInstance modelInstance = null;
-    private ModelInstance gizmoInstance = null;
+    private volatile Model model = null;
+    private volatile ModelInstance modelInstance = null;
+    private volatile ModelInstance gizmoInstance = null;
 
     private final Model[] lodModels = new Model[ClientConfig.lodLevels];
     private final Vector3 relativePosition = new Vector3();
@@ -69,7 +68,8 @@ public class ChunkModel implements RenderableProvider {
 
                     this.beingBuilt = true;
 
-                    task = QuantumClient.get().runAsyncTask(() -> buildAsync(modelBuilder, pos));
+                    buildAsync(modelBuilder, pos);
+                    this.beingBuilt = false;
                 }
                 chunk.loadCustomRendered();
 
@@ -86,7 +86,7 @@ public class ChunkModel implements RenderableProvider {
         try {
             try (var ignored2 = QuantumClient.PROFILER.start("solid-mesh")) {
                 MeshBuilder meshBuilder = new MeshBuilder();
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
                 chunk.mesher.buildMesh(blk -> !blk.isTransparent(), meshBuilder);
                 Mesh end = QuantumClient.invokeAndWait(() -> meshBuilder.end());
                 modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
@@ -94,13 +94,13 @@ public class ChunkModel implements RenderableProvider {
 
             try (var ignored3 = QuantumClient.PROFILER.start("transparent-mesh")) {
                 MeshBuilder meshBuilder = new MeshBuilder();
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
+                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
                 chunk.mesher.buildMesh(Block::isTransparent, meshBuilder);
                 Mesh end2 = QuantumClient.invokeAndWait(() -> meshBuilder.end());
                 modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
             }
 
-            this.model = modelBuilder.end();
+            this.model = QuantumClient.invokeAndWait(modelBuilder::end);
 
             if (this.model == null) {
                 throw new IllegalStateException("Failed to generate chunk model: " + pos);

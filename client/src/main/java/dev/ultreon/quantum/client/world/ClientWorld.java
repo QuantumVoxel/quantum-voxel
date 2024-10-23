@@ -393,46 +393,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      */
     @Override
     public boolean set(@NotNull BlockVec pos, @NotNull BlockState block, int flags) {
-        // Check if we're on the main thread, if not invokeAndWait the method on the main thread
-        if (!QuantumClient.isOnRenderThread()) {
-            return QuantumClient.invokeAndWait(() -> this.set(pos, block, flags));
-        }
-
-        // Set the block and get the result
-        boolean isBlockSet = super.set(pos, block, flags);
-
-        // Get the chunk containing the block
-        ClientChunk chunk = this.getChunkAt(pos);
-
-        // If the chunk exists, set the light source
-        if (chunk != null) {
-            chunk.setLightSource(pos.chunkLocal(), block.getLight());
-        }
-
-        // If the SYNC flag is set, sync the block
-        if ((flags & BlockFlags.SYNC) != 0) {
-            this.sync(pos.x, pos.y, pos.z, block);
-        }
-
-        // If the LIGHT flag is set and the chunk exists, update the light chunks
-        if ((flags & BlockFlags.LIGHT) != 0 && chunk != null && isBlockSet) {
-            this.updateLightChunks(chunk);
-        }
-
-        // If the UPDATE flag is set and the chunk exists, update the chunk and its neighbors
-        if ((flags & BlockFlags.UPDATE) != 0 && chunk != null && isBlockSet) {
-            chunk.set(pos.chunkLocal(), block);
-            this.updateChunkAndNeighbours(chunk);
-
-            // Update the blocks in each direction of the block
-            for (Direction direction : Direction.values()) {
-                BlockVec offset = pos.offset(direction);
-                BlockState blockState = this.get(offset);
-                blockState.update(this, offset);
-            }
-        }
-
-        return isBlockSet;
+        return set(pos.x, pos.y, pos.z, block, flags);
     }
 
     /**
@@ -441,26 +402,26 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * @param chunk The chunk for which to update the light.
      */
     private void updateLightChunks(ClientChunk chunk) {
-//        // Get the neighboring chunks of the current chunk
-//        ClientChunk[] neighbourChunks = this.getNeighbourChunks(chunk);
-//
-//        // Clear light in the current chunk
-//        chunk.clearLight();
-//
-//        // Clear light in each neighboring chunk
-//        for (ClientChunk neighbourChunk : neighbourChunks) {
-//            if (neighbourChunk != null)
-//                neighbourChunk.clearLight();
-//        }
-//
-//        // Update light in the current chunk
-//        this.updateLightChunk(chunk);
-//
-//        // Update light in each neighboring chunk
-//        for (ClientChunk neighbourChunk : neighbourChunks) {
-//            if (neighbourChunk != null)
-//                this.updateLightChunk(neighbourChunk);
-//        }
+        // Get the neighboring chunks of the current chunk
+        ClientChunk[] neighbourChunks = this.getNeighbourChunks(chunk);
+
+        // Clear light in the current chunk
+        chunk.clearLight();
+
+        // Clear light in each neighboring chunk
+        for (ClientChunk neighbourChunk : neighbourChunks) {
+            if (neighbourChunk != null)
+                neighbourChunk.clearLight();
+        }
+
+        // Update light in the current chunk
+        this.updateLightChunk(chunk);
+
+        // Update light in each neighboring chunk
+        for (ClientChunk neighbourChunk : neighbourChunks) {
+            if (neighbourChunk != null)
+                this.updateLightChunk(neighbourChunk);
+        }
     }
 
     private ClientChunk[] getNeighbourChunks(ClientChunk chunk) {
@@ -490,7 +451,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             chunk.updateLight(client.world);
         }
 
-        Vec3i offset = chunk.getOffset();
+        BlockVec offset = chunk.getOffset();
         for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
             for (int z = offset.x; z < offset.x + CHUNK_SIZE; z++) {
                 setInitialSunlight(x, z);
@@ -506,13 +467,13 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         if (chunk == null) return;
 
         // Start from the top of the world and move downward
-        for (int y = chunk.getOffset().y - 1; y >= 0; y--) {
+        for (int y = 256 - 1; y >= 0; y--) {
             BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
             int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
-                setSunlight(localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity); // Assuming maximum sunlight intensity is 15
-                queue.addLast(new int[]{localBlockVec.getIntX(), localBlockVec.getIntY(), localBlockVec.getIntZ(), intensity});
+                setSunlight(localBlockVec.x, localBlockVec.y, localBlockVec.z, intensity); // Assuming maximum sunlight intensity is 15
+                queue.addLast(new int[]{localBlockVec.x, localBlockVec.y, localBlockVec.z, intensity});
             } else {
                 break; // Stop when hitting a non-transparent block
             }
@@ -588,8 +549,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * Fills a region with light starting from a given position.
      * Uses a breadth-first search algorithm to traverse the region.
      *
-     * @param startX The setX-coordinate of the starting position.
-     * @param startY The setY-coordinate of the starting position.
+     * @param startX The x-coordinate of the starting position.
+     * @param startY The y-coordinate of the starting position.
      * @param startZ The z-coordinate of the starting position.
      * @param light  The initial light intensity.
      */
@@ -631,16 +592,16 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * Adds a new position to the queue to be processed in the floodfill algorithm.
      *
      * @param queue     The queue of positions to be processed.
-     * @param x         The setX-coordinate of the new position.
-     * @param y         The setY-coordinate of the new position.
+     * @param x         The x-coordinate of the new position.
+     * @param y         The y-coordinate of the new position.
      * @param z         The z-coordinate of the new position.
      * @param intensity The light intensity of the new position.
      */
     private void newState(Queue<int[]> queue, int x, int y, int z, int intensity) {
         ClientChunk chunkAt = this.getChunkAt(x, y, z);
         if (chunkAt == null) return;
-        BlockState blockState = chunkAt.get(toLocalBlockVec(x, y, z, this.tmp));
-        int lightReduction = max(blockState.getLightReduction(), 1);
+        BlockState blockProperties = chunkAt.get(toLocalBlockVec(x, y, z));
+        int lightReduction = max(blockProperties.getLightReduction(), 1);
         queue.addLast(new int[]{x, y, z, intensity - lightReduction});
     }
 

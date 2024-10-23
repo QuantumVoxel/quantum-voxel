@@ -2808,49 +2808,42 @@ public class Renderer implements Disposable {
     final String FRAG = """
                     // Fragment shader
                     #ifdef GL_ES
-                    precision mediump float;
+                    precision highp float;
                     #endif
-                               \s
+                    
+                    #define pi 3.14159265
+                    
                     varying vec4 vColor;
                     varying vec2 vTexCoord;
-                               \s
+                    
                     uniform sampler2D u_texture;
                     uniform vec2 iResolution;
                     uniform float iBlurRadius; // Radius of the blur
                     uniform vec2 iBlurDirection; // Direction of the blur
-                               \s
+                    uniform vec4 iClamp;
+                    
+                    // Function to calculate Gaussian weights
+                    float gaussian(float x, float sigma) {
+                        return exp(-0.5 * (x * x) / (sigma * sigma)) / (sigma * sqrt(2.0 * pi));
+                    }
+                    
                     void main() {
-                      float Pi = 6.28318530718; // Pi*2
-                               \s
-                      // GAUSSIAN BLUR SETTINGS {{{
-                      float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
-                      float Quality = 4.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
-                      float Size = iBlurRadius; // BLUR SIZE (Radius)
-                      // GAUSSIAN BLUR SETTINGS }}}
-                               \s
-                      vec2 Radius = Size/iResolution.xy;
-                               \s
-                      // Normalized pixel coordinates (from 0 to 1)
-                      vec2 uv = gl_FragCoord.xy/iResolution.xy;
-                      // Pixel colour
-                      vec4 color = texture2D(u_texture, uv);
-                               \s
-                      // Blur calculations
-                      for( float d=0.0; d<Pi; d+=Pi/Directions)
-                      {
-                        for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)
-                        {
-                          color += texture2D(u_texture, uv+vec2(cos(d),sin(d))*Radius*i);
+                        float sigma = iBlurRadius;  // Sigma is usually proportional to the radius
+                        vec4 color = vec4(0.0);
+                        float total = 0.0;
+                    
+                        vec2 iPos = vTexCoord * iResolution;
+                    
+                        // Gaussian kernel size depends on the radius (optimize for reasonable radius)
+                        for (int i = -int(iBlurRadius); i <= int(iBlurRadius); i++) {
+                            float weight = gaussian(float(i), sigma);
+                            vec2 offset = vec2(float(i) / (iResolution.x), float(i) / (iResolution.y)) * iBlurDirection; // Horizontal blur
+                    
+                            color += texture2D(u_texture, vTexCoord + offset) * weight;
+                            total += weight;
                         }
-                      }
-                     \s
-                      // Gamma correction
-                      float Gamma = 1.0;
-                      color.rgba = pow(color.rgba, vec4(1.0/Gamma));
-                               \s
-                      // Output to screen
-                      color /= Quality * Directions;
-                      gl_FragColor = color;
+                    
+                        gl_FragColor = color / total;  // Normalize by total weight
                     }
                     """;
 
@@ -2964,7 +2957,7 @@ public class Renderer implements Disposable {
             //draw target B to the screen with a vertical blur effect
             fboRegion.setTexture(blurTargetB.getColorBufferTexture());
             this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0);
+            batch.draw(fboRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
             //reset to default shader without blurs
             batch.setShader(null);

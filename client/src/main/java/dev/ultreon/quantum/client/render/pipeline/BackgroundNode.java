@@ -3,8 +3,6 @@ package dev.ultreon.quantum.client.render.pipeline;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.input.GameCamera;
@@ -31,12 +29,11 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
     }
 
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
+    public void render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, float deltaTime) {
         SceneShaders shaderProvider = this.shaderProvider.get();
         ShaderContext.set(shaderProvider);
         this.renderWorld(modelBatch);
         textures.put("skybox", this.getFrameBuffer().getColorBufferTexture());
-        return input;
     }
 
     @Override

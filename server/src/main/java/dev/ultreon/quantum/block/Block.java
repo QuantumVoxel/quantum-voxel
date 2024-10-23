@@ -243,7 +243,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     public int getLightReduction(@NotNull BlockState blockState) {
-        if (isAir()) return 0;
+        if (isAir()) return 1;
         return lightReduction;
     }
 
