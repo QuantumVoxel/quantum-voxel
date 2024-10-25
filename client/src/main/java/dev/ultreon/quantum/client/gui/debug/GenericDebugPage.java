@@ -41,12 +41,12 @@ public class GenericDebugPage implements DebugPage {
         if (integratedServer != null) {
             context.left("Integrated Server")
                     .left("Server TPS", integratedServer.getCurrentTps())
-                    .left("Packets", "rx = " + IConnection.getRx().get() + ", tx = " + IConnection.getTx().get())
+                    .left("Packets", "rx = " + IConnection.rx.get() + ", tx = " + IConnection.tx.get())
                     .left();
         } else {
             context.left("Server Connection")
                     .left("Server TPS", "N/A (Coming Soon!)")
-                    .left("Packets", "rx = " + IConnection.getRx().get() + ", tx = " + IConnection.getTx().get())
+                    .left("Packets", "rx = " + IConnection.rx.get() + ", tx = " + IConnection.tx.get())
                     .left();
         }
 

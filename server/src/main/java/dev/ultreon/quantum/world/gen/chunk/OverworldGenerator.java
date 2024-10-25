@@ -93,7 +93,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @return the biome generator index for the specified offset and height
      */
     public BiomeGenerator.Index findGenerator(Vec3i offset, int height) {
-        return this.findGenerator(offset, height, Modifications.INSTANCE.getEnableDomainWarping());
+        return this.findGenerator(offset, height, Modifications.enableDomainWarping);
     }
 
     /**

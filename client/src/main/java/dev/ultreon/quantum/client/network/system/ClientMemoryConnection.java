@@ -18,7 +18,7 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
     private final QuantumClient client;
 
     public ClientMemoryConnection(QuantumClient client, Thread thread) {
-        super(null, client, thread);
+        super(null, client);
         this.client = client;
     }
 

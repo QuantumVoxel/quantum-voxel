@@ -21,7 +21,7 @@ public class MemoryNetworker implements Networker {
         super();
         this.server = server;
         this.otherSide = otherSide;
-        this.connection = new ServerMemoryConnection(otherSide, server, server.thread());
+        this.connection = new ServerMemoryConnection(otherSide, server);
         this.connection.initiate(new LoginServerPacketHandler(this.server, connection), null);
     }
 

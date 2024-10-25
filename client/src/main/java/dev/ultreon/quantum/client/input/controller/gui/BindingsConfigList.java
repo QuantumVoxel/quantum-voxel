@@ -45,7 +45,7 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
         config.save();
     }
 
-    protected static class ListEntry extends Entry<ListEntry> {
+    protected static class ListEntry extends SelectionList.Entry<ListEntry> {
         private static final Color COLOR = new Color(0xffffff40);
         private final BindingsConfigList list;
         final ConfigEntry<?> configEntry;

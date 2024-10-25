@@ -88,7 +88,7 @@ public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, Serv
 
     @Override
     public void onPing(long ping) {
-        this.setPing(ping);
+        this.ping = ping;
     }
 
     @Override

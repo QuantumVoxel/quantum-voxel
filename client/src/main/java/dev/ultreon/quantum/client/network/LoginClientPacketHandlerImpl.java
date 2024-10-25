@@ -57,7 +57,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
         Objects.requireNonNull(this.client.world).spawn(player);
 
-        IConnection.getLogger().info("Logged in with uuid: {}", uuid);
+        IConnection.LOGGER.info("Logged in with uuid: {}", uuid);
 
         if (this.client.integratedServer != null) this.client.setActivity(GameActivity.SINGLEPLAYER);
         else this.client.setActivity(GameActivity.MULTIPLAYER);
@@ -84,7 +84,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
         } catch (ClosedConnectionException | ClosedChannelException e) {
             // Ignored
         } catch (IOException e) {
-            IConnection.getLogger().error("Failed to close connection", e);
+            IConnection.LOGGER.error("Failed to close connection", e);
         }
 
         this.client.showScreen(new DisconnectedScreen(message, !this.connection.isMemoryConnection()));

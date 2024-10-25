@@ -49,7 +49,6 @@ public class Block implements DataWriter<MapType> {
     private final int lightReduction;
     private final SoundType soundType;
     private BlockState defaultState;
-    @Getter
     private BlockStateDefinition definition;
 
     public Block() {
@@ -74,8 +73,8 @@ public class Block implements DataWriter<MapType> {
         this.soundType = properties.soundType;
 
         this.definition = new BlockStateDefinition(this);
-        this.defineState(definition);
-        this.defaultState = definition.build();
+        this.defineState(getDefinition());
+        this.defaultState = getDefinition().build();
     }
 
     public void onStateReload() {
@@ -256,23 +255,27 @@ public class Block implements DataWriter<MapType> {
     }
 
     public BlockState readBlockState(@NotNull PacketIO buffer) {
-        return definition.read(buffer);
+        return getDefinition().read(buffer);
     }
 
     public void writeBlockState(PacketIO buffer, BlockState state) {
-        definition.write(state, buffer);
+        getDefinition().write(state, buffer);
     }
 
     public BlockState loadBlockState(MapType data) {
         MapType entriesData = data.getMap("Entries");
-        return definition.load(entriesData);
+        return getDefinition().load(entriesData);
     }
 
     public void saveBlockState(MapType entriesData, BlockState blockState) {
-        definition.save(blockState, entriesData);
+        getDefinition().save(blockState, entriesData);
     }
 
-    public static class Properties {
+    public BlockStateDefinition getDefinition() {
+		return definition;
+	}
+
+	public static class Properties {
         private SoundType soundType = new SoundType();
         private boolean greedyMerge = true;
         private boolean occlude = true;

@@ -86,20 +86,20 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
         if (this.server.getPlayer(uuid) != null) {
             this.connection.disconnect("Player " + name + " is already in the server.");
-            IConnection.getLogger().info("%s left the server because they are already in the server.", name);
+            IConnection.LOGGER.info("%s left the server because they are already in the server.", name);
             return;
         }
 
         if (this.server.getPlayerCount() >= this.server.getMaxPlayers()) {
             this.connection.disconnect("The server is full.");
-            IConnection.getLogger().info("%s left the server because the server is full.", name);
+            IConnection.LOGGER.info("%s left the server because the server is full.", name);
             return;
         }
 
         final var player = this.server.loadPlayer(name, uuid, this.connection);
         this.connection.setPlayer(player);
 
-        IConnection.getLogger().info("{} joined the server.", name);
+        IConnection.LOGGER.info("{} joined the server.", name);
 
         BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> {
             this.server.getOverworld().getChunkAt(0, 0, 0);

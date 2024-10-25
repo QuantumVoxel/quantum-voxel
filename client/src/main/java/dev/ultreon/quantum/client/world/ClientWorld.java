@@ -41,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
-import static dev.ultreon.quantum.client.util.ExtKt.deg;
 import static java.lang.Math.max;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
@@ -63,7 +62,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x)), ATLAS_SIZE.get().y));
 
-    public static Rot SKYBOX_ROTATION = deg(-60);
+    public static Rot SKYBOX_ROTATION = Rot.deg(-60);
     public static int VOID_Y_START = 20;
     public static int VOID_Y_END = 0;
     @NotNull

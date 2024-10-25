@@ -75,7 +75,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     @Override
     public void onDisconnect(String message) {
-        IConnection.getLogger().info("Player %s disconnected: %s", this.player.getName(), message);
+        IConnection.LOGGER.info("Player %s disconnected: %s", this.player.getName(), message);
         PlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(this.player);
 
         this.disconnected = true;
@@ -141,7 +141,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onBlockBreaking(BlockVec pos, C2SBlockBreakingPacket.BlockStatus status) {
-        this.server.submit(() -> {
+        this.server.submit((Runnable) () -> {
             ServerWorld world = this.player.getWorld();
             BlockState block = world.get(pos);
             float efficiency = 1.0F;

@@ -832,7 +832,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
         String[] icons = new String[sizes.length];
         for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
-            var size = sizes[i];
             if (isMac) {
                 icons[i] = "icons/mac.png";
             } else {

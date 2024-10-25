@@ -79,11 +79,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final NamespaceID MOON_ID = id("generated/moon");
     public static final NamespaceID SUN_ID = id("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
-    @Getter
     private Material material;
-    @Getter
     private Material transparentMaterial;
-    @Getter
     private Texture breakingTex;
     private Environment environment;
     private int visibleChunks;
@@ -146,11 +143,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     private void setupBreaking() {
         // Breaking animation meshes.
-        this.breakingTex = this.client.getTextureManager().getTexture(id("textures/break_stages.png"));
+        this.setBreakingTex(this.client.getTextureManager().getTexture(id("textures/break_stages.png")));
 
         Array<TextureRegion> breakingTexRegions = new Array<>(new TextureRegion[6]);
         for (int i = 0; i < 6; i++) {
-            TextureRegion textureRegion = new TextureRegion(this.breakingTex, 0, i / 6f, 1, (i + 1) / 6f);
+            TextureRegion textureRegion = new TextureRegion(this.getBreakingTex(), 0, i / 6f, 1, (i + 1) / 6f);
             breakingTexRegions.set(i, textureRegion);
         }
 
@@ -190,12 +187,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.material.set(TextureAttribute.createDiffuse(blockTex));
         this.material.set(TextureAttribute.createEmissive(emissiveBlockTex));
         this.material.set(new DepthTestAttribute(GL_LEQUAL));
-        this.transparentMaterial = new Material();
-        this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
-        this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
-        this.transparentMaterial.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        this.transparentMaterial.set(new DepthTestAttribute(GL_LEQUAL));
-        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
+        this.setTransparentMaterial(new Material());
+        this.getTransparentMaterial().set(TextureAttribute.createDiffuse(blockTex));
+        this.getTransparentMaterial().set(TextureAttribute.createEmissive(emissiveBlockTex));
+        this.getTransparentMaterial().set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        this.getTransparentMaterial().set(new DepthTestAttribute(GL_LEQUAL));
+        this.getTransparentMaterial().set(FloatAttribute.createAlphaTest(0.01f));
     }
 
     /**
@@ -931,7 +928,31 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return false;
     }
 
-    private static class ChunkRenderRef {
+    public Material getTransparentMaterial() {
+		return transparentMaterial;
+	}
+
+	public void setTransparentMaterial(Material transparentMaterial) {
+		this.transparentMaterial = transparentMaterial;
+	}
+	
+	public Material getMaterial() {
+		return material;
+	}
+	
+	public void setMaterial(Material material) {
+		this.material = material;
+	}
+
+	public Texture getBreakingTex() {
+		return breakingTex;
+	}
+
+	public void setBreakingTex(Texture breakingTex) {
+		this.breakingTex = breakingTex;
+	}
+
+	private static class ChunkRenderRef {
         boolean chunkRendered = false;
     }
 }

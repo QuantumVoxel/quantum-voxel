@@ -25,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
-@Getter
 public class ChunkModel implements RenderableProvider {
     private static final Lazy<Model> gizmo = LazyKt.lazy(ChunkModel::createBorderGizmo);
     private static final Color CHUNK_GIZMO_COLOR = new Color(0.0f, 1.0f, 0.0f, 1.0f);
@@ -200,4 +199,52 @@ public class ChunkModel implements RenderableProvider {
     public boolean needsRebuild(ClientWorld world) {
         return world.isChunkInvalidated(chunk);
     }
+
+	public static Lazy<Model> getGizmo() {
+		return gizmo;
+	}
+
+	public ChunkVec getPos() {
+		return pos;
+	}
+
+	public ClientChunk getChunk() {
+		return chunk;
+	}
+
+	public Material getMaterial() {
+		return material;
+	}
+
+	public Material getTransparentMaterial() {
+		return transparentMaterial;
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
+	public ModelInstance getModelInstance() {
+		return modelInstance;
+	}
+
+	public ModelInstance getGizmoInstance() {
+		return gizmoInstance;
+	}
+
+	public Model[] getLodModels() {
+		return lodModels;
+	}
+
+	public Vector3 getRelativePosition() {
+		return relativePosition;
+	}
+
+	public boolean isBeingBuilt() {
+		return beingBuilt;
+	}
+
+	public CompletableFuture<Void> getTask() {
+		return task;
+	}
 }
