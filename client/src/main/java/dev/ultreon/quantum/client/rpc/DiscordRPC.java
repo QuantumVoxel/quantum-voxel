@@ -9,6 +9,7 @@ import com.jagrosh.discordipc.exceptions.NoDiscordClientException;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import org.apache.commons.collections4.BagUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
@@ -40,6 +41,7 @@ public class DiscordRPC implements RpcHandler {
     public void start() {
         // Initialize the Discord IPC client with the application ID.
         client = new IPCClient(1179401719902384138L);
+
         // Sets up the IPC listener for the Discord IPC client. This method is called when the client is ready to start
         // sending Rich Presence updates to Discord.
         client.setListener(new IPCListener() {
@@ -75,6 +77,9 @@ public class DiscordRPC implements RpcHandler {
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
                             .setJoinSecret(quantumClient.serverData.address());
                 }
+
+                builder.setJoinSecret("hello_world");
+
                 // Send the initial Rich Presence
                 client.sendRichPresence(builder.build());
 
