@@ -15,10 +15,10 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
-import lombok.Getter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -81,6 +81,12 @@ public class ChunkModel implements RenderableProvider {
 
     private void buildAsync(ModelBuilder modelBuilder, ChunkVec pos) {
         long millis = System.currentTimeMillis();
+
+        if (chunk.isUniform()) {
+            this.model = new Model();
+            this.modelInstance = new ModelInstance(model);
+            return;
+        }
 
         try {
             try (var ignored2 = QuantumClient.PROFILER.start("solid-mesh")) {
@@ -165,7 +171,10 @@ public class ChunkModel implements RenderableProvider {
     @Override
     public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
         if (modelInstance == null || model == null) return;
+
+        int count = array.size;
         modelInstance.getRenderables(array, pool);
+        ValueTracker.trackRenderables(array.size - count);
 
         modelInstance.transform.getTranslation(relativePosition);
 

@@ -161,4 +161,9 @@ public class FlatStorage<D> implements Storage<D> {
     public FlatStorage<D> clone() throws CloneNotSupportedException {
         return (FlatStorage<D>) super.clone();
     }
+
+    @Override
+    public boolean isUniform() {
+        return false;
+    }
 }

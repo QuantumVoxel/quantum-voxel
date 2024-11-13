@@ -126,6 +126,7 @@ public class ImGuiOverlay {
         if (!ImGuiOverlay.SHOW_IM_GUI.get()) return;
         if (GamePlatform.get().isAngleGLES()) return;
 
+        ImGuiOverlay.imGuiGl3.newFrame();
         ImGuiOverlay.imGuiGlfw.newFrame();
 
         ImGui.newFrame();
@@ -513,8 +514,8 @@ public class ImGuiOverlay {
 
         synchronized (ImGuiOverlay.class) {
             if (ImGuiOverlay.isImplCreated) {
-                ImGuiOverlay.imGuiGl3.dispose();
-                ImGuiOverlay.imGuiGlfw.dispose();
+                ImGuiOverlay.imGuiGl3.shutdown();
+                ImGuiOverlay.imGuiGlfw.shutdown();
             }
 
             if (ImGuiOverlay.isContextCreated) {

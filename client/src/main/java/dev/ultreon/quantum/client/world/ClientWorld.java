@@ -218,7 +218,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public void updateChunkAndNeighbours(@NotNull Chunk chunk) {
         super.updateChunkAndNeighbours(chunk);
 
-        this.updateLightChunks((ClientChunk) chunk);
+//        this.updateLightChunks((ClientChunk) chunk);
     }
 
     @Override
@@ -363,7 +363,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
         // If the LIGHT flag is set and the chunk exists, update the light chunks
         if ((flags & BlockFlags.LIGHT) != 0 && chunk != null && isBlockSet) {
-            this.updateLightChunks(chunk);
+//            this.updateLightChunks(chunk);
         }
 
         // If the UPDATE flag is set and the chunk exists, update the chunk and its neighbors

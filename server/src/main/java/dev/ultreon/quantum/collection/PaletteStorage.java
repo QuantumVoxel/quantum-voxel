@@ -209,7 +209,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Nullable
     @Override
-    @Synchronized
     public D get(int idx) {
         short paletteIdx = this.toDataIdx(idx);
         return paletteIdx < 0 ? this.defaultValue : this.direct(paletteIdx);
@@ -304,5 +303,9 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     @Synchronized
     public PaletteStorage<D> clone() throws CloneNotSupportedException {
         return (PaletteStorage<D>) super.clone();
+    }
+
+    public boolean isUniform() {
+        return data.size <= 1;
     }
 }

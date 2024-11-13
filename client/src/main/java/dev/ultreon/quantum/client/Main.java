@@ -104,6 +104,8 @@ public final class Main implements ApplicationListener {
         if (client != null) return;
 
         glProfiler = new GLProfiler(Gdx.graphics);
+        if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
+
         glProfiler.setListener(error -> {
             String stackTrace = ExceptionUtils.getStackTrace(new Exception());
             Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);

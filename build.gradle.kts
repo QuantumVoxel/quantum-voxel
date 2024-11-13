@@ -660,7 +660,7 @@ commonProperties
                         StandardOpenOption.WRITE
                     )
 
-                    var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=${launchFile.path}"
+                    var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=\"${launchFile.path}\""
 
                     if (System.getProperty("os.name").lowercase().startsWith("mac")) {
                         defaultJvmArgs += " -XstartOnFirstThread"

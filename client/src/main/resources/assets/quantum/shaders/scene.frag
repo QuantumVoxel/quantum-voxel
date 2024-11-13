@@ -203,6 +203,6 @@ void main() {
     #endif
     #if LOD_LEVEL < 2
     specularOut = blockLight;
-    depthOut = vec3(1 - sunLight);
+    depthOut = vec3(1.0 - sunLight);
     #endif
 }

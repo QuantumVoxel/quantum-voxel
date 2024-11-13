@@ -641,6 +641,10 @@ public abstract class Chunk implements Disposable, ChunkAccess {
         this.blockEntities.remove(blockVec);
     }
 
+    public boolean isUniform() {
+        return storage.isUniform();
+    }
+
     /**
      * Chunk status for client chunk load response.
      *
