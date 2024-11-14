@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public enum CubicDirection implements StringSerializable {
+public enum Direction implements StringSerializable {
     UP(new Vector3(0, 1, 0), -1, new Quaternion(Vector3.Y, 90 * MathUtils.degRad)),
     DOWN(new Vector3(0, -1, 0), -1, new Quaternion(Vector3.Y, -90 * MathUtils.degRad)),
     NORTH(new Vector3(0, 0, 1), 0, new Quaternion(Vector3.Y, 0 * MathUtils.degRad)),
@@ -22,20 +22,20 @@ public enum CubicDirection implements StringSerializable {
     SOUTH(new Vector3(0, 0, -1), 2, new Quaternion(Vector3.Y, 180 * MathUtils.degRad)),
     EAST(new Vector3(1, 0, 0), 3, new Quaternion(Vector3.Y, -90 * MathUtils.degRad));
 
-    public static final CubicDirection[] HORIZONTAL = {NORTH, WEST, SOUTH, EAST};
+    public static final Direction[] HORIZONTAL = {NORTH, WEST, SOUTH, EAST};
 
     private final Vector3 normal;
     private final Quaternion rotation;
     public final int hIndex;
 
-    CubicDirection(Vector3 normal, int index, Quaternion rotation) {
+    Direction(Vector3 normal, int index, Quaternion rotation) {
         this.normal = normal;
         this.hIndex = index;
         this.rotation = rotation;
     }
 
-    public static @Nullable CubicDirection ofNormal(Vec3f normal) {
-        for (CubicDirection face : CubicDirection.values()) {
+    public static @Nullable Direction ofNormal(Vec3f normal) {
+        for (Direction face : Direction.values()) {
             if (face.normal.x == normal.x && face.normal.y == normal.y && face.normal.z == normal.z) {
                 return face;
             }
@@ -43,7 +43,7 @@ public enum CubicDirection implements StringSerializable {
         return null;
     }
 
-    public static CubicDirection fromVec3d(Vec3d direction) {
+    public static Direction fromVec3d(Vec3d direction) {
         double[] comps = new double[]{direction.x, direction.y, direction.z};
         double max;
 
@@ -58,8 +58,8 @@ public enum CubicDirection implements StringSerializable {
         else return max < 0 ? WEST : EAST;
     }
 
-    public static CubicDirection random(RNG random) {
-        return CubicDirection.values()[random.nextInt(6)];
+    public static Direction random(RNG random) {
+        return Direction.values()[random.nextInt(6)];
     }
 
     public Vector3 getNormal() {
@@ -78,7 +78,7 @@ public enum CubicDirection implements StringSerializable {
         };
     }
 
-    public CubicDirection getOpposite() {
+    public Direction getOpposite() {
         return switch (this) {
             case UP -> DOWN;
             case DOWN -> UP;
@@ -89,7 +89,7 @@ public enum CubicDirection implements StringSerializable {
         };
     }
 
-    public CubicDirection getClockwise() {
+    public Direction getClockwise() {
         return switch (this) {
             case UP -> UP;
             case DOWN -> DOWN;
@@ -100,7 +100,7 @@ public enum CubicDirection implements StringSerializable {
         };
     }
 
-    public CubicDirection getCounterClockwise() {
+    public Direction getCounterClockwise() {
         return switch (this) {
             case UP -> UP;
             case DOWN -> DOWN;
@@ -126,7 +126,7 @@ public enum CubicDirection implements StringSerializable {
         return this.hIndex;
     }
 
-    public CubicDirection rotateY(int hIndex) {
+    public Direction rotateY(int hIndex) {
         if (this.hIndex == -1) return this;
 
         return switch (hIndex) {
@@ -152,5 +152,29 @@ public enum CubicDirection implements StringSerializable {
     @Override
     public String serialize() {
         return name().toLowerCase();
+    }
+
+    public int getOffsetX() {
+        return switch (this) {
+            case UP, SOUTH, NORTH, DOWN -> 0;
+            case WEST -> -1;
+            case EAST -> 1;
+        };
+    }
+
+    public int getOffsetZ() {
+        return switch (this) {
+            case UP, WEST, EAST, DOWN -> 0;
+            case SOUTH -> -1;
+            case NORTH -> 1;
+        };
+    }
+
+    public int getOffsetY() {
+        return switch (this) {
+            case WEST, EAST, NORTH, SOUTH -> 0;
+            case UP -> 1;
+            case DOWN -> -1;
+        };
     }
 }

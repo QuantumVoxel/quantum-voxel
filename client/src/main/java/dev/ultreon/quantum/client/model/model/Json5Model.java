@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.model.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.google.common.collect.Table;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
@@ -13,6 +14,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Json5Model implements BlockModel, ItemModel {
     public final Map<String, NamespaceID> textureElements;
@@ -36,7 +38,7 @@ public class Json5Model implements BlockModel, ItemModel {
     }
 
     public Model bake() {
-        return ModelManager.INSTANCE.generateModel(id, modelBuilder -> {
+        return ModelManager.INSTANCE.generateModel(id, (Consumer<ModelBuilder>)  modelBuilder -> {
             for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
                 Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
                 modelElement.bake(i, modelBuilder, textureElements);

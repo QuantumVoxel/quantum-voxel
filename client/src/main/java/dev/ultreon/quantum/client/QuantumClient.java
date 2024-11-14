@@ -779,7 +779,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
             // Set fps limit
             int fpsLimit = ClientConfig.fpsLimit;
-            if (fpsLimit >= 240) QuantumClient.setFpsLimit(240);
+            if (fpsLimit >= 240) QuantumClient.setFpsLimit(0);
             else QuantumClient.setFpsLimit(fpsLimit < 10 ? 60 : fpsLimit);
         });
     }
@@ -832,7 +832,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
         String[] icons = new String[sizes.length];
         for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
-            var size = sizes[i];
             if (isMac) {
                 icons[i] = "icons/mac.png";
             } else {
@@ -2799,5 +2798,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         LOGGER.info("Shutting down Quantum Client");
         Gdx.app.exit();
+    }
+
+    public CompletableFuture<Void> runAsyncTask(Runnable o) {
+        return CompletableFuture.runAsync(o, executor);
     }
 }

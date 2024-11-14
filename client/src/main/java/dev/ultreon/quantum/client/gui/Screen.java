@@ -6,10 +6,11 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
+import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.Vec2f;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ import java.util.List;
 public abstract class Screen extends UIContainer<Screen> {
     private static final Color BACKGOUND_OVERLAY = new Color(0, 0, 0, 0.25f);
     private static final Color DIALOG_BACKGROUND = new Color(0, 0, 0, 0.45f);
+    private final Resizer resizer;
     protected @Nullable TextObject title;
     public @Nullable Screen parentScreen;
     public Widget directHovered;
@@ -51,6 +53,8 @@ public abstract class Screen extends UIContainer<Screen> {
         this.root = this;
         this.title = title;
         this.isVisible = true;
+
+        this.resizer = new Resizer(7680, 4320);
     }
 
     public final void resize(int width, int height) {
@@ -196,8 +200,20 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clearColor(0, 0, 0, 1);
             renderer.clear();
             int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-            renderer.blurred(true, (int) this.client.getGuiScale(), () -> renderer.blit(QuantumClient.id("textures/gui/title_background.png"), 0, -extraHeight, this.size.width, this.size.height + extraHeight, 0, 0, 256, 256, 256, 256));
+            renderer.scale(1 / client.getGuiScale(), 1 / client.getGuiScale());
+            renderer.blurred(true, () -> {
+                Vec2f thumbnail = this.resizer.thumbnail(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+                float drawWidth = thumbnail.x;
+                float drawHeight = thumbnail.y;
+
+                float drawX = (Gdx.graphics.getWidth() - drawWidth) / 2;
+                float drawY = (Gdx.graphics.getHeight() - drawHeight) / 2;
+
+                renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
+            });
             renderer.flush();
+            renderer.scale(client.getGuiScale(), client.getGuiScale());
 
             renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, BACKGOUND_OVERLAY);
         }

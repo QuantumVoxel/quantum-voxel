@@ -153,3 +153,5 @@ Thumbs.db
 /logs/2024-07-07-5.log.gz
 /logs/2024-07-07-6.log.gz
 /logs/debug-6.log.gz
+/profile.jfr
+/.profileconfig.json

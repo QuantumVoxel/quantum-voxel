@@ -6,6 +6,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.badlogic.gdx.utils.Os;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
@@ -107,7 +109,7 @@ public class DesktopLauncher {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
 
         LauncherConfig launcherConfig = LauncherConfig.get();
-        boolean useAngleGraphics = launcherConfig.useAngleGraphics;
+        boolean useAngleGraphics = launcherConfig.useAngleGraphics && SharedLibraryLoader.os == Os.Windows;
         windowVibrancyEnabled = launcherConfig.windowVibrancyEnabled;
         fullVibrancyEnabled = launcherConfig.enableFullVibrancy;
 

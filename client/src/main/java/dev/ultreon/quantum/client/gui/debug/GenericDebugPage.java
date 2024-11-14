@@ -91,10 +91,11 @@ public class GenericDebugPage implements DebugPage {
                         .left("Chunk Unloads", ServerWorld.getChunkUnloads());
             }
 
-            context.left("Pool Free", WorldRenderer.getPoolFree())
-                    .left("Pool Max", WorldRenderer.getPoolMax())
-                    .left("Pool Peak", WorldRenderer.getPoolPeak())
+            context.left("Chunk Renderable", ValueTracker.getRenderableCount())
+                    .left("Avg. Chunk Renderables", ValueTracker.getAverageRenderables())
                     .left();
+
+            ValueTracker.resetRenderables();
         }
 
         // Queues

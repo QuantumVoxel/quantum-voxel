@@ -1,5 +1,6 @@
 import dev.ultreon.gameutils.GameUtilsExt
 import org.jetbrains.gradle.ext.Application
+import org.jetbrains.gradle.ext.ShortenCommandLine
 import org.jetbrains.gradle.ext.runConfigurations
 import org.jetbrains.gradle.ext.settings
 import org.jreleaser.gradle.plugin.JReleaserExtension
@@ -659,7 +660,7 @@ commonProperties
                         StandardOpenOption.WRITE
                     )
 
-                    var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=${launchFile.path}"
+                    var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=\"${launchFile.path}\""
 
                     if (System.getProperty("os.name").lowercase().startsWith("mac")) {
                         defaultJvmArgs += " -XstartOnFirstThread"
@@ -680,6 +681,7 @@ commonProperties
                             moduleName = rootProject.name + ".${dependency.name}.main"
                             workingDirectory = workingDir
                             programParameters = "--gameDir=."
+                            shortenCommandLine = ShortenCommandLine.ARGS_FILE
                         }
                     }
                 }

@@ -5,6 +5,7 @@ import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
+import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -17,7 +18,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.ByteArrayType;
+import dev.ultreon.ubo.DataTypes;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.LOGGER;
 import static java.lang.System.currentTimeMillis;
 
 /**
@@ -59,6 +61,11 @@ public final class ServerChunk extends Chunk {
                                    @NotNull ChunkVec pos,
                                    @NotNull MapType chunkData,
                                    @NotNull ServerWorld.Region region) {
+
+        if (DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) {
+            LOGGER.debug(String.format("Loading chunk at %s", pos));
+        }
+
         var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Blocks.AIR.getDefaultState());
         var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, world.getServer().getBiomes().getDefaultKey());
 
@@ -96,12 +103,12 @@ public final class ServerChunk extends Chunk {
             MapType extra = chunkData.getMap("Extra", new MapType());
             this.original = chunkData.getBoolean("original", this.original);
 
-            if (chunkData.<ByteArrayType>contains("LightMap"))
+            if (chunkData.contains("LightMap", DataTypes.BYTE_ARRAY))
                 this.lightMap.load(chunkData.getByteArray("LightMap"));
 
             this.modified = false;
 
-            if (chunkData.<ListType<?>>contains("BlockEntities")) {
+            if (chunkData.contains("BlockEntities", DataTypes.LIST)) {
                 ListType<MapType> blockEntities = chunkData.getList("BlockEntities");
 
                 for (MapType data : blockEntities.getValue()) {

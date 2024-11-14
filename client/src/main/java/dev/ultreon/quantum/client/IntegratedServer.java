@@ -288,7 +288,6 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
-    @InternalApi
     @ApiStatus.Internal
     public void handleWorldSaveError(Exception e) {
         super.handleWorldSaveError(e);

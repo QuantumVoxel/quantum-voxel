@@ -11,18 +11,19 @@ import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.system.MemoryConnection;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler, ServerPacketHandler> {
     private final QuantumClient client;
 
-    public ClientMemoryConnection(QuantumClient client) {
+    public ClientMemoryConnection(QuantumClient client, Thread thread) {
         super(null, client);
         this.client = client;
     }
 
     @Override
-    protected void received(Packet<? extends ClientPacketHandler> packet, @Nullable PacketListener resultListener) {
+    protected void received(@NotNull Packet<? extends ClientPacketHandler> packet, @Nullable PacketListener resultListener) {
         QuantumClient.invoke(() -> super.received(packet, resultListener));
     }
 

@@ -63,7 +63,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public MapType save(MapType outputData, Function<D, MapType> encoder) {
         ListType<MapType> data = new ListType<>();
         for (@NotNull D entry : this.data.toArray()) {
@@ -77,7 +76,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public void load(MapType inputData, Function<MapType, D> decoder) {
         this.data.clear();
         var data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
@@ -94,7 +92,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public void write(PacketIO buffer, BiConsumer<PacketIO, D> encoder) {
         buffer.writeVarInt(this.data.size);
         for (D entry : this.data.toArray()) if (entry != null) encoder.accept(buffer, entry);
@@ -106,7 +103,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
         var data = new Array<D>(defaultValue.getClass());
         var dataSize = buffer.readVarInt();
@@ -125,7 +121,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public boolean set(int idx, D value) {
         if (value == null) {
             this.remove(idx);
@@ -159,12 +154,10 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         return false;
     }
 
-    @Synchronized
     public short toDataIdx(int idx) {
         return idx >= 0 && idx < this.palette.length ? this.palette[idx] : -1;
     }
 
-    @Synchronized
     public D direct(int dataIdx) {
         if (dataIdx >= 0 && dataIdx < this.data.size) {
             D d = this.data.get(dataIdx);
@@ -174,7 +167,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         return this.defaultValue;
     }
 
-    @Synchronized
     public short add(int idx, D value) {
         Preconditions.checkNotNull(value, "value");
 
@@ -184,7 +176,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         return dataIdx;
     }
 
-    @Synchronized
     public void remove(int idx) {
         if (idx >= 0 && idx < this.data.size) {
             int dataIdx = this.toDataIdx(idx);
@@ -201,7 +192,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public void dispose() {
         this.data.clear();
         this.palette = null;
@@ -209,14 +199,12 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Nullable
     @Override
-    @Synchronized
     public D get(int idx) {
         short paletteIdx = this.toDataIdx(idx);
         return paletteIdx < 0 ? this.defaultValue : this.direct(paletteIdx);
     }
 
     @Override
-    @Synchronized
     public <R> Storage<R> map(@NotNull R defaultValue, IntFunction<R[]> generator, @NotNull Function<@NotNull D, @Nullable R> mapper) {
         Preconditions.checkNotNull(defaultValue, "defaultValue");
         Preconditions.checkNotNull(mapper, "mapper");
@@ -247,19 +235,16 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         return new PaletteStorage<>(defaultValue, this.palette, new Array<>(data));
     }
 
-    @Synchronized
     public short[] getPalette() {
         short[] palette = this.palette.clone();
         this.rwLock.readLock().unlock();
         return palette;
     }
 
-    @Synchronized
     public List<D> getData() {
         return List.of(this.data.toArray());
     }
 
-    @Synchronized
     public void set(short[] palette, D[] data) {
         Preconditions.checkNotNull(palette, "palette");
         Preconditions.checkNotNull(data, "data");
@@ -267,7 +252,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         set(palette, new Array<>(data));
     }
 
-    @Synchronized
     public void set(short[] palette, Array<D> data) {
         Preconditions.checkNotNull(palette, "palette");
         Preconditions.checkNotNull(data, "data");
@@ -283,7 +267,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
@@ -292,7 +275,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    @Synchronized
     public int hashCode() {
         int result = this.data.hashCode();
         result = 31 * result + Arrays.hashCode(this.palette);
@@ -301,8 +283,11 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Override
     @SuppressWarnings("unchecked")
-    @Synchronized
     public PaletteStorage<D> clone() throws CloneNotSupportedException {
         return (PaletteStorage<D>) super.clone();
+    }
+
+    public boolean isUniform() {
+        return data.size <= 1;
     }
 }

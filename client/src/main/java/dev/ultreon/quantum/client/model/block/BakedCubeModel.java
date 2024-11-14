@@ -17,7 +17,7 @@ import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -148,7 +148,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
 
         int faces = 0;
 
-        for (CubicDirection blockFace : CubicDirection.values()) {
+        for (Direction blockFace : Direction.values()) {
             TextureRegion entry = switch (blockFace) {
                 case UP -> top;
                 case DOWN -> bottom;
@@ -349,5 +349,16 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
                 "right=" + this.right + ", " +
                 "front=" + this.front + ", " +
                 "back=" + this.back + ']';
+    }
+
+    public TextureRegion tex(Direction direction) {
+        return switch (direction) {
+            case UP -> top;
+            case DOWN -> bottom;
+            case WEST -> left;
+            case EAST -> right;
+            case NORTH -> front;
+            case SOUTH -> back;
+        };
     }
 }

@@ -55,7 +55,7 @@ public class ConfigsList extends SelectionList<ConfigsList.ListEntry> {
         Config.saveAll();
     }
 
-    protected static class ListEntry extends Entry<ListEntry> {
+    protected static class ListEntry extends SelectionList.Entry<ListEntry> {
         public static final Color COLOR = RgbColor.BLACK.withAlpha(0x40).toGdx();
         private final ConfigsList list;
         final Config configEntry;

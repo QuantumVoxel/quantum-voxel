@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.render;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -12,7 +13,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.model.QVModel;
 
-public class RenderLayer {
+public class RenderLayer implements RenderableProvider {
     public static final RenderLayer BACKGROUND = new RenderLayer();
     public static final RenderLayer WORLD = new RenderLayer();
 
@@ -94,7 +95,8 @@ public class RenderLayer {
         }
     }
 
-    public void finish(Array<Renderable> output, Pool<Renderable> pool) {
+    @Override
+    public void getRenderables(Array<Renderable> output, Pool<Renderable> pool) {
         for (ModelInstance modelInstance : this.activeObjects.toArray(ModelInstance.class)) {
             modelInstance.getRenderables(output, pool);
         }

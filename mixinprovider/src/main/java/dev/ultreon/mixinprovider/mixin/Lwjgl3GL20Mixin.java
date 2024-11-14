@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class Lwjgl3GL20Mixin implements ShaderProgramAccess {
     @Redirect(method = "glLineWidth", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glLineWidth(F)V"))
     private void quantum$glLineWidth(float width) {
-        GL11.glLineWidth(6);
+        GL11.glLineWidth(2f);
     }
 }

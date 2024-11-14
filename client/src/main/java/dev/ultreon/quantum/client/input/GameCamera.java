@@ -184,4 +184,36 @@ public class GameCamera extends PerspectiveCamera {
         Vec3f sub = position.sub(this.player.getPosition(client.partialTick).add(0, this.player.getEyeHeight(), 0)).f();
         return tmp.set(sub.x, sub.y, sub.z);
     }
+
+	public float getFov() {
+		return fov;
+	}
+
+	public void setFov(float fov) {
+		this.fov = fov;
+	}
+
+	public float getFovModifierGoal() {
+		return fovModifierGoal;
+	}
+
+	public void setFovModifierGoal(float fovModifierGoal) {
+		this.fovModifierGoal = fovModifierGoal;
+	}
+
+	public Vec3d getCamPos() {
+		return camPos;
+	}
+
+	public void setCamPos(Vec3d camPos) {
+		this.camPos = camPos;
+	}
+
+	public float getCameraBop() {
+		return cameraBop;
+	}
+
+	public void setCameraBop(float cameraBop) {
+		this.cameraBop = cameraBop;
+	}
 }

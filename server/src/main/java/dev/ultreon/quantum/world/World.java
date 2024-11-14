@@ -55,7 +55,7 @@ import java.util.stream.Stream;
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
 public abstract class World implements Disposable, WorldAccess {
-    public static final int CHUNK_SIZE = 16;
+    public static final int CHUNK_SIZE = 32;
     public static final int REGION_SIZE = 32;
     public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;
@@ -831,21 +831,21 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     public boolean set(BlockVec position, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
-        this.checkThread();
-
-        ModApi.getGlobalEventHandler().call(new BlockSetEvent(this, position, block, flags));
-
-        Chunk chunk = this.getChunkAt(position);
-        if (chunk == null) return false;
-
-        BlockVec localPos = position.chunkLocal();
-        return chunk.set(localPos.getIntX(), localPos.getIntY(), localPos.getIntZ(), block);
+        return this.set(position.getIntX(), position.getIntY(), position.getIntZ(), block, flags);
     }
 
     @Override
     public boolean set(int x, int y, int z, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
-        return this.set(new BlockVec(x, y, z, BlockVecSpace.WORLD), block, flags);
+        this.checkThread();
+
+        ModApi.getGlobalEventHandler().call(new BlockSetEvent(this, new BlockVec(x, y, z), block, flags));
+
+        Chunk chunk = this.getChunkAt(x, y, z);
+        if (chunk == null) return false;
+
+        BlockVec localPos = toLocalBlockVec(x, y, z);
+        return chunk.set(localPos.getIntX(), localPos.getIntY(), localPos.getIntZ(), block);
     }
 
     @Override

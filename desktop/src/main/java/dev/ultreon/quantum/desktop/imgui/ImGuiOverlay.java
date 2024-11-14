@@ -2,16 +2,15 @@ package dev.ultreon.quantum.desktop.imgui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.WorldShader;
+import dev.ultreon.quantum.client.util.Rot;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.Skybox;
@@ -43,8 +42,6 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-import static dev.ultreon.quantum.client.util.ExtKt.deg;
 
 public class ImGuiOverlay {
     public static final ImFloat I_GAMMA = new ImFloat(1.5f);
@@ -83,6 +80,9 @@ public class ImGuiOverlay {
     private static ImPlotContext imPlotCtx;
     private static String[] modelViewerList = new String[0];
 
+    /**
+     * Sets up ImGui for the game.
+     */
     public static void setupImGui() {
         if (GamePlatform.get().isAngleGLES()) return;
 
@@ -109,6 +109,9 @@ public class ImGuiOverlay {
         });
     }
 
+    /**
+     * Initializes the ImGui implementation.
+     */
     public static void preInitImGui() {
         if (GamePlatform.get().isAngleGLES()) return;
 
@@ -119,14 +122,25 @@ public class ImGuiOverlay {
         }
     }
 
+    /**
+     * Checks if the chunk section borders are currently shown.
+     *
+     * @return true if the chunk section borders are shown, false otherwise
+     */
     public static boolean isChunkSectionBordersShown() {
         return ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
     }
 
+    /**
+     * Render ImGui for the game.
+     *
+     * @param client the game client instance
+     */
     public static void renderImGui(QuantumClient client) {
         if (!ImGuiOverlay.SHOW_IM_GUI.get()) return;
         if (GamePlatform.get().isAngleGLES()) return;
 
+        ImGuiOverlay.imGuiGl3.newFrame();
         ImGuiOverlay.imGuiGlfw.newFrame();
 
         ImGui.newFrame();
@@ -514,8 +528,8 @@ public class ImGuiOverlay {
 
         synchronized (ImGuiOverlay.class) {
             if (ImGuiOverlay.isImplCreated) {
-                ImGuiOverlay.imGuiGl3.dispose();
-                ImGuiOverlay.imGuiGlfw.dispose();
+                ImGuiOverlay.imGuiGl3.shutdown();
+                ImGuiOverlay.imGuiGlfw.shutdown();
             }
 
             if (ImGuiOverlay.isContextCreated) {
@@ -526,6 +540,6 @@ public class ImGuiOverlay {
     }
 
     private static void setSkyboxRot(float v) {
-        ClientWorld.SKYBOX_ROTATION = deg(v);
+        ClientWorld.SKYBOX_ROTATION = Rot.deg(v);
     }
 }

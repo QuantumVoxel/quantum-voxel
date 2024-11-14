@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.entity.LivingEntityDeathEvent;
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.ai.Navigator;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
@@ -382,7 +383,8 @@ public abstract class LivingEntity extends Entity {
     }
 
     public boolean isBuried() {
-        return getBuriedBlock().hasCollider();
+        BlockState buriedBlock = getBuriedBlock();
+        return buriedBlock.hasCollider() && buriedBlock.getBlock() != Blocks.BARRIER;
     }
 
     public BlockState getBuriedBlock() {

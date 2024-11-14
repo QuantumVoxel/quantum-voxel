@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.Fork;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.gen.TerrainFeature;
@@ -50,14 +50,14 @@ public class OreFeature extends TerrainFeature {
                 QuantumServer.LOGGER.warn("Generating ore feature at: " + x + ", " + y + ", " + z);
             }
 
-            CubicDirection dir = CubicDirection.random(random);
+            Direction dir = Direction.random(random);
             BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
             for (int i = 0; i < size; i++) {
                 vec = vec.relative(dir);
                 if (!setter.isAir(x, y, z))
                     setter.set(vec.x, vec.y, vec.z, this.ore.getDefaultState());
                 if (random.chance(.5f))
-                    dir = CubicDirection.random(random);
+                    dir = Direction.random(random);
             }
             return true;
         }

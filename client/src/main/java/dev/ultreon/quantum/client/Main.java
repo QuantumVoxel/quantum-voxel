@@ -48,7 +48,6 @@ import static io.github.libsdl4j.api.SdlSubSystemConst.*;
  * @since 0.1.0
  */
 @ApiStatus.Internal
-@OptIn(markerClass = InternalApi.class)
 public final class Main implements ApplicationListener {
     public static final Color SEMI_TRANSPARENT_WHITE = new Color(.5f, .5f, .5f, 1);
     private static Main instance;
@@ -98,27 +97,6 @@ public final class Main implements ApplicationListener {
     }
 
     /**
-     * Handles uncaught exceptions.
-     * If the exception is an ApplicationCrash, delays the crash log processing using QuantumClient.
-     * Logs the exception otherwise.
-     *
-     * @param thread    The thread where the exception occurred
-     * @param throwable The uncaught exception
-     */
-    private void uncaughtException(Thread thread, Throwable throwable) {
-        if (throwable instanceof ApplicationCrash e) {
-            try {
-                CrashLog crashLog = e.getCrashLog();
-                QuantumClient.get().delayCrash(crashLog);
-                return;
-            } catch (Throwable t) {
-                CommonConstants.LOGGER.error("Failed to handle uncaught exception", t);
-            }
-        }
-        CommonConstants.LOGGER.error("Uncaught exception", throwable);
-    }
-
-    /**
      * Initializes the QuantumClient and sets up exception handlers.
      */
     @Override
@@ -126,6 +104,8 @@ public final class Main implements ApplicationListener {
         if (client != null) return;
 
         glProfiler = new GLProfiler(Gdx.graphics);
+        if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
+
         glProfiler.setListener(error -> {
             String stackTrace = ExceptionUtils.getStackTrace(new Exception());
             Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);

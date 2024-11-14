@@ -88,7 +88,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             }
         });
 
-        this.mesher = new GreedyMesher(this, true);
+        this.mesher = new GreedyMesher(this, false);
     }
 
     private int index(int x, int y, int z) {
@@ -110,7 +110,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     public float getSunlightLevel(int x, int y, int z) {
-        int sunlight = this.lightMap.getSunlight(x, y, z);
+        int sunlight = this.getSunlight(x, y, z);
         float sunlightMapped = Chunk.lightLevelMap[Mth.clamp(sunlight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
         
         return Mth.clamp(sunlightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
@@ -118,7 +118,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     public float getBlockLightLevel(int x, int y, int z) {
-        int blockLight = this.lightMap.getBlockLight(x, y, z);
+        int blockLight = this.getBlockLight(x, y, z);
         float blockLightMapped = Chunk.lightLevelMap[Mth.clamp(blockLight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
         
         return Mth.clamp(blockLightMapped + Chunk.lightLevelMap[0], Chunk.lightLevelMap[0], Chunk.lightLevelMap[Chunk.MAX_LIGHT_LEVEL]);
@@ -157,9 +157,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     protected @NotNull BlockState getFast(int x, int y, int z) {
-        if (!QuantumClient.isOnRenderThread())
-            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
-
         return super.getFast(x, y, z);
     }
 
@@ -389,6 +386,12 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public int getSunlight(BlockVec pos) {
-        return lightMap.getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
+//        return lightMap.getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
+        return getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
+    }
+
+    public int getSunlight(int x, int y, int z) {
+//        return get(x, y, z).isAir() ? 15 : 0;
+        return 15;
     }
 }

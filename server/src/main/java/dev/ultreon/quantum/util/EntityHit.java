@@ -2,7 +2,7 @@ package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class EntityHit implements Hit {
     public static final EntityHit MISS = new EntityHit();
-    protected CubicDirection direction;
+    protected Direction direction;
     // input
     protected Ray ray;
     protected float distanceMax = 5.0F;
@@ -117,11 +117,11 @@ public class EntityHit implements Hit {
         return Objects.hash(getDirection(), ray, distanceMax, position, normal, pos, collide, getDistance());
     }
 
-    public CubicDirection getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 
-    public void setDirection(CubicDirection direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 }

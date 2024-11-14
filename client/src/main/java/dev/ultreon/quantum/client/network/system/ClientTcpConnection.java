@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client.network.system;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
@@ -10,9 +9,7 @@ import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SDisconnectPacket;
-import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.stage.LoginPacketStage;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.PacketIOSerializerFactory;
@@ -57,7 +54,7 @@ public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, Serv
     }
 
     public static Result<ClientMemoryConnection> connectToLocalServer() {
-        return Result.ok(new ClientMemoryConnection(QuantumClient.get()));
+        return Result.ok(new ClientMemoryConnection(QuantumClient.get(), Thread.currentThread()));
     }
 
     @Override

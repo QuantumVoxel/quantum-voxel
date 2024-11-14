@@ -4,7 +4,7 @@ import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec3i;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
@@ -179,7 +179,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         return this.dst(point.getIntX(), point.getIntY(), point.getIntZ());
     }
 
-    public BlockVec offset(CubicDirection direction) {
+    public BlockVec offset(Direction direction) {
         return this.offset(direction.getOffset());
     }
 
@@ -187,7 +187,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         return new BlockVec(this.x + vec.getX(), this.y + vec.getY(), this.z + vec.getZ(), space);
     }
 
-    public BlockVec offset(CubicDirection direction, int distance) {
+    public BlockVec offset(Direction direction, int distance) {
         Vec3i offset = direction.getOffset();
         if (distance == 0) return this;
 
@@ -570,7 +570,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         return new int[]{x, y, z};
     }
 
-    public BlockVec relative(CubicDirection dir) {
+    public BlockVec relative(Direction dir) {
         return switch (dir) {
             case NORTH -> new BlockVec(this.x, this.y, this.z - 1, this.space);
             case SOUTH -> new BlockVec(this.x, this.y, this.z + 1, this.space);
