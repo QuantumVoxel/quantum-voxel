@@ -724,11 +724,11 @@ tasks.register<Exec>("runClient") {
     }
 
     commandLine(
-        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+        "\"" + Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
             if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
             else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
             else "java"
-        ),
+        ) + "\"",
         "@${argFile.path}"
     )
 }
