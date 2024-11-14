@@ -28,7 +28,7 @@ public interface ChunkGenerator extends Disposable {
      * @param world the server world in which the chunk generator is being created
      * @param seed the seed used for generating the chunk
      */
-    void create(ServerWorld world, long seed);
+    void create(@NotNull ServerWorld world, long seed);
 
     /**
      * Generates terrain and features for the provided chunk in the specified world, taking into account the changes
@@ -38,7 +38,7 @@ public interface ChunkGenerator extends Disposable {
      * @param chunk the chunk to be generated
      * @param changes the collection of recorded changes in neighboring chunks
      */
-    void generate(ServerWorld world, BuilderChunk chunk, Collection<ServerWorld.@NotNull RecordedChange> changes);
+    void generate(@NotNull ServerWorld world, BuilderChunk chunk, Collection<ServerWorld.@NotNull RecordedChange> changes);
 
     DomainWarping getLayerDomain();
 

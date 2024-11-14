@@ -49,7 +49,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     }
 
     @Override
-    public void create(ServerWorld world, long seed) {
+    public void create(@NotNull ServerWorld world, long seed) {
         NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
         noiseConfig = noiseConfigs.biomeMap;
         this.biomeDomain = new DomainWarping(noiseConfigs.biomeX.create(seed + 100), noiseConfigs.biomeY.create(seed + 110));

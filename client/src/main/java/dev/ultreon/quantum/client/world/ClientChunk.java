@@ -223,10 +223,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         ClientChunkEvents.BUILT.factory().onClientChunkRebuilt(this);
     }
 
-    public Object getBounds() {
-        return null;
-    }
-
     public Map<BlockVec, BlockState> getCustomRendered() {
         return this.customRendered;
     }
@@ -246,13 +242,13 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @CanIgnoreReturnValue
-    public ModelInstance addModel(BlockVec pos, ModelInstance instance) {
+    public void addModel(BlockVec pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
             ModelInstance modelInstance1 = this.models.get(pos);
             RenderLayer.WORLD.destroy(modelInstance1);
             this.models.remove(pos);
         }
-        return this.addedModels.put(pos, instance);
+        this.addedModels.put(pos, instance);
     }
 
     @Override

@@ -164,6 +164,8 @@ import static dev.ultreon.mixinprovider.PlatformOS.isMac;
 
 /**
  * This class is the main entry point for the Quantum Voxel Client.
+ * It is responsible for initializing and running the game.
+ * It also provides access to the game's main components and resources.
  *
  * @author <a href="https://github.com/Ultreon">Ultreon Team</a>
  * @see <a href="https://github.com/Ultreon/quantum-voxel">QuantumVoxel</a>

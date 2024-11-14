@@ -18,6 +18,7 @@ import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.Biome;
+import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
@@ -118,7 +119,8 @@ public class GenericDebugPage implements DebugPage {
                 context.right();
                 context.right("Chunk Info");
                 context.right("Client Load Time", chunk.info.loadDuration);
-                context.right("Server Build Time", chunk.info.build.buildDuration);
+                ChunkBuildInfo build = chunk.info.build;
+                if (build != null) context.right("Server Build Time", build.buildDuration);
             }
         }
 

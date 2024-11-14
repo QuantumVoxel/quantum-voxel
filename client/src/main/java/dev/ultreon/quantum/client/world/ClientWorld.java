@@ -522,6 +522,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
     }
 
+    @Override
     public int getSunlight(int x, int y, int z) {
         ClientChunk chunk = getChunkAt(x, y, z);
         if (chunk != null) {
@@ -935,10 +936,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
     }
 
+    @Override
     public Array<Entity> getAllEntities() {
         return this.entitiesById.values().toArray();
     }
 
+    @Override
     public float getGlobalSunlight() {
         long daytime = this.getDaytime();
         final int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
@@ -975,10 +978,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         this.updateChunkAndNeighbours(chunkAt);
     }
 
+    @Override
     public long getDaytime() {
         return this.time % DAY_CYCLE;
     }
 
+    @CanIgnoreReturnValue
     static Color mixColors(Color color1, Color color2, Color output, double percent) {
         percent = Mth.clamp(percent, 0.0, 1.0);
         double inversePercent = 1.0 - percent;
@@ -1004,10 +1009,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         return this.totalChunks;
     }
 
+    @Override
     public void setDaytime(long daytime) {
         this.time = daytime;
     }
 
+    @Override
     public void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
         QuantumClient.LOGGER.debug("Adding entity with id " + id + " of type " + type.getId() + " at " + position);
 
@@ -1024,6 +1031,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         this.entitiesById.put(id, entity);
     }
 
+    @Override
     @CanIgnoreReturnValue
     public Entity removeEntity(int id) {
         Entity remove = this.entitiesById.remove(id);
@@ -1041,6 +1049,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
      * @param playerId The ID of the player initiating the attack.
      * @param entityId The ID of the entity being attacked.
      */
+    @Override
     public void onPlayerAttack(int playerId, int entityId) {
         // Get the player entity and the target entity based on their IDs
         Entity player = this.entitiesById.get(playerId);

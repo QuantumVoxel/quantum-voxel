@@ -18,13 +18,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.langgen.LangGenConfig;
 import dev.ultreon.langgen.LangGenListener;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import kotlin.OptIn;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -81,14 +79,7 @@ public final class Main implements ApplicationListener {
         }
     }
 
-    static void displayCrash(ApplicationCrash crash) {
-        crashOverride = crash.getCrashLog();
-
-        while (ScissorStack.peekScissors() != null) ScissorStack.popScissors();
-
-        CommonConstants.LOGGER.error("\n" + crash);
-    }
-
+    @ApiStatus.Internal
     public static Main createInstance(String[] argv) {
         if (instance == null) {
             instance = new Main(argv);
@@ -166,7 +157,6 @@ public final class Main implements ApplicationListener {
     }
 
     private void createClient() {
-        // Initialize QuantumClient with given arguments
         this.sdl = SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_SENSOR);
         this.client = new QuantumClient(this.argv);
     }

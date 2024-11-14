@@ -19,6 +19,7 @@ import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -32,13 +33,18 @@ public class ChunkModel implements RenderableProvider {
     private final ClientChunk chunk;
     private final Material material;
     private final Material transparentMaterial;
+    @Nullable
     private volatile Model model = null;
+    @Nullable
     private volatile ModelInstance modelInstance = null;
+    @Nullable
     private volatile ModelInstance gizmoInstance = null;
 
     private final Model[] lodModels = new Model[ClientConfig.lodLevels];
     private final Vector3 relativePosition = new Vector3();
     private boolean beingBuilt;
+
+    @Nullable
     private CompletableFuture<Void> task;
 
     public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
@@ -83,7 +89,7 @@ public class ChunkModel implements RenderableProvider {
         long millis = System.currentTimeMillis();
 
         if (chunk.isUniform()) {
-            this.model = new Model();
+            var model = this.model = new Model();
             this.modelInstance = new ModelInstance(model);
             return;
         }
@@ -105,14 +111,14 @@ public class ChunkModel implements RenderableProvider {
                 modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
             }
 
-            this.model = QuantumClient.invokeAndWait(modelBuilder::end);
+            var model = this.model = QuantumClient.invokeAndWait(modelBuilder::end);
 
             if (this.model == null) {
                 throw new IllegalStateException("Failed to generate chunk model: " + pos);
             }
 
-            this.modelInstance = new ModelInstance(model, 0, 0, 0);
-            this.modelInstance.userData = chunk;
+            var modelInstance = this.modelInstance = new ModelInstance(model, 0, 0, 0);
+            modelInstance.userData = chunk;
         } catch (Throwable t) {
             CrashLog crashLog = new CrashLog("Failed to generate chunk model: " + pos, t);
             CrashCategory category = new CrashCategory("Chunk Details");
@@ -156,8 +162,11 @@ public class ChunkModel implements RenderableProvider {
         }
 
         try (var ignoredSection = QuantumClient.PROFILER.start("chunk-model-unload")) {
-            if (model != null) model.dispose();
-            model = null;
+            Model model = this.model;
+            if (model != null) {
+                model.dispose();
+            }
+            this.model = null;
             modelInstance = null;
         }
     }
@@ -170,13 +179,15 @@ public class ChunkModel implements RenderableProvider {
 
     @Override
     public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
-        if (modelInstance == null || model == null) return;
+        ModelInstance cModelInstance = modelInstance;
+        Model cModel = model;
+        if (cModelInstance == null || cModel == null) return;
 
         int count = array.size;
-        modelInstance.getRenderables(array, pool);
+        cModelInstance.getRenderables(array, pool);
         ValueTracker.trackRenderables(array.size - count);
 
-        modelInstance.transform.getTranslation(relativePosition);
+        cModelInstance.transform.getTranslation(relativePosition);
 
         float lodThreshold = ClientConfig.lodThreshold * 16.0f;
         float dst = relativePosition.dst(0, 0, 0);
@@ -187,9 +198,10 @@ public class ChunkModel implements RenderableProvider {
             renderable.userData = chunk;
         }
 
-        if (gizmoInstance != null && GamePlatform.get().areChunkBordersVisible()) {
-            gizmoInstance.transform = modelInstance.transform;
-            gizmoInstance.getRenderables(array, pool);
+        ModelInstance cGizmoInstance = gizmoInstance;
+        if (cGizmoInstance != null && GamePlatform.get().areChunkBordersVisible()) {
+            cGizmoInstance.transform = cModelInstance.transform;
+            cGizmoInstance.getRenderables(array, pool);
         }
     }
 
@@ -229,15 +241,15 @@ public class ChunkModel implements RenderableProvider {
 		return transparentMaterial;
 	}
 
-	public Model getModel() {
+	public @Nullable Model getModel() {
 		return model;
 	}
 
-	public ModelInstance getModelInstance() {
+	public @Nullable ModelInstance getModelInstance() {
 		return modelInstance;
 	}
 
-	public ModelInstance getGizmoInstance() {
+	public @Nullable ModelInstance getGizmoInstance() {
 		return gizmoInstance;
 	}
 
@@ -253,7 +265,7 @@ public class ChunkModel implements RenderableProvider {
 		return beingBuilt;
 	}
 
-	public CompletableFuture<Void> getTask() {
+	public @Nullable CompletableFuture<Void> getTask() {
 		return task;
 	}
 }

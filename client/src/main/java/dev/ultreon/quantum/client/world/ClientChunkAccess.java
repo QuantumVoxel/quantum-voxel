@@ -38,7 +38,7 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     float getBrightness(int lightLevel);
 
-    ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance);
+    void addModel(BlockVec blockVec, ModelInstance modelInstance);
 
     boolean isLoaded();
 

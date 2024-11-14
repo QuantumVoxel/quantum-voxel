@@ -79,7 +79,7 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      */
     boolean set(BlockVec pos, BlockState block, int flags);
 
-    ChunkAccess getChunkAt(@NotNull BlockVec pos);
+    @Nullable ChunkAccess getChunkAt(@NotNull BlockVec pos);
 
     /**
      * Retrieves the chunk for a given position in the world.

@@ -6,7 +6,11 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-@Deprecated
+/**
+ * Represents a C2S (Client to Server) packet indicating that a block break event has occurred.
+ *
+ * @param pos The position of the block that was broken.
+ */
 public record C2SBlockBreakPacket(BlockVec pos) implements Packet<InGameServerPacketHandler> {
 
     public static C2SBlockBreakPacket read(PacketIO buffer) {

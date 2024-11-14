@@ -51,9 +51,9 @@ import java.util.stream.Collectors;
 import static dev.ultreon.quantum.client.QuantumClient.id;
 
 /**
- * Renderer class.
- *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * The Renderer class is responsible for rendering shapes, textures, and various graphics elements.
+ * It provides methods to set properties such as color and stroke width, and draw shapes like circles, rectangles,
+ * lines, and textures. The rendering context can be manipulated using the provided matrices.
  */
 @SuppressWarnings({"unused", "IntegerDivisionInFloatingPointContext"})
 public class Renderer implements Disposable {
@@ -97,19 +97,20 @@ public class Renderer implements Disposable {
     private String layoutText = "";
 
     /**
-     * Creates a new Renderer instance with the default matrices.
+     * Constructs a new Renderer object with the specified ShapeDrawer.
      *
-     * @param shapes shape drawer instance from {@link QuantumClient}
+     * @param shapes The ShapeDrawer instance used for drawing shapes.
      */
     public Renderer(ShapeDrawer shapes) {
         this(shapes, new Matrices());
     }
 
     /**
-     * Creates a new Renderer instance with the given matrices.
+     * Constructs a new Renderer object responsible for managing and drawing shapes,
+     * applying matrix transformations, handling textures, and managing visual effects.
      *
-     * @param shapes   shape drawer instance from {@link QuantumClient}
-     * @param matrices current matrix stack.
+     * @param shapes shape drawer used for rendering various shapes
+     * @param matrices matrix manager responsible for handling matrix operations and transformations
      */
     public Renderer(ShapeDrawer shapes, Matrices matrices) {
         // Create a new global translation.
@@ -160,16 +161,33 @@ public class Renderer implements Disposable {
         blurShader.setUniformf("radius", 1f);
     }
 
+    /**
+     * Retrieves the current Matrices object.
+     *
+     * @return the Matrices object associated with this instance.
+     */
     public Matrices getMatrices() {
         return this.matrices;
     }
 
+    /**
+     * Sets the width of the stroke for the renderer.
+     *
+     * @param strokeWidth the width to set for the stroke
+     * @return the current instance of the Renderer for method chaining
+     */
     @CanIgnoreReturnValue
     public Renderer setStrokeWidth(float strokeWidth) {
         this.strokeWidth = strokeWidth;
         return this;
     }
 
+    /**
+     * Sets the color of the renderer. If the provided color is null, the method will return the current instance
+     * without making any changes.
+     *
+     * @param c the Color object to set; if null, no changes will be made
+     * @return the current instance of Renderer after setting the color*/
     @CanIgnoreReturnValue
     public Renderer setColor(Color c) {
         if (c == null) return this;
@@ -180,6 +198,10 @@ public class Renderer implements Disposable {
     }
 
 
+    /**
+     * Sets the color for the renderer, affecting both the font and shapes.
+     *
+     * @param c the color to be set. If null, the method will return without modifying*/
     @CanIgnoreReturnValue
     public Renderer setColor(com.badlogic.gdx.graphics.Color c) {
         if (c == null) return this;
@@ -189,30 +211,64 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    /**
+     * Sets the color of the renderer using RGB values.
+     *
+     * @param r the red component of the color (0-255)
+     * @param g the green component of the color (0-255)
+     * @param b the blue component of the color (0-255)
+     * @return the Renderer instance with the updated color
+     */
     @CanIgnoreReturnValue
     public Renderer setColor(int r, int g, int b) {
         this.setColor(this.tmpC.set(r / 255f, g / 255f, b / 255f, 1f));
         return this;
     }
 
+    /**
+     * Sets the color of the renderer using the specified red, green, and blue values.
+     *
+     * @param r the red component of the color, typically between 0 and 1
+     * @param g the green component of the color*/
     @CanIgnoreReturnValue
     public Renderer setColor(float r, float g, float b) {
         this.setColor(this.tmpC.set(r, g, b, 1f));
         return this;
     }
 
+    /**
+     * Sets the color using RGBA values.
+     *
+     * @param r The red component of the color, in the range 0-255.
+     * @param g The green component of the color, in the range 0-255.
+     * @param b The blue component of the color, in the range 0-255.
+     * @param a The alpha (transparency) component of the*/
     @CanIgnoreReturnValue
     public Renderer setColor(int r, int g, int b, int a) {
         this.setColor(this.tmpC.set(r / 255f, g / 255f, b / 255f, a / 255f));
         return this;
     }
 
+    /**
+     * Sets the color of the renderer using the specified red, green, blue, and alpha values.
+     *
+     * @param r the red component of the color
+     * @param g the green component of the color
+     * @param b the blue component of the color
+     * @param a the alpha component of the color
+     * @return the current instance of the*/
     @CanIgnoreReturnValue
     public Renderer setColor(float r, float g, float b, float a) {
         this.setColor(this.tmpC.set(r, g, b, a));
         return this;
     }
 
+    /**
+     * Sets the color of the renderer using an ARGB integer value.
+     *
+     * @param argb An integer representing the color with alpha, red, green, and blue components.
+     *             The format should be 0xAARRGGBB where AA is alpha, RR is red, GG is green, and BB is blue.
+     * @return The Renderer instance with*/
     @CanIgnoreReturnValue
     public Renderer setColor(int argb) {
         this.setColor(this.tmpC.set((argb >> 16 & 0xFF) / 255f, (argb >> 8 & 0xFF) / 255f, (argb & 0xFF) / 255f, (argb >> 24 & 0xFF) / 255f));

@@ -485,9 +485,8 @@ public class TerrainNode implements Disposable, RenderableProvider, ClientChunkA
     }
 
     @Override
-    public ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance) {
+    public void addModel(BlockVec blockVec, ModelInstance modelInstance) {
         // TODO
-        return modelInstance;
     }
 
     @Override

@@ -18,29 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 public interface ClientWorldAccess extends WorldAccess {
-    ClientChunkAccess getChunkAt(@NotNull dev.ultreon.quantum.world.vec.BlockVec pos);
-
-    @Override
-    @Nullable ClientChunkAccess getChunk(dev.ultreon.quantum.world.vec.ChunkVec pos);
-
-    @Override
-    @Nullable ClientChunkAccess getChunk(int x, int y, int z);
-
-    ClientChunkAccess getChunkAt(int x, int y, int z);
-
-    Collection<? extends ClientChunkAccess> getLoadedChunks();
-
-    boolean isChunkInvalidated(@NotNull Chunk chunk);
-
     void fillCrashInfo(CrashLog crashLog);
-
-    BreakResult continueBreaking(dev.ultreon.quantum.world.vec.BlockVec breaking, float v, Player player);
-
-    boolean stopBreaking(BlockVec blockVec, Player player);
-
-    void startBreaking(dev.ultreon.quantum.world.vec.BlockVec blockVec, Player player);
-
-    float getBreakProgress(BlockVec blockVec);
 
     long getDaytime();
 

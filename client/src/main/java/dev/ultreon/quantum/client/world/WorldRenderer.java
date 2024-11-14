@@ -58,6 +58,7 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,9 +79,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final NamespaceID MOON_ID = id("generated/moon");
     public static final NamespaceID SUN_ID = id("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
+
+    @MonotonicNonNull
     private Material material;
+    @MonotonicNonNull
     private Material transparentMaterial;
+    @MonotonicNonNull
     private Texture breakingTex;
+    @MonotonicNonNull
     private Environment environment;
     private int visibleChunks;
     private int loadedChunks;
@@ -90,9 +96,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private ClientWorld world;
     private final QuantumClient client = QuantumClient.get();
 
+    @Nullable
     private ModelInstance cursor = null;
+    @Nullable
     private ModelInstance sun = null;
+    @Nullable
     private ModelInstance moon = null;
+    @Nullable
+    private BlockHit lastHitResult;
+
     private boolean disposed = false;
     private final Vector3 tmp = new Vector3();
     private final Array<Model> breakingModels = new Array<>();
@@ -100,16 +112,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Int2ObjectMap<QVModel> qvModels = new Int2ObjectOpenHashMap<>();
     private final List<Disposable> disposables = new ArrayList<>();
     private final Skybox skybox = new Skybox();
-    private BlockHit lastHitResult;
     private final Map<BlockVec, ModelInstance> breakingInstances = new HashMap<>();
     private final Map<BlockVec, ModelInstance> blockInstances = new ConcurrentHashMap<>();
     private final Map<ChunkVec, ChunkModel> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Vector3 sunDirection = new Vector3();
     private final Vector3 tmp2 = new Vector3();
-    private BlendingAttribute attribute = new BlendingAttribute(0.5f);
+    private final BlendingAttribute attribute = new BlendingAttribute(0.5f);
 
-    public WorldRenderer(@Nullable ClientWorld world) {
+    public WorldRenderer(@NotNull ClientWorld world) {
         this.world = world;
 
         this.setup();
@@ -296,7 +307,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
-    public Entity removeEntity(int id) {
+    public @Nullable Entity removeEntity(int id) {
         this.checkThread();
         ModelInstance remove = this.modelInstances.remove(id);
         if (remove == null) return null;
@@ -338,7 +349,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         if (this.disposed) return;
 
         // Update the skybox and environment.
-        this.skybox.update(this.world.getDaytime(), deltaTime);
+        this.skybox.update(this.world.getDaytime());
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
 
         // Get the loaded chunks and sort them by distance from the player.
@@ -928,30 +939,30 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     public Material getTransparentMaterial() {
-		return transparentMaterial;
-	}
+        return transparentMaterial;
+    }
 
-	public void setTransparentMaterial(Material transparentMaterial) {
-		this.transparentMaterial = transparentMaterial;
-	}
-	
-	public Material getMaterial() {
-		return material;
-	}
-	
-	public void setMaterial(Material material) {
-		this.material = material;
-	}
+    public void setTransparentMaterial(Material transparentMaterial) {
+        this.transparentMaterial = transparentMaterial;
+    }
 
-	public Texture getBreakingTex() {
-		return breakingTex;
-	}
+    public Material getMaterial() {
+        return material;
+    }
 
-	public void setBreakingTex(Texture breakingTex) {
-		this.breakingTex = breakingTex;
-	}
+    public void setMaterial(Material material) {
+        this.material = material;
+    }
 
-	private static class ChunkRenderRef {
+    public Texture getBreakingTex() {
+        return breakingTex;
+    }
+
+    public void setBreakingTex(Texture breakingTex) {
+        this.breakingTex = breakingTex;
+    }
+
+    private static class ChunkRenderRef {
         boolean chunkRendered = false;
     }
 }
