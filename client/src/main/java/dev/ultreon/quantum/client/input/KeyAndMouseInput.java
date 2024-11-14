@@ -58,6 +58,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
     private static final BitSet PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
     private static final BitSet WAS_PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
+    private long lastKeyCancelFrame;
 
     public KeyAndMouseInput(QuantumClient client, Camera camera) {
         super(client, camera);
@@ -176,6 +177,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
             return true;
         }
+
+        lastKeyCancelFrame = Gdx.graphics.getFrameId();
 
         // Handle key press for player
         Player player = this.client.player;
@@ -446,7 +449,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         // Check if there is a current screen and if so, trigger the CHAR_TYPE event
         Screen currentScreen = this.client.screen;
-        if (currentScreen != null) {
+        if (currentScreen != null && lastKeyCancelFrame != Gdx.graphics.getFrameId()) {
             ScreenEvents.CHAR_TYPE.factory().onCharTypeScreen(character);
             return currentScreen.charType(character);
         }

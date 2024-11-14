@@ -32,8 +32,10 @@ public final class GameCommands {
         CommandRegistry.register(new EntityCommand());
         CommandRegistry.register(new ItemCommand());
 
-        if (FabricLoader.getInstance().isDevelopmentEnvironment())
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             CommandRegistry.register(new JSCommand());
+            CommandRegistry.register(new DebugCommand());
+        }
 
         LoadingEvent.REGISTER_COMMANDS.factory().onRegisterCommands();
 

@@ -1978,6 +1978,7 @@ public class ServerWorld extends World {
                 var parts = key.substring(1).split(";");
                 var chunkX = Integer.parseInt(parts[0]);
                 var chunkY = Integer.parseInt(parts[1]);
+
                 var chunkZ = Integer.parseInt(parts[2]);
 
                 // Validate chunk coordinates.
@@ -1993,6 +1994,7 @@ public class ServerWorld extends World {
                 ChunkVec globalVec = localChunkVec.worldSpace(new RegionVec(x, y, z));
                 var chunk = ServerChunk.load(world, globalVec, map, region);
                 chunkMap.put(globalVec, chunk);
+                chunk.ready = true;
             }
 
             synchronized (this) {
