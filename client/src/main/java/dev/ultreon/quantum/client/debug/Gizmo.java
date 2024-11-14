@@ -41,8 +41,6 @@ public abstract class Gizmo implements RenderableProvider {
         instance.userData = this;
         instance.transform.setToTranslationAndScaling(rawPos, size);
 
-        Gdx.gl.glLineWidth(2.0F);
-
         instance.getRenderables(renderables, pool);
     }
 

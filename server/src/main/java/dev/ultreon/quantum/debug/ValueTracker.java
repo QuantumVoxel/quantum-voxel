@@ -179,6 +179,7 @@ public class ValueTracker {
     }
 
     public static int getAverageRenderables() {
+        if (chunkTracks == 0) return 0;
         return renderableCount / chunkTracks;
     }
 }

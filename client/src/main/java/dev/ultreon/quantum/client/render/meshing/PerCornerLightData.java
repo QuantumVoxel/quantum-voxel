@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.render.meshing;
 
 public class PerCornerLightData {
+    public static final PerCornerLightData EMPTY = new PerCornerLightData(0, 0, 0, 0, 1, 1, 1, 1);
     public float l00, l01, l10, l11;
     public float s00, s01, s10, s11;
 

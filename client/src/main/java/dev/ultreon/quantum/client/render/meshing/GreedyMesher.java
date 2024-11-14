@@ -834,7 +834,7 @@ public class GreedyMesher implements Mesher {
             this.z = z;
             this.side = side;
             this.sunlightLevel = sunlightLevel;
-            this.lightData = lightData;
+            this.lightData = lightData == null ? PerCornerLightData.EMPTY : lightData;
 
             QuantumClient client = QuantumClient.get();
             this.renderer = BlockRendererRegistry.get(block.getBlock());
@@ -936,6 +936,7 @@ public class GreedyMesher implements Mesher {
 
     private int blockLight(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
+        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
         if (y < 0) {
             chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ());
             y += CHUNK_SIZE;
@@ -961,12 +962,13 @@ public class GreedyMesher implements Mesher {
         }
 
         if (chunk != null)
-            return chunk.getBlockLight(x, y - CHUNK_SIZE, z);
+            return chunk.getBlockLight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
         return 0;
     }
 
     private int sunlight(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
+        this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
         if (y < 0) {
             chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ());
             y += CHUNK_SIZE;
@@ -992,7 +994,7 @@ public class GreedyMesher implements Mesher {
         }
 
         if (chunk != null)
-            return chunk.getSunlight(x, y - CHUNK_SIZE, z);
-        return 0;
+            return chunk.getSunlight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
+        return 15;
     }
 }

@@ -88,7 +88,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             }
         });
 
-        this.mesher = new GreedyMesher(this, true);
+        this.mesher = new GreedyMesher(this, false);
     }
 
     private int index(int x, int y, int z) {
@@ -386,10 +386,12 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public int getSunlight(BlockVec pos) {
-        return lightMap.getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
+//        return lightMap.getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
+        return getSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
     public int getSunlight(int x, int y, int z) {
-        return lightMap.getSunlight(x, y, z);
+//        return get(x, y, z).isAir() ? 15 : 0;
+        return 15;
     }
 }

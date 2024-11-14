@@ -57,7 +57,6 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import lombok.Getter;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -338,8 +337,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         if (player == null) return;
         if (this.disposed) return;
 
-        Gdx.gl.glLineWidth(10f);
-
         // Update the skybox and environment.
         this.skybox.update(this.world.getDaytime(), deltaTime);
         this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
@@ -354,7 +351,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         Array<ChunkVec> positions = new Array<>();
 
         // Collect the chunks to render.
-        QuantumClient.PROFILER.section("chunks", () -> this.collectChunks(batch, renderLayer, chunks, positions, player, ref));
+        try (var ignored = QuantumClient.PROFILER.start("chunks")) {
+            this.collectChunks(batch, renderLayer, chunks, positions, player, ref);
+        }
 
         // Render the cursor.
         @NotNull Hit gameCursor = this.client.cursor;
@@ -389,8 +388,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                     var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                     var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-                    Gdx.gl32.glLineWidth(2f);
-
                     WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, material));
                 });
 
@@ -420,7 +417,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             MultiplayerData multiplayerData = this.client.getMultiplayerData();
             if (multiplayerData == null) return;
             for (var remotePlayer : multiplayerData.getRemotePlayers()) {
-                QuantumClient.PROFILER.section(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")", () -> this.collectEntity(remotePlayer, batch));
+                try (var ignored1 = QuantumClient.PROFILER.start(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")")) {
+                    this.collectEntity(remotePlayer, batch);
+                }
             }
         }
 
@@ -490,7 +489,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             ChunkModel model = this.chunkModels.get(chunk.getVec());
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
-                if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild() || this.shouldIgnoreRebuild() && !chunk.immediateRebuild)) {
+                if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild())) {
                     try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
                         chunk.dirty = false;
                         if (model != null) {

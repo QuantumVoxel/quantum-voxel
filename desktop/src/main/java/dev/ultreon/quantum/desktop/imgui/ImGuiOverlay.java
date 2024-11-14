@@ -2,13 +2,11 @@ package dev.ultreon.quantum.desktop.imgui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.WorldShader;
@@ -82,6 +80,9 @@ public class ImGuiOverlay {
     private static ImPlotContext imPlotCtx;
     private static String[] modelViewerList = new String[0];
 
+    /**
+     * Sets up ImGui for the game.
+     */
     public static void setupImGui() {
         if (GamePlatform.get().isAngleGLES()) return;
 
@@ -108,6 +109,9 @@ public class ImGuiOverlay {
         });
     }
 
+    /**
+     * Initializes the ImGui implementation.
+     */
     public static void preInitImGui() {
         if (GamePlatform.get().isAngleGLES()) return;
 
@@ -118,10 +122,20 @@ public class ImGuiOverlay {
         }
     }
 
+    /**
+     * Checks if the chunk section borders are currently shown.
+     *
+     * @return true if the chunk section borders are shown, false otherwise
+     */
     public static boolean isChunkSectionBordersShown() {
         return ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
     }
 
+    /**
+     * Render ImGui for the game.
+     *
+     * @param client the game client instance
+     */
     public static void renderImGui(QuantumClient client) {
         if (!ImGuiOverlay.SHOW_IM_GUI.get()) return;
         if (GamePlatform.get().isAngleGLES()) return;
