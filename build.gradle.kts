@@ -714,7 +714,7 @@ tasks.register<Exec>("runClient") {
             -Dfabric.log.disableAnsi=false
             -Dfabric.skipMcProvider=true
             -Dfabric.zipfs.use_temp_file=false
-            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
+            "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
             -cp
             $classpath
             net.fabricmc.devlaunchinjector.Main
