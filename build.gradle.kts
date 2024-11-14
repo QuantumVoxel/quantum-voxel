@@ -703,7 +703,7 @@ tasks.register<Exec>("runClient") {
 
     val classpath = project(":desktop").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
 
-    val a = if (System.getProperty("os.name").lowercase().startsWith("mac")) "-XstartOnFirstThread" else ""
+    val a = if (System.getProperty("os.name").lowercase().startsWith("mac")) "-XstartOnFirstThread " else ""
 
     val argFile = File.createTempFile("argfile", ".args").apply {
         deleteOnExit()
