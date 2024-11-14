@@ -716,7 +716,7 @@ tasks.register<Exec>("runClient") {
             -Dfabric.zipfs.use_temp_file=false
             "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
             -cp
-            $classpath
+            "$classpath"
             net.fabricmc.devlaunchinjector.Main
             --gameDir=.
             """.trimIndent()
@@ -724,11 +724,11 @@ tasks.register<Exec>("runClient") {
     }
 
     commandLine(
-        "\"" + Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
+        Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
             if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
             else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
             else "java"
-        ) + "\"",
+        ),
         "@${argFile.path}"
     )
 }
