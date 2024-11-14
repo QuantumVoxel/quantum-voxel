@@ -1,0 +1,10 @@
+{
+  "classpath": [],
+  "sdk": {
+    "version": "21",
+    "versions": ">=21",
+    "type": "java"
+  },
+  "main-class": "net.fabricmc.loader.launch.knot.KnotMain",
+  "game": "quantum"
+}
