@@ -3,7 +3,7 @@
   "sdk": {
     "version": "21",
     "versions": ">=21",
-    "type": "java"
+    "type": "JavaJDK"
   },
   "main-class": "net.fabricmc.loader.launch.knot.KnotMain",
   "game": "quantum"
