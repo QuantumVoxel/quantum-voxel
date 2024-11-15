@@ -5,10 +5,10 @@ import com.badlogic.gdx.math.Vector3;
 import com.google.gson.Gson;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Options;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.rng.JavaRNG;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommonConstants {
     public static final String EX_NOT_ON_RENDER_THREAD = "Current thread is not the rendering thread.";

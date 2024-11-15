@@ -90,10 +90,8 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
                     this.renderChild(renderer, mouseX, mouseY, deltaTime, widget);
                 continue;
             }
-            if (renderer.pushScissors(this.getBounds())) {
-                this.renderChild(renderer, mouseX, mouseY, deltaTime, widget);
-                renderer.popScissors();
-            }
+
+            this.renderChild(renderer, mouseX, mouseY, deltaTime, widget);
         }
     }
 

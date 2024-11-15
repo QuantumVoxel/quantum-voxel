@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.graphics.Color;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
@@ -7,7 +8,6 @@ import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Size;
-import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     protected int contentHeight;
     protected int contentWidth;
-    private RgbColor backgroundColor = RgbColor.argb(0x40000000);
+    public final Color backgroundColor = new Color(0x00000040);
 
     public ScrollableContainer(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
@@ -51,11 +51,14 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
         this.innerYOffset = (int) Mth.clamp(this.scrollY, 0, this.contentHeight - this.size.height);
 
+        if (!isWithinBounds(mouseX, mouseY)) {
+            mouseX = mouseY = Integer.MIN_VALUE;
+        }
 
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
             renderer.translate(0, -this.scrollY);
-            this.renderChildren(renderer, mouseX, (int) (mouseY - scrollY), deltaTime);
+            this.renderChildren(renderer, mouseX, (int) (mouseY + scrollY), deltaTime);
             renderer.popScissors();
         }
         renderer.popMatrix();
@@ -123,13 +126,13 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     }
 
     @Override
-    public boolean mouseDrag(int x, int y, int dragX, int dragY, int pointer) {
-        @Nullable Widget widgetAt = this.getWidgetAt(x, y);
-        dragX -= this.pos.x;
-        dragY -= this.pos.y;
-        if (widgetAt != null)
-            return widgetAt.mouseDrag(x, y - widgetAt.getY(), dragX, dragY, pointer);
-        return super.mouseDrag(x, y, dragX, dragY, pointer);
+    public boolean mouseDrag(int x, int y, int deltaX, int deltaY, int pointer) {
+        for (Widget widget : this.widgets) {
+            if (widget.isWithinBounds(x, (int) (y + this.scrollY))) {
+                return widget.mouseDrag(x, (int) (y - widget.getY() - this.scrollY), deltaX, deltaY, pointer);
+            }
+        }
+        return false;
     }
 
     @Override
@@ -160,16 +163,34 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
+        for (Widget widget : this.widgets) {
+            if (widget.isWithinBounds(mouseX, (int) (mouseY + scrollY))) {
+                widget.mousePress(mouseX, (int) (mouseY - scrollY), button);
+                return true;
+            }
+        }
         return super.mousePress(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        for (Widget widget : this.widgets) {
+            if (widget.isWithinBounds(mouseX, (int) (mouseY + scrollY))) {
+                widget.mouseRelease(mouseX, (int) (mouseY - scrollY), button);
+                return true;
+            }
+        }
         return super.mouseRelease(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
+        for (Widget widget : this.widgets) {
+            if (widget.isWithinBounds(mouseX, (int) (mouseY + scrollY))) {
+                widget.mouseClick(mouseX, (int) (mouseY - scrollY), button, clicks);
+                return true;
+            }
+        }
         return super.mouseClick(mouseX, mouseY, button, clicks);
     }
 
@@ -216,12 +237,19 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         return this;
     }
 
-    public ScrollableContainer backgroundColor(RgbColor color) {
-        this.backgroundColor = color;
-        return this;
+    public void setBackgroundColor(Color color) {
+        this.backgroundColor.set(color);
     }
 
-    public RgbColor backgroundColor() {
+    public void setBackgroundColor(int color) {
+        this.backgroundColor.set(color);
+    }
+
+    public void setBackgroundColor(float r, float g, float b, float a) {
+        this.backgroundColor.set(r, g, b, a);
+    }
+
+    public Color getBackgroundColor() {
         return this.backgroundColor;
     }
 }

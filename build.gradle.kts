@@ -703,9 +703,12 @@ tasks.register<Exec>("runClient") {
 
     val classpath = project(":desktop").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
 
+    val a = if (System.getProperty("os.name").lowercase().startsWith("mac")) "-XstartOnFirstThread " else ""
+
     val argFile = File.createTempFile("argfile", ".args").apply {
         deleteOnExit()
         writeText(
+            a +
             """
             -Xmx4g
             -Xms4g
@@ -716,9 +719,9 @@ tasks.register<Exec>("runClient") {
             -Dfabric.log.disableAnsi=false
             -Dfabric.skipMcProvider=true
             -Dfabric.zipfs.use_temp_file=false
-            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
+            "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
             -cp
-            $classpath
+            "$classpath"
             net.fabricmc.devlaunchinjector.Main
             --gameDir=.
             """.trimIndent()

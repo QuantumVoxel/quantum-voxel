@@ -116,7 +116,7 @@ public class MainRenderNode extends RenderNode {
                 }
             }
 
-            this.drawDiffuse(vignetteTex);
+            this.drawDiffuse(vignetteTex, ClientConfig.vignetteOpacity);
         } else if (this.client.viewMode == 1) {
             this.drawDiffuse(normalTex);
         } else if (this.client.viewMode == 2) {
@@ -138,6 +138,13 @@ public class MainRenderNode extends RenderNode {
     private void drawDiffuse(@NotNull Texture diffuseTexture) {
         this.client.spriteBatch.setShader(null);
         this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    }
+
+    private void drawDiffuse(@NotNull Texture diffuseTexture, float opacity) {
+        this.client.spriteBatch.setShader(null);
+        this.client.spriteBatch.setColor(1, 1, 1, opacity);
+        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.client.spriteBatch.setColor(1, 1, 1, 1);
     }
 
     @Override
