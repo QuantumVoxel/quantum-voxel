@@ -27,7 +27,7 @@ public class HellGenerator extends SimpleChunkGenerator {
     }
 
     @Override
-    public void create(ServerWorld world, long seed) {
+    public void create(@NotNull ServerWorld world, long seed) {
         super.create(world, seed);
 
         this.carver = new HellLandscapeCarver(seed);

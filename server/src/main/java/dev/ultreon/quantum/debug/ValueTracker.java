@@ -17,6 +17,8 @@ public class ValueTracker {
     private static int obtainRequests;
     private static int freeRequests;
     private static int flushRequests;
+    private static int renderableCount;
+    private static int chunkTracks;
 
     public static long getMeshDisposes() {
         return ValueTracker.meshDisposes;
@@ -160,5 +162,24 @@ public class ValueTracker {
 
     public static int getFlushRequests() {
         return flushRequests;
+    }
+
+    public static void trackRenderables(int count) {
+        renderableCount+=count;
+        chunkTracks++;
+    }
+
+    public static int getRenderableCount() {
+        return renderableCount;
+    }
+
+    public static void resetRenderables() {
+        renderableCount = 0;
+        chunkTracks = 0;
+    }
+
+    public static int getAverageRenderables() {
+        if (chunkTracks == 0) return 0;
+        return renderableCount / chunkTracks;
     }
 }

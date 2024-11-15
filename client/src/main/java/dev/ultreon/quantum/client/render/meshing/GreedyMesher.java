@@ -2,8 +2,6 @@ package dev.ultreon.quantum.client.render.meshing;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -19,7 +17,7 @@ import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.Vec3i;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
@@ -81,14 +79,6 @@ public class GreedyMesher implements Mesher {
         this.perCornerLight = perCornerLight;
     }
 
-    @Override
-    public List<Face> prepare(UseCondition condition) {
-        if (!chunk.isLoaded())
-            throw new IllegalStateException("Chunk is not loaded");
-
-        return this.getFaces(condition);
-    }
-
     public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
@@ -96,8 +86,7 @@ public class GreedyMesher implements Mesher {
         int depth = CHUNK_SIZE;
         int height = CHUNK_SIZE;
 
-// Loop arrays initialization can be extracted into reusable logic to avoid repeating patterns
-        for (int y = 0; y <= height; y++) {
+        for (int y = 0; y < height; y++) {
             boolean[][] topMask = new boolean[width][depth];
             PerCornerLightData[][] topPcld = this.perCornerLight ? new PerCornerLightData[width][depth] : null;
 
@@ -106,22 +95,21 @@ public class GreedyMesher implements Mesher {
 
             for (int z = 0; z < depth; z++) {
                 for (int x = 0; x < width; x++) {
-                    // Move exception handling outside the inner loop
                     try {
-                        if (facesY(condition, ocCond, x, y, z, topMask, topPcld, btmMask, btmPcld)) continue;
+                        if (!topMask[x][z] || !btmMask[x][z]) {
+                            facesY(condition, ocCond, x, y, z, topMask, topPcld, btmMask, btmPcld);
+                        }
                     } catch (PosOutOfBoundsException ex) {
                         QuantumClient.LOGGER.error("Greedy Meshing error:", ex);
-                        break;  // Break out of the current z-loop to avoid continuous error handling
+                        break;
                     }
                 }
             }
 
-            // Reuse common offset logic
-            applyGreedyMeshing(faces, CubicDirection.UP, topMask, topPcld, y, shouldMerge);
-            applyGreedyMeshing(faces, CubicDirection.DOWN, btmMask, btmPcld, y, shouldMerge);
+            applyGreedyMeshing(faces, Direction.UP, topMask, topPcld, y, shouldMerge);
+            applyGreedyMeshing(faces, Direction.DOWN, btmMask, btmPcld, y, shouldMerge);
         }
 
-// East, west loop optimization
         for (int x = 0; x < width; x++) {
             boolean[][] westMask = new boolean[depth][height];
             PerCornerLightData[][] westPcld = this.perCornerLight ? new PerCornerLightData[depth][height] : null;
@@ -132,7 +120,9 @@ public class GreedyMesher implements Mesher {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     try {
-                        if (facesX(condition, ocCond, x, y, z, westMask, westPcld, eastMask, eastPcld)) continue;
+                        if (!westMask[z][y] || !eastMask[z][y]) {
+                            facesX(condition, ocCond, x, y, z, westMask, westPcld, eastMask, eastPcld);
+                        }
                     } catch (PosOutOfBoundsException ex) {
                         QuantumClient.LOGGER.error("Greedy Meshing error:", ex);
                         break;
@@ -140,11 +130,10 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            applyGreedyMeshing(faces, CubicDirection.EAST, eastMask, eastPcld, x, shouldMerge);
-            applyGreedyMeshing(faces, CubicDirection.WEST, westMask, westPcld, x, shouldMerge);
+            applyGreedyMeshing(faces, Direction.EAST, eastMask, eastPcld, x, shouldMerge);
+            applyGreedyMeshing(faces, Direction.WEST, westMask, westPcld, x, shouldMerge);
         }
 
-// North, south loop optimization
         for (int z = 0; z < depth; z++) {
             boolean[][] northMask = new boolean[width][height];
             PerCornerLightData[][] northPcld = this.perCornerLight ? new PerCornerLightData[width][height] : null;
@@ -155,7 +144,9 @@ public class GreedyMesher implements Mesher {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     try {
-                        if (facesZ(condition, ocCond, x, y, z, northMask, northPcld, southMask, southPcld)) continue;
+                        if (!northMask[x][y] || !southMask[x][y]) {
+                            facesZ(condition, ocCond, x, y, z, northMask, northPcld, southMask, southPcld);
+                        }
                     } catch (PosOutOfBoundsException ex) {
                         QuantumClient.LOGGER.error("Greedy Meshing error:", ex);
                         break;
@@ -163,22 +154,21 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            applyGreedyMeshing(faces, CubicDirection.NORTH, northMask, northPcld, z, shouldMerge);
-            applyGreedyMeshing(faces, CubicDirection.SOUTH, southMask, southPcld, z, shouldMerge);
+            applyGreedyMeshing(faces, Direction.NORTH, northMask, northPcld, z, shouldMerge);
+            applyGreedyMeshing(faces, Direction.SOUTH, southMask, southPcld, z, shouldMerge);
         }
-
 
         return faces;
     }
 
     // Common meshing logic
-    private void applyGreedyMeshing(List<Face> faces, CubicDirection direction, boolean[][] mask, PerCornerLightData[][] pcld, int index, MergeCondition shouldMerge) {
+    private void applyGreedyMeshing(List<Face> faces, Direction direction, boolean[][] mask, PerCornerLightData[][] pcld, int index, MergeCondition shouldMerge) {
         this.greedy(faces, direction, shouldMerge, mask, pcld, index);
     }
-
     private boolean facesY(UseCondition condition, OccludeCondition ocCond, int x, int y, int z, boolean[][] topMask, PerCornerLightData[][] topPcld, boolean[][] btmMask, PerCornerLightData[][] btmPcld) {
         BlockState curBlock = this.block(this.chunk, x, y, z);
         if (curBlock == null) return true;
+
         BlockModel blockModel = BlockModelRegistry.get().get(curBlock);
         if (blockModel != null && !(blockModel instanceof BakedCubeModel)) {
             this.chunk.addModel(new BlockVec(x, y, z, BlockVecSpace.CHUNK), new ModelInstance(blockModel.getModel()));
@@ -189,247 +179,235 @@ public class GreedyMesher implements Mesher {
 
         int bottomNeighborY = y - 1;
         int topNeighborY = y + 1;
-        @Nullable ClientChunkAccess bottomNeighborChunk = this.chunk;
-        @Nullable ClientChunkAccess topNeighborChunk = this.chunk;
+
+        ClientChunkAccess bottomNeighborChunk = this.chunk;
+        ClientChunkAccess topNeighborChunk = this.chunk;
+
+        // Cache the chunk coordinates
+        int chunkX = this.chunk.getVec().getIntX();
+        int chunkY = this.chunk.getVec().getIntY();
+        int chunkZ = this.chunk.getVec().getIntZ();
+
+        // Get neighboring chunks if needed
         if (bottomNeighborY < 0) {
-            bottomNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY() - 1, this.chunk.getVec().getIntZ());
+            bottomNeighborChunk = this.chunk.getWorld().getChunk(chunkX, chunkY - 1, chunkZ);
             bottomNeighborY += CHUNK_SIZE;
         }
         if (topNeighborY >= CHUNK_SIZE) {
-            topNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY() + 1, this.chunk.getVec().getIntZ());
+            topNeighborChunk = this.chunk.getWorld().getChunk(chunkX, chunkY + 1, chunkZ);
             topNeighborY -= CHUNK_SIZE;
         }
-        if (topNeighborChunk != null) {
-            BlockState westNeighborBlk = topNeighborChunk.get(x, topNeighborY, z);
-            if (!ocCond.shouldOcclude(curBlock.getBlock(), westNeighborBlk.getBlock())) {
+
+        // Check top neighbor
+        if (topNeighborChunk != null && !topMask[x][z]) {
+            BlockState topNeighborBlk = topNeighborChunk.get(x, topNeighborY, z);
+            if (!ocCond.shouldOcclude(curBlock.getBlock(), topNeighborBlk.getBlock())) {
                 topMask[x][z] = true;
 
                 if (this.perCornerLight) {
-                    PerCornerLightData lightData = new PerCornerLightData();
-                    lightData.l00 = this.calcPerCornerLight(CubicDirection.UP, x, y, z);
-                    lightData.l01 = this.calcPerCornerLight(CubicDirection.UP, x, y, z + 1);
-                    lightData.l10 = this.calcPerCornerLight(CubicDirection.UP, x + 1, y, z);
-                    lightData.l11 = this.calcPerCornerLight(CubicDirection.UP, x + 1, y, z + 1);
-                    lightData.s00 = this.calcPerCornerSunlight(CubicDirection.UP, x, y, z);
-                    lightData.s01 = this.calcPerCornerSunlight(CubicDirection.UP, x, y, z + 1);
-                    lightData.s10 = this.calcPerCornerSunlight(CubicDirection.UP, x + 1, y, z);
-                    lightData.s11 = this.calcPerCornerSunlight(CubicDirection.UP, x + 1, y, z + 1);
-                    topPcld[x][z] = lightData;
+                    topPcld[x][z] = calculatePerCornerLightAndSunlight(Direction.UP, x, y, z);
                 }
             }
         }
 
-        if (bottomNeighborChunk != null) {
-            BlockState westNeighborBlk = bottomNeighborChunk.get(x, bottomNeighborY, z);
-            if (!ocCond.shouldOcclude(curBlock.getBlock(), westNeighborBlk.getBlock())) {
+        // Check bottom neighbor
+        if (bottomNeighborChunk != null && !btmMask[x][z]) {
+            BlockState bottomNeighborBlk = bottomNeighborChunk.get(x, bottomNeighborY, z);
+            if (!ocCond.shouldOcclude(curBlock.getBlock(), bottomNeighborBlk.getBlock())) {
                 btmMask[x][z] = true;
 
                 if (this.perCornerLight) {
-                    PerCornerLightData lightData = new PerCornerLightData();
-                    lightData.l00 = this.calcPerCornerLight(CubicDirection.DOWN, x, y, z);
-                    lightData.l01 = this.calcPerCornerLight(CubicDirection.DOWN, x, y, z + 1);
-                    lightData.l10 = this.calcPerCornerLight(CubicDirection.DOWN, x + 1, y, z);
-                    lightData.l11 = this.calcPerCornerLight(CubicDirection.DOWN, x + 1, y, z + 1);
-                    lightData.s00 = this.calcPerCornerSunlight(CubicDirection.DOWN, x, y, z);
-                    lightData.s01 = this.calcPerCornerSunlight(CubicDirection.DOWN, x, y, z + 1);
-                    lightData.s10 = this.calcPerCornerSunlight(CubicDirection.DOWN, x + 1, y, z);
-                    lightData.s11 = this.calcPerCornerSunlight(CubicDirection.DOWN, x + 1, y, z + 1);
-                    btmPcld[x][z] = lightData;
+                    btmPcld[x][z] = calculatePerCornerLightAndSunlight(Direction.DOWN, x, y, z);
                 }
             }
         }
+
         return false;
     }
 
     private boolean facesX(UseCondition condition, OccludeCondition ocCond, int x, int y, int z, boolean[][] westMask, PerCornerLightData[][] westPcld, boolean[][] eastMask, PerCornerLightData[][] eastPcld) {
         BlockState curBlock = this.block(this.chunk, x, y, z);
         if (curBlock == null) return true;
+
         BlockModel blockModel = BlockModelRegistry.get().get(curBlock);
         if (blockModel != null && !(blockModel instanceof BakedCubeModel)) {
             return true;
         }
+
         if (!condition.shouldUse(curBlock.getBlock())) return true;
 
         int westNeighborX = x - 1;
         int eastNeighborX = x + 1;
-        @Nullable ClientChunkAccess westNeighborChunk = this.chunk;
-        @Nullable ClientChunkAccess eastNeighborChunk = this.chunk;
+
+        ClientChunkAccess westNeighborChunk = this.chunk;
+        ClientChunkAccess eastNeighborChunk = this.chunk;
+
+        // Cache chunk coordinates
+        int chunkX = this.chunk.getVec().getIntX();
+        int chunkY = this.chunk.getVec().getIntY();
+        int chunkZ = this.chunk.getVec().getIntZ();
+
+        // Get neighboring chunks if needed
         if (westNeighborX < 0) {
-            westNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX() - 1, this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ());
+            westNeighborChunk = this.chunk.getWorld().getChunk(chunkX - 1, chunkY, chunkZ);
             westNeighborX += CHUNK_SIZE;
         }
         if (eastNeighborX >= CHUNK_SIZE) {
-            eastNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX() + 1, this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ());
+            eastNeighborChunk = this.chunk.getWorld().getChunk(chunkX + 1, chunkY, chunkZ);
             eastNeighborX -= CHUNK_SIZE;
         }
-        if (westNeighborChunk != null) {
+
+        // Check west neighbor
+        if (westNeighborChunk != null && !westMask[z][y]) {
             BlockState westNeighborBlk = westNeighborChunk.get(westNeighborX, y, z);
             if (!ocCond.shouldOcclude(curBlock.getBlock(), westNeighborBlk.getBlock())) {
                 westMask[z][y] = true;
 
                 if (this.perCornerLight) {
-                    PerCornerLightData lightData = new PerCornerLightData();
-                    lightData.l00 = this.calcPerCornerLight(CubicDirection.WEST, x, y, z);
-                    lightData.l01 = this.calcPerCornerLight(CubicDirection.WEST, x, y, z + 1);
-                    lightData.l10 = this.calcPerCornerLight(CubicDirection.WEST, x, y + 1, z);
-                    lightData.l11 = this.calcPerCornerLight(CubicDirection.WEST, x, y + 1, z + 1);
-                    lightData.s00 = this.calcPerCornerSunlight(CubicDirection.WEST, x, y, z);
-                    lightData.s01 = this.calcPerCornerSunlight(CubicDirection.WEST, x, y, z + 1);
-                    lightData.s10 = this.calcPerCornerSunlight(CubicDirection.WEST, x, y + 1, z);
-                    lightData.s11 = this.calcPerCornerSunlight(CubicDirection.WEST, x, y + 1, z + 1);
-                    westPcld[z][y] = lightData;
+                    westPcld[z][y] = calculatePerCornerLightAndSunlight(Direction.WEST, x, y, z);
                 }
             }
         }
 
-        if (eastNeighborChunk != null) {
+        // Check east neighbor
+        if (eastNeighborChunk != null && !eastMask[z][y]) {
             BlockState eastNeighborBlk = eastNeighborChunk.get(eastNeighborX, y, z);
             if (!ocCond.shouldOcclude(curBlock.getBlock(), eastNeighborBlk.getBlock())) {
                 eastMask[z][y] = true;
 
                 if (this.perCornerLight) {
-                    PerCornerLightData lightData = new PerCornerLightData();
-                    lightData.l00 = this.calcPerCornerLight(CubicDirection.EAST, x, y, z);
-                    lightData.l01 = this.calcPerCornerLight(CubicDirection.EAST, x, y, z + 1);
-                    lightData.l10 = this.calcPerCornerLight(CubicDirection.EAST, x, y + 1, z);
-                    lightData.l11 = this.calcPerCornerLight(CubicDirection.EAST, x, y + 1, z + 1);
-                    lightData.s00 = this.calcPerCornerSunlight(CubicDirection.EAST, x, y, z);
-                    lightData.s01 = this.calcPerCornerSunlight(CubicDirection.EAST, x, y, z + 1);
-                    lightData.s10 = this.calcPerCornerSunlight(CubicDirection.EAST, x, y + 1, z);
-                    lightData.s11 = this.calcPerCornerSunlight(CubicDirection.EAST, x, y + 1, z + 1);
-                    eastPcld[z][y] = lightData;
+                    eastPcld[z][y] = calculatePerCornerLightAndSunlight(Direction.EAST, x, y, z);
                 }
             }
         }
+
         return false;
     }
 
     private boolean facesZ(UseCondition condition, OccludeCondition ocCond, int x, int y, int z, boolean[][] northMask, PerCornerLightData[][] northPcld, boolean[][] southMask, PerCornerLightData[][] southPcld) {
         BlockState curBlock = this.block(this.chunk, x, y, z);
         if (curBlock == null) return true;
+
         BlockModel blockModel = BlockModelRegistry.get().get(curBlock);
         if (blockModel != null && !(blockModel instanceof BakedCubeModel)) {
             return true;
         }
+
         if (!condition.shouldUse(curBlock.getBlock())) return true;
 
         int northNeighborZ = z + 1;
         int southNeighborZ = z - 1;
-        @Nullable ClientChunkAccess northNeighborChunk = this.chunk;
-        @Nullable ClientChunkAccess southNeighborChunk = this.chunk;
+
+        ClientChunkAccess northNeighborChunk = this.chunk;
+        ClientChunkAccess southNeighborChunk = this.chunk;
+
+        // Cache chunk coordinates
+        int chunkX = this.chunk.getVec().getIntX();
+        int chunkY = this.chunk.getVec().getIntY();
+        int chunkZ = this.chunk.getVec().getIntZ();
+
+        // Get neighboring chunks if needed
         if (northNeighborZ >= CHUNK_SIZE) {
-            northNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ() + 1);
+            northNeighborChunk = this.chunk.getWorld().getChunk(chunkX, chunkY, chunkZ + 1);
             northNeighborZ -= CHUNK_SIZE;
-        } else if (southNeighborZ < 0) {
-            southNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ() - 1);
+        }
+        if (southNeighborZ < 0) {
+            southNeighborChunk = this.chunk.getWorld().getChunk(chunkX, chunkY, chunkZ - 1);
             southNeighborZ += CHUNK_SIZE;
         }
 
-        if (northNeighborChunk != null) {
+        // Check north neighbor
+        if (northNeighborChunk != null && !northMask[x][y]) {
             BlockState northNeighborBlock = northNeighborChunk.get(x, y, northNeighborZ);
             if (!ocCond.shouldOcclude(curBlock.getBlock(), northNeighborBlock.getBlock())) {
                 northMask[x][y] = true;
 
                 if (this.perCornerLight) {
-                    PerCornerLightData lightData = new PerCornerLightData();
-                    lightData.l00 = this.calcPerCornerLight(CubicDirection.NORTH, x, y, z);
-                    lightData.l01 = this.calcPerCornerLight(CubicDirection.NORTH, x, y + 1, z);
-                    lightData.l10 = this.calcPerCornerLight(CubicDirection.NORTH, x + 1, y, z);
-                    lightData.l11 = this.calcPerCornerLight(CubicDirection.NORTH, x + 1, y + 1, z);
-                    lightData.s00 = this.calcPerCornerSunlight(CubicDirection.NORTH, x, y, z);
-                    lightData.s01 = this.calcPerCornerSunlight(CubicDirection.NORTH, x, y + 1, z);
-                    lightData.s10 = this.calcPerCornerSunlight(CubicDirection.NORTH, x + 1, y, z);
-                    lightData.s11 = this.calcPerCornerSunlight(CubicDirection.NORTH, x + 1, y + 1, z);
-                    northPcld[x][y] = lightData;
+                    northPcld[x][y] = calculatePerCornerLightAndSunlight(Direction.NORTH, x, y, z);
                 }
             }
         }
 
-        if (southNeighborChunk != null) {
+        // Check south neighbor
+        if (southNeighborChunk != null && !southMask[x][y]) {
             BlockState southNeighborBlock = southNeighborChunk.get(x, y, southNeighborZ);
             if (!ocCond.shouldOcclude(curBlock.getBlock(), southNeighborBlock.getBlock())) {
                 southMask[x][y] = true;
 
                 if (this.perCornerLight) {
-                    PerCornerLightData lightData = new PerCornerLightData();
-                    lightData.l00 = this.calcPerCornerLight(CubicDirection.SOUTH, x, y, z);
-                    lightData.l01 = this.calcPerCornerLight(CubicDirection.SOUTH, x, y + 1, z);
-                    lightData.l10 = this.calcPerCornerLight(CubicDirection.SOUTH, x + 1, y, z);
-                    lightData.l11 = this.calcPerCornerLight(CubicDirection.SOUTH, x + 1, y + 1, z);
-                    lightData.s00 = this.calcPerCornerSunlight(CubicDirection.SOUTH, x, y, z);
-                    lightData.s01 = this.calcPerCornerSunlight(CubicDirection.SOUTH, x, y + 1, z);
-                    lightData.s10 = this.calcPerCornerSunlight(CubicDirection.SOUTH, x + 1, y, z);
-                    lightData.s11 = this.calcPerCornerSunlight(CubicDirection.SOUTH, x + 1, y + 1, z);
-                    southPcld[x][y] = lightData;
+                    southPcld[x][y] = calculatePerCornerLightAndSunlight(Direction.SOUTH, x, y, z);
                 }
             }
         }
+
         return false;
     }
 
-    private float calcLightLevel(CubicDirection side, int x, int y, int z) throws PosOutOfBoundsException {
+    private PerCornerLightData calculatePerCornerLightAndSunlight(Direction dir, int x, int y, int z) {
+        PerCornerLightData lightData = new PerCornerLightData();
+        lightData.l00 = this.calcPerCornerLight(dir, x, y, z);
+        lightData.l01 = this.calcPerCornerLight(dir, x, y, z + 1);
+        lightData.l10 = this.calcPerCornerLight(dir, x + 1, y, z);
+        lightData.l11 = this.calcPerCornerLight(dir, x + 1, y, z + 1);
+        lightData.s00 = this.calcPerCornerSunlight(dir, x, y, z);
+        lightData.s01 = this.calcPerCornerSunlight(dir, x, y, z + 1);
+        lightData.s10 = this.calcPerCornerSunlight(dir, x + 1, y, z);
+        lightData.s11 = this.calcPerCornerSunlight(dir, x + 1, y, z + 1);
+        return lightData;
+    }
+
+    private float calcLightLevel(Direction side, int x, int y, int z) throws PosOutOfBoundsException {
         LightLevelData result = this.calcLightLevels(side, x, y, z);
         if (result == null) return 1;
 
         return Math.min(1, result.sunBrightness() + result.blockBrightness());
     }
-
     @Nullable
-    private LightLevelData calcLightLevels(CubicDirection side, int x, int y, int z) {
+    private LightLevelData calcLightLevels(Direction side, int x, int y, int z) {
+        if (this.chunk == null) return null;  // Early exit if chunk is null
+
+        // Adjust coordinates based on the side direction
         switch (side) {
-            case UP:
-                y += 1;
-                break;
-            case DOWN:
-                y -= 1;
-                break;
-            case WEST:
-                x -= 1;
-                break;
-            case EAST:
-                x += 1;
-                break;
-            case NORTH:
-                z += 1;
-                break;
-            case SOUTH:
-                z -= 1;
-                break;
+            case UP -> y++;
+            case DOWN -> y--;
+            case WEST -> x--;
+            case EAST -> x++;
+            case NORTH -> z++;
+            case SOUTH -> z--;
         }
 
-        ClientWorldAccess world = Objects.requireNonNull(this.chunk).getWorld();
-        int chunkSize = CHUNK_SIZE;
-        @Nullable ClientChunkAccess sChunk = this.chunk;
-        if (z < 0) {
-            sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
-            z += chunkSize;
-        } else if (z > chunkSize - 1) {
-            sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
-            z -= chunkSize;
-        } else if (y < 0) {
-            sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
-            y += chunkSize;
-        } else if (y > chunkSize - 1) {
-            sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
-            y -= chunkSize;
-        } else if (x < 0) {
-            sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
-            x += chunkSize;
-        } else if (x > chunkSize - 1) {
-            sChunk = world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
-            x -= chunkSize;
-        }
+        ClientWorldAccess world = this.chunk.getWorld();
 
-        if (sChunk == null) return null;
+        // Adjust coordinates if out of chunk bounds
+        ClientChunkAccess sChunk = adjustCoordinatesForChunk(world, x, y, z);
+
+        if (sChunk == null) return null;  // Early exit if neighboring chunk is not found
+
+        // Calculate brightness
         float sunBrightness = sChunk.getBrightness(this.sunlight(sChunk, x, y, z));
         float blockBrightness = sChunk.getBrightness(this.blockLight(sChunk, x, y, z));
-        return new LightLevelData(sunBrightness, blockBrightness);
+
+        return new LightLevelData(blockBrightness, sunBrightness);
     }
 
-    public List<Face> getFaces(UseCondition condition) {
-        try (var ignoredSection = QuantumClient.PROFILER.start("chunk-get-faces")) {
-            return this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+    @Nullable
+    private ClientChunkAccess adjustCoordinatesForChunk(ClientWorldAccess world, int x, int y, int z) {
+        int chunkSize = CHUNK_SIZE;
+
+        if (x < 0 || x >= chunkSize) {
+            x = (x + chunkSize) % chunkSize;
+            return world.getChunk(GreedyMesher.OFF_X + (x < 0 ? -1 : 1), GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + z);
         }
+        if (y < 0 || y >= chunkSize) {
+            y = (y + chunkSize) % chunkSize;
+            return world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + (y < 0 ? -1 : 1), GreedyMesher.OFF_Z + z);
+        }
+        if (z < 0 || z >= chunkSize) {
+            z = (z + chunkSize) % chunkSize;
+            return world.getChunk(GreedyMesher.OFF_X + x, GreedyMesher.OFF_Y + y, GreedyMesher.OFF_Z + (z < 0 ? -1 : 1));
+        }
+
+        return this.chunk;  // Default to current chunk if still within bounds
     }
 
     private boolean shouldNotRenderNormally(Block blockToBlockFace) {
@@ -445,129 +423,111 @@ public class GreedyMesher implements Mesher {
      * @param side       BlockFace being meshed
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, CubicDirection side, MergeCondition mergeCond, boolean[][] mask, PerCornerLightData[][] lightDatas, int z) {
+    private void greedy(List<Face> outputList, Direction side, MergeCondition mergeCond, boolean[][] mask, PerCornerLightData[][] lightDatas, int z) {
         int width = mask.length;
         int height = mask[0].length;
-        boolean[][] used = new boolean[mask.length][mask[0].length];
+        boolean[][] used = new boolean[width][height];  // Reuse existing mask sizes for used array
 
-        try {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    if (!mask[x][y]) continue;
+        // Loop through each y, x coordinate
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (!mask[x][y] || used[x][y]) continue;  // Skip if already processed or not in mask
 
-                    // "real" values of setX,setY,z
-                    int realX = this.realX(side, x, z);
-                    int realY = this.realY(side, y, z);
-                    int realZ = this.realZ(side, x, y, z);
+                // Calculate real-world coordinates for the current face
+                int realX = this.realX(side, x, z);
+                int realY = this.realY(side, y, z);
+                int realZ = this.realZ(side, x, y, z);
 
-                    BlockState block = this.block(this.chunk, realX, realY, realZ);
-                    if (block == null || block.isAir() || used[x][y]) continue;
-                    used[x][y] = true;
-                    float ll = 1;
-                    PerCornerLightData lightData = null;
-                    if (this.perCornerLight) {
-                        lightData = lightDatas[x][y];
-                    } else {
-                        ll = this.calcLightLevel(side, realX, realY, realZ);
-                    }
-                    int endX = x + 1;
-                    int endY = y + 1;
-                    while (true) {
-                        int newX = endX;
-                        boolean shouldPass = false;
+                BlockState block = this.block(this.chunk, realX, realY, realZ);
+                if (block == null || block.isAir()) continue;  // Skip if air or null block
 
-                        // Check bounds once, move other logic inside the condition
-                        if (newX < width) {
-                            // Cache repeated calculations
-                            int newRealX = this.realX(side, newX, z);
-                            int newRealY = this.realY(side, y, z);
-                            int newRealZ = this.realZ(side, newX, y, z);
-                            BlockState newBlock = this.block(this.chunk, newRealX, newRealY, newRealZ);
+                used[x][y] = true;
 
-                            if (newBlock != null && !newBlock.isAir() && !used[newX][y]) {
-                                float newLight = 15;
-                                PerCornerLightData newPcld = null;
-
-                                // Choose light calculation only if necessary
-                                if (this.perCornerLight) {
-                                    newPcld = lightDatas[newX][y];
-                                } else {
-                                    newLight = this.calcLightLevel(side, newRealX, newRealY, newRealZ);
-                                }
-
-                                // Check merge condition
-                                shouldPass = mergeCond.shouldMerge(block, ll, lightData, newBlock, newLight, newPcld);
-                            }
-                        }
-
-                        // Expand right if conditions pass
-                        if (shouldPass) {
-                            endX++;
-                            used[newX][y] = true;
-                        } else {
-                            // Start passing up after finishing the initial pass to the right
-                            while (endY < height) {
-                                boolean allPassed = true;
-
-                                // Pre-calculate real coordinates once for endY
-                                int lRY = this.realY(side, endY, z);
-                                for (int lx = x; lx < endX; lx++) {
-                                    // Cache repeated calculations
-                                    int lRX = this.realX(side, lx, z);
-                                    int lRZ = this.realZ(side, lx, endY, z);
-
-                                    BlockState lblk = this.block(this.chunk, lRX, lRY, lRZ);
-                                    if (lblk == null || lblk.isAir() || used[lx][endY]) {
-                                        allPassed = false;
-                                        break;
-                                    }
-
-                                    float llight = 15;
-                                    PerCornerLightData lPcld = null;
-
-                                    // Only calculate light if necessary
-                                    if (this.perCornerLight) {
-                                        lPcld = lightDatas[lx][endY];
-                                    } else {
-                                        llight = this.calcLightLevel(side, lRX, lRY, lRZ);
-                                    }
-
-                                    if (!mergeCond.shouldMerge(block, ll, lightData, lblk, llight, lPcld)) {
-                                        allPassed = false;
-                                        break;
-                                    }
-                                }
-
-                                // If all passed, mark them as used and continue to the next row
-                                if (allPassed) {
-                                    for (int lx = x; lx < endX; lx++) {
-                                        used[lx][endY] = true;
-                                    }
-                                    endY++;
-                                } else {
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    outputList.add(new Face(side, block, ll, lightData, x + GreedyMesher.OFF_X, y + GreedyMesher.OFF_Y, endX + GreedyMesher.OFF_X, endY + GreedyMesher.OFF_Y, z + GreedyMesher.OFF_Z, 1));
+                // Light level handling
+                float ll = 1.0f;
+                PerCornerLightData lightData = null;
+                if (this.perCornerLight) {
+                    lightData = lightDatas[x][y];
+                } else {
+                    ll = this.calcLightLevel(side, realX, realY, realZ);
                 }
+
+                int endX = x + 1, endY = y + 1;
+
+                // Horizontal (x-axis) expansion
+                while (endX < width) {
+                    if (!canMerge(mergeCond, block, ll, lightData, side, endX, y, z, lightDatas, used)) break;
+                    used[endX][y] = true;
+                    endX++;
+                }
+
+                // Vertical (y-axis) expansion
+                while (endY < height) {
+                    if (!canExpandVertically(mergeCond, block, ll, lightData, side, x, endX, endY, z, lightDatas, used)) break;
+                    for (int lx = x; lx < endX; lx++) {
+                        used[lx][endY] = true;
+                    }
+                    endY++;
+                }
+
+                // Add the resulting face to the output list
+                outputList.add(new Face(side, block, ll, lightData,
+                        x + GreedyMesher.OFF_X, y + GreedyMesher.OFF_Y,
+                        endX + GreedyMesher.OFF_X, endY + GreedyMesher.OFF_Y,
+                        z + GreedyMesher.OFF_Z, 1));
             }
-        } catch (PosOutOfBoundsException ex) {
-            throw new GdxRuntimeException(ex);
         }
     }
 
-    @Override
-    public void meshFaces(List<Face> faces, MeshPartBuilder builder) {
-        try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
-            if (section != null) section.addStat("face-count", faces.size());
-            builder.ensureVertices(faces.size() * 4);
-            for (Face f : faces) {
-                f.render(builder);
+    // Helper method for horizontal merging
+    private boolean canMerge(MergeCondition mergeCond, BlockState block, float ll, PerCornerLightData lightData, Direction side, int newX, int y, int z, PerCornerLightData[][] lightDatas, boolean[][] used) {
+        int realX = this.realX(side, newX, z);
+        int realY = this.realY(side, y, z);
+        int realZ = this.realZ(side, newX, y, z);
+
+        if (used[newX][y]) return false;  // If already used, cannot merge
+
+        BlockState newBlock = this.block(this.chunk, realX, realY, realZ);
+        if (newBlock == null || newBlock.isAir()) return false;
+
+        float newLight = 15;
+        PerCornerLightData newPcld = null;
+
+        if (this.perCornerLight) {
+            newPcld = lightDatas[newX][y];
+        } else {
+            newLight = this.calcLightLevel(side, realX, realY, realZ);
+        }
+
+        return mergeCond.shouldMerge(block, ll, lightData, newBlock, newLight, newPcld);
+    }
+
+    // Helper method for vertical expansion
+    private boolean canExpandVertically(MergeCondition mergeCond, BlockState block, float ll, PerCornerLightData lightData, Direction side, int startX, int endX, int endY, int z, PerCornerLightData[][] lightDatas, boolean[][] used) {
+        for (int lx = startX; lx < endX; lx++) {
+            int realX = this.realX(side, lx, z);
+            int realY = this.realY(side, endY, z);
+            int realZ = this.realZ(side, lx, endY, z);
+
+            if (used[lx][endY]) return false;
+
+            BlockState lblk = this.block(this.chunk, realX, realY, realZ);
+            if (lblk == null || lblk.isAir()) return false;
+
+            float llight = 15;
+            PerCornerLightData lPcld = null;
+
+            if (this.perCornerLight) {
+                lPcld = lightDatas[lx][endY];
+            } else {
+                llight = this.calcLightLevel(side, realX, realY, realZ);
+            }
+
+            if (!mergeCond.shouldMerge(block, ll, lightData, lblk, llight, lPcld)) {
+                return false;
             }
         }
+        return true;
     }
 
     /**
@@ -578,7 +538,7 @@ public class GreedyMesher implements Mesher {
      * @param y    Chunk-relative Y coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
      * @param cz   Chunk-relative Z coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
      */
-    private float calcPerCornerLight(CubicDirection side, int cx, int y, int cz) {
+    private float calcPerCornerLight(Direction side, int cx, int y, int cz) {
         // coordinate offsets for getting the blocks to average
         int posX = 0, negX = 0, posY = 0, negY = 0, posZ = 0, negZ = 0;
         switch (side) {
@@ -675,41 +635,42 @@ public class GreedyMesher implements Mesher {
      * @param y    Chunk-relative Y coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
      * @param cz   Chunk-relative Z coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
      */
-    private float calcPerCornerSunlight(CubicDirection side, int cx, int y, int cz) {
+    private float calcPerCornerSunlight(Direction side, int cx, int y, int cz) {
         // coordinate offsets for getting the blocks to average
         int posX = 0, negX = 0, posY = 0, negY = 0, posZ = 0, negZ = 0;
         switch (side) {
-            case UP:// Use the light values from the blocks above the face
+            case UP -> {
                 negY = posY = 1;
                 // Get blocks around the point
                 negZ = negX = -1;
-                break;
-            case DOWN:// Use the light values from the blocks below the face
+            }
+            case DOWN -> {
                 negY = posY = -1;
                 // Get blocks around the point
                 negZ = negX = -1;
-                break;
-            case WEST:// Use the light values from the blocks to the west of the face
+            }
+            case WEST -> {
                 negX = posX = -1;
                 // Get blocks around the point
                 negY = negZ = -1;
-                break;
-            case EAST:// Use the light values from the blocks to the east of the face
+            }
+            case EAST -> {
                 negX = posX = 1;
                 // Get blocks around the point
                 negY = negZ = -1;
-                break;
-            case NORTH:// Use the light values from the blocks to the north of the face
+            }
+            case NORTH -> {
                 negZ = posZ = 1;
                 // Get blocks around the point
                 negY = negX = -1;
-                break;
-            case SOUTH:// Use the light values from the blocks to the south of the face
+            }
+            case SOUTH -> {
                 negZ = posZ = -1;
                 // Get blocks around the point
                 negY = negX = -1;
-                break;
+            }
         }
+
         // sx,sy,sz are the setX, setY, and z positions of the side block
         int count = 0;
         float lightSum = 0;
@@ -792,6 +753,25 @@ public class GreedyMesher implements Mesher {
         return sameBlock && sameLight;
     }
 
+    @Override
+    public void buildMesh(UseCondition condition, MeshPartBuilder builder) {
+        if (!chunk.isLoaded())
+            throw new IllegalStateException("Chunk is not loaded");
+
+        List<Face> faces;
+        try (var ignoredSection = QuantumClient.PROFILER.start("chunk-get-faces")) {
+            faces = this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+        }
+
+        try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
+            if (section != null) section.addStat("face-count", faces.size());
+            builder.ensureVertices(faces.size() * 4);
+            for (Face f : faces) {
+                f.render(builder);
+            }
+        }
+    }
+
     public static final class LightLevelData {
         private final float sunBrightness;
         private final float blockBrightness;
@@ -799,10 +779,6 @@ public class GreedyMesher implements Mesher {
         public LightLevelData(float blockBrightness, float sunBrightness) {
             this.sunBrightness = sunBrightness;
             this.blockBrightness = blockBrightness;
-        }
-
-        public float lightLevel() {
-            return Mth.clamp(this.sunBrightness + this.blockBrightness, 0, 1);
         }
 
         public float sunBrightness() {
@@ -838,7 +814,7 @@ public class GreedyMesher implements Mesher {
 
     public static class Face {
 
-        private final CubicDirection side;
+        private final Direction side;
         private final int x1, y1, x2, y2, z;
         private final float lightLevel;
         private final PerCornerLightData lightData;
@@ -849,7 +825,7 @@ public class GreedyMesher implements Mesher {
         /**
          * @param lightData     Per corner light data. Pass null if per corner lighting is disabled.
          */
-        public Face(CubicDirection side, BlockState block, float lightLevel, PerCornerLightData lightData, int startX, int startY, int endX, int endY, int z, float sunlightLevel) {
+        public Face(Direction side, BlockState block, float lightLevel, PerCornerLightData lightData, int startX, int startY, int endX, int endY, int z, float sunlightLevel) {
             this.lightLevel = lightLevel;
             this.x1 = startX;
             this.y1 = startY;
@@ -858,7 +834,7 @@ public class GreedyMesher implements Mesher {
             this.z = z;
             this.side = side;
             this.sunlightLevel = sunlightLevel;
-            this.lightData = lightData;
+            this.lightData = lightData == null ? PerCornerLightData.EMPTY : lightData;
 
             QuantumClient client = QuantumClient.get();
             this.renderer = BlockRendererRegistry.get(block.getBlock());
@@ -889,7 +865,7 @@ public class GreedyMesher implements Mesher {
     }
 
     // Find "real" setX based on relative position in the greedy method
-    private int realX(CubicDirection side, int x, int z) {
+    private int realX(Direction side, int x, int z) {
         return switch (side) {
             case UP, DOWN, NORTH, SOUTH -> x;
             case EAST, WEST -> z;
@@ -897,7 +873,7 @@ public class GreedyMesher implements Mesher {
     }
 
     // Find "real" setY based on relative position in the greedy method
-    private int realY(CubicDirection side, int y, int z) {
+    private int realY(Direction side, int y, int z) {
         return switch (side) {
             case EAST, WEST, NORTH, SOUTH -> y;
             case UP, DOWN -> z;
@@ -905,7 +881,7 @@ public class GreedyMesher implements Mesher {
     }
 
     // Find "real" z based on relative position in the greedy method
-    private int realZ(CubicDirection side, int x, int y, int z) {
+    private int realZ(Direction side, int x, int y, int z) {
         return switch (side) {
             case UP, DOWN -> y;
             case WEST, EAST -> x;
@@ -929,27 +905,96 @@ public class GreedyMesher implements Mesher {
     private BlockState block(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
         this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
-        @Nullable ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
-        if (chunkAt != null)
-            return chunkAt.get(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
+        if (y < 0) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ());
+            y += CHUNK_SIZE;
+        } else if (y >= CHUNK_SIZE) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() + 1, chunk.getVec().getIntZ());
+            y -= CHUNK_SIZE;
+        }
+
+        if (x < 0 && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ());
+            x += CHUNK_SIZE;
+        } else if (x >= CHUNK_SIZE && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ());
+            x -= CHUNK_SIZE;
+        }
+
+        if (z < 0 && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1);
+            z += CHUNK_SIZE;
+        } else if (z >= CHUNK_SIZE && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1);
+            z -= CHUNK_SIZE;
+        }
+
+        if (chunk != null)
+            return chunk.get(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
         return Blocks.AIR.getDefaultState();
     }
 
     private int blockLight(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
         this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
-        @Nullable ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
-        if (chunkAt != null)
-            return chunkAt.getBlockLight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
+        if (y < 0) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ());
+            y += CHUNK_SIZE;
+        } else if (y >= CHUNK_SIZE) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() + 1, chunk.getVec().getIntZ());
+            y -= CHUNK_SIZE;
+        }
+
+        if (x < 0 && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ());
+            x += CHUNK_SIZE;
+        } else if (x >= CHUNK_SIZE && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ());
+            x -= CHUNK_SIZE;
+        }
+
+        if (z < 0 && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1);
+            z += CHUNK_SIZE;
+        } else if (z >= CHUNK_SIZE && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1);
+            z -= CHUNK_SIZE;
+        }
+
+        if (chunk != null)
+            return chunk.getBlockLight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
         return 0;
     }
 
     private int sunlight(@NotNull ClientChunkAccess chunk, int x, int y, int z) {
         ClientWorldAccess world = chunk.getWorld();
         this.tmp3i.set(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ()).mul(CHUNK_SIZE).add(x, y, z);
-        @Nullable ClientChunkAccess chunkAt = world.getChunkAt(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z);
-        if (chunkAt != null)
-            return chunkAt.getSunlight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
-        return 0;
+        if (y < 0) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() - 1, chunk.getVec().getIntZ());
+            y += CHUNK_SIZE;
+        } else if (y >= CHUNK_SIZE) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY() + 1, chunk.getVec().getIntZ());
+            y -= CHUNK_SIZE;
+        }
+
+        if (x < 0 && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX() - 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ());
+            x += CHUNK_SIZE;
+        } else if (x >= CHUNK_SIZE && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX() + 1, chunk.getVec().getIntY(), chunk.getVec().getIntZ());
+            x -= CHUNK_SIZE;
+        }
+
+        if (z < 0 && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() - 1);
+            z += CHUNK_SIZE;
+        } else if (z >= CHUNK_SIZE && chunk != null) {
+            chunk = world.getChunk(chunk.getVec().getIntX(), chunk.getVec().getIntY(), chunk.getVec().getIntZ() + 1);
+            z -= CHUNK_SIZE;
+        }
+
+        if (chunk != null)
+            return chunk.getSunlight(World.toLocalBlockVec(this.tmp3i.x, this.tmp3i.y, this.tmp3i.z, this.tmp3i));
+        return 15;
     }
 }

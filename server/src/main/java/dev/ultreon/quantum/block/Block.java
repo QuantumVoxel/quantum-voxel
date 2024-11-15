@@ -4,7 +4,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.block.state.BlockStateDefinition;
-import dev.ultreon.quantum.block.state.StatePropertyKey;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -50,7 +49,6 @@ public class Block implements DataWriter<MapType> {
     private final int lightReduction;
     private final SoundType soundType;
     private BlockState defaultState;
-    @Getter
     private BlockStateDefinition definition;
 
     public Block() {
@@ -75,8 +73,8 @@ public class Block implements DataWriter<MapType> {
         this.soundType = properties.soundType;
 
         this.definition = new BlockStateDefinition(this);
-        this.defineState(definition);
-        this.defaultState = definition.build();
+        this.defineState(getDefinition());
+        this.defaultState = getDefinition().build();
     }
 
     public void onStateReload() {
@@ -203,7 +201,7 @@ public class Block implements DataWriter<MapType> {
         return this.replaceable;
     }
 
-    public boolean shouldOcclude(@NotNull CubicDirection face, @NotNull Chunk chunk, int x, int y, int z) {
+    public boolean shouldOcclude(@NotNull Direction face, @NotNull Chunk chunk, int x, int y, int z) {
         return this.occlude;
     }
 
@@ -223,7 +221,7 @@ public class Block implements DataWriter<MapType> {
         this.onPlace(serverWorld, offset, meta);
     }
 
-    public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable CubicDirection direction) {
+    public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable Direction direction) {
         return true;
     }
 
@@ -244,7 +242,7 @@ public class Block implements DataWriter<MapType> {
     }
 
     public int getLightReduction(@NotNull BlockState blockState) {
-        if (isAir()) return 0;
+        if (isAir()) return 1;
         return lightReduction;
     }
 
@@ -257,23 +255,27 @@ public class Block implements DataWriter<MapType> {
     }
 
     public BlockState readBlockState(@NotNull PacketIO buffer) {
-        return definition.read(buffer);
+        return getDefinition().read(buffer);
     }
 
     public void writeBlockState(PacketIO buffer, BlockState state) {
-        definition.write(state, buffer);
+        getDefinition().write(state, buffer);
     }
 
     public BlockState loadBlockState(MapType data) {
         MapType entriesData = data.getMap("Entries");
-        return definition.load(entriesData);
+        return getDefinition().load(entriesData);
     }
 
     public void saveBlockState(MapType entriesData, BlockState blockState) {
-        definition.save(blockState, entriesData);
+        getDefinition().save(blockState, entriesData);
     }
 
-    public static class Properties {
+    public BlockStateDefinition getDefinition() {
+		return definition;
+	}
+
+	public static class Properties {
         private SoundType soundType = new SoundType();
         private boolean greedyMerge = true;
         private boolean occlude = true;

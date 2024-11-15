@@ -32,14 +32,14 @@ public class BindingsConfigScreen extends Screen {
         this.list.addEntries(config.values());
         this.add(this.list);
 
-        this.doneButton = TextButton.of(Translations.GUI_DONE).getCallback(button -> {
+        this.doneButton = TextButton.of(Translations.GUI_DONE).setCallback(button -> {
             this.list.save();
             assert this.client != null;
             this.client.showScreen(this.back);
         }).bounds(() -> new Bounds(this.size.width / 2 + 5, this.size.height - 6 - 20, 150, 20));
         this.add(this.doneButton);
 
-        cancelButton = TextButton.of(Translations.GUI_CANCEL).getCallback(button -> {
+        cancelButton = TextButton.of(Translations.GUI_CANCEL).setCallback(button -> {
             assert this.client != null;
             this.client.showScreen(this.back);
         }).bounds(() -> new Bounds(this.size.width / 2 - 155, this.size.height - 6 - 20, 150, 20));

@@ -17,7 +17,7 @@
 package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -126,7 +126,7 @@ public class Ray implements Serializable {
 		return result;
 	}
 
-	public CubicDirection getDirection() {
-		return CubicDirection.fromVec3d(this.direction);
+	public Direction getDirection() {
+		return Direction.fromVec3d(this.direction);
 	}
 }

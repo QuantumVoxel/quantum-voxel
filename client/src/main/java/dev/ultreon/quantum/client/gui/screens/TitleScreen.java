@@ -5,21 +5,19 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
-import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Rectangle;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.TitleButton;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.util.Resizer;
-import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Vec2f;
+import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TitleScreen extends Screen {
-    private Label titleLabel;
     private TitleButton singleplayerButton;
     private TitleButton multiplayerButton;
     private TitleButton modListButton;
@@ -27,7 +25,6 @@ public class TitleScreen extends Screen {
     private TitleButton quitButton;
     private final Resizer resizer;
     private @Nullable TextButton worldGenTestButton;
-    private @Nullable TextButton newWorldTestButton;
 
     public TitleScreen() {
         super((TextObject) null, null);
@@ -42,40 +39,36 @@ public class TitleScreen extends Screen {
         if (!GamePlatform.get().hasBackPanelRemoved())
             builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
 
-        this.titleLabel = builder.add(Label.of(Formatter.format("[*]Quantum[grey][*]Voxel")).position(() -> new Position(this.size.width / 2, 40))
-                .alignment(Alignment.CENTER)
-                .scale(2));
-
         this.singleplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.singleplayer"), 100)
                         .icon(QuantumClient.id("textures/gui/title/singleplayer.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, this.size.height / 2 - 100, 100, 150))
-                .getCallback(this::openSingleplayer));
+                .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::openSingleplayer));
 
         if (GamePlatform.get().isDevEnvironment()) {
             this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
-                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, this.size.height / 2 - 125))
-                    .getCallback(this::openTest));
+                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 125))
+                    .setCallback(this::openTest));
         }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
                         .icon(QuantumClient.id("textures/gui/title/multiplayer.png"))
-                        .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100, this.size.height / 2 - 100, 100, 150))
-                .getCallback(this::openMultiplayer));
+                .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::openMultiplayer));
 
         this.modListButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.mod_list"), 100)
                         .icon(QuantumClient.id("textures/gui/title/mods.png"))
-                        .bounds(() -> new Bounds(this.size.width / 2 - 50, this.size.height / 2 - 100, 100, 150))
-                .getCallback(this::showModList));
+                .bounds(() -> new Bounds(this.size.width / 2 - 50, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::showModList));
 
         this.optionsButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.options"), 100)
                         .icon(QuantumClient.id("textures/gui/title/options.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50, this.size.height / 2 - 100, 100, 150))
-                .getCallback(this::showOptions));
+                .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::showOptions));
 
         this.quitButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.quit"), 100)
                         .icon(QuantumClient.id("textures/gui/title/quit.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50 + 10 + 100, this.size.height / 2 - 100, 100, 150))
-                .getCallback(this::quitGame));
+                .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50 + 10 + 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::quitGame));
 
         if (GamePlatform.get().isMobile()) {
             this.quitButton.isEnabled = false;
@@ -108,7 +101,6 @@ public class TitleScreen extends Screen {
 
     @Override
     protected void renderSolidBackground(Renderer renderer) {
-
         if (!GamePlatform.get().hasBackPanelRemoved()) {
             Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
@@ -122,16 +114,19 @@ public class TitleScreen extends Screen {
         }
     }
 
+    @Override
+    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+
+        renderer.blit(QuantumClient.id("textures/gui/quantum_voxel.png"), this.size.width / 2f - 878 / 6f, Math.max(2 * this.size.height / 3f - 301 / 6f - 200, 10), 878 / 3f, 301 / 3f, 0, 0, 100, 150, 100, 150);
+    }
+
     public TitleButton getSingleplayerButton() {
         return this.singleplayerButton;
     }
 
     public @Nullable TextButton getWorldGenTestButton() {
         return worldGenTestButton;
-    }
-
-    public @Nullable TextButton getNewWorldTestButton() {
-        return newWorldTestButton;
     }
 
     public TitleButton getMultiplayerButton() {
@@ -158,9 +153,5 @@ public class TitleScreen extends Screen {
     @Override
     public boolean onClose(Screen next) {
         return !(next instanceof TitleScreen);
-    }
-
-    public Label getTitleLabel() {
-        return this.titleLabel;
     }
 }

@@ -31,7 +31,7 @@ public class IntEntry extends ConfigEntry<Integer> {
     @Override
     public Widget createWidget() {
         return new Slider(this.value, this.min, this.max)
-                .callback(slider -> {
+                .setCallback(slider -> {
                     this.value = slider.value().get();
                     this.config.save();
                 });

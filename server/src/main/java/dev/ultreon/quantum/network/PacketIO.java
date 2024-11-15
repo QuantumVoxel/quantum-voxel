@@ -32,6 +32,9 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+/**
+ * The PacketIO class provides methods for reading and writing various data types to and from input and output streams.
+ */
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class PacketIO {
     private static final int MAX_UBO_SIZE = 1024 * 1024 * 2;
@@ -40,6 +43,14 @@ public class PacketIO {
     private final InputStream inputOrig;
     private final OutputStream outputOrig;
 
+    /**
+     * Initializes a new PacketIO instance with the specified input and output streams.
+     * If the provided input or output stream is null, it defaults to a NullInputStream
+     * or NullOutputStream respectively.
+     *
+     * @param in the input stream from which packets will be read. If null, defaults to a NullInputStream.
+     * @param out the output stream to which packets will be written. If null, defaults to a NullOutputStream.
+     */
     @SuppressWarnings("resource")
     public PacketIO(InputStream in, OutputStream out) {
         if (in == null) in = new NullInputStream();
@@ -51,25 +62,36 @@ public class PacketIO {
     }
 
     /**
-     * Creates a new packet buffer from a list of partial packets.
+     * Initializes a new PacketIO instance with the specified input and output streams,
+     * and checks the integrity of the provided partial packets.
      *
-     * @param parts the partial packets
-     * @throws PacketIntegrityException if the packet integrity check fails
+     * @param in   the input stream from which packets will be read. If null, defaults to a NullInputStream.
+     * @param out  the output stream to which packets will be written. If null, defaults to a NullOutputStream.
+     * @param parts the list of partial packets to be validated for integrity.
+     * @throws PacketIntegrityException if the packet integrity check fails.
      */
+    @ApiStatus.Experimental
     public PacketIO(InputStream in, OutputStream out, List<PartialPacket> parts) throws PacketIntegrityException {
         this(in, out);
     }
 
+    /**
+     * Initializes a new PacketIO instance using the specified socket.
+     * The socket's input and output streams are used for reading and writing packets.
+     *
+     * @param socket the socket to be used for input and output streams.
+     * @throws IOException if an I/O error occurs when creating the input or output streams.
+     */
     public PacketIO(Socket socket) throws IOException {
         this(socket.getInputStream(), socket.getOutputStream());
     }
 
     /**
-     * Checks the integrity of the partial packets.
+     * Validates a list of partial packets to ensure their data offsets are in the correct sequence.
      *
-     * @param parts the partial packets
-     * @return the list of netty byte buffers
-     * @throws PacketIntegrityException if the packet integrity check fails
+     * @param parts a list of PartialPacket objects to be validated.
+     * @return a list of ByteBuf objects reassembled from the validated partial packets.
+     * @throws PacketIntegrityException if any partial packet has an incorrect data offset.
      */
     @ApiStatus.Internal
     public final List<ByteBuf> validate(List<PartialPacket> parts) throws PacketIntegrityException {

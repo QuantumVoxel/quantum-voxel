@@ -228,7 +228,7 @@ public class ServerWorld extends World {
         block.onPlace(this, blockVec);
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
-            for (CubicDirection direction : CubicDirection.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockVec offset = blockVec.offset(direction);
                 BlockState blockState = this.get(offset);
                 blockState.update(this, offset);
@@ -259,7 +259,7 @@ public class ServerWorld extends World {
         block.onPlace(this, blockVec);
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
-            for (CubicDirection direction : CubicDirection.values()) {
+            for (Direction direction : Direction.values()) {
                 BlockVec offset = blockVec.offset(direction);
                 BlockState blockState = this.get(offset);
                 blockState.update(this, offset);
@@ -1978,6 +1978,7 @@ public class ServerWorld extends World {
                 var parts = key.substring(1).split(";");
                 var chunkX = Integer.parseInt(parts[0]);
                 var chunkY = Integer.parseInt(parts[1]);
+
                 var chunkZ = Integer.parseInt(parts[2]);
 
                 // Validate chunk coordinates.
@@ -1993,6 +1994,7 @@ public class ServerWorld extends World {
                 ChunkVec globalVec = localChunkVec.worldSpace(new RegionVec(x, y, z));
                 var chunk = ServerChunk.load(world, globalVec, map, region);
                 chunkMap.put(globalVec, chunk);
+                chunk.ready = true;
             }
 
             synchronized (this) {

@@ -31,6 +31,6 @@ public class DoubleEntry extends ConfigEntry<Double> {
     @Override
     public Widget createWidget() {
         return new Slider(this.value.intValue(), (int) this.min, (int) this.max)
-                .callback(slider -> this.value = (double) slider.value().get());
+                .setCallback(slider -> this.value = (double) slider.value().get());
     }
 }

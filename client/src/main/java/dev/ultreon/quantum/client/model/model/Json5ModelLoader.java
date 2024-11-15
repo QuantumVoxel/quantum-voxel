@@ -36,7 +36,7 @@ import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -144,7 +144,7 @@ public class Json5ModelLoader {
         for (Json5Element elem : elements) {
             Json5Object element = elem.getAsJson5Object();
             Json5Object faces = element.getAsJson5Object("faces");
-            Map<CubicDirection, FaceElement> blockFaceFaceElementMap = loadFaces(faces, textureWidth, textureHeight);
+            Map<Direction, FaceElement> blockFaceFaceElementMap = loadFaces(faces, textureWidth, textureHeight);
 
             Json5Element shade1 = element.get("shade");
             boolean shade = shade1 != null && shade1.getAsBoolean();
@@ -166,10 +166,10 @@ public class Json5ModelLoader {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    private Map<CubicDirection, FaceElement> loadFaces(Json5Object faces, int textureWidth, int textureHeight) {
-        Map<CubicDirection, FaceElement> faceElems = new HashMap<>();
+    private Map<Direction, FaceElement> loadFaces(Json5Object faces, int textureWidth, int textureHeight) {
+        Map<Direction, FaceElement> faceElems = new HashMap<>();
         for (Map.Entry<String, Json5Element> face : faces.entrySet()) {
-            CubicDirection cubicDirection = CubicDirection.valueOf(face.getKey().toUpperCase(Locale.ROOT));
+            Direction direction = Direction.valueOf(face.getKey().toUpperCase(Locale.ROOT));
             Json5Object faceData = face.getValue().getAsJson5Object();
             Json5Array uvs = faceData.getAsJson5Array("uv");
             String texture = faceData.get("texture").getAsString();
@@ -180,7 +180,7 @@ public class Json5ModelLoader {
             Json5Element cullface = faceData.get("cullface");
             String cullFace = cullface == null ? null : cullface.getAsString();
 
-            faceElems.put(cubicDirection, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace));
+            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace));
         }
 
         return faceElems;
@@ -341,14 +341,14 @@ public class Json5ModelLoader {
     public static final class ModelElement {
             private static final Vector3 tmp = new Vector3();
             private static final Quaternion tmpQ = new Quaternion();
-        private final Map<CubicDirection, FaceElement> blockFaceFaceElementMap;
+        private final Map<Direction, FaceElement> blockFaceFaceElementMap;
         private final boolean shade;
         private final ElementRotation rotation;
         private final Vector3 from;
         private final Vector3 to;
 
 
-            public ModelElement(Map<CubicDirection, FaceElement> blockFaceFaceElementMap, boolean shade, ElementRotation rotation, Vector3 from, Vector3 to) {
+            public ModelElement(Map<Direction, FaceElement> blockFaceFaceElementMap, boolean shade, ElementRotation rotation, Vector3 from, Vector3 to) {
                 Preconditions.checkNotNull(blockFaceFaceElementMap);
                 Preconditions.checkNotNull(rotation);
                 Preconditions.checkNotNull(from);
@@ -372,8 +372,8 @@ public class Json5ModelLoader {
                 VertexInfo v01 = new VertexInfo();
                 VertexInfo v10 = new VertexInfo();
                 VertexInfo v11 = new VertexInfo();
-                for (Map.Entry<CubicDirection, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
-                    CubicDirection cubicDirection = entry.getKey();
+                for (Map.Entry<Direction, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
+                    Direction direction = entry.getKey();
                     FaceElement faceElement = entry.getValue();
                     String texRef = faceElement.texture;
                     NamespaceID texture;
@@ -388,17 +388,17 @@ public class Json5ModelLoader {
                     v10.setCol(Color.WHITE);
                     v11.setCol(Color.WHITE);
 
-                    v00.setNor(cubicDirection.getNormal());
-                    v01.setNor(cubicDirection.getNormal());
-                    v10.setNor(cubicDirection.getNormal());
-                    v11.setNor(cubicDirection.getNormal());
+                    v00.setNor(direction.getNormal());
+                    v01.setNor(direction.getNormal());
+                    v10.setNor(direction.getNormal());
+                    v11.setNor(direction.getNormal());
 
                     v00.setUV(faceElement.uvs.x1, faceElement.uvs.y2);
                     v01.setUV(faceElement.uvs.x1, faceElement.uvs.y1);
                     v10.setUV(faceElement.uvs.x2, faceElement.uvs.y2);
                     v11.setUV(faceElement.uvs.x2, faceElement.uvs.y1);
 
-                    switch (cubicDirection) {
+                    switch (direction) {
                         case UP:
                             v00.setPos(to.x, to.y, from.z);
                             v01.setPos(to.x, to.y, to.z);
@@ -444,7 +444,7 @@ public class Json5ModelLoader {
                     material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
                     material.set(new FloatAttribute(FloatAttribute.AlphaTest));
                     material.set(new DepthTestAttribute(GL20.GL_LEQUAL));
-                    nodeBuilder.part(idx + "." + cubicDirection.name(), meshBuilder.end(), GL20.GL_TRIANGLES, material);
+                    nodeBuilder.part(idx + "." + direction.name(), meshBuilder.end(), GL20.GL_TRIANGLES, material);
                 }
 
                 Model end = nodeBuilder.end();
@@ -463,7 +463,7 @@ public class Json5ModelLoader {
                 node.rotation.set(node.localTransform.getRotation(tmpQ));
             }
 
-        public Map<CubicDirection, FaceElement> blockFaceFaceElementMap() {
+        public Map<Direction, FaceElement> blockFaceFaceElementMap() {
             return blockFaceFaceElementMap;
         }
 

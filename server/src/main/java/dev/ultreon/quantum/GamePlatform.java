@@ -224,4 +224,24 @@ public abstract class GamePlatform {
      * @return true if the window has no background, false otherwise
      */
     public abstract boolean hasBackPanelRemoved();
+
+    public void setFullVibrancy(boolean value) {
+
+    }
+
+    public boolean getFullVibrancy() {
+        return false;
+    }
+
+    public boolean isVibrancySupported() {
+        return false;
+    }
+
+    public void setWindowVibrancy(boolean value) {
+
+    }
+
+    public boolean getWindowVibrancy() {
+        return false;
+    }
 }

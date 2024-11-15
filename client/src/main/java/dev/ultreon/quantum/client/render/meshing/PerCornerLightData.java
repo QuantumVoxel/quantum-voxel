@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.render.meshing;
 
 public class PerCornerLightData {
+    public static final PerCornerLightData EMPTY = new PerCornerLightData(0, 0, 0, 0, 1, 1, 1, 1);
     public float l00, l01, l10, l11;
     public float s00, s01, s10, s11;
 
@@ -46,7 +47,8 @@ public class PerCornerLightData {
         if(o == this)
             return true;
         if(o instanceof PerCornerLightData p) {
-            return p.l10 == this.l10 && p.l11 == this.l11 && p.l00 == this.l00 && p.l01 == this.l01;
+            return p.l10 == this.l10 && p.l11 == this.l11 && p.l00 == this.l00 && p.l01 == this.l01 &&
+                   p.s10 == this.s10 && p.s11 == this.s11 && p.s00 == this.s00 && p.s01 == this.s01;
         }
         return false;
     }

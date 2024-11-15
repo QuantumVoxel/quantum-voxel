@@ -257,10 +257,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.recipeManager.reload(context);
     }
 
-//    public static WatchManager getWatchManager() {
-//        return QuantumServer.WATCH_MANAGER;
-//    }
-
     public void load() throws IOException {
 
     }
@@ -778,6 +774,13 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     /**
+     * @return the overworld.
+     */
+    public ServerWorld getOverworld() {
+        return this.dimManager.getWorld(DimensionInfo.OVERWORLD);
+    }
+
+    /**
      * @return the server connections.
      */
     public Networker getNetworker() {
@@ -1018,5 +1021,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public void addGizmo(BoundingBox boundingBox, Color color) {
 
+    }
+
+    public Thread thread() {
+        return thread;
     }
 }

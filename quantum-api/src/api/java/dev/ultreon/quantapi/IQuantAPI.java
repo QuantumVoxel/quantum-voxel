@@ -4,7 +4,6 @@ import dev.ultreon.quantapi.networking.api.INetwork;
 import dev.ultreon.quantapi.networking.api.INetworkFactory;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
@@ -12,7 +11,7 @@ public interface IQuantAPI {
     static IQuantAPI get() {
         if (QuantAPIHolder.api != null) return QuantAPIHolder.api;
         ServiceLoader<IQuantAPI> serviceLoader = ServiceLoader.load(IQuantAPI.class);
-        List<ServiceLoader.Provider<IQuantAPI>> first = serviceLoader.stream().collect(Collectors.toList());
+        List<ServiceLoader.Provider<IQuantAPI>> first = serviceLoader.stream().toList();
 
         if (first.isEmpty())
             throw new IllegalStateException("No IQuantAPI implementation found!");

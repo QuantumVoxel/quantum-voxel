@@ -28,13 +28,17 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     int getSunlight(Vec3i pos);
 
+    int getSunlight(int x, int y, int z);
+
     int getBlockLight(Vec3i pos);
+
+    int getBlockLight(int x, int y, int z);
 
     Vector3 getRenderOffset();
 
     float getBrightness(int lightLevel);
 
-    ModelInstance addModel(BlockVec blockVec, ModelInstance modelInstance);
+    void addModel(BlockVec blockVec, ModelInstance modelInstance);
 
     boolean isLoaded();
 

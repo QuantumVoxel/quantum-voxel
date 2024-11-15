@@ -141,7 +141,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onBlockBreaking(BlockVec pos, C2SBlockBreakingPacket.BlockStatus status) {
-        this.server.submit(() -> {
+        this.server.submit((Runnable) () -> {
             ServerWorld world = this.player.getWorld();
             BlockState block = world.get(pos);
             float efficiency = 1.0F;

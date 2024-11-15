@@ -164,6 +164,8 @@ import static dev.ultreon.mixinprovider.PlatformOS.isMac;
 
 /**
  * This class is the main entry point for the Quantum Voxel Client.
+ * It is responsible for initializing and running the game.
+ * It also provides access to the game's main components and resources.
  *
  * @author <a href="https://github.com/Ultreon">Ultreon Team</a>
  * @see <a href="https://github.com/Ultreon/quantum-voxel">QuantumVoxel</a>
@@ -190,7 +192,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Maximum-scaled size before automatic resize.
     // This is used for the "Automatic" gui scale.
-    private static final int MINIMUM_WIDTH = 480;
+    private static final int MINIMUM_WIDTH = 550;
     private static final int MINIMUM_HEIGHT = 300;
 
     // Zero, what else could it be? :thinking:
@@ -776,7 +778,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
             // Set fps limit
             int fpsLimit = ClientConfig.fpsLimit;
-            if (fpsLimit >= 240) QuantumClient.setFpsLimit(240);
+            if (fpsLimit >= 240) QuantumClient.setFpsLimit(0);
             else QuantumClient.setFpsLimit(fpsLimit < 10 ? 60 : fpsLimit);
         });
     }
@@ -829,7 +831,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
         String[] icons = new String[sizes.length];
         for (int i = 0, sizesLength = sizes.length; i < sizesLength; i++) {
-            var size = sizes[i];
             if (isMac) {
                 icons[i] = "icons/mac.png";
             } else {
@@ -1920,9 +1921,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Resize the renderer
         this.renderer.resize(width, height);
 
+        this.autoScale = ClientConfig.guiScale == 0;
+
         // Auto-scale the GUI if enabled
         if (this.autoScale) {
             this.guiScale = this.calcMaxGuiScale();
+        } else {
+            this.guiScale = Math.clamp(ClientConfig.guiScale, 1, calcMaxGuiScale());
         }
 
         // Update the camera if present
@@ -2327,7 +2332,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return world.getBreakProgress(new BlockVec(breaking));
     }
 
-    private int calcMaxGuiScale() {
+    public int calcMaxGuiScale() {
         var windowWidth = Gdx.graphics.getWidth();
         var windowHeight = Gdx.graphics.getHeight();
 
@@ -2495,6 +2500,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             this.guiScale = this.calcMaxGuiScale();
             return;
         }
+
+        if (guiScale <= 0) throw new IllegalArgumentException("GUI scale must be greater than 0");
 
         // If autoScale is disabled, set the GUI scale to the provided scale value and resize the GUI
         this.guiScale = guiScale;
@@ -2796,5 +2803,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         LOGGER.info("Shutting down Quantum Client");
         Gdx.app.exit();
+    }
+
+    public CompletableFuture<Void> runAsyncTask(Runnable o) {
+        return CompletableFuture.runAsync(o, executor);
     }
 }

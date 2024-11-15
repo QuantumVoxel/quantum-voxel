@@ -9,16 +9,7 @@ import java.util.List;
  * Turns an array of voxels into OpenGL vertices
  */
 public interface Mesher {
-
-    /**
-     * Meshes the specified voxels.
-     *
-     * @param condition Condition to check if the block should be used in the mesh
-     * @return
-     */
-    List<GreedyMesher.Face> prepare(UseCondition condition);
-
-    void meshFaces(List<GreedyMesher.Face> faces, MeshPartBuilder builder);
+    void buildMesh(UseCondition condition, MeshPartBuilder builder);
 
     interface UseCondition {
         /**

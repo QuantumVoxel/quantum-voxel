@@ -42,9 +42,9 @@ public class ClientConfig extends CraftyConfig {
     @Ranged(min = 40, max = 120)
     public static int fov = 70;
 
-    @ConfigEntry(path = "video.guiScale", comment = "The scale of the GUI.")
-    @Ranged(min = 0, max = 4)
-    public static int guiScale = 2;
+    @ConfigEntry(path = "video.guiScale", comment = "The scale of the GUI, 0 for automatic scaling.")
+    @Ranged(min = 0, max = 6)
+    public static int guiScale = 0;
 
     @ConfigEntry(path = "video.fullscreen", comment = "Whether the game is fullscreen at startup.")
     public static boolean fullscreen = false;
@@ -91,6 +91,10 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "personalisation.backgroundTransparency", comment = "The transparency of in-game menu backgrounds.")
     @Ranged(min = 0, max = 1)
     public static float backgroundTransparency = 0.5F;
+
+    @Ranged(min = 0, max = 1)
+    @ConfigEntry(path = "personalisation.vignetteOpacity", comment = "The opacity of the game's vignette.")
+    public static float vignetteOpacity = 0.5F;
 
     @ConfigEntry(path = "crafting.showOnlyCraftable", comment = "Whether only craftable items are shown in the inventory.")
     @Ranged(min = 0, max = 1)
@@ -151,10 +155,12 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "personalisation.showMemoryUsage", comment = "Whether the memory usage is shown in the game's GUI / HUD.")
     public static boolean showMemoryUsage = GamePlatform.get().isDevEnvironment() && GamePlatform.get().isWindows();
 
-    @ConfigEntry(path = "accessibility.doublePressDelay", comment = "The delay between double presses or clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
+    @ConfigEntry(path = "accessibility.doublePressDelay", comment = "The delay between double key presses.\nNote that the value is in ticks (20 ticks = 1 second).")
+    @Ranged(min = 20, max = 60)
     public static int doublePressDelay = 30;
 
-    @ConfigEntry(path = "accessibility.doubleTapDelay", comment = "The delay between double presses or clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
+    @ConfigEntry(path = "accessibility.doubleTapDelay", comment = "The delay between double mouse button clicks.\nNote that the value is in ticks (20 ticks = 1 second).")
+    @Ranged(min = 20, max = 60)
     public static int doubleTapDelay = 40;
 
     @ConfigEntry(path = "accessibility.closePrompt", comment = "Shows a confirmation when closing the game.")

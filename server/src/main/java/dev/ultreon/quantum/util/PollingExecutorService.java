@@ -4,6 +4,7 @@ import com.google.common.collect.Queues;
 import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,6 +12,10 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+/**
+ * PollingExecutorService is an implementation of the ExecutorService that uses polling for task execution.
+ * Tasks are kept in a synchronized queue and processed by a dedicated thread.
+ */
 @SuppressWarnings("NewApi")
 public class PollingExecutorService implements ExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
@@ -22,10 +27,25 @@ public class PollingExecutorService implements ExecutorService {
     private Runnable active;
     public final Profiler profiler;
 
+    /**
+     * Internal constructor for creating an instance of PollingExecutorService using the current thread
+     * and a Profiler instance for monitoring the execution.
+     *
+     * @param profiler The Profiler instance for monitoring the execution.
+     */
+    @ApiStatus.Internal
     public PollingExecutorService(Profiler profiler) {
         this(Thread.currentThread(), profiler);
     }
 
+    /**
+     * Internal constructor for creating an instance of PollingExecutorService using a specified thread
+     * and a Profiler instance for monitoring the execution.
+     *
+     * @param thread The thread to be associated with the PollingExecutorService instance.
+     * @param profiler The Profiler instance for monitoring the execution.
+     */
+    @ApiStatus.Internal
     public PollingExecutorService(@NotNull Thread thread, Profiler profiler) {
         this.thread = thread;
         this.profiler = profiler;
@@ -260,6 +280,15 @@ public class PollingExecutorService implements ExecutorService {
         return Thread.currentThread().threadId() == this.thread.threadId();
     }
 
+    /**
+     * Polls the next task from the queue and runs it if available.
+     * If a task is polled, it will be executed, and any exceptions thrown during its execution
+     * will be logged using the LOGGER.
+     * <p>
+     * This method is intended for internal use only and is primarily utilized within the
+     * PollingExecutorService to process and execute tasks.
+     */
+    @ApiStatus.Internal
     public void poll() {
         this.profiler.section("pollTask", () -> {
             if ((this.active = this.tasks.poll()) != null) {
@@ -272,6 +301,16 @@ public class PollingExecutorService implements ExecutorService {
         });
     }
 
+    /**
+     * Polls and executes all tasks in the task queue.
+     * <p>
+     * This method continues to poll tasks from the queue and execute them
+     * until there are no more tasks left in the queue. For each task polled
+     * from the queue, it creates a profiling section named "pollTask" to monitor its execution.
+     * <p>
+     * If an exception occurs during the execution of a task, it is caught and logged
+     * using the LOGGER instance.
+     */
     public void pollAll() {
         while ((this.active = this.tasks.poll()) != null) {
             this.profiler.section("pollTask", () -> {
@@ -286,6 +325,14 @@ public class PollingExecutorService implements ExecutorService {
         }
     }
 
+    /**
+     * Returns the current size of the task queue.
+     * <p>
+     * This method returns the number of tasks currently in the task queue.
+     * It can be used to determine the number of tasks that are waiting to be executed.
+     *
+     * @return the current size of the task queue.
+     */
     public int getQueueSize() {
         return this.tasks.size();
     }

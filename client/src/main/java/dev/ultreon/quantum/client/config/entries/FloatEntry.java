@@ -31,7 +31,7 @@ public class FloatEntry extends ConfigEntry<Float> {
     @Override
     public Widget createWidget() {
         return new Slider(200, this.value.intValue(), (int) this.min, (int) this.max)
-                .callback((value) -> {
+                .setCallback((value) -> {
                     this.value = (float) value.value().get();
                     this.config.save();
                 });

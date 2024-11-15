@@ -18,13 +18,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.langgen.LangGenConfig;
 import dev.ultreon.langgen.LangGenListener;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import kotlin.OptIn;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +46,6 @@ import static io.github.libsdl4j.api.SdlSubSystemConst.*;
  * @since 0.1.0
  */
 @ApiStatus.Internal
-@OptIn(markerClass = InternalApi.class)
 public final class Main implements ApplicationListener {
     public static final Color SEMI_TRANSPARENT_WHITE = new Color(.5f, .5f, .5f, 1);
     private static Main instance;
@@ -82,40 +79,12 @@ public final class Main implements ApplicationListener {
         }
     }
 
-    static void displayCrash(ApplicationCrash crash) {
-        crashOverride = crash.getCrashLog();
-
-        while (ScissorStack.peekScissors() != null) ScissorStack.popScissors();
-
-        CommonConstants.LOGGER.error("\n" + crash);
-    }
-
+    @ApiStatus.Internal
     public static Main createInstance(String[] argv) {
         if (instance == null) {
             instance = new Main(argv);
         }
         return instance;
-    }
-
-    /**
-     * Handles uncaught exceptions.
-     * If the exception is an ApplicationCrash, delays the crash log processing using QuantumClient.
-     * Logs the exception otherwise.
-     *
-     * @param thread    The thread where the exception occurred
-     * @param throwable The uncaught exception
-     */
-    private void uncaughtException(Thread thread, Throwable throwable) {
-        if (throwable instanceof ApplicationCrash e) {
-            try {
-                CrashLog crashLog = e.getCrashLog();
-                QuantumClient.get().delayCrash(crashLog);
-                return;
-            } catch (Throwable t) {
-                CommonConstants.LOGGER.error("Failed to handle uncaught exception", t);
-            }
-        }
-        CommonConstants.LOGGER.error("Uncaught exception", throwable);
     }
 
     /**
@@ -126,6 +95,8 @@ public final class Main implements ApplicationListener {
         if (client != null) return;
 
         glProfiler = new GLProfiler(Gdx.graphics);
+        if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
+
         glProfiler.setListener(error -> {
             String stackTrace = ExceptionUtils.getStackTrace(new Exception());
             Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
@@ -186,7 +157,6 @@ public final class Main implements ApplicationListener {
     }
 
     private void createClient() {
-        // Initialize QuantumClient with given arguments
         this.sdl = SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_SENSOR);
         this.client = new QuantumClient(this.argv);
     }

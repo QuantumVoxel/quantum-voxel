@@ -102,8 +102,8 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         IConnection.LOGGER.info("{} joined the server.", name);
 
         BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> {
-            this.server.getWorld().getChunkAt(0, 0, 0);
-            return this.server.getWorld().getSpawnPoint();
+            this.server.getOverworld().getChunkAt(0, 0, 0);
+            return this.server.getOverworld().getSpawnPoint();
         });
 
         this.connection.send(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));

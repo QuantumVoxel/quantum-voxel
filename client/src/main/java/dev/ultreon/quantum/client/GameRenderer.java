@@ -33,6 +33,10 @@ import org.jetbrains.annotations.Nullable;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+/**
+ * The GameRenderer class is responsible for rendering the game world and overlays.
+ * It handles the rendering pipeline, update cycles, and camera adjustments.
+ */
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
     private final ModelBatch modelBatch;
@@ -46,6 +50,13 @@ public class GameRenderer implements Disposable {
     private int lastX;
     private int lastY;
 
+    /**
+     * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
+     *
+     * @param client the client instance to be used by the renderer
+     * @param modelBatch the batch used for rendering 3D models
+     * @param pipeline the rendering pipeline managing different render passes
+     */
     public GameRenderer(QuantumClient client, ModelBatch modelBatch, RenderPipeline pipeline) {
         this.client = client;
         this.modelBatch = modelBatch;
@@ -66,6 +77,12 @@ public class GameRenderer implements Disposable {
         this.pipeline.resize(width, height);
     }
 
+    /**
+     * Renders the game state including the world, overlays, and notifications.
+     *
+     * @param renderer The renderer used for rendering the game.
+     * @param deltaTime The time elapsed since the last frame.
+     */
     public void render(Renderer renderer, float deltaTime) {
         var world = this.client.world;
         var worldRenderer = this.client.worldRenderer;

@@ -28,14 +28,14 @@ public class ConfigsScreen extends Screen {
         this.list.addEntries(Config.getConfigs());
         this.add(this.list);
 
-        this.doneButton = TextButton.of(Translations.GUI_DONE).getCallback(button -> {
+        this.doneButton = TextButton.of(Translations.GUI_DONE).setCallback(button -> {
             this.list.save();
             assert this.client != null;
             this.client.showScreen(this.back);
         });
         this.add(this.doneButton);
 
-        cancelButton = TextButton.of(Translations.GUI_CANCEL).getCallback(button -> {
+        cancelButton = TextButton.of(Translations.GUI_CANCEL).setCallback(button -> {
             assert this.client != null;
             this.client.showScreen(this.back);
         });

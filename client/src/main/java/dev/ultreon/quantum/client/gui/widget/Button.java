@@ -132,7 +132,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     public abstract Button<T> bounds(Supplier<Bounds> position);
 
     @SuppressWarnings("unchecked")
-    public T getCallback(Callback<T> callback) {
+    public T setCallback(Callback<T> callback) {
         this.callback.set(callback);
         return (T) this;
     }

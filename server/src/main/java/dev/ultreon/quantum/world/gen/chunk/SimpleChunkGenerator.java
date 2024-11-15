@@ -36,13 +36,13 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
     }
 
     @Override
-    public void create(ServerWorld world, long seed) {
+    public void create(@NotNull ServerWorld world, long seed) {
         NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
         layerDomain = new DomainWarping(QuantumServer.get().disposeOnClose(noiseConfigs.layerX.create(seed)), QuantumServer.get().disposeOnClose(noiseConfigs.layerY.create(seed)));
     }
 
     @Override
-    public void generate(ServerWorld world, BuilderChunk chunk, Collection<ServerWorld.@NotNull RecordedChange> changes) {
+    public void generate(@NotNull ServerWorld world, BuilderChunk chunk, Collection<ServerWorld.@NotNull RecordedChange> changes) {
         Carver carver = getCarver();
 
         this.generateTerrain(chunk, carver);

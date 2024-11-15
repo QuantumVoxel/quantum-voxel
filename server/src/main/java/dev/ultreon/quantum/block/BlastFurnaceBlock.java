@@ -2,13 +2,12 @@ package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.entity.CrateBlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.block.state.BlockStateDefinition;
 import dev.ultreon.quantum.block.state.StateProperties;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
-import dev.ultreon.quantum.world.CubicDirection;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
@@ -25,7 +24,7 @@ public class BlastFurnaceBlock extends EntityBlock {
         super.defineState(definition);
 
         definition.set(StateProperties.LIT, false);
-        definition.set(StateProperties.FACING, CubicDirection.NORTH);
+        definition.set(StateProperties.FACING, Direction.NORTH);
     }
 
     @Override

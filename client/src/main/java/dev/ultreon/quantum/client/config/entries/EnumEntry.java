@@ -28,7 +28,7 @@ public class EnumEntry<T extends Enum<T>> extends ConfigEntry<T> {
                 .value(this.get())
                 .values(this.getDefaultValue().getDeclaringClass().getEnumConstants())
                 .formatter(value -> TextObject.literal(value.name()))
-                .getCallback(this::set);
+                .setCallback(this::set);
     }
 
     private void set(CycleButton<T> tCycleButton) {

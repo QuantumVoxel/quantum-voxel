@@ -85,7 +85,7 @@ public class TitleButton extends Button<TitleButton> {
     }
 
     @Override
-    public TitleButton getCallback(Callback<TitleButton> callback) {
+    public TitleButton setCallback(Callback<TitleButton> callback) {
         this.callback.set(callback);
         return this;
     }

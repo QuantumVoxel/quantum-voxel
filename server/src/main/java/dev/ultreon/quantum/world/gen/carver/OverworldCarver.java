@@ -54,21 +54,21 @@ public class OverworldCarver implements Carver {
         for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
             BlockVec vec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
             if (y <= groundPos) {
-                if (y <= World.SEA_LEVEL) {
-                    if (y < groundPos - 7) {
-                        boolean cave;
-                        double v1 = caveNoise.evaluateNoise(x, y, z);
-                        cave = v1 > 0.0;
-                        chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.getDefaultState() : stoneState);
-                    } else {
+//                if (y <= World.SEA_LEVEL) {
+//                    if (y < groundPos - 7) {
+//                        boolean cave;
+//                        double v1 = caveNoise.evaluateNoise(x, y, z);
+//                        cave = v1 > 0.0;
+//                        chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.getDefaultState() : stoneState);
+//                    } else {
                         chunk.set(vec.x, vec.y, vec.z, stoneState);
-                    }
-                } else {
-                    boolean cave;
-                    double v1 = caveNoise.evaluateNoise(x, y, z);
-                    cave = v1 > 0.0;
-                    chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.getDefaultState() : stoneState);
-                }
+//                    }
+//                } else {
+//                    boolean cave;
+//                    double v1 = caveNoise.evaluateNoise(x, y, z);
+//                    cave = v1 > 0.0;
+//                    chunk.set(vec.x, vec.y, vec.z, cave ? Blocks.CAVE_AIR.getDefaultState() : stoneState);
+//                }
             } else if (y <= World.SEA_LEVEL) {
                 chunk.set(vec.x, vec.y, vec.z, Blocks.WATER.getDefaultState());
             } else {

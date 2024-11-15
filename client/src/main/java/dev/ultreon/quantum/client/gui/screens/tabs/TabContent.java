@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.gui.screens.tabs;
 import dev.ultreon.quantum.client.gui.widget.ScrollableContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
 
 public class TabContent extends ScrollableContainer {
     private final TabbedUI parent;
@@ -11,7 +10,7 @@ public class TabContent extends ScrollableContainer {
 
     public TabContent(TabbedUI parent, int x, int y, int width, int height, TextObject title) {
         super(width, height);
-        this.backgroundColor(RgbColor.TRANSPARENT);
+        this.setBackgroundColor(0, 0, 0, 0);
         this.parent = parent;
         this.title = title;
     }

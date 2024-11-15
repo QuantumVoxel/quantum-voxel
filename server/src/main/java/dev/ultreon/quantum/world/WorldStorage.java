@@ -8,7 +8,6 @@ import dev.ultreon.ubo.DataIo;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
 import kotlin.io.FilesKt;
-import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +31,6 @@ public final class WorldStorage {
      *
      * @return the world directory.
      */
-    @Getter
     private final Path directory;
     private final Path infoFile;
     private boolean infoLoaded;
@@ -47,7 +45,7 @@ public final class WorldStorage {
      */
     public WorldStorage(Path path) {
         this.directory = path;
-        this.infoFile = this.directory.resolve("info.ubo");
+        this.infoFile = this.getDirectory().resolve("info.ubo");
     }
 
     /**
@@ -132,7 +130,7 @@ public final class WorldStorage {
         if (Paths.get(path).isAbsolute())
             throw new IllegalArgumentException("Path is absolute: " + path);
 
-        Path worldPath = this.directory.resolve(path).toAbsolutePath().normalize();
+        Path worldPath = this.getDirectory().resolve(path).toAbsolutePath().normalize();
 
         // Check if there are any links in the world directory by iterating through the world path.
         for (Path value : worldPath) {
@@ -164,7 +162,7 @@ public final class WorldStorage {
      * @return the region file.
      */
     public File regionFile(int x, int y, int z) {
-        return this.directory.resolve("regions/" + x + "." + y + "." + z + ".ubo").toFile();
+        return this.getDirectory().resolve("regions/" + x + "." + y + "." + z + ".ubo").toFile();
     }
 
     /**
@@ -175,9 +173,9 @@ public final class WorldStorage {
      */
     @CanIgnoreReturnValue
     public boolean delete() throws IOException {
-        if (Files.notExists(this.directory)) return false;
-        FilesKt.deleteRecursively(this.directory.toFile());
-        FileUtils.deleteDirectory(this.directory.toFile());
+        if (Files.notExists(this.getDirectory())) return false;
+        FilesKt.deleteRecursively(this.getDirectory().toFile());
+        FileUtils.deleteDirectory(this.getDirectory().toFile());
         return true;
     }
 
@@ -319,4 +317,8 @@ public final class WorldStorage {
         this.info = worldSaveInfo;
         worldSaveInfo.save(this);
     }
+
+	public Path getDirectory() {
+		return directory;
+	}
 }

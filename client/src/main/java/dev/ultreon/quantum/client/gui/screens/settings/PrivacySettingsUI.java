@@ -28,14 +28,14 @@ public class PrivacySettingsUI {
                 .value(ClientConfig.hideActiveServerFromRPC ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.hidden") : TextObject.translation("quantum.ui.visible"))
-                .getCallback(this::setHideActiveServer));
+                .setCallback(this::setHideActiveServer));
 
         builder.add(TextObject.translation("quantum.screen.options.privacy.hideRpc"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.hideRPC ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.hidden" : "quantum.ui.visible"))
-                .getCallback(this::setHideActivity)
+                .setCallback(this::setHideActivity)
         );
 
         builder.add(TextObject.translation("quantum.screen.options.privacy.hidePlayerName"), new CycleButton<BooleanEnum>()
@@ -43,14 +43,14 @@ public class PrivacySettingsUI {
                 .value(ClientConfig.hideUsername ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.hidden") : TextObject.translation("quantum.ui.visible"))
-                .getCallback(this::setHidePlayerNames));
+                .setCallback(this::setHidePlayerNames));
 
         builder.add(TextObject.translation("quantum.screen.options.privacy.hidePlayerSkin"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.hideSkin ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.hidden" : "quantum.ui.visible"))
-                .getCallback(this::setHidePlayerSkin));
+                .setCallback(this::setHidePlayerSkin));
     }
 
     private void setHideActiveServer(CycleButton<BooleanEnum> button) {

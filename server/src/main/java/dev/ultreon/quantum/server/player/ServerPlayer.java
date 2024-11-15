@@ -537,12 +537,12 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void handlePlayerMove(double x, double y, double z) {
         ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
-        ServerChunk chunk = this.world.getChunk(chunkVec);
+        ServerChunk chunk = this.world.getChunkNoLoad(chunkVec);
         if (chunk == null) {
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
-            QuantumServer.LOGGER.warn(String.format("Player moved into an inactive chunk: %s", this.getName()));
+            QuantumServer.LOGGER.warn(String.format("Player moved into an untracked chunk: %s", this.getName()));
             return;
         }
 
@@ -567,7 +567,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void handlePlayerMove(double x, double y, double z, float xHeadRot, float xRot, float yRot) {
         ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
-        ServerChunk chunk = this.world.getChunk(chunkVec);
+        ServerChunk chunk = this.world.getChunkNoLoad(chunkVec);
         if (chunk == null) {
             return;
         }

@@ -75,7 +75,7 @@ public class ModListScreen extends Screen {
 
         this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
                 .position(() -> new Position(5, this.size.height - 51))
-                .getCallback(button -> {
+                .setCallback(button -> {
                     Mod mod = this.list.getSelected();
                     if (mod != null) {
                         try {
@@ -97,31 +97,31 @@ public class ModListScreen extends Screen {
 
         this.sourcesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.sources"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .getCallback(this::onSources)
+                .setCallback(this::onSources)
                 .getType(Button.Type.DARK_EMBED));
         this.sourcesButton.isVisible = false;
 
         this.issuesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.issues"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .getCallback(this::onIssues)
+                .setCallback(this::onIssues)
                 .getType(Button.Type.DARK_EMBED));
         this.issuesButton.isVisible = false;
 
         this.discordInviteButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.discord"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .getCallback(this::onDiscordInvite)
+                .setCallback(this::onDiscordInvite)
                 .getType(Button.Type.DARK_EMBED));
         this.discordInviteButton.isVisible = false;
 
         this.homepageButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.homepage"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
-                .getCallback(this::onHomepage)
+                .setCallback(this::onHomepage)
                 .getType(Button.Type.DARK_EMBED));
         this.homepageButton.isVisible = false;
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190)
                 .position(() -> new Position(5, this.size.height - 26))
-                .getCallback(this::onBack)
+                .setCallback(this::onBack)
                 .getType(Button.Type.DARK_EMBED));
     }
 

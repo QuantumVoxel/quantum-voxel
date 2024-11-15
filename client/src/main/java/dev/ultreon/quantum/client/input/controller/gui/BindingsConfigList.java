@@ -45,7 +45,7 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
         config.save();
     }
 
-    protected static class ListEntry extends Entry<ListEntry> {
+    protected static class ListEntry extends SelectionList.Entry<ListEntry> {
         private static final Color COLOR = new Color(0xffffff40);
         private final BindingsConfigList list;
         final ConfigEntry<?> configEntry;
@@ -58,7 +58,7 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
             this.configEntry = configEntry;
             this.widget = configEntry.createButton(config, rowWidth - 160, 0, 150);
 
-            this.resetBtn = IconButton.of(GenericIcon.RESET).getCallback(button -> {
+            this.resetBtn = IconButton.of(GenericIcon.RESET).setCallback(button -> {
                 configEntry.reset();
                 widget = configEntry.createButton(config, list.getRowWidth() - 160, 0, 150);
             });

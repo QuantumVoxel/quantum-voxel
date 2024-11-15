@@ -25,7 +25,7 @@ public class SpaceGenerator extends SimpleChunkGenerator {
     }
 
     @Override
-    public void create(ServerWorld world, long seed) {
+    public void create(@NotNull ServerWorld world, long seed) {
         super.create(world, seed);
 
         carver = new FloatingIslandsCarver(seed);

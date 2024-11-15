@@ -49,7 +49,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     }
 
     @Override
-    public void create(ServerWorld world, long seed) {
+    public void create(@NotNull ServerWorld world, long seed) {
         NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
         noiseConfig = noiseConfigs.biomeMap;
         this.biomeDomain = new DomainWarping(noiseConfigs.biomeX.create(seed + 100), noiseConfigs.biomeY.create(seed + 110));
@@ -93,7 +93,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @return the biome generator index for the specified offset and height
      */
     public BiomeGenerator.Index findGenerator(Vec3i offset, int height) {
-        return this.findGenerator(offset, height, Modifications.INSTANCE.getEnableDomainWarping());
+        return this.findGenerator(offset, height, Modifications.enableDomainWarping);
     }
 
     /**

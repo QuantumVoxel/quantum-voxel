@@ -41,15 +41,15 @@ public class PauseScreen extends Screen {
 
         this.backToGameButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.backToGame"))
                         .bounds(() -> new Bounds(15, this.size.height - 100, 120, 21)))
-                .getCallback(this::resumeGame);
+                .setCallback(this::resumeGame);
 
         this.optionsButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.options"), 95)
                         .bounds(() -> new Bounds(15, this.size.height - 75, 120, 21)))
-                .getCallback(caller -> QuantumClient.get().showScreen(new SettingsScreen()));
+                .setCallback(caller -> QuantumClient.get().showScreen(new SettingsScreen()));
 
         this.exitWorldButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"), 95)
                         .bounds(() -> new Bounds(15, this.size.height - 36, 120, 21)))
-                .getCallback(this::exitWorld);
+                .setCallback(this::exitWorld);
     }
 
     @Override

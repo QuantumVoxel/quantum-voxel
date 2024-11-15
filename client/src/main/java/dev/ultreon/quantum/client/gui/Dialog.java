@@ -23,7 +23,7 @@ public class Dialog extends UIContainer<Dialog> {
     List<Button<?>> buttons = new ArrayList<>();
     private final TextButton closeButton = TextButton.of(TextObject.literal("x"))
             .position(() -> new Position(size.width - 21, 0))
-            .getCallback(caller -> close())
+            .setCallback(caller -> close())
             .getType(Button.Type.DARK_EMBED);
     private final Rectangle contentBounds = new Rectangle();
     private final Rectangle titleBounds = new Rectangle();

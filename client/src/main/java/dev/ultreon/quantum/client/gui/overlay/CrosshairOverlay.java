@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.gui.overlay;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.util.NamespaceID;
 
 /**
  * Crosshair overlay class for the Quantum Voxel.
@@ -10,6 +11,9 @@ import dev.ultreon.quantum.client.gui.Renderer;
  * @since 0.1.0
  */
 public class CrosshairOverlay extends Overlay {
+
+    public static final NamespaceID ICONS = QuantumClient.id("textures/gui/icons.png");
+
     /**
      * Draws the crosshair.
      * By default, the crosshair is drawn at the center of the screen.
@@ -23,7 +27,7 @@ public class CrosshairOverlay extends Overlay {
         renderer.invertOn();
 
         // Draw crosshair
-        renderer.blit(QuantumClient.id("textures/gui/icons.png"), width / 2f - 4.5f, height / 2f - 4.5f, 9, 9, 0, 0, 9, 9);
+        renderer.blit(ICONS, width / 2f - 4.5f, height / 2f - 4.5f, 9, 9, 0, 0, 9, 9);
 
         // Disable invert
         renderer.invertOff();

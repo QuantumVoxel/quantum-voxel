@@ -5,6 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FlushablePool;
 import dev.ultreon.quantum.debug.ValueTracker;
 
+/**
+ * RenderablePool is a custom implementation of a pool for managing Renderable objects.
+ * It extends FlushablePool to provide additional functionalities specific to the
+ * Renderable class, including tracking and resetting Renderable's state when obtained.
+ */
 public class RenderablePool extends FlushablePool<Renderable> {
     @Override
     protected Renderable newObject () {
@@ -25,6 +30,11 @@ public class RenderablePool extends FlushablePool<Renderable> {
         return renderable;
     }
 
+    /**
+     * Returns the count of Renderable objects currently obtained from the pool.
+     *
+     * @return the number of Renderable objects currently in use.
+     */
     public int getObtainedCount() {
         return this.obtained.size;
     }

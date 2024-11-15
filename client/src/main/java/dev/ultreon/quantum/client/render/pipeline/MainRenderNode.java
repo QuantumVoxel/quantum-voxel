@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -40,13 +38,11 @@ public class MainRenderNode extends RenderNode {
      * @param textures   The map containing textures.
      * @param modelBatch The ModelBatch used for rendering.
      * @param camera     The GameCamera representing the camera.
-     * @param input      The array of Renderables.
      * @param deltaTime  The time passed since the last frame.
-     * @return The array of Renderables after rendering.
      */
     @NewInstance
     @Override
-    public Array<Renderable> render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, Array<Renderable> input, float deltaTime) {
+    public void render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, float deltaTime) {
         // Extract textures
         if (vignetteTex == null) {
             vignetteTex = this.client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
@@ -101,15 +97,13 @@ public class MainRenderNode extends RenderNode {
 
         // Enable blending and set blend function
         this.client.renderer.getBatch().enableBlending();
-
-        return input;
     }
 
     private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex, Texture foregroundTex) {
         this.client.spriteBatch.enableBlending();
 
+        this.drawDiffuse(skyboxTex);
         if (this.client.viewMode == 0) {
-            this.drawDiffuse(skyboxTex);
             this.drawDiffuse(diffuseTex);
             this.drawDiffuse(foregroundTex);
 
@@ -122,7 +116,7 @@ public class MainRenderNode extends RenderNode {
                 }
             }
 
-            this.drawDiffuse(vignetteTex);
+            this.drawDiffuse(vignetteTex, ClientConfig.vignetteOpacity);
         } else if (this.client.viewMode == 1) {
             this.drawDiffuse(normalTex);
         } else if (this.client.viewMode == 2) {
@@ -143,7 +137,14 @@ public class MainRenderNode extends RenderNode {
 
     private void drawDiffuse(@NotNull Texture diffuseTexture) {
         this.client.spriteBatch.setShader(null);
-        if (diffuseTexture != null) this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    }
+
+    private void drawDiffuse(@NotNull Texture diffuseTexture, float opacity) {
+        this.client.spriteBatch.setShader(null);
+        this.client.spriteBatch.setColor(1, 1, 1, opacity);
+        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.client.spriteBatch.setColor(1, 1, 1, 1);
     }
 
     @Override

@@ -23,7 +23,7 @@ public class EnumEntry<T extends Enum<T>> extends ConfigEntry<T> {
 
     @Override
     public Widget createButton(Config options, int x, int y, int width) {
-        CycleButton<T> cycleButton = new CycleButton<T>().formatter(enumValue -> TextObject.nullToEmpty(enumValue.name())).values(clazz.getEnumConstants()).index(this.get().ordinal()).getCallback((cycler) -> {
+        CycleButton<T> cycleButton = new CycleButton<T>().formatter(enumValue -> TextObject.nullToEmpty(enumValue.name())).values(clazz.getEnumConstants()).index(this.get().ordinal()).setCallback((cycler) -> {
             T enumValue = cycler.getValue();
             cycler.text().set(TextObject.nullToEmpty(enumValue.name()));
         });

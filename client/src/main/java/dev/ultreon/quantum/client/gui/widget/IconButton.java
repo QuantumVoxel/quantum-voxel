@@ -54,7 +54,7 @@ public class IconButton extends Button<IconButton> {
     }
 
     @Override
-    public IconButton getCallback(Callback<IconButton> callback) {
+    public IconButton setCallback(Callback<IconButton> callback) {
         this.callback.set(callback);
         return this;
     }

@@ -2,10 +2,11 @@ package dev.ultreon.quantum.client.registry;
 
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.client.InternalApi;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.util.NamespaceID;
+
+import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class BlockEntityModelRegistry {
         REGISTRY.put(type, modelFactory);
     }
 
-    @InternalApi
+    @Internal
     public static void load(QuantumClient client) {
         for (var entry : REGISTRY.entrySet()) {
             BlockModel model = entry.getValue().apply(Objects.requireNonNull(entry.getKey().getId()).mapPath(path -> "blocks/" + path + ".g3dj"));
