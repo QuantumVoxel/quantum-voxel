@@ -99,13 +99,18 @@ public class Slider extends Widget {
     public boolean mousePress(int mouseX, int mouseY, int button) {
         int thumbX = this.pos.x + (this.size.width - 14) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 2;
 
-        if (Widget.isPosWithin(mouseX, mouseY, thumbX + 1, this.pos.y, 10, 19)) {
-            this.originalValue = this.value.get();
-            this.holdStart = mouseX;
-            this.isHolding = true;
+        if (mouseX < thumbX || mouseX > thumbX + 10) {
+            // Set the value to the mouse position
+            this.value.set((mouseX - this.pos.x - 2) * (this.value.max() - this.value.min()) / (this.size.width - 14) + this.value.min());
+            this.callback.call(this);
+            return true;
         }
 
-        return super.mousePress(mouseX, mouseY, button);
+        this.originalValue = this.value.get();
+        this.holdStart = mouseX;
+        this.isHolding = true;
+
+        return true;
     }
 
     @Override

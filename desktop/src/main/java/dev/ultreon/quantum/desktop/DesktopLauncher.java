@@ -1,19 +1,16 @@
 package dev.ultreon.quantum.desktop;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
-import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.Os;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
-import dev.ultreon.mixinprovider.PlatformOS;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
@@ -43,7 +40,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -134,6 +130,33 @@ public class DesktopLauncher {
             @Override
             public boolean hasBackPanelRemoved() {
                 return fullVibrancyEnabled && windowVibrancyEnabled && !useAngleGraphics;
+            }
+
+            @Override
+            public void setFullVibrancy(boolean value) {
+                LauncherConfig.get().enableFullVibrancy = value;
+                LauncherConfig.save();
+            }
+
+            @Override
+            public boolean getFullVibrancy() {
+                return fullVibrancyEnabled;
+            }
+
+            @Override
+            public boolean isVibrancySupported() {
+                return isWindows() && System.getProperty("os.version") != null && Integer.parseInt(System.getProperty("os.version").split("\\.")[0]) >= 10;
+            }
+
+            @Override
+            public void setWindowVibrancy(boolean value) {
+                LauncherConfig.get().windowVibrancyEnabled = value;
+                LauncherConfig.save();
+            }
+
+            @Override
+            public boolean getWindowVibrancy() {
+                return windowVibrancyEnabled;
             }
         };
 
