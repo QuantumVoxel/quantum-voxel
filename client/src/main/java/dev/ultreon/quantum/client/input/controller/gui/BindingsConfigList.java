@@ -58,7 +58,7 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
             this.configEntry = configEntry;
             this.widget = configEntry.createButton(config, rowWidth - 160, 0, 150);
 
-            this.resetBtn = IconButton.of(GenericIcon.RESET).callback(button -> {
+            this.resetBtn = IconButton.of(GenericIcon.RESET).setCallback(button -> {
                 configEntry.reset();
                 widget = configEntry.createButton(config, list.getRowWidth() - 160, 0, 150);
             });

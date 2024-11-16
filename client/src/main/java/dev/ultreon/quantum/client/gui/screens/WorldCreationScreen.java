@@ -53,15 +53,15 @@ public class WorldCreationScreen extends Screen {
                 .hint(TextObject.translation("quantum.screen.world_creation.name")));
 
         this.reloadButton = builder.add(IconButton.of(GenericIcon.RELOAD).position(() -> new Position(this.getWidth() / 2 + 105, this.getHeight() / 2 - 24))
-                .callback(this::regenerateName));
+                .setCallback(this::regenerateName));
 
         this.createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_creation.create"), 95)
                 .position(() -> new Position(this.getWidth() / 2 - 100, this.getHeight() / 2 + 5))
-                .callback(this::createWorld));
+                .setCallback(this::createWorld));
 
         builder.add(TextButton.of(UITranslations.CANCEL, 95)
                 .position(() -> new Position(this.getWidth() / 2 + 5, this.getHeight() / 2 + 5))
-                .callback(this::onBack));
+                .setCallback(this::onBack));
     }
 
     private void regenerateName(IconButton iconButton) {

@@ -482,6 +482,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @return the crash log
      */
     public CrashLog crash(Throwable t) {
+        LOGGER.error("Crash reported:", t);
+
         // Create crash log.
         CrashLog crashLog = new CrashLog("Server crashed! :(", t);
 

@@ -9,7 +9,7 @@ public class ControlButton extends IconButton {
         super(icon);
         setSize(14, 14);
 
-        this.type(Type.DARK_EMBED);
+        this.getType(Type.DARK_EMBED);
     }
 
     @Override

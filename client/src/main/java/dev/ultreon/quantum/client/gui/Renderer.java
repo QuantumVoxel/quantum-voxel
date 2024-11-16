@@ -3132,10 +3132,14 @@ public class Renderer implements Disposable {
     }
 
     public void drawItemStack(ItemStack item, int x, int y, Anchor anchor) {
+        if (item.isEmpty()) return;
         int mx = x + anchor.getX() * 8;
         int my = y + anchor.getY() * 8;
         this.client.itemRenderer.render(item.getItem(), this, mx, my);
-        this.textRight(Integer.toString(item.getCount(), isMathDay() ? 16 : 10), mx + 8, my + 8);
+
+        if (item.getCount() > 1) {
+            this.textRight(Integer.toString(item.getCount(), isMathDay() ? 16 : 10), mx + 16, my + 8);
+        }
     }
 
     private boolean isMathDay() {

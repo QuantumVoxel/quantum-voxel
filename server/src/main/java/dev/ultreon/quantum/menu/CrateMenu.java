@@ -9,6 +9,8 @@ import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class CrateMenu extends BlockContainerMenu {
@@ -23,7 +25,7 @@ public class CrateMenu extends BlockContainerMenu {
      * @param entity the entity that opened the menu.
      * @param pos    the position where the menu is opened.
      */
-    public CrateMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos) {
+    public CrateMenu(@NotNull MenuType<? extends CrateMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable BlockVec pos) {
         this(type, world, entity, CrateMenu.getBlockEntity(world, pos), pos);
     }
 
@@ -49,8 +51,8 @@ public class CrateMenu extends BlockContainerMenu {
      * @param entity the entity that opened the menu.
      * @param pos    the position where the menu is opened.
      */
-    public CrateMenu(@NotNull MenuType<?> type, @NotNull World world, @NotNull Entity entity, @Nullable CrateBlockEntity blockEntity, @Nullable BlockVec pos) {
-        super(type, world, entity, blockEntity, pos, 63);
+    public CrateMenu(@NotNull MenuType<? extends CrateMenu> type, @NotNull World world, @NotNull Entity entity, @Nullable CrateBlockEntity blockEntity, @Nullable BlockVec pos) {
+        super(type, world, entity, blockEntity, pos, 63, blockEntity);
 
         this.blockEntity = blockEntity;
 
@@ -66,6 +68,7 @@ public class CrateMenu extends BlockContainerMenu {
             }
         }
 
+        super.build();
 
         this.inventoryMenu(idx, 0, 89);
     }
@@ -92,5 +95,20 @@ public class CrateMenu extends BlockContainerMenu {
             if (slot == null) continue;
             slot.setItem(items.get(i), false);
         }
+    }
+
+    @Override
+    public List<ItemSlot> getInputs() {
+        return List.of();
+    }
+
+    @Override
+    public List<ItemSlot> getOutputs() {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return Arrays.stream(slots).map(ItemSlot::getItem).iterator();
     }
 }

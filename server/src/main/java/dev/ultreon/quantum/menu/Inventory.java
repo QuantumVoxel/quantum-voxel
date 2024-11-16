@@ -14,6 +14,8 @@ import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class Inventory extends ContainerMenu {
@@ -25,7 +27,7 @@ public class Inventory extends ContainerMenu {
     private final Player holder;
 
     public Inventory(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos) {
-        super(type, world, entity, pos, MAX_SLOTS);
+        super(type, world, entity, pos, MAX_SLOTS, null);
 
         if (!(entity instanceof Player player)) {
             throw new IllegalArgumentException("Entity must be a player!");
@@ -114,5 +116,20 @@ public class Inventory extends ContainerMenu {
 
     public Player getHolder() {
         return this.holder;
+    }
+
+    @Override
+    public List<ItemSlot> getInputs() {
+        return List.of(this.slots);
+    }
+
+    @Override
+    public List<ItemSlot> getOutputs() {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return Arrays.stream(this.slots).map(ItemSlot::getItem).iterator();
     }
 }

@@ -14,13 +14,14 @@ import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.c2s.C2SMenuTakeItemPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.RgbColor;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public abstract class ContainerScreen extends Screen {
+    @Getter
     private final int maxSlots;
     private final ContainerMenu menu;
     private final LocalPlayer player;
@@ -86,34 +87,6 @@ public abstract class ContainerScreen extends Screen {
         this.renderBackgroundImage(renderer);
     }
 
-    @SuppressWarnings("GDXJavaFlushInsideLoop")
-    protected void renderSlots(Renderer renderer, int mouseX, int mouseY) {
-        for (var slot : this.menu.slots) {
-            if (slot == null) {
-                continue;
-            }
-
-            this.renderSlot(renderer, mouseX, mouseY, slot);
-        }
-    }
-
-    protected void renderSlot(Renderer renderer, int mouseX, int mouseY, ItemSlot slot) {
-        var x = this.left() + slot.getSlotX();
-        var y = this.top() + slot.getSlotY();
-
-        ItemStack slotItem = slot.getItem();
-        this.client.itemRenderer.render(slotItem.getItem(), renderer, x, y, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
-
-        if (slot.isWithinBounds(mouseX - this.left(), mouseY - this.top())) {
-            renderer.fill(x, y, 16, 16, RgbColor.WHITE.withAlpha(0x60));
-        }
-
-        if (!slotItem.isEmpty() && slotItem.getCount() > 1) {
-            String text = Integer.toString(slotItem.getCount());
-            renderer.textLeft(text, x + 18 - renderer.textWidth(text), y + 17 - this.font.getLineHeight(), RgbColor.WHITE, false);
-        }
-    }
-
     protected void renderBackgroundImage(Renderer renderer) {
         renderer.blit(this.getBackground(), this.left(), this.top(), this.backgroundWidth(), this.backgroundHeight());
     }
@@ -122,7 +95,6 @@ public abstract class ContainerScreen extends Screen {
     public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
 
-        this.renderSlots(renderer, mouseX, mouseY);
         this.renderForeground(renderer, mouseX, mouseY, deltaTime);
     }
 
@@ -157,10 +129,6 @@ public abstract class ContainerScreen extends Screen {
         }
 
         return super.mouseClick(x, y, button, count);
-    }
-
-    public int getMaxSlots() {
-        return this.maxSlots;
     }
 
     public ItemSlot get(int index) {

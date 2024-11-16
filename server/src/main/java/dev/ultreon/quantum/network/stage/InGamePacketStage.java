@@ -53,6 +53,7 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CMenuCursorPacket::read);
         this.addClientBound(S2CBlockSetPacket::read);
         this.addClientBound(S2CBlockEntitySetPacket::read);
+        this.addClientBound(S2CBlockEntityUpdatePacket::read);
         this.addClientBound(S2COpenMenuPacket::read);
         this.addClientBound(S2CCloseMenuPacket::read);
         this.addClientBound(S2CChatPacket::read);

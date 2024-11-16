@@ -120,16 +120,6 @@ public class InventoryScreen extends ContainerScreen {
         renderer.blit(background, this.left() + this.backgroundWidth() + 1, this.getHeight() / 2f - 64, 104, 128, 0, 127);
     }
 
-    @SuppressWarnings("GDXJavaFlushInsideLoop")
-    @Override
-    protected void renderSlots(Renderer renderer, int mouseX, int mouseY) {
-        super.renderSlots(renderer, mouseX, mouseY);
-
-        for (ItemSlot slot : this.recipeSlots) {
-            this.renderSlot(renderer, mouseX, mouseY, slot);
-        }
-    }
-
     @Override
     public void renderForeground(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         super.renderForeground(renderer, mouseX, mouseY, deltaTime);

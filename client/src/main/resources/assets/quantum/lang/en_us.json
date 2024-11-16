@@ -177,6 +177,7 @@
 
   "quantum.container.inventory.title": "Inventory",
   "quantum.container.crate.title": "Crate",
+  "quantum.container.blast_furnace.title": "Blast Furnace",
 
   "quantum.recipe.craftable": "Craftable",
   "quantum.recipe.uncraftable": "Uncraftable",

@@ -30,66 +30,66 @@ public class PersonalSettingsUI {
                 .value(ClientConfig.diagonalFontShadow ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setDiagonalFontShadow));
+                .setCallback(this::setDiagonalFontShadow));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.enforceUnicode"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.enforceUnicode ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setEnforceUnicode));
+                .setCallback(this::setEnforceUnicode));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.blurRadius"), new Slider(ClientConfig.blurRadius == 0 ? 32 : (int) ClientConfig.blurRadius, 4, 128)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .text(TextObject.translation("quantum.screen.options.personalisation.blurRadius.text"))
-                .callback(this::setBlurRadius));
+                .setCallback(this::setBlurRadius));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.blurEnabled"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.blurEnabled ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setBlurEnabled));
+                .setCallback(this::setBlurEnabled));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.vignetteOpacity"), new Slider((int) (ClientConfig.vignetteOpacity * 100), 0, 100)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
                 .text(TextObject.translation("quantum.screen.options.personalisation.vignetteOpacity.text"))
-                .callback(this::setVignetteOpacity));
+                .setCallback(this::setVignetteOpacity));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.showMemoryUsage"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.showMemoryUsage ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setShowMemoryUsage));
+                .setCallback(this::setShowMemoryUsage));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.enableFpsCounter"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.enableFpsCounter ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 200, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .callback(this::setFpsCounter));
+                .setCallback(this::setFpsCounter));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.showOnlyCraftable"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.showOnlyCraftable ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 225, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .callback(this::setShowOnlyCraftable));
+                .setCallback(this::setShowOnlyCraftable));
 
         CycleButton<BooleanEnum> fullVibrancy = builder.add(TextObject.translation("quantum.screen.options.personalisation.fullVibrancy"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(GamePlatform.get().getFullVibrancy() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 250, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setFullVibrancy));
+                .setCallback(this::setFullVibrancy));
 
         CycleButton<BooleanEnum> windowVibrancy = builder.add(TextObject.translation("quantum.screen.options.personalisation.windowVibrancy"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(GamePlatform.get().getWindowVibrancy() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 275, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setWindowVibrancy));
+                .setCallback(this::setWindowVibrancy));
 
         if (!GamePlatform.get().isVibrancySupported()) {
             fullVibrancy.disable();

@@ -105,4 +105,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void handleTimeSync(S2CTimeSyncPacket s2CTimeSyncPacket, PacketContext ctx);
 
     void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet);
+
+    void onBlockEntityUpdate(BlockVec pos, MapType data);
 }

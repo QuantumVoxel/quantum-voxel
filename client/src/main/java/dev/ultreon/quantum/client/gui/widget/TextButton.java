@@ -82,7 +82,7 @@ public class TextButton extends Button<TextButton> {
     }
 
     @Override
-    public TextButton callback(Callback<TextButton> callback) {
+    public TextButton setCallback(Callback<TextButton> callback) {
         this.callback.set(callback);
         return this;
     }

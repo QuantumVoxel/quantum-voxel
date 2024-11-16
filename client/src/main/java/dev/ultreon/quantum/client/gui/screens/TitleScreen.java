@@ -42,33 +42,33 @@ public class TitleScreen extends Screen {
         this.singleplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.singleplayer"), 100)
                         .icon(QuantumClient.id("textures/gui/title/singleplayer.png"))
                 .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
-                .callback(this::openSingleplayer));
+                .setCallback(this::openSingleplayer));
 
         if (GamePlatform.get().isDevEnvironment()) {
             this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
                     .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 125))
-                    .callback(this::openTest));
+                    .setCallback(this::openTest));
         }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
                         .icon(QuantumClient.id("textures/gui/title/multiplayer.png"))
                 .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
-                .callback(this::openMultiplayer));
+                .setCallback(this::openMultiplayer));
 
         this.modListButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.mod_list"), 100)
                         .icon(QuantumClient.id("textures/gui/title/mods.png"))
                 .bounds(() -> new Bounds(this.size.width / 2 - 50, 2 * this.size.height / 3 - 100, 100, 150))
-                .callback(this::showModList));
+                .setCallback(this::showModList));
 
         this.optionsButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.options"), 100)
                         .icon(QuantumClient.id("textures/gui/title/options.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50, 2 * this.size.height / 3 - 100, 100, 150))
-                .callback(this::showOptions));
+                .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::showOptions));
 
         this.quitButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.quit"), 100)
                         .icon(QuantumClient.id("textures/gui/title/quit.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 + 5 + 50 + 10 + 100, 2 * this.size.height / 3 - 100, 100, 150))
-                .callback(this::quitGame));
+                .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50 + 10 + 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .setCallback(this::quitGame));
 
         if (GamePlatform.get().isMobile()) {
             this.quitButton.isEnabled = false;

@@ -1,18 +1,15 @@
 package dev.ultreon.quantum.world.container;
 
-import dev.ultreon.quantum.block.entity.CapabilityHolder;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.world.capability.CapabilityType;
+import dev.ultreon.quantum.menu.Menu;
 
-public interface Container<T extends ContainerMenu> extends CapabilityHolder {
+public interface Container<T extends ContainerMenu> extends Menu {
     T getMenu();
 
     void open(Player player);
 
-    void onGainedViewer(Player player, T menu);
+    void onGainedViewer(Player player);
 
-    void onLostViewer(Player player, T menu);
-
-    int getCapacity(CapabilityType<?, ?> capability);
+    void onLostViewer(Player player);
 }

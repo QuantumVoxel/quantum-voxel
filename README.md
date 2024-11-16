@@ -9,5 +9,5 @@ A voxel game that aims to do stuff differently.
 
 ## Making Mods
 See the [Quantum Voxel Example Mod](https://gitlab.com/ultreon/quantum/java-example-mod).
-> [!Note]
+> **Note**
 > Be aware that large refactors may occur due to the game still being in pre-alpha phase.

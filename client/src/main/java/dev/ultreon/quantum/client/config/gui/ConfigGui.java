@@ -10,21 +10,22 @@ import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ConfigGui extends Screen {
-    private final CraftyConfigGui back;
     private final CraftyConfig config;
     private final List<ConfigEntry<?>> entries;
     private final List<Widget> entryWidgets;
+
+    @Nullable
     private SelectionList<ConfigEntry<?>> list;
 
     public ConfigGui(CraftyConfigGui back, CraftyConfig config) {
         super(config.getFileName());
-        this.back = back;
         this.config = config;
 
         this.entries = createEntries();

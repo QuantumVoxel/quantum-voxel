@@ -120,7 +120,7 @@ public class Slider extends Widget {
         return super.mouseRelease(mouseX, mouseY, button);
     }
 
-    public Slider callback(Callback<Slider> callback) {
+    public Slider setCallback(Callback<Slider> callback) {
         this.callback.set(callback);
         return this;
     }

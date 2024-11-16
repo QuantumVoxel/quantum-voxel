@@ -3,6 +3,7 @@ package dev.ultreon.quantum.menu;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import dev.ultreon.quantum.block.entity.ContainerBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.MenuEvents;
@@ -15,6 +16,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.ApiStatus;
@@ -31,7 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see ItemStack
  * @see MenuType
  */
-public abstract class ContainerMenu {
+public abstract class ContainerMenu implements Menu {
     private final @NotNull MenuType<?> type;
     private final @NotNull WorldAccess world;
     private final @NotNull Entity entity;
@@ -42,6 +44,7 @@ public abstract class ContainerMenu {
 
     protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
+    private final Container<?> container;
 
     /**
      * Creates a new {@link ContainerMenu}
@@ -52,7 +55,8 @@ public abstract class ContainerMenu {
      * @param pos    the position where the menu is opened.
      * @param size   the number of slots.
      */
-    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size) {
+    protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
+        this.container = container;
         Preconditions.checkNotNull(type, "Menu type cannot be null!");
         Preconditions.checkNotNull(world, "World cannot be null!");
         Preconditions.checkNotNull(entity, "Entity cannot be null!");
@@ -89,7 +93,9 @@ public abstract class ContainerMenu {
     /**
      * Builds the menu and fills it with item slots.
      */
-    public abstract void build();
+    public void build() {
+
+    }
 
     public ItemSlot get(int index) {
         Preconditions.checkElementIndex(index, this.slots.length, "Slot index out of chance");
@@ -119,8 +125,8 @@ public abstract class ContainerMenu {
     }
 
     @CanIgnoreReturnValue
-    public ItemStack setItem(int index, ItemStack stack) {
-        return this.slots[index].setItem(stack, false);
+    public void setItem(int index, ItemStack stack) {
+        this.slots[index].setItem(stack, false);
     }
 
     public ItemStack getItem(int index) {
@@ -178,12 +184,12 @@ public abstract class ContainerMenu {
 
         if (rightClick) {
             // Right click transfer
-            if (player.getCursor().isEmpty()) {
+            if (slot.mayPickup(player) && player.getCursor().isEmpty()) {
                 // Split item from slot and put it in the cursor
                 ItemStack item = slot.split();
                 slot.update();
                 player.setCursor(item);
-            } else {
+            } else if (slot.mayPlace(player.getCursor().getItem())) {
                 // Transfer one item from cursor to slot
                 int i = player.getCursor().transferTo(slot.getItem(), 1);
                 if (i == 0) {
@@ -198,7 +204,7 @@ public abstract class ContainerMenu {
         ItemStack cursor = player.getCursor();
         ItemStack slotItem = slot.getItem();
 
-        if (!cursor.isEmpty() && cursor.sameItemSameData(slotItem)) {
+        if (slot.mayPlace(cursor.getItem()) && !cursor.isEmpty() && cursor.sameItemSameData(slotItem)) {
             // Take item from cursor and put it in the slot, remaining items are left in the cursor.
             cursor.transferTo(slotItem, cursor.getCount());
             slot.update();
@@ -206,11 +212,11 @@ public abstract class ContainerMenu {
             return;
         }
 
-        if (cursor.isEmpty()) {
+        if (slot.mayPickup(player) && cursor.isEmpty()) {
             // Take item from slot and put it in the cursor
             ItemStack toSet = slot.takeItem();
             player.setCursor(toSet);
-        } else {
+        } else if (slot.mayPickup(player)) {
             // Swap items between cursor and slot
             slot.setItem(cursor);
             player.setCursor(slotItem);
@@ -276,5 +282,9 @@ public abstract class ContainerMenu {
         }
 
         return idx;
+    }
+
+    public Container<?> getContainer() {
+        return container;
     }
 }

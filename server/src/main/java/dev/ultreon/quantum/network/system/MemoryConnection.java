@@ -67,6 +67,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
                     this.otherSide.receive(id, bos.toByteArray());
                 } catch (IOException e) {
+                    disconnect(e.getMessage());
+                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    disconnect(e.getClass().getName() + ":\n" + e.getMessage());
                     throw new RuntimeException(e);
                 }
                 tx.decrementAndGet();

@@ -1,10 +1,13 @@
 package dev.ultreon.quantum.recipe;
 
 import dev.ultreon.quantum.collection.OrderedMap;
+import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Inventory;
+import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.AbstractRegistryMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
+import dev.ultreon.quantum.world.container.Container;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -16,14 +19,7 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
     public static final String CATEGORY = "recipe";
     private final OrderedMap<NamespaceID, T> keyMap = new OrderedMap<>();
     private final OrderedMap<T, NamespaceID> valueMap = new OrderedMap<>();
-    private final Class<T> type;
     private boolean frozen = false;
-
-    @SafeVarargs
-    @SuppressWarnings("unchecked")
-    public RecipeRegistry(T... typeGetter) {
-        this.type = (Class<T>) typeGetter.getClass().getComponentType();
-    }
 
     @Override
     public T get(NamespaceID obj) {
@@ -53,7 +49,7 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
         return this.keyMap.entrySet();
     }
 
-    public PagedList<T> getRecipes(int pageSize, @Nullable Inventory inventory) {
+    public PagedList<T> getRecipes(int pageSize, @Nullable ContainerMenu inventory) {
         List<T> values = this.keyMap.valueList();
         if (inventory != null) {
             values = values.stream().filter(t -> t.canCraft(inventory)).collect(Collectors.toList());
@@ -77,7 +73,8 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
         this.frozen = true;
     }
 
-    public Class<T> getType() {
-        return type;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<T> findRecipe(Menu menu) {
+        return this.keyMap.values().stream().filter(t -> t.canCraft(menu)).toList();
     }
 }

@@ -27,7 +27,7 @@ public class ModImportFailedScreen extends Screen {
 
         builder.add(TextButton.of(UITranslations.OK, 100)
                 .position(() -> new Position(this.getWidth() / 2 - 50, this.getHeight() / 2 + 50))
-                .callback(this::onBack));
+                .setCallback(this::onBack));
     }
 
     private void onBack(TextButton caller) {

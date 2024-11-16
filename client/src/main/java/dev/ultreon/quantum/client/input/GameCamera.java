@@ -29,12 +29,6 @@ public class GameCamera extends PerspectiveCamera {
     private float fovModifierGoal = 1;
     private InspectionNode<GameCamera> node;
     private Vector3 hitPosition;
-    /**
-     * -- GETTER --
-     *
-     * @return the eye position in world-coordinates.
-     */
-    @Getter
     private Vec3d camPos;
     private BlockHit hitResult;
     private LocalPlayer player;

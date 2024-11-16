@@ -6,9 +6,11 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.CrateMenu;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class CrateScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
     private static final NamespaceID BACKGROUND = QuantumClient.id("textures/gui/container/crate.png");
@@ -37,10 +39,6 @@ public class CrateScreen extends ContainerScreen {
     @Override
     public void setup(List<ItemStack> items) {
         this.menu.setupClient(items);
-    }
-
-    public CrateMenu getMenu() {
-        return this.menu;
     }
 
     @Override

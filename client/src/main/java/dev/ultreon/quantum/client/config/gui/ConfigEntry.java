@@ -14,8 +14,6 @@ public abstract class ConfigEntry<T> {
     private final String key;
     private final T defaultValue;
     protected T value;
-    @Nullable
-    private String comment;
     protected final CraftyConfig config;
 
     protected ConfigEntry(String key, T value, CraftyConfig config) {
@@ -79,7 +77,6 @@ public abstract class ConfigEntry<T> {
 
     public ConfigEntry<T> comment(String comment) {
         Preconditions.checkNotNull(comment, "Cannot add null comment");
-        this.comment = comment;
         return this;
     }
 

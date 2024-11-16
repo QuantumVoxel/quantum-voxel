@@ -192,7 +192,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Maximum-scaled size before automatic resize.
     // This is used for the "Automatic" gui scale.
-    private static final int MINIMUM_WIDTH = 480;
+    private static final int MINIMUM_WIDTH = 550;
     private static final int MINIMUM_HEIGHT = 300;
 
     // Zero, what else could it be? :thinking:
@@ -669,9 +669,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Set current language
         LanguageManager.setCurrentLanguage(Locale.of("en", "us"));
-
-        // Start memory monitor
-        HardwareMonitor.start();
 
         this.closeButton = new ControlButton(ControlIcon.Close);
         this.maximizeButton = new ControlButton(ControlIcon.Maximize);
@@ -1924,9 +1921,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Resize the renderer
         this.renderer.resize(width, height);
 
+        this.autoScale = ClientConfig.guiScale == 0;
+
         // Auto-scale the GUI if enabled
         if (this.autoScale) {
             this.guiScale = this.calcMaxGuiScale();
+        } else {
+            this.guiScale = Math.clamp(ClientConfig.guiScale, 1, calcMaxGuiScale());
         }
 
         // Update the camera if present
@@ -2331,7 +2332,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return world.getBreakProgress(new BlockVec(breaking));
     }
 
-    private int calcMaxGuiScale() {
+    public int calcMaxGuiScale() {
         var windowWidth = Gdx.graphics.getWidth();
         var windowHeight = Gdx.graphics.getHeight();
 
@@ -2499,6 +2500,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             this.guiScale = this.calcMaxGuiScale();
             return;
         }
+
+        if (guiScale <= 0) throw new IllegalArgumentException("GUI scale must be greater than 0");
 
         // If autoScale is disabled, set the GUI scale to the provided scale value and resize the GUI
         this.guiScale = guiScale;

@@ -3,6 +3,7 @@ package dev.ultreon.quantum.recipe;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.container.Container;
 
 import java.util.Objects;
 
@@ -11,10 +12,15 @@ import java.util.Objects;
  */
 public final class RecipeType<T extends Recipe> {
     public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<>(CraftingRecipe::deserialize));
+    public static final RecipeType<BlastingRecipe> BLASTING = RecipeType.register("blasting", new RecipeType<>(BlastingRecipe::deserialize)); // TODO: Add blasting
     private final RecipeDeserializer<T> deserializer;
 
     public RecipeType(RecipeDeserializer<T> deserializer) {
         this.deserializer = deserializer;
+    }
+
+    public static void nopInit() {
+
     }
 
     /**
@@ -67,7 +73,7 @@ public final class RecipeType<T extends Recipe> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (RecipeType) obj;
+        var that = (RecipeType<?>) obj;
         return Objects.equals(this.deserializer, that.deserializer);
     }
 
@@ -80,6 +86,13 @@ public final class RecipeType<T extends Recipe> {
     public String toString() {
         return "RecipeType[" +
                "deserializer=" + deserializer + ']';
+    }
+
+    public <C extends Container<?>> T find(C container) {
+        for (T recipe : RecipeManager.get().findRecipe(this, container)) {
+            return recipe;
+        }
+        return null;
     }
 
 

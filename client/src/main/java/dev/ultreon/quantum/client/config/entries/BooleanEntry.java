@@ -23,7 +23,7 @@ public class BooleanEntry extends ConfigEntry<Boolean> {
                 .values(Boolean.FALSE, Boolean.TRUE)
                 .value(this.value)
                 .formatter(value -> TextObject.nullToEmpty(value ? "on" : "off"))
-                .callback((value) -> {
+                .setCallback((value) -> {
                     this.set(value.getValue());
                 });
     }

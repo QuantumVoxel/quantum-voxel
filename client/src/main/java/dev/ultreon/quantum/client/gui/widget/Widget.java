@@ -10,6 +10,8 @@ import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
 import dev.ultreon.quantum.component.GameComponent;
 import dev.ultreon.quantum.component.GameComponentHolder;
 import dev.ultreon.quantum.util.NamespaceID;
+import lombok.Getter;
+import lombok.Setter;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -25,9 +27,13 @@ import java.util.function.Supplier;
  * Widget instances manage their bounds, components and handle various user interactions.
  */
 @SuppressWarnings("unchecked")
+@Getter
+@Setter
 public abstract class Widget implements StaticWidget, GameComponentHolder<UIComponent> {
     protected boolean ignoreBounds = false;
+    @Getter
     private final Position preferredPos = new Position(0, 0);
+    @Getter
     private final Size preferredSize = new Size(0, 0);
     public boolean isVisible = true;
     public boolean isEnabled = true;
@@ -36,8 +42,11 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
 
     @ApiStatus.Internal
     protected Screen root;
+    @Getter
     protected final Bounds bounds = new Bounds();
+    @Getter
     protected final Position pos = bounds.pos;
+    @Getter
     protected final Size size = bounds.size;
 
     UIContainer<?> parent = UIContainer.ROOT;
@@ -173,43 +182,35 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
         return this.size.height;
     }
 
-    @CanIgnoreReturnValue
     public void setPos(int x, int y) {
         this.pos.x = x;
         this.pos.y = y;
     }
 
-    @CanIgnoreReturnValue
     public void setPos(Position pos) {
         this.pos.set(pos);
     }
 
-    @CanIgnoreReturnValue
     public void setSize(int width, int height) {
         this.size.set(width, height);
     }
 
-    @CanIgnoreReturnValue
     public void setSize(Size size) {
         this.size.set(size);
     }
 
-    @CanIgnoreReturnValue
     public void setX(int x) {
         this.pos.x = x;
     }
 
-    @CanIgnoreReturnValue
     public void setY(int y) {
         this.pos.y = y;
     }
 
-    @CanIgnoreReturnValue
     public void width(int width) {
         this.size.width = width;
     }
 
-    @CanIgnoreReturnValue
     public void height(int height) {
         this.size.height = height;
     }
@@ -218,7 +219,6 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
         this.bounds.set(x, y, width, height);
     }
 
-    @CanIgnoreReturnValue
     public void setVisible(boolean visible) {
         this.isVisible = visible;
     }
@@ -264,18 +264,6 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
      */
     public Path path() {
         return this.parent.path().resolve(String.format("%s[%d]", this.getName(), this.createTime));
-    }
-
-    public Bounds getBounds() {
-        return bounds;
-    }
-
-    public Position getPreferredPos() {
-        return this.preferredPos;
-    }
-
-    public Size getPreferredSize() {
-        return this.preferredSize;
     }
 
     public final boolean isWithinBounds(int x, int y) {

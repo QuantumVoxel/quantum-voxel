@@ -38,11 +38,11 @@ public class WorldDeleteConfirmScreen extends Screen {
 
         builder.add(TextButton.of(UITranslations.PROCEED, 95)
                 .position(() -> new Position(this.getWidth() / 2 - 100, this.getHeight() / 2 + 50))
-                .callback(this::deleteWorld));
+                .setCallback(this::deleteWorld));
 
         builder.add(TextButton.of(UITranslations.CANCEL, 95)
                 .position(() -> new Position(this.getWidth() / 2 + 5, this.getHeight() / 2 + 50))
-                .callback(this::onBack));
+                .setCallback(this::onBack));
     }
 
     private void deleteWorld(TextButton caller) {

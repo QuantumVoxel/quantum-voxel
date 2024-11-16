@@ -4,7 +4,9 @@ public enum Scale {
     AUTO(0),
     SMALL(1),
     MEDIUM(2),
-    LARGE(3);
+    LARGE(3),
+    EXTRA_LARGE(4),
+    HUGE(5);
 
     private final int value;
 

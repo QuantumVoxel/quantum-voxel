@@ -156,6 +156,11 @@ public class IntegratedServer extends QuantumServer {
         return ClientConfig.renderDistance / CHUNK_SIZE;
     }
 
+    @Override
+    public int getEntityRenderDistance() {
+        return ClientConfig.entityRenderDistance / CHUNK_SIZE;
+    }
+
     /**
      * Places the player on the server.
      * <p>Called when the player joins the server.</p>

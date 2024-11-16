@@ -18,18 +18,15 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 @ConfigInfo(fileName = "quantum-client")
 public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "video.renderDistance", comment = "The render distance of blocks in the game.")
-    @Ranged(min = CHUNK_SIZE * 2, max = 256)
+    @Ranged(min = CHUNK_SIZE * 4, max = 256)
     public static int renderDistance = 128;
 
     @ConfigEntry(path = "video.entityRenderDistance", comment = "The render distance of entities.")
     @Ranged(min = 4, max = 32)
-    public static int entityRenderDistance = 8;
+    public static int entityRenderDistance = 128;
 
     @ConfigEntry(path = "video.fog", comment = "Whether fog is enabled.")
     public static boolean fog = true;
-
-    @ConfigEntry(path = "video.ambientOcclusion", comment = "Whether ambient occlusion is enabled.")
-    public static boolean ambientOcclusion = true;
 
     @ConfigEntry(path = "video.enableVsync", comment = "Whether vsync is enabled.\nVsync is when the game updates at the same speed as the monitor updates.")
     public static boolean enableVsync = true;
@@ -42,18 +39,15 @@ public class ClientConfig extends CraftyConfig {
     @Ranged(min = 40, max = 120)
     public static int fov = 70;
 
-    @ConfigEntry(path = "video.guiScale", comment = "The scale of the GUI.")
-    @Ranged(min = 0, max = 4)
-    public static int guiScale = 2;
+    @ConfigEntry(path = "video.guiScale", comment = "The scale of the GUI, 0 for automatic scaling.")
+    @Ranged(min = 0, max = 6)
+    public static int guiScale = 0;
 
     @ConfigEntry(path = "video.fullscreen", comment = "Whether the game is fullscreen at startup.")
     public static boolean fullscreen = false;
 
     @ConfigEntry(path = "video.enableFpsCounter", comment = "Whether the FPS counter is enabled in the HUD.")
     public static boolean enableFpsCounter = false;
-
-    @ConfigEntry(path = "video.maxReflectDistance", comment = "Maximum distance for reflections (for example in water).")
-    public static float maxReflectDistance = 80;
 
     @ConfigEntry(path = "video.lodThreshold", comment = "The LOD threshold (distance at which chunks are rendered at different levels of detail).")
     @Ranged(min = 0, max = 128)
@@ -64,9 +58,6 @@ public class ClientConfig extends CraftyConfig {
 
     @ConfigEntry(path = "generic.enableDebugUtils", comment = "Whether debug utils are enabled.")
     public static boolean enableDebugUtils = GamePlatform.get().isDevEnvironment();
-
-    @ConfigEntry(path = "generic.enableDebugOverlay", comment = "Whether debug overlays are enabled.")
-    public static boolean enableDebugOverlay = false;
 
     @ConfigEntry(path = "generic.language", comment = "The language of the game. Use the ISO 639-1 code.")
     public static NamespaceID language = new NamespaceID("en_us");
@@ -80,17 +71,6 @@ public class ClientConfig extends CraftyConfig {
     @ConfigEntry(path = "personalisation.blurRadius", comment = "The radius of the blur effect in the background of the GUI.")
     @Ranged(min = 0, max = 120)
     public static float blurRadius = 16.0F;
-
-    @ConfigEntry(path = "personalisation.hexagonTransparency", comment = "The transparency of the hexagon effect in the background of the GUI.")
-    @Ranged(min = 0, max = 1)
-    public static float hexagonTransparency = 0.5F;
-
-    @ConfigEntry(path = "personalisation.hexagonColor", comment = "The hex color code of the hexagon effect in the background of the GUI.")
-    public static String hexagonColor = "#FFFFFF";
-
-    @ConfigEntry(path = "personalisation.backgroundTransparency", comment = "The transparency of in-game menu backgrounds.")
-    @Ranged(min = 0, max = 1)
-    public static float backgroundTransparency = 0.5F;
 
     @Ranged(min = 0, max = 1)
     @ConfigEntry(path = "personalisation.vignetteOpacity", comment = "The opacity of the game's vignette.")

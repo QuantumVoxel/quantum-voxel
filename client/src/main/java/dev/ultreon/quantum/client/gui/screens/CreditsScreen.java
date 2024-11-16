@@ -62,7 +62,8 @@ public class CreditsScreen extends TabbedUI {
 
             add(Label.of(name).bounds(() -> new Bounds(0, 10, 100, 20))).width(100);
 
-            if (assetInfo.has("url") && assetInfo.get("url").isJson5Primitive() && assetInfo.get("url").getAsJson5Primitive().isString()) add(TextButton.of("Open page", 80, 21).callback(btn -> {
+            if (assetInfo.has("url") && assetInfo.get("url").isJson5Primitive() && assetInfo.get("url").getAsJson5Primitive().isString())
+                add(TextButton.of("Open page", 80, 21).setCallback(btn -> {
                 if (assetInfo.has("url") && assetInfo.get("url").isJson5Primitive() && assetInfo.get("url").getAsJson5Primitive().isString()) {
                     String url = assetInfo.get("url").getAsString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal(name + "'s website:")).message(TextObject.literal(url)).button(TextObject.literal("Ok"), () -> CreditsScreen.this.getDialog().close()).button(TextObject.literal("Open in browser"), () -> {
@@ -89,7 +90,7 @@ public class CreditsScreen extends TabbedUI {
                     }));
                 }
             }));
-            if (assetInfo.has("roles")) add(TextButton.of("View roles", 80, 21).callback(btn -> {
+            if (assetInfo.has("roles")) add(TextButton.of("View roles", 80, 21).setCallback(btn -> {
                 if (assetInfo.has("roles") && assetInfo.get("roles").isJson5Array()) {
                     Json5Array roles = assetInfo.getAsJson5Array("roles");
                     StringBuilder sb = new StringBuilder();
@@ -102,7 +103,7 @@ public class CreditsScreen extends TabbedUI {
                     CreditsScreen.this.getDialog().height(200);
                 }
             }));
-            if (assetInfo.has("for")) add(TextButton.of("Has made", 80, 21).callback(btn -> {
+            if (assetInfo.has("for")) add(TextButton.of("Has made", 80, 21).setCallback(btn -> {
                 if (assetInfo.has("for") && assetInfo.get("for").isJson5Array()) {
                     Json5Array for_ = assetInfo.getAsJson5Array("for");
                     StringBuilder sb = new StringBuilder();
@@ -115,7 +116,7 @@ public class CreditsScreen extends TabbedUI {
                     CreditsScreen.this.getDialog().height(200);
                 }
             }));
-            if (assetInfo.has("description")) add(TextButton.of("View description", 80, 21).callback(btn -> {
+            if (assetInfo.has("description")) add(TextButton.of("View description", 80, 21).setCallback(btn -> {
                 if (assetInfo.has("description") && assetInfo.get("description").isJson5Primitive() && assetInfo.get("description").getAsJson5Primitive().isString()) {
                     String description = assetInfo.get("description").getAsString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("Description of " + name + ":")).message(TextObject.literal(description)));
@@ -123,14 +124,14 @@ public class CreditsScreen extends TabbedUI {
                 }
             }));
 
-            if (assetInfo.has("license")) add(TextButton.of("View license", 80, 21).callback(btn -> {
+            if (assetInfo.has("license")) add(TextButton.of("View license", 80, 21).setCallback(btn -> {
                 if (assetInfo.has("license") && assetInfo.get("license").isJson5Primitive() && assetInfo.get("license").getAsJson5Primitive().isString()) {
                     String license = assetInfo.get("license").getAsString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("License of " + name + ":")).message(TextObject.literal(license)));
                 }
             }));
 
-            if (assetInfo.has("links")) add(TextButton.of("View links", 80, 21).callback(btn -> {
+            if (assetInfo.has("links")) add(TextButton.of("View links", 80, 21).setCallback(btn -> {
                 if (assetInfo.has("links") && assetInfo.get("links").isJson5Array()) {
                     Json5Array links = assetInfo.getAsJson5Array("links");
                     StringBuilder sb = new StringBuilder();

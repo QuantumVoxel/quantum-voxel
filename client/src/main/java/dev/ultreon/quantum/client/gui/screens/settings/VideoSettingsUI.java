@@ -32,26 +32,26 @@ public class VideoSettingsUI {
         builder.add(TextObject.translation("quantum.screen.options.video.fov"), Slider.of(200, 30, 160)
                 .value(ClientConfig.fov)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
-                .callback(this::setFov));
+                .setCallback(this::setFov));
 
         builder.add(TextObject.translation("quantum.screen.options.video.renderDistance"), Slider.of(200, CHUNK_SIZE, 256)
                 .value(ClientConfig.renderDistance)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
-                .callback(this::setRenderDistance));
+                .setCallback(this::setRenderDistance));
 
         builder.add(TextObject.translation("quantum.screen.options.video.vSync"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.enableVsync ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .callback(this::setVsync));
+                .setCallback(this::setVsync));
 
         builder.add(TextObject.translation("quantum.screen.options.video.fullscreen"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfig.fullscreen ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .callback(this::setFullscreen));
+                .setCallback(this::setFullscreen));
 
         builder.add(TextObject.translation("quantum.screen.options.video.guiScale"), new CycleButton<Scale>()
                 .values(Scale.values())
@@ -63,12 +63,12 @@ public class VideoSettingsUI {
                     }
                     return TextObject.literal(scale.get() + "x");
                 })
-                .callback(this::setScale));
+                .setCallback(this::setScale));
 
         builder.add(TextObject.translation("quantum.screen.options.video.frameRate"), Slider.of(200, 10, 240)
                 .value(ClientConfig.fpsLimit)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
-                .callback(this::setFrameRate));
+                .setCallback(this::setFrameRate));
     }
 
     private void setFpsCounter(CycleButton<BooleanEnum> cycleButton) {
@@ -89,7 +89,7 @@ public class VideoSettingsUI {
     private void setScale(CycleButton<Scale> caller) {
         int value = caller.getValue().get();
         this.client.setAutomaticScale(caller.getValue() == Scale.AUTO);
-        this.client.setGuiScale(value);
+        this.client.setGuiScale(value == 0 ? this.client.calcMaxGuiScale() : value);
         ClientConfig.guiScale = value;
         this.client.newConfig.save();
     }
