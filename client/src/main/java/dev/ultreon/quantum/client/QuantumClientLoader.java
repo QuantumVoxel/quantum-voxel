@@ -18,6 +18,7 @@ import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.debug.*;
 import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
+import dev.ultreon.quantum.client.gui.screens.container.AdvancedCraftingScreen;
 import dev.ultreon.quantum.client.gui.screens.container.BlastFurnaceScreen;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
@@ -310,6 +311,7 @@ class QuantumClientLoader implements Runnable {
 
     private void registerMenuScreens() {
         MenuRegistry.registerScreen(MenuTypes.INVENTORY, InventoryScreen::new);
+        MenuRegistry.registerScreen(MenuTypes.ADVANCED_CRAFTING, AdvancedCraftingScreen::new);
         MenuRegistry.registerScreen(MenuTypes.CRATE, CrateScreen::new);
         MenuRegistry.registerScreen(MenuTypes.BLAST_FURNACE, BlastFurnaceScreen::new);
     }

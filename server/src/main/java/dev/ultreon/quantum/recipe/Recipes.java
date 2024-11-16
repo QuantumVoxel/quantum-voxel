@@ -10,14 +10,24 @@ import java.util.List;
 public class Recipes {
     public static void init() {
         RecipeManager recipes = RecipeManager.get();
-        Recipes.registerCraftingRecipes(recipes);
+        Recipes.registerRecipes(recipes);
 
         LoadingEvent.LOAD_RECIPES.factory().onRecipeState(recipes);
 
         recipes.fireRecipeModifications();
     }
 
-    private static void registerCraftingRecipes(RecipeManager recipes) {
+    private static void registerRecipes(RecipeManager recipes) {
+        crafting(recipes);
+        advancedCrafting(recipes);
+        blasting(recipes);
+    }
+
+    private static void advancedCrafting(RecipeManager recipes) {
+
+    }
+
+    private static void crafting(RecipeManager recipes) {
         recipes.register(new NamespaceID("log_to_planks"), new CraftingRecipe(
                 List.of(new ItemStack(Items.LOG)),
                 new ItemStack(Items.PLANK, 3)));
@@ -65,7 +75,9 @@ public class Recipes {
         recipes.register(new NamespaceID("stone_axe"), new CraftingRecipe(
                 List.of(new ItemStack(Items.ROCK, 2), new ItemStack(Items.STICK, 1)),
                 new ItemStack(Items.STONE_AXE)));
+    }
 
+    private static void blasting(RecipeManager recipes) {
         recipes.register(new NamespaceID("smelt_iron"), new BlastingRecipe(
                 new ItemStack(Items.RAW_IRON, 1),
                 1000,

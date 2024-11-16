@@ -10,10 +10,7 @@ import dev.ultreon.quantum.entity.LivingEntity;
 import dev.ultreon.quantum.events.ItemEvents;
 import dev.ultreon.quantum.events.MenuEvents;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.menu.CrateMenu;
-import dev.ultreon.quantum.menu.Inventory;
-import dev.ultreon.quantum.menu.MenuTypes;
+import dev.ultreon.quantum.menu.*;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.sound.event.SoundEvents;
@@ -21,6 +18,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -436,7 +434,7 @@ public abstract class Player extends LivingEntity {
     /**
      * Retrieves the currently open menu of the player.
      *
-     * @return the currently open {@link ContainerMenu} if a menu is open, otherwise null.
+     * @return the currently open {@link Menu} if a menu is open, otherwise null.
      */
     public @Nullable ContainerMenu getOpenMenu() {
         return this.openMenu;
@@ -447,7 +445,7 @@ public abstract class Player extends LivingEntity {
      * If the player already has an open menu, it will close the current menu
      * before opening the new one.
      *
-     * @param menu the {@link ContainerMenu} to open.
+     * @param menu the {@link Menu} to open.
      */
     public void openMenu(ContainerMenu menu) {
         if (this.openMenu != null) {
@@ -709,5 +707,9 @@ public abstract class Player extends LivingEntity {
      */
     public void setReach(float reach) {
         this.reach = reach;
+    }
+
+    public void openAdvancedCrafting(@NotNull BlockVec pos) {
+
     }
 }

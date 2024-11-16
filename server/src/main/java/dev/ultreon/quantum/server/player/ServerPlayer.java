@@ -21,7 +21,9 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.menu.CraftingMenu;
 import dev.ultreon.quantum.menu.ItemSlot;
+import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -501,6 +503,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             gamemode.setAbilities(this.abilities);
             this.connection.send(new S2CAbilitiesPacket(this.abilities));
         }
+    }
+
+    @Override
+    public void openAdvancedCrafting(@NotNull BlockVec pos) {
+        openMenu = new CraftingMenu(world, this, pos, null);
     }
 
     @Override

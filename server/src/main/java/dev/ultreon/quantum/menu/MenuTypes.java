@@ -6,11 +6,8 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 public class MenuTypes {
-    public static final MenuType<Inventory> INVENTORY = MenuTypes.register("inventory", (type, world, entity, pos) -> {
-        if (entity instanceof Player player) {
-            return player.inventory;
-        } else return null;
-    });
+    public static final MenuType<Inventory> INVENTORY = MenuTypes.register("inventory", (type, world, entity, pos) -> entity instanceof Player player ? player.inventory : null);
+    public static final MenuType<CraftingMenu> ADVANCED_CRAFTING = MenuTypes.register("advanced_crafting", CraftingMenu::new);
     public static final MenuType<CrateMenu> CRATE = MenuTypes.register("crate", CrateMenu::new);
     public static final MenuType<BlastFurnaceMenu> BLAST_FURNACE = MenuTypes.register("blast_furnace", BlastFurnaceMenu::new);
 

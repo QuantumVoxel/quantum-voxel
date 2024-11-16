@@ -12,32 +12,11 @@ import lombok.Getter;
  * @see ItemStack
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  */
-@Getter
 public class ItemSlot {
-    /**
-     * -- GETTER --
-     *
-     * @return the container menu the slot it in.
-     */
     private final ContainerMenu container;
     int index;
-    /**
-     * -- GETTER --
-     *
-     * @return the item in the slot.
-     */
     private ItemStack item;
-    /**
-     * -- GETTER --
-     *
-     * @return the slot's x coordinate in the GUI.
-     */
     private final int slotX;
-    /**
-     * -- GETTER --
-     *
-     * @return the slot's y coordinate in the GUI.
-     */
     private final int slotY;
 
     public ItemSlot(int index, ContainerMenu container, ItemStack item, int slotX, int slotY) {
@@ -124,5 +103,25 @@ public class ItemSlot {
 
     public boolean mayPlace(Item carried) {
         return true;
+    }
+
+    public ContainerMenu getContainer() {
+        return container;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public ItemStack getItem() {
+        return item;
+    }
+
+    public int getSlotX() {
+        return slotX;
+    }
+
+    public int getSlotY() {
+        return slotY;
     }
 }

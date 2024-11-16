@@ -1,0 +1,246 @@
+package dev.ultreon.quantum.menu;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
+import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.container.Container;
+import dev.ultreon.quantum.world.vec.BlockVec;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * A class that holds a bunch of item slots.
+ *
+ * @see ItemSlot
+ * @see ItemStack
+ * @see MenuType
+ */
+public class CraftingMenu extends ContainerMenu {
+    private final @NotNull MenuType<?> type;
+    private final @NotNull WorldAccess world;
+    private final @NotNull Entity entity;
+    private final @Nullable BlockVec pos;
+
+    protected final List<Player> watching = new CopyOnWriteArrayList<>();
+    private @Nullable TextObject customTitle = null;
+    private final Container<?> container;
+
+    /**
+     * Constructs a new CraftingMenu.
+     *
+     * @param world     the world where the menu is opened.
+     * @param entity    the entity that opened the menu.
+     * @param pos       the position where the menu is opened; may be null.
+     * @param container the container associated with the menu; may be null.
+     */
+    public CraftingMenu(@NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, @Nullable Container<?> container) {
+        this(MenuTypes.ADVANCED_CRAFTING, world, entity, pos, 0, container);
+    }
+
+    /**
+     * Constructs a new CraftingMenu.
+     *
+     * @param type      the type of the menu, must not be null.
+     * @param world     the world where the menu is opened, must not be null.
+     * @param entity    the entity that opened the menu, must not be null.
+     * @param pos       the position where the menu is opened, may be null.
+     * @param size      the size of the menu, cannot be negative.
+     * @param container the container associated with the menu, may be null.
+     */
+    public CraftingMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
+        super(type, world, entity, pos, size, container);
+
+        this.container = container;
+
+        Preconditions.checkNotNull(type, "Menu type cannot be null!");
+        Preconditions.checkNotNull(world, "World cannot be null!");
+        Preconditions.checkNotNull(entity, "Entity cannot be null!");
+        Preconditions.checkArgument(size >= 0, "Size cannot be negative!");
+
+        this.type = type;
+        this.world = world;
+        this.entity = entity;
+        this.pos = pos;
+    }
+
+    /**
+     * Constructs a new CraftingMenu.
+     *
+     * @param craftingMenuMenuType the type of the crafting menu, must not be null.
+     * @param world the world where the menu is opened, must not be null.
+     * @param entity the entity that opened the menu, must not be null.
+     * @param pos the position where the menu is opened, may be null.
+     */
+    public CraftingMenu(MenuType<CraftingMenu> craftingMenuMenuType, World world, Entity entity, @Nullable BlockVec pos) {
+        this(craftingMenuMenuType, world, entity, pos, 0, null);
+    }
+
+    public @NotNull MenuType<?> getType() {
+        return this.type;
+    }
+
+    public @NotNull WorldAccess getWorld() {
+        return this.world;
+    }
+
+    public @NotNull Entity getEntity() {
+        return this.entity;
+    }
+
+    public @Nullable BlockVec getPos() {
+        return this.pos;
+    }
+
+    /**
+     * Called when an item is changed in the menu
+     *
+     * @param slot the slot that was changed
+     */
+    protected void onItemChanged(ItemSlot slot) {
+        for (Player player : this.watching) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
+                if (packet != null) {
+                    serverPlayer.connection.send(packet);
+                }
+            }
+        }
+    }
+
+    @CanIgnoreReturnValue
+    public void setItem(int index, ItemStack stack) {
+
+    }
+
+    @Override
+    public List<ItemSlot> getInputs() {
+        return List.of();
+    }
+
+    @Override
+    public List<ItemSlot> getOutputs() {
+        return List.of();
+    }
+
+    public ItemStack getItem(int index) {
+        return ItemStack.EMPTY;
+    }
+
+    public ItemStack takeItem(int index) {
+        return ItemStack.EMPTY;
+    }
+
+    /**
+     * Adds a player to the list of watchers.
+     *
+     * @param player the player to be added
+     */
+    public void addWatcher(Player player) {
+        this.watching.add(player);
+    }
+
+    /**
+     * Removes a player from the list of watchers.
+     *
+     * @param player the player to be removed
+     */
+    public void removeWatcher(Player player) {
+        if (!this.watching.contains(player)) {
+            QuantumServer.LOGGER.warn("Player {} is not a watcher of {}", player, this);
+            return;
+        }
+        this.watching.remove(player);
+        if (this.watching.isEmpty()) {
+            this.close();
+        }
+    }
+
+    private void close() {
+        this.world.closeMenu(this);
+    }
+
+    /**
+     * Retrieves the title of the menu.
+     *
+     * @return the title
+     */
+    public TextObject getTitle() {
+        NamespaceID id = this.getType().getId();
+
+        if (this.customTitle == null)
+            return TextObject.translation(id.getDomain() + ".container." + id.getPath().replace("/", ".") + ".title");
+        return this.customTitle;
+    }
+
+    /**
+     * Gets the custom title of the menu.
+     *
+     * @return the custom title or null if it isn't set.
+     */
+    public @Nullable TextObject getCustomTitle() {
+        return this.customTitle;
+    }
+
+    /**
+     * Sets the custom title of the menu.
+     *
+     * @param customTitle the custom title to set or null to remove it.
+     */
+    public void setCustomTitle(@Nullable TextObject customTitle) {
+        this.customTitle = customTitle;
+    }
+
+    @Override
+    public String toString() {
+        return "ContainerMenu[" + this.getType().getId() + "]";
+    }
+
+    public boolean hasViewers() {
+        return !this.watching.isEmpty();
+    }
+
+    public boolean isOnItsOwn() {
+        return this.watching.isEmpty();
+    }
+
+    @CanIgnoreReturnValue
+    protected int inventoryMenu(int idx, int offX, int offY) {
+        if (getEntity() instanceof Player player) {
+            for (int x = 0; x < 9; x++) {
+                this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 83));
+            }
+
+            for (int x = 0; x < 9; x++) {
+                for (int y = 0; y < 3; y++) {
+                    this.addSlot(new RedirectItemSlot(idx++, player.inventory.inv[x][y], offX + x * 19 + 6, offY + y * 19 + 6));
+                }
+            }
+        }
+
+        return idx;
+    }
+
+    public Container<?> getContainer() {
+        return container;
+    }
+
+    @Override
+    public @NotNull Iterator<ItemStack> iterator() {
+        return Iterators.cycle();
+    }
+}

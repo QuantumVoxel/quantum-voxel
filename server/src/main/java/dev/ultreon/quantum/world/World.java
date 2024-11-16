@@ -23,6 +23,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.menu.ContainerMenu;
+import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.util.Utils;
@@ -74,7 +75,7 @@ public abstract class World implements Disposable, WorldAccess {
 
     boolean disposed;
     private final Set<ChunkVec> invalidatedChunks = Collections.synchronizedSet(new LinkedHashSet<>());
-    private final List<ContainerMenu> menus = new ArrayList<>();
+    private final List<Menu> menus = new ArrayList<>();
     private final RegistryKey<DimensionInfo> info = DimensionInfo.OVERWORLD; // TODO WIP
     protected UUID uid = Utils.ZEROED_UUID;
     protected int spawnX;
