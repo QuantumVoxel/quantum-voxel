@@ -100,6 +100,11 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         this.setupAttributes();
     }
 
+    /**
+     * Initializes the attributes for the entity.
+     * This method is called during the entity setup process to configure
+     * its attributes.
+     */
     protected void setupAttributes() {
 
     }
@@ -268,14 +273,27 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         }
     }
 
+    /**
+     * Moves the entity by its current velocity.
+     */
     protected void move() {
         this.move(this.velocityX, this.velocityY, this.velocityZ);
     }
 
+    /**
+     * Checks if the entity is affected by a fluid.
+     *
+     * @return true if the entity is in water, false otherwise
+     */
     public boolean isAffectedByFluid() {
         return this.isInWater();
     }
 
+    /**
+     * Checks if the entity is currently in a block of water.
+     *
+     * @return true if the entity is in water, false otherwise
+     */
     public boolean isInWater() {
         return this.world.get(this.getBlockVec()).isWater();
     }
@@ -486,15 +504,33 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         return false;
     }
 
+    /**
+     * Computes and returns the bounding box of the current object.
+     *
+     * @return the bounding box that encompasses the current object.
+     */
     public BoundingBox getBoundingBox() {
         return this.getBoundingBox(this.getSize());
     }
 
+    /**
+     * Calculates and returns the bounding box for an entity based on its current position and size.
+     *
+     * @param size the size of the entity for which the bounding box is calculated
+     * @return the bounding box corresponding to the entity's current position and size
+     */
     @ApiStatus.OverrideOnly
     public BoundingBox getBoundingBox(EntitySize size) {
         return Entity.getBoundingBox(this.getPosition(), size);
     }
 
+    /**
+     * Calculates and returns a bounding box based on the provided position and size.
+     *
+     * @param pos The central position of the bounding box as a {@code Vec3d}.
+     * @param size The size of the entity, which includes width and height, as an {@code EntitySize}.
+     * @return A {@code BoundingBox} object that represents the boundary defined by the dimensions centered on the given position.
+     */
     public static BoundingBox getBoundingBox(Vec3d pos, EntitySize size) {
         double x1 = pos.x - size.width() / 2;
         double y1 = pos.y;
@@ -577,18 +613,39 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         }
     }
 
+    /**
+     * Retrieves a BlockVec instance representing the coordinates in the world space.
+     *
+     * @return a new BlockVec object with the current coordinates (x, y, z) and space set to WORLD.
+     */
     public BlockVec getBlockVec() {
         return new BlockVec(this.x, this.y, this.z, BlockVecSpace.WORLD);
     }
 
+    /**
+     * Generates a BlockVec object with the current coordinates and the provided space.
+     *
+     * @param space the BlockVecSpace object defining the space in which the BlockVec resides
+     * @return a new BlockVec object with coordinates and the provided space
+     */
     public BlockVec getBlockVec(BlockVecSpace space) {
         return new BlockVec(this.x, this.y, this.z, space);
     }
 
+    /**
+     * Retrieves the current rotation values.
+     *
+     * @return a Vec2f object containing the rotation on the x and y axes.
+     */
     public Vec2f getRotation() {
         return new Vec2f(this.xRot, this.yRot);
     }
 
+    /**
+     * Computes and returns the look vector based on the current rotation angles.
+     *
+     * @return A normalized Vec3d representing the direction in which the entity is looking.
+     */
     public Vec3d getLookVector() {
         // Calculate the direction vector
         Vec3d direction = new Vec3d();
@@ -603,6 +660,11 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         return direction;
     }
 
+    /**
+     * Sets the rotation of the entity based on the given position.
+     *
+     * @param position a Vec2f object containing the x and y rotation values
+     */
     public void setRotation(Vec2f position) {
         this.xRot = position.x;
         this.yRot = Mth.clamp(position.y, -90, 90);
@@ -616,16 +678,33 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         }
     }
 
+    /**
+     * Retrieves the current velocity vector.
+     *
+     * @return a Vec3d object representing the current velocity.
+     */
     public Vec3d getVelocity() {
         return new Vec3d(this.velocityX, this.velocityY, this.velocityZ);
     }
 
+    /**
+     * Sets the velocity of an object using a Vec3d instance.
+     *
+     * @param velocity a Vec3d instance representing the new velocity
+     *                 with components x, y, and z
+     */
     public void setVelocity(Vec3d velocity) {
         this.velocityX = velocity.x;
         this.velocityY = velocity.y;
         this.velocityZ = velocity.z;
     }
 
+    /**
+     * This method is called during the preparation phase of spawning an entity.
+     * Subclasses should override this method to add custom spawn preparation logic.
+     *
+     * @param spawnData the data related to the spawning process, providing necessary context and parameters
+     */
     @ApiStatus.OverrideOnly
     public void onPrepareSpawn(MapType spawnData) {
 

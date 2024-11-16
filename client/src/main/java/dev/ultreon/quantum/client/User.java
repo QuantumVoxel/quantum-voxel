@@ -2,19 +2,15 @@ package dev.ultreon.quantum.client;
 
 import java.util.Objects;
 
-public final class User {
-    private final String name;
-
-    public User(String name) {
-        this.name = name;
-    }
+/**
+ * Represents a user with a name.
+ * <p>
+ * The User record provides implementations for toString and equals methods.
+ */
+public record User(String name) {
 
     @Override
     public String toString() {
-        return name;
-    }
-
-    public String name() {
         return name;
     }
 
@@ -26,8 +22,4 @@ public final class User {
         return Objects.equals(this.name, that.name);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
 }

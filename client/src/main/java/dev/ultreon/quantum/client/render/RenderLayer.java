@@ -13,6 +13,11 @@ import com.badlogic.gdx.utils.Pool;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.model.QVModel;
 
+/**
+ * The RenderLayer class manages collections of ModelInstance objects and their associated animations.
+ * It provides functionalities to create, add, activate, deactivate, destroy, and retrieve renderable objects.
+ * Furthermore, it allows for the updating and clearing of objects and animations within the layer.
+ */
 public class RenderLayer implements RenderableProvider {
     public static final RenderLayer BACKGROUND = new RenderLayer();
     public static final RenderLayer WORLD = new RenderLayer();

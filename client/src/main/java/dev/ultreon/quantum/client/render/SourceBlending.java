@@ -2,6 +2,9 @@ package dev.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.GL30;
 
+/**
+ * The SourceBlending enum represents various blending options for source factors in OpenGL rendering.
+ */
 public enum SourceBlending {
     ONE(GL30.GL_ONE),
     ZERO(GL30.GL_ZERO),
@@ -18,6 +21,9 @@ public enum SourceBlending {
     CONSTANT_ALPHA(GL30.GL_CONSTANT_ALPHA),
     ONE_MINUS_CONSTANT_ALPHA(GL30.GL_ONE_MINUS_CONSTANT_ALPHA),
     SRC_ALPHA_SATURATE(GL30.GL_SRC_ALPHA_SATURATE);
+    /**
+     * The identifier for the corresponding OpenGL constant in the SourceBlending enum.
+     */
     public final int id;
 
     SourceBlending(int id) {

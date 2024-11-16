@@ -2,6 +2,10 @@ package dev.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.GL30;
 
+/**
+ * Enumeration representing different destination blending modes for OpenGL rendering.
+ * Each enum constant maps to a specific OpenGL blending mode value.
+ */
 public enum DestinationBlending {
     ONE(GL30.GL_ONE),
     ZERO(GL30.GL_ZERO),
@@ -18,6 +22,10 @@ public enum DestinationBlending {
     CONSTANT_ALPHA(GL30.GL_CONSTANT_ALPHA),
     ONE_MINUS_CONSTANT_ALPHA(GL30.GL_ONE_MINUS_CONSTANT_ALPHA),
     SRC_ALPHA_SATURATE(GL30.GL_SRC_ALPHA_SATURATE);
+
+    /**
+     * The OpenGL blending mode value associated with the specific destination blending mode.
+     */
     public final int id;
 
     DestinationBlending(int id) {

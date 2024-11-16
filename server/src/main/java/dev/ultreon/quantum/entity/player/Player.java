@@ -29,6 +29,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 
+/**
+ * The Player class represents a player entity within the game. It manages various player-specific details such as inventory,
+ * movement, abilities, and status effects.
+ */
 public abstract class Player extends LivingEntity {
     public int selected;
     public Inventory inventory;
@@ -48,6 +52,14 @@ public abstract class Player extends LivingEntity {
     private final FoodStatus foodStatus = new FoodStatus(this);
     private float reach = 6.0F;
 
+    /**
+     * Constructs a Player entity in the specified world with a given entity type and name.
+     * Initializes the player's inventory and sets up inventory related actions.
+     *
+     * @param entityType the type of entity
+     * @param world the world the player is in
+     * @param name the name of the player
+     */
     protected Player(EntityType<? extends Player> entityType, WorldAccess world, String name) {
         super(entityType, world);
 
@@ -81,12 +93,25 @@ public abstract class Player extends LivingEntity {
         this.sendAbilities();
     }
 
+    /**
+     * Selects a block slot in the player's inventory based on the given index.
+     * The selection wraps around the available slots (0-8).
+     *
+     * @param i the index to select. This value is normalized to a valid
+     *          slot (i.e., within 0-8) using the modulus operation.
+     */
     public void selectBlock(int i) {
         int toSelect = i % 9;
         if (toSelect < 0) toSelect += 9;
         this.selected = toSelect;
     }
 
+    /**
+     * Retrieves the currently selected item from the player's hotbar.
+     * If the selected slot is out of bounds, returns an empty ItemStack.
+     *
+     * @return the ItemStack in the selected hotbar slot, or an empty ItemStack if out of bounds.
+     */
     public ItemStack getSelectedItem() {
         if (this.selected < 0) this.selected = 0;
         return this.selected >= 9 ? ItemStack.empty() : this.inventory.getHotbarSlot(this.selected).getItem();
@@ -171,57 +196,130 @@ public abstract class Player extends LivingEntity {
         return TextObject.literal(this.name);
     }
 
+    /**
+     * Rotates the player's head by the specified amounts in the x and y directions.
+     * The y-axis rotation (pitch) is clamped between -90 and 90 degrees ensuring the player cannot look too far up or down.
+     * The x-axis rotation (yaw) is adjusted and clamped to stay within 50 degrees of the current head rotation.
+     *
+     * @param x the amount to rotate the head on the x-axis (yaw)
+     * @param y the amount to rotate the head on the y-axis (pitch)
+     */
     public void rotateHead(float x, float y) {
         this.xHeadRot += x;
         this.yRot = Mth.clamp(this.yRot + y, -90, 90);
         this.xRot = Mth.clamp(this.xRot, this.xHeadRot - 50, this.xHeadRot + 50);
     }
 
+    /**
+     * Returns the eye height of the player, considering if the player is crouching or not.
+     *
+     * @return the eye height of the player. Returns 1.15 when crouching, otherwise returns 1.63.
+     */
     public float getEyeHeight() {
         return this.crouching ? 1.15F : 1.63F;
     }
 
+    /**
+     * Checks whether the player is currently running.
+     * A player is considered running if they are marked as running, have moved from their previous position,
+     * and are currently walking.
+     *
+     * @return true if the player is running; false otherwise.
+     */
     public boolean isRunning() {
         return this.running && (this.ox != this.x || this.oz != this.z || this.oy != this.y) & isWalking();
     }
 
+    /**
+     * Sets the running state of the player.
+     *
+     * @param running boolean value indicating whether the player is running
+     */
     public void setRunning(boolean running) {
         this.running = running;
     }
 
+    /**
+     * Retrieves the player's walking speed. If the player is currently running,
+     * the walking speed is multiplied by the run modifier.
+     *
+     * @return the walking speed, adjusted for running if applicable.
+     */
     public float getWalkingSpeed() {
         return this.isRunning() ? this.walkingSpeed * this.runModifier : this.walkingSpeed;
     }
 
+    /**
+     * Sets the walking speed for the player.
+     *
+     * @param walkingSpeed the new walking speed value to set
+     */
     public void setWalkingSpeed(float walkingSpeed) {
         this.walkingSpeed = walkingSpeed;
     }
 
+    /**
+     * Retrieves the flying speed of the player.
+     * The speed is modified by the running modifier if the player is running.
+     *
+     * @return the calculated flying speed of the player.
+     */
     public float getFlyingSpeed() {
         return isRunning() ? this.flyingSpeed * this.runModifier : this.flyingSpeed;
     }
 
+    /**
+     * Sets the flying speed of the player.
+     *
+     * @param flyingSpeed the new flying speed to set
+     */
     public void setFlyingSpeed(float flyingSpeed) {
         this.flyingSpeed = flyingSpeed;
     }
 
+    /**
+     * Checks if the player is currently in a flying state.
+     *
+     * @return true if the player is flying, false otherwise.
+     */
     public boolean isFlying() {
         return this.abilities.flying;
     }
 
+    /**
+     * Sets the player's flying state and updates related abilities.
+     *
+     * @param flying the new flying state to set. If true, enables flying and disables gravity;
+     *               if false, disables flying and enables gravity.
+     */
     public void setFlying(boolean flying) {
         this.noGravity = this.abilities.flying = flying;
         this.sendAbilities();
     }
 
+    /**
+     * Checks if the player is currently in the crouching state.
+     *
+     * @return true if the player is crouching, false otherwise.
+     */
     public boolean isCrouching() {
         return this.crouching;
     }
 
+    /**
+     * Sets the crouching state of the player.
+     *
+     * @param crouching true to set the player as crouching, false to set the player as not crouching.
+     */
     public void setCrouching(boolean crouching) {
         this.crouching = crouching;
     }
 
+    /**
+     * Checks if the player is currently in spectator mode.
+     *
+     * @return true if the player's game mode is SPECTATOR, false otherwise
+     */
     public boolean isSpectator() {
         return this.gamemode == GameMode.SPECTATOR;
     }
@@ -247,6 +345,13 @@ public abstract class Player extends LivingEntity {
         //    and will break client <-> server connection. DO NOT CALL SUPER HERE!
     }
 
+    /**
+     * Performs a ray casting operation from the player's current position and orientation
+     * to determine if a collision with another object occurs within the player's reach.
+     *
+     * @return a Hit object that contains details about the collision, including distance,
+     *         collision vector, and whether a collision occurred.
+     */
     public Hit rayCast() {
         Ray ray1 = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
         return this.world.rayCast(ray1, this, this.getReach(), CommonConstants.VEC3D_0_C);
@@ -294,25 +399,56 @@ public abstract class Player extends LivingEntity {
 
     }
 
+    /**
+     * Determines if the player is permitted to fly.
+     *
+     * @return true if the player is allowed to fly; false otherwise.
+     */
     public boolean isAllowFlight() {
         return this.abilities.allowFlight;
     }
 
+    /**
+     * Sets whether the player is allowed to fly.
+     *
+     * @param allowFlight boolean value indicating whether flight is allowed
+     */
     public void setAllowFlight(boolean allowFlight) {
         this.abilities.allowFlight = allowFlight;
         this.sendAbilities();
     }
 
+    /**
+     * Sends the current abilities of the player to the client/server.
+     */
     protected abstract void sendAbilities();
 
+    /**
+     * Handles the player's abilities based on the information provided by an AbilitiesPacket.
+     *
+     * @param packet the AbilitiesPacket containing information about the player's current abilities,
+     *               such as whether the player is flying.
+     */
     protected void onAbilities(AbilitiesPacket packet) {
         this.noGravity = packet.flying();
     }
 
+    /**
+     * Retrieves the currently open menu of the player.
+     *
+     * @return the currently open {@link ContainerMenu} if a menu is open, otherwise null.
+     */
     public @Nullable ContainerMenu getOpenMenu() {
         return this.openMenu;
     }
 
+    /**
+     * Opens the specified menu for the player.
+     * If the player already has an open menu, it will close the current menu
+     * before opening the new one.
+     *
+     * @param menu the {@link ContainerMenu} to open.
+     */
     public void openMenu(ContainerMenu menu) {
         if (this.openMenu != null) {
             if (this.openMenu == menu)
@@ -324,6 +460,9 @@ public abstract class Player extends LivingEntity {
         this.openMenu.addWatcher(this);
     }
 
+    /**
+     * Closes the currently open menu for this player.
+     */
     public void closeMenu() {
         if (this.openMenu == null) {
             CommonConstants.LOGGER.warn("Tried to close menu that was not open", new RuntimeException());
@@ -369,10 +508,19 @@ public abstract class Player extends LivingEntity {
         this.cursor = cursor;
     }
 
+    /**
+     * Opens the inventory menu for the player or user.
+     */
     public void openInventory() {
         this.openMenu(this.inventory);
     }
 
+    /**
+     * Casts a ray in the direction the current entity is looking and determines the closest intersecting entity.
+     *
+     * @param entities An iterable collection of entities to check for intersections.
+     * @return The closest entity intersecting with the ray, or null if no intersection is found.
+     */
     public @Nullable Entity rayCast(Iterable<Entity> entities) {
         Ray ray = new Ray(this.getPosition(), this.getLookVector());
         boolean seen = false;
@@ -387,6 +535,11 @@ public abstract class Player extends LivingEntity {
         return seen ? best : null;
     }
 
+    /**
+     * Finds and returns the nearest entity to the current entity based on their positions.
+     *
+     * @return the nearest entity if any are present, otherwise null
+     */
     public @Nullable Entity nearestEntity() {
         return Arrays.stream(this.world.getEntities()
                 .toArray(Entity.class))
@@ -394,6 +547,13 @@ public abstract class Player extends LivingEntity {
                 .orElse(null);
     }
 
+    /**
+     * Finds the nearest entity of the specified class type within the world.
+     *
+     * @param <T> The type of the entity that extends the Entity class.
+     * @param clazz The class type of the entity to find.
+     * @return The nearest entity of the specified class type, or null if no such entity is found.
+     */
     public @Nullable <T extends Entity> T nearestEntity(Class<T> clazz) {
         return Arrays.stream(this.world.getEntities()
                 .toArray(Entity.class))
@@ -403,6 +563,11 @@ public abstract class Player extends LivingEntity {
                 .orElse(null);
     }
 
+    /**
+     * Sets the game mode for the player and adjusts their abilities accordingly.
+     *
+     * @param gamemode the new game mode to set for the player
+     */
     public void setGameMode(GameMode gamemode) {
         this.gamemode = gamemode;
         switch (gamemode) {
@@ -443,23 +608,50 @@ public abstract class Player extends LivingEntity {
         this.sendAbilities();
     }
 
+    /**
+     * Retrieves the current game mode.
+     *
+     * @return the current GameMode
+     */
     public GameMode getGamemode() {
         return this.gamemode;
     }
 
+    /**
+     * Determines if the current game mode is either BUILDER or BUILDER_PLUS.
+     *
+     * @return true if the game mode is BUILDER or BUILDER_PLUS, false otherwise
+     */
     public boolean isBuilder() {
         return this.gamemode == GameMode.BUILDER || this.gamemode == GameMode.BUILDER_PLUS;
     }
 
+    /**
+     * Checks if the current game mode is either SURVIVAL or ADVENTUROUS.
+     *
+     * @return true if the game mode is SURVIVAL or ADVENTUROUS, false otherwise.
+     */
     public boolean isSurvival() {
         return this.gamemode == GameMode.SURVIVAL || this.gamemode == GameMode.ADVENTUROUS;
     }
 
+    /**
+     * Drops the specified item stack at the current entity's position in the world.
+     *
+     * @param itemStack the item stack to be dropped in the world
+     */
     public void drop(ItemStack itemStack) {
         this.world.drop(itemStack, this.getPosition());
         ItemEvents.DROPPED.factory().onDropped(itemStack);
     }
 
+    /**
+     * Handles the logic for dropping a single item from the player's selected item stack.
+     * The method first checks if the world is on the client side; if so, it exits immediately.
+     * If the selected item stack size is reduced and becomes zero, the process ends.
+     * Otherwise, a copy of the item stack is created with a count of one,
+     * and this copy is dropped into the world.
+     */
     public void dropItem() {
         if (this.world.isClientSide()) return;
         ItemStack itemStack = this.getSelectedItem();
@@ -470,24 +662,51 @@ public abstract class Player extends LivingEntity {
         this.drop(copy);
     }
 
+    /**
+     * Closes the specified menu if it is the currently open menu.
+     *
+     * @param menu the menu that might need to be closed
+     */
     public void closeMenu(CrateMenu menu) {
         if (this.openMenu == menu) {
             this.closeMenu();
         }
     }
 
+    /**
+     * Retrieves the current food status of the player.
+     *
+     * @return the player's current {@code FoodStatus}.
+     */
     public FoodStatus getFoodStatus() {
         return this.foodStatus;
     }
 
+    /**
+     * Determines if the entity is currently swimming.
+     *
+     * @return true if the entity is in water and there is a significant change in position
+     *         indicating movement, otherwise false.
+     */
     public boolean isSwimming() {
         return this.isInWater() && (this.x != this.ox || this.z != this.oz || this.y > this.oy);
     }
 
+    /**
+     * Retrieves the player's reach distance.
+     *
+     * @return the reach distance of the player.
+     */
     public float getReach() {
         return reach;
     }
 
+    /**
+     * Sets the reach distance for this player. The reach distance determines how far
+     * the player can interact with blocks and entities in the world.
+     *
+     * @param reach the new reach distance to set
+     */
     public void setReach(float reach) {
         this.reach = reach;
     }

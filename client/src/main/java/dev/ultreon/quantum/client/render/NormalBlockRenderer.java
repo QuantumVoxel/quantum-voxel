@@ -8,6 +8,11 @@ import dev.ultreon.quantum.client.render.meshing.PerCornerLightData;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
 
+/**
+ * NormalBlockRenderer is responsible for rendering the six faces of a block in a 3D environment.
+ * This class provides methods to render the north, south, west, east, top, and bottom faces of a block,
+ * taking into account the texture region and lighting data provided.
+ */
 public class NormalBlockRenderer implements BlockRenderer {
     private static final float TEXTURE_PERCENTAGE = 16f / 2048f;
     private static final int BLOCKS_PER_WIDTH = 2048 / 16;

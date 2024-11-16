@@ -9,8 +9,17 @@ import java.util.List;
  * Turns an array of voxels into OpenGL vertices
  */
 public interface Mesher {
+    /**
+     * Builds a mesh based on the given condition and MeshPartBuilder.
+     *
+     * @param condition The condition to determine which blocks should be used for the mesh.
+     * @param builder   The MeshPartBuilder to construct the mesh.
+     */
     void buildMesh(UseCondition condition, MeshPartBuilder builder);
 
+    /**
+     * Determines whether a block should be used in the mesh.
+     */
     interface UseCondition {
         /**
          * @param block Block to check

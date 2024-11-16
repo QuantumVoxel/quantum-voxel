@@ -290,9 +290,10 @@ public abstract class LivingEntity extends Entity {
     }
 
     /**
-     * Load the data for the player character.
+     * Loads the state of the LivingEntity instance from the provided MapType data.
+     * This includes health, maximum health, damage immunity, death status, jump velocity, jumping state, and invincibility.
      *
-     * @param data the map containing player data
+     * @param data the MapType object to load the entity's data from
      */
     @Override
     public void load(MapType data) {
@@ -308,10 +309,10 @@ public abstract class LivingEntity extends Entity {
     }
 
     /**
-     * A description of the entire Java function.
+     * Saves the state of the LivingEntity instance to the provided MapType object.
      *
-     * @param data Description of the data parameter
-     * @return Description of the return value
+     * @param data the MapType object to save the entity's data to
+     * @return the updated MapType object containing the saved state
      */
     @Override
     public MapType save(MapType data) {

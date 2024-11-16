@@ -8,6 +8,10 @@ import dev.ultreon.quantum.client.ClientRegistries;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * The RenderEffect class represents different visual effects that can be applied during rendering.
+ * It is used to register and manage different rendering effects.
+ */
 public class RenderEffect {
     public static final RenderEffect DEFAULT = RenderEffect.register("default", new RenderEffect());
     public static final RenderEffect WATER = RenderEffect.register("water", new RenderEffect());

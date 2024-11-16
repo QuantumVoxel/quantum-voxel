@@ -79,6 +79,14 @@ public class GreedyMesher implements Mesher {
         this.perCornerLight = perCornerLight;
     }
 
+    /**
+     * Generates a list of visible faces for the chunk mesh based on the given conditions.
+     *
+     * @param condition   Condition to determine the use of a face.
+     * @param ocCond      Condition to determine if a block face should be occluded.
+     * @param shouldMerge Condition to determine if adjacent faces should be merged.
+     * @return List of visible faces for the chunk mesh.
+     */
     public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
@@ -165,6 +173,7 @@ public class GreedyMesher implements Mesher {
     private void applyGreedyMeshing(List<Face> faces, Direction direction, boolean[][] mask, PerCornerLightData[][] pcld, int index, MergeCondition shouldMerge) {
         this.greedy(faces, direction, shouldMerge, mask, pcld, index);
     }
+
     private boolean facesY(UseCondition condition, OccludeCondition ocCond, int x, int y, int z, boolean[][] topMask, PerCornerLightData[][] topPcld, boolean[][] btmMask, PerCornerLightData[][] btmPcld) {
         BlockState curBlock = this.block(this.chunk, x, y, z);
         if (curBlock == null) return true;
@@ -362,6 +371,7 @@ public class GreedyMesher implements Mesher {
 
         return Math.min(1, result.sunBrightness() + result.blockBrightness());
     }
+
     @Nullable
     private LightLevelData calcLightLevels(Direction side, int x, int y, int z) {
         if (this.chunk == null) return null;  // Early exit if chunk is null
@@ -463,7 +473,8 @@ public class GreedyMesher implements Mesher {
 
                 // Vertical (y-axis) expansion
                 while (endY < height) {
-                    if (!canExpandVertically(mergeCond, block, ll, lightData, side, x, endX, endY, z, lightDatas, used)) break;
+                    if (!canExpandVertically(mergeCond, block, ll, lightData, side, x, endX, endY, z, lightDatas, used))
+                        break;
                     for (int lx = x; lx < endX; lx++) {
                         used[lx][endY] = true;
                     }
@@ -479,7 +490,6 @@ public class GreedyMesher implements Mesher {
         }
     }
 
-    // Helper method for horizontal merging
     private boolean canMerge(MergeCondition mergeCond, BlockState block, float ll, PerCornerLightData lightData, Direction side, int newX, int y, int z, PerCornerLightData[][] lightDatas, boolean[][] used) {
         int realX = this.realX(side, newX, z);
         int realY = this.realY(side, y, z);
@@ -502,7 +512,6 @@ public class GreedyMesher implements Mesher {
         return mergeCond.shouldMerge(block, ll, lightData, newBlock, newLight, newPcld);
     }
 
-    // Helper method for vertical expansion
     private boolean canExpandVertically(MergeCondition mergeCond, BlockState block, float ll, PerCornerLightData lightData, Direction side, int startX, int endX, int endY, int z, PerCornerLightData[][] lightDatas, boolean[][] used) {
         for (int lx = startX; lx < endX; lx++) {
             int realX = this.realX(side, lx, z);
@@ -772,36 +781,14 @@ public class GreedyMesher implements Mesher {
         }
     }
 
-    public static final class LightLevelData {
-        private final float sunBrightness;
-        private final float blockBrightness;
-
-        public LightLevelData(float blockBrightness, float sunBrightness) {
-            this.sunBrightness = sunBrightness;
-            this.blockBrightness = blockBrightness;
-        }
-
-        public float sunBrightness() {
-            return sunBrightness;
-        }
-
-        public float blockBrightness() {
-            return blockBrightness;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (LightLevelData) obj;
-            return Float.floatToIntBits(this.sunBrightness) == Float.floatToIntBits(that.sunBrightness) &&
-                    Float.floatToIntBits(this.blockBrightness) == Float.floatToIntBits(that.blockBrightness);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sunBrightness, blockBrightness);
-        }
+    /**
+     * Represents light level data for a specific block, encapsulating both block brightness
+     * and sunlight brightness.
+     *
+     * @param blockBrightness The brightness level emitted by the block itself.
+     * @param sunBrightness   The brightness level contributed by sunlight on the block.
+     */
+    public record LightLevelData(float blockBrightness, float sunBrightness) {
 
         @Override
         public String toString() {
@@ -809,9 +796,12 @@ public class GreedyMesher implements Mesher {
                     "sunBrightness=" + sunBrightness + ", " +
                     "blockBrightness=" + blockBrightness + ']';
         }
-
     }
 
+    /**
+     * The Face class represents a single face of a block in the game world. This includes the coordinates, lighting
+     * information, and rendering details required to draw the face on the screen.
+     */
     public static class Face {
 
         private final Direction side;
@@ -823,7 +813,18 @@ public class GreedyMesher implements Mesher {
         private final float sunlightLevel;
 
         /**
-         * @param lightData     Per corner light data. Pass null if per corner lighting is disabled.
+         * Constructs a new Face instance.
+         *
+         * @param side the direction of the face
+         * @param block the block state to which this face belongs
+         * @param lightLevel the general light level of this face
+         * @param lightData the per-corner light data for this face
+         * @param startX the starting X coordinate of the face
+         * @param startY the starting Y coordinate of the face
+         * @param endX the ending X coordinate of the face
+         * @param endY the ending Y coordinate of the face
+         * @param z the Z coordinate of the face
+         * @param sunlightLevel the sunlight level of this face
          */
         public Face(Direction side, BlockState block, float lightLevel, PerCornerLightData lightData, int startX, int startY, int endX, int endY, int z, float sunlightLevel) {
             this.lightLevel = lightLevel;
@@ -841,6 +842,11 @@ public class GreedyMesher implements Mesher {
             this.bakedBlockModel = (BakedCubeModel) client.getBlockModel(block);
         }
 
+        /**
+         * Renders a face of a block using the specified MeshPartBuilder.
+         *
+         * @param builder the MeshPartBuilder used to build the mesh for the face
+         */
         public void render(MeshPartBuilder builder) {
             try (var ignored = QuantumClient.PROFILER.start("face")) {
                 LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);
@@ -889,6 +895,10 @@ public class GreedyMesher implements Mesher {
         };
     }
 
+    /**
+     * Represents a condition to determine when the side of a given block
+     * should be occluded based on the block it faces.
+     */
     public interface OccludeCondition {
         /**
          * @param curBlock    current block being checked
@@ -898,7 +908,26 @@ public class GreedyMesher implements Mesher {
         boolean shouldOcclude(Block curBlock, Block facingBlock);
     }
 
+    /**
+     * Represents a condition to determine whether two adjacent block faces
+     * should be merged during the mesh generation process.
+     * <p>
+     * The `shouldMerge` method will be implemented to define the logic
+     * for merging faces based on their properties, such as block state and
+     * lighting conditions.
+     */
     public interface MergeCondition {
+        /**
+         * Determines whether two adjacent block faces should be merged during the mesh generation process.
+         *
+         * @param data1 The block state of the first face.
+         * @param light1 The light level of the first face.
+         * @param lightData1 The per-corner light data of the first face.
+         * @param data2 The block state of the second face.
+         * @param light2 The light level of the second face.
+         * @param lightData2 The per-corner light data of the second face.
+         * @return true if the two block faces should be merged; false otherwise.
+         */
         boolean shouldMerge(BlockState data1, float light1, PerCornerLightData lightData1, BlockState data2, float light2, PerCornerLightData lightData2);
     }
 
