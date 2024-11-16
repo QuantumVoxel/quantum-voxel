@@ -1,13 +1,8 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
-import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
@@ -33,9 +28,6 @@ public class AdvancedCraftingMenu extends ContainerMenu {
     protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
 
-    public final ItemSlot[] hotbar = new ItemSlot[9];
-    public final ItemSlot[][] inv = new ItemSlot[9][3];
-
     /**
      * Constructs a new CraftingMenu.
      *
@@ -60,6 +52,8 @@ public class AdvancedCraftingMenu extends ContainerMenu {
      */
     public AdvancedCraftingMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
         super(type, world, entity, pos, size, container);
+
+        this.build();
     }
 
     /**
@@ -81,27 +75,6 @@ public class AdvancedCraftingMenu extends ContainerMenu {
         inventoryMenu(0, 6, 6);
     }
 
-    /**
-     * Called when an item is changed in the menu
-     *
-     * @param slot the slot that was changed
-     */
-    protected void onItemChanged(ItemSlot slot) {
-        for (Player player : this.watching) {
-            if (player instanceof ServerPlayer serverPlayer) {
-                Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
-                if (packet != null) {
-                    serverPlayer.connection.send(packet);
-                }
-            }
-        }
-    }
-
-    @CanIgnoreReturnValue
-    public void setItem(int index, ItemStack stack) {
-
-    }
-
     @Override
     public List<ItemSlot> getInputs() {
         return List.of();
@@ -110,39 +83,6 @@ public class AdvancedCraftingMenu extends ContainerMenu {
     @Override
     public List<ItemSlot> getOutputs() {
         return List.of();
-    }
-
-    public ItemStack getItem(int index) {
-        return ItemStack.EMPTY;
-    }
-
-    public ItemStack takeItem(int index) {
-        return ItemStack.EMPTY;
-    }
-
-    /**
-     * Adds a player to the list of watchers.
-     *
-     * @param player the player to be added
-     */
-    public void addWatcher(Player player) {
-        this.watching.add(player);
-    }
-
-    /**
-     * Removes a player from the list of watchers.
-     *
-     * @param player the player to be removed
-     */
-    public void removeWatcher(Player player) {
-        if (!this.watching.contains(player)) {
-            QuantumServer.LOGGER.warn("Player {} is not a watcher of {}", player, this);
-            return;
-        }
-        this.watching.remove(player);
-        if (this.watching.isEmpty()) {
-            this.close();
-        }
     }
 
     private void close() {
@@ -162,35 +102,9 @@ public class AdvancedCraftingMenu extends ContainerMenu {
         return this.customTitle;
     }
 
-    /**
-     * Gets the custom title of the menu.
-     *
-     * @return the custom title or null if it isn't set.
-     */
-    public @Nullable TextObject getCustomTitle() {
-        return this.customTitle;
-    }
-
-    /**
-     * Sets the custom title of the menu.
-     *
-     * @param customTitle the custom title to set or null to remove it.
-     */
+    @Override
     public void setCustomTitle(@Nullable TextObject customTitle) {
         this.customTitle = customTitle;
-    }
-
-    @Override
-    public String toString() {
-        return "ContainerMenu[" + this.getType().getId() + "]";
-    }
-
-    public boolean hasViewers() {
-        return !this.watching.isEmpty();
-    }
-
-    public boolean isOnItsOwn() {
-        return this.watching.isEmpty();
     }
 
     @Override

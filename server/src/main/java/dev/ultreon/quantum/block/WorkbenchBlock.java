@@ -20,7 +20,7 @@ public class WorkbenchBlock extends Block {
 
     @Override
     public @NotNull UseResult use(@NotNull WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
-        player.openMenu(new AdvancedCraftingMenu(player.getWorld(), player, pos, null));
+        if (world.isClientSide()) player.openMenu(new AdvancedCraftingMenu(player.getWorld(), player, pos, null));
         return UseResult.ALLOW;
     }
 }
