@@ -3,8 +3,7 @@ package dev.ultreon.quantum.recipe;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.Inventory;
-import dev.ultreon.quantum.menu.ItemSlot;
+import dev.ultreon.quantum.menu.*;
 import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public final class CraftingRecipe implements Recipe {
 
     @Override
     public boolean canCraft(Inventory inventory) {
-        return canCraft(inventory, false);
+        return canCraft((Menu) inventory);
     }
 
     private static void collectItems(ItemSlot slot, List<ItemStack> copy, boolean simulate) {
@@ -123,11 +122,17 @@ public final class CraftingRecipe implements Recipe {
                "result=" + result + ']';
     }
 
-    public boolean canCraft(Inventory inventory, boolean advanced) {
-        if (advanced != isAdvanced) return false;
+    @Override
+    public boolean canCraft(Menu inventory) {
+        if (isAdvanced) {
+            if (!(inventory instanceof AdvancedCraftingMenu)) {
+                return false;
+            }
+        }
+        if (!(inventory instanceof ContainerMenu menu)) return false;
         var ingredients = this.ingredients.stream().map(ItemStack::copy).collect(Collectors.toList());
 
-        for (ItemSlot slot : inventory.slots) {
+        for (ItemSlot slot : menu.slots) {
             if (slot.isEmpty()) {
                 continue;
             }

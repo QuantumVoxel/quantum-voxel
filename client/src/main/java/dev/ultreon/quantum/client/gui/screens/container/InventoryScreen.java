@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.widget.ItemSlotWidget;
+import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
@@ -12,10 +14,7 @@ import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SCraftRecipePacket;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
-import dev.ultreon.quantum.recipe.CraftingRecipe;
-import dev.ultreon.quantum.recipe.Recipe;
-import dev.ultreon.quantum.recipe.RecipeManager;
-import dev.ultreon.quantum.recipe.RecipeType;
+import dev.ultreon.quantum.recipe.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
@@ -25,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class InventoryScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
@@ -80,18 +80,17 @@ public class InventoryScreen extends ContainerScreen {
         List<ItemSlot> list = new ArrayList<>();
         int x = 0;
         int y = 0;
-        this.recipes = menu.getEntity() instanceof Player player
-                ? RecipeManager.get().getRecipes(RecipeType.CRAFTING, 30, player.inventory)
-                : new PagedList<>(30);
+        this.recipes = RecipeManager.get().getRecipes(RecipeType.CRAFTING, 30, menu);
         this.currentPage = this.recipes.getFullPage(this.page);
         for (CraftingRecipe recipe : this.currentPage) {
-            if (recipe.canCraft(this.inventory, isAdvanced())) {
+            if (recipe.canCraft(this.inventory)) {
                 if (x >= 5) {
                     x = 0;
                     y++;
                 }
                 ItemSlot itemSlot = this.createItemSlot(recipe, x, y);
                 list.add(itemSlot);
+                add(new RecipeSlot(recipe, itemSlot, this.left() + itemSlot.getSlotX(), this.top() + itemSlot.getSlotY()));
                 x++;
             }
         }
@@ -176,15 +175,8 @@ public class InventoryScreen extends ContainerScreen {
 
     @Nullable
     private RecipeSlot getRecipeSlotAt(int mouseX, int mouseY) {
-        List<ItemSlot> slots = this.recipeSlots;
-        List<? extends CraftingRecipe> recipeList = this.currentPage;
-        for (int i = 0, slotsSize = slots.size(); i < slotsSize; i++) {
-            ItemSlot slot = slots.get(i);
-            if (slot.isWithinBounds(mouseX - this.left(), mouseY - this.top())) {
-                return new RecipeSlot(recipeList.get(i), slot);
-            }
-        }
-        return null;
+        Widget widgetAt = getWidgetAt(mouseX, mouseY);
+        return widgetAt instanceof RecipeSlot recipeSlot ? recipeSlot : null;
     }
 
     @Override
@@ -222,12 +214,41 @@ public class InventoryScreen extends ContainerScreen {
         this.rebuildSlots();
     }
 
-    private record RecipeSlot(Recipe recipe, ItemSlot slot) {
+    private static final class RecipeSlot extends ItemSlotWidget {
+        private final Recipe recipe;
+
+        private RecipeSlot(Recipe recipe, ItemSlot slot, int x, int y) {
+            super(slot, x, y);
+            this.recipe = recipe;
+        }
+
         @Override
         public String toString() {
             return "RecipeSlot[" +
-                   "recipe=" + recipe + ", " +
-                   "slot=" + slot + ']';
+                    "recipe=" + recipe + ", " +
+                    "slot=" + slot + ']';
+        }
+
+        public Recipe recipe() {
+            return recipe;
+        }
+
+        public ItemSlot slot() {
+            return slot;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (RecipeSlot) obj;
+            return Objects.equals(this.recipe, that.recipe) &&
+                    Objects.equals(this.slot, that.slot);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(recipe, slot);
         }
 
 

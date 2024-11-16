@@ -8,10 +8,7 @@ import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.tool.ToolItem;
-import dev.ultreon.quantum.menu.AdvancedCraftingMenu;
-import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.menu.ItemSlot;
-import dev.ultreon.quantum.menu.MenuType;
+import dev.ultreon.quantum.menu.*;
 import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.api.PacketDestination;
@@ -253,7 +250,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         Recipe recipe = RecipeManager.get().get(recipeId, recipeType);
         if (recipe == null) throw new IllegalStateException("Recipe not found: " + recipeId);
         if (!recipe.canCraft(this.player.inventory)) return;
-        ItemStack crafted = recipe.craft(this.player.inventory);
+        ItemStack crafted = recipe.craft((Menu) this.player.inventory);
         this.player.inventory.addItem(crafted);
     }
 
@@ -263,7 +260,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         if (!(recipe instanceof CraftingRecipe craftingRecipe)) throw new IllegalStateException("Not a crafting recipe: " + recipeId);
         if (!(player.getOpenMenu() instanceof AdvancedCraftingMenu))
             throw new IllegalStateException("Player is not in a crafting menu.");
-        if (!craftingRecipe.canCraft(this.player.inventory, true)) return;
+        if (!craftingRecipe.canCraft(this.player.getOpenMenu())) return;
         ItemStack crafted = craftingRecipe.craft(this.player.inventory);
         this.player.inventory.addItem(crafted);
     }
