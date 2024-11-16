@@ -29,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see ItemStack
  * @see MenuType
  */
-public class CraftingMenu extends ContainerMenu {
+public class AdvancedCraftingMenu extends ContainerMenu {
     protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
 
@@ -44,7 +44,7 @@ public class CraftingMenu extends ContainerMenu {
      * @param pos       the position where the menu is opened; may be null.
      * @param container the container associated with the menu; may be null.
      */
-    public CraftingMenu(@NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, @Nullable Container<?> container) {
+    public AdvancedCraftingMenu(@NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, @Nullable Container<?> container) {
         this(MenuTypes.ADVANCED_CRAFTING, world, entity, pos, 36, container);
     }
 
@@ -58,7 +58,7 @@ public class CraftingMenu extends ContainerMenu {
      * @param size      the size of the menu, cannot be negative.
      * @param container the container associated with the menu, may be null.
      */
-    public CraftingMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
+    public AdvancedCraftingMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
         super(type, world, entity, pos, size, container);
     }
 
@@ -70,7 +70,7 @@ public class CraftingMenu extends ContainerMenu {
      * @param entity the entity that opened the menu, must not be null.
      * @param pos the position where the menu is opened, may be null.
      */
-    public CraftingMenu(MenuType<CraftingMenu> craftingMenuMenuType, World world, Entity entity, @Nullable BlockVec pos) {
+    public AdvancedCraftingMenu(MenuType<AdvancedCraftingMenu> craftingMenuMenuType, World world, Entity entity, @Nullable BlockVec pos) {
         this(craftingMenuMenuType, world, entity, pos, 36, null);
     }
 

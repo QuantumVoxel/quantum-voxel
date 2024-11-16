@@ -13,7 +13,6 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.ubo.DataWriter;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec3d;
@@ -23,7 +22,6 @@ import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
-import lombok.Getter;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +29,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class Block implements DataWriter<MapType> {
+/**
+ * Represents a block with specific properties and behaviors within the game.
+ * The Block class encapsulates properties such as transparency, collision behavior, fluidity,
+ * tool requirements, hardness, loot generation, rendering options, and more.
+ */
+public class Block {
     private final boolean transparent;
     private final boolean collides;
     private final boolean fluid;
@@ -51,10 +54,25 @@ public class Block implements DataWriter<MapType> {
     private BlockState defaultState;
     private BlockStateDefinition definition;
 
+    /**
+     * Constructs a new Block object with default properties.
+     * <p>
+     * The default properties will be used for this block, which include settings for transparency, collision, fluidity,
+     * required tools, hardness, effective tool, loot generation, rendering behavior, replacement, occlusion, greedy merging,
+     * tool level, light reduction, and sound type.
+     * <p>
+     * This constructor delegates to the constructor that accepts a {@code Properties} object
+     * with default property values.
+     */
     public Block() {
         this(new Properties());
     }
 
+    /**
+     * Constructs a new Block object with the specified properties.
+     *
+     * @param properties The properties used to configure the block.
+     */
     public Block(Properties properties) {
         this.transparent = properties.transparent;
         this.disableRendering = properties.disableRendering;
@@ -80,6 +98,11 @@ public class Block implements DataWriter<MapType> {
     public void onStateReload() {
     }
 
+    /**
+     * Defines the initial state and properties for the block based on the provided BlockStateDefinition.
+     *
+     * @param definition The BlockStateDefinition object used to set up the block's properties.
+     */
     protected void defineState(BlockStateDefinition definition) {
 
     }
@@ -122,32 +145,42 @@ public class Block implements DataWriter<MapType> {
         return this.getBoundingBox(pos.x, pos.y, pos.z, this.getDefaultState());
     }
 
-    @Override
-    public MapType save() {
-        MapType data = new MapType();
-        data.putString("id", this.getId().toString());
-        return data;
-    }
-
-    public static @NotNull Block load(@NotNull MapType data) {
-        NamespaceID id = NamespaceID.tryParse(data.getString("id"));
-        if (id == null) return Blocks.AIR;
-        Block block = Registries.BLOCK.get(id);
-        return block == null ? Blocks.AIR : block;
-    }
-
+    /**
+     * Handles the use of this block in a given world at a specified position.
+     *
+     * @param world  the world where the block is being used
+     * @param player the player using the block
+     * @param item   the item being used with the block
+     * @param pos    the position where the block is being used
+     * @return the result of the use action, which can be {@link UseResult#ALLOW}, {@link UseResult#DENY}, or {@link UseResult#SKIP}
+     */
     public @NotNull UseResult use(@NotNull WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
         return UseResult.SKIP;
     }
 
+    /**
+     * Writes the current block's ID to the specified PacketIO buffer.
+     *
+     * @param buffer the PacketIO buffer where the block's ID will be written.
+     */
     public final void write(@NotNull PacketIO buffer) {
         buffer.writeId(this.getId());
     }
 
+    /**
+     * Retrieves the translated text object for the block.
+     *
+     * @return A TextObject representing the translation of this block's name.
+     */
     public TextObject getTranslation() {
         return TextObject.translation(this.getTranslationId());
     }
 
+    /**
+     * Retrieves the translation ID for the block.
+     *
+     * @return the translation ID as a non-null string. Defaults to "quantum.block.air.name" if the block's registry ID is null.
+     */
     @NotNull
     public String getTranslationId() {
         NamespaceID key = Registries.BLOCK.getId(this);
@@ -213,6 +246,14 @@ public class Block implements DataWriter<MapType> {
         return defaultState;
     }
 
+    /**
+     * Handles the block placement context and returns the updated BlockState accordingly.
+     *
+     * @param blockMeta The metadata of the block being placed.
+     * @param at        The position at which the block is placed.
+     * @param context   The context in which the item is used to place the block.
+     * @return The updated BlockState after considering the placement context.
+     */
     public BlockState onPlacedBy(BlockState blockMeta, BlockVec at, UseItemContext context) {
         return blockMeta;
     }
@@ -221,10 +262,27 @@ public class Block implements DataWriter<MapType> {
         this.onPlace(serverWorld, offset, meta);
     }
 
+    /**
+     * Determines if the block can be placed at the specified location.
+     *
+     * @param world     The world where the block placement is being attempted.
+     * @param blockVec  The position vector representing the block's location.
+     * @param player    The player attempting to place the block (can be null).
+     * @param stack     The item stack used to place the block (can be null).
+     * @param direction The direction in which the block is being placed (can be null).
+     * @return True if the block can be placed at the given position, otherwise false.
+     */
     public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable Direction direction) {
         return true;
     }
 
+    /**
+     * Determines if the block can be replaced by another block based on the provided usage context and block state.
+     *
+     * @param context    The context in which the item is being used, including world, player, hit result, item stack, and usage amount.
+     * @param blockState The current state of the block that is being checked for replacement.
+     * @return true if the block can be replaced based on the given context and block state; otherwise false.
+     */
     public boolean canBeReplacedBy(@NotNull UseItemContext context, @NotNull BlockState blockState) {
         return true;
     }
@@ -233,23 +291,59 @@ public class Block implements DataWriter<MapType> {
         return toolLevel;
     }
 
+    /**
+     * Handles the destruction of the block within the specified world and position,
+     * including modifying the block's state and processing actions by the breaker, if applicable.
+     *
+     * @param world      the world where the block is being destroyed
+     * @param breaking   the position of the block being destroyed
+     * @param blockState the current state of the block being destroyed
+     * @param breaker    the player who is destroying the block, or null if not applicable
+     */
     public void onDestroy(@NotNull World world, @NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
 
     }
 
+    /**
+     * Retrieves the light level emitted by the given block state.
+     *
+     * @param blockState The state of the block for which the light level is queried.
+     * @return The light level emitted by the block state.
+     */
     public int getLight(@NotNull BlockState blockState) {
         return 0;
     }
 
+    /**
+     * Retrieves the light reduction level of the block given its current state.
+     * Light reduction is used to reduce the light level emitted by the block when light passes through it.
+     *
+     * @param blockState The state of the block for which the light reduction level is queried.
+     * @return The light reduction level of the block state.
+     */
     public int getLightReduction(@NotNull BlockState blockState) {
         if (isAir()) return 1;
         return lightReduction;
     }
 
+    /**
+     * Determines if the specified player can use the block.
+     *
+     * @param player the player whose capability to use the block is in question
+     * @return true if the player can use the block, otherwise false
+     */
     public boolean canUse(Player player) {
-        return false;
+        return true;
     }
 
+    /**
+     * Retrieves the sound type associated with the given block state in the specified world and position.
+     *
+     * @param state    The current state of the block.
+     * @param world    The world where the block exists.
+     * @param blockVec The position vector of the block.
+     * @return The sound type associated with the block.
+     */
     public SoundType getSoundType(BlockState state, WorldAccess world, BlockVec blockVec) {
         return this.soundType;
     }
@@ -271,11 +365,21 @@ public class Block implements DataWriter<MapType> {
         getDefinition().save(blockState, entriesData);
     }
 
+    /**
+     * Retrieves the block state definition for this block.
+     *
+     * @return The current BlockStateDefinition associated with this block.
+     */
     public BlockStateDefinition getDefinition() {
-		return definition;
-	}
+        return definition;
+    }
 
-	public static class Properties {
+    /**
+     * The Properties class defines the configurable attributes for a block.
+     * These properties allow customization of various aspects such as sound type, hardness,
+     * collision behavior, tool effectiveness, and rendering properties.
+     */
+    public static class Properties {
         private SoundType soundType = new SoundType();
         private boolean greedyMerge = true;
         private boolean occlude = true;

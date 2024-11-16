@@ -26,7 +26,11 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Dedicated server implementation.
+ * DedicatedServer is a specific type of QuantumServer designed to run as a dedicated server
+ * for the Quantum game platform.
+ * <p>
+ * It manages server-specific functionalities such as player connections, world storage, and
+ * server language. It provides methods for starting, shutting down, and handling server crashes.
  *
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  * @since 0.1.0

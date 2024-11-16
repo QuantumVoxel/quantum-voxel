@@ -11,6 +11,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.events.server.ServerStartedEvent;
@@ -60,6 +61,8 @@ import dev.ultreon.quantum.world.gen.chunk.TestGenerator;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +83,8 @@ import java.util.stream.Stream;
 
 
 /**
- * The base class for the Quantum Voxel server.
+ * The {@link QuantumServer} class represents the core server component of the QuantumGaming platform.
+ * It manages all server operations including world data, player management, network communication, and more.
  *
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
  * @since 0.1.0
@@ -88,7 +92,13 @@ import java.util.stream.Stream;
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @ApiStatus.NonExtendable
 public abstract class QuantumServer extends PollingExecutorService implements Runnable, Shutdownable {
+    /**
+     * TPS (Ticks Per Second) represents the number of ticks that occur
+     * in one second. It is a crucial metric for timekeeping in game loops
+     * and simulation software to ensure smooth and consistent updates.
+     */
     public static final int TPS = 20;
+
     public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
     public static final long NANOSECONDS_PER_TICK = QuantumServer.NANOSECONDS_PER_SECOND / QuantumServer.TPS;
 
@@ -496,8 +506,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     /**
-     * Stops the server thread in a clean state.
-     * Note: this method is blocking.
+     * Initiates the shutdown process for the server. This method ensures that
+     * all players are kicked, the scheduler is properly terminated, and the main
+     * server thread is joined within a specified timeout. In case of failure during
+     * termination or interruption, the appropriate crash handling is invoked.
+     * <p>
+     * This method blocks until the server shutdown process is complete or until the
+     * specified timeout is reached.
+     *
+     * @throws RuntimeException if the safe shutdown process is interrupted.
      */
     @Override
     @Blocking
@@ -528,12 +545,33 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         super.shutdownNow();
     }
 
+    /**
+     * Removes all players from the game.
+     * This method iterates through all connected players and removes them
+     * from the game's player list. It may also perform additional cleanup
+     * tasks necessary to reset the game state for all players being removed.
+     * <p>
+     * Note: Ensure that this method is called in a context where it is safe
+     * to remove all players (e.g., game shutdown or reset scenario).
+     */
     protected void kickAllPlayers() {
 
     }
 
+    /**
+     * Method to handle crash events by processing the provided crash log.
+     *
+     * @param crashLog the log information related to the crash event
+     */
     public abstract void crash(CrashLog crashLog);
 
+    /**
+     * Executes a single server tick. This method performs various server-side operations
+     * including profiler updates, task polling, connection handling, and world ticking.
+     * <p>
+     * Subclasses overriding this method must invoke this implementation to ensure basic server
+     * operations are performed.
+     */
     @OverridingMethodsMustInvokeSuper
     protected void runTick() {
         this.profiler.update();
@@ -634,6 +672,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return this.scheduler.schedule(runnable, time, unit);
     }
 
+    /**
+     * Closes the server instance and performs cleanup of resources.
+     */
     public void close() {
         for (Disposable disposable : this.disposables) {
             disposable.dispose();
@@ -678,13 +719,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     /**
-     * @return the game's version.
+     * Retrieves the game version based on the mod container's metadata.
+     *
+     * @return Friendly string representation of the game's version.
+     * @throws InternalError if the mod container for the base game cannot be found.
      */
     public String getGameVersion() {
-//        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE);
-//        if (container.isEmpty()) throw new InternalError("Can't find mod container for the base game.");
-//        return container.get().getMetadata().getVersion().getFriendlyString();
-        return "0.1.0";
+        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE);
+        if (container.isEmpty()) throw new InternalError("Can't find mod container for the base game.");
+        return container.get().getMetadata().getVersion().getFriendlyString();
     }
 
     /**
@@ -847,18 +890,38 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return this.players.size();
     }
 
+    /**
+     * Checks if the server is currently running.
+     *
+     * @return true if the server is running, false otherwise.
+     */
     public boolean isRunning() {
         return this.running;
     }
 
+    /**
+     * Checks if the server is integrated with the client.
+     *
+     * @return true if this is the integrated server
+     */
     public boolean isIntegrated() {
         return false;
     }
 
+    /**
+     * Checks if the server is dedicated.
+     *
+     * @return true if this is the dedicated server
+     */
     public final boolean isDedicated() {
         return !this.isIntegrated();
     }
 
+    /**
+     * Retrieves the UUID of the host.
+     *
+     * @return the UUID of the host, or null if no host is available
+     */
     @Nullable
     public UUID getHost() {
         return null;
@@ -1009,6 +1072,11 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return noiseConfigs;
     }
 
+    /**
+     * Retrieves the DimensionManager instance associated with this object.
+     *
+     * @return the current instance of DimensionManager.
+     */
     public DimensionManager getDimManager() {
         return dimManager;
     }
