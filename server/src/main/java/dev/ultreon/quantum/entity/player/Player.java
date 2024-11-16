@@ -18,7 +18,6 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -709,7 +708,4 @@ public abstract class Player extends LivingEntity {
         this.reach = reach;
     }
 
-    public void openAdvancedCrafting(@NotNull BlockVec pos) {
-
-    }
 }

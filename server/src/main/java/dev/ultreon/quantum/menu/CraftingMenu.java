@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
@@ -19,6 +17,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -31,14 +30,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see MenuType
  */
 public class CraftingMenu extends ContainerMenu {
-    private final @NotNull MenuType<?> type;
-    private final @NotNull WorldAccess world;
-    private final @NotNull Entity entity;
-    private final @Nullable BlockVec pos;
-
     protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
-    private final Container<?> container;
+
+    public final ItemSlot[] hotbar = new ItemSlot[9];
+    public final ItemSlot[][] inv = new ItemSlot[9][3];
 
     /**
      * Constructs a new CraftingMenu.
@@ -49,7 +45,7 @@ public class CraftingMenu extends ContainerMenu {
      * @param container the container associated with the menu; may be null.
      */
     public CraftingMenu(@NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, @Nullable Container<?> container) {
-        this(MenuTypes.ADVANCED_CRAFTING, world, entity, pos, 0, container);
+        this(MenuTypes.ADVANCED_CRAFTING, world, entity, pos, 36, container);
     }
 
     /**
@@ -64,18 +60,6 @@ public class CraftingMenu extends ContainerMenu {
      */
     public CraftingMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
         super(type, world, entity, pos, size, container);
-
-        this.container = container;
-
-        Preconditions.checkNotNull(type, "Menu type cannot be null!");
-        Preconditions.checkNotNull(world, "World cannot be null!");
-        Preconditions.checkNotNull(entity, "Entity cannot be null!");
-        Preconditions.checkArgument(size >= 0, "Size cannot be negative!");
-
-        this.type = type;
-        this.world = world;
-        this.entity = entity;
-        this.pos = pos;
     }
 
     /**
@@ -87,23 +71,14 @@ public class CraftingMenu extends ContainerMenu {
      * @param pos the position where the menu is opened, may be null.
      */
     public CraftingMenu(MenuType<CraftingMenu> craftingMenuMenuType, World world, Entity entity, @Nullable BlockVec pos) {
-        this(craftingMenuMenuType, world, entity, pos, 0, null);
+        this(craftingMenuMenuType, world, entity, pos, 36, null);
     }
 
-    public @NotNull MenuType<?> getType() {
-        return this.type;
-    }
+    @Override
+    public void build() {
+        super.build();
 
-    public @NotNull WorldAccess getWorld() {
-        return this.world;
-    }
-
-    public @NotNull Entity getEntity() {
-        return this.entity;
-    }
-
-    public @Nullable BlockVec getPos() {
-        return this.pos;
+        inventoryMenu(0, 6, 6);
     }
 
     /**
@@ -171,7 +146,7 @@ public class CraftingMenu extends ContainerMenu {
     }
 
     private void close() {
-        this.world.closeMenu(this);
+        this.getWorld().closeMenu(this);
     }
 
     /**
@@ -218,29 +193,8 @@ public class CraftingMenu extends ContainerMenu {
         return this.watching.isEmpty();
     }
 
-    @CanIgnoreReturnValue
-    protected int inventoryMenu(int idx, int offX, int offY) {
-        if (getEntity() instanceof Player player) {
-            for (int x = 0; x < 9; x++) {
-                this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 83));
-            }
-
-            for (int x = 0; x < 9; x++) {
-                for (int y = 0; y < 3; y++) {
-                    this.addSlot(new RedirectItemSlot(idx++, player.inventory.inv[x][y], offX + x * 19 + 6, offY + y * 19 + 6));
-                }
-            }
-        }
-
-        return idx;
-    }
-
-    public Container<?> getContainer() {
-        return container;
-    }
-
     @Override
     public @NotNull Iterator<ItemStack> iterator() {
-        return Iterators.cycle();
+        return Arrays.stream(this.slots).map(ItemSlot::getItem).iterator();
     }
 }

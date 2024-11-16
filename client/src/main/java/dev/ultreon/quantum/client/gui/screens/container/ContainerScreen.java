@@ -45,7 +45,7 @@ public abstract class ContainerScreen extends Screen {
         this.slots = new ItemSlotWidget[this.menu.slots.length];
         for (int i = 0; i < this.menu.slots.length; i++) {
             var slot = this.menu.slots[i];
-            if (slot == null) continue;
+            if (slot == null) throw new IllegalStateException("Slot " + i + " is null");
 
             ItemSlotWidget widget = new ItemSlotWidget(slot, this.left() + slot.getSlotX(), this.top() + slot.getSlotY());
             this.slots[i] = builder.add(widget);

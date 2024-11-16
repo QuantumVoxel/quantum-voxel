@@ -143,7 +143,7 @@ public class IntegratedServer extends QuantumServer {
         this.shutdown();
         crashLog.writeToLog();
 
-        this.client.showScreen(new CrashScreen(List.of(crashLog)));
+        client.delayCrash(crashLog);
     }
 
     @Override
