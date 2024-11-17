@@ -56,7 +56,7 @@ public final class NoiseConfigs {
         layerY = register("layer_y",
                 new NoiseConfig(0.01f, 4, new Vec2f(35900, 15900), 985449, 0.6f, 1.2f, 5f, 30, 60));
         biomeMap = register(BIOME_MAP,
-                new NoiseConfig(0.002f, 8, new Vec2f(903852, 493382), 137339, 0.6f, 2.0f, 5f, 10, 0));
+                new NoiseConfig(0.02f, 8, new Vec2f(903852, 493382), 137339, 0.6f, 2.0f, 5f, 10, 0));
         foliage = register("foliage",
                 new NoiseConfig(1f, 1, new Vec2f(652748, 695825), 297418, 0.5f, 2.0f, 1f, 2, 0));
         ore = register("ore",

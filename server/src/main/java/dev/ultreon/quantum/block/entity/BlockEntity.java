@@ -67,4 +67,8 @@ public abstract class BlockEntity implements CapabilityHolder {
     public void onUpdate(MapType data) {
 
     }
+
+    public BlockEntityType<?> getType() {
+        return type;
+    }
 }

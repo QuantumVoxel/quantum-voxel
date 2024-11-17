@@ -38,7 +38,7 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
  */
 @NotThreadSafe
 @ApiStatus.NonExtendable
-public abstract class Chunk implements Disposable, ChunkAccess {
+public abstract class Chunk extends GameObject implements Disposable, ChunkAccess {
     public static final int VERTEX_SIZE = 6;
     protected static final int MAX_LIGHT_LEVEL = 15;
     protected static final float[] lightLevelMap = new float[Chunk.MAX_LIGHT_LEVEL + 1];

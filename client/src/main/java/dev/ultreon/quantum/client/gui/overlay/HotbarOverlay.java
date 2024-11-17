@@ -1,18 +1,28 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.entity.player.Temperature;
+import dev.ultreon.quantum.entity.player.TemperatureUnit;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ItemSlot;
-import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.util.Vec2i;
 
 import java.util.List;
 
 public class HotbarOverlay extends Overlay {
+    private static final NamespaceID TEXTURE = QuantumClient.id("textures/gui/new_hotbar.png");
+    private static final Vec2i HEALTH_OFFSET = new Vec2i(5, 5);
+    private static final Vec2i AIR_OFFSET = new Vec2i(5, 18);
+    private static final Vec2i ITEMS_OFFSET = new Vec2i(66, 7);
+    private static final Vec2i HUNGER_OFFSET = new Vec2i(240, 5);
+    private static final Vec2i THIRST_OFFSET = new Vec2i(240, 18);
+    private static final Vec2i TEMP_OFFSET = new Vec2i(292, 5);
+    private static final Vec2i TEMP_LOW_OFFSET = new Vec2i(291, 19);
 
     @Override
     protected void render(Renderer renderer, float deltaTime) {
@@ -20,30 +30,21 @@ public class HotbarOverlay extends Overlay {
         if (player == null) return;
         if (player.isSpectator()) return;
 
-        int x = player.selected * 20;
-        ItemStack selectedItem = player.getSelectedItem();
-        NamespaceID key = Registries.ITEM.getId(selectedItem.getItem());
+        renderer.blit(TEXTURE, (width >> 1) - 150, height - 48, 300, 32, 0, 0, 300, 32, 300, 32);
 
-        var widgetsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/hotbar.png"));
-        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 25, leftY - 48, 59, 28, 175, 189, 50, 28, 400, 256);
-        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 126, leftY - 48, 254, 32, 73, 224, 254, 32, 400, 256);
-        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 125, leftY - 64, 102, 16, 74, 162, 102, 16, 400, 256);
-        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) + 23, leftY - 64, 102, 16, 74, 162, 102, 16, 400, 256);
-//        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 90 + x, leftY - 24, 20, 21, 0, 82);
+        renderer.fill((width >> 1) - 150 + HEALTH_OFFSET.x, height - 48 + HEALTH_OFFSET.y, (int) (55 * player.getHealth() / player.getMaxHealth()), 9, Color.SCARLET);
+        renderer.fill((width >> 1) - 150 + AIR_OFFSET.x, height - 48 + AIR_OFFSET.y, (int) (55 * player.getAir() / player.getMaxAir()), 5, Color.SKY);
 
-        List<ItemSlot> allowed = player.inventory.getHotbarSlots();
-        for (int index = 0, allowedLength = allowed.size(); index < allowedLength; index++) {
-            this.drawHotbarSlot(renderer, allowed, index);
-        }
+        renderer.fill((width >> 1) - 150 + HUNGER_OFFSET.x, height - 48 + HUNGER_OFFSET.y, 47 * player.getFoodStatus().getFoodLevel() / 20, 9, Color.FIREBRICK);
+        renderer.fill((width >> 1) - 150 + THIRST_OFFSET.x, height - 48 + THIRST_OFFSET.y, (int) (47 * player.getFoodStatus().getThirstLevel() / 20), 5, Color.ROYAL);
 
-        if (key != null && !selectedItem.isEmpty()) {
-            TextObject name = selectedItem.getItem().getTranslation();
+        renderer.fill((width >> 1) - 150 + TEMP_LOW_OFFSET.x, height - 48 + TEMP_LOW_OFFSET.y, 4, 4, Color.CHARTREUSE);
+        renderer.fill((width >> 1) - 150 + TEMP_OFFSET.x, height - 48 + TEMP_OFFSET.y + 14 - (int) (14 * player.getTemperature() / 50.0F), 2, (int) (14 * player.getTemperature() / 50.0F), Color.CHARTREUSE);
 
-            renderer.textCenter(name, (int) ((float) this.client.getScaledWidth()) / 2, leftY - 80);
-        }
+        Temperature temperature = new Temperature(player.getTemperature());
+        double temp = temperature.convertTo(TemperatureUnit.CELSIUS);
 
-        leftY -= 49;
-        rightY -= 49;
+        renderer.textLeft(String.format("%.1f °C", temp), (width >> 1) - 150 + TEMP_OFFSET.x + 18, height - 48 + TEMP_OFFSET.y + 8, RgbColor.WHITE, true);
     }
 
     private void drawHotbarSlot(Renderer renderer, List<ItemSlot> allowed, int index) {

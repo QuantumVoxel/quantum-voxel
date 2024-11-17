@@ -14,6 +14,7 @@ import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
@@ -107,4 +108,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet);
 
     void onBlockEntityUpdate(BlockVec pos, MapType data);
+
+    void onTemperatureSync(S2CTemperatureSyncPacket packet);
 }

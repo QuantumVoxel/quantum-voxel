@@ -262,6 +262,7 @@ public class IntegratedServer extends QuantumServer {
         super.shutdown();
 
         this.timer.cancel();
+        this.client.remove(this);
         this.client.integratedServer = null;
     }
 

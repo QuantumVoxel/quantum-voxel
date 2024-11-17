@@ -49,4 +49,9 @@ public class HellGenerator extends SimpleChunkGenerator {
     public Carver getCarver() {
         return carver;
     }
+
+    @Override
+    public double getTemperature(int x, int z) {
+        return 4.0;
+    }
 }

@@ -41,6 +41,7 @@ import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -252,6 +253,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             }
             if (this.client.integratedServer != null) {
                 this.client.integratedServer.shutdown();
+                this.client.remove(this.client.integratedServer);
                 this.client.integratedServer = null;
             }
 
@@ -536,6 +538,11 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (blockEntity != null) {
             blockEntity.onUpdate(data);
         }
+    }
+
+    @Override
+    public void onTemperatureSync(S2CTemperatureSyncPacket packet) {
+        client.player.onTemperatureSync(packet);
     }
 
     @Override

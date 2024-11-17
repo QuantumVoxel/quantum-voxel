@@ -2324,10 +2324,10 @@ public class Renderer implements Disposable {
 
     @CanIgnoreReturnValue
     public Renderer textMultiline(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        y -= this.font.getLineHeight();
+        y -= (int) this.font.getLineHeight();
 
         for (String line : text.split("\n")) {
-            y += this.font.getLineHeight() + 2;
+            y += (int) (this.font.getLineHeight() + 2);
             this.textLeft(line, x, y, color, shadow);
         }
 
@@ -2461,22 +2461,22 @@ public class Renderer implements Disposable {
         if (translation != null) {
             rect.setPosition(rect.getPosition(this.tmp2A).add(translation.x, translation.y));
         }
-        rect.setPosition(rect.getPosition(this.tmp2A).add(0, -client.getDrawOffset().y * 2));
+        rect.setPosition(rect.getPosition(this.tmp2A).add(0, 0));
 
         if (rect.x < 0) {
             rect.width = Math.max(rect.width + rect.x, 0);
             rect.x = 0;
         }
 
-        if (rect.y < -client.getDrawOffset().y * 2) {
+        if (rect.y < client.getDrawOffset().y) {
             rect.height = Math.max(rect.height + rect.y, 0);
-            rect.y = -client.getDrawOffset().y * 2;
+            rect.y = client.getDrawOffset().y;
         }
 
         if (rect.width < 1) return false;
         if (rect.height < 1) return false;
 
-        rect.y = this.client.getHeight() - rect.y - rect.height;
+        rect.y = Gdx.graphics.getHeight() - rect.y - rect.height;
 
         if (!Gdx.gl.glIsEnabled(GL20.GL_SCISSOR_TEST)) {
             Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
@@ -2736,11 +2736,11 @@ public class Renderer implements Disposable {
     }
 
     public void renderFrame(int x, int y, int w, int h) {
-        renderFrame(id("textures/gui/frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
+        renderFrame(NamespaceID.of("textures/gui/frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
     }
 
     public void renderPopoutFrame(int x, int y, int w, int h) {
-        renderFrame(id("textures/gui/popout_frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
+        renderFrame(NamespaceID.of("textures/gui/popout_frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
     }
 
     public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
@@ -2978,7 +2978,7 @@ public class Renderer implements Disposable {
 
             // set the shader uniforms
             blurShader.setUniformf("iBlurDirection", 1f, 0f);
-            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            blurShader.setUniformf("iResolution", QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
             blurShader.setUniformf("iBlurRadius", radius / guiScale);
             blurShader.setUniformf("iTime", iTime);
 
@@ -3005,7 +3005,7 @@ public class Renderer implements Disposable {
             blurShader.setUniformf("iBlurDirection", 0f, 1f);
 
             //update the resolution of the blur along Y-axis
-            blurShader.setUniformf("iResolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            blurShader.setUniformf("iResolution", QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
 
             //update the Y-axis blur radius
             blurShader.setUniformf("radius", radius);
@@ -3013,7 +3013,7 @@ public class Renderer implements Disposable {
             //draw target B to the screen with a vertical blur effect
             fboRegion.setTexture(blurTargetB.getColorBufferTexture());
             this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            batch.draw(fboRegion, 0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
 
             //reset to default shader without blurs
             batch.setShader(null);
@@ -3048,11 +3048,11 @@ public class Renderer implements Disposable {
     }
 
     public int getWidth() {
-        return width;
+        return QuantumClient.get().getWidth();
     }
 
     public int getHeight() {
-        return height;
+        return QuantumClient.get().getHeight();
     }
 
     public boolean isBlurred() {

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -23,7 +24,7 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.SceneCategory;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -72,8 +73,8 @@ public class GameRenderer implements Disposable {
         if (width <= 0 || height <= 0) return;
         this.depthFbo.dispose();
         this.fbo.dispose();
-        this.depthFbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        this.depthFbo = new FrameBuffer(Pixmap.Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
+        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
         this.pipeline.resize(width, height);
     }
 
@@ -94,10 +95,10 @@ public class GameRenderer implements Disposable {
 
         if (player != null) {
             try (var ignored1 = QuantumClient.PROFILER.start("camera")) {
-                if (this.client.screen == null && !GamePlatform.get().isShowingImGui()) {
+                if (this.client.screen == null && Gdx.input.isCursorCatched()) {
                     // Calculate delta position for player rotation.
-                    int width = Gdx.graphics.getWidth();
-                    int height = Gdx.graphics.getHeight();
+                    int width = QuantumClient.get().getWidth();
+                    int height = QuantumClient.get().getHeight();
                     int centerX = width / 2;
                     int centerY = height / 2;
                     float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfig.cameraSensitivity);
@@ -127,8 +128,8 @@ public class GameRenderer implements Disposable {
             };
         }
 
-        RenderLayer.BACKGROUND.update(deltaTime);
-        RenderLayer.WORLD.update(deltaTime);
+        client.backgroundCat.update(deltaTime);
+        client.mainCat.update(deltaTime);
 
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
 
@@ -214,8 +215,9 @@ public class GameRenderer implements Disposable {
         if (screen != null) {
             try (var ignored = QuantumClient.PROFILER.start("screen")) {
 
-                float x = (Gdx.input.getX() - this.client.getDrawOffset().x) / this.client.getGuiScale();
-                float y = (Gdx.input.getY() - this.client.getDrawOffset().y) / this.client.getGuiScale();
+                GridPoint2 mouseOffset = this.client.getMousePos();
+                float x = GamePlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
+                float y = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
 
                 if (GamePlatform.get().isMobile()) {
                     MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();

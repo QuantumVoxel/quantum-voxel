@@ -14,7 +14,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.SceneCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
@@ -60,7 +60,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
     private final Map<BlockVec, ModelInstance> addedModels = new ConcurrentHashMap<>();
-    private final Map<BlockVec, ModelInstance> models = new ConcurrentHashMap<>();
+    private final Map<BlockVec, BlockObject> models = new ConcurrentHashMap<>();
     private final Array<BlockVec> removedModels = new Array<>();
     public boolean visible;
     private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
@@ -244,8 +244,8 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @CanIgnoreReturnValue
     public void addModel(BlockVec pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
-            ModelInstance modelInstance1 = this.models.get(pos);
-            RenderLayer.WORLD.destroy(modelInstance1);
+            BlockObject modelInstance1 = this.models.get(pos);
+            this.remove(modelInstance1);
             this.models.remove(pos);
         }
         this.addedModels.put(pos, instance);
@@ -271,25 +271,26 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return empty;
     }
 
-    public void renderModels(RenderLayer renderLayer) {
+    public void renderModels(SceneCategory sceneCategory) {
         for (BlockVec pos : this.addedModels.keySet()) {
             ModelInstance model = this.addedModels.get(pos);
             model.userData = Shaders.MODEL_VIEW.get();
             this.addedModels.remove(pos);
-            this.models.put(pos, model);
-            renderLayer.add(model);
+            BlockObject value = new BlockObject(model);
+            this.models.put(pos, value);
+            sceneCategory.add("Block Object", value);
         }
 
         for (BlockVec pos : this.models.keySet()) {
-            ModelInstance inst = this.models.get(pos);
+            BlockObject inst = this.models.get(pos);
             inst.transform.setToTranslationAndScaling(renderOffset.x + pos.getIntX(), renderOffset.y + pos.getIntY(), renderOffset.z + pos.getIntZ(), 1 / 16f, 1 / 16f, 1 / 16f);
         }
 
         for (BlockVec pos : this.removedModels.toArray(BlockVec.class)) {
             this.removedModels.removeValue(pos, false);
-            ModelInstance model = this.models.remove(pos);
+            BlockObject model = this.models.remove(pos);
             if (model != null)
-                renderLayer.destroy(model);
+                this.remove(model);
         }
     }
 
@@ -319,7 +320,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     public void destroyModels() {
         for (var model : this.models.values()) {
-            RenderLayer.WORLD.destroy(model);
+            this.remove(model);
         }
     }
 

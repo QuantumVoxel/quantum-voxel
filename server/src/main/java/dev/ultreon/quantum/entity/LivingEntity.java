@@ -7,7 +7,9 @@ import dev.ultreon.quantum.api.events.entity.LivingEntityDeathEvent;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.ai.Navigator;
+import dev.ultreon.quantum.entity.component.AirSupply;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
+import dev.ultreon.quantum.entity.player.Temperature;
 import dev.ultreon.quantum.events.EntityEvents;
 import dev.ultreon.quantum.events.api.ValueEventResult;
 import dev.ultreon.quantum.item.food.AppliedEffect;
@@ -44,6 +46,9 @@ public abstract class LivingEntity extends Entity {
     private final List<AppliedEffect> appliedEffects = Lists.newArrayList();
     private boolean tagged;
     private Navigator navigator;
+    private final AirSupply airSupply = this.set(AirSupply.class, new AirSupply(10));
+    protected double temperature;
+    protected double temperatureGoal;
 
     public LivingEntity(EntityType<? extends LivingEntity> entityType, WorldAccess world) {
         super(entityType, world);
@@ -131,8 +136,34 @@ public abstract class LivingEntity extends Entity {
             }
         }
 
+        tickAirSupply();
+        tickTemperature();
+
         // Call the superclass tick method
         super.tick();
+    }
+
+    protected void tickTemperature() {
+        if (!(world instanceof ServerWorld serverWorld)) return;
+        temperatureGoal = Temperature.getTemperature(serverWorld, (int) x, (int) y, (int) z);
+
+        final double delta = 0.1;
+        final double acceleration = 24;
+        if (temperature < temperatureGoal) { // Getting warmer.
+            temperature = Math.min(temperatureGoal, temperature + (delta * ((temperatureGoal - temperature) / acceleration)));
+        } else if (temperature > temperatureGoal) { // Getting colder.
+            temperature = Math.max(temperatureGoal, temperature - (delta * ((temperature - temperatureGoal) / acceleration)));
+        }
+    }
+
+    protected void tickAirSupply() {
+        if (isBuried() && getBuriedBlock().getBlock() == Blocks.WATER)
+            airSupply.air -= 0.1f;
+
+        if (getY() > 320) {
+            double air = (getY() - 320) / 120f;
+            airSupply.air = air >= 20 ? 0 : airSupply.air - (float) air;
+        }
     }
 
     @Override
@@ -140,6 +171,13 @@ public abstract class LivingEntity extends Entity {
         super.onPrepareSpawn(spawnData);
 
         this.setHealth(this.maxHealth);
+        this.setInitialTemperature();
+    }
+
+    private void setInitialTemperature() {
+        if (world instanceof ServerWorld serverWorld) {
+            temperatureGoal = temperature = Temperature.getTemperature(serverWorld, (int) x, (int) y, (int) z);
+        }
     }
 
     @Override
@@ -395,5 +433,22 @@ public abstract class LivingEntity extends Entity {
 
     public float getEyeHeight() {
         return getType().getEyeHeight();
+    }
+
+    public float getAir() {
+        return airSupply.air;
+    }
+
+    public int getMaxAir() {
+        return airSupply.maxAir;
+    }
+
+    /**
+     * Retrieves the current temperature in Celsius.
+     *
+     * @return the current temperature as a floating-point number.
+     */
+    public double getTemperature() {
+        return temperature;
     }
 }

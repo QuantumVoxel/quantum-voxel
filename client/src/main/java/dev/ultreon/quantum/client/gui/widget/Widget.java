@@ -7,18 +7,16 @@ import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
-import dev.ultreon.quantum.component.GameComponent;
-import dev.ultreon.quantum.component.GameComponentHolder;
+import dev.ultreon.quantum.component.Component;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import lombok.Getter;
-import lombok.Setter;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -27,9 +25,7 @@ import java.util.function.Supplier;
  * Widget instances manage their bounds, components and handle various user interactions.
  */
 @SuppressWarnings("unchecked")
-@Getter
-@Setter
-public abstract class Widget implements StaticWidget, GameComponentHolder<UIComponent> {
+public abstract class Widget extends GameObject implements StaticWidget {
     protected boolean ignoreBounds = false;
     @Getter
     private final Position preferredPos = new Position(0, 0);
@@ -69,27 +65,6 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     protected final <C extends UIComponent> C register(NamespaceID id, C component) {
         this.components.put(id, component);
         return component;
-    }
-
-    @Override
-    public Map<NamespaceID, UIComponent> componentRegistry() {
-        return Collections.unmodifiableMap(this.components);
-    }
-
-    @Override
-    public <T extends GameComponent<?>> T getComponent(NamespaceID id, T... typeGetter) {
-        UIComponent component = this.components.get(id);
-        if (component == null) throw new IllegalArgumentException("Component not found: " + id);
-        if (!component.getClass().isAssignableFrom(typeGetter.getClass().getComponentType()))
-            throw new ClassCastException(typeGetter.getClass().getComponentType().getName() + " does not extend " + component.getHolder() + ".");
-
-        return (T) component;
-    }
-
-    @SafeVarargs
-    public final <T extends GameComponent<?>> void withComponent(NamespaceID id, Consumer<T> consumer, T... typeGetter) {
-        UIComponent uiComponent = this.getComponent(id);
-        if (uiComponent == null) throw new IllegalArgumentException("Component not found: " + id);
     }
 
     @Override
@@ -267,7 +242,7 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     }
 
     public final boolean isWithinBounds(int x, int y) {
-        return this.getBounds().contains(x, y) || this.ignoreBounds;
+        return this.bounds.contains(x, y) || this.ignoreBounds;
     }
 
     @CanIgnoreReturnValue
@@ -392,5 +367,77 @@ public abstract class Widget implements StaticWidget, GameComponentHolder<UIComp
     @FunctionalInterface
     public interface RevalidateListener {
         void revalidate(Widget widget);
+    }
+
+    public boolean isIgnoreBounds() {
+        return ignoreBounds;
+    }
+
+    public void setIgnoreBounds(boolean ignoreBounds) {
+        this.ignoreBounds = ignoreBounds;
+    }
+
+    public Position getPreferredPos() {
+        return preferredPos;
+    }
+
+    public Size getPreferredSize() {
+        return preferredSize;
+    }
+
+    public void setHovered(boolean hovered) {
+        isHovered = hovered;
+    }
+
+    public void setFocused(boolean focused) {
+        isFocused = focused;
+    }
+
+    public Screen getRoot() {
+        return root;
+    }
+
+    public void setRoot(Screen root) {
+        this.root = root;
+    }
+
+    public Bounds getBounds() {
+        return bounds;
+    }
+
+    public Position getPos() {
+        return pos;
+    }
+
+    public Size getSize() {
+        return size;
+    }
+
+    public UIContainer<?> getParent() {
+        return parent;
+    }
+
+    public void setParent(UIContainer<?> parent) {
+        this.parent = parent;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public QuantumClient getClient() {
+        return client;
+    }
+
+    public GameFont getFont() {
+        return font;
+    }
+
+    public void setFont(GameFont font) {
+        this.font = font;
+    }
+
+    public List<RevalidateListener> getRevalidateListeners() {
+        return revalidateListeners;
     }
 }

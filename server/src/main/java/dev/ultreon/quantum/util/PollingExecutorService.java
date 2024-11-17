@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * Tasks are kept in a synchronized queue and processed by a dedicated thread.
  */
 @SuppressWarnings("NewApi")
-public class PollingExecutorService implements ExecutorService {
+public class PollingExecutorService extends GameObject implements ExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
     private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>(2000));
     private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();

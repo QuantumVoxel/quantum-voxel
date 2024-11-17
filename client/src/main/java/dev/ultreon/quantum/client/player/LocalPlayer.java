@@ -28,6 +28,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.SoundType;
@@ -453,5 +454,11 @@ public class LocalPlayer extends ClientPlayer {
     @Deprecated
     public void onTeleportedDimension(WorldAccess world) {
         super.onTeleportedDimension(world);
+    }
+
+    public void onTemperatureSync(S2CTemperatureSyncPacket packet) {
+        double temperature = packet.temperature();
+        this.temperature = temperature;
+        this.temperatureGoal = temperature;
     }
 }

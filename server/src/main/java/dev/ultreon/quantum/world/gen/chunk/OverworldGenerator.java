@@ -119,7 +119,6 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         BiomeGenerator biomeGen = selectGenerator(height, humid, temp, variation);
 
         return new BiomeGenerator.Index(biomeGen);
-
     }
 
     /**
@@ -178,5 +177,10 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     public Carver getCarver() {
         if (carver == null) throw new IllegalStateException("Carver not initialized yet!");
         return carver;
+    }
+
+    @Override
+    public double getTemperature(int x, int z) {
+        return this.tempNoise.evaluateNoise(x * this.noiseConfig.noiseZoom(), z * this.noiseConfig.noiseZoom()) * 2.0f;
     }
 }

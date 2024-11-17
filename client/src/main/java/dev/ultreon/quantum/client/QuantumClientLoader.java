@@ -245,10 +245,6 @@ class QuantumClientLoader implements Runnable {
         //*************//
         QuantumClient.LOGGER.info("Opening title screen");
 
-        if (client.imGui) {
-            GamePlatform.get().setupImGui();
-        }
-
         client.onReloadConfig();
 
         client.booted = true;

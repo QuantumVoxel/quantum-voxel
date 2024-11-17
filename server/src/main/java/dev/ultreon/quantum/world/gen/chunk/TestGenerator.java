@@ -32,4 +32,9 @@ public class TestGenerator extends SimpleChunkGenerator {
     public Carver getCarver() {
         return carver;
     }
+
+    @Override
+    public double getTemperature(int x, int z) {
+        return 1.1;
+    }
 }

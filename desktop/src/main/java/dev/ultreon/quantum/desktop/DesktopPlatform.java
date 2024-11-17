@@ -45,7 +45,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void preInitImGui() {
-        ImGuiOverlay.preInitImGui();
+        QuantumClient.invokeAndWait(ImGuiOverlay::preInitImGui);
     }
 
     @Override
@@ -55,6 +55,9 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void renderImGui() {
+        if (ImGuiOverlay.isShown()) ImGuiOverlay.setBounds(insets);
+        else insets.idt();
+        QuantumClient.get().updateViewport();
         ImGuiOverlay.renderImGui(QuantumClient.get());
     }
 
@@ -78,6 +81,8 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void setShowingImGui(boolean value) {
         ImGuiOverlay.setShowingImGui(value);
+        if (!value) insets.idt();
+        else ImGuiOverlay.setBounds(insets);
     }
 
     @Override

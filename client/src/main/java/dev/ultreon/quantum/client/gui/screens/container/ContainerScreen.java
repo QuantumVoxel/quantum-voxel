@@ -56,7 +56,7 @@ public abstract class ContainerScreen extends Screen {
     public void resized(int width, int height) {
         super.resized(width, height);
 
-        for (int i = 0; i < this.maxSlots; i++) {
+        for (int i = 0; i < this.slots.length; i++) {
             if (this.slots[i] == null) continue;
             this.slots[i].setX(this.left() + this.menu.slots[i].getSlotX());
             this.slots[i].setY(this.top() + this.menu.slots[i].getSlotY());

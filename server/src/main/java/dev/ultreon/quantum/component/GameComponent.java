@@ -1,15 +1,13 @@
 package dev.ultreon.quantum.component;
 
-public abstract class GameComponent<T> {
-    private final Class<? extends T> holder;
+import dev.ultreon.quantum.util.GameObject;
 
-    @SafeVarargs
-    @SuppressWarnings("unchecked")
-    protected GameComponent(T... typeGetter) {
-        this.holder = (Class<? extends T>) typeGetter.getClass().getComponentType();
+public abstract class GameComponent extends Component<GameObject> {
+    protected GameComponent() {
+        super(GameObject.class);
     }
 
-    public Class<? extends T> getHolder() {
-        return this.holder;
+    public void update(float deltaTime) {
+
     }
 }

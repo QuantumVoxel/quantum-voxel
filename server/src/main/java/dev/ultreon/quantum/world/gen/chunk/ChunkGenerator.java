@@ -43,4 +43,6 @@ public interface ChunkGenerator extends Disposable {
     DomainWarping getLayerDomain();
 
     Carver getCarver();
+
+    double getTemperature(int x, int z);
 }

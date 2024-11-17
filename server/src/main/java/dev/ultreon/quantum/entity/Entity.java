@@ -6,7 +6,6 @@ import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
-import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.network.packets.s2c.S2CEntityPipeline;
@@ -49,7 +48,7 @@ import java.util.UUID;
  * @see World#spawn(Entity)
  * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
  */
-public abstract class Entity extends ComponentSystem implements CommandSender {
+public abstract class Entity extends GameObject implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected WorldAccess world;
     protected double x;
@@ -498,6 +497,7 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
 
     /**
      * @return true if the entity is in the void, false otherwise.
+     * @deprecated not used until found a different use for void (feature? 👀).
      */
     @Deprecated
     public boolean isInVoid() {

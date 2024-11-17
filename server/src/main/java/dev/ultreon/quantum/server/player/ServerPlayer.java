@@ -72,6 +72,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     private boolean isAdmin;
     private final Tracker<ChunkVec> chunkTracker = new Tracker<>();
     private boolean isInactive;
+    private final Vec3d tmp3Da = new Vec3d();
 
     public ServerPlayer(EntityType<? extends Player> entityType, ServerWorld world, UUID uuid, String name, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         super(entityType, world, name);
@@ -216,6 +217,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         velocityY = 0;
         velocityZ = 0;
 
+
+        if (this.world.isServerSide()) {
+            float curSpeed = (float) this.tmp3Da.set(this.ox, this.oy, this.oz).dst(this.x, this.y, this.z);
+
+            if (curSpeed > 0) {
+                getFoodStatus().exhaust(curSpeed / 10f);
+            }
+        }
+
         // Check if the player's health has changed
         if (this.oldHealth != this.health) {
             // Send the updated health to the client
@@ -233,6 +243,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             if (pos != null && pos.vec().d().dst(this.getPosition()) > 5)
                 // Auto-close the menu if the distance is greater than 5
                 this.autoCloseMenu();
+        }
+    }
+
+    @Override
+    protected void tickTemperature() {
+        super.tickTemperature();
+
+        if (getAge() % 10 == 0) {
+            sendPacket(new S2CTemperatureSyncPacket(getTemperature()));
         }
     }
 
@@ -546,16 +565,13 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
 
-        this.x = x;
-        this.y = y;
-        this.z = z;
 
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
-        this.velocityX = x - this.ox;
-        this.velocityY = y - this.oy;
-        this.velocityZ = z - this.oz;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     /**
@@ -576,6 +592,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
 
+        this.ox = this.x;
+        this.oy = this.y;
+        this.oz = this.z;
+
         this.x = x;
         this.y = y;
         this.z = z;
@@ -583,14 +603,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.xHeadRot = xHeadRot;
         this.xRot = xRot;
         this.yRot = yRot;
-
-        this.ox = this.x;
-        this.oy = this.y;
-        this.oz = this.z;
-
-        this.velocityX = x - this.ox;
-        this.velocityY = y - this.oy;
-        this.velocityZ = z - this.oz;
     }
 
     public boolean isSpawned() {

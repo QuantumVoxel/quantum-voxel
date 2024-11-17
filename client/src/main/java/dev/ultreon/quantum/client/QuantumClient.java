@@ -21,13 +21,13 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.video.VideoPlayer;
-import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.KnownFonts;
 import com.google.common.base.Preconditions;
@@ -80,7 +80,7 @@ import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.render.MeshManager;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.SceneCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
@@ -234,6 +234,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public TouchInput touchInput;
     public VirtualKeyboard virtualKeyboard;
 
+    public SceneCategory backgroundCat = new SceneCategory();
+    public SceneCategory worldCat = new SceneCategory();
+    public SceneCategory mainCat = new SceneCategory();
+
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
     // Cursors
@@ -260,10 +264,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private final ControlButton maximizeButton;
     private final ControlButton minimizeButton;
 
-    // Background video because why peanuts.
-    // TODO: See if this is a good idea, or if it's just a lil' bit too much.
-    public VideoPlayer backgroundVideo = VideoPlayerCreator.createVideoPlayer();
-
     // Input
     public TouchPoint motionPointer = null;
     public Vector2 scrollPointer = new Vector2();
@@ -275,7 +275,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Window vibrancy
     private final boolean windowVibrancyEnabled = false;
-    private final Bounds gameBounds = new Bounds();
+    private final Rectangle gameBounds = new Rectangle();
     private long lastPress;
 
     // G3D model loader (libGDX 3D models)
@@ -337,15 +337,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Font stuff
     public GameFont font;
-    @NotNull
-    @Deprecated
-    public final GameFont unifont;
+    private GameFont unifont;
 
     // Generic renderers
     @Nullable
     public TerrainRenderer worldRenderer;
     public ItemRenderer itemRenderer;
-    private final GameRenderer gameRenderer;
+    private GameRenderer gameRenderer;
 
     // GUI stuff
     @Nullable
@@ -354,11 +352,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     private FrameBuffer fbo;
 
-    @NotNull
-    public final SpriteBatch spriteBatch;
-    public final ModelBatch modelBatch;
-    public final ShapeDrawer shapes;
-    public final Renderer renderer;
+    public SpriteBatch spriteBatch;
+    public ModelBatch modelBatch;
+    public ShapeDrawer shapes;
+    public Renderer renderer;
 
     private float guiScale = this.calcMaxGuiScale();
 
@@ -395,6 +392,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private final ShaderProviderManager shaderProviderManager;
     private final ShaderProgramManager shaderProgramManager;
     private final TextureAtlasManager textureAtlasManager;
+
+    @HiddenNode
     public final FontManager fontManager = new FontManager();
 
     // Registries
@@ -404,10 +403,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Raycast and block breaking
     public Hit hit;
+
+    @ShowInNodeView
     private BlockVec breaking;
+
+    @ShowInNodeView
     private BlockState breakingBlock;
 
-    public @NotNull Hit cursor;
+    public @Nullable Hit cursor;
 
     // Public Flags
     public boolean renderWorld = false;
@@ -420,6 +423,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public TextureAtlas itemTextureAtlas;
 
     // Baked Models
+    @HiddenNode
     public BakedModelRegistry bakedBlockModels;
 
     // Advanced Shadows
@@ -434,8 +438,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private int width;
     private int height;
 
+    @ShowInNodeView
     Texture windowTex;
 
+    @ShowInNodeView
     private final GameWindow window;
 
     // Frames and ticking
@@ -483,6 +489,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public Vector2[] touchMovedScl = new Vector2[Gdx.input.getMaxPointers()];
     public Vector2[] touchMoved = new Vector2[Gdx.input.getMaxPointers()];
     private boolean shuttingDown = false;
+    private GridPoint2 offset = new GridPoint2(0, 0);
+    private final GameInsets insets = new GameInsets(0, 0, 0, 0);
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -519,6 +527,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
+
+        this.mainCat.add("Client", this);
 
         ModApi.init();
 
@@ -610,9 +620,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         RpcHandler.enable();
 
         // Initialize ImGui if necessary
-        this.imGui = !isMac && !PlatformOS.isAndroid && !PlatformOS.isARM && !PlatformOS.isIos;
-        if (this.imGui)
+        this.imGui = !PlatformOS.isAndroid && !PlatformOS.isIos;
+        if (this.imGui) {
             GamePlatform.get().preInitImGui();
+            GamePlatform.get().setupImGui();
+        }
 
         // Initialize the model loader
         G3dModelLoader modelLoader = new G3dModelLoader(new JsonReader());
@@ -921,7 +933,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 throw new RejectedExecutionException("Failed to execute task", e);
             }
         }
-        return QuantumClient.instance.submit(func).join();
+        try {
+            return QuantumClient.instance.submit(func).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RejectedExecutionException("Failed to execute task", e);
+        }
     }
 
     /**
@@ -1076,7 +1092,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      *
      * @param path the path to the resource.
      * @return the identifier for the given path.
+     * @deprecated Use {@link NamespaceID#of(String)} instead
      */
+    @Deprecated
     public static NamespaceID id(String path) {
         return new NamespaceID(CommonConstants.NAMESPACE, path);
     }
@@ -1133,6 +1151,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             return invokeAndWait(() -> this.showScreen(finalNext));
         }
 
+        if (this.screen != null) this.remove(this.screen);
         if (!skipScreenshot && next instanceof PauseScreen pause && world != null) {
             this.screenshot(true).thenAccept(screenshot -> {
                 if (screenshot != null) {
@@ -1177,6 +1196,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         this.screen = next;
         this.screen.init(this.getScaledWidth(), this.getScaledHeight());
+        this.add("Screen", next);
         KeyAndMouseInput.setCursorCaught(false);
 
         this.setWindowTitle(this.screen.getTitle());
@@ -1246,6 +1266,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             try {
                 if (this.integratedServer != null) {
                     this.integratedServer.shutdownNow();
+                    this.remove(integratedServer);
                     this.integratedServer = null;
                 }
 
@@ -1268,10 +1289,17 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     private void doRender(float deltaTime) {
-        this.width = Gdx.graphics.getWidth();
-        this.height = Gdx.graphics.getHeight();
+        if (this.width == 0 || this.height == 0) {
+            this.width = Gdx.graphics.getWidth();
+            this.height = Gdx.graphics.getHeight();
+        }
 
-        if (this.width == 0 || this.height == 0) return;
+        if (deferredWidth != null && deferredHeight != null && (width != deferredWidth || height != deferredHeight)) {
+            width = deferredWidth;
+            height = deferredHeight;
+
+            this.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
 
         if (this.screenshotWorldOnly) {
             ScreenUtils.clear(0, 0, 0, 0, true);
@@ -1288,7 +1316,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (this.triggerScreenshot) this.prepareScreenshot();
 
         try (var ignored0 = PROFILER.start("renderGame")) {
-            this.renderGame(renderer, deltaTime);
+            gameBounds.set(getDrawOffset().x, getDrawOffset().y, width, height);
+            if (ScissorStack.pushScissors(gameBounds)) {
+                try {
+                    this.renderGame(renderer, deltaTime);
+                } finally {
+                    ScissorStack.popScissors();
+                }
+            }
         }
 
         if (this.captureScreenshot && !this.screenshotWorldOnly) this.handleScreenshot();
@@ -1397,12 +1432,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         ScreenUtils.clear(0, 0, 0, 0, true);
         Gdx.gl.glFlush();
 
-        this.gameBounds.setPos(0, 0);
-        this.gameBounds.setSize(getScaledWidth() + getDrawOffset().x / 2, getScaledHeight() + getDrawOffset().y / 2);
-        if (renderer.pushScissors(this.gameBounds)) {
-            this.renderMain(renderer, deltaTime);
-            renderer.popScissors();
-        }
+        this.renderMain(renderer, deltaTime);
         return false;
     }
 
@@ -1906,6 +1936,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public void resize(int width, int height) {
         if (this.spriteBatch == null
             || this.renderer == null) return;
+        if (width == 0 && height == 0) {
+            return;
+        }
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invokeAndWait(() -> this.resize(width, height));
             return;
@@ -1917,6 +1950,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Update the deferred width and height values
         this.deferredWidth = width;
         this.deferredHeight = height;
+
+        this.width = width;
+        this.height = height;
 
         // Resize the renderer
         this.renderer.resize(width, height);
@@ -1932,28 +1968,28 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Update the camera if present
         if (this.camera != null) {
-            this.camera.viewportWidth = width;
-            this.camera.viewportHeight = height;
+            this.camera.viewportWidth = getWidth();
+            this.camera.viewportHeight = getHeight();
             this.camera.update();
         }
 
         // Resize the item renderer
         if (this.itemRenderer != null) {
-            this.itemRenderer.resize(width, height);
+            this.itemRenderer.resize(getWidth(), getHeight());
         }
 
         // Resize the game renderer
-        this.gameRenderer.resize(width, height);
+        this.gameRenderer.resize(getWidth(), getHeight());
 
         // Resize the current screen
         var cur = this.screen;
         if (cur != null) {
-            float w = width / this.getGuiScale();
-            float h = height / this.getGuiScale();
+            float w = getWidth() / this.getGuiScale();
+            float h = getHeight() / this.getGuiScale();
             cur.resize(ceil(w), ceil(h));
         }
 
-        OverlayManager.resize(ceil(width / this.getGuiScale()), ceil(height / this.getGuiScale()));
+        OverlayManager.resize(ceil(getWidth() / this.getGuiScale()), ceil(height / this.getGuiScale()));
     }
 
     @Override
@@ -2003,8 +2039,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 QuantumClient.cleanUp(this.fbo);
 
                 // Clear scenes
-                RenderLayer.BACKGROUND.clear();
-                RenderLayer.WORLD.clear();
+                backgroundCat.clear();
+                worldCat.clear();
+                mainCat.clear();
 
                 // Dispose Models
                 ModelManager.INSTANCE.dispose();
@@ -2067,11 +2104,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public int getWidth() {
-        return this.width - this.getDrawOffset().x * 2;
+        GameInsets insets = GamePlatform.get().getInsets();
+        return GamePlatform.get().isShowingImGui() ? insets.width : Gdx.graphics.getWidth();
     }
 
     public int getHeight() {
-        return this.height - this.getDrawOffset().y * 2;
+        GameInsets insets = GamePlatform.get().getInsets();
+        return GamePlatform.get().isShowingImGui() ? insets.height : Gdx.graphics.getHeight();
     }
 
     public TextureManager getTextureManager() {
@@ -2091,11 +2130,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public int getScaledWidth() {
-        return ceil(Gdx.graphics.getWidth() / this.getGuiScale() - getDrawOffset().x);
+        return ceil(getWidth() / this.getGuiScale());
     }
 
     public int getScaledHeight() {
-        return ceil(Gdx.graphics.getHeight() / this.getGuiScale() - (float) getDrawOffset().y / (window.isMaximized() ? 2 : 1));
+        return ceil(getHeight() / this.getGuiScale());
     }
 
     public void exitWorldToTitle() {
@@ -2116,6 +2155,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 QuantumClient.crash(e);
                 return;
             }
+
+            IntegratedServer server = integratedServer;
+            if (server != null)
+                this.remove(integratedServer);
 
             QuantumClient.cleanUp((Shutdownable) this.integratedServer);
 
@@ -2333,8 +2376,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public int calcMaxGuiScale() {
-        var windowWidth = Gdx.graphics.getWidth();
-        var windowHeight = Gdx.graphics.getHeight();
+        var windowWidth = getWidth();
+        var windowHeight = getHeight();
 
         if (windowWidth / QuantumClient.MINIMUM_WIDTH < windowHeight / QuantumClient.MINIMUM_HEIGHT) {
             return Math.max(windowWidth / QuantumClient.MINIMUM_WIDTH, 1);
@@ -2357,7 +2400,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public GridPoint2 getDrawOffset() {
-        return this.isCustomBorderShown() ? new GridPoint2(window.isMaximized() ? 0 : 18 * 2, 22 * 2) : new GridPoint2();
+        GameInsets insets = GamePlatform.get().getInsets();
+        return this.offset.set(0, 0);
+    }
+
+    public GridPoint2 getMousePos() {
+        GameInsets insets = GamePlatform.get().getInsets();
+        return GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched() ? this.offset.set(insets.left, insets.top) : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
     }
 
     @ApiStatus.Experimental
@@ -2418,7 +2467,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public void connectToServer(String host, int port) {
         this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
-        this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(),  e -> {
+        this.connection = ClientTcpConnection.connectToServer(host, port).map(Function.identity(), e -> {
             this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e.getMessage(), true));
             return null;
         }).getValueOrNull();
@@ -2803,6 +2852,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         LOGGER.info("Shutting down Quantum Client");
         Gdx.app.exit();
+    }
+
+    public void updateViewport() {
+        if (!insets.equals(GamePlatform.get().getInsets())) {
+            resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            insets.set(GamePlatform.get().getInsets());
+        }
     }
 
     public CompletableFuture<Void> runAsyncTask(Runnable o) {
