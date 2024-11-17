@@ -2038,6 +2038,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 QuantumClient.cleanUp(this.worldRenderer);
                 QuantumClient.cleanUp(this.fbo);
 
+                mainCat.pop(this);
+
                 // Clear scenes
                 backgroundCat.clear();
                 worldCat.clear();
