@@ -610,7 +610,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         RpcHandler.enable();
 
         // Initialize ImGui if necessary
-        this.imGui = !isMac && !PlatformOS.isAndroid && !PlatformOS.isARM && !PlatformOS.isIos;
+        this.imGui = !PlatformOS.isAndroid && !PlatformOS.isIos;
         if (this.imGui)
             GamePlatform.get().preInitImGui();
 
