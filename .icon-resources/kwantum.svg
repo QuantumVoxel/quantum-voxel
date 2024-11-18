@@ -9,7 +9,7 @@
         id="svg1"
         inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
         sodipodi:docname="kwantum.svg"
-        inkscape:export-filename="icon.png"
+        inkscape:export-filename="kwantum.png"
         inkscape:export-xdpi="768.00092"
         inkscape:export-ydpi="768.00092"
         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -133,10 +133,10 @@
                 inkscape:collect="always"
                 xlink:href="#linearGradient3"
                 id="linearGradient4"
-                x1="141.93311"
-                y1="7.1527677"
-                x2="-6.466424"
-                y2="128.3139"
+                x1="135.46667"
+                y1="0"
+                x2="0"
+                y2="135.46667"
                 gradientUnits="userSpaceOnUse"/>
         <linearGradient
                 inkscape:collect="always"
