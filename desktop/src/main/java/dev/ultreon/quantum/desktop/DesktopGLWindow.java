@@ -2,9 +2,7 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.mixinprovider.PlatformOS;
-import dev.ultreon.quantum.GameWindow;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.lwjgl.glfw.GLFWNativeWin32;
@@ -25,18 +23,6 @@ public class DesktopGLWindow extends DesktopWindow {
 
         if (isDragging()) {
             GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//            int setX = dragX;
-//            int setY = dragY;
-//
-//            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-//            Point location = pointerInfo.getLocation();
-//            int nx = location.setX;
-//            int ny = location.setY;
-//
-//            int i = nx - setX;
-//            int i1 = ny - setY;
-//
-//            GLFW.glfwSetWindowPos(getHandle(), i + setX - dragOffX, i1 + setY - dragOffY);
         }
     }
 
@@ -47,13 +33,6 @@ public class DesktopGLWindow extends DesktopWindow {
 
     @Override
     public boolean isHovered() {
-//        booleanPointerInfo pointerInfo = MouseInfo.getPointerInfo();
-//        Point location = pointerInfo.getLocation();
-//        GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//        int setX = location.setX - xPos[0];
-//        int setY = location.setY - yPos[0];
-//
-//        return setX >= 0 && setX < Gdx.graphics.getWidth() && setY >= 0 && setY < Gdx.graphics.getHeight();
         return true;
     }
 
@@ -145,17 +124,6 @@ public class DesktopGLWindow extends DesktopWindow {
 
     @Override
     public void setDragging(boolean dragging) {
-        if (dragging != this.dragging) {
-//            GLFW.glfwGetWindowPos(getHandle(), xPos, yPos);
-//            this.dragging = dragging;
-//            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-//            Point location = pointerInfo.getLocation();
-//            int nx = location.setX;
-//            int ny = location.setY;
-//            this.dragX = nx;
-//            this.dragY = ny;
-//            this.dragOffX = nx - xPos[0];
-//            this.dragOffY = ny - yPos[0];
-        }
+        // no-op
     }
 }

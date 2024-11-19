@@ -9,8 +9,6 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.sound.event.SoundEvents;
-import lombok.Getter;
-import lombok.Setter;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -18,14 +16,12 @@ import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.client.QuantumClient.id;
 
-@Getter
-@Setter
 public abstract class Button<T extends Button<T>> extends Widget {
-    protected final CallbackComponent<T> callback;
-    private Type type;
-    private boolean pressed;
-    private boolean wasPressed;
-    private Color tmp = new Color();
+    public final CallbackComponent<T> callback;
+    public Type type;
+    public boolean pressed;
+    public boolean wasPressed;
+    private final Color tmp = new Color();
 
     protected Button(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         this(width, height, Type.DARK);
