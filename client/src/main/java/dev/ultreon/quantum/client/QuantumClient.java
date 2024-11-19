@@ -610,7 +610,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         RpcHandler.enable();
 
         // Initialize ImGui if necessary
-        this.imGui = !isMac && !PlatformOS.isAndroid && !PlatformOS.isARM && !PlatformOS.isIos;
+        this.imGui = !PlatformOS.isAndroid && !PlatformOS.isIos;
         if (this.imGui)
             GamePlatform.get().preInitImGui();
 
@@ -2705,7 +2705,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
         mouseX /= 2;
         mouseY /= 2;
-        if (mouseY < 44) {
+        if (isCustomBorderShown() && mouseY < 44) {
             closeButton.mouseRelease(mouseX, mouseY, button);
             maximizeButton.mouseRelease(mouseX, mouseY, button);
             minimizeButton.mouseRelease(mouseX, mouseY, button);

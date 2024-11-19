@@ -89,9 +89,7 @@ public class ImGuiOverlay {
         QuantumClient.LOGGER.info("Setting up ImGui");
 
         QuantumClient.get().deferClose(GLFWErrorCallback.create((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description)).set());
-        if (!GLFW.glfwInit()) {
-            throw new IllegalStateException("Unable to initialize GLFW");
-        }
+
         synchronized (ImGuiOverlay.class) {
             ImGui.createContext();
             ImGuiOverlay.imPlotCtx = ImPlot.createContext();
