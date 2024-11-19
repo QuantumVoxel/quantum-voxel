@@ -20,7 +20,6 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec3f;
-import dev.ultreon.quantum.world.vec.ChunkVec;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
@@ -40,7 +39,6 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public class ImGuiOverlay {
     public static final ImFloat I_GAMMA = new ImFloat(1.5f);
@@ -63,7 +61,6 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_CHUNK_DEBUGGER = new ImBoolean(false);
     private static final ImBoolean SHOW_PROFILER = new ImBoolean(false);
 
-    private static final ChunkVec RESET_CHUNK = new ChunkVec(17, 4, 18);
     protected static final String[] keys = {"A", "B", "C"};
     protected static final Double[] values = {0.1, 0.3, 0.6};
     private static final Vector3 TRANSLATE_TMP = new Vector3();
@@ -194,7 +191,6 @@ public class ImGuiOverlay {
         if (ImGuiOverlay.SHOW_PLAYER_UTILS.get()) ImGuiOverlay.showPlayerUtilsWindow(client);
         if (ImGuiOverlay.SHOW_GUI_UTILS.get()) ImGuiOverlay.showGuiEditor(client);
         if (ImGuiOverlay.SHOW_UTILS.get()) ImGuiOverlay.showUtils(client);
-        if (ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get()) ImGuiOverlay.showChunkDebugger(client);
         if (ImGuiOverlay.SHOW_SHADER_EDITOR.get()) ImGuiOverlay.showShaderEditor();
         if (ImGuiOverlay.SHOW_SKYBOX_EDITOR.get()) ImGuiOverlay.showSkyboxEditor();
         if (ImGuiOverlay.SHOW_MODEL_VIEWER.get()) ImGuiOverlay.showModelViewer();
@@ -358,25 +354,6 @@ public class ImGuiOverlay {
             }
             ImGui.text(" Frame ID: " + Gdx.graphics.getFrameId() + " ");
             ImGui.endMenuBar();
-        }
-    }
-
-    private static void showChunkDebugger(QuantumClient client) {
-        ImGui.setNextWindowSize(400, 200, ImGuiCond.Once);
-        ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
-        if (client.player != null && ImGui.begin("Chunk Debugging", ImGuiOverlay.getDefaultFlags())) {
-            if (ImGui.button(String.format("Reset chunk at %s", ImGuiOverlay.RESET_CHUNK))) {
-                CompletableFuture.runAsync(() -> {
-                    @Nullable ClientWorldAccess world = client.world;
-                    QuantumClient.invokeAndWait(() -> {
-                        if (world != null) {
-                            world.unloadChunk(ImGuiOverlay.RESET_CHUNK);
-                        }
-                    });
-                    QuantumServer.invokeAndWait(() -> client.integratedServer.getWorld().regenerateChunk(ImGuiOverlay.RESET_CHUNK));
-                });
-            }
-            ImGui.end();
         }
     }
 
