@@ -301,6 +301,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param func the runnable to be executed.
      */
     public static void invokeAndWait(Runnable func) {
+        if (Thread.currentThread() == QuantumServer.instance.thread()) {
+            func.run();
+            return;
+        }
         QuantumServer.instance.submit(func).join();
     }
 
@@ -405,13 +409,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                 // Check if we can tick.
                 if (canTick) {
                     ticksPassed++;
-                    try {
-                        // Tick the server.
-                        this.runTick();
-                    } catch (Throwable t) {
-                        // Handle server tick error.
-                        this.crash(new Throwable("Game being ticked.", t));
-                    }
+                    this.runTick();
                 }
 
                 // Calculate the current TPS every second.
@@ -424,6 +422,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                 // Allow thread interrupting.
                 sleepDuration.sleep();
             }
+
+            // Server stopped.
+            LOGGER.info("Stopping server...");
         } catch (InterruptedException ignored) {
             // Ignore interruption exception.
         } catch (Throwable t) {
@@ -435,6 +436,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             // Send server stopped event to mods.
             ModApi.getGlobalEventHandler().call(new ServerStoppingEvent(this));
         }
+
+        LOGGER.info("Server stopped.");
 
         // Close all connections.
         try {

@@ -106,7 +106,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
             return this.server.getOverworld().getSpawnPoint();
         });
 
-        this.connection.send(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));
+        player.sendPacket(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));
 
         this.server.placePlayer(player);
         this.connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(this.server, player, this.connection));

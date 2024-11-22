@@ -179,11 +179,11 @@ public class DedicatedServer extends QuantumServer {
     }
 
     @Override
-    public void init() {
-        super.init();
-
+    public void run() {
         // Set up the spawn for the world
         this.dimManager.getWorld(DimensionInfo.OVERWORLD).setupSpawn();
+
+        super.run();
     }
 
     @Override

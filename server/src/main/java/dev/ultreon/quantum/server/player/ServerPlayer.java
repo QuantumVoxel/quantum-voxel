@@ -373,7 +373,14 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
-        this.connection.send(packet);
+        try {
+            QuantumServer.LOGGER.debug("Sending packet: {}", packet.getClass().getName());
+            this.connection.send(packet);
+        } catch (Exception e) {
+            this.connection.disconnect("Internal server error");
+            this.connection.on3rdPartyDisconnect("Internal server error");
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleClientLoadChunk(@NotNull ChunkVec vec) {

@@ -282,7 +282,7 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
-    protected void runTick() {
+    public void runTick() {
         this.client.pollServerTick();
 
         super.runTick();
