@@ -763,8 +763,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         for (ServerPlayer other : players) {
             if (other == player) continue;
             Debugger.log("Player " + player.getName() + " is within the render distance of " + this.getEntityRenderDistance() + "!");
-            other.connection.send(new S2CAddPlayerPacket(player.getUuid(), player.getName(), player.getPosition()));
-            player.connection.send(new S2CAddPlayerPacket(other.getUuid(), other.getName(), other.getPosition()));
+            other.connection.send(new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), player.getPosition()));
+            player.connection.send(new S2CAddPlayerPacket(other.getId(), other.getUuid(), other.getName(), other.getPosition()));
         }
     }
 

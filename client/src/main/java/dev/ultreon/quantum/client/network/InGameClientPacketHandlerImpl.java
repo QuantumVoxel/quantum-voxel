@@ -293,9 +293,9 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onAddPlayer(UUID uuid, String name, Vec3d position) {
+    public void onAddPlayer(int id, UUID uuid, String name, Vec3d position) {
         if (this.client.getMultiplayerData() != null) {
-            this.client.getMultiplayerData().addPlayer(uuid, name, position);
+            this.client.getMultiplayerData().addPlayer(id, uuid, name, position);
         } else {
             throw new IllegalStateException("Multiplayer data is null");
         }

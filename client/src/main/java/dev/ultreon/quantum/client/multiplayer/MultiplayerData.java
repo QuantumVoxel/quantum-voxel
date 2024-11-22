@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.client.multiplayer;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.RemotePlayer;
+import dev.ultreon.quantum.util.Vec3d;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,10 +36,11 @@ public class MultiplayerData {
     }
 
     @CanIgnoreReturnValue
-    public RemotePlayer addPlayer(UUID uuid, String name, Vec3d position) {
+    public RemotePlayer addPlayer(int id, UUID uuid, String name, Vec3d position) {
         QuantumClient.LOGGER.info("{} joined the server.", name);
         RemotePlayer player = new RemotePlayer(this.client.world);
         player.setUuid(uuid);
+        player.setId(id);
         player.setName(name);
         player.setPosition(position);
         this.remotePlayers.put(uuid, player);

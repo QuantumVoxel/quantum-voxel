@@ -55,7 +55,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onPlaySound(NamespaceID sound, float volume);
 
-    void onAddPlayer(UUID uuid, String name, Vec3d position);
+    void onAddPlayer(int id, UUID uuid, String name, Vec3d position);
 
     void onRemovePlayer(UUID u);
 

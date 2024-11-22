@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * The Player class represents a player entity within the game. It manages various player-specific details such as inventory,
@@ -709,5 +710,19 @@ public abstract class Player extends LivingEntity {
      */
     public void setReach(float reach) {
         this.reach = reach;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return getUuid() == player.getUuid();
+    }
+
+    @Override
+    public int hashCode() {
+        UUID uuid = getUuid();
+        if (uuid == null) return 0;
+        return uuid.hashCode();
     }
 }
