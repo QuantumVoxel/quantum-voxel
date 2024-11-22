@@ -110,7 +110,7 @@ dependencies {
 
     // LibGDX
     implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
-    runtimeOnly "com.badlogicgames.gdx:gdx-backend-headless:$gdx_version"
+    implementation api("com.badlogicgames.gdx:gdx-backend-headless:$gdx_version")
 
     // JNA
     implementation api("net.java.dev.jna:jna:$jna_version")

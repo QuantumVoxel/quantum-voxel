@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.server.dedicated;
 
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.backends.headless.HeadlessApplication;
+import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
 import com.esotericsoftware.kryo.kryo5.minlog.Log;
-import dev.ultreon.langgen.LangGenConfig;
-import dev.ultreon.langgen.LangGenListener;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Dedicated server main class.
@@ -65,58 +64,65 @@ public class Main {
             Log.setLogger(KyroSlf4jLogger.INSTANCE);
             com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
 
-            AtomicBoolean waitingForLanguageBindings = new AtomicBoolean(true);
-            JDialog progressDialog = new JDialog();
-            progressDialog.setModal(true);
+            LOGGER.info("Booting started!");
+            HeadlessApplication app = new HeadlessApplication(new ApplicationAdapter() {
 
-            progressDialog.setLayout(new BoxLayout(progressDialog.getContentPane(), BoxLayout.Y_AXIS));
+            }, createConfig());
 
-            JLabel messageLabel = new JLabel();
-            progressDialog.add(messageLabel);
-
-            JProgressBar progressBar = new JProgressBar();
-            progressDialog.add(progressBar);
-
-            progressDialog.pack();
-
-            AtomicBoolean preprocessing = new AtomicBoolean(true);
-
-            LangGenConfig.progressListener = new LangGenListener() {
-                @Override
-                public void onProgress(int progress, int total) {
-                    preprocessing.set(false);
-                    messageLabel.setText("Generating language bindings: " + progress + "/" + total);
-                    progressBar.setValue(progress);
-                    progressBar.setMaximum(total);
-                }
-
-                @Override
-                public void onPreprocessProgress(int progress, int total) {
-                    if (!preprocessing.get()) return;
-                    messageLabel.setText("Preprocessing language bindings: " + progress + "/" + total);
-                    progressBar.setValue(progress);
-                    progressBar.setMaximum(total);
-                }
-
-                @Override
-                public void onDone() {
-                    waitingForLanguageBindings.set(false);
-                    progressDialog.dispose();
-                }
-            };
-            LangGenMain.genBindings();
-
-            while (waitingForLanguageBindings.get()) {
-                Thread.sleep(100);
-            }
+//            AtomicBoolean waitingForLanguageBindings = new AtomicBoolean(true);
+//            JDialog progressDialog = new JDialog();
+//            progressDialog.setModal(true);
+//
+//            progressDialog.setLayout(new BoxLayout(progressDialog.getContentPane(), BoxLayout.Y_AXIS));
+//
+//            JLabel messageLabel = new JLabel();
+//            progressDialog.add(messageLabel);
+//
+//            JProgressBar progressBar = new JProgressBar();
+//            progressDialog.add(progressBar);
+//
+//            progressDialog.pack();
+//
+//            AtomicBoolean preprocessing = new AtomicBoolean(true);
+//
+//            LangGenConfig.progressListener = new LangGenListener() {
+//                @Override
+//                public void onProgress(int progress, int total) {
+//                    preprocessing.set(false);
+//                    messageLabel.setText("Generating language bindings: " + progress + "/" + total);
+//                    progressBar.setValue(progress);
+//                    progressBar.setMaximum(total);
+//                }
+//
+//                @Override
+//                public void onPreprocessProgress(int progress, int total) {
+//                    if (!preprocessing.get()) return;
+//                    messageLabel.setText("Preprocessing language bindings: " + progress + "/" + total);
+//                    progressBar.setValue(progress);
+//                    progressBar.setMaximum(total);
+//                }
+//
+//                @Override
+//                public void onDone() {
+//                    waitingForLanguageBindings.set(false);
+//                    progressDialog.dispose();
+//                }
+//            };
+//            LangGenMain.genBindings();
+//
+//            while (waitingForLanguageBindings.get()) {
+//                Thread.sleep(100);
+//            }
 
             ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), Main::initConfig);
 
             // Invoke FabricMC entrypoint for dedicated server.
+            LOGGER.info("Invoking FabricMC entrypoints");
             FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
             FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
 
             Thread httpThread = new Thread(() -> {
+                LOGGER.info("Starting HTTP server");
                 try {
                     Main.site = new ServerHttpSite();
                 } catch (IOException e) {
@@ -130,23 +136,30 @@ public class Main {
 
             LanguageBootstrap.bootstrap.set((path, args1) -> server != null ? server.handleTranslation(path, args1) : path);
 
-            Main.serverLoader = new ServerLoader();
-            Main.serverLoader.load();
+            // Initialize the server loader.
+            LOGGER.info("Loading server resources");
+            serverLoader = new ServerLoader();
+            serverLoader.load();
 
             // Start the server.
-            @SuppressWarnings("InstantiationOfUtilityClass") InspectionRoot<Main> inspection = new InspectionRoot<>(new Main());
-            Main.server = new DedicatedServer(inspection);
-            Main.server.start();
+            LOGGER.info("Starting server");
+            @SuppressWarnings("InstantiationOfUtilityClass") var inspection = new InspectionRoot<>(new Main());
+            server = new DedicatedServer(inspection);
+            server.init();
+            server.start();
 
             // Handle server console commands.
             Scanner scanner = new Scanner(System.in);
 
             if (!GraphicsEnvironment.isHeadless()) {
                 SwingUtilities.invokeLater(() -> {
+                    LOGGER.info("Starting server GUI");
                     DedicatedServerGui gui = new DedicatedServerGui();
                     gui.setVisible(true);
                 });
             }
+
+            LOGGER.info("Server started!");
 
             while (!Main.server.isTerminated()) {
                 // Read command from the server console.
@@ -162,8 +175,6 @@ public class Main {
                     }
                 }
             }
-
-//            QuantumServer.getWatchManager().stop();
         } catch (ApplicationCrash e) {
             e.getCrashLog().createCrash().printCrash();
         } catch (Throwable e) {
@@ -175,6 +186,14 @@ public class Main {
             Main.LOGGER.error(string);
             System.exit(1);
         }
+    }
+
+    private static HeadlessApplicationConfiguration createConfig() {
+        var config = new HeadlessApplicationConfiguration();
+        config.updatesPerSecond = 20;
+        config.preferencesDirectory = "config";
+        config.maxNetThreads = 32;
+        return config;
     }
 
     /**

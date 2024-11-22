@@ -119,9 +119,6 @@ public class DedicatedServer extends QuantumServer {
 
         // Set the maxPlayers from the config
         this.maxPlayers = ServerConfig.maxPlayers;
-
-        // Set up the spawn for the world
-        this.dimManager.getWorld(DimensionInfo.OVERWORLD).setupSpawn();
     }
 
     /**
@@ -179,6 +176,14 @@ public class DedicatedServer extends QuantumServer {
     @Override
     public void fatalCrash(Throwable throwable) {
         this.crash(throwable);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+
+        // Set up the spawn for the world
+        this.dimManager.getWorld(DimensionInfo.OVERWORLD).setupSpawn();
     }
 
     @Override
