@@ -46,6 +46,7 @@ public final class ServerChunk extends Chunk {
 
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
+    private long trackDuration = 10000L;
 
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
@@ -199,7 +200,7 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
-        if (!isBeingTracked()) {
+        if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
             this.world.unloadChunk(this, this.getVec());
             return;
         }
@@ -212,7 +213,7 @@ public final class ServerChunk extends Chunk {
     public void tick() {
         Collection<BlockEntity> blockEntities;
         synchronized (this){
-            if (!isBeingTracked() && lastTracked + 1000L < System.currentTimeMillis()) {
+            if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
                 this.world.unloadChunk(this, this.getVec());
                 return;
             } else if (isBeingTracked()) {

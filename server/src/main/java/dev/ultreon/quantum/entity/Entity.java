@@ -953,6 +953,18 @@ public abstract class Entity extends GameObject implements CommandSender {
         return Math.sqrt(a * a + b * b + c * c);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return id == entity.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
     public enum Pose {
         IDLE,
         WALKING

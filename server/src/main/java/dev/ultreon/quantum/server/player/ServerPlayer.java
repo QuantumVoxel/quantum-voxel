@@ -357,11 +357,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         switch (status) {
             case FAILED -> this.handleFailedChunk(vec);
             case UNLOADED -> {
-                ServerChunk chunk = this.world.getChunk(vec);
+                ServerChunk chunk = this.world.getChunkNoLoad(vec);
                 if (chunk != null) {
                     chunk.getTracker().stopTracking(this);
                 }
-
                 this.chunkTracker.stopTracking(vec);
             }
             case SUCCESS -> this.handleClientLoadChunk(vec);
@@ -384,7 +383,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     private void handleClientLoadChunk(@NotNull ChunkVec vec) {
         // Handle the chunk status accordingly
-        if (vec.dst(this.getChunkVec()) > this.server.getRenderDistance()) {
+        if (vec.dst(this.getChunkVec()) * World.CHUNK_SIZE > this.server.getRenderDistance()) {
             this.sendPacket(new S2CChunkUnloadPacket(vec));
             return;
         }
@@ -399,8 +398,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             Chat.sendInfo(this, "Position reset on chunk load.");
 
         ServerChunk chunk = this.world.getChunk(vec);
-        if (chunk != null)
-            chunk.getTracker().startTracking(this);
+        chunk.getTracker().startTracking(this);
 
         this.chunkTracker.startTracking(vec);
     }

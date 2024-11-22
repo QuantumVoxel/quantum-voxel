@@ -697,7 +697,6 @@ public class ServerWorld extends World {
             return false;
         }
 
-        chunk.sendAllViewers(new S2CChunkUnloadPacket(chunkVec));
         LOGGER.debug("Unloaded chunk " + chunkVec);
 
         if (region.isEmpty() && save) {
@@ -1131,7 +1130,7 @@ public class ServerWorld extends World {
             if (this.storage.regionExists(regionPos.x, regionPos.y, regionPos.z)) {
                 return this.openRegion(regionPos.x, regionPos.y, regionPos.z);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Log error if the region failed to load
             World.LOGGER.error(String.format("Region at %s run failed to load:", regionPos), e);
         }
