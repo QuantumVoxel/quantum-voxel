@@ -551,6 +551,7 @@ public class ServerWorld extends World {
 
         if (this.time % 20 == 0) {
             for (ServerPlayer player : this.server.getPlayers()) {
+                if (player.connection.isLoggingIn()) continue;
                 player.sendPacket(new S2CTimeSyncPacket(time));
             }
         }

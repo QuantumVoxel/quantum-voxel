@@ -6,7 +6,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.server.QuantumServer;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -29,8 +28,6 @@ public class PacketSerializer extends Serializer<Packet<?>> {
         try {
             var constructor = aClass.getMethod("read", PacketIO.class);
             constructor.setAccessible(true);
-            String name = constructor.getDeclaringClass().getName();
-            QuantumServer.LOGGER.debug("Reading packet {}", name);
             return (Packet<?>) constructor.invoke(null, new PacketIO(input, null));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);

@@ -8,7 +8,6 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
-import lombok.Synchronized;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -283,8 +282,12 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public PaletteStorage<D> clone() throws CloneNotSupportedException {
-        return (PaletteStorage<D>) super.clone();
+    public PaletteStorage<D> clone() {
+        try {
+            return (PaletteStorage<D>) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isUniform() {

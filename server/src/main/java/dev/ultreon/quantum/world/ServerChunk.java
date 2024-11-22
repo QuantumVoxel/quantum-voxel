@@ -205,7 +205,7 @@ public final class ServerChunk extends Chunk {
         }
 
         this.world.getServer().onChunkSent(this);
-        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage, this.biomeStorage, this.getBlockEntities()));
+        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
 
     }
 

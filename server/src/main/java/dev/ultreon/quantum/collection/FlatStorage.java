@@ -158,8 +158,12 @@ public class FlatStorage<D> implements Storage<D> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public FlatStorage<D> clone() throws CloneNotSupportedException {
-        return (FlatStorage<D>) super.clone();
+    public FlatStorage<D> clone() {
+        try {
+            return (FlatStorage<D>) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -374,7 +374,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
         try {
-            QuantumServer.LOGGER.debug("Sending packet: {}", packet.getClass().getName());
             this.connection.send(packet);
         } catch (Exception e) {
             this.connection.disconnect("Internal server error");
@@ -428,7 +427,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void sendChunk(@NotNull ChunkVec vec, @NotNull ServerChunk chunk) {
         if (this.sendingChunk) return;
 
-        this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()));
+        this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage.clone(), chunk.biomeStorage.clone(), chunk.getBlockEntities()));
         this.sendingChunk = false;
     }
 
@@ -782,7 +781,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                         }
 
                         receivedChunk.getTracker().startTracking(this);
-                        receivedChunk.sendChunk();
+                        QuantumServer.invoke(receivedChunk::sendChunk);
                     }).exceptionally(throwable -> {
                         this.chunkTracker.stopTracking(pos);
                         this.sendPacket(new S2CChunkUnloadPacket(pos));
