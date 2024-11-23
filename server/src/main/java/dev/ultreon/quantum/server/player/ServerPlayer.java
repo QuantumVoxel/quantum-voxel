@@ -28,7 +28,9 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.CommandRegistry;
+import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.Formatter;
@@ -187,12 +189,22 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.world.prepareSpawn(this);
         this.world.spawn(this);
 
+        this.sendRecipes();
+
         // Send gamemode and respawn packets to the connection
         this.connection.send(new S2CGamemodePacket(this.getGamemode()));
         this.connection.send(new S2CRespawnPacket(this.getPosition()));
 
         // Mark the entity as spawned
         this.spawned = true;
+    }
+
+    @ApiStatus.Internal
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void sendRecipes() {
+        for (RecipeType<?> type : Registries.RECIPE_TYPE.values()) {
+            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRecipes(type).stream().toList()));
+        }
     }
 
     public void markSpawned() {
@@ -272,7 +284,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     protected void onMoved() {
         // Check if the chunk is loaded and the entity is in an active chunk
-        if (world.getChunk(this.getChunkVec()) == null) {
+        if (world.getChunkNoLoad(this.getChunkVec()) == null) {
             isInactive = true;
             return;
         }

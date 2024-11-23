@@ -15,6 +15,7 @@ import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
+import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
@@ -39,12 +40,10 @@ import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
+import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
@@ -158,14 +157,9 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                     };
 
                     long l = TimingKt.measureTimeMillis(() -> {
-                        @Nullable ClientWorldAccess worldAccess = this.client.world;
+                        @Nullable ClientWorld world = this.client.world;
 
-                        if (worldAccess == null) {
-                            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
-                            return null;
-                        }
-
-                        if (!(worldAccess instanceof ClientWorld world)) {
+                        if (world == null) {
                             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                             return null;
                         }
@@ -546,7 +540,15 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onTemperatureSync(S2CTemperatureSyncPacket packet) {
-        client.player.onTemperatureSync(packet);
+        LocalPlayer player = client.player;
+        if (player != null) {
+            player.onTemperatureSync(packet);
+        }
+    }
+
+    @Override
+    public <T extends Recipe> void onRecipeSync(S2CRecipeSyncPacket<T> packet) {
+        ClientRecipeManager.INSTANCE.onPacket(packet);
     }
 
     @Override

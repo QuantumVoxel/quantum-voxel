@@ -12,10 +12,8 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
+import dev.ultreon.quantum.network.packets.s2c.*;
+import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.GameMode;
@@ -109,4 +107,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onBlockEntityUpdate(BlockVec pos, MapType data);
 
     void onTemperatureSync(S2CTemperatureSyncPacket packet);
+
+    <T extends Recipe> void onRecipeSync(S2CRecipeSyncPacket<T> ts2CRecipeSyncPacket);
 }

@@ -115,7 +115,8 @@ public final class ServerChunk extends Chunk {
                 for (MapType data : blockEntities.getValue()) {
                     BlockVec blockVec = new BlockVec(data.getInt("x"), data.getInt("y"), data.getInt("z"), BlockVecSpace.WORLD);
                     BlockEntity blockEntity = BlockEntity.fullyLoad(world, blockVec, data);
-                    this.setBlockEntity(blockVec.chunkLocal(), blockEntity);
+                    if (blockEntity != null)
+                        this.setBlockEntity(blockVec.chunkLocal(), blockEntity);
                 }
             }
 

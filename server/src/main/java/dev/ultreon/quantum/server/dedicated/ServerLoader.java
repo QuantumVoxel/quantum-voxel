@@ -1,10 +1,8 @@
 package dev.ultreon.quantum.server.dedicated;
 
 import dev.ultreon.quantum.CommonLoader;
+import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.entity.EntityTypes;
-import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.GameCommands;
 
@@ -22,9 +20,7 @@ public class ServerLoader {
 
         // Initialize registries
         Registries.nopInit();
-        Blocks.init();
-        Items.init();
-        EntityTypes.init();
+        CommonRegistries.register();
 
         // Register game commands
         GameCommands.register();

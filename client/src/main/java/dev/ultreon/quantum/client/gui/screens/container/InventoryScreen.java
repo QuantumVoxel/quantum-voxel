@@ -4,13 +4,13 @@ import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.c2s.C2SCraftRecipePacket;
 import dev.ultreon.quantum.recipe.CraftingRecipe;
 import dev.ultreon.quantum.recipe.Recipe;
-import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -35,7 +35,7 @@ public class InventoryScreen extends ContainerScreen {
         super(inventory, title, InventoryScreen.CONTAINER_SIZE);
         this.inventory = inventory;
 
-        this.recipes = RecipeManager.get().getRecipes(RecipeType.CRAFTING, 30, inventory);
+        this.recipes = ClientRecipeManager.INSTANCE.getRecipes(RecipeType.CRAFTING, 30, inventory);
         this.currentPage = this.recipes.getFullPage(this.page);
         this.rebuildSlots();
     }
@@ -71,7 +71,7 @@ public class InventoryScreen extends ContainerScreen {
         List<ItemSlot> list = new ArrayList<>();
         int x = 0;
         int y = 0;
-        this.recipes = RecipeManager.get().getRecipes(RecipeType.CRAFTING, 30, inventory);
+        this.recipes = ClientRecipeManager.INSTANCE.getRecipes(RecipeType.CRAFTING, 30, inventory);
         this.currentPage = this.recipes.getFullPage(this.page);
         for (Recipe recipe : this.currentPage) {
             if (recipe.canCraft(this.inventory)) {
