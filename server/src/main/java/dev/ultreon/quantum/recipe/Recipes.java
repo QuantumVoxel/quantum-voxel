@@ -26,15 +26,15 @@ public class Recipes {
     private static void advancedCrafting(RecipeManager recipes) {
         recipes.register(new NamespaceID("iron_pickaxe"), new CraftingRecipe(
                 List.of(new ItemStack(Items.IRON_INGOT, 3), new ItemStack(Items.STICK)),
-                new ItemStack(Items.PLANK, 3), true));
+                new ItemStack(Items.IRON_PICKAXE, 1), true));
 
         recipes.register(new NamespaceID("iron_shovel"), new CraftingRecipe(
                 List.of(new ItemStack(Items.IRON_INGOT), new ItemStack(Items.STICK)),
-                new ItemStack(Items.PLANK, 1), true));
+                new ItemStack(Items.IRON_SHOVEL, 1), true));
 
         recipes.register(new NamespaceID("iron_axe"), new CraftingRecipe(
                 List.of(new ItemStack(Items.IRON_INGOT), new ItemStack(Items.STICK)),
-                new ItemStack(Items.PLANK, 2), true));
+                new ItemStack(Items.IRON_AXE, 2), true));
     }
 
     private static void crafting(RecipeManager recipes) {

@@ -6,19 +6,18 @@ import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.ItemSlotWidget;
 import dev.ultreon.quantum.client.gui.widget.Widget;
-import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
+import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SCraftRecipePacket;
+import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.recipe.CraftingRecipe;
 import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeType;
-import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
-import dev.ultreon.quantum.recipe.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
@@ -79,6 +78,12 @@ public class InventoryScreen extends ContainerScreen {
         }
 
         if (inventory == null) return;
+
+        for (Widget child : List.copyOf(this.children())) {
+            if (child instanceof RecipeSlot recipeSlot) {
+                this.remove(recipeSlot);
+            }
+        }
 
         this.recipeSlots.clear();
         List<ItemSlot> list = new ArrayList<>();

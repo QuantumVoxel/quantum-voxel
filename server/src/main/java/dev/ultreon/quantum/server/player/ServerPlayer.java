@@ -203,7 +203,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void sendRecipes() {
         for (RecipeType<?> type : Registries.RECIPE_TYPE.values()) {
-            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRecipes(type).stream().toList()));
+            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRegistry(type)));
         }
     }
 

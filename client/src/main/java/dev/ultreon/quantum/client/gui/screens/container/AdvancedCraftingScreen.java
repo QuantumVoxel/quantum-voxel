@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.screens.container;
 
+import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
 import dev.ultreon.quantum.menu.AdvancedCraftingMenu;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SCraftAdvancedRecipePacket;
@@ -20,6 +21,6 @@ public class AdvancedCraftingScreen extends InventoryScreen {
 
     @Override
     protected @NotNull Packet<InGameServerPacketHandler> getPacket(Recipe recipe) {
-        return new C2SCraftAdvancedRecipePacket(recipe.getType(), recipe);
+        return new C2SCraftAdvancedRecipePacket(recipe.getType().getId(), ClientRecipeManager.INSTANCE.getId(recipe.getType(), recipe));
     }
 }

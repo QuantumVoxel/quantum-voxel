@@ -3,6 +3,7 @@ package dev.ultreon.quantum.recipe;
 import com.badlogic.gdx.utils.IdentityMap;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
+import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
@@ -156,5 +157,9 @@ public class RecipeManager {
         RecipeRegistry<?> recipeRegistry = this.registryMap.get(blasting);
         if (recipeRegistry == null) throw new IllegalArgumentException("Unknown recipe type!");
         return (List<R>) recipeRegistry.findRecipe(menu);
+    }
+
+    public <T extends Recipe> OrderedMap<NamespaceID, Recipe> getRegistry(RecipeType<T> type) {
+        return this.registryMap.get(type).keyMap;
     }
 }
