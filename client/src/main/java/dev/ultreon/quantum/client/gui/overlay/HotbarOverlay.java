@@ -16,6 +16,7 @@ import java.util.List;
 
 public class HotbarOverlay extends Overlay {
     private static final NamespaceID TEXTURE = QuantumClient.id("textures/gui/new_hotbar.png");
+    private static final NamespaceID SELECT = QuantumClient.id("textures/gui/new_hotbar_select.png");
     private static final Vec2i HEALTH_OFFSET = new Vec2i(5, 5);
     private static final Vec2i AIR_OFFSET = new Vec2i(5, 18);
     private static final Vec2i ITEMS_OFFSET = new Vec2i(66, 7);
@@ -45,14 +46,20 @@ public class HotbarOverlay extends Overlay {
         double temp = temperature.convertTo(TemperatureUnit.CELSIUS);
 
         renderer.textLeft(String.format("%.1f °C", temp), (width >> 1) - 150 + TEMP_OFFSET.x + 18, height - 48 + TEMP_OFFSET.y + 8, RgbColor.WHITE, true);
+
+        int selX = 65 + player.selected * 19;
+        int selY = 6;
+        int selW = 18, selH = 18;
+
+        renderer.blit(SELECT, (width >> 1) - 150 + selX, height - 48 + selY, selW, selH, 0, 0, selW, selH, selW, selH);
+
+        for (int i = 0; i < 9; i++)
+            this.drawHotbarSlot(renderer, player.inventory.getHotbarSlots(), i);
     }
 
-    private void drawHotbarSlot(Renderer renderer, List<ItemSlot> allowed, int index) {
-        ItemStack item = allowed.get(index).getItem();
-        int ix = (int) ((float) this.client.getScaledWidth() / 2) - 103 + index * 19 + 2;
-        if (index >= 4) {
-            ix = (int) ((float) this.client.getScaledWidth() / 2) + 27 + (index - 4) * 19 + 2;
-        }
+    private void drawHotbarSlot(Renderer renderer, List<ItemSlot> slots, int index) {
+        ItemStack item = slots.get(index).getItem();
+        int ix = (width >> 1) - 150 + (65 + index * 19);
         this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 41);
         int count = item.getCount();
         if (!item.isEmpty() && count > 1) {

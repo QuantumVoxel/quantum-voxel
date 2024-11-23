@@ -64,7 +64,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
         u += 63 * type.xOffset;
         v += 42 * type.yOffset;
 
-        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 5, 256, 256);
+        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 9, 256, 256);
         if (!pressed && wasPressed && !this.isWithinBounds(mouseX, mouseY)) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
@@ -134,7 +134,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     @SuppressWarnings("unchecked")
-    public T getType(Type type) {
+    public T setType(Type type) {
         this.type = type;
         return (T) this;
     }
