@@ -551,6 +551,7 @@ public class ServerWorld extends World {
 
         if (this.time % 20 == 0) {
             for (ServerPlayer player : this.server.getPlayers()) {
+                if (player.connection.isLoggingIn()) continue;
                 player.sendPacket(new S2CTimeSyncPacket(time));
             }
         }
@@ -696,7 +697,6 @@ public class ServerWorld extends World {
             return false;
         }
 
-        chunk.sendAllViewers(new S2CChunkUnloadPacket(chunkVec));
         LOGGER.debug("Unloaded chunk " + chunkVec);
 
         if (region.isEmpty() && save) {
@@ -1130,7 +1130,7 @@ public class ServerWorld extends World {
             if (this.storage.regionExists(regionPos.x, regionPos.y, regionPos.z)) {
                 return this.openRegion(regionPos.x, regionPos.y, regionPos.z);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Log error if the region failed to load
             World.LOGGER.error(String.format("Region at %s run failed to load:", regionPos), e);
         }
@@ -1175,7 +1175,7 @@ public class ServerWorld extends World {
         T spawn = super.spawn(entity);
 
         if (entity instanceof ServerPlayer player) {
-            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
+            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddEntityPacket(spawn));
 
@@ -1190,7 +1190,7 @@ public class ServerWorld extends World {
         T spawn = super.spawn(entity, spawnData);
 
         if (entity instanceof ServerPlayer player) {
-            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
+            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddEntityPacket(spawn));
 

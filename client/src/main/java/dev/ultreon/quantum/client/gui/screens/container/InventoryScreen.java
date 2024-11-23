@@ -7,12 +7,16 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.ItemSlotWidget;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.c2s.C2SCraftRecipePacket;
+import dev.ultreon.quantum.recipe.CraftingRecipe;
+import dev.ultreon.quantum.recipe.Recipe;
+import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.recipe.*;
 import dev.ultreon.quantum.text.TextObject;
@@ -42,7 +46,7 @@ public class InventoryScreen extends ContainerScreen {
 
         if (menu.getEntity() instanceof Player player) {
             this.inventory = player.inventory;
-            this.recipes = RecipeManager.get().getRecipes(RecipeType.CRAFTING, 30, player.inventory);
+            this.recipes = ClientRecipeManager.INSTANCE.getRecipes(RecipeType.CRAFTING, 30, player.inventory);
         } else this.recipes = new PagedList<>(30);
         this.currentPage = this.recipes.getFullPage(this.page);
         this.rebuildSlots();
@@ -80,7 +84,7 @@ public class InventoryScreen extends ContainerScreen {
         List<ItemSlot> list = new ArrayList<>();
         int x = 0;
         int y = 0;
-        this.recipes = RecipeManager.get().getRecipes(RecipeType.CRAFTING, 30, menu);
+        this.recipes = ClientRecipeManager.INSTANCE.getRecipes(RecipeType.CRAFTING, 30, menu);
         this.currentPage = this.recipes.getFullPage(this.page);
         for (CraftingRecipe recipe : this.currentPage) {
             if (recipe.canCraft(this.inventory)) {

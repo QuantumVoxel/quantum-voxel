@@ -14,6 +14,7 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.util.Rot;
+import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
@@ -835,7 +836,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             chunk = data;
         } else {
             // If the chunk already exists, log a warning and return
-            unloadChunk(chunk, pos);
+            if (DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) World.LOGGER.warn("Chunk already exists: {}", pos);
+            TerrainRenderer worldRenderer = this.client.worldRenderer;
+            if (worldRenderer != null) {
+                ClientChunk finalChunk = chunk;
+                QuantumClient.invoke(() -> worldRenderer.unload(finalChunk));
+            }
             return;
         }
 

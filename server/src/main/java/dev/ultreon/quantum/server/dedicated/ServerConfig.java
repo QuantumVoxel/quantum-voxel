@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.server.dedicated;
 
-import dev.ultreon.quantum.config.crafty.ConfigEntry;
-import dev.ultreon.quantum.config.crafty.ConfigInfo;
-import dev.ultreon.quantum.config.crafty.CraftyConfig;
-import dev.ultreon.quantum.config.crafty.RequiresRestart;
+import dev.ultreon.quantum.config.crafty.*;
+import dev.ultreon.quantum.world.World;
 
 @ConfigInfo(fileName = "server")
 public class ServerConfig extends CraftyConfig {
@@ -22,5 +20,6 @@ public class ServerConfig extends CraftyConfig {
     public static int maxPlayers = 10;
 
     @ConfigEntry(path = "server.renderDistance", comment = "The render distance of the server.")
-    public static int renderDistance;
+    @Ranged(min = World.CHUNK_SIZE * 2, max = 256)
+    public static int renderDistance = 128;
 }

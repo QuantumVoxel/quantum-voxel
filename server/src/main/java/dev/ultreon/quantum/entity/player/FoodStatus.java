@@ -9,23 +9,29 @@ public class FoodStatus {
     private float saturationLevel;
     private float exhaustion = 1.0f;
     private boolean isStarving;
+    private float thirstLevel;
 
-    public FoodStatus(Player player, int foodLevel, int saturationLevel) {
+    public FoodStatus(Player player, int foodLevel, int saturationLevel, int thirstLevel) {
         this.player = player;
         this.foodLevel = foodLevel;
         this.saturationLevel = saturationLevel;
+        this.thirstLevel = thirstLevel;
     }
 
     public FoodStatus(Player player) {
-        this(player, 20, 5);
+        this(player, 20, 5, 20);
     }
 
     public void setFoodLevel(int foodLevel) {
-        this.foodLevel = foodLevel;
+        this.foodLevel = Math.clamp(foodLevel, 0, 20);
     }
 
     public void setSaturationLevel(int saturationLevel) {
         this.saturationLevel = saturationLevel;
+    }
+
+    public void setThirstLevel(float thirstLevel) {
+        this.thirstLevel = Math.clamp(thirstLevel, 0, 20);
     }
 
     public int getFoodLevel() {
@@ -34,6 +40,10 @@ public class FoodStatus {
 
     public float getSaturationLevel() {
         return this.saturationLevel;
+    }
+
+    public float getThirstLevel() {
+        return thirstLevel;
     }
 
     public boolean isFull() {
@@ -48,8 +58,13 @@ public class FoodStatus {
         return this.isStarving;
     }
 
+    public boolean isThirsty() {
+        return this.thirstLevel == 0;
+    }
+
     public boolean exhaust(float exhaustion) {
         this.exhaustion -= exhaustion;
+        this.thirstLevel -= exhaustion / 20f;
         if (this.exhaustion < 0) {
             this.exhaustion = 20;
             decrementSaturation();

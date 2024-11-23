@@ -92,37 +92,37 @@ public class ModListScreen extends Screen {
                         }
                     }
                 })
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
         this.configButton.disable();
 
         this.sourcesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.sources"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .setCallback(this::onSources)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
         this.sourcesButton.isVisible = false;
 
         this.issuesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.issues"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .setCallback(this::onIssues)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
         this.issuesButton.isVisible = false;
 
         this.discordInviteButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.discord"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .setCallback(this::onDiscordInvite)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
         this.discordInviteButton.isVisible = false;
 
         this.homepageButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.homepage"), 90)
                 .position(() -> new Position(5, this.size.height - 26))
                 .setCallback(this::onHomepage)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
         this.homepageButton.isVisible = false;
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190)
                 .position(() -> new Position(5, this.size.height - 26))
                 .setCallback(this::onBack)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
     }
 
     private void onSources(TextButton textButton) {

@@ -137,4 +137,8 @@ public class BlockStateDefinition {
     public <T> StatePropertyKey<?> byName(@NotNull String name) {
         return propertyByName.get(name);
     }
+
+    public StatePropertyKey<?>[] keys() {
+        return keys;
+    }
 }

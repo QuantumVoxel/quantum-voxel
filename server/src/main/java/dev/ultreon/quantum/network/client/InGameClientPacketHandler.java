@@ -12,14 +12,12 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
+import dev.ultreon.quantum.network.packets.s2c.*;
+import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
@@ -48,13 +46,13 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
 
-    void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, Vec2f rotation);
+    void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot);
 
     void onKeepAlive();
 
     void onPlaySound(NamespaceID sound, float volume);
 
-    void onAddPlayer(UUID uuid, String name, Vec3d position);
+    void onAddPlayer(int id, UUID uuid, String name, Vec3d position);
 
     void onRemovePlayer(UUID u);
 
@@ -107,4 +105,8 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onChangeDimension(PacketContext ctx, S2CChangeDimensionPacket packet);
 
     void onBlockEntityUpdate(BlockVec pos, MapType data);
+
+    void onTemperatureSync(S2CTemperatureSyncPacket packet);
+
+    <T extends Recipe> void onRecipeSync(S2CRecipeSyncPacket<T> ts2CRecipeSyncPacket);
 }

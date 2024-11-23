@@ -1,22 +1,21 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.Button;
 import dev.ultreon.quantum.client.gui.widget.Panel;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.TextEntry;
 import dev.ultreon.quantum.client.text.Language;
+import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MultiplayerScreen extends Screen {
     private TextEntry entry;
     private TextButton joinButton;
+    private TextButton backButton;
+    private Panel panel;
 
     public MultiplayerScreen() {
         super(Language.translate("quantum.screen.multiplayer"));
@@ -27,19 +26,42 @@ public class MultiplayerScreen extends Screen {
     }
 
     @Override
-    public void build(@NotNull GuiBuilder builder) {
-        builder.add(Panel.create().bounds(() -> new Bounds(this.size.width / 2 - 105, this.size.height / 2 - 15, 210, 57)));
+    protected void init() {
+        super.init();
 
-        this.entry = builder.add(TextEntry.of().position(() -> new Position(this.size.width / 2 - 100, this.size.height / 2 - 10)))
-                .callback(this::validateServerIp)
-                .hint(TextObject.translation("quantum.screen.multiplayer.server_ip"));
+        panel = add(Panel.create());
+        panel.setPos(this.size.width / 2 - 105, this.size.height / 2 - 15);
+        panel.setSize(210, 57);
 
+        entry = add(TextEntry.of());
+        entry.setPos(this.size.width / 2 - 100, this.size.height / 2 - 10);
+        entry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_ip"));
+        entry.callback().set(this::validateServerIp);
 
-        this.joinButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98)
-                .position(() -> new Position(this.size.width / 2 + 2, this.size.height / 2 + 15))
-                .getType(Button.Type.DARK_EMBED)
-                .setCallback(this::joinServer));
-        this.joinButton.disable();
+        backButton = add(TextButton.of(UITranslations.BACK, 98));
+        backButton.setPos(this.size.width / 2 - 100, this.size.height / 2 + 15);
+        backButton.setType(Button.Type.DARK_EMBED);
+        backButton.setCallback(this::back);
+
+        joinButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98));
+        joinButton.setPos(this.size.width / 2 + 2, this.size.height / 2 + 15);
+        joinButton.setType(Button.Type.DARK_EMBED);
+        joinButton.setCallback(this::joinServer);
+        joinButton.disable();
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        super.resized(width, height);
+
+        this.panel.setPos(width / 2 - 105, height / 2 - 15);
+        this.entry.setPos(width / 2 - 100, height / 2 - 10);
+        this.backButton.setPos(width / 2 - 100, height / 2 + 15);
+        this.joinButton.setPos(width / 2 + 2, height / 2 + 15);
+    }
+
+    private void back(TextButton textButton) {
+        this.back();
     }
 
     private void joinServer(TextButton caller) {

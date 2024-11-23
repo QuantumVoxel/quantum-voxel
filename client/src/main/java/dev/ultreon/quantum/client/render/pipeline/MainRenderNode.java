@@ -27,7 +27,7 @@ import static com.badlogic.gdx.Gdx.gl;
 import static com.badlogic.gdx.graphics.GL20.*;
 
 public class MainRenderNode extends RenderNode {
-    private Mesh quad = this.createFullScreenQuad();
+    private Mesh quad = createFullScreenQuad();
     private final Supplier<ShaderProgram> program = ShaderPrograms.MAIN;
     private float blurScale = 0f;
     private Texture vignetteTex;
@@ -45,7 +45,7 @@ public class MainRenderNode extends RenderNode {
     public void render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, float deltaTime) {
         // Extract textures
         if (vignetteTex == null) {
-            vignetteTex = this.client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
+            vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
         }
 
         Texture depthTex = textures.get("depth");
@@ -59,13 +59,13 @@ public class MainRenderNode extends RenderNode {
 
         // End modelBatch and begin rendering
         modelBatch.end();
-        this.client.renderer.begin();
-        this.client.renderer.getBatch().enableBlending();
-        this.client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        client.renderer.begin();
+        client.renderer.getBatch().enableBlending();
+        client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Handle blur effect
         if (blurScale > 0f) {
-            this.client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
+            client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
                 render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex, foregroundTex);
             });
         } else {
@@ -73,92 +73,92 @@ public class MainRenderNode extends RenderNode {
         }
 
         // Disable blending and end rendering
-        this.client.renderer.getBatch().disableBlending();
-        this.client.renderer.end();
-        this.client.spriteBatch.setShader(null);
+        client.renderer.getBatch().disableBlending();
+        client.renderer.end();
+        client.spriteBatch.setShader(null);
 
         gl.glActiveTexture(GL_TEXTURE0);
 
         // Show render pipeline
         if (GamePlatform.get().showRenderPipeline()) {
-            this.client.renderer.begin();
-            this.client.renderer.getBatch().enableBlending();
-            this.client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
-            this.client.spriteBatch.flush();
-            this.client.spriteBatch.draw(positionTex, (float) (Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
-            this.client.spriteBatch.flush();
-            this.client.spriteBatch.draw(normalTex, (float) (2 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
-            this.client.spriteBatch.flush();
-            this.client.spriteBatch.draw(foregroundTex, (float) (3 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
-            this.client.spriteBatch.flush();
-            this.client.spriteBatch.draw(skyboxTex, (float) (4 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
-            this.client.renderer.end();
+            client.renderer.begin();
+            client.renderer.getBatch().enableBlending();
+            client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.flush();
+            client.spriteBatch.draw(positionTex, (float) (Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.flush();
+            client.spriteBatch.draw(normalTex, (float) (2 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.flush();
+            client.spriteBatch.draw(foregroundTex, (float) (3 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.flush();
+            client.spriteBatch.draw(skyboxTex, (float) (4 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.renderer.end();
         }
 
         // Enable blending and set blend function
-        this.client.renderer.getBatch().enableBlending();
+        client.renderer.getBatch().enableBlending();
     }
 
     private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex, Texture foregroundTex) {
-        this.client.spriteBatch.enableBlending();
+        client.spriteBatch.enableBlending();
 
-        this.drawDiffuse(skyboxTex);
-        if (this.client.viewMode == 0) {
-            this.drawDiffuse(diffuseTex);
-            this.drawDiffuse(foregroundTex);
+        drawDiffuse(skyboxTex);
+        if (client.viewMode == 0) {
+            drawDiffuse(diffuseTex);
+            drawDiffuse(foregroundTex);
 
-            BlockState buriedBlock = this.client.player.getBuriedBlock();
+            BlockState buriedBlock = client.player.getBuriedBlock();
             if (!buriedBlock.isAir()) {
-                TextureRegion texture = this.client.getBlockModel(buriedBlock).getBuriedTexture();
-                if (!this.client.player.isSpectator() && texture != null && texture != TextureManager.DEFAULT_TEX_REG && texture.getTexture() != null && texture.getTexture() != TextureManager.DEFAULT_TEX_REG.getTexture()) {
-                    this.client.spriteBatch.draw(texture, 0, Gdx.graphics.getHeight(), Gdx.graphics.getWidth(), -Gdx.graphics.getHeight());
-                    this.client.renderer.fill(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), new Color(0, 0, 0, 0.5f));
+                TextureRegion texture = client.getBlockModel(buriedBlock).getBuriedTexture();
+                if (!client.player.isSpectator() && texture != null && texture != TextureManager.DEFAULT_TEX_REG && texture.getTexture() != null && texture.getTexture() != TextureManager.DEFAULT_TEX_REG.getTexture()) {
+                    client.spriteBatch.draw(texture, 0, Gdx.graphics.getHeight(), Gdx.graphics.getWidth(), -Gdx.graphics.getHeight());
+                    client.renderer.fill(0, 0, client.getWidth(), client.getHeight(), new Color(0, 0, 0, 0.5f));
                 }
             }
 
-            this.drawDiffuse(vignetteTex, ClientConfig.vignetteOpacity);
-        } else if (this.client.viewMode == 1) {
-            this.drawDiffuse(normalTex);
-        } else if (this.client.viewMode == 2) {
-            this.drawDiffuse(reflectiveTex);
-        } else if (this.client.viewMode == 3) {
-            this.drawDiffuse(depthTex);
-        } else if (this.client.viewMode == 4) {
-            this.drawDiffuse(positionTex);
-        } else if (this.client.viewMode == 5) {
-            this.drawDiffuse(specularTex);
-        } else if (this.client.viewMode == 6) {
-            this.drawDiffuse(foregroundTex);
+            drawDiffuse(vignetteTex, ClientConfig.vignetteOpacity);
+        } else if (client.viewMode == 1) {
+            drawDiffuse(normalTex);
+        } else if (client.viewMode == 2) {
+            drawDiffuse(reflectiveTex);
+        } else if (client.viewMode == 3) {
+            drawDiffuse(depthTex);
+        } else if (client.viewMode == 4) {
+            drawDiffuse(positionTex);
+        } else if (client.viewMode == 5) {
+            drawDiffuse(specularTex);
+        } else if (client.viewMode == 6) {
+            drawDiffuse(foregroundTex);
         } else {
-            this.drawDiffuse(skyboxTex);
-            this.drawDiffuse(foregroundTex);
+            drawDiffuse(skyboxTex);
+            drawDiffuse(foregroundTex);
         }
     }
 
     private void drawDiffuse(@NotNull Texture diffuseTexture) {
-        this.client.spriteBatch.setShader(null);
-        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        client.spriteBatch.setShader(null);
+        client.spriteBatch.draw(diffuseTexture, 0, 0, client.getWidth(), client.getHeight());
     }
 
     private void drawDiffuse(@NotNull Texture diffuseTexture, float opacity) {
-        this.client.spriteBatch.setShader(null);
-        this.client.spriteBatch.setColor(1, 1, 1, opacity);
-        this.client.spriteBatch.draw(diffuseTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        this.client.spriteBatch.setColor(1, 1, 1, 1);
+        client.spriteBatch.setShader(null);
+        client.spriteBatch.setColor(1, 1, 1, opacity);
+        client.spriteBatch.draw(diffuseTexture, 0, 0, client.getWidth(), client.getHeight());
+        client.spriteBatch.setColor(1, 1, 1, 1);
     }
 
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
 
-        this.quad.dispose();
-        this.quad = this.createFullScreenQuad();
+        quad.dispose();
+        quad = createFullScreenQuad();
     }
 
     @Override
     public void dumpInfo(PrintStream stream) {
         super.dumpInfo(stream);
-        stream.println("Shader Handle: " + this.program.get().getHandle());
+        stream.println("Shader Handle: " + program.get().getHandle());
     }
 
     public Mesh createFullScreenQuad() {
@@ -199,6 +199,6 @@ public class MainRenderNode extends RenderNode {
     }
 
     public void blur(float blurScale) {
-        this.blurScale = blurScale;
+        blurScale = blurScale;
     }
 }

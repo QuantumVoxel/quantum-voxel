@@ -469,8 +469,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         // Adjust screen coordinates based on draw offset
-        screenX -= this.client.getDrawOffset().x;
-        screenY -= this.client.getDrawOffset().y;
+        screenX = this.client.getMousePos().x;
+        screenY = this.client.getMousePos().y;
 
         if (WindowManager.mouseMoved(screenX, screenY)) {
             return true;
@@ -503,8 +503,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         // Adjust the screen coordinates based on the draw offset
-        screenX -= this.client.getDrawOffset().x;
-        screenY -= this.client.getDrawOffset().y;
+        screenX = this.client.getMousePos().x;
+        screenY = this.client.getMousePos().y;
 
         if (WindowManager.mouseDragged(screenX, screenY)) {
             return true;
@@ -533,8 +533,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         // Adjust for draw offset
-        screenX -= this.client.getDrawOffset().x;
-        screenY -= this.client.getDrawOffset().y;
+        screenX = this.client.getMousePos().x;
+        screenY = this.client.getMousePos().y;
 
         if (WindowManager.mousePress(screenX, screenY, button)) {
             return true;
@@ -552,18 +552,13 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
             // Check if mouse press event is canceled or pressed
             boolean canceled = ScreenEvents.MOUSE_PRESS.factory().onMousePressScreen(mouseX, mouseY, button).isCanceled();
-            boolean pressed = client.mousePress(mouseX + client.getDrawOffset().x, mouseY + client.getDrawOffset().y, button) || currentScreen.mousePress(mouseX, mouseY, button);
+            boolean pressed = client.mousePress(mouseX + client.getMousePos().x, mouseY + client.getMousePos().y, button) || currentScreen.mousePress(mouseX, mouseY, button);
             return !canceled && pressed;
         }
 
         // Check if the world is null or there is already a screen active
         if (world == null || this.client.screen != null)
             return false;
-
-        // Check if the cursor is not caught and ImGui is not showing
-        if (!Gdx.input.isCursorCatched() && !GamePlatform.get().isShowingImGui()) {
-            return true;
-        }
 
         // Check if player and hit result are not null
         return player != null && hit != null;
@@ -633,8 +628,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         // Adjust screen coordinates based on the draw offset
-        screenX -= this.client.getDrawOffset().x;
-        screenY -= this.client.getDrawOffset().y;
+        screenX = this.client.getMousePos().x;
+        screenY = this.client.getMousePos().y;
 
         if (WindowManager.mouseRelease(screenX, screenY, button)) {
             return true;
@@ -655,7 +650,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Handle mouse release event on the current screen
         if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled()) {
             if (!currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button)) {
-                client.mouseRelease(screenX + client.getDrawOffset().x, screenY + client.getDrawOffset().y, button);
+                client.mouseRelease(screenX + client.getMousePos().x, screenY + client.getMousePos().y, button);
             }
         }
 
@@ -686,9 +681,6 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         if (WindowManager.mouseScroll(Gdx.input.getX(), Gdx.input.getY(), amountY)) {
             return true;
         }
-
-        // Check if the ImGui overlay is shown and return false if it is
-        if (GamePlatform.get().isShowingImGui()) return false;
 
         // Handle hotbar scrolling with the mouse wheel
         Player player = this.client.player;

@@ -46,10 +46,10 @@ public interface TerrainRenderer extends Disposable {
      * Renders the terrain using the specified model batch and render layer with a given delta time.
      *
      * @param batch       the model batch used for rendering
-     * @param renderLayer the render layer that defines collections of model instances and animations
+     * @param sceneCategory the render layer that defines collections of model instances and animations
      * @param deltaTime   the time passed since the last frame, used for animations and updates
      */
-    void render(ModelBatch batch, RenderLayer renderLayer, float deltaTime);
+    void render(ModelBatch batch, SceneCategory sceneCategory, float deltaTime);
 
     /**
      * Gathers rendering data for a specified entity to be processed by the renderer.

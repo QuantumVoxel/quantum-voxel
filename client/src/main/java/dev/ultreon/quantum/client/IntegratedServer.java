@@ -270,6 +270,7 @@ public class IntegratedServer extends QuantumServer {
         super.shutdown();
 
         this.timer.cancel();
+        this.client.remove(this);
         this.client.integratedServer = null;
     }
 
@@ -289,7 +290,7 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
-    protected void runTick() {
+    public void runTick() {
         this.client.pollServerTick();
 
         super.runTick();

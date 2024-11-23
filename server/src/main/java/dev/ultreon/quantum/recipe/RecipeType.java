@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.recipe;
 
 import de.marhali.json5.Json5Object;
+import dev.ultreon.quantum.network.PacketIO;
+import dev.ultreon.quantum.network.packets.PacketCodec;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.container.Container;
@@ -11,12 +13,31 @@ import java.util.Objects;
  * Represents a type of recipe.
  */
 public final class RecipeType<T extends Recipe> {
-    public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<>(CraftingRecipe::deserialize));
-    public static final RecipeType<BlastingRecipe> BLASTING = RecipeType.register("blasting", new RecipeType<>(BlastingRecipe::deserialize)); // TODO: Add blasting
+    public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<>(CraftingRecipe::deserialize, CraftingRecipe.class, PacketCodec.of(packetIO -> {
+        return new CraftingRecipe(packetIO.readList(PacketIO::readItemStack), packetIO.readItemStack());
+    }, ((packetIO, data) -> {
+        packetIO.writeList(data.ingredients(), PacketIO::writeItemStack);
+        packetIO.writeItemStack(data.result());
+    }))));
+    public static final RecipeType<BlastingRecipe> BLASTING = RecipeType.register("blasting", new RecipeType<>(BlastingRecipe::deserialize, BlastingRecipe.class, PacketCodec.of(
+            packetIO -> {
+                return new BlastingRecipe(packetIO.readItemStack(), packetIO.readInt(), packetIO.readInt(), packetIO.readItemStack());
+            },
+            (packetIO, data) -> {
+                packetIO.writeItemStack(data.getInput());
+                packetIO.writeInt(data.getMinTemperature());
+                packetIO.writeInt(data.getCookTime());
+                packetIO.writeItemStack(data.result());
+            }
+    ))); // TODO: Add blasting
     private final RecipeDeserializer<T> deserializer;
+    private final Class<T> type;
+    private final PacketCodec<T> codec;
 
-    public RecipeType(RecipeDeserializer<T> deserializer) {
+    public RecipeType(RecipeDeserializer<T> deserializer, Class<T> type, PacketCodec<T> codec) {
         this.deserializer = deserializer;
+        this.type = type;
+        this.codec = codec;
     }
 
     public static void nopInit() {
@@ -93,6 +114,14 @@ public final class RecipeType<T extends Recipe> {
             return recipe;
         }
         return null;
+    }
+
+    public T cast(Recipe recipe) {
+        return type.cast(recipe);
+    }
+
+    public PacketCodec<T> codec() {
+        return codec;
     }
 
 

@@ -46,6 +46,7 @@ public final class ServerChunk extends Chunk {
 
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
+    private long trackDuration = 10000L;
 
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
@@ -114,7 +115,8 @@ public final class ServerChunk extends Chunk {
                 for (MapType data : blockEntities.getValue()) {
                     BlockVec blockVec = new BlockVec(data.getInt("x"), data.getInt("y"), data.getInt("z"), BlockVecSpace.WORLD);
                     BlockEntity blockEntity = BlockEntity.fullyLoad(world, blockVec, data);
-                    this.setBlockEntity(blockVec.chunkLocal(), blockEntity);
+                    if (blockEntity != null)
+                        this.setBlockEntity(blockVec.chunkLocal(), blockEntity);
                 }
             }
 
@@ -199,20 +201,20 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
-        if (!isBeingTracked()) {
+        if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
             this.world.unloadChunk(this, this.getVec());
             return;
         }
 
         this.world.getServer().onChunkSent(this);
-        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage, this.biomeStorage, this.getBlockEntities()));
+        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
 
     }
 
     public void tick() {
         Collection<BlockEntity> blockEntities;
         synchronized (this){
-            if (!isBeingTracked() && lastTracked + 1000L < System.currentTimeMillis()) {
+            if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
                 this.world.unloadChunk(this, this.getVec());
                 return;
             } else if (isBeingTracked()) {

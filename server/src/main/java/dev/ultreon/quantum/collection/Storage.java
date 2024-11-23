@@ -24,7 +24,7 @@ public interface Storage<D> extends Cloneable {
 
     <R> Storage<R> map(R defaultValue, IntFunction<R[]> type, Function<D, R> o);
 
-    Storage<D> clone() throws CloneNotSupportedException;
+    Storage<D> clone();
 
     boolean isUniform();
 }

@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
+import dev.ultreon.quantum.component.Component;
 import dev.ultreon.quantum.util.NamespaceID;
 import imgui.ImGui;
 
@@ -72,12 +73,6 @@ public class GuiEditor {
             ImGuiEx.text("Classname: ", () -> widget.getClass().getSimpleName());
             ImGuiEx.editBool("Enabled: ", path + "::enabled", widget::isEnabled, widget::setEnabled);
             ImGuiEx.editBool("Visible: ", path + "::visible", widget::isVisible, widget::setVisible);
-
-            // Properties
-            var components = widget.componentRegistry();
-            for (Map.Entry<NamespaceID, UIComponent> component : components.entrySet()) {
-                component.getValue().handleImGui(path + "::" + component.getKey(), component.getKey(), widget);
-            }
 
             if (ImGui.collapsingHeader("Position")) {
                 ImGui.treePush();

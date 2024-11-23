@@ -39,7 +39,9 @@ public abstract class BlockEntity implements CapabilityHolder {
 
     public static BlockEntity fullyLoad(World world, BlockVec pos, MapType mapType) {
         NamespaceID type = NamespaceID.tryParse(mapType.getString("type"));
+        if (type == null) return null;
         BlockEntityType<?> value = Registries.BLOCK_ENTITY_TYPE.get(type);
+        if (value == null) return null;
         return value.load(world, pos, mapType);
     }
 
@@ -66,5 +68,9 @@ public abstract class BlockEntity implements CapabilityHolder {
 
     public void onUpdate(MapType data) {
 
+    }
+
+    public BlockEntityType<?> getType() {
+        return type;
     }
 }

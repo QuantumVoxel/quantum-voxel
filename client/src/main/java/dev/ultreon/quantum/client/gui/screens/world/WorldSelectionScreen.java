@@ -63,17 +63,17 @@ public class WorldSelectionScreen extends Screen {
         this.createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
                 .position(() -> new Position(this.getWidth() / 2 - 227, this.getHeight() - 31))
                 .setCallback(this::createWorld)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
 
         this.playButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.play"), 150)
                 .position(() -> new Position(this.getWidth() / 2 - 75, this.getHeight() - 31))
                 .setCallback(this::playWorld)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
 
         this.deleteWorld = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
                 .position(() -> new Position(this.getWidth() / 2 + 77, this.getHeight() - 31))
                 .setCallback(this::deleteWorld)
-                .getType(Button.Type.DARK_EMBED));
+                .setType(Button.Type.DARK_EMBED));
     }
 
     private void selectWorld(WorldCardList.Entry entry) {

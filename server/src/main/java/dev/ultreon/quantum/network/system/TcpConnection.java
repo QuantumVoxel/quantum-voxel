@@ -1,18 +1,25 @@
 package dev.ultreon.quantum.network.system;
 
 import com.badlogic.gdx.utils.Pool;
-import com.esotericsoftware.kryonet.*;
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.FrameworkMessage;
+import com.esotericsoftware.kryonet.KryoNetException;
+import com.esotericsoftware.kryonet.Listener;
 import com.google.common.collect.Queues;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
-import dev.ultreon.quantum.network.*;
+import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketData;
+import dev.ultreon.quantum.network.PacketHandler;
+import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.packets.s2c.S2CKeepAlivePacket;
 import dev.ultreon.quantum.network.stage.PacketStage;
+import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.Result;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
@@ -21,7 +28,6 @@ import java.nio.channels.ClosedChannelException;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.SynchronousQueue;
 
 public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> extends Listener implements IConnection<OurHandler, TheirHandler>, Closeable {
     public static final Pool<Long> sequencePool = new Pool<>() {
@@ -42,6 +48,7 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     private OurHandler handler;
     private boolean readOnly;
     protected long ping = 0;
+    private boolean loggingIn = true;
 
     public TcpConnection(com.esotericsoftware.kryonet.Connection connection, Executor executor) {
         this.connection = connection;
@@ -52,6 +59,13 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
         senderThread = new Thread(() -> {
             try {
                 this.sender();
+            } catch (KryoException e) {
+                LOGGER.error("Failed to send packet", e);
+                try {
+                    this.close();
+                } catch (IOException ex) {
+                    LOGGER.error("Failed to close connection", ex);
+                }
             } catch (ClosedChannelException | ClosedConnectionException e) {
                 // Ignored
             } catch (IOException e) {
@@ -148,6 +162,7 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
                 connection.sendTCP(new FrameworkMessage.KeepAlive());
             } else {
                 connection.close();
+                this.getPlayer().getServer().onDisconnected(this.getPlayer(), "Connection closed!");
             }
         } catch (Exception e) {
             LOGGER.error("Failed to handle packet", e);
@@ -157,6 +172,14 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     @Override
     public void disconnected(Connection connection) {
         this.on3rdPartyDisconnect("Connection closed!");
+
+        ServerPlayer player = this.getPlayer();
+        if (player == null) return;
+
+        QuantumServer server = player.getServer();
+        if (server == null) return;
+
+        server.onDisconnected(player, "Connection closed!");
     }
 
     protected abstract Packet<TheirHandler> getDisconnectPacket(String message);
@@ -175,6 +198,8 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     public void moveTo(PacketStage stage, OurHandler handler) {
         this.ourPacketData = this.getOurData(stage);
         this.theirPacketData = this.getTheirData(stage);
+
+        this.loggingIn = stage == PacketStages.LOGIN;
 
         this.handler = handler;
     }
@@ -216,6 +241,11 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     @Override
     public void onPing(long ping) {
 
+    }
+
+    @Override
+    public boolean isLoggingIn() {
+        return loggingIn;
     }
 
     public boolean isReadOnly() {

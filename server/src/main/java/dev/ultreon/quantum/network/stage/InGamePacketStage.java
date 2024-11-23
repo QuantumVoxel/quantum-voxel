@@ -44,6 +44,7 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CChunkCancelPacket::read);
         this.addClientBound(S2CRespawnPacket::read);
         this.addClientBound(S2CPlayerHealthPacket::read);
+        this.addClientBound(S2CTemperatureSyncPacket::read);
         this.addClientBound(S2CPlayerSetPosPacket::read);
         this.addClientBound(S2CPlayerPositionPacket::read);
         this.addClientBound(S2CPlaySoundPacket::read);
@@ -71,5 +72,6 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CChunkUnloadPacket::read);
         this.addClientBound(S2CTimeSyncPacket::read);
         this.addClientBound(S2CChangeDimensionPacket::read);
+        this.addClientBound(S2CRecipeSyncPacket::read);
     }
 }

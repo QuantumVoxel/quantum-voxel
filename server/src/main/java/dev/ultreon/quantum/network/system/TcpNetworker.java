@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.network.system;
 
-import com.esotericsoftware.kryo.kryo5.minlog.Log;
-import com.esotericsoftware.kryonet.*;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Server;
 import dev.ultreon.quantum.network.Networker;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
-import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStages;
@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TcpNetworker extends Listener implements Networker {
     private final QuantumServer server;
@@ -24,7 +26,7 @@ public class TcpNetworker extends Listener implements Networker {
     public TcpNetworker(QuantumServer server, @Nullable InetAddress host, int port) throws IOException {
         this.server = server;
 
-        this.kryoServer = new Server(2 * 1024 * 1024, 2 * 1024 * 1024);
+        this.kryoServer = new Server(16 * 1024 * 1024, 16 * 1024 * 1024);
         this.kryoServer.addListener(this);
         this.kryoServer.getKryo().setReferences(false);
         this.kryoServer.getKryo().setRegistrationRequired(false);

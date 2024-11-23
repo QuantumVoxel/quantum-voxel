@@ -7,7 +7,6 @@ import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Label;
-import dev.ultreon.quantum.client.util.VoxelTerrain;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -19,7 +18,6 @@ import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +53,8 @@ public class WorldLoadScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         IntegratedServer server = new IntegratedServer(this.storage);
         this.client.integratedServer = server;
+
+        this.client.add("Integrated Server", server);
 
         server.init();
 

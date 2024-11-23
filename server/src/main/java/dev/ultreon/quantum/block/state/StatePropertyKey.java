@@ -54,4 +54,8 @@ public abstract class StatePropertyKey<T> {
 
         packetBuffer.writeInt(index);
     }
+
+    public String getName() {
+        return name;
+    }
 }

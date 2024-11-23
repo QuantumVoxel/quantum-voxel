@@ -6,7 +6,6 @@ import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
-import dev.ultreon.quantum.cs.ComponentSystem;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.network.packets.s2c.S2CEntityPipeline;
@@ -49,7 +48,7 @@ import java.util.UUID;
  * @see World#spawn(Entity)
  * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
  */
-public abstract class Entity extends ComponentSystem implements CommandSender {
+public abstract class Entity extends GameObject implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected WorldAccess world;
     protected double x;
@@ -498,6 +497,7 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
 
     /**
      * @return true if the entity is in the void, false otherwise.
+     * @deprecated not used until found a different use for void (feature? 👀).
      */
     @Deprecated
     public boolean isInVoid() {
@@ -671,7 +671,7 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
 
         if (this.world instanceof ServerWorld serverWorld) {
             if (this instanceof ServerPlayer serverPlayer) {
-                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), getRotation()), serverPlayer);
+                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), serverPlayer.xHeadRot, xRot, yRot), serverPlayer);
             } else {
                 serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
             }
@@ -951,6 +951,18 @@ public abstract class Entity extends ComponentSystem implements CommandSender {
         double b = y - this.y;
         double c = z - this.z;
         return Math.sqrt(a * a + b * b + c * c);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return id == entity.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public enum Pose {

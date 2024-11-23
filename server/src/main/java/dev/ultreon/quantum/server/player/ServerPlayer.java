@@ -28,7 +28,9 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.CommandRegistry;
+import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.Formatter;
@@ -72,6 +74,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     private boolean isAdmin;
     private final Tracker<ChunkVec> chunkTracker = new Tracker<>();
     private boolean isInactive;
+    private final Vec3d tmp3Da = new Vec3d();
 
     public ServerPlayer(EntityType<? extends Player> entityType, ServerWorld world, UUID uuid, String name, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         super(entityType, world, name);
@@ -186,12 +189,22 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.world.prepareSpawn(this);
         this.world.spawn(this);
 
+        this.sendRecipes();
+
         // Send gamemode and respawn packets to the connection
         this.connection.send(new S2CGamemodePacket(this.getGamemode()));
         this.connection.send(new S2CRespawnPacket(this.getPosition()));
 
         // Mark the entity as spawned
         this.spawned = true;
+    }
+
+    @ApiStatus.Internal
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void sendRecipes() {
+        for (RecipeType<?> type : Registries.RECIPE_TYPE.values()) {
+            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRecipes(type).stream().toList()));
+        }
     }
 
     public void markSpawned() {
@@ -216,6 +229,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         velocityY = 0;
         velocityZ = 0;
 
+
+        if (this.world.isServerSide()) {
+            float curSpeed = (float) this.tmp3Da.set(this.ox, this.oy, this.oz).dst(this.x, this.y, this.z);
+
+            if (curSpeed > 0) {
+                getFoodStatus().exhaust(curSpeed / 10f);
+            }
+        }
+
         // Check if the player's health has changed
         if (this.oldHealth != this.health) {
             // Send the updated health to the client
@@ -236,6 +258,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
     }
 
+    @Override
+    protected void tickTemperature() {
+        super.tickTemperature();
+
+        if (getAge() % 10 == 0) {
+            sendPacket(new S2CTemperatureSyncPacket(getTemperature()));
+        }
+    }
+
     private void autoCloseMenu() {
         this.connection.send(new S2CCloseMenuPacket());
     }
@@ -253,7 +284,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     protected void onMoved() {
         // Check if the chunk is loaded and the entity is in an active chunk
-        if (world.getChunk(this.getChunkVec()) == null) {
+        if (world.getChunkNoLoad(this.getChunkVec()) == null) {
             isInactive = true;
             return;
         }
@@ -263,7 +294,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
 
         if (isInactive) {
-            connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition()));
+            connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
             isInactive = false;
         }
 
@@ -280,7 +311,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
             // Check if player is within entity render distance
             if (player.getPosition().dst(this.getPosition()) < this.server.getEntityRenderDistance())
-                player.connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition()));
+                player.connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
         }
     }
 
@@ -338,11 +369,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         switch (status) {
             case FAILED -> this.handleFailedChunk(vec);
             case UNLOADED -> {
-                ServerChunk chunk = this.world.getChunk(vec);
+                ServerChunk chunk = this.world.getChunkNoLoad(vec);
                 if (chunk != null) {
                     chunk.getTracker().stopTracking(this);
                 }
-
                 this.chunkTracker.stopTracking(vec);
             }
             case SUCCESS -> this.handleClientLoadChunk(vec);
@@ -354,12 +384,18 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
-        this.connection.send(packet);
+        try {
+            this.connection.send(packet);
+        } catch (Exception e) {
+            this.connection.disconnect("Internal server error");
+            this.connection.on3rdPartyDisconnect("Internal server error");
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleClientLoadChunk(@NotNull ChunkVec vec) {
         // Handle the chunk status accordingly
-        if (vec.dst(this.getChunkVec()) > this.server.getRenderDistance()) {
+        if (vec.dst(this.getChunkVec()) * World.CHUNK_SIZE > this.server.getRenderDistance()) {
             this.sendPacket(new S2CChunkUnloadPacket(vec));
             return;
         }
@@ -374,8 +410,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             Chat.sendInfo(this, "Position reset on chunk load.");
 
         ServerChunk chunk = this.world.getChunk(vec);
-        if (chunk != null)
-            chunk.getTracker().startTracking(this);
+        chunk.getTracker().startTracking(this);
 
         this.chunkTracker.startTracking(vec);
     }
@@ -402,7 +437,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void sendChunk(@NotNull ChunkVec vec, @NotNull ServerChunk chunk) {
         if (this.sendingChunk) return;
 
-        this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage, chunk.biomeStorage, chunk.getBlockEntities()));
+        this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage.clone(), chunk.biomeStorage.clone(), chunk.getBlockEntities()));
         this.sendingChunk = false;
     }
 
@@ -546,16 +581,13 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
 
-        this.x = x;
-        this.y = y;
-        this.z = z;
 
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
-        this.velocityX = x - this.ox;
-        this.velocityY = y - this.oy;
-        this.velocityZ = z - this.oz;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     /**
@@ -576,6 +608,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
 
+        this.ox = this.x;
+        this.oy = this.y;
+        this.oz = this.z;
+
         this.x = x;
         this.y = y;
         this.z = z;
@@ -584,13 +620,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.xRot = xRot;
         this.yRot = yRot;
 
-        this.ox = this.x;
-        this.oy = this.y;
-        this.oz = this.z;
-
-        this.velocityX = x - this.ox;
-        this.velocityY = y - this.oy;
-        this.velocityZ = z - this.oz;
+        this.world.sendAllTrackingExcept((int) x, (int) y, (int) z, new S2CPlayerPositionPacket(this.getUuid(), new Vec3d(x, y, z), xHeadRot, xRot, yRot), this);
     }
 
     public boolean isSpawned() {
@@ -763,7 +793,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                         }
 
                         receivedChunk.getTracker().startTracking(this);
-                        receivedChunk.sendChunk();
+                        QuantumServer.invoke(receivedChunk::sendChunk);
                     }).exceptionally(throwable -> {
                         this.chunkTracker.stopTracking(pos);
                         this.sendPacket(new S2CChunkUnloadPacket(pos));

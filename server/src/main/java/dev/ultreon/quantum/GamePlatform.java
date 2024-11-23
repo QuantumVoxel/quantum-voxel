@@ -18,9 +18,14 @@ import java.util.function.Consumer;
 
 public abstract class GamePlatform {
     protected static GamePlatform instance;
+    protected final GameInsets insets = new GameInsets(0, 0, 0, 0);
 
     protected GamePlatform() {
         instance = this;
+
+        if (isDevEnvironment()) {
+            this.setShowingImGui(true);
+        }
     }
 
     public static GamePlatform get() {
@@ -224,6 +229,10 @@ public abstract class GamePlatform {
      * @return true if the window has no background, false otherwise
      */
     public abstract boolean hasBackPanelRemoved();
+
+    public GameInsets getInsets() {
+        return insets;
+    }
 
     public void setFullVibrancy(boolean value) {
 

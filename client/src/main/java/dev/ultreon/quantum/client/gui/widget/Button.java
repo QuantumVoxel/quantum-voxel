@@ -9,8 +9,6 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.sound.event.SoundEvents;
-import lombok.Getter;
-import lombok.Setter;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -18,14 +16,12 @@ import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.client.QuantumClient.id;
 
-@Getter
-@Setter
 public abstract class Button<T extends Button<T>> extends Widget {
-    protected final CallbackComponent<T> callback;
-    private Type type;
-    private boolean pressed;
-    private boolean wasPressed;
-    private Color tmp = new Color();
+    public final CallbackComponent<T> callback;
+    public Type type;
+    public boolean pressed;
+    public boolean wasPressed;
+    private final Color tmp = new Color();
 
     protected Button(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         this(width, height, Type.DARK);
@@ -68,7 +64,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
         u += 63 * type.xOffset;
         v += 42 * type.yOffset;
 
-        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 5, 256, 256);
+        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 9, 256, 256);
         if (!pressed && wasPressed && !this.isWithinBounds(mouseX, mouseY)) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
@@ -138,7 +134,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     @SuppressWarnings("unchecked")
-    public T getType(Type type) {
+    public T setType(Type type) {
         this.type = type;
         return (T) this;
     }

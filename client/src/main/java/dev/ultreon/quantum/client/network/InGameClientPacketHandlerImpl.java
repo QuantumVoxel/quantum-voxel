@@ -15,6 +15,7 @@ import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
+import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
@@ -39,15 +40,17 @@ import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CChangeDimensionPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CTimeSyncPacket;
+import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.GameMode;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
@@ -154,14 +157,9 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                     };
 
                     long l = TimingKt.measureTimeMillis(() -> {
-                        @Nullable ClientWorldAccess worldAccess = this.client.world;
+                        @Nullable ClientWorld world = this.client.world;
 
-                        if (worldAccess == null) {
-                            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
-                            return null;
-                        }
-
-                        if (!(worldAccess instanceof ClientWorld world)) {
+                        if (world == null) {
                             this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                             return null;
                         }
@@ -252,6 +250,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             }
             if (this.client.integratedServer != null) {
                 this.client.integratedServer.shutdown();
+                this.client.remove(this.client.integratedServer);
                 this.client.integratedServer = null;
             }
 
@@ -270,14 +269,15 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, Vec2f rotation) {
+    public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot) {
         // Update the remote player's position in the local multiplayer data.
         var data = this.client.getMultiplayerData();
         RemotePlayer remotePlayer = data != null ? data.getRemotePlayerByUuid(player) : null;
         if (remotePlayer == null) return;
 
         remotePlayer.setPosition(pos);
-        remotePlayer.setRotation(rotation);
+        remotePlayer.setRotation(xRot, yRot);
+        remotePlayer.xHeadRot = xHeadRot;
     }
 
     @Override
@@ -291,9 +291,9 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onAddPlayer(UUID uuid, String name, Vec3d position) {
+    public void onAddPlayer(int id, UUID uuid, String name, Vec3d position) {
         if (this.client.getMultiplayerData() != null) {
-            this.client.getMultiplayerData().addPlayer(uuid, name, position);
+            this.client.getMultiplayerData().addPlayer(id, uuid, name, position);
         } else {
             throw new IllegalStateException("Multiplayer data is null");
         }
@@ -536,6 +536,19 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (blockEntity != null) {
             blockEntity.onUpdate(data);
         }
+    }
+
+    @Override
+    public void onTemperatureSync(S2CTemperatureSyncPacket packet) {
+        LocalPlayer player = client.player;
+        if (player != null) {
+            player.onTemperatureSync(packet);
+        }
+    }
+
+    @Override
+    public <T extends Recipe> void onRecipeSync(S2CRecipeSyncPacket<T> packet) {
+        ClientRecipeManager.INSTANCE.onPacket(packet);
     }
 
     @Override

@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.RenderLayer;
+import dev.ultreon.quantum.client.render.SceneCategory;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -40,7 +40,7 @@ public class WorldNode extends WorldRenderNode {
         }
         var position = localPlayer.getPosition(client.partialTick);
         Array<Entity> toSort = new Array<>(world.getAllEntities());
-        worldRenderer.render(modelBatch, RenderLayer.WORLD, deltaTime);
+        worldRenderer.render(modelBatch, client.worldCat, deltaTime);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);
@@ -60,7 +60,7 @@ public class WorldNode extends WorldRenderNode {
         }
 
 
-        modelBatch.render(RenderLayer.WORLD);
+        modelBatch.render(client.worldCat);
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
 

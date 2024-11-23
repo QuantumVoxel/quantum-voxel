@@ -1,20 +1,18 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class PlayerTracker implements Audience {
     private final Set<ServerPlayer> players = new HashSet<>();
 
     public void startTracking(ServerPlayer player) {
+        if (isTracking(player)) return;
         this.players.add(player);
     }
 

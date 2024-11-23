@@ -7,6 +7,7 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
+import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.SanityCheckException;
@@ -31,6 +32,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     private final Queue<Packet<? extends TheirHandler>> sendQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Packet<? extends OurHandler>> receiveQueue = new ConcurrentLinkedQueue<>();
+    private boolean loggingIn = true;
 
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
         this.otherSide = otherSide;
@@ -100,6 +102,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     @Override
     public void onPing(long ping) {
         // No-op
+    }
+
+    @Override
+    public boolean isLoggingIn() {
+        return loggingIn;
     }
 
     @Override
@@ -190,6 +197,8 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     public void moveTo(PacketStage stage, OurHandler handler) {
         this.ourPacketData = this.getOurData(stage);
         this.theirPacketData = this.getTheirData(stage);
+
+        this.loggingIn = stage == PacketStages.LOGIN;
 
         this.handler = handler;
     }

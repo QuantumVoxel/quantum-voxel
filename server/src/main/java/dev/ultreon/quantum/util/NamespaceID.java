@@ -28,7 +28,8 @@ import java.util.regex.Pattern;
  * @since 0.1.0
  */
 public final class NamespaceID {
-    public static final Codec<NamespaceID> CODEC = Codec.STRING.xmap(NamespaceID::parse, NamespaceID::toString);
+    public static final @NotNull Codec<NamespaceID> CODEC = Codec.STRING.xmap(NamespaceID::parse, NamespaceID::toString);
+    public static final @NotNull String ROOT = "quantum";
     private final @NotNull String domain;
     private final @NotNull String path;
 
@@ -115,6 +116,10 @@ public final class NamespaceID {
         }
 
         return path;
+    }
+
+    public static @NotNull NamespaceID of(String path) {
+        return new NamespaceID(ROOT, path);
     }
 
     /**
