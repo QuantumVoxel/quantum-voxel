@@ -1080,7 +1080,7 @@ public class PacketIO {
     }
 
     public <K, V> Map<K, V> readMap(Function<PacketIO, K> keyDecoder, Function<PacketIO, V> valueDecoder) {
-        int size = this.readInt();
+        int size = this.readMedium();
         var map = new HashMap<K, V>();
 
         for (int i = 0; i < size; i++) {
@@ -1091,7 +1091,7 @@ public class PacketIO {
     }
 
     public <K, V> Map<K, V> readMap(Function<PacketIO, K> keyDecoder, Function<PacketIO, V> valueDecoder, int max) {
-        int size = this.readInt();
+        int size = this.readMedium();
         if (size > max) {
             throw new PacketException(String.format("Map too large, max = %d, actual = %d", max, size));
         }

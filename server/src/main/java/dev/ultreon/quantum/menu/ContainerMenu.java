@@ -3,7 +3,7 @@ package dev.ultreon.quantum.menu;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import dev.ultreon.quantum.block.entity.ContainerBlockEntity;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.MenuEvents;
@@ -16,9 +16,9 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -279,6 +279,8 @@ public abstract class ContainerMenu implements Menu {
                     this.addSlot(new RedirectItemSlot(idx++, player.inventory.inv[x][y], offX + x * 19 + 6,  offY + y * 19 + 6));
                 }
             }
+        } else {
+            CommonConstants.LOGGER.debug("Entity is not a player, skipping inventory menu.");
         }
 
         return idx;

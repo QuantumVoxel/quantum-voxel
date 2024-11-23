@@ -203,7 +203,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void sendRecipes() {
         for (RecipeType<?> type : Registries.RECIPE_TYPE.values()) {
-            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRecipes(type).stream().toList()));
+            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRegistry(type)));
         }
     }
 
@@ -505,7 +505,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         if (MenuEvents.MENU_OPEN.factory().onMenuOpen(menu, this).isCanceled())
             return;
 
-        // Call the superclass method to open the menu
+        // Call the superclass meth\od to open the menu
         super.openMenu(menu);
 
         // Send a packet to open the container menu

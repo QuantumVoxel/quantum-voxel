@@ -151,6 +151,8 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             if (resultListener != null) {
                 resultListener.onFailure();
             }
+            this.disconnect(e.getClass().getName() + ":\n" + e.getMessage());
+            this.on3rdPartyDisconnect(e.getClass().getName() + ":\n" + e.getMessage());
             CommonConstants.LOGGER.error("Failed to handle packet", e);
             rx.decrementAndGet();
             return;

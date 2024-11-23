@@ -3,8 +3,9 @@ package dev.ultreon.quantum.recipe;
 import com.badlogic.gdx.utils.IdentityMap;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
+import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.events.LoadingEvent;
-import dev.ultreon.quantum.menu.Inventory;
+import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -14,7 +15,6 @@ import dev.ultreon.quantum.resources.StaticResource;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
-import dev.ultreon.quantum.world.container.Container;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -111,7 +111,7 @@ public class RecipeManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Recipe> PagedList<? extends T> getRecipes(RecipeType<T> type, int pageSize, @Nullable Inventory inventory) {
+    public <T extends Recipe> PagedList<? extends T> getRecipes(RecipeType<T> type, int pageSize, @Nullable ContainerMenu inventory) {
         return (PagedList<? extends T>) this.registryMap.get(type).getRecipes(pageSize, inventory);
     }
 
@@ -157,5 +157,9 @@ public class RecipeManager {
         RecipeRegistry<?> recipeRegistry = this.registryMap.get(blasting);
         if (recipeRegistry == null) throw new IllegalArgumentException("Unknown recipe type!");
         return (List<R>) recipeRegistry.findRecipe(menu);
+    }
+
+    public <T extends Recipe> OrderedMap<NamespaceID, Recipe> getRegistry(RecipeType<T> type) {
+        return this.registryMap.get(type).keyMap;
     }
 }

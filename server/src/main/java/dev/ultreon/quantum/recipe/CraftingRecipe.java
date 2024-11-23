@@ -3,8 +3,7 @@ package dev.ultreon.quantum.recipe;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.Inventory;
-import dev.ultreon.quantum.menu.ItemSlot;
+import dev.ultreon.quantum.menu.*;
 import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.ArrayList;
@@ -15,10 +14,16 @@ import java.util.stream.Collectors;
 public final class CraftingRecipe implements Recipe {
     private final List<ItemStack> ingredients;
     private final ItemStack result;
+    private boolean isAdvanced;
 
     public CraftingRecipe(List<ItemStack> ingredients, ItemStack result) {
+        this(ingredients, result, false);
+    }
+
+    public CraftingRecipe(List<ItemStack> ingredients, ItemStack result, boolean isAdvanced) {
         this.ingredients = ingredients;
         this.result = result;
+        this.isAdvanced = isAdvanced;
     }
 
     @Override
@@ -43,21 +48,7 @@ public final class CraftingRecipe implements Recipe {
 
     @Override
     public boolean canCraft(Inventory inventory) {
-        var ingredients = this.ingredients.stream().map(ItemStack::copy).collect(Collectors.toList());
-
-        for (ItemSlot slot : inventory.slots) {
-            if (slot.isEmpty()) {
-                continue;
-            }
-
-            CraftingRecipe.collectItems(slot, ingredients, true);
-
-            if (ingredients.isEmpty()) {
-                return true;
-            }
-        }
-
-        return false;
+        return canCraft((Menu) inventory);
     }
 
     private static void collectItems(ItemSlot slot, List<ItemStack> copy, boolean simulate) {
@@ -95,8 +86,9 @@ public final class CraftingRecipe implements Recipe {
         }
 
         ItemStack result = ItemStack.deserialize(object.getAsJson5Object("result"));
+        boolean advanced = object.has("advanced") && object.getAsJson5Primitive("advanced").getAsBoolean();
 
-        return new CraftingRecipe(ingredients, result);
+        return new CraftingRecipe(ingredients, result, advanced);
     }
 
     @Override
@@ -130,4 +122,28 @@ public final class CraftingRecipe implements Recipe {
                "result=" + result + ']';
     }
 
+    @Override
+    public boolean canCraft(Menu inventory) {
+        if (isAdvanced) {
+            if (!(inventory instanceof AdvancedCraftingMenu)) {
+                return false;
+            }
+        }
+        if (!(inventory instanceof ContainerMenu menu)) return false;
+        var ingredients = this.ingredients.stream().map(ItemStack::copy).collect(Collectors.toList());
+
+        for (ItemSlot slot : menu.slots) {
+            if (slot.isEmpty()) {
+                continue;
+            }
+
+            CraftingRecipe.collectItems(slot, ingredients, true);
+
+            if (ingredients.isEmpty()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

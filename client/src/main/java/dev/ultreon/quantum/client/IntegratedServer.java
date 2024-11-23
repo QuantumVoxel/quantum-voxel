@@ -23,7 +23,6 @@ import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
-import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,8 +37,15 @@ import java.util.UUID;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+/**
+ * The IntegratedServer class represents a server integrated into the client system for local play.
+ * This class provides various methods to manage the server, including starting it, loading players,
+ * saving data, handling crashes, and more.
+ *
+ * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @since 0.1.0
+ */
 public class IntegratedServer extends QuantumServer {
-    @Getter
     private final QuantumClient client = QuantumClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
@@ -73,9 +79,11 @@ public class IntegratedServer extends QuantumServer {
     }
 
     /**
-     * Loads player data and sets the host player if found.
+     * Loads the given player into the server.
      *
-     * @param localPlayer The local player object to load
+     * @param localPlayer The local player to load.
+     * @throws IllegalStateException If the player is not found.
+     * @throws RuntimeException If an I/O error occurs during player data loading.
      */
     public void loadPlayer(@NotNull LocalPlayer localPlayer) {
         // Retrieve the player object from the server
@@ -143,7 +151,7 @@ public class IntegratedServer extends QuantumServer {
         this.shutdown();
         crashLog.writeToLog();
 
-        this.client.showScreen(new CrashScreen(List.of(crashLog)));
+        client.delayCrash(crashLog);
     }
 
     @Override
@@ -488,4 +496,12 @@ public class IntegratedServer extends QuantumServer {
         });
     }
 
+    /**
+     * Retrieves the {@link QuantumClient} instance associated with this server.
+     *
+     * @return the quantum voxel client instance.
+     */
+    public QuantumClient getClient() {
+        return client;
+    }
 }
