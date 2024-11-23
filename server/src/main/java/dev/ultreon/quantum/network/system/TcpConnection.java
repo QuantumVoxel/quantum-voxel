@@ -162,6 +162,7 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
                 connection.sendTCP(new FrameworkMessage.KeepAlive());
             } else {
                 connection.close();
+                this.getPlayer().getServer().onDisconnected(this.getPlayer(), "Connection closed!");
             }
         } catch (Exception e) {
             LOGGER.error("Failed to handle packet", e);
@@ -171,6 +172,7 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     @Override
     public void disconnected(Connection connection) {
         this.on3rdPartyDisconnect("Connection closed!");
+        this.getPlayer().getServer().onDisconnected(this.getPlayer(), "Connection closed!");
     }
 
     protected abstract Packet<TheirHandler> getDisconnectPacket(String message);

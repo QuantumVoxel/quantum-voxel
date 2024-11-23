@@ -671,7 +671,7 @@ public abstract class Entity extends GameObject implements CommandSender {
 
         if (this.world instanceof ServerWorld serverWorld) {
             if (this instanceof ServerPlayer serverPlayer) {
-                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), getRotation()), serverPlayer);
+                serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), serverPlayer.xHeadRot, xRot, yRot), serverPlayer);
             } else {
                 serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
             }

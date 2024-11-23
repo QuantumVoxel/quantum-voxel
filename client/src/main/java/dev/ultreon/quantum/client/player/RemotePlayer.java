@@ -42,4 +42,9 @@ public class RemotePlayer extends ClientPlayer {
     public void onAttack(Entity entity) {
         // TODO
     }
+
+    public void setRotation(float xRot, float yRot) {
+        this.xRot = xRot;
+        this.yRot = yRot;
+    }
 }

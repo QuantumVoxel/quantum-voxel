@@ -282,7 +282,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
 
         if (isInactive) {
-            connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition()));
+            connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
             isInactive = false;
         }
 
@@ -299,7 +299,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
             // Check if player is within entity render distance
             if (player.getPosition().dst(this.getPosition()) < this.server.getEntityRenderDistance())
-                player.connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition()));
+                player.connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
         }
     }
 
@@ -607,6 +607,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.xHeadRot = xHeadRot;
         this.xRot = xRot;
         this.yRot = yRot;
+
+        this.world.sendAllTrackingExcept((int) x, (int) y, (int) z, new S2CPlayerPositionPacket(this.getUuid(), new Vec3d(x, y, z), xHeadRot, xRot, yRot), this);
     }
 
     public boolean isSpawned() {

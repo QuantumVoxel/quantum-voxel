@@ -411,11 +411,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             if (this.cursor != null) batch.render(this.cursor);
         }
 
+        drawSelf:
         try (var ignored = QuantumClient.PROFILER.start("(Local Player)")) {
             LocalPlayer localPlayer = this.client.player;
             if (localPlayer == null || !this.client.isInThirdPerson() && ClientConfig.hideFirstPersonPlayer) {
                 if (localPlayer != null) modelInstances.remove(localPlayer.getId());
-                return;
+                break drawSelf;
             }
 
             this.collectEntity(localPlayer, batch);
@@ -669,7 +670,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             batch.flush();
 
-            Gdx.gl.glCullFace(GL_NONE);
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(batch, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
 

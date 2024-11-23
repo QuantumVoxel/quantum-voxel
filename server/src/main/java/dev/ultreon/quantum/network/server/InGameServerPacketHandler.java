@@ -80,6 +80,9 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
         this.disconnected = true;
         this.connection.setReadOnly();
+        QuantumServer server = this.player.getServer();
+        if (server != null)
+            server.onDisconnected(this.player, message);
     }
 
     @Override

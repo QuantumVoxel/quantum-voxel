@@ -82,9 +82,9 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.clientWorld = world;
         this.active = false;
 
-        blockEntities.forEach((BlockVec, type) -> {
+        blockEntities.forEach((vec, type) -> {
             if (type != null) {
-                this.setBlockEntity(BlockVec, type.create(world, BlockVec.offset(pos)));
+                this.setBlockEntity(vec, type.create(world, pos.blockInWorldSpace(vec)));
             }
         });
 

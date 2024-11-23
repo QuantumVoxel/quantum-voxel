@@ -48,7 +48,10 @@ import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.GameMode;
+import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
@@ -272,14 +275,15 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, Vec2f rotation) {
+    public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot) {
         // Update the remote player's position in the local multiplayer data.
         var data = this.client.getMultiplayerData();
         RemotePlayer remotePlayer = data != null ? data.getRemotePlayerByUuid(player) : null;
         if (remotePlayer == null) return;
 
         remotePlayer.setPosition(pos);
-        remotePlayer.setRotation(rotation);
+        remotePlayer.setRotation(xRot, yRot);
+        remotePlayer.xHeadRot = xHeadRot;
     }
 
     @Override
