@@ -2,12 +2,10 @@ package dev.ultreon.quantum.recipe;
 
 import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.AbstractRegistryMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
-import dev.ultreon.quantum.world.container.Container;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<NamespaceID, T> {
     public static final String CATEGORY = "recipe";
-    private final OrderedMap<NamespaceID, T> keyMap = new OrderedMap<>();
+    final OrderedMap<NamespaceID, T> keyMap = new OrderedMap<>();
     private final OrderedMap<T, NamespaceID> valueMap = new OrderedMap<>();
     private boolean frozen = false;
 

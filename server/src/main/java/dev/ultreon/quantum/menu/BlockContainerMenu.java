@@ -1,13 +1,12 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.ContainerBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,22 +57,5 @@ public abstract class BlockContainerMenu extends ContainerMenu {
         super.removeWatcher(player);
 
         this.blockEntity.onLostViewer(player);
-    }
-
-    @CanIgnoreReturnValue
-    protected int inventoryMenu(int idx, int offX, int offY) {
-        if (getEntity() instanceof Player player) {
-            for (int x = 0; x < 9; x++) {
-                this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 7, offY + 70));
-            }
-
-            for (int x = 0; x < 9; x++) {
-                for (int y = 0; y < 3; y++) {
-                    this.addSlot(new RedirectItemSlot(idx++, player.inventory.inv[x][y], offX + x * 19 + 7,  offY + y * 19));
-                }
-            }
-        }
-
-        return idx;
     }
 }

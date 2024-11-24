@@ -10,14 +10,14 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 import io.netty.handler.codec.EncoderException;
 
-import java.util.List;
+import java.util.Map;
 
 public record S2CRecipeSyncPacket<T extends Recipe>(RecipeType<T> type,
-                                                    List<T> recipes) implements Packet<InGameClientPacketHandler> {
+                                                    Map<NamespaceID, ? extends T> recipes) implements Packet<InGameClientPacketHandler> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Recipe> S2CRecipeSyncPacket<T> read(PacketIO packetIO) {
         RecipeType<? extends Recipe> type = Registries.RECIPE_TYPE.get(packetIO.readId());
-        List<? extends Recipe> recipes = packetIO.readList(io -> Recipe.read(type, io));
+        Map<NamespaceID, ? extends T> recipes = (Map<NamespaceID, T>) packetIO.readMap(PacketIO::readId, io -> Recipe.read(type, io));
         return (S2CRecipeSyncPacket<T>) new S2CRecipeSyncPacket(type, recipes);
     }
 
@@ -26,7 +26,7 @@ public record S2CRecipeSyncPacket<T extends Recipe>(RecipeType<T> type,
         NamespaceID id = Registries.RECIPE_TYPE.getId(type);
         if (id == null) throw new EncoderException("Unknown recipe type: " + type);
         packetIO.writeId(id);
-        packetIO.writeList(recipes, (io, recipe) -> Recipe.write(type, io, recipe));
+        packetIO.writeMap(recipes, PacketIO::writeId, (io, recipe) -> Recipe.write(type, io, recipe));
     }
 
     @Override

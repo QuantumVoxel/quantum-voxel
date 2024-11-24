@@ -36,7 +36,7 @@ public final class Blocks {
     public static final Block PLANKS_SLAB = Blocks.register("planks_slab", new SlabBlock(new Properties().hardness(2.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.PLANKS)));
     public static final Block LEAVES = Blocks.register("leaves", new Block(new Properties().transparent().hardness(0.2F).soundType(SoundType.GRASS).noCollision().lightReduction(2)));
     public static final Block CRATE = Blocks.register("crate", new CrateBlock(new Properties().hardness(2.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).usesCustomRender().dropsItems(Items.CRATE)));
-    public static final Block CRAFTING_BENCH = Blocks.register("crafting_bench", new Block(new Properties().hardness(3.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
+    public static final Block CRAFTING_BENCH = Blocks.register("crafting_bench", new WorkbenchBlock(new Properties().hardness(3.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
     public static final Block TALL_GRASS = Blocks.register("tall_grass", new Block(new Properties().noOcclude().replaceable().transparent().noCollision().usesCustomRender().dropsItems(new RandomLoot(new RandomLoot.ChanceLootEntry(0.4f, Items.GRASS_FIBRE)))));
     public static final Block CACTUS = Blocks.register("cactus", new CactusBlock(new Properties().noOcclude().usesCustomRender().dropsItems(Items.CACTUS)));
     public static final Block BLAST_FURNACE = Blocks.register("blast_furnace", new BlastFurnaceBlock(new Properties().hardness(12.0F).effectiveTool(ToolType.PICKAXE).requiresTool().dropsItems(Items.BLAST_FURNACE)));

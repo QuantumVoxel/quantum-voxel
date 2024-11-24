@@ -31,7 +31,6 @@ public interface Recipe {
         return false;
     }
 
-    @Deprecated
     default boolean canCraft(Inventory inventory) {
         return false;
     }

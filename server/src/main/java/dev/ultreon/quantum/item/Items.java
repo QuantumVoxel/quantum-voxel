@@ -34,6 +34,10 @@ public class Items {
     public static final ShovelItem STONE_SHOVEL = Items.register("stone_shovel", new ShovelItem(new Properties().stackSize(1), ItemMaterials.STONE));
     public static final AxeItem STONE_AXE = Items.register("stone_axe", new AxeItem(new Properties().stackSize(1), ItemMaterials.STONE));
     public static final SwordItem STONE_SWORD = Items.register("stone_sword", new SwordItem(new Properties().stackSize(1), ItemMaterials.STONE));
+    public static final PickaxeItem IRON_PICKAXE = Items.register("iron_pickaxe", new PickaxeItem(new Properties().stackSize(1), ItemMaterials.IRON));
+    public static final ShovelItem IRON_SHOVEL = Items.register("iron_shovel", new ShovelItem(new Properties().stackSize(1), ItemMaterials.IRON));
+    public static final AxeItem IRON_AXE = Items.register("iron_axe", new AxeItem(new Properties().stackSize(1), ItemMaterials.IRON));
+    public static final SwordItem IRON_SWORD = Items.register("iron_axe", new SwordItem(new Properties().stackSize(1), ItemMaterials.IRON));
     public static final BlockItem CRAFTING_BENCH = Items.register("crafting_bench", new BlockItem(new Properties(), () -> Blocks.CRAFTING_BENCH));
     public static final Item STICK = Items.register("stick", new Item(new Properties()));
     public static final Item ROCK = Items.register("rock", new Item(new Properties()));
