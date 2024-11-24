@@ -126,11 +126,11 @@ public class InventoryScreen extends ContainerScreen {
 
         var slotAt = this.getRecipeSlotAt(mouseX, mouseY);
         if (slotAt != null && !slotAt.slot.getItem().isEmpty()) {
-            renderer.renderTooltip(slotAt.slot.getItem(), mouseX + 4, mouseY + 4, this.withRecipeInfo(slotAt.recipe, slotAt.slot.getItem().getDescription()));
+            renderer.renderTooltip(slotAt.slot.getItem(), mouseX + 4, mouseY + 4, this.withRecipeInfo(slotAt.recipe, slotAt.slot.getItem().getFullDescription()));
         }
     }
 
-    private List<TextObject> withRecipeInfo(Recipe recipe, List<TextObject> description) {
+    private String withRecipeInfo(Recipe recipe, String description) {
         var result = new ArrayList<TextObject>();
         var ingredients = recipe.ingredients();
         if (!ingredients.isEmpty()) {
@@ -150,9 +150,7 @@ public class InventoryScreen extends ContainerScreen {
             result.add(TextObject.empty());
         }
 
-        result.addAll(description);
-
-        return result;
+        return String.join("\n", result.stream().map(TextObject::getText).toList()) + "\n\n" + description;
     }
 
     private boolean showOnlyCraftable() {

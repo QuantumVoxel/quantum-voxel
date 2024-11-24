@@ -48,8 +48,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static dev.ultreon.quantum.client.QuantumClient.id;
-
 /**
  * The Renderer class is responsible for rendering shapes, textures, and various graphics elements.
  * It provides methods to set properties such as color and stroke width, and draw shapes like circles, rectangles,
@@ -3138,7 +3136,7 @@ public class Renderer implements Disposable {
         this.client.itemRenderer.render(item.getItem(), this, mx, my);
 
         if (item.getCount() > 1) {
-            this.textRight(Integer.toString(item.getCount(), isMathDay() ? 16 : 10), mx + 16, my + 8);
+            this.textRight((isMathDay() ? "0x" : "") + Integer.toString(item.getCount(), isMathDay() ? 16 : 10), mx + 16, my + 8);
         }
     }
 
@@ -3152,26 +3150,32 @@ public class Renderer implements Disposable {
     }
 
     public void renderTooltip(ItemStack item, int x, int y) {
-        this.renderTooltip(item, x, y, item.getDescription());
+        this.renderTooltip(item, x, y, item.getFullDescription());
     }
 
+    @Deprecated
     public void renderTooltip(ItemStack item, int x, int y, List<TextObject> description) {
+        this.renderTooltip(x, y, item.getItem().getTranslation(), String.join("\n", description.stream().map(TextObject::getText).toList()), item.getItem().getId().toString());
+    }
+
+    public void renderTooltip(ItemStack item, int x, int y, String description) {
         this.renderTooltip(x, y, item.getItem().getTranslation(), description, item.getItem().getId().toString());
     }
 
-    public void renderTooltip(int x, int y, TextObject title, List<TextObject> description, @Nullable String subTitle) {
+    public void renderTooltip(int x, int y, TextObject title, String description, @Nullable String subTitle) {
         x += 8;
         y += 8;
 
-        var all = Lists.newArrayList(description);
-        all.addFirst(title);
-        if (subTitle != null) all.add(TextObject.literal(subTitle));
+        var all = Lists.<String>newArrayList();
+        all.addFirst(title.getText());
+        all.addAll(Arrays.asList(description.split("\n")));
+        if (subTitle != null) all.add(subTitle);
         boolean seen = false;
         int best = 0;
         int[] arr = new int[10];
         int count = 0;
         Font font1 = this.font;
-        for (TextObject textObject : all) {
+        for (String textObject : all) {
             int width = textWidth(textObject);
             if (arr.length == count) arr = Arrays.copyOf(arr, count * 2);
             arr[count++] = width;
@@ -3184,7 +3188,7 @@ public class Renderer implements Disposable {
             }
         }
         int textWidth = seen ? best : 0;
-        int descHeight = (int) (description.size() * (this.font.getLineHeight() + 1) - 1);
+        int descHeight = (int) (description.lines().count() * (this.font.getLineHeight() + 1) - 1);
         int textHeight = (int) (descHeight + 3 + this.font.getLineHeight());
 
         if (description.isEmpty() && subTitle == null) {
@@ -3198,16 +3202,16 @@ public class Renderer implements Disposable {
         this.fill(x, y + 1, textWidth + 6, textHeight + 4, RgbColor.rgb(0x202020));
         this.box(x + 1, y + 1, textWidth + 4, textHeight + 4, RgbColor.rgb(0x303030));
 
-        this.textLeft(title, x + 3, y + 3, RgbColor.WHITE);
+        this.textLeft("[#ffffff][*]" + title, x + 3, y + 3, RgbColor.WHITE);
 
         int lineNr = 0;
-        for (TextObject line : description) {
-            this.textLeft(line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1, RgbColor.rgb(0xa0a0a0));
+        for (String line : description.lines().toList()) {
+            this.textLeft("[#a0a0a0]" + line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1);
             lineNr++;
         }
 
         if (subTitle != null)
-            this.textLeft(subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1, RgbColor.rgb(0x606060));
+            this.textLeft("[#606060]" + subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1);
     }
 
     private void drawText(@NotNull String text, float x, float y, Color color, boolean shadow) {

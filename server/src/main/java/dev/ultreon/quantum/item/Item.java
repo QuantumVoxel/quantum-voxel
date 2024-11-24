@@ -2,6 +2,7 @@ package dev.ultreon.quantum.item;
 
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.food.FoodData;
+import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -12,15 +13,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.ultreon.quantum.text.LanguageBootstrap.translate;
+
 public class Item {
     private final int maxStackSize;
     private final FoodData food;
     private final ItemRarity rarity;
 
-    public Item(Properties properties) {
-        this.maxStackSize = properties.maxStackSize;
-        this.food = properties.food;
-        this.rarity = properties.rarity;
+    public Item(Properties propertiesIn) {
+        maxStackSize = propertiesIn.maxStackSize;
+        food = propertiesIn.food;
+        rarity = propertiesIn.rarity;
     }
 
     public UseResult use(UseItemContext useItemContext) {
@@ -44,7 +47,7 @@ public class Item {
 
     @NotNull
     public String getTranslationId() {
-        NamespaceID id = this.getId();
+        NamespaceID id = getId();
         return id == null ? "quantum.item.air.name" : id.getDomain() + ".item." + id.getPath() + ".name";
     }
 
@@ -52,7 +55,7 @@ public class Item {
         return Registries.ITEM.getId(this);
     }
 
-    public List<TextObject> getDescription(ItemStack itemStack) {
+    public List<TextObject> getDescription(ItemStack stackIn) {
         return Collections.emptyList();
     }
 
@@ -74,6 +77,25 @@ public class Item {
         return 0;
     }
 
+    public String getExtendedDescription(ItemStack itemStack) {
+        float attackDamage = itemStack.getAttackDamage();
+        StringBuilder builder = new StringBuilder();
+        if (attackDamage > 1) {
+            float v = attackDamage;
+            builder.append("[#a0a0a0]").append(translate("quantum.stats.item.attack_damage")).append(String.format(": [#808080]%.1f\n", v));
+        }
+
+        if (this instanceof ToolItem toolItem) {
+            float efficiency = toolItem.getEfficiency();
+            if (efficiency > 0) {
+                float v = efficiency;
+                builder.append("[#a0a0a0]").append(translate("quantum.stats.item.efficiency")).append(String.format(": [#808080]%.1f\n", v));
+            }
+        }
+
+        return builder.toString();
+    }
+
     /**
      * Item properties.
      */
@@ -85,20 +107,20 @@ public class Item {
         /**
          * Set the max stack size.
          *
-         * @param size the stack size.
+         * @param sizeIn the stack size.
          */
-        public @This Properties stackSize(int size) {
-            this.maxStackSize = size;
+        public @This Properties stackSize(int sizeIn) {
+            maxStackSize = sizeIn;
             return this;
         }
 
-        public Properties food(FoodData food) {
-            this.food = food;
+        public Properties food(FoodData foodIn) {
+            food = foodIn;
             return this;
         }
 
-        public Properties rarity(ItemRarity rarity) {
-            this.rarity = rarity;
+        public Properties rarity(ItemRarity rarityIn) {
+            rarity = rarityIn;
             return this;
         }
     }

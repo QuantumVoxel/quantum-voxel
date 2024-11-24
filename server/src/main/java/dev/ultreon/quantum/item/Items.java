@@ -7,6 +7,7 @@ import dev.ultreon.quantum.item.material.ItemMaterials;
 import dev.ultreon.quantum.item.tool.AxeItem;
 import dev.ultreon.quantum.item.tool.PickaxeItem;
 import dev.ultreon.quantum.item.tool.ShovelItem;
+import dev.ultreon.quantum.item.tool.SwordItem;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 
@@ -28,9 +29,11 @@ public class Items {
     public static final PickaxeItem WOODEN_PICKAXE = Items.register("wooden_pickaxe", new PickaxeItem(new Properties().stackSize(1), ItemMaterials.WOOD));
     public static final ShovelItem WOODEN_SHOVEL = Items.register("wooden_shovel", new ShovelItem(new Properties().stackSize(1), ItemMaterials.WOOD));
     public static final AxeItem WOODEN_AXE = Items.register("wooden_axe", new AxeItem(new Properties().stackSize(1), ItemMaterials.WOOD));
+    public static final SwordItem WOODEN_SWORD = Items.register("wooden_sword", new SwordItem(new Properties().stackSize(1), ItemMaterials.WOOD));
     public static final PickaxeItem STONE_PICKAXE = Items.register("stone_pickaxe", new PickaxeItem(new Properties().stackSize(1), ItemMaterials.STONE));
     public static final ShovelItem STONE_SHOVEL = Items.register("stone_shovel", new ShovelItem(new Properties().stackSize(1), ItemMaterials.STONE));
     public static final AxeItem STONE_AXE = Items.register("stone_axe", new AxeItem(new Properties().stackSize(1), ItemMaterials.STONE));
+    public static final SwordItem STONE_SWORD = Items.register("stone_sword", new SwordItem(new Properties().stackSize(1), ItemMaterials.STONE));
     public static final BlockItem CRAFTING_BENCH = Items.register("crafting_bench", new BlockItem(new Properties(), () -> Blocks.CRAFTING_BENCH));
     public static final Item STICK = Items.register("stick", new Item(new Properties()));
     public static final Item ROCK = Items.register("rock", new Item(new Properties()));

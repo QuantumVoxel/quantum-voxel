@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.item.tool;
 
-import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.material.ItemMaterial;
 
 public class PickaxeItem extends ToolItem {
@@ -14,7 +13,7 @@ public class PickaxeItem extends ToolItem {
     }
 
     @Override
-    public float getAttackDamage(ItemStack itemStack) {
-        return material.getAttackDamage() + 1f;
+    protected float getAttackModifier() {
+        return 1.4F;
     }
 }

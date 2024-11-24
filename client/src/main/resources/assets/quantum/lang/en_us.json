@@ -298,5 +298,7 @@
   "quantum.message.controller_connected.text": "The controller %1$s has been connected.",
 
   "quantum.message.controller_disconnected.title": "Controller Disconnected",
-  "quantum.message.controller_disconnected.text": "A controller has been disconnected."
+  "quantum.message.controller_disconnected.text": "A controller has been disconnected.",
+  "quantum.stats.item.attack_damage": "Attack Damage",
+  "quantum.stats.item.efficiency": "Efficiency"
 }

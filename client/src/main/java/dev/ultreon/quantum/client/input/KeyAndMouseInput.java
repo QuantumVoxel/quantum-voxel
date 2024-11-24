@@ -606,6 +606,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             }
         } else if (hit instanceof EntityHit entityHitResult) {
             if (!entityHitResult.isCollide()) {
+                // + Miss
                 return;
             }
 

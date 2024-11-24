@@ -11,4 +11,9 @@ public class AxeItem extends ToolItem {
     public ToolType getToolType() {
         return ToolType.AXE;
     }
+
+    @Override
+    protected float getAttackModifier() {
+        return 2.4F;
+    }
 }

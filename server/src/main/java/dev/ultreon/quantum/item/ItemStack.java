@@ -331,4 +331,13 @@ public class ItemStack {
     public float getAttackDamage() {
         return item.getAttackDamage(this);
     }
+
+    public String getFullDescription() {
+        String join = String.join("\n", getDescription().stream().map(TextObject::getText).toList());
+        return join + "\n\n" + getExtendedDescription();
+    }
+
+    private String getExtendedDescription() {
+        return this.item.getExtendedDescription(this);
+    }
 }
