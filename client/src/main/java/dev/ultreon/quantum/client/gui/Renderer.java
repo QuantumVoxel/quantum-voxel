@@ -3314,12 +3314,12 @@ public class Renderer implements Disposable {
         String formatted = "[#%06x]%s".formatted(c, string);
 
         if (this.layoutText.equals(formatted)) {
-            this.font.drawGlyphs(batch, layout, x, y - (int) this.font.getAscent());
+            this.font.drawGlyphs(batch, layout, x, y);
             return;
         }
         this.layoutText = formatted;
         this.layout.clear();
         this.font.markup(formatted, this.layout);
-        this.font.drawGlyphs(batch, layout, x, y - (int) this.font.getAscent());
+        this.font.drawGlyphs(batch, layout, x, y);
     }
 }

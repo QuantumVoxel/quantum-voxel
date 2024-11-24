@@ -691,7 +691,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public void onMessageSent(String message) {
         for (ServerPlayer player : this.server.getPlayers()) {
-            player.sendMessage(new Formatter(true, true, "[cyan]&<" + this.getName() + "> [white]" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
+            player.sendMessage(new Formatter(true, true, "[cyan]<" + this.getName() + "> [white]" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
         }
     }
 

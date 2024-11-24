@@ -98,35 +98,39 @@ public class TextEntry extends Widget {
                 .blit(texture, tx + tw - 4, ty + th - 4, 4, 4, 8 + u, 8 + v, 4, 4, 36, 12);
 
         if (renderer.pushScissors(this.getBounds().shrink(1, 1, 1, 4))) {
-            if (selectFrom != -1 && selectTo != -1) {
-                int selectFrom = Math.min(this.selectFrom, this.selectTo);
-                int selectTo = Math.max(this.selectFrom, this.selectTo);
-
-                String before = this.value.substring(0, selectFrom);
-                String selected = this.value.substring(selectFrom, selectTo);
-                String after = this.value.substring(selectTo);
-
-                int beforeWidth = renderer.textWidth(before);
-                int selectedWidth = renderer.textWidth(selected);
-
-                renderer.textLeft(before, this.pos.x + 5, this.pos.y + 6, RgbColor.WHITE.withAlpha(0x80), false);
-                renderer.fill(this.pos.x + 5 + beforeWidth, this.pos.y + 6, selectedWidth, 10, RgbColor.WHITE.withAlpha(0x80));
-                renderer.textLeft(selected, this.pos.x + 5 + beforeWidth, this.pos.y + 6, RgbColor.RED, false);
-                renderer.textLeft(after, this.pos.x + 5 + beforeWidth + selectedWidth, this.pos.y + 6, RgbColor.WHITE.withAlpha(0x80), false);
-            } else {
-                renderer.textLeft(this.value, this.pos.x + 5, this.pos.y + 6, false);
-            }
-            TextObject hintObj = this.hint.get();
-            if (this.value.isEmpty() && hintObj != null) {
-                renderer.textLeft(hintObj, this.pos.x + 5, this.pos.y + 6, RgbColor.WHITE.withAlpha(0x80), false);
-            }
-
-            if (this.isFocused) {
-                renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
-            }
-
-            renderer.popScissors();
+            renderText(renderer);
         }
+    }
+
+    protected void renderText(Renderer renderer) {
+        if (selectFrom != -1 && selectTo != -1) {
+            int selectFrom = Math.min(this.selectFrom, this.selectTo);
+            int selectTo = Math.max(this.selectFrom, this.selectTo);
+
+            String before = this.value.substring(0, selectFrom);
+            String selected = this.value.substring(selectFrom, selectTo);
+            String after = this.value.substring(selectTo);
+
+            int beforeWidth = renderer.textWidth(before);
+            int selectedWidth = renderer.textWidth(selected);
+
+            renderer.textLeft(before, this.pos.x + 5, this.pos.y + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), false);
+            renderer.fill(this.pos.x + 5 + beforeWidth, (int) (this.pos.y + this.font.getLineHeight()), selectedWidth, 10, RgbColor.WHITE.withAlpha(0x80));
+            renderer.textLeft(selected, this.pos.x + 5 + beforeWidth, this.pos.y + this.font.getLineHeight(), RgbColor.RED, false);
+            renderer.textLeft(after, this.pos.x + 5 + beforeWidth + selectedWidth, this.pos.y + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), false);
+        } else {
+            renderer.textLeft(this.value, this.pos.x + 5, this.pos.y + this.font.getLineHeight(), false);
+        }
+        TextObject hintObj = this.hint.get();
+        if (this.value.isEmpty() && hintObj != null) {
+            renderer.textLeft(hintObj, this.pos.x + 5, this.pos.y + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), false);
+        }
+
+        if (this.isFocused) {
+            renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
+        }
+
+        renderer.popScissors();
     }
 
     @Override
@@ -398,9 +402,9 @@ public class TextEntry extends Widget {
             return;
         }
 
-        this.cursorX = this.textWidth(this.value.substring(0, this.cursorIdx)) + 3;
+        this.cursorX = this.textWidth(this.value.substring(0, this.cursorIdx)) + 2;
 
-        GamePlatform.get().setTextCursorPos((int) this.cursorX, getY());
+        GamePlatform.get().setTextCursorPos((int) this.cursorX + getX(), getY());
 
         this.callback.call(this);
     }

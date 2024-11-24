@@ -556,7 +556,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
         this.font.useIntegerPositions(true);
         this.font.setBoldStrength(0.33f);
-        this.font.scale(1f, -1f);
         this.font.lineHeight = 7f;
 
         KnownFonts.addEmoji(font);
@@ -564,7 +563,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.unifont = new GameFont(new BitmapFont(resource(id("unifont/unifont.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -14, 0, -28, true);
         this.unifont.useIntegerPositions(true);
         this.unifont.setBoldStrength(0.33f);
-        this.unifont.scale(0.5f, -0.5f);
+        this.unifont.scale(0.5f, 0.5f);
 
         KnownFonts.addEmoji(unifont);
 
