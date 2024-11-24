@@ -486,7 +486,7 @@ public class Renderer implements Disposable {
     public Renderer blit(TextureRegion tex, float x, float y, float width, float height) {
         if (tex == null) tex = TextureManager.DEFAULT_TEX_REG;
         this.batch.setColor(this.blitColor.toGdx());
-        this.batch.draw(tex, x, y + tex.getRegionHeight(), tex.getRegionWidth(), -tex.getRegionHeight());
+        this.batch.draw(tex, x, y + height, width, -height);
         return this;
     }
 
