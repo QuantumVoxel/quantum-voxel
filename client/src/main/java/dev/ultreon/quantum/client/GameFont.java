@@ -2,41 +2,59 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.github.tommyettinger.textra.Font;
+import dev.ultreon.quantum.client.text.LanguageManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameFont extends Font {
+    private static final List<GameFont> fonts = new ArrayList<>();
     public float lineHeight;
     public float ascent;
 
     public GameFont(BitmapFont bmFont) {
         super(bmFont);
 
-        this.lineHeight = bmFont.getLineHeight() + bmFont.getDescent();
-        this.ascent = bmFont.getAscent();
+        setup(bmFont);
     }
 
     public GameFont(BitmapFont bmFont, float xAdjust, float yAdjust, float widthAdjust, float heightAdjust) {
         super(bmFont, xAdjust, yAdjust, widthAdjust, heightAdjust);
 
-        this.lineHeight = bmFont.getLineHeight() + bmFont.getDescent();
-        this.ascent = bmFont.getAscent();
+        setup(bmFont);
     }
 
     public GameFont(BitmapFont bmFont, DistanceFieldType distanceField, float xAdjust, float yAdjust, float widthAdjust, float heightAdjust) {
         super(bmFont, distanceField, xAdjust, yAdjust, widthAdjust, heightAdjust);
 
-        this.lineHeight = bmFont.getLineHeight() + bmFont.getDescent();
-        this.ascent = bmFont.getAscent();
+        setup(bmFont);
     }
 
     public GameFont(BitmapFont bmFont, DistanceFieldType distanceField, float xAdjust, float yAdjust, float widthAdjust, float heightAdjust, boolean makeGridGlyphs) {
         super(bmFont, distanceField, xAdjust, yAdjust, widthAdjust, heightAdjust, makeGridGlyphs);
 
-        this.lineHeight = bmFont.getLineHeight() + bmFont.getDescent();
-        this.ascent = bmFont.getAscent();
+        setup(bmFont);
     }
 
     public GameFont() {
-        super();
+        this(new BitmapFont());
+    }
+
+    private void setup(BitmapFont bmFont) {
+        this.lineHeight = bmFont.getLineHeight() + bmFont.getAscent() + bmFont.getDescent();
+        this.ascent = bmFont.getAscent();
+
+        this.obliqueStrength = -0.5f;
+        update();
+
+        GameFont.fonts.add(this);
+    }
+
+    public static void update() {
+        for (GameFont font : GameFont.fonts) {
+            font.heightAdjust = LanguageManager.isUpsideDown() ? -font.lineHeight : 0f;
+            font.yAdjust = LanguageManager.isUpsideDown() ? font.lineHeight : 0f;
+        }
     }
 
     @Override

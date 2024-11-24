@@ -7,7 +7,6 @@ import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
-import dev.ultreon.quantum.component.Component;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import lombok.Getter;
@@ -16,7 +15,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -81,6 +83,10 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
         this.renderBackground(renderer, deltaTime);
         this.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    }
+
+    public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+        return false;
     }
 
     public Widget position(Supplier<Position> position) {

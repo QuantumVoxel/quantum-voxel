@@ -46,6 +46,17 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     @Override
+    public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+        for (var widget : this.widgets) {
+            if (widget.renderTooltips(renderer, mouseX, mouseY, deltaTime)) {
+                return true;
+            }
+        }
+
+        return super.renderTooltips(renderer, mouseX, mouseY, deltaTime);
+    }
+
+    @Override
     public UIContainer<T> position(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;

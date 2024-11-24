@@ -5,6 +5,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.registry.ClientRegistry;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ResourceManager;
@@ -36,6 +37,14 @@ public class LanguageManager {
 
     public static void setCurrentLanguage(Locale currentLanguage) {
         LanguageManager.currentLanguage = currentLanguage;
+        GameFont.update();
+    }
+
+    public static boolean isUpsideDown() {
+        if (currentLanguage == null) {
+            return false;
+        }
+        return currentLanguage.getCountry().equals("en") && currentLanguage.getLanguage().equals("ud");
     }
 
     public Language load(Locale locale, NamespaceID id, ResourceManager resourceManager) {

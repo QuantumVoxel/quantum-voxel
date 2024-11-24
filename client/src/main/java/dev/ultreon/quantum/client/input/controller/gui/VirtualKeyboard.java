@@ -36,7 +36,7 @@ public class VirtualKeyboard extends Widget {
     @Override
     public void render(@NotNull Renderer guiGraphics, int mouseX, int mouseY, float partialTick) {
         guiGraphics.pushMatrix();
-        guiGraphics.translate(0, 0, 2000);
+        guiGraphics.translate(0, 0, Renderer.OVERLAY_ZINDEX);
         guiGraphics.fill(0, 0, QuantumClient.get().getScaledWidth(), QuantumClient.get().getScaledHeight(), BG_COLOR);
         this.screen.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.popMatrix();

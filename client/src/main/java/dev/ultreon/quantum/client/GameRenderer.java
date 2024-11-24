@@ -24,7 +24,6 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.SceneCategory;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -237,6 +236,7 @@ public class GameRenderer implements Disposable {
                 renderer.getBatch().enableBlending();
                 renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
                 screen.render(renderer, (int) x, (int) y, deltaTime);
+                screen.renderTooltips(renderer, (int) x, (int) y, deltaTime);
                 WindowManager.render(renderer, (int) x, (int) y, deltaTime);
                 renderer.getBatch().enableBlending();
                 renderer.flush();

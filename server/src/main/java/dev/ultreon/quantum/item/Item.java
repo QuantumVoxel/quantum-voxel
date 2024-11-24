@@ -80,16 +80,24 @@ public class Item {
     public String getExtendedDescription(ItemStack itemStack) {
         float attackDamage = itemStack.getAttackDamage();
         StringBuilder builder = new StringBuilder();
-        if (attackDamage > 1) {
+        if (attackDamage != 0) {
             float v = attackDamage;
-            builder.append("[#a0a0a0]").append(translate("quantum.stats.item.attack_damage")).append(String.format(": [#808080]%.1f\n", v));
+            if (v < 0) {
+                builder.append("[#a0a0a0]").append(translate("quantum.stats.item.attack_damage")).append(String.format(": [#a00000]%.1f\n", v));
+            } else {
+                builder.append("[#a0a0a0]").append(translate("quantum.stats.item.attack_damage")).append(String.format(": [#00a000]+%.1f\n", v));
+            }
         }
 
         if (this instanceof ToolItem toolItem) {
             float efficiency = toolItem.getEfficiency();
-            if (efficiency > 0) {
+            if (efficiency != 0) {
                 float v = efficiency;
-                builder.append("[#a0a0a0]").append(translate("quantum.stats.item.efficiency")).append(String.format(": [#808080]%.1f\n", v));
+                if (v < 0) {
+                    builder.append("[#a0a0a0]").append(translate("quantum.stats.item.efficiency")).append(String.format(": [#a00000]%.1f\n", v));
+                } else {
+                    builder.append("[#a0a0a0]").append(translate("quantum.stats.item.efficiency")).append(String.format(": [#00a000]+%.1f\n", v));
+                }
             }
         }
 

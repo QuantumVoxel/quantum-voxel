@@ -56,6 +56,9 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unused", "IntegerDivisionInFloatingPointContext"})
 public class Renderer implements Disposable {
     private static final int TAB_WIDTH = 32;
+    public static final float OVERLAY_ZINDEX = 2000;
+    public static final int TOOLTIP_ZINDEX = 100;
+    public static final @NotNull RgbColor TRANSPARENT_BLACK = RgbColor.BLACK.withAlpha(0x80);
 
     private final QuantumClient client = QuantumClient.get();
     private final Deque<Vector3> globalTranslation = new ArrayDeque<>();
@@ -3163,6 +3166,10 @@ public class Renderer implements Disposable {
     }
 
     public void renderTooltip(int x, int y, TextObject title, String description, @Nullable String subTitle) {
+        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+
+        this.translate(0, 0, -TOOLTIP_ZINDEX);
+
         x += 8;
         y += 8;
 
@@ -3188,16 +3195,23 @@ public class Renderer implements Disposable {
             }
         }
         int textWidth = seen ? best : 0;
-        int descHeight = (int) (description.lines().count() * (this.font.getLineHeight() + 1) - 1);
-        int textHeight = (int) (descHeight + 3 + this.font.getLineHeight());
+        int descHeight = description.isBlank() ? 0 : (int) (description.lines().count() * (this.font.getLineHeight() + 3) - 3);
+        int textHeight = 1 + descHeight + (int) (3 + this.font.getLineHeight());
 
         if (description.isEmpty() && subTitle == null) {
             textHeight -= 3;
         }
         if (subTitle != null) {
-            textHeight += (int) (1 + this.font.getLineHeight());
+            textHeight += (int) (3 + this.font.getLineHeight());
         }
 
+        // Shadow
+        this.fill(x + 5, y + 4, textWidth + 4, 1, TRANSPARENT_BLACK);
+        this.fill(x + 4, y + 5, textWidth + 6, textHeight + 4, TRANSPARENT_BLACK);
+        this.fill(x + 5, y + textHeight + 9, textWidth + 4, 1, TRANSPARENT_BLACK);
+
+
+        // Box
         this.fill(x + 1, y, textWidth + 4, textHeight + 6, RgbColor.rgb(0x202020));
         this.fill(x, y + 1, textWidth + 6, textHeight + 4, RgbColor.rgb(0x202020));
         this.box(x + 1, y + 1, textWidth + 4, textHeight + 4, RgbColor.rgb(0x303030));
@@ -3206,12 +3220,14 @@ public class Renderer implements Disposable {
 
         int lineNr = 0;
         for (String line : description.lines().toList()) {
-            this.textLeft("[#a0a0a0]" + line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1);
+            this.textLeft("[#a0a0a0]" + line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 3f) - 3);
             lineNr++;
         }
 
         if (subTitle != null)
-            this.textLeft("[#606060]" + subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 1f) - 1);
+            this.textLeft("[#606060][/]" + subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + (description.isBlank() ? 0 : lineNr * (this.font.getLineHeight() + 3f) - 3));
+
+        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
     }
 
     private void drawText(@NotNull String text, float x, float y, Color color, boolean shadow) {

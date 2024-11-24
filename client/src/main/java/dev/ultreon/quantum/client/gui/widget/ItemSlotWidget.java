@@ -24,9 +24,13 @@ public class ItemSlotWidget extends Widget {
         if (isHovered && slot.mayPickup(client.player)) {
             renderer.fill(pos.x, pos.y, size.width, size.height, COLOR);
         }
+    }
 
+    public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         if (isWithinBounds(mouseX, mouseY) && !slot.isEmpty()) {
             renderer.renderTooltip(slot.getItem(), mouseX, mouseY);
+            return true;
         }
+        return false;
     }
 }
