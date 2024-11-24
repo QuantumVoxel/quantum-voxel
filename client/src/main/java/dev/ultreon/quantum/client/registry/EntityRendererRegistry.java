@@ -58,8 +58,6 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
         for (var entry : REGISTRY.entrySet()) {
             EntityType<?> entityType = entry.getKey();
             Model finished = modelManager.getFinished(entityType);
-//            if (finished == null)
-//                continue;
 
             EntityRenderer<?> renderer = entry.getValue().apply(this.modelManager.get(entityType), finished);
             this.finishedRegistry.put(entityType, renderer);
@@ -78,7 +76,7 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
             }
 
             if (this.modelManager.getFinished(e.getKey()) == null) {
-                QuantumClient.LOGGER.warn("Finished model for entity %s is null", e.getKey().getId());
+                QuantumClient.LOGGER.warn("Finished model for entity {} is null", e.getKey().getId());
                 continue;
             }
 
@@ -111,12 +109,12 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
             } else {
                 // If the model does not exist, use the entity model and renderer
                 if (entityModel == null) {
-                    QuantumClient.LOGGER.warn("Model not found for entity %s", type.getId());
+                    QuantumClient.LOGGER.warn("Model not found for entity {}", type.getId());
                     continue;
                 }
 
                 if (renderer == null) {
-                    QuantumClient.LOGGER.warn("Renderer not found for entity %s", type.getId());
+                    QuantumClient.LOGGER.warn("Renderer not found for entity {}", type.getId());
                     continue;
                 }
 

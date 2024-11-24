@@ -163,7 +163,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                         this.registerDefault(value);
                     }
                 } catch (IOException e) {
-                    QuantumClient.LOGGER.error("Failed to load block model for " + value.getId(), e);
+                    QuantumClient.LOGGER.error("Failed to load block model for {}", value.getId(), e);
                 }
             }
 

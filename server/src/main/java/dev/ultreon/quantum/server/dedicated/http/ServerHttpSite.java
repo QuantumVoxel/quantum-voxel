@@ -43,19 +43,19 @@ public class ServerHttpSite implements AutoCloseable {
             // Download file from server
             String path1 = exchange.getRequestURI().getPath();
             if (!path1.startsWith("/dl/") || path1.contains("..")) {
-                CommonConstants.LOGGER.error("Invalid path: " + path1);
+                CommonConstants.LOGGER.error("Invalid path: {}", path1);
                 exchange.sendResponseHeaders(HttpCodes.FORBIDDEN, 0);
                 return;
             }
             Path path = Path.of(path1);
             if (path.isAbsolute()) {
-                CommonConstants.LOGGER.error("Invalid path: " + path);
+                CommonConstants.LOGGER.error("Invalid path: {}", path);
                 exchange.sendResponseHeaders(HttpCodes.FORBIDDEN, 0);
                 return;
             }
 
             if (Files.notExists(path)) {
-                CommonConstants.LOGGER.error("File not found: " + path);
+                CommonConstants.LOGGER.error("File not found: {}", path);
                 exchange.sendResponseHeaders(HttpCodes.NOT_FOUND, 0);
                 return;
             }
@@ -75,7 +75,7 @@ public class ServerHttpSite implements AutoCloseable {
                 }
             }
 
-            CommonConstants.LOGGER.info("Sending file: " + path);
+            CommonConstants.LOGGER.info("Sending file: {}", path);
             exchange.sendResponseHeaders(200, Files.size(path));
             Files.copy(path, exchange.getResponseBody());
         }));
@@ -83,13 +83,13 @@ public class ServerHttpSite implements AutoCloseable {
             OutputStream responseBody = new BufferedOutputStream(httpExchange.getResponseBody(), 8192);
             String path = httpExchange.getRequestURI().getPath();
             if (!path.startsWith("/assets/img/") || path.contains("..")) {
-                CommonConstants.LOGGER.error("Invalid path: " + path);
+                CommonConstants.LOGGER.error("Invalid path: {}", path);
                 httpExchange.sendResponseHeaders(400, 0);
                 return;
             }
             try (InputStream resource = ServerHttpSite.class.getResourceAsStream("/html" + path)) {
                 if (resource == null) {
-                    CommonConstants.LOGGER.error("Resource not found: " + path);
+                    CommonConstants.LOGGER.error("Resource not found: {}", path);
                     httpExchange.sendResponseHeaders(404, 0);
                     responseBody.close();
                     return;
@@ -109,13 +109,13 @@ public class ServerHttpSite implements AutoCloseable {
             OutputStream responseBody = new BufferedOutputStream(httpExchange.getResponseBody(), 8192);
             String path = httpExchange.getRequestURI().getPath();
             if (!path.startsWith("/assets/") || path.contains("..")) {
-                CommonConstants.LOGGER.error("Invalid path: " + path);
+                CommonConstants.LOGGER.error("Invalid path: {}", path);
                 httpExchange.sendResponseHeaders(400, 0);
                 return;
             }
             try (InputStream resource = ServerHttpSite.class.getResourceAsStream("/html" + path)) {
                 if (resource == null) {
-                    CommonConstants.LOGGER.error("Resource not found: " + path);
+                    CommonConstants.LOGGER.error("Resource not found: {}", path);
                     httpExchange.sendResponseHeaders(404, 0);
                     responseBody.close();
                     return;
@@ -186,7 +186,7 @@ public class ServerHttpSite implements AutoCloseable {
                         return;
                     }
                     if (!login(query)) {
-                        CommonConstants.LOGGER.error("Failed to login: " + query);
+                        CommonConstants.LOGGER.error("Failed to login: {}", query);
                         exchange.getResponseHeaders().add("Location", "/login");
                     } else {
                         exchange.getResponseHeaders().add("Set-Cookie", "token=" + apiHandler.generateToken() + "; Path=; SameSite=Strict; Secure");
@@ -263,7 +263,7 @@ public class ServerHttpSite implements AutoCloseable {
     }
 
     private void send404(HttpExchange exchange) throws IOException {
-        CommonConstants.LOGGER.info("Sending 404 to: " + exchange.getRemoteAddress());
+        CommonConstants.LOGGER.info("Sending 404 to: {}", exchange.getRemoteAddress());
         exchange.sendResponseHeaders(404, 0);
         try (InputStream notFound = getClass().getClassLoader().getResourceAsStream("html/404.html")) {
             if (notFound != null) {
@@ -330,7 +330,7 @@ public class ServerHttpSite implements AutoCloseable {
         if (Files.notExists(Path.of("password.txt"))) {
             try (FileWriter writer = new FileWriter("password.txt")) {
                 String initialPassword = generatePassword();
-                CommonConstants.LOGGER.info("Generated initial password: " + initialPassword);
+                CommonConstants.LOGGER.info("Generated initial password: {}", initialPassword);
                 writer.write("admin:" + hash(initialPassword));
             } catch (IOException e) {
                 CommonConstants.LOGGER.error("Failed to create password.txt", e);
@@ -364,7 +364,7 @@ public class ServerHttpSite implements AutoCloseable {
         String username = parts[0].split("=")[1];
         String password = parts[1].split("=")[1];
         boolean login = login(username, hash(password));
-        if (!login) CommonConstants.LOGGER.error("Failed to login: " + username);
+        if (!login) CommonConstants.LOGGER.error("Failed to login: {}", username);
         return login;
     }
 
@@ -404,24 +404,24 @@ public class ServerHttpSite implements AutoCloseable {
 
         String[] parts = new String(Base64.getDecoder().decode(auth.substring(6))).split(":", 2);
         if (parts.length != 2 && kick) {
-            CommonConstants.LOGGER.info("Invalid credentials: " + parts[0]);
+            CommonConstants.LOGGER.info("Invalid credentials: {}", parts[0]);
             httpExchange.getResponseHeaders().add("Message", "Invalid credentials");
             respondUnauthorized(httpExchange);
             httpExchange.close();
             return false;
         } else if (parts.length != 2) {
-            CommonConstants.LOGGER.info("Invalid credentials: " + parts[0]);
+            CommonConstants.LOGGER.info("Invalid credentials: {}", parts[0]);
             return false;
         }
 
         boolean login = login(parts[0], parts[1]);
         if (!login && kick) {
-            CommonConstants.LOGGER.error("Failed to login: " + parts[0]);
+            CommonConstants.LOGGER.error("Failed to login: {}", parts[0]);
             httpExchange.getResponseHeaders().add("Message", "Invalid credentials");
             respondUnauthorized(httpExchange);
             httpExchange.close();
         } else if (!login) {
-            CommonConstants.LOGGER.info("Failed to login: " + parts[0]);
+            CommonConstants.LOGGER.info("Failed to login: {}", parts[0]);
             return false;
         }
         return login;
@@ -442,8 +442,8 @@ public class ServerHttpSite implements AutoCloseable {
         }
 
         boolean equals = password.equals(passwordInFile);
-        if (!equals) CommonConstants.LOGGER.error("Failed to login: " + username);
-        else CommonConstants.LOGGER.info("Logged in: " + username);
+        if (!equals) CommonConstants.LOGGER.error("Failed to login: {}", username);
+        else CommonConstants.LOGGER.info("Logged in: {}", username);
         return equals;
     }
 

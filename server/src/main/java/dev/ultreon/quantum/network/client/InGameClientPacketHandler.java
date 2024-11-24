@@ -58,9 +58,9 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onBlockSet(BlockVec pos, BlockState block);
 
-    void onMenuItemChanged(int index, ItemStack stack);
+    void onMenuItemChanged(S2CMenuItemChangedPacket packet);
 
-    void onInventoryItemChanged(int index, ItemStack stack);
+    void onInventoryItemChanged(S2CInventoryItemChangedPacket packet);
 
     void onMenuCursorChanged(ItemStack cursor);
 
@@ -109,4 +109,6 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
     void onTemperatureSync(S2CTemperatureSyncPacket packet);
 
     <T extends Recipe> void onRecipeSync(S2CRecipeSyncPacket<T> ts2CRecipeSyncPacket);
+
+    void onMenuChanged(NamespaceID menuId, ItemStack[] stack);
 }

@@ -13,7 +13,7 @@ import dev.ultreon.quantum.util.Suppliers;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BlockFlags;
 import dev.ultreon.quantum.world.UseResult;
-import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,26 +59,27 @@ public class BlockItem extends Item {
     }
 
     @NotNull
-    private UseResult placeBlock(WorldAccess world, Vec3i next, BlockVec blockVec, UseItemContext useItemContext) {
+    private UseResult placeBlock(World world, Vec3i next, BlockVec blockVec, UseItemContext useItemContext) {
         if (world.intersectEntities(this.getBlock().getBoundingBox(next)))
             return UseResult.DENY;
 
+        ItemStack stack = useItemContext.stack();
+        if (stack.isEmpty()) return UseResult.DENY;
+
         BlockState state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
         BlockState original = world.get(blockVec);
-        if (world.isClientSide())
-            world.set(blockVec, state, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.LIGHT);
 
+        if (world.isClientSide()) return UseResult.ALLOW;
+        world.set(blockVec, state, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.LIGHT);
         Player player = useItemContext.player();
-        ItemStack stack = useItemContext.stack();
         ModApi.getGlobalEventHandler().call(new BlockPlaceEvent(world, original, state, blockVec, player));
 
-        if (!world.isClientSide())
-            stack.shrink(1);
+        if (world.isServerSide()) stack.shrink(1);
         return UseResult.ALLOW;
     }
 
     @NotNull
-    private UseResult replaceBlock(WorldAccess world, BlockVec vec, UseItemContext useItemContext) {
+    private UseResult replaceBlock(World world, BlockVec vec, UseItemContext useItemContext) {
         if (world.intersectEntities(this.getBlock().getBoundingBox(vec)))
             return UseResult.DENY;
 

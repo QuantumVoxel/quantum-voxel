@@ -205,7 +205,7 @@ public abstract class DesktopPlatform extends GamePlatform {
                 try {
                     QuantumClient.get().getResourceManager().importPackage(rootPath);
                 } catch (IOException e) {
-                    CommonConstants.LOGGER.warn("Importing resources failed for path: " + rootPath.toFile(), e);
+                    CommonConstants.LOGGER.warn("Importing resources failed for path: {}", rootPath.toFile(), e);
                 }
             }
         }

@@ -32,10 +32,10 @@ public class ShaderPrograms {
         ShaderProgram program = new ShaderProgram(vertexResource, fragmentResource);
         String shaderLog = program.getLog();
         if (program.isCompiled()) {
-            if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation success for " + id);
-            else QuantumClient.LOGGER.warn("Shader compilation warnings for " + id + ":\n{}", shaderLog);
+            if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation success for {}", id);
+            else QuantumClient.LOGGER.warn("Shader compilation warnings for {}:\n{}", id, shaderLog);
         } else {
-            QuantumClient.LOGGER.error("Shader compilation failed for " + id + ":\n" + shaderLog);
+            QuantumClient.LOGGER.error("Shader compilation failed for {}:\n{}", id, shaderLog);
         }
         return program;
     }

@@ -99,30 +99,28 @@ public class CommandParserImpl {
         }
 
         if (!duplicateSpecValues.isEmpty()) {
-            QuantumServer.LOGGER.warn("Duplicate specification values for commands: " + StringUtils.join(this.data.getAliases(), ", "));
+            QuantumServer.LOGGER.warn("Duplicate specification values for commands: {}", StringUtils.join(this.data.getAliases(), ", "));
             for (var duplicateSpecValue : duplicateSpecValues) {
-                QuantumServer.LOGGER.warn("  Overload: " + duplicateSpecValue.getFirst().spec().toString());
+                QuantumServer.LOGGER.warn("  Overload: {}", duplicateSpecValue.getFirst().spec().toString());
                 for (var duplicate : duplicateSpecValue.getSecond()) {
-                    QuantumServer.LOGGER.warn(String.format("    Duplicate: {}", duplicate));
+                    QuantumServer.LOGGER.warn("    Duplicate: {}", duplicate);
                 }
             }
         }
         if (!conflicts.isEmpty()) {
             if (overloadsContents.size() <= 1) return;
 
-            QuantumServer.LOGGER.error("FATAL: Overload conflict for commands: " + StringUtils.join(this.data.getAliases(), ", "));
+            QuantumServer.LOGGER.error("FATAL: Overload conflict for commands: {}", StringUtils.join(this.data.getAliases(), ", "));
             for (var entry : conflicts.entrySet()) {
                 var key = entry.getKey();
                 var value = entry.getValue();
-                QuantumServer.LOGGER.error("FATAL:   Conflict: " + value.spec());
-                QuantumServer.LOGGER.error("FATAL:     Conflicting arguments: " + StringUtils.join(
+                QuantumServer.LOGGER.error("FATAL:   Conflict: {}", value.spec());
+                QuantumServer.LOGGER.error("FATAL:     Conflicting arguments: {}", StringUtils.join(
                         key.indexedValues.values(), ", "
-                    )
-                );
-                QuantumServer.LOGGER.error("FATAL:     Conflicting size: " + StringUtils.join(
+                ));
+                QuantumServer.LOGGER.error("FATAL:     Conflicting size: {}", StringUtils.join(
                         key.indexedValues.values(), ", "
-                    )
-                );
+                ));
             }
         }
     }
@@ -183,10 +181,10 @@ public class CommandParserImpl {
         try {
             return (CommandResult) method.invoke(instance, callArgs.toArray(new Object[0]));
         } catch (IllegalAccessException e) {
-            QuantumServer.LOGGER.error("Failed to access command method: " + method);
+            QuantumServer.LOGGER.error("Failed to access command method: {}", method);
             return null;
         } catch (InvocationTargetException e) {
-            QuantumServer.LOGGER.error("Failed to invoke command method: " + method, e);
+            QuantumServer.LOGGER.error("Failed to invoke command method: {}", method, e);
             return null;
         } catch (IllegalArgumentException e) {
             QuantumServer.LOGGER.error("Got illegal argument, possible argument mismatch.");
@@ -197,7 +195,8 @@ public class CommandParserImpl {
             for (var obj : callArgs) QuantumServer.LOGGER.error("  {}", obj == null ? null : obj.getClass().getName());
 
             QuantumServer.LOGGER.error("Dumping stack trace:");
-            for (var line : dev.ultreon.libs.commons.v0.util.StringUtils.splitIntoLines(ExceptionUtils.getStackTrace(e))) QuantumServer.LOGGER.error(String.format("  %s", line));
+            for (var line : dev.ultreon.libs.commons.v0.util.StringUtils.splitIntoLines(ExceptionUtils.getStackTrace(e)))
+                QuantumServer.LOGGER.error("  {}", line);
             throw new CommandArgumentMismatch(method.getParameterTypes(), callArgs, e);
         }
     }

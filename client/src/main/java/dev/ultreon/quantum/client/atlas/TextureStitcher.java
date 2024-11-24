@@ -83,7 +83,7 @@ public class TextureStitcher implements Disposable {
         Pixmap reflectivePix = reflective.exists() ? new Pixmap(reflective) : null;
 
         if (diffusePix == null && emissivePix == null && normalPix == null && specularPix == null && reflectivePix == null) {
-            CommonConstants.LOGGER.warn("No texture for " + texture + " found");
+            CommonConstants.LOGGER.warn("No texture for {} found", texture);
             return;
         }
 

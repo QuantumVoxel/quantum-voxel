@@ -43,6 +43,7 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
+import dev.ultreon.ubo.types.MapType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -256,6 +257,30 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                 // Auto-close the menu if the distance is greater than 5
                 this.autoCloseMenu();
         }
+    }
+
+    @Override
+    public void load(@NotNull MapType data) {
+        super.load(data);
+
+        if (connection != null && !connection.isLoggingIn()) sendAllData();
+    }
+
+    /**
+     * Sends all data to the client.
+     *
+     * @apiNote Should only be called when strictly necessary.
+     * Sending all data too frequently can cause lag and too much unnecessary network traffic.
+     */
+    @ApiStatus.Internal
+    public void sendAllData() {
+        Vec3d position = getPosition();
+        connection.send(new S2CPlayerPositionPacket(uuid, position, xHeadRot, xRot, yRot));
+        connection.send(new S2CPlayerHealthPacket(health));
+        connection.send(new S2CGamemodePacket(getGamemode()));
+        connection.send(new S2CTemperatureSyncPacket(getTemperature()));
+        inventory.onAllChanged();
+        sendAbilities();
     }
 
     @Override
@@ -497,7 +522,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     public void openMenu(@NotNull ContainerMenu menu) {
         if (getOpenMenu() == menu) {
-            QuantumServer.LOGGER.warn("Player {} tried to open menu %s but it was already open!", this.name, menu.getType().getId());
+            QuantumServer.LOGGER.warn("Player {} tried to open menu {} but it was already open!", this.name, menu.getType().getId());
             return;
         }
 
@@ -577,7 +602,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
-            QuantumServer.LOGGER.warn(String.format("Player moved into an untracked chunk: %s", this.getName()));
+            QuantumServer.LOGGER.warn("Player moved into an untracked chunk: {}", this.getName());
             return;
         }
 
@@ -604,7 +629,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
-            QuantumServer.LOGGER.warn(String.format("Player moved into an inactive chunk: %s", this.getName()));
+            QuantumServer.LOGGER.warn("Player moved into an inactive chunk: {}", this.getName());
             return;
         }
 
@@ -750,7 +775,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void onDisconnect(String message) {
-        QuantumServer.LOGGER.info(String.format("Player %s disconnected: %s", this.getName(), message));
+        QuantumServer.LOGGER.info("Player {} disconnected: {}", this.getName(), message);
     }
 
     public void onAttack(int id) {
@@ -777,13 +802,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                     if (!this.chunkTracker.isTracking(pos)) {
                         this.chunkTracker.startTracking(pos);
                     } else {
-                        @Nullable ServerChunk chunk = this.world.getChunk(pos);
-                        if (chunk != null) {
-                            chunk.sendChunk();
-                        } else {
-                            this.server.onChunkFailedToLoad(pos.blockInWorldSpace(0, 0, 0).vec().d());
-                            return;
-                        }
+                        ServerChunk chunk = this.world.getChunk(pos);
+                        chunk.sendChunk();
                     }
 
                     this.world.getOrLoadChunk(pos).thenAccept(receivedChunk -> {

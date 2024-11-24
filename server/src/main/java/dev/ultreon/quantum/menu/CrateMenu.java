@@ -4,8 +4,8 @@ import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.CrateBlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,8 +74,8 @@ public class CrateMenu extends BlockContainerMenu {
     }
 
     @Override
-    protected void onItemChanged(ItemSlot slot) {
-        super.onItemChanged(slot);
+    protected void onChanged(ItemSlot slot) {
+        super.onChanged(slot);
 
         int index = slot.getIndex();
         if (index >= 27) return;

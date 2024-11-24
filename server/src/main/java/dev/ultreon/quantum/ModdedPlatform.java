@@ -73,7 +73,7 @@ public abstract class ModdedPlatform extends GamePlatform {
                 try {
                     getResourceManager().importPackage(rootPath);
                 } catch (IOException e) {
-                    CommonConstants.LOGGER.warn("Importing resources failed for path: " + rootPath.toFile(), e);
+                    CommonConstants.LOGGER.warn("Importing resources failed for path: {}", rootPath.toFile(), e);
                 }
             }
         }

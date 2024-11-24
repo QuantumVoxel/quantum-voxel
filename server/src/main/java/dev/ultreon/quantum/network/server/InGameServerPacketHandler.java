@@ -74,7 +74,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     @Override
     public void onDisconnect(String message) {
-        IConnection.LOGGER.info("Player %s disconnected: %s", this.player.getName(), message);
+        IConnection.LOGGER.info("Player {} disconnected: {}", this.player.getName(), message);
         PlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(this.player);
 
         this.disconnected = true;
@@ -114,7 +114,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onRespawn() {
-        QuantumServer.LOGGER.debug("Respawning player: %s", this.player.getName());
+        QuantumServer.LOGGER.debug("Respawning player: {}", this.player.getName());
         this.server.submit(this.player::respawn);
     }
 
@@ -143,7 +143,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onBlockBreaking(BlockVec pos, C2SBlockBreakingPacket.BlockStatus status) {
-        this.server.submit((Runnable) () -> {
+        this.server.submit(() -> {
             ServerWorld world = this.player.getWorld();
             BlockState block = world.get(pos);
             float efficiency = 1.0F;
@@ -178,7 +178,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             if (openMenu != null) {
                 openMenu.onTakeItem(this.player, index, rightClick);
             } else {
-                QuantumServer.LOGGER.warn("Player %s attempted to take item without a menu open.", this.player.getName());
+                QuantumServer.LOGGER.warn("Player {} attempted to take item without a menu open.", this.player.getName());
             }
         });
     }
@@ -188,7 +188,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         var ChunkVec = pos.chunk();
 
         if (!this.player.isChunkActive(ChunkVec)) {
-            QuantumServer.LOGGER.warn("Player %s attempted to break block that is not loaded.", this.player.getName());
+            QuantumServer.LOGGER.warn("Player {} attempted to break block that is not loaded.", this.player.getName());
             return;
         }
 

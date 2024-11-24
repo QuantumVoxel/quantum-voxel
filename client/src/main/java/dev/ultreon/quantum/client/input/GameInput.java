@@ -13,6 +13,7 @@ import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.events.ItemEvents;
 import dev.ultreon.quantum.item.Item;
@@ -24,7 +25,6 @@ import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.UseResult;
-import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -166,12 +166,12 @@ public abstract class GameInput implements Disposable {
     public abstract void update(float deltaTime);
 
     @CanIgnoreReturnValue
-    public UseResult useItem(Player player, @Nullable WorldAccess world, Hit hit) {
+    public UseResult useItem(Player player, @Nullable ClientWorld world, Hit hit) {
         return useItem(player, world, hit, 1F);
     }
 
     @CanIgnoreReturnValue
-    public UseResult useItem(Player player, @Nullable WorldAccess world, Hit hit, float amount) {
+    public UseResult useItem(Player player, @Nullable ClientWorld world, Hit hit, float amount) {
         if (this.itemUseCooldown > System.currentTimeMillis())
             return UseResult.DENY;
 
@@ -181,7 +181,7 @@ public abstract class GameInput implements Disposable {
         return useResult;
     }
 
-    private UseResult useItem0(Player player, @Nullable WorldAccess world, Hit hit, float amount) {
+    private UseResult useItem0(Player player, @Nullable ClientWorld world, Hit hit, float amount) {
         if (!(hit instanceof BlockHit)) return UseResult.DENY;
 
         ItemStack stack = player.getSelectedItem();

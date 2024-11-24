@@ -27,7 +27,7 @@ public interface LodRenderableProvider extends RenderableProvider {
     @Override
     @Deprecated
     default void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-        QuantumClient.LOGGER.warn("Call to deprecated method 'getRenderables' for " + getClass().getName() + "!");
+        QuantumClient.LOGGER.warn("Call to deprecated method 'getRenderables' for {}!", getClass().getName());
         getLodRenderables(renderables, pool, CommonConstants.DEFAULT_LOD_LEVEL);
     }
 

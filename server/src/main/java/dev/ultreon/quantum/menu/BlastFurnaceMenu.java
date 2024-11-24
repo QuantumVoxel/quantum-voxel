@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.menu;
 
 import com.google.common.collect.Iterators;
-import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
+import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.World;
@@ -74,8 +74,8 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
     }
 
     @Override
-    protected void onItemChanged(ItemSlot slot) {
-        super.onItemChanged(slot);
+    protected void onChanged(ItemSlot slot) {
+        super.onChanged(slot);
 
         int index = slot.getIndex();
         if (index >= 3) return;

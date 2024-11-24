@@ -46,7 +46,6 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.RegionVec;
 import imgui.ImGui;
 import imgui.ImGuiIO;
-import imgui.ImVec2;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
 import imgui.extension.implot.ImPlot;
@@ -58,7 +57,6 @@ import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -130,7 +128,7 @@ public class ImGuiOverlay {
 
         QuantumClient.LOGGER.info("Setting up ImGui");
 
-        QuantumClient.get().deferClose(GLFWErrorCallback.create((error, description) -> QuantumClient.LOGGER.error("GLFW Error: %s", description)).set());
+        QuantumClient.get().deferClose(GLFWErrorCallback.create((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description)).set());
         synchronized (ImGuiOverlay.class) {
             ImGui.createContext();
             ImGuiOverlay.imPlotCtx = ImPlot.createContext();

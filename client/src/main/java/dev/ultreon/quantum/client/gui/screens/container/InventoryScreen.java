@@ -99,7 +99,7 @@ public class InventoryScreen extends ContainerScreen {
                 }
                 ItemSlot itemSlot = this.createItemSlot(recipe, x, y);
                 list.add(itemSlot);
-                add(new RecipeSlot(recipe, itemSlot, this.left() + itemSlot.getSlotX(), this.top() + itemSlot.getSlotY()));
+                add(new RecipeSlot(recipe, itemSlot, this.left() + itemSlot.getSlotX(), this.top() + itemSlot.getSlotY(), this));
                 x++;
             }
         }
@@ -143,16 +143,6 @@ public class InventoryScreen extends ContainerScreen {
         renderer.blit(background, this.left() + this.backgroundWidth() + 1, this.getHeight() / 2f - 64, 104, 128, 0, 127);
     }
 
-    @Override
-    public void renderForeground(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderForeground(renderer, mouseX, mouseY, deltaTime);
-
-        var slotAt = this.getRecipeSlotAt(mouseX, mouseY);
-        if (slotAt != null && !slotAt.slot.getItem().isEmpty()) {
-            renderer.renderTooltip(slotAt.slot.getItem(), mouseX + 4, mouseY + 4, this.withRecipeInfo(slotAt.recipe, slotAt.slot.getItem().getFullDescription()));
-        }
-    }
-
     private String withRecipeInfo(Recipe recipe, String description) {
         var result = new ArrayList<TextObject>();
         var ingredients = recipe.ingredients();
@@ -166,14 +156,11 @@ public class InventoryScreen extends ContainerScreen {
             if (!this.showOnlyCraftable()) {
                 result.add(recipe.canCraft(this.menu) ? TextObject.translation("quantum.recipe.craftable").style(textStyle -> textStyle.color(RgbColor.GREEN)) : TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(RgbColor.RED)));
             }
-
-            result.add(TextObject.empty());
         } else {
             result.add(TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(RgbColor.RED)));
-            result.add(TextObject.empty());
         }
 
-        return String.join("\n", result.stream().map(TextObject::getText).toList()) + "\n\n" + description;
+        return String.join("\n", result.stream().map(TextObject::getText).toList()) + description;
     }
 
     private boolean showOnlyCraftable() {
@@ -203,7 +190,7 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     protected @NotNull Packet<InGameServerPacketHandler> getPacket(Recipe recipe) {
-        return new C2SCraftRecipePacket(recipe.getType(), recipe);
+        return new C2SCraftRecipePacket(recipe.getType().getId(), ClientRecipeManager.INSTANCE.getId(recipe.getType(), recipe));
     }
 
     public ContainerMenu getMenu() {
@@ -218,15 +205,17 @@ public class InventoryScreen extends ContainerScreen {
     public void emitUpdate() {
         super.emitUpdate();
 
-        this.rebuildSlots();
+        rebuildSlots();
     }
 
     private static final class RecipeSlot extends ItemSlotWidget {
         private final Recipe recipe;
+        private final InventoryScreen screen;
 
-        private RecipeSlot(Recipe recipe, ItemSlot slot, int x, int y) {
+        private RecipeSlot(Recipe recipe, ItemSlot slot, int x, int y, InventoryScreen screen) {
             super(slot, x, y);
             this.recipe = recipe;
+            this.screen = screen;
         }
 
         @Override
@@ -258,6 +247,14 @@ public class InventoryScreen extends ContainerScreen {
             return Objects.hash(recipe, slot);
         }
 
+        @Override
+        public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+            if (isWithinBounds(mouseX, mouseY)) {
+                renderer.renderTooltip(slot.getItem(), mouseX + 4, mouseY + 4, screen.withRecipeInfo(recipe, slot.getItem().getFullDescription()));
+                return true;
+            }
 
+            return false;
+        }
     }
 }

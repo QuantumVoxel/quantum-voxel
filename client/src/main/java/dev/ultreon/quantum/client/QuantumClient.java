@@ -112,8 +112,6 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.js.JsLoader;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.c2s.C2SAttackPacket;
@@ -144,6 +142,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
@@ -831,7 +831,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (QuantumClient.isPackaged()) QuantumClient.LOGGER.warn("Running in the JPackage environment.");
         QuantumClient.LOGGER.debug("Java Version: {}", System.getProperty("java.version"));
         QuantumClient.LOGGER.debug("Java Vendor: {}", System.getProperty("java.vendor"));
-        QuantumClient.LOGGER.debug("Operating System: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
+        QuantumClient.LOGGER.debug("Operating System: {} {} {}", System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"));
     }
 
     public static String[] getIcons() {
@@ -1759,7 +1759,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             var crashLog = crash.getCrashLog();
             CrashHandler.handleCrash(crashLog);
             String string = crashLog.toString();
-            LOGGER.error("Dumping crash report...\n" + string);
+            LOGGER.error("Dumping crash report...\n{}", string);
 
             if (instance != null) instance.shutdown();
             System.exit(1);
@@ -2438,7 +2438,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         Sound sound = this.soundRegistry.getSound(soundEvent.getId());
         if (sound == null) {
-            QuantumClient.LOGGER.warn("Unknown sound event: %s", soundEvent.getId());
+            QuantumClient.LOGGER.warn("Unknown sound event: {}", soundEvent.getId());
             return;
         }
         if (soundEvent.isVaryingPitch()) {

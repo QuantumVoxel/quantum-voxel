@@ -40,19 +40,19 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
     @Override
     public void onDisconnect(String message) {
-        this.connection.setReadOnly();
-        this.disconnected = true;
+        connection.setReadOnly();
+        disconnected = true;
     }
 
     @Override
     public boolean shouldHandlePacket(Packet<?> packet) {
         if (ServerPacketHandler.super.shouldHandlePacket(packet)) return true;
-        else return this.connection.isConnected();
+        else return connection.isConnected();
     }
 
     @Override
     public PacketContext context() {
-        return this.context;
+        return context;
     }
 
     @Override
@@ -62,11 +62,11 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
     @Override
     public boolean isAcceptingPackets() {
-        return this.connection.isConnected();
+        return connection.isConnected();
     }
 
     public void onModPacket(NetworkChannel channel, ModPacket<?> packet) {
-        packet.handlePacket(() -> new ModPacketContext(channel, null, this.connection, Env.SERVER));
+        packet.handlePacket(() -> new ModPacketContext(channel, null, connection, Env.SERVER));
     }
 
     public NetworkChannel getChannel(NamespaceID channelId) {
@@ -81,42 +81,43 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         UUID uuid = UUID.nameUUIDFromBytes(("Quantum:" + name).getBytes());
 
         // Find a free UUID if the requested UUID is already in use
-        while (this.server.getPlayer(uuid) != null) {
+        while (server.getPlayer(uuid) != null) {
             uuid = UUID.randomUUID();
         }
 
-        if (this.server.getPlayer(uuid) != null) {
-            this.connection.disconnect("Player " + name + " is already in the server.");
-            IConnection.LOGGER.info("%s left the server because they are already in the server.", name);
+        if (server.getPlayer(uuid) != null) {
+            connection.disconnect("Player " + name + " is already in the server.");
+            IConnection.LOGGER.info("{} left the server because they are already in the server.", name);
             return;
         }
 
-        if (this.server.getPlayerCount() >= this.server.getMaxPlayers()) {
-            this.connection.disconnect("The server is full.");
-            IConnection.LOGGER.info("%s left the server because the server is full.", name);
+        if (server.getPlayerCount() >= server.getMaxPlayers()) {
+            connection.disconnect("The server is full.");
+            IConnection.LOGGER.info("{} left the server because the server is full.", name);
             return;
         }
 
-        final var player = this.server.loadPlayer(name, uuid, this.connection);
-        this.connection.setPlayer(player);
+        final var player = server.loadPlayer(name, uuid, connection);
+        connection.setPlayer(player);
 
         IConnection.LOGGER.info("{} joined the server.", name);
 
         BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> {
-            this.server.getOverworld().getChunkAt(0, 0, 0);
-            return this.server.getOverworld().getSpawnPoint();
+            server.getOverworld().getChunkAt(0, 0, 0);
+            return server.getOverworld().getSpawnPoint();
         });
 
         player.sendPacket(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));
 
-        this.connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(this.server, player, this.connection));
-        this.server.placePlayer(player);
+        connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(server, player, connection));
+
+        server.placePlayer(player);
 
         PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
+        player.sendAllData();
 
         if (!player.isSpawned()) {
-            player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), this.connection);
-            player.setInitialItems();
+            player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), connection);
         }
 
         PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);

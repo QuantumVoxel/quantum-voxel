@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk
+FROM openjdk:21-jdk
 
 # Setup environment
 ENV JAVA_TOOL_OPTIONS -Dfile.encoding=UTF8

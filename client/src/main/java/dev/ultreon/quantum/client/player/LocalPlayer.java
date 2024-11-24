@@ -23,7 +23,6 @@ import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
-import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
@@ -33,6 +32,7 @@ import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.SoundType;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
@@ -461,5 +461,11 @@ public class LocalPlayer extends ClientPlayer {
         double temperature = packet.temperature();
         this.temperature = temperature;
         this.temperatureGoal = temperature;
+    }
+
+    public void onMenuChanged(NamespaceID menuId, ItemStack[] stack) {
+        if (this.openMenu != null && this.openMenu.getType().getId().equals(menuId)) {
+            this.openMenu.setAll(stack);
+        }
     }
 }

@@ -20,7 +20,7 @@ public class ModLoadingContext {
         try {
             runnable.run();
         } catch (Exception e) {
-            CommonConstants.LOGGER.error("Failed to load mod " + mod.getName(), e);
+            CommonConstants.LOGGER.error("Failed to load mod {}", mod.getName(), e);
             throw new RuntimeException(e);
         } finally {
             instance = null;

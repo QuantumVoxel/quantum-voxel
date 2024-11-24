@@ -8,22 +8,25 @@ import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CBlockEntityUpdatePacket;
-import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChanged;
+import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChangedPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.Audience;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.capability.ItemStorageCapability;
 import dev.ultreon.quantum.world.container.ItemContainer;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import org.codehaus.groovy.util.ArrayIterator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 public abstract class ContainerBlockEntity<T extends ContainerMenu> extends BlockEntity implements ItemContainer<T>, Audience {
     private final ItemStack[] items;
@@ -94,7 +97,7 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     }
 
     public void sendUpdate(int slot) {
-        this.sendPacket(new S2CMenuItemChanged(slot, items[slot]));
+        this.sendPacket(new S2CMenuItemChangedPacket(menu.getType().getId(), slot, this.items[slot]));
     }
 
     @Override

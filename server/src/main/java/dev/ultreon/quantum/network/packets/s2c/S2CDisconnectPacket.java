@@ -20,7 +20,7 @@ public record S2CDisconnectPacket<T extends ClientPacketHandler>(String message)
 
     @Override
     public void handle(PacketContext packetContext, T handler) {
-        CommonConstants.LOGGER.info("Server disconnected: %s", this.message);
+        CommonConstants.LOGGER.info("Server disconnected: {}", this.message);
 
         handler.onDisconnect(this.message);
     }

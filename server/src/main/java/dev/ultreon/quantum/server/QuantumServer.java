@@ -29,8 +29,6 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.gamerule.GameRules;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.Networker;
 import dev.ultreon.quantum.network.ServerStatusException;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -67,6 +65,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -299,8 +299,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     protected void savePlayer(boolean silent, ServerPlayer entry) throws IOException {
-        if (!silent) LOGGER.info("Saving player {}", entry.getName());
+        if (!silent) LOGGER.info("Saving player '{}'", entry.getName());
         MapType save = entry.save(new MapType());
+        save.putString("dimension", entry.getWorld().getDimension().id().toString());
         this.storage.write(save, "players/" + entry.getUuid() + ".ubo");
     }
 
@@ -878,11 +879,11 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     @ApiStatus.Internal
     public void onDisconnected(ServerPlayer player, String message) {
-        QuantumServer.LOGGER.info("Player '%s' disconnected with message: %s", player.getName(), message);
+        QuantumServer.LOGGER.info("Player '{}' disconnected with message: {}", player.getName(), message);
         try {
             savePlayer(false, player);
         } catch (IOException e) {
-            QuantumServer.LOGGER.warn("Failed to save player '" + player.getName() + "'!", e);
+            QuantumServer.LOGGER.warn("Failed to save player '{}'!", player.getName(), e);
         }
         this.players.remove(player.getUuid());
         for (ServerPlayer other : this.players.values()) {
@@ -953,14 +954,19 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public ServerPlayer loadPlayer(String name, UUID uuid, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         try {
-            if (this.storage.exists(String.format("players/%s.ubo", name))) {
-                QuantumServer.LOGGER.info("Loading player '%s'...", name);
-                MapType read = this.storage.read(String.format("players/%s.ubo", name));
+            String path = "players/" + uuid + ".ubo";
+            if (this.storage.exists(path)) {
+                QuantumServer.LOGGER.info("Loading player '{}'...", name);
+                MapType read = this.storage.read(path);
                 NamespaceID dimId = NamespaceID.tryParse(read.getString("dimension"));
+                if (dimId == null) {
+                    QuantumServer.LOGGER.warn("Failed to properly load player '{}', missing dimension!", name);
+                    dimId = NamespaceID.of("overworld");
+                }
                 RegistryKey<DimensionInfo> key = RegistryKey.of(RegistryKeys.DIMENSION, dimId);
                 ServerWorld world = this.dimManager.getWorld(key);
                 if (world == null) {
-                    QuantumServer.LOGGER.warn("Failed to properly load player '%s'! Unknown dimension: %s", name, dimId);
+                    QuantumServer.LOGGER.warn("Failed to properly load player '{}', unknown dimension '{}'!", name, dimId);
                     world = this.dimManager.getWorld(DimensionInfo.OVERWORLD);
                 }
                 ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, world, uuid, name, connection);
@@ -969,14 +975,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                 return player;
             }
         } catch (IOException e) {
-            QuantumServer.LOGGER.warn("Failed to load player '" + name + "'!", e);
+            QuantumServer.LOGGER.warn("Failed to load player '{}'!", name, e);
         }
 
         return new ServerPlayer(EntityTypes.PLAYER, this.dimManager.getWorld(DimensionInfo.OVERWORLD), uuid, name, connection);
     }
 
     public boolean hasPlayedBefore(CacheablePlayer player) {
-        return this.storage.exists("players/" + player.getName() + ".ubo");
+        return this.storage.exists("players/" + player.getUuid() + ".ubo");
     }
 
     public void handleWorldSaveError(Exception e) {

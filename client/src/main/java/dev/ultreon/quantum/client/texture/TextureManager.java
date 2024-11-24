@@ -134,7 +134,7 @@ public class TextureManager implements Disposable {
 
         FileHandle handle = QuantumClient.resource(id);
         if (!handle.exists()) {
-            QuantumClient.LOGGER.warn("Texture not found: " + id);
+            QuantumClient.LOGGER.warn("Texture not found: {}", id);
             this.textures.put(id, TextureManager.getDefaultTex());
             return TextureManager.getDefaultTex();
         }
@@ -143,7 +143,7 @@ public class TextureManager implements Disposable {
 
         Texture texture = new Texture(pixmap);
         if (texture.getTextureData() == null) {
-            QuantumClient.LOGGER.warn("Couldn't read texture data: " + id);
+            QuantumClient.LOGGER.warn("Couldn't read texture data: {}", id);
             this.textures.put(id, TextureManager.getDefaultTex());
             return TextureManager.getDefaultTex();
         }

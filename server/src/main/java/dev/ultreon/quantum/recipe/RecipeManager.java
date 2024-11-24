@@ -46,7 +46,7 @@ public class RecipeManager {
                         this.register(resource.id(), recipe);
                     }
                 } catch (Exception e) {
-                    QuantumServer.LOGGER.error("Failed to load recipe: " + resource.id().mapPath(path -> {
+                    QuantumServer.LOGGER.error("Failed to load recipe: {}", resource.id().mapPath(path -> {
                         String prefix = RecipeRegistry.CATEGORY + "/";
                         if (path.startsWith(prefix)) {
                             return path.substring(prefix.length());
@@ -64,12 +64,12 @@ public class RecipeManager {
         Json5Element json5Element = resource.readJson5();
 
         if (json5Element == null) {
-            QuantumServer.LOGGER.warn("Failed to load recipe as it's unreadable: " + id);
+            QuantumServer.LOGGER.warn("Failed to load recipe as it's unreadable: {}", id);
             return null;
         }
 
         if (!json5Element.isJson5Object()) {
-            QuantumServer.LOGGER.warn("Failed to load recipe as it is not an object: " + id);
+            QuantumServer.LOGGER.warn("Failed to load recipe as it is not an object: {}", id);
             return null;
         }
 
@@ -77,7 +77,7 @@ public class RecipeManager {
 
         Json5Element typeElement = root.get("type");
         if (!typeElement.isJson5Primitive() && !typeElement.getAsJson5Primitive().isString()) {
-            QuantumServer.LOGGER.warn("Failed to load recipe as it is not a string: " + id);
+            QuantumServer.LOGGER.warn("Failed to load recipe as it is not a string: {}", id);
             return null;
         }
 
@@ -86,7 +86,7 @@ public class RecipeManager {
 
         RecipeType<?> recipeType = Registries.RECIPE_TYPE.get(recipeTypeId);
         if (recipeType == null) {
-            QuantumServer.LOGGER.warn("Failed to load recipe as it has an invalid type: " + id);
+            QuantumServer.LOGGER.warn("Failed to load recipe as it has an invalid type: {}", id);
             return null;
         }
 

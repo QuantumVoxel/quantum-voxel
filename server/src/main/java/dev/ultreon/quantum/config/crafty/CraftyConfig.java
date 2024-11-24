@@ -246,7 +246,7 @@ public abstract class CraftyConfig {
                 throw new IllegalStateException("Failed to load config entry " + path, e);
             } catch (Exception e) {
                 // Log an error and set success to false if an error occurs during processing
-                CommonConstants.LOGGER.error("Failed to load config entry " + path, e);
+                CommonConstants.LOGGER.error("Failed to load config entry {}", path, e);
                 success = false;
             }
         }
@@ -292,7 +292,7 @@ public abstract class CraftyConfig {
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("Failed to save config entry " + path, e);
             } catch (Exception e) {
-                CommonConstants.LOGGER.error("Failed to save config entry " + path, e);
+                CommonConstants.LOGGER.error("Failed to save config entry {}", path, e);
             }
         }
 
@@ -309,7 +309,7 @@ public abstract class CraftyConfig {
         try {
             saveUnsafe();
         } catch (Exception e) {
-            CommonConstants.LOGGER.error("Failed to save config file " + this.configPath, e);
+            CommonConstants.LOGGER.error("Failed to save config file {}", this.configPath, e);
         }
 
         enableWatcher();
@@ -359,7 +359,7 @@ public abstract class CraftyConfig {
                 this.setDefaults(field, field.getType());
             } catch (IllegalAccessException e) {
                 // Log an error if setting default value fails
-                CommonConstants.LOGGER.error("Failed to reset config entry " + field.getName(), e);
+                CommonConstants.LOGGER.error("Failed to reset config entry {}", field.getName(), e);
             }
         });
 
@@ -396,19 +396,19 @@ public abstract class CraftyConfig {
                 if (!fileName.endsWith(".json5")) continue;
 
                 // Log the reloading of the config file
-                CommonConstants.LOGGER.info("Reloading config file " + context);
+                CommonConstants.LOGGER.info("Reloading config file {}", context);
                 // Disable the watcher while updating the config file
                 disableWatcher();
                 try {
                     // Attempt to load the config file
                     if (!CONFIGS.get(fileName).loadUnsafe()) {
                         // Log an error if failed to reload and save the config file
-                        CommonConstants.LOGGER.error("Failed to reload config file " + context);
+                        CommonConstants.LOGGER.error("Failed to reload config file {}", context);
                         CONFIGS.get(fileName).save();
                     }
                 } catch (IOException e) {
                     // Log an error if failed to reload due to an exception and save the config file
-                    CommonConstants.LOGGER.error("Failed to reload config file " + context, e);
+                    CommonConstants.LOGGER.error("Failed to reload config file {}", context, e);
                     CONFIGS.get(fileName).save();
                 }
                 // Enable the watcher after updating the config file

@@ -106,4 +106,9 @@ public class UsernameScreen extends Screen {
     private static boolean isFakeDeveloper(TextEntry textEntry) {
         return textEntry.getValue().equalsIgnoreCase("dev") && !GamePlatform.get().isDevEnvironment();
     }
+
+    @Override
+    public boolean canCloseWithEsc() {
+        return false;
+    }
 }

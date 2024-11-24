@@ -47,7 +47,7 @@ public class OreFeature extends TerrainFeature {
             setter.set(x, y, z, this.ore.getDefaultState());
 
             if (DebugFlags.ORE_FEATURE.isEnabled()) {
-                QuantumServer.LOGGER.warn("Generating ore feature at: " + x + ", " + y + ", " + z);
+                QuantumServer.LOGGER.warn("Generating ore feature at: {}, {}, {}", x, y, z);
             }
 
             Direction dir = Direction.random(random);

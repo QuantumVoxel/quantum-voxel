@@ -36,7 +36,7 @@ public class NamedTag<T> {
             return "tags/" + domain + "." + registry.id().getPath() + path + ".json5";
         }));
         if (res == null) {
-            CommonConstants.LOGGER.warn("Tag not found: " + name + " for registry " + registry.id());
+            CommonConstants.LOGGER.warn("Tag not found: {} for registry {}", name, registry.id());
             this.loaded = false;
             return;
         }

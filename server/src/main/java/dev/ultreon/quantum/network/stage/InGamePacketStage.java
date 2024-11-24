@@ -51,7 +51,7 @@ public class InGamePacketStage extends PacketStage {
         this.addClientBound(S2CAddPlayerPacket::read);
         this.addClientBound(S2CRemovePlayerPacket::read);
         this.addClientBound(S2CInventoryItemChangedPacket::read);
-        this.addClientBound(S2CMenuItemChanged::read);
+        this.addClientBound(S2CMenuItemChangedPacket::read);
         this.addClientBound(S2CMenuCursorPacket::read);
         this.addClientBound(S2CBlockSetPacket::read);
         this.addClientBound(S2CBlockEntitySetPacket::read);

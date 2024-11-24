@@ -561,7 +561,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         ChunkModel chunkModel = chunkModels.remove(chunk.getVec());
         if (chunkModel == null) {
-            LOGGER.warn("Tried to unload a chunk that didn't exist: " + chunk.getVec());
+            LOGGER.warn("Tried to unload a chunk that didn't exist: {}", chunk.getVec());
             return;
         }
         client.worldCat.remove(chunkModel);
@@ -646,7 +646,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             var renderer = (EntityRenderer<@NotNull Entity>) this.client.entityRendererManager.get(entity.getType());
             if (model == null) {
                 if (renderer == null) {
-                    QuantumClient.LOGGER.warn("Failed to render entity " + entity.getId() + " because it's renderer is null");
+                    QuantumClient.LOGGER.warn("Failed to render entity {} because it's renderer is null", entity.getId());
                     return;
                 }
                 model = renderer.createModel(entity);

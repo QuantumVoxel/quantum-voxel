@@ -121,8 +121,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (!(client.screen instanceof WorldLoadScreen)) {
             client.showScreen(null);
         }
-
-        QuantumClient.LOGGER.debug(String.format("Player respawned at %s", pos)); //! DEBUG
     }
 
     @Override
@@ -312,18 +310,24 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onBlockSet(BlockVec pos, BlockState block) {
         ClientWorldAccess worldAccess = this.client.world;
         if (worldAccess != null) {
-            worldAccess.onBlockSet(pos, block);
+            QuantumClient.invoke(() -> worldAccess.onBlockSet(pos, block));
         }
     }
 
     @Override
-    public void onMenuItemChanged(int index, ItemStack stack) {
+    public void onMenuItemChanged(S2CMenuItemChangedPacket packet) {
         var player = this.client.player;
 
         if (player != null) {
             ContainerMenu openMenu = player.getOpenMenu();
             if (openMenu != null) {
-                openMenu.setItem(index, stack);
+                if (openMenu.getType().getId().equals(packet.menuId())) {
+                    for (var entry : packet.stackMap().entrySet()) {
+                        openMenu.setItem(entry.getKey(), entry.getValue());
+                    }
+                } else {
+                    QuantumClient.LOGGER.error("Menu type mismatch: {} != {}", packet.menuId(), openMenu.getType().getId());
+                }
             }
 
             if (this.client.screen instanceof ContainerScreen screen) {
@@ -333,16 +337,21 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onInventoryItemChanged(int index, ItemStack stack) {
+    public void onInventoryItemChanged(S2CInventoryItemChangedPacket packet) {
         var player = this.client.player;
 
-        if (player != null) {
-            Inventory inventory = player.inventory;
-            inventory.setItem(index, stack);
+        if (player == null) return;
 
-            if (this.client.screen instanceof InventoryScreen screen) {
-                screen.emitUpdate();
+        Inventory inventory = player.inventory;
+
+        if (inventory != null) {
+            for (var entry : packet.stackMap().entrySet()) {
+                inventory.setItem(entry.getKey(), entry.getValue());
             }
+        }
+
+        if (this.client.screen instanceof InventoryScreen screen) {
+            screen.emitUpdate();
         }
     }
 
@@ -549,6 +558,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public <T extends Recipe> void onRecipeSync(S2CRecipeSyncPacket<T> packet) {
         ClientRecipeManager.INSTANCE.onPacket(packet);
+    }
+
+    @Override
+    public void onMenuChanged(NamespaceID menuId, ItemStack[] stack) {
+        LocalPlayer player = this.client.player;
+        if (player != null) {
+            player.onMenuChanged(menuId, stack);
+        }
     }
 
     @Override

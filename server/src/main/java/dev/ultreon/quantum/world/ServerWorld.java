@@ -443,7 +443,7 @@ public class ServerWorld extends World {
                 return serverChunk;
             }).exceptionally(throwable -> {
                 if (throwable.getCause() instanceof CancellationException) {
-                    CommonConstants.LOGGER.warn("Chunk load cancelled: " + globalVec, throwable.getCause());
+                    CommonConstants.LOGGER.warn("Chunk load cancelled: {}", globalVec, throwable.getCause());
                     return null;
                 }
                 return null;
@@ -690,7 +690,7 @@ public class ServerWorld extends World {
 
         ChunkVec localChunkVec = chunkVec.regionLocal();
         if (region.getActiveChunk(localChunkVec) == null && DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) {
-            LOGGER.debug(String.format("Tried to unload chunk %s but it isn't active", chunkVec));
+            LOGGER.debug("Tried to unload chunk {} but it isn't active", chunkVec);
             return false;
         }
 
@@ -705,7 +705,7 @@ public class ServerWorld extends World {
             try {
                 this.saveRegion(region);
             } catch (Exception e) {
-                World.LOGGER.warn(String.format("Failed to save region %s:", region.getPos()), e);
+                World.LOGGER.warn("Failed to save region {}:", region.getPos(), e);
                 return false;
             }
         }
@@ -769,7 +769,7 @@ public class ServerWorld extends World {
         }
 
         if (DebugFlags.CHUNK_LOADER_DEBUG.isEnabled() && chunk == null)
-            LOGGER.debug(String.format("Chunk not found at %s", pos));
+            LOGGER.debug("Chunk not found at {}", pos);
 
         // Return the chunk
         return chunk;
@@ -799,7 +799,7 @@ public class ServerWorld extends World {
         }
 
         if (DebugFlags.CHUNK_LOADER_DEBUG.isEnabled() && chunk == null)
-            LOGGER.debug(String.format("Chunk not found at %s", globalVec));
+            LOGGER.debug("Chunk not found at {}", globalVec);
 
         if (chunk == null) {
             return (ServerChunk) loadChunkNow(globalVec);
@@ -1018,7 +1018,7 @@ public class ServerWorld extends World {
                 if (region.isDirty())
                     this.saveRegion(region, false);
             } catch (Exception e) {
-                World.LOGGER.warn(String.format("Failed to save region %s:", region.getPos()), e);
+                World.LOGGER.warn("Failed to save region {}:", region.getPos(), e);
                 var remove = this.regionStorage.regions.remove(region.getPos());
                 if (remove != region)
                     this.server.crash(new ValidationError("Removed region is not the region that got saved."));
@@ -1134,7 +1134,7 @@ public class ServerWorld extends World {
             }
         } catch (Exception e) {
             // Log error if the region failed to load
-            World.LOGGER.error(String.format("Region at %s run failed to load:", regionPos), e);
+            World.LOGGER.error("Region at {} run failed to load:", regionPos, e);
         }
 
         // Create a new region if it doesn't exist and add it to the regions map
@@ -1613,7 +1613,7 @@ public class ServerWorld extends World {
                 throw new CancellationException("Chunk was cancelled during build");
             } catch (Throwable t) {
                 this.generatingChunks.remove(globalVec);
-                World.LOGGER.error(String.format("Failed to build chunk at %s:", globalVec), t);
+                World.LOGGER.error("Failed to build chunk at {}:", globalVec, t);
                 CrashLog crash = world.server.crash(t);
                 throw new ApplicationCrash(crash);
             }
@@ -1687,7 +1687,7 @@ public class ServerWorld extends World {
                 } catch (CancellationException | RejectedExecutionException e) {
                     throw e;
                 } catch (Throwable e) {
-                    QuantumServer.LOGGER.error(String.format("Failed to build chunk at %s:", globalVec), e);
+                    QuantumServer.LOGGER.error("Failed to build chunk at {}:", globalVec, e);
                     throw e;
                 }
             }, this.world.executor).thenApplyAsync(builtChunk -> QuantumServer.invoke(() -> {
@@ -1713,7 +1713,7 @@ public class ServerWorld extends World {
                 return builtChunk;
             }).exceptionallyAsync(e -> {
                 if (!(e instanceof CancellationException))
-                    QuantumServer.LOGGER.error(String.format("Failed to build chunk at %s:", globalVec), e);
+                    QuantumServer.LOGGER.error("Failed to build chunk at {}:", globalVec, e);
 
                 return null;
             }).join(), this.world.executor);
@@ -1915,7 +1915,7 @@ public class ServerWorld extends World {
                 // Write chunks to the region file.
                 var chunks = region.getChunks().stream().filter(serverChunk -> !serverChunk.isOriginal()).toList();
                 var idx = 0;
-                CommonConstants.LOGGER.info("Saving " + chunks.size() + " chunks in region " + pos);
+                CommonConstants.LOGGER.info("Saving {} chunks in region {}", chunks.size(), pos);
                 for (var chunk : chunks) {
                     if (idx >= World.REGION_SIZE * World.REGION_SIZE * World.REGION_SIZE)
                         throw new IllegalArgumentException("Too many chunks in region!");

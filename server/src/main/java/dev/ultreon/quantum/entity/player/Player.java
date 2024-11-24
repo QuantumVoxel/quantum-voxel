@@ -367,6 +367,7 @@ public abstract class Player extends LivingEntity {
         this.runModifier = data.getFloat("runModifier", this.runModifier);
         this.gamemode = Objects.requireNonNullElse(GameMode.byOrdinal(data.getByte("gamemode", (byte) 0)), GameMode.SURVIVAL);
         this.abilities.load(data.getMap("Abilities"));
+        this.inventory.load(data.getList("Inventory"));
     }
 
     @Override
@@ -382,6 +383,7 @@ public abstract class Player extends LivingEntity {
         data.putFloat("runModifier", this.runModifier);
         data.putByte("gamemode", (byte) this.gamemode.ordinal());
         data.put("Abilities", this.abilities.save(new MapType()));
+        data.put("Inventory", this.inventory.save());
 
         return data;
     }

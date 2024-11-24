@@ -13,7 +13,7 @@ import dev.ultreon.quantum.client.gui.screens.PauseScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.Hit;
@@ -175,7 +175,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         screenY -= this.client.getDrawOffset().y;
 
         Screen currentScreen = this.client.screen;
-        @Nullable ClientWorldAccess world = this.client.world;
+        @Nullable ClientWorld world = this.client.world;
         Player player = this.client.player;
         if (!Gdx.input.isCursorCatched() && currentScreen != null) {
             int mouseX = (int) (screenX / this.client.getGuiScale());
@@ -211,7 +211,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         return this.doPlayerInteraction(button, hit, world, player);
     }
 
-    private boolean doPlayerInteraction(int button, Hit hit, @Nullable ClientWorldAccess world, Player player) {
+    private boolean doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
         if (button == Input.Buttons.RIGHT) {
             this.useItem(player, world, hit);
             return true;

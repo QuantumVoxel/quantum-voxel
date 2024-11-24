@@ -2,9 +2,9 @@ package dev.ultreon.quantum.item;
 
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.util.Hit;
-import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.World;
 
-public record UseItemContext(WorldAccess world, Player player, Hit result, ItemStack stack, float amount) {
+public record UseItemContext(World world, Player player, Hit result, ItemStack stack, float amount) {
 
     @Override
     public String toString() {

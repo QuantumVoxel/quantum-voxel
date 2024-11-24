@@ -64,7 +64,7 @@ public final class ServerChunk extends Chunk {
                                    @NotNull ServerWorld.Region region) {
 
         if (DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) {
-            LOGGER.debug(String.format("Loading chunk at %s", pos));
+            LOGGER.debug("Loading chunk at {}", pos);
         }
 
         var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Blocks.AIR.getDefaultState());

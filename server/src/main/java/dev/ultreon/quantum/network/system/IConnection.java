@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.network.system;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.PacketHandler;
 import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -11,6 +9,8 @@ import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;

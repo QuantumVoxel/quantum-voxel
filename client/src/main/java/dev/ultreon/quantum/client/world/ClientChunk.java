@@ -237,7 +237,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         if (blockModel != null) {
             blockModel.loadInto(blockEntity.pos(), this);
         } else {
-            QuantumClient.LOGGER.warn("No block entity model for " + blockEntity.getType().getId() + " at " + blockVec);
+            QuantumClient.LOGGER.warn("No block entity model for {} at {}", blockEntity.getType().getId(), blockVec);
         }
     }
 

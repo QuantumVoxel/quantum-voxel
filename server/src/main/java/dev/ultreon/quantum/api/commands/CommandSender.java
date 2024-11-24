@@ -114,7 +114,7 @@ public interface CommandSender {
             argv = ArrayUtils.remove(argv, 0);
         }
         // Log the command being executed
-        QuantumServer.LOGGER.info(this.getName() + " ran command: " + commandline);
+        QuantumServer.LOGGER.info("{} ran command: {}", this.getName(), commandline);
 
         // Retrieve the base command from the registry
         Command baseCommand = CommandRegistry.get(command);

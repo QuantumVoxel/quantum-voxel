@@ -171,7 +171,7 @@ public class ResourceManager implements Closeable {
                 addImported(new ResourcePackage(map, categories));
             }
         } catch (IOException e) {
-            CommonConstants.LOGGER.error("Failed to load resource package: " + file.getAbsolutePath(), e);
+            CommonConstants.LOGGER.error("Failed to load resource package: {}", file.getAbsolutePath(), e);
         }
     }
 
@@ -200,7 +200,7 @@ public class ResourceManager implements Closeable {
                 stream.closeEntry();
             }
         } catch (IOException e) {
-            CommonConstants.LOGGER.error("Failed to load resource package: " + filePath, e);
+            CommonConstants.LOGGER.error("Failed to load resource package: {}", filePath, e);
         }
 
         addImported(new ResourcePackage(map, categories));

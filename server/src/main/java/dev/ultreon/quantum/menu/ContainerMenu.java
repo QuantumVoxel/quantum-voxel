@@ -11,7 +11,7 @@ import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChanged;
+import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChangedPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
@@ -23,7 +23,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -107,21 +109,27 @@ public abstract class ContainerMenu implements Menu {
      *
      * @param slot the slot that was changed
      */
-    protected void onItemChanged(ItemSlot slot) {
+    protected void onChanged(ItemSlot slot) {
         for (Player player : this.watching) {
-            if (player instanceof ServerPlayer serverPlayer) {
-                Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
-                if (packet != null) {
-                    serverPlayer.connection.send(packet);
-                }
+            if (!(player instanceof ServerPlayer serverPlayer)) continue;
+            Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
+            if (packet != null && !serverPlayer.connection.isLoggingIn()) {
+                serverPlayer.connection.send(packet);
             }
         }
     }
 
-    protected @Nullable Packet<InGameClientPacketHandler> createPacket(ServerPlayer player, ItemSlot slot) {
+    protected @Nullable Packet<InGameClientPacketHandler> createPacket(ServerPlayer player, ItemSlot... slots) {
         if (player.getOpenMenu() != this) return null;
 
-        return new S2CMenuItemChanged(slot.index, slot.getItem());
+        Map<Integer, ItemStack> map = new HashMap<>();
+        for (ItemSlot slot : slots) {
+            if (map.put(slot.index, slot.getItem()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+
+        return new S2CMenuItemChangedPacket(getType().getId(), map);
     }
 
     @CanIgnoreReturnValue
@@ -288,5 +296,40 @@ public abstract class ContainerMenu implements Menu {
 
     public Container<?> getContainer() {
         return container;
+    }
+
+    /**
+     * Sends all items to the players watching the menu.
+     *
+     * @apiNote Should only be called when strictly necessary. Sending all items too frequently can cause lag and too much unnecessary network traffic.
+     */
+    @ApiStatus.Internal
+    public void onAllChanged() {
+        for (Player player : this.watching) {
+            if (!(player instanceof ServerPlayer serverPlayer)) continue;
+
+            Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slots);
+            if (packet == null) continue;
+            if (!serverPlayer.connection.isLoggingIn())
+                serverPlayer.connection.send(packet);
+            else
+                CommonConstants.LOGGER.debug("Player is logging in, not sending menu update packet.");
+        }
+    }
+
+    public void setAll(ItemStack[] stack) {
+        for (int i = 0; i < stack.length; i++) {
+            this.slots[i].setItem(stack[i], false);
+        }
+    }
+
+    protected void onChanged(List<ItemSlot> changed) {
+        for (Player player : this.watching) {
+            if (!(player instanceof ServerPlayer serverPlayer)) continue;
+            Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, changed.toArray(ItemSlot[]::new));
+            if (packet != null && !serverPlayer.connection.isLoggingIn()) {
+                serverPlayer.connection.send(packet);
+            }
+        }
     }
 }

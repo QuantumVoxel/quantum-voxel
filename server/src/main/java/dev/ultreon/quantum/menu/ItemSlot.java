@@ -4,7 +4,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
-import lombok.Getter;
 
 /**
  * Item slot for {@link ContainerMenu}.
@@ -63,7 +62,7 @@ public class ItemSlot {
     }
 
     public void update() {
-        this.container.onItemChanged(this);
+        this.container.onChanged(this);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class MultiplayerData {
         RemotePlayer remotePlayer = this.remotePlayers.get(uuid);
         if (remotePlayer == null) return;
 
-        QuantumClient.LOGGER.info("%s left the server.", remotePlayer.getName());
+        QuantumClient.LOGGER.info("{} left the server.", remotePlayer.getName());
         RemotePlayer remove = this.remotePlayers.remove(uuid);
         this.client.world.removeEntity(remove.getId());
     }

@@ -50,7 +50,7 @@ public class CommandCrashReport {
         File commandCrashes = new File("command-crashes/");
         if (!commandCrashes.exists() && !commandCrashes.mkdirs()) {
             sender.sendMessage(TextObject.translation("quantum.commands.crash.save.failed"));
-            QuantumServer.LOGGER.error("Failed to create directory for command crashes: " + commandCrashes.getAbsolutePath());
+            QuantumServer.LOGGER.error("Failed to create directory for command crashes: {}", commandCrashes.getAbsolutePath());
             return null;
         }
 

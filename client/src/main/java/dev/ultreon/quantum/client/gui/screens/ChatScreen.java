@@ -44,7 +44,7 @@ public class ChatScreen extends Screen {
         ChatScreen.MESSAGES.add(0, message);
         ChatScreen.MESSAGE_TIMESTAMPS.add(0, System.currentTimeMillis());
 
-        QuantumClient.LOGGER.info("Received message: " + message.getText());
+        QuantumClient.LOGGER.info("Received message: {}", message.getText());
 
         if (ChatScreen.MESSAGES.size() > 100) {
             ChatScreen.MESSAGES.remove(ChatScreen.getMessages().size() - 1);

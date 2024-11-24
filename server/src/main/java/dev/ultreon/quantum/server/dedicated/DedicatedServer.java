@@ -111,7 +111,7 @@ public class DedicatedServer extends QuantumServer {
         // Call the other constructor with hostname, port, and inspection
         this(ServerConfig.hostname, ServerConfig.port, inspection);
 
-        LOGGER.info("Server started on %s:%s", ServerConfig.hostname, ServerConfig.port);
+        LOGGER.info("Server started on {}:{}", ServerConfig.hostname, ServerConfig.port);
 
         try {
             // Create the world storage

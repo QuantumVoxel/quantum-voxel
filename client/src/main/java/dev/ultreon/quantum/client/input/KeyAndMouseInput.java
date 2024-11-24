@@ -354,7 +354,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         if (player == null || currentScreen != null) return;
         if (!Gdx.input.isCursorCatched()) return;
 
-        @Nullable ClientWorldAccess world = this.client.world;
+        @Nullable ClientWorld world = this.client.world;
         if (world == null) return;
 
         Hit hit = this.client.hit;
@@ -572,7 +572,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * @param world the game world
      * @param player the player entity
      */
-    private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorldAccess world, Player player) {
+    private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
         // Get the position and metadata of the current and next blocks
         BlockVec pos = hit.getBlockVec();
         if (hit instanceof BlockHit blockHitResult){

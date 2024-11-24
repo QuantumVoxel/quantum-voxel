@@ -134,22 +134,22 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         BiomeGenerator biomeGen = null;
 
         if (variation < -2.0 || variation > 2.0) {
-            CommonConstants.LOGGER.warn("Invalid variation: " + variation);
+            CommonConstants.LOGGER.warn("Invalid variation: {}", variation);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
         if (temp < -2.0 || temp > 2.0) {
-            CommonConstants.LOGGER.warn("Invalid temperature: " + temp);
+            CommonConstants.LOGGER.warn("Invalid temperature: {}", temp);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
         if (humid < -2.0 || humid > 2.0) {
-            CommonConstants.LOGGER.warn("Invalid humidity: " + humid);
+            CommonConstants.LOGGER.warn("Invalid humidity: {}", humid);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
         if (height < -64.0 || height > 320.0) {
-            CommonConstants.LOGGER.warn("Invalid height: " + height);
+            CommonConstants.LOGGER.warn("Invalid height: {}", height);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
@@ -165,7 +165,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         }
 
         if (biomeGen == null) {
-            CommonConstants.LOGGER.warn("No biome generator found for height: " + height + ", humid: " + humid + ", temp: " + temp + ", variation: " + variation);
+            CommonConstants.LOGGER.warn("No biome generator found for height: {}, humid: {}, temp: {}, variation: {}", height, humid, temp, variation);
             return this.biomeGenData.getFirst().biomeGen();
         }
 
