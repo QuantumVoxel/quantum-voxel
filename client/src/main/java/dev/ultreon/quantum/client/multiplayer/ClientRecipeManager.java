@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.multiplayer;
 
+import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.network.packets.s2c.S2CRecipeSyncPacket;
 import dev.ultreon.quantum.recipe.Recipe;
@@ -33,7 +34,7 @@ public class ClientRecipeManager {
         PagedList<T> recipes = new PagedList<>(limit);
 
         for (Recipe recipe : this.recipes.getOrDefault(type, Map.of()).values()) {
-            if (recipe.canCraft(inventory))
+            if (recipe.canCraft(inventory) || !ClientConfig.showOnlyCraftable)
                 recipes.add(type.cast(recipe));
         }
 

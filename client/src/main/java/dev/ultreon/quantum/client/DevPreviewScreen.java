@@ -20,7 +20,7 @@ public class DevPreviewScreen extends Screen {
      * Initializes with a translation text for the screen title.
      */
     protected DevPreviewScreen() {
-        super(TextObject.translation("quantum.screen.dev"));
+        super(TextObject.translation("quantum.screen.dev"), new UsernameScreen());
     }
 
     /**
@@ -41,7 +41,7 @@ public class DevPreviewScreen extends Screen {
                 .bounds(() -> new Bounds(client.getScaledWidth() / 2 - 50, size.height - 40, 100, 20))
                 .setCallback(caller -> {
                     if (client.getUser() == null)
-                        client.showScreen(new UsernameScreen());
+                        back();
                     else
                         client.showScreen(new TitleScreen());
                 }));
