@@ -78,11 +78,12 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onPlayerLogin(String name) {
-        UUID uuid;
-        do {
-            uuid = UUID.randomUUID();
-        } while (this.server.getPlayer(uuid) != null);
+        UUID uuid = UUID.nameUUIDFromBytes(("Quantum:" + name).getBytes());
 
+        // Find a free UUID if the requested UUID is already in use
+        while (this.server.getPlayer(uuid) != null) {
+            uuid = UUID.randomUUID();
+        }
 
         if (this.server.getPlayer(uuid) != null) {
             this.connection.disconnect("Player " + name + " is already in the server.");

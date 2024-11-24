@@ -48,6 +48,18 @@ public class ServerTcpConnection extends TcpConnection<ServerPacketHandler, Clie
     }
 
     @Override
+    public void disconnected(Connection connection) {
+        ServerPlayer cachePlayer = player;
+        if (cachePlayer == null) return;
+
+        QuantumServer cacheServer = server;
+        if (cacheServer == null) return;
+
+        cacheServer.onDisconnected(cachePlayer, "Connection closed!");
+        super.disconnected(connection);
+    }
+
+    @Override
     protected PacketData<ServerPacketHandler> getOurData(PacketStage stage) {
         return stage.getServerPackets();
     }
@@ -76,5 +88,9 @@ public class ServerTcpConnection extends TcpConnection<ServerPacketHandler, Clie
 
     public QuantumServer getServer() {
         return server;
+    }
+
+    public Server getKryoServer() {
+        return kryoServer;
     }
 }

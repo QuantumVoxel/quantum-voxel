@@ -49,6 +49,7 @@ public abstract class LivingEntity extends Entity {
     private final AirSupply airSupply = this.set(AirSupply.class, new AirSupply(10));
     protected double temperature;
     protected double temperatureGoal;
+    protected @Nullable Entity lastAttacker = null;
 
     public LivingEntity(EntityType<? extends LivingEntity> entityType, WorldAccess world) {
         super(entityType, world);
@@ -172,6 +173,13 @@ public abstract class LivingEntity extends Entity {
 
         this.setHealth(this.maxHealth);
         this.setInitialTemperature();
+    }
+
+    @Override
+    public void onRemoved() {
+        super.onRemoved();
+
+        lastAttacker = null;
     }
 
     private void setInitialTemperature() {
@@ -450,5 +458,13 @@ public abstract class LivingEntity extends Entity {
      */
     public double getTemperature() {
         return temperature;
+    }
+
+    public Entity getLastAttacker() {
+        return lastAttacker;
+    }
+
+    public void setLastAttacker(Entity entity) {
+        this.lastAttacker = entity;
     }
 }

@@ -965,6 +965,10 @@ public abstract class Entity extends GameObject implements CommandSender {
         return Objects.hashCode(id);
     }
 
+    public void onRemoved() {
+
+    }
+
     public enum Pose {
         IDLE,
         WALKING

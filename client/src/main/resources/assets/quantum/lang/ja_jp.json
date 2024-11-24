@@ -136,14 +136,14 @@
   "quantum.commands.player.dumpData.success": "プレイヤーデータをダンプしました: ",
 
   "quantum.damageSource.kill": "%s が殺されました",
-  "quantum.damageSource.kill.player": "%1$s が %2$s に殺されました",
+  "quantum.damageSource.kill.by": "%1$s が %2$s に殺されました",
   "quantum.damageSource.kill.item": "%1$s が %2$s に %3$s を使って殺されました",
   "quantum.damageSource.falling": "%s が高所から落ちました",
-  "quantum.damageSource.falling.player": "%1$s が %2$s に押されて高所から落ちました",
+  "quantum.damageSource.falling.by": "%1$s が %2$s に押されて高所から落ちました",
   "quantum.damageSource.void": "%s が虚無に飲み込まれました",
-  "quantum.damageSource.void.player": "%1$s は %2$s によって虚無に飲み込まれました",
+  "quantum.damageSource.void.by": "%1$s は %2$s によって虚無に飲み込まれました",
   "quantum.damageSource.none": "%s は突然死しました",
-  "quantum.damageSource.none.player": "%1$s は %2$s によって突然死しました",
+  "quantum.damageSource.none.by": "%1$s は %2$s によって突然死しました",
   "quantum.damageSource.hunger": "%1$s は餓死しました",
 
   "quantum.ui.auto": "自動",

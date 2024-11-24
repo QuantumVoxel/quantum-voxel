@@ -172,14 +172,6 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     @Override
     public void disconnected(Connection connection) {
         this.on3rdPartyDisconnect("Connection closed!");
-
-        ServerPlayer player = this.getPlayer();
-        if (player == null) return;
-
-        QuantumServer server = player.getServer();
-        if (server == null) return;
-
-        server.onDisconnected(player, "Connection closed!");
     }
 
     protected abstract Packet<TheirHandler> getDisconnectPacket(String message);

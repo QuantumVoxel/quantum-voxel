@@ -287,7 +287,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private MultiplayerData multiplayerData;
 
     // Local user
-    private final User user;
+    private User user;
 
     // Developer stuff
     final boolean devWorld;
@@ -615,8 +615,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.devWorld = QuantumClient.arguments.getFlags().contains("devWorld");
 
         // Create a new user
-        this.user = new User("Player" + MathUtils.random(100, 999));
-
         RpcHandler.enable();
 
         // Initialize ImGui if necessary
@@ -2865,5 +2863,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     public CompletableFuture<Void> runAsyncTask(Runnable o) {
         return CompletableFuture.runAsync(o, executor);
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

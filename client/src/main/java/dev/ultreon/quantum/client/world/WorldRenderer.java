@@ -39,7 +39,6 @@ import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.entity.renderer.EntityRenderer;
-import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.SceneCategory;
@@ -420,15 +419,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
 
             this.collectEntity(localPlayer, batch);
-        }
-
-        try (var ignored = QuantumClient.PROFILER.start("players")) {
-            MultiplayerData multiplayerData = this.client.getMultiplayerData();
-            if (multiplayerData == null) return;
-            for (var remotePlayer : multiplayerData.getRemotePlayers())
-                try (var ignored1 = QuantumClient.PROFILER.start(remotePlayer.getType().getId() + " (" + remotePlayer.getName() + ")")) {
-                    this.collectEntity(remotePlayer, batch);
-                }
         }
 
         for (String category : world.getEnabledGizmoCategories()) {

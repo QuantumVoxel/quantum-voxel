@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client;
 
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.TitleScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.text.TextObject;
@@ -38,7 +39,12 @@ public class DevPreviewScreen extends Screen {
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.dev.close"))
                 .bounds(() -> new Bounds(client.getScaledWidth() / 2 - 50, size.height - 40, 100, 20))
-                .setCallback(caller -> this.close()));
+                .setCallback(caller -> {
+                    if (client.getUser() == null)
+                        client.showScreen(new UsernameScreen());
+                    else
+                        client.showScreen(new TitleScreen());
+                }));
     }
 
     /**

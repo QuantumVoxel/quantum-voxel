@@ -274,18 +274,34 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public void save(boolean silent) throws IOException {
         try {
             for (var worldEntry : dimManager.getWorlds().entrySet()) {
-                if (!silent) {
-                    LOGGER.info("Saving world {}", worldEntry.getKey());
-                }
+                if (!silent) LOGGER.info("Saving world {}", worldEntry.getKey());
 
                 var world = worldEntry.getValue();
-                if (world.isSaveable()) {
-                    world.save(silent);
-                }
+                if (world.isSaveable()) world.save(silent);
             }
+
+            if (!silent) LOGGER.info("Saving world data");
+            this.storage.write(this.worldData, "world.ubo");
+
+            if (!silent) LOGGER.info("Saving player data");
+            savePlayers(silent);
         } catch (IOException e) {
             QuantumServer.LOGGER.error("Failed to save world", e);
         }
+    }
+
+    private void savePlayers(boolean silent) throws IOException {
+        for (var entry : this.players.values()) {
+            UUID key = entry.getUuid();
+            if (key.equals(getHost())) continue;
+            savePlayer(silent, entry);
+        }
+    }
+
+    protected void savePlayer(boolean silent, ServerPlayer entry) throws IOException {
+        if (!silent) LOGGER.info("Saving player {}", entry.getName());
+        MapType save = entry.save(new MapType());
+        this.storage.write(save, "players/" + entry.getUuid() + ".ubo");
     }
 
     @Override
@@ -447,6 +463,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             ModApi.getGlobalEventHandler().call(new ServerStoppingEvent(this));
         }
 
+        // Save all the server data.
+        try {
+            this.save(false);
+        } catch (IOException e) {
+            // Log error for saving server data failure.
+            QuantumServer.LOGGER.error("Saving server data failed!", e);
+        }
+
         LOGGER.info("Server stopped.");
 
         // Close all connections.
@@ -457,14 +481,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         } catch (IOException e) {
             // Log error for closing connections failure.
             QuantumServer.LOGGER.error("Closing connections failed!", e);
-        }
-
-        // Save all the server data.
-        try {
-            this.save(false);
-        } catch (IOException e) {
-            // Log error for saving server data failure.
-            QuantumServer.LOGGER.error("Saving server data failed!", e);
         }
 
         // Cleanup any resources allocated.
@@ -863,6 +879,11 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Internal
     public void onDisconnected(ServerPlayer player, String message) {
         QuantumServer.LOGGER.info("Player '%s' disconnected with message: %s", player.getName(), message);
+        try {
+            savePlayer(false, player);
+        } catch (IOException e) {
+            QuantumServer.LOGGER.warn("Failed to save player '" + player.getName() + "'!", e);
+        }
         this.players.remove(player.getUuid());
         for (ServerPlayer other : this.players.values()) {
             other.connection.send(new S2CRemovePlayerPacket(other.getUuid()));
@@ -951,8 +972,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             QuantumServer.LOGGER.warn("Failed to load player '" + name + "'!", e);
         }
 
-        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.dimManager.getWorld(DimensionInfo.OVERWORLD), uuid, name, connection);
-        return player;
+        return new ServerPlayer(EntityTypes.PLAYER, this.dimManager.getWorld(DimensionInfo.OVERWORLD), uuid, name, connection);
     }
 
     public boolean hasPlayedBefore(CacheablePlayer player) {

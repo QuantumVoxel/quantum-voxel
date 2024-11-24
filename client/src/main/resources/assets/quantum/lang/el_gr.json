@@ -218,13 +218,13 @@
   "quantum.screen.message.disconnected": "Διακόφθηκες προσωρινά από το παιχνίδι",
   "quantum.commands.player.dumpData.success": "Εξάγει δεδομένα παίκτη: ",
   "quantum.damageSource.kill": "%s κάτωσε",
-  "quantum.damageSource.kill.player": "%1$s κάτωσε από %2$s",
+  "quantum.damageSource.kill.by": "%1$s κάτωσε από %2$s",
   "quantum.damageSource.kill.item": "%1$s κάτωσε από %2$s χρησιμοποιώντας %3$s",
   "quantum.damageSource.falling": "%s πήγε πάνω σε μεγάλη ύψος",
-  "quantum.damageSource.falling.player": "%1$s πήγε πάνω σε μεγάλη ύψος από %2$s",
+  "quantum.damageSource.falling.by": "%1$s πήγε πάνω σε μεγάλη ύψος από %2$s",
   "quantum.damageSource.void": "%s πήγε στο Κενό",
-  "quantum.damageSource.void.player": "%1$s πήγε στο Κενό λόγω %2$s",
+  "quantum.damageSource.void.by": "%1$s πήγε στο Κενό λόγω %2$s",
   "quantum.damageSource.none": "%s πήγε κατάσταση ελεύθερου",
-  "quantum.damageSource.none.player": "%1$s πήγε κατάσταση ελεύθερου λόγω %2$s",
+  "quantum.damageSource.none.by": "%1$s πήγε κατάσταση ελεύθερου λόγω %2$s",
   "quantum.damageSource.hunger": "%1$s στερεώθηκε"
 }

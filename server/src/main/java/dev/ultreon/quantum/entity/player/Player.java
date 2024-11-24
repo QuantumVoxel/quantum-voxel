@@ -87,7 +87,6 @@ public abstract class Player extends LivingEntity {
 
     @Override
     public void setInvincible(boolean invincible) {
-        this.abilities.invincible = invincible;
         this.sendAbilities();
     }
 

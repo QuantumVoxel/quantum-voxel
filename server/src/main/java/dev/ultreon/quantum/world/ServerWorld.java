@@ -537,6 +537,8 @@ public class ServerWorld extends World {
                 BlockVec blockVec = entity1.getBlockVec();
                 this.sendAllTracking(blockVec.getIntX(), blockVec.getIntY(), blockVec.getIntZ(), new S2CRemoveEntityPacket(entity1.getId()));
                 EntityEvents.REMOVED.factory().onEntityRemoved(entity1);
+
+                entity1.onRemoved();
             }
         }
 

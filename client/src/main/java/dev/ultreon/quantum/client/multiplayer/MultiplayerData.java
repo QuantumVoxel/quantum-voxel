@@ -44,6 +44,7 @@ public class MultiplayerData {
         player.setName(name);
         player.setPosition(position);
         this.remotePlayers.put(uuid, player);
+        this.client.world.addEntity(player);
         return player;
     }
 
@@ -52,7 +53,8 @@ public class MultiplayerData {
         if (remotePlayer == null) return;
 
         QuantumClient.LOGGER.info("%s left the server.", remotePlayer.getName());
-        this.remotePlayers.remove(uuid);
+        RemotePlayer remove = this.remotePlayers.remove(uuid);
+        this.client.world.removeEntity(remove.getId());
     }
 
     public void clear() {

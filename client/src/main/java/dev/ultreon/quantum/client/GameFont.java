@@ -45,6 +45,10 @@ public class GameFont extends Font {
         this.ascent = bmFont.getAscent();
 
         this.obliqueStrength = -0.5f;
+        this.underY += 3f;
+        this.strikeY -= 2f;
+        this.inlineImageOffsetY -= lineHeight;
+        this.inlineImageOffsetX -= lineHeight;
         update();
 
         GameFont.fonts.add(this);

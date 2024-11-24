@@ -1077,4 +1077,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public RegistryKey<DimensionInfo> getDimension() {
         return dimension;
     }
+
+    public void addEntity(Entity entity) {
+        if (entity.getId() == -1) throw new IllegalArgumentException("Entity ID not set");
+        this.entitiesById.put(entity.getId(), entity);
+    }
 }

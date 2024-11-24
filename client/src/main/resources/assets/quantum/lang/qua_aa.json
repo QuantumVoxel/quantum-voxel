@@ -123,7 +123,7 @@
   "quantum.screen.crash": "Quantum Voxel náta",
   "quantum.screen.crash.message": "Ávalcar carma perta ië nótië. Sië óta carma, áturë racina nótiëma carma/nótiëhóma ië carma.",
   "quantum.damageSource.none": "%s quorinë",
-  "quantum.damageSource.none.player": "%1$s quorinë an %2$s",
+  "quantum.damageSource.none.by": "%1$s quorinë an %2$s",
   "quantum.damageSource.hunger": "%1$s quorinë na málo",
   "quantum.ui.auto": "Automá",
   "quantum.ui.manual": "Macil",

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity.damagesource;
 
 import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.entity.LivingEntity;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
@@ -14,7 +15,7 @@ public class DamageSource {
     public static final DamageSource VOID = DamageSource.register(new NamespaceID("void"), new DamageSource().byPassInvincibility(true));
     public static final DamageSource KILL = DamageSource.register(new NamespaceID("kill"), new DamageSource().byPassInvincibility(true));
     public static final DamageSource HUNGER = DamageSource.register(new NamespaceID("hunger"), new DamageSource());
-    public static final DamageSource PLAYER = DamageSource.register(new NamespaceID("player"), new DamageSource());
+    public static final DamageSource ATTACK = DamageSource.register(new NamespaceID("attack"), new DamageSource());
     public static final DamageSource SUFFOCATION = DamageSource.register(new NamespaceID("suffocation"), new DamageSource());
     public static final DamageSource IN_SPACE = DamageSource.register(new NamespaceID("in_space"), new DamageSource());
 
@@ -34,6 +35,10 @@ public class DamageSource {
         if (type == null) return Formatter.format("[light red]NULL</>");
         if (entity == null) return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), Formatter.format("[light red]NULL</>"));
         TextObject displayName = entity.getDisplayName();
+        if (entity instanceof LivingEntity livingEntity) {
+            Entity lastAttacker = livingEntity.getLastAttacker();
+            return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", ".") + ".by", displayName, lastAttacker.getDisplayName());
+        }
         return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), displayName);
     }
 

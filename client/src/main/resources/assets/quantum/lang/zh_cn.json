@@ -136,14 +136,14 @@
   "quantum.commands.player.dumpData.success": "导出玩家数据：",
 
   "quantum.damageSource.kill": "%s 被杀死了",
-  "quantum.damageSource.kill.player": "%1$s 被 %2$s 杀死了",
+  "quantum.damageSource.kill.by": "%1$s 被 %2$s 杀死了",
   "quantum.damageSource.kill.item": "%1$s 被 %2$s 用 %3$s 杀死了",
   "quantum.damageSource.falling": "%s 从高处跌落而死",
-  "quantum.damageSource.falling.player": "%1$s 被 %2$s 推下高处而死",
+  "quantum.damageSource.falling.by": "%1$s 被 %2$s 推下高处而死",
   "quantum.damageSource.void": "%s 被虚空吞噬了",
-  "quantum.damageSource.void.player": "%1$s 被 %2$s 推入虚空而死",
+  "quantum.damageSource.void.by": "%1$s 被 %2$s 推入虚空而死",
   "quantum.damageSource.none": "%s 离奇死亡",
-  "quantum.damageSource.none.player": "%1$s 离奇死亡，原因是 %2$s",
+  "quantum.damageSource.none.by": "%1$s 离奇死亡，原因是 %2$s",
   "quantum.damageSource.hunger": "%1$s 饿死了",
 
   "quantum.ui.auto": "自动",
