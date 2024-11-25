@@ -9,7 +9,6 @@ import com.jagrosh.discordipc.exceptions.NoDiscordClientException;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import org.apache.commons.collections4.BagUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
@@ -75,7 +74,7 @@ public class DiscordRPC implements RpcHandler {
                             .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
-                            .setJoinSecret(quantumClient.serverData.address());
+                            .setJoinSecret(quantumClient.serverInfo.address());
                 }
 
                 builder.setJoinSecret("hello_world");
@@ -117,7 +116,7 @@ public class DiscordRPC implements RpcHandler {
                             .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
-                            .setJoinSecret(QuantumClient.get().serverData.address());
+                            .setJoinSecret(QuantumClient.get().serverInfo.address());
                 }
 
                 // Send the updated Rich Presence to the Discord client.

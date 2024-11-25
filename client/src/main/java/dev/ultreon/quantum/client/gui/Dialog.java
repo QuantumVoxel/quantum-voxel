@@ -28,7 +28,7 @@ public class Dialog extends UIContainer<Dialog> {
     private final Rectangle contentBounds = new Rectangle();
     private final Rectangle titleBounds = new Rectangle();
 
-    Dialog(Screen parent) {
+    protected Dialog(Screen parent) {
         super(200, 100);
         parent.defineRoot(this);
         this.defineRoot(this.closeButton);
@@ -145,12 +145,12 @@ public class Dialog extends UIContainer<Dialog> {
     }
 
     @Override
-    public boolean keyPress(int keyCode) {
+    public boolean keyRelease(int keyCode) {
         if (keyCode == Input.Keys.ESCAPE) {
             this.close();
             return true;
         }
 
-        return super.keyPress(keyCode);
+        return super.keyRelease(keyCode);
     }
 }

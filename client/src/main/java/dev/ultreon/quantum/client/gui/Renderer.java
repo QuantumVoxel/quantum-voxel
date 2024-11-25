@@ -2948,6 +2948,13 @@ public class Renderer implements Disposable {
 
         this.blurred = true;
         try {
+
+            if (blurTargetA != null) blurTargetA.dispose();
+            if (blurTargetB != null) blurTargetB.dispose();
+
+            blurTargetA = new FrameBuffer(Format.RGBA8888, getWidth(), getHeight(), false);
+            blurTargetB = new FrameBuffer(Format.RGBA8888, getWidth(), getHeight(), false);
+
             TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
 
             //Start rendering to an offscreen color buffer
@@ -3014,7 +3021,7 @@ public class Renderer implements Disposable {
             //draw target B to the screen with a vertical blur effect
             fboRegion.setTexture(blurTargetB.getColorBufferTexture());
             this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
+            batch.draw(fboRegion, 0, 0, getWidth(), getHeight());
 
             //reset to default shader without blurs
             batch.setShader(null);
@@ -3032,12 +3039,6 @@ public class Renderer implements Disposable {
     public void resize(int width, int height) {
         this.width = width;
         this.height = height;
-
-        if (blurTargetA != null) blurTargetA.dispose();
-        if (blurTargetB != null) blurTargetB.dispose();
-
-        blurTargetA = new FrameBuffer(Format.RGBA8888, width, height, false);
-        blurTargetB = new FrameBuffer(Format.RGBA8888, width, height, false);
     }
 
     @Override
@@ -3049,11 +3050,11 @@ public class Renderer implements Disposable {
     }
 
     public int getWidth() {
-        return QuantumClient.get().getWidth();
+        return (int) (QuantumClient.get().getWidth() / matrices.getScale(tmp2A).x);
     }
 
     public int getHeight() {
-        return QuantumClient.get().getHeight();
+        return (int) (QuantumClient.get().getHeight() / matrices.getScale(tmp2A).y);
     }
 
     public boolean isBlurred() {

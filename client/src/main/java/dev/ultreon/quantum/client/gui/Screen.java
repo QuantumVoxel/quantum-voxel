@@ -418,9 +418,7 @@ public abstract class Screen extends UIContainer<Screen> {
 
     @Override
     public boolean keyPress(int keyCode) {
-        if (this.dialog != null) {
-            return this.dialog.keyPress(keyCode);
-        }
+        if (this.dialog != null) return this.dialog.keyPress(keyCode);
 
         if (this.focused != null) {
             if (this.focused.keyPress(keyCode)) return true;
@@ -431,9 +429,7 @@ public abstract class Screen extends UIContainer<Screen> {
 
     @Override
     public boolean keyRelease(int keyCode) {
-        if (this.dialog != null) {
-            return this.dialog.keyRelease(keyCode);
-        }
+        if (this.dialog != null) return this.dialog.keyRelease(keyCode);
 
         if (keyCode == Input.Keys.ESCAPE && this.canCloseWithEsc()) {
             Gdx.app.postRunnable(this::back);
@@ -468,6 +464,13 @@ public abstract class Screen extends UIContainer<Screen> {
         this.mouseExit();
 
         this.dialog = message.build();
+        this.dialog.init();
+    }
+
+    public void showDialog(Dialog dialog) {
+        this.mouseExit();
+
+        this.dialog = dialog;
         this.dialog.init();
     }
 

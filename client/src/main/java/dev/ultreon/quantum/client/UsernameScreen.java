@@ -43,6 +43,10 @@ public class UsernameScreen extends Screen {
 
                     assert this.client != null;
                     this.client.setUser(new User(usernameInput.getValue()));
+
+                    this.client.localData.username = usernameInput.getValue();
+                    this.client.localData.save();
+
                     this.client.showScreen(new TitleScreen());
                 }));
         nextButton.setPos(this.size.width / 2 + 2, this.size.height / 2 + 26);

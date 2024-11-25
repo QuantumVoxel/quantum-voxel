@@ -14,10 +14,10 @@ public enum GameActivity {
     SINGLEPLAYER("Playing singleplayer"),
     MULTIPLAYER("Playing multiplayer", () -> {
         QuantumClient client = QuantumClient.get();
-        if (client.serverData == null || ClientConfig.hideActiveServerFromRPC) {
+        if (client.serverInfo == null || ClientConfig.hideActiveServerFromRPC) {
             return null;
         }
-        return "On " + client.serverData.name();
+        return "On " + client.serverInfo.name();
     });
 
     private final String displayName;

@@ -212,7 +212,17 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
                 if (widget.ignoreBounds && widget.mousePress(mouseX, mouseY, button)) return true;
                 continue;
             }
-            if (widget.isWithinBounds(mouseX, mouseY) && widget.mousePress(mouseX, mouseY, button)) return true;
+            if (widget.isWithinBounds(mouseX, mouseY)) {
+                if (focused != widget && focused != null) focused.onFocusLost();
+                this.focused = widget;
+                root.focused = widget;
+                widget.setFocused(true);
+                widget.onFocusGained();
+
+                if (widget.mousePress(mouseX, mouseY, button)) {
+                    return true;
+                }
+            }
         }
         return super.mousePress(mouseX, mouseY, button);
     }

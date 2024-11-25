@@ -238,6 +238,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public SceneCategory worldCat = new SceneCategory();
     public SceneCategory mainCat = new SceneCategory();
 
+    // Local data
+    public LocalData localData = LocalData.load();
+
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
     // Cursors
@@ -283,7 +286,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Multiplayer stuff
     public IConnection<ClientPacketHandler, ServerPacketHandler> connection;
-    public ServerData serverData;
+    public ServerInfo serverInfo;
     private MultiplayerData multiplayerData;
 
     // Local user
@@ -551,6 +554,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
         FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
+
+        if (this.localData.username != null) {
+            this.user = new User(this.localData.username);
+        }
 
         // Initialize the unifont and font
         this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
