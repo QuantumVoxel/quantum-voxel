@@ -1535,9 +1535,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             QuantumClient.crashHook = null;
 
             QuantumClient.invoke(() -> {
-                this.screen = this.crashes.isEmpty() ? new DevPreviewScreen() : new CrashScreen(this.crashes);
-                this.screen.init(this.getScaledWidth(), this.getScaledHeight());
-                this.loadingOverlay = null;
+                if (crashes.isEmpty()) {
+                    screen = new DevPreviewScreen(user == null ? new UsernameScreen() : null);
+                } else {
+                    screen = new CrashScreen(crashes);
+                }
+
+                screen.init(getScaledWidth(), getScaledHeight());
+                loadingOverlay = null;
             }).exceptionally(throwable -> {
                 crash(throwable);
                 return null;

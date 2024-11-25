@@ -33,11 +33,9 @@ import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
-import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -691,7 +689,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public void onMessageSent(String message) {
         for (ServerPlayer player : this.server.getPlayers()) {
-            player.sendMessage(new Formatter(true, true, "[cyan]<" + this.getName() + "> [white]" + message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
+            player.sendMessage("[cyan]<" + this.getName() + "> [white]" + message);
         }
     }
 
@@ -702,7 +700,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     @Override
     public void sendMessage(@NotNull String message) {
-        this.sendMessage(new Formatter(true, true, message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE).parse().getResult());
+        this.sendMessage(TextObject.literal(message));
     }
 
     @Override

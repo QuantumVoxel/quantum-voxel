@@ -40,7 +40,10 @@ public class LocalData {
     public static LocalData load() {
         LocalData localData = new LocalData();
         FileHandle data = QuantumClient.data("localdata.ubo");
-        if (!data.exists()) return localData;
+        if (!data.exists()) {
+            QuantumClient.LOGGER.debug("No local data found, creating new one");
+            return localData;
+        }
         try {
             MapType mapType = DataIo.read(data.read());
             localData.username = mapType.getString("username");

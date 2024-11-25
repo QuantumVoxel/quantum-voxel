@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.text;
 
-import com.badlogic.gdx.utils.Array;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
@@ -30,14 +29,7 @@ public class LiteralText extends MutableText {
 
     @Override
     public @NotNull String createString() {
-        String prefix = "";
-        prefix += "[%%%d00]".formatted(getSize());
-        if (this.isBold()) prefix += "[*]";
-        if (this.isItalic()) prefix += "[/]";
-        if (this.isUnderlined()) prefix += "[_]";
-        if (this.isStrikethrough()) prefix += "[~]";
-        prefix += "[#%06x]".formatted((this.getColor().getRed() & 0xff) << 16 | (this.getColor().getGreen() & 0xff) << 8 | this.getColor().getBlue() & 0xff);
-        return prefix + this.text;
+        return this.text;
     }
 
     @Override
