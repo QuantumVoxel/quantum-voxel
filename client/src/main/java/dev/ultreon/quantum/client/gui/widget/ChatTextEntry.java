@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
@@ -12,6 +13,7 @@ import static com.badlogic.gdx.Input.Keys.*;
 public class ChatTextEntry extends TextEntry {
     private final ChatScreen screen;
     private final TabCompletePopup popup = new TabCompletePopup(0, 0);
+    private final Color backgroundColor = new Color(0, 0, 0, 1f);
     private int completeX = -1;
 
     public ChatTextEntry(ChatScreen screen) {
@@ -89,7 +91,7 @@ public class ChatTextEntry extends TextEntry {
         }
 
         boolean b = super.charType(character);
-        if (b && this.popup.visible) {
+        if (b) {
             String value = this.revalidateCompleteX();
             this.client.connection.send(new C2SRequestTabComplete(value));
         }
@@ -122,7 +124,11 @@ public class ChatTextEntry extends TextEntry {
 
     @Override
     public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, this.backgroundColor);
+
+        if (renderer.pushScissors(this.getBounds().shrink(1, 1, 1, 4))) {
+            renderText(renderer);
+        }
 
         this.popup.y = this.getY();
         this.popup.render(renderer, mouseX, mouseY, deltaTime);

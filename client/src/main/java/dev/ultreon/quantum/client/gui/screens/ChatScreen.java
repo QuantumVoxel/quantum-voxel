@@ -81,6 +81,15 @@ public class ChatScreen extends Screen {
         super.renderWidget(renderer, mouseX, mouseY, deltaTime);
     }
 
+    @Override
+    protected void renderTransparentBackground(Renderer renderer) {
+        /*
+         Do not render the transparent background, just pass through the game directly.
+         If we remove the blur, people can see what they're chatting about.
+         No need to get some glasses :P
+        */
+    }
+
     public void send() {
         var input = this.entry.getValue();
         if (input.startsWith("/")) {

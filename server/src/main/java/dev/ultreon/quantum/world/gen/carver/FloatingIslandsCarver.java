@@ -24,8 +24,8 @@ public class FloatingIslandsCarver implements Carver {
     @Override
     public int carve(BuilderChunk chunk, int x, int z) {
         BlockVec offset = chunk.getOffset();
-        for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
-            double noise = this.source.evaluateNoise(x, y, z);
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            double noise = this.source.evaluateNoise(x, offset.y + y, z);
             if (noise > 0.7) {
                 chunk.set(x, y, z, Blocks.COBBLESTONE.getDefaultState());
             }

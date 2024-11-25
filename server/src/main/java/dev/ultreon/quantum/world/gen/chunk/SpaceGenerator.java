@@ -7,7 +7,6 @@ import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.carver.Carver;
 import dev.ultreon.quantum.world.gen.carver.FloatingIslandsCarver;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
@@ -34,13 +33,11 @@ public class SpaceGenerator extends SimpleChunkGenerator {
 
     @Override
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
-        BlockVec offset = chunk.getOffset();
-
-        for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
-            for (int z = offset.z; z < offset.z + CHUNK_SIZE; z++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
                 carver.carve(chunk, x, z);
 
-                for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
+                for (int y = 0; y < CHUNK_SIZE; y++) {
                     // Set biomes to registry key "quantum:space"
                     chunk.setBiomeGenerator(x, z, space);
                 }

@@ -2000,7 +2000,7 @@ public class ServerWorld extends World {
             }
 
             synchronized (this) {
-                // Check if region already exists, if so, then throw an error.
+                // Check if a region already exists, if so, then throw an error.
                 var oldRegion = this.regions.get(regionPos);
                 if (oldRegion != null) {
                     throw new OverwriteError(String.format("Tried to overwrite region %s", regionPos));

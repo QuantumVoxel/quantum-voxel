@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
-import com.github.tommyettinger.textra.Font;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -12,6 +11,10 @@ import dev.ultreon.quantum.util.RgbColor;
 import it.unimi.dsi.fastutil.longs.LongList;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,12 +42,12 @@ public class ChatOverlay extends Overlay {
                 long millisAgo = System.currentTimeMillis() - messageTimestamp;
                 if (millisAgo <= 4000 || showAnyways) {
                     if (millisAgo <= 3000 || showAnyways) {
-                        renderer.textLeft(text, 10, y, RgbColor.WHITE);
+                        renderer.textLeft("[lighter red][[[gold]" + DateTimeFormatter.ISO_TIME.format(LocalDateTime.ofInstant(Instant.ofEpochSecond(messageTimestamp / 1000), ZoneId.systemDefault())) + "[lighter red]] [ ]" + text, 10, y, RgbColor.WHITE);
                     } else {
                         int alpha = (int) (255 * (millisAgo - 3000) / 1000) % 1000;
                         renderer.setColor(RgbColor.WHITE.withAlpha(alpha));
                         renderer.setBlitColor(RgbColor.WHITE.withAlpha(alpha));
-                        renderer.textLeft(text, 10, y);
+                        renderer.textLeft("[lighter red][[[gold]" + DateTimeFormatter.ISO_TIME.format(LocalDateTime.ofInstant(Instant.ofEpochSecond(messageTimestamp / 1000), ZoneId.systemDefault())) + "[lighter red]] [ ]" + text, 10, y);
                         renderer.setColor(RgbColor.WHITE);
                         renderer.setBlitColor(RgbColor.WHITE);
                     }
