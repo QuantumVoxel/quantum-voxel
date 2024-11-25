@@ -22,7 +22,7 @@ public final class Blocks {
     public static final Block CAVE_AIR = Blocks.register("cave_air", new Block(new Properties().replaceable().noCollision().noRendering().transparent()));
     public static final Block BARRIER = Blocks.register("barrier", new Block(new Properties().soundType(SoundType.STONE).transparent().noRendering()));
     public static final Block ERROR = Blocks.register("error", new Block(new Properties().soundType(SoundType.STONE)));
-    public static final Block GRASS_BLOCK = Blocks.register("grass_block", new Block(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT)));
+    public static final GrassBlock GRASS_BLOCK = Blocks.register("grass_block", new GrassBlock(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT).doRandomTick()));
     public static final Block DIRT = Blocks.register("dirt", new Block(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT)));
     public static final Block VOIDGUARD = Blocks.register("voidguard", new Block(new Properties().unbreakable().soundType(SoundType.STONE).effectiveTool(ToolType.PICKAXE).dropsItems(new ItemStack[0])));
     public static final Block SAND = Blocks.register("sand", new Block(new Properties().hardness(2.5F).soundType(SoundType.SAND).effectiveTool(ToolType.SHOVEL).dropsItems(Items.SAND)));
@@ -34,11 +34,11 @@ public final class Blocks {
     public static final Block LOG = Blocks.register("log", new Block(new Properties().hardness(2.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.LOG)));
     public static final Block PLANKS = Blocks.register("planks", new Block(new Properties().hardness(2.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.PLANKS)));
     public static final Block PLANKS_SLAB = Blocks.register("planks_slab", new SlabBlock(new Properties().hardness(2.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.PLANKS)));
-    public static final Block LEAVES = Blocks.register("leaves", new Block(new Properties().transparent().hardness(0.2F).soundType(SoundType.GRASS).noCollision().lightReduction(2)));
+    public static final LeavesBlock LEAVES = Blocks.register("leaves", new LeavesBlock(new Properties().transparent().hardness(0.2F).soundType(SoundType.GRASS).noCollision().lightReduction(2)));
     public static final Block CRATE = Blocks.register("crate", new CrateBlock(new Properties().hardness(2.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).usesCustomRender().dropsItems(Items.CRATE)));
-    public static final Block CRAFTING_BENCH = Blocks.register("crafting_bench", new WorkbenchBlock(new Properties().hardness(3.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
+    public static final WorkbenchBlock CRAFTING_BENCH = Blocks.register("crafting_bench", new WorkbenchBlock(new Properties().hardness(3.0F).soundType(SoundType.WOOD).effectiveTool(ToolType.AXE).dropsItems(Items.CRAFTING_BENCH)));
     public static final Block TALL_GRASS = Blocks.register("tall_grass", new Block(new Properties().noOcclude().replaceable().transparent().noCollision().usesCustomRender().dropsItems(new RandomLoot(new RandomLoot.ChanceLootEntry(0.4f, Items.GRASS_FIBRE)))));
-    public static final Block CACTUS = Blocks.register("cactus", new CactusBlock(new Properties().noOcclude().usesCustomRender().dropsItems(Items.CACTUS)));
+    public static final CactusBlock CACTUS = Blocks.register("cactus", new CactusBlock(new Properties().noOcclude().usesCustomRender().dropsItems(Items.CACTUS)));
     public static final Block BLAST_FURNACE = Blocks.register("blast_furnace", new BlastFurnaceBlock(new Properties().hardness(12.0F).effectiveTool(ToolType.PICKAXE).requiresTool().dropsItems(Items.BLAST_FURNACE)));
     public static final Block IRON_ORE = Blocks.register("iron_ore", new Block(new Properties().hardness(3.0F).soundType(SoundType.STONE).effectiveTool(ToolType.PICKAXE).toolRequirement(ToolLevel.STONE).requiresTool().dropsItems(Items.IRON_ORE)));
     public static final Block SNOWY_GRASS_BLOCK = Blocks.register("snowy_grass_block", new Block(new Properties().hardness(3F).soundType(SoundType.SNOW).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT, Items.SNOW_BALL)));

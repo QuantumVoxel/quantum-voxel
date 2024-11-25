@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.ubo.DataKeys;
+import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import org.apache.commons.lang3.ArrayUtils;
@@ -15,10 +16,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 /**
  * <p>Palette storage is used for storing data in palettes.
@@ -292,5 +295,33 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     public boolean isUniform() {
         return data.size <= 1;
+    }
+
+    @Override
+    public D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
+        if (this.data.size == 0) return null;
+
+        List<D> list = Arrays.stream(this.data.toArray()).filter(predicate).toList();
+        if (list.isEmpty()) return null;
+
+        int[] realIndexes = findIndexes(this.palette, list);
+        int rand = realIndexes[rng.nextInt(realIndexes.length)];
+        integer.set(rand);
+        return get(rand);
+    }
+
+    private int[] findIndexes(short[] arr, List<D> val) {
+        int[] indexes = new int[arr.length];
+        int count = 0;
+        int i = 0;
+
+        // Find all indexes from 0 to val.size() in the palette
+        for (short v : arr) {
+            if (v < 0 || v >= val.size()) continue;
+            indexes[i++] = v;
+            count++;
+        }
+
+        return Arrays.copyOf(indexes, count);
     }
 }

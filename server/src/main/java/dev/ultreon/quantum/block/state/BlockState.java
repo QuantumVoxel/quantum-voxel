@@ -9,6 +9,7 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.loot.LootGenerator;
@@ -488,5 +489,13 @@ public class BlockState {
 
     public Object get(int i) {
         return entries[i];
+    }
+
+    public void randomTick(ServerChunk chunk, BlockVec position) {
+        block.randomTick(chunk.getWorld(), position, this);
+    }
+
+    public boolean doesRandomTick() {
+        return block.doesRandomTick();
     }
 }

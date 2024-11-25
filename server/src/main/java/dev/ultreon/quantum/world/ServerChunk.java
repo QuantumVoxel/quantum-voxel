@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -15,6 +17,7 @@ import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.SanityCheckException;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -26,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 import static dev.ultreon.quantum.world.World.LOGGER;
@@ -47,6 +51,7 @@ public final class ServerChunk extends Chunk {
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
     private long trackDuration = 10000L;
+    private final AtomicInteger rTick = new AtomicInteger(0);
 
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
@@ -231,5 +236,33 @@ public final class ServerChunk extends Chunk {
 
     public void stopTracking(ServerPlayer serverPlayer) {
         this.tracker.stopTracking(serverPlayer);
+    }
+
+    public boolean randomTick() {
+        BlockState random = this.storage.getRandom(CommonConstants.RANDOM, rTick, BlockState::doesRandomTick);
+        if (random == null) return false;
+        if (!random.doesRandomTick()) throw new SanityCheckException("Block state does not randomly tick");
+
+        int index = rTick.get();
+
+
+        // Calculate x, y, and z
+        int randX = index % CHUNK_SIZE;
+        int randYZ = index / CHUNK_SIZE;
+        int randY = randYZ % CHUNK_SIZE;
+        int randZ = randYZ / CHUNK_SIZE;
+
+        if (GamePlatform.get().isDevEnvironment()) {
+            BlockState blockState = this.get(randX, randY, randZ);
+            if (blockState != random)
+                throw new SanityCheckException("Block state is not the same as the random tick block state");
+        }
+
+        random.randomTick(this, getVec().blockInWorldSpace(new BlockVec(randX, randY, randZ, BlockVecSpace.CHUNK)));
+        return true;
+    }
+
+    public boolean isEmpty() {
+        return this.storage.isUniform() && this.storage.get(0).isAir();
     }
 }

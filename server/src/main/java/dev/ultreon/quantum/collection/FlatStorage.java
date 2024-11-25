@@ -3,6 +3,7 @@ package dev.ultreon.quantum.collection;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.DataKeys;
+import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
 import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;
@@ -12,9 +13,11 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class FlatStorage<D> implements Storage<D> {
@@ -169,5 +172,10 @@ public class FlatStorage<D> implements Storage<D> {
     @Override
     public boolean isUniform() {
         return false;
+    }
+
+    @Override
+    public D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
+        throw new UnsupportedOperationException();
     }
 }

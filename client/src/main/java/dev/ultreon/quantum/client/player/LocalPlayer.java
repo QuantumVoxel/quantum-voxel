@@ -70,6 +70,8 @@ public class LocalPlayer extends ClientPlayer {
         super(entityType, world);
         this.world = world;
         this.setUuid(uuid);
+
+        this.health = this.getMaxHealth();
     }
 
     /**

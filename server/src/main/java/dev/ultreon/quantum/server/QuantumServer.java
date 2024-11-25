@@ -98,6 +98,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * and simulation software to ensure smooth and consistent updates.
      */
     public static final int TPS = 20;
+    public static final int MSPT = 1000 / TPS;
 
     public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
     public static final long NANOSECONDS_PER_TICK = QuantumServer.NANOSECONDS_PER_SECOND / QuantumServer.TPS;

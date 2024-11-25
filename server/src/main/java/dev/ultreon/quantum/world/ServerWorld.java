@@ -31,6 +31,7 @@ import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.gen.FeatureData;
 import dev.ultreon.quantum.world.gen.StructureData;
@@ -67,7 +68,7 @@ import java.util.zip.GZIPInputStream;
  * It contains methods to manipulate and query chunks, blocks, and other
  * world data.
  */
-public class ServerWorld extends World {
+public class ServerWorld extends World implements Audience {
     private final WorldStorage storage;
     private final ChunkGenerator generator;
     private final QuantumServer server;
@@ -94,6 +95,8 @@ public class ServerWorld extends World {
     private final FeatureData featureData = new FeatureData();
     private final StructureData structureData = new StructureData();
 
+    private final RandomTicker randomTicker;
+
     public ServerWorld(QuantumServer server, RegistryKey<DimensionInfo> key, WorldStorage storage, ChunkGenerator generator, long seed, MapType worldData) {
         super(seed);
 
@@ -104,6 +107,9 @@ public class ServerWorld extends World {
         this.generator = generator;
 
         this.load(worldData);
+
+        this.randomTicker = new RandomTicker(this, QuantumServer.MSPT * 10);
+        this.randomTicker.start();
 
         NoiseConfigs noiseConfigs = server.getNoiseConfigs();
         final var biomeDomain = new DomainWarping(noiseConfigs.biomeX.create(this.seed), noiseConfigs.biomeY.create(this.seed));
@@ -525,6 +531,7 @@ public class ServerWorld extends World {
         }
     }
 
+    @Override
     @SuppressWarnings("GDXJavaUnsafeIterator")
     public void tick() {
         this.playTime++;
@@ -831,10 +838,11 @@ public class ServerWorld extends World {
         var saveSchedule = this.saveSchedule;
         if (saveSchedule != null) saveSchedule.cancel(true);
         this.saveExecutor.shutdownNow();
+
         super.dispose();
 
         this.generator.dispose();
-
+        this.randomTicker.dispose();
         this.regionStorage.dispose();
     }
 
@@ -1379,6 +1387,33 @@ public class ServerWorld extends World {
         return featureData;
     }
 
+    @Override
+    public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
+        for (ServerPlayer player : getServer().getPlayers()) {
+            if (player.getWorld() == this) {
+                player.sendPacket(packet);
+            }
+        }
+    }
+
+    @Override
+    public void sendMessage(String message) {
+        for (ServerPlayer player : getServer().getPlayers()) {
+            if (player.getWorld() == this) {
+                player.sendMessage(message);
+            }
+        }
+    }
+
+    @Override
+    public void sendMessage(TextObject message) {
+        for (ServerPlayer player : getServer().getPlayers()) {
+            if (player.getWorld() == this) {
+                player.sendMessage(message);
+            }
+        }
+    }
+
     /**
      * The region class.
      * Note: This class is not thread safe.
@@ -1431,7 +1466,7 @@ public class ServerWorld extends World {
          * @return all loaded chunks within the region.
          */
         public Collection<ServerChunk> getChunks() {
-            return List.copyOf(this.chunks.values());
+            return this.chunks.values().stream().filter(chunk -> activeChunks.contains(chunk.getVec())).collect(Collectors.toList());
         }
 
         /**

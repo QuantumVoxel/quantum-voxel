@@ -1,11 +1,14 @@
 package dev.ultreon.quantum.collection;
 
 import dev.ultreon.quantum.network.PacketIO;
+import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.ubo.types.MapType;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 public interface Storage<D> extends Cloneable {
 
@@ -27,4 +30,6 @@ public interface Storage<D> extends Cloneable {
     Storage<D> clone();
 
     boolean isUniform();
+
+    D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate);
 }

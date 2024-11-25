@@ -51,8 +51,9 @@ public class Block {
     private final @Nullable ToolLevel toolLevel;
     private final int lightReduction;
     private final SoundType soundType;
-    private BlockState defaultState;
-    private BlockStateDefinition definition;
+    private final BlockState defaultState;
+    private final BlockStateDefinition definition;
+    private final boolean doesRandomTick;
 
     /**
      * Constructs a new Block object with default properties.
@@ -89,6 +90,7 @@ public class Block {
         this.toolLevel = properties.toolLevel;
         this.lightReduction = properties.lightReduction;
         this.soundType = properties.soundType;
+        this.doesRandomTick = properties.doesRandomTick;
 
         this.definition = new BlockStateDefinition(this);
         this.defineState(getDefinition());
@@ -375,6 +377,21 @@ public class Block {
     }
 
     /**
+     * This method is called randomly by the {@link RandomTicker} class to perform a random tick on the block.
+     *
+     * @param world      the world where the block is being ticked
+     * @param position   the position of the block
+     * @param blockState the current state of the block
+     */
+    public void randomTick(@NotNull ServerWorld world, BlockVec position, BlockState blockState) {
+        // To be implemented
+    }
+
+    public boolean doesRandomTick() {
+        return doesRandomTick;
+    }
+
+    /**
      * The Properties class defines the configurable attributes for a block.
      * These properties allow customization of various aspects such as sound type, hardness,
      * collision behavior, tool effectiveness, and rendering properties.
@@ -396,6 +413,7 @@ public class Block {
         private boolean disableRendering = false;
         private int lightReduction = 15;
         private @Nullable ToolLevel toolLevel = null;
+        private boolean doesRandomTick;
 
         public @This Properties soundType(SoundType soundType) {
             this.soundType = soundType;
@@ -496,6 +514,11 @@ public class Block {
         public Properties toolRequirement(@NotNull ToolLevel toolLevel) {
             this.requiresTool();
             this.toolLevel = toolLevel;
+            return this;
+        }
+
+        public Properties doRandomTick() {
+            this.doesRandomTick = true;
             return this;
         }
     }
