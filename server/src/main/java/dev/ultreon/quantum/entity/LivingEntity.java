@@ -460,7 +460,7 @@ public abstract class LivingEntity extends Entity {
         return temperature;
     }
 
-    public Entity getLastAttacker() {
+    public @Nullable Entity getLastAttacker() {
         return lastAttacker;
     }
 

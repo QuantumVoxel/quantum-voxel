@@ -1,8 +1,10 @@
 package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.server.QuantumServer;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -22,7 +24,6 @@ public class RandomTicker implements Disposable {
 
     private void randomTick() {
         // TODO: Make this work without breaking the breaking coordinates de-indexation.
-        /*
         List<ServerChunk> loadedChunks = List.copyOf(world.getLoadedChunks());
         if (loadedChunks.isEmpty()) return;
         int i = CommonConstants.RANDOM.nextInt(loadedChunks.size());
@@ -31,7 +32,6 @@ public class RandomTicker implements Disposable {
         if (serverChunk.isEmpty()) return;
 
         serverChunk.randomTick();
-        */
     }
 
     @Override

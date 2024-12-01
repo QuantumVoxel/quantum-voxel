@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
-import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
@@ -138,9 +137,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private void setupParticles() {
-        BillboardParticleBatch billboardParticleBatch = new BillboardParticleBatch();
-        billboardParticleBatch.setCamera(this.client.camera);
-        this.particleSystem.add(billboardParticleBatch);
+//        BillboardParticleBatch billboardParticleBatch = new BillboardParticleBatch();
+//        billboardParticleBatch.setCamera(this.client.camera);
+//        this.particleSystem.add(billboardParticleBatch);
     }
 
     private void setupEnvironment() {

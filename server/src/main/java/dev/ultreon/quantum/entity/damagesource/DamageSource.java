@@ -37,6 +37,8 @@ public class DamageSource {
         TextObject displayName = entity.getDisplayName();
         if (entity instanceof LivingEntity livingEntity) {
             Entity lastAttacker = livingEntity.getLastAttacker();
+            if (lastAttacker == null)
+                return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), displayName);
             return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", ".") + ".by", displayName, lastAttacker.getDisplayName());
         }
         return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), displayName);

@@ -9,6 +9,8 @@ import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.ubo.types.ListType;
 import dev.ultreon.ubo.types.MapType;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -301,25 +303,32 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     public D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
         if (this.data.size == 0) return null;
 
-        List<D> list = Arrays.stream(this.data.toArray()).filter(predicate).toList();
+        IntList list = new IntArrayList();
+        D[] array = this.data.toArray();
+        for (int i = 0, arrayLength = array.length; i < arrayLength; i++) {
+            D d = array[i];
+            if (d == null || !predicate.test(d)) continue;
+            list.add(i);
+        }
         if (list.isEmpty()) return null;
 
-        int[] realIndexes = findIndexes(this.palette, list);
+        int[] realIndexes = findIndexes(this.palette, list.toIntArray());
         int rand = realIndexes[rng.nextInt(realIndexes.length)];
         integer.set(rand);
         return get(rand);
     }
 
-    private int[] findIndexes(short[] arr, List<D> val) {
+    private int[] findIndexes(short[] arr, int[] val) {
         int[] indexes = new int[arr.length];
         int count = 0;
         int i = 0;
 
         // Find all indexes from 0 to val.size() in the palette
         for (short v : arr) {
-            if (v < 0 || v >= val.size()) continue;
-            indexes[i++] = v;
-            count++;
+            if (ArrayUtils.contains(val, v)) {
+                indexes[i++] = v;
+                count++;
+            }
         }
 
         return Arrays.copyOf(indexes, count);
