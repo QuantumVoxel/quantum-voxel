@@ -161,7 +161,7 @@ public class IntegratedServer extends QuantumServer {
 
     @Override
     public int getRenderDistance() {
-        return ClientConfig.renderDistance / CHUNK_SIZE;
+        return ClientConfig.renderDistance;
     }
 
     @Override
