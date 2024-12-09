@@ -195,6 +195,7 @@ public class InventoryScreen extends ContainerScreen {
             ItemSlot slot = slots.get(i);
             if (slot.isWithinBounds(x - this.left(), y - this.top())) {
                 Recipe recipe = this.recipes.get(this.page, i);
+                if (recipe == null) return false;
                 this.client.connection.send(getPacket(recipe));
                 this.rebuildSlots();
                 return true;
