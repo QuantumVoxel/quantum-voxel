@@ -27,7 +27,7 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
 
     @Override
     protected void received(Packet<? extends ServerPacketHandler> packet, @Nullable PacketListener resultListener) {
-        QuantumServer.invokeAndWait(() -> {
+        QuantumServer.invoke(() -> {
             try {
                 super.received(packet, resultListener);
             } catch (Exception e) {

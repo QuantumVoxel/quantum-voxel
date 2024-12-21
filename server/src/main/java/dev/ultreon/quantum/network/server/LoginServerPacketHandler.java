@@ -3,6 +3,7 @@ package dev.ultreon.quantum.network.server;
 import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
+import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.api.packet.ModPacketContext;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -107,9 +108,10 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
             return server.getOverworld().getSpawnPoint();
         });
 
-        player.sendPacket(new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()));
-
-        connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(server, player, connection));
+        player.connection.send(
+                new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()),
+                PacketListener.onSuccess(() -> connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(server, player, connection)))
+        );
 
         server.placePlayer(player);
 

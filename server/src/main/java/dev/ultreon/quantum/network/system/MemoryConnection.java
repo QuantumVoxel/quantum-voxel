@@ -11,6 +11,7 @@ import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.SanityCheckException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -30,8 +31,8 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private PacketData<TheirHandler> theirPacketData;
     private boolean readOnly;
 
-    private final Queue<Packet<? extends TheirHandler>> sendQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<Packet<? extends OurHandler>> receiveQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = new ConcurrentLinkedQueue<>();
     private boolean loggingIn = true;
 
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
@@ -54,12 +55,13 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
         Thread sender = new Thread(() -> {
             while (true) {
-                Packet<? extends TheirHandler> packet = this.sendQueue.poll();
-                if (packet == null) continue;
+                PacketInstance<@NotNull Packet<? extends TheirHandler>> instance = this.sendQueue.poll();
+                if (instance == null) continue;
 
                 try {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     PacketIO io = new PacketIO(null, bos);
+                    Packet<? extends TheirHandler> packet = instance.packet();
                     packet.toBytes(io);
                     bos.close();
 
@@ -67,11 +69,21 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
                     int id = theirPacketData.getId(packet);
 
+                    if (instance.listener() != null) {
+                        instance.listener().onSuccess();
+                    }
+
                     this.otherSide.receive(id, bos.toByteArray());
                 } catch (IOException e) {
+                    if (instance.listener() != null) {
+                        instance.listener().onFailure();
+                    }
                     disconnect(e.getMessage());
                     throw new RuntimeException(e);
                 } catch (Exception e) {
+                    if (instance.listener() != null) {
+                        instance.listener().onFailure();
+                    }
                     disconnect(e.getClass().getName() + ":\n" + e.getMessage());
                     throw new RuntimeException(e);
                 }
@@ -111,6 +123,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @Override
     public void send(Packet<? extends TheirHandler> packet) {
+        send(packet, null);
+    }
+
+    @Override
+    public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
         if (otherSide == null || this.readOnly)
             throw new ReadOnlyConnectionException();
         final int id = theirPacketData.getId(packet);
@@ -118,19 +135,13 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
         tx.incrementAndGet();
-        this.sendQueue.add(packet);
+        this.sendQueue.add(new PacketInstance<>(packet, resultListener));
 
         if (sendQueue.size() >= 5000) {
             CrashLog crashLog = new CrashLog("Too many packets in send queue", new Throwable(":("));
             crashLog.add("Send queue size", sendQueue.size());
             throw new ApplicationCrash(crashLog);
         }
-    }
-
-    @Override
-    @Deprecated
-    public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
-        this.send(packet);
     }
 
     @Override

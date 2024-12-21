@@ -34,12 +34,13 @@ public class ChunkModel extends GameObject implements RenderableProvider {
     private final ClientChunk chunk;
     private final Material material;
     private final Material transparentMaterial;
+    private final WorldRenderer worldRenderer;
     @Nullable
-    private volatile Model model = null;
+    private Model model = null;
     @Nullable
-    private volatile ModelInstance modelInstance = null;
+    private ModelInstance modelInstance = null;
     @Nullable
-    private volatile ModelInstance gizmoInstance = null;
+    private ModelInstance gizmoInstance = null;
 
     private final Model[] lodModels = new Model[ClientConfig.lodLevels];
     private final Vector3 relativePosition = new Vector3();
@@ -53,73 +54,83 @@ public class ChunkModel extends GameObject implements RenderableProvider {
         this.transparentMaterial = renderer.getTransparentMaterial();
         this.pos = pos;
         this.chunk = chunk;
+        this.worldRenderer = renderer;
     }
 
     public boolean build() {
-        if (beingBuilt || model != null || modelInstance != null) return false;
+        if (beingBuilt || model != null || modelInstance != null) return true;
         generateModel();
+        chunk.dirty = false;
+        chunk.initialized = true;
         return true;
     }
 
     private void generateModel() {
-        try (var ignored = QuantumClient.PROFILER.start("build")) {
-            chunk.immediateRebuild = false;
-            this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
+        chunk.immediateRebuild = false;
+        this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
 
-            chunk.whileLocked(() -> {
-                if (modelInstance == null) {
-                    ChunkVec pos = chunk.getVec();
-                    ModelBuilder modelBuilder = new ModelBuilder();
-                    modelBuilder.begin();
+        this.beingBuilt = true;
+        CompletableFuture.runAsync(() -> {
+            if (modelInstance == null) {
+                ChunkVec pos = chunk.getVec();
+                ModelBuilder modelBuilder = QuantumClient.invokeAndWait(() -> {
+                    ModelBuilder builder = new ModelBuilder();
+                    builder.begin();
+                    return builder;
+                });
 
-                    this.beingBuilt = true;
 
-                    buildAsync(modelBuilder, pos);
-                    this.beingBuilt = false;
-                }
-                chunk.loadCustomRendered();
+                buildAsync(modelBuilder, pos);
+            }
+            QuantumClient.invokeAndWait(chunk::loadCustomRendered);
 
-                chunk.dirty = false;
+            chunk.dirty = false;
+            QuantumClient.invoke(() -> {
                 chunk.onUpdated();
                 chunk.initialized = true;
             });
-        }
+            this.beingBuilt = false;
+        }, worldRenderer.executor);
     }
 
     private void buildAsync(ModelBuilder modelBuilder, ChunkVec pos) {
         long millis = System.currentTimeMillis();
 
         if (chunk.isUniform()) {
-            var model = this.model = new Model();
-            this.modelInstance = new ModelInstance(model);
+            QuantumClient.invokeAndWait(() -> {
+                var model = this.model = new Model();
+                this.modelInstance = new ModelInstance(model);
+            });
             return;
         }
 
         try {
-            try (var ignored2 = QuantumClient.PROFILER.start("solid-mesh")) {
-                MeshBuilder meshBuilder = new MeshBuilder();
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                chunk.mesher.buildMesh(blk -> !blk.isTransparent(), meshBuilder);
-                Mesh end = QuantumClient.invokeAndWait(() -> meshBuilder.end());
+            MeshBuilder meshBuilder = new MeshBuilder();
+            QuantumClient.invokeAndWait(() -> meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES));
+            chunk.mesher.buildMesh(blk -> !blk.isTransparent(), meshBuilder);
+            QuantumClient.invokeAndWait(() -> {
+                Mesh end = meshBuilder.end();
                 modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
-            }
-
-            try (var ignored3 = QuantumClient.PROFILER.start("transparent-mesh")) {
-                MeshBuilder meshBuilder = new MeshBuilder();
                 meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-                chunk.mesher.buildMesh(Block::isTransparent, meshBuilder);
-                Mesh end2 = QuantumClient.invokeAndWait(() -> meshBuilder.end());
-                modelBuilder.part("generated/chunk_part_transparent", end2, GL_TRIANGLES, transparentMaterial);
-            }
+            });
+            chunk.mesher.buildMesh(Block::isTransparent, meshBuilder);
+            QuantumClient.invokeAndWait(() -> {
+                Mesh end = meshBuilder.end();
+                modelBuilder.part("generated/chunk_part_transparent", end, GL_TRIANGLES, transparentMaterial);
 
-            var model = this.model = QuantumClient.invokeAndWait(modelBuilder::end);
+                Model model = this.model;
+                if (model != null) {
+                    model.dispose();
+                }
 
-            if (this.model == null) {
-                throw new IllegalStateException("Failed to generate chunk model: " + pos);
-            }
+                model = this.model = modelBuilder.end();
+                if (this.model == null) {
+                    throw new IllegalStateException("Failed to generate chunk model: " + pos);
+                }
 
-            var modelInstance = this.modelInstance = new ModelInstance(model, 0, 0, 0);
-            modelInstance.userData = chunk;
+                var modelInstance = this.modelInstance = new ModelInstance(model, 0, 0, 0);
+                modelInstance.userData = chunk;
+            });
         } catch (Throwable t) {
             CrashLog crashLog = new CrashLog("Failed to generate chunk model: " + pos, t);
             CrashCategory category = new CrashCategory("Chunk Details");
@@ -158,10 +169,13 @@ public class ChunkModel extends GameObject implements RenderableProvider {
                 cachedTask.cancel(true);
             }
             task = null;
-            beingBuilt = false;
             return;
         }
 
+        internalUnload();
+    }
+
+    private void internalUnload() {
         try (var ignoredSection = QuantumClient.PROFILER.start("chunk-model-unload")) {
             Model model = this.model;
             if (model != null) {
@@ -173,9 +187,12 @@ public class ChunkModel extends GameObject implements RenderableProvider {
     }
 
     public boolean rebuild() {
-        if (model == null && modelInstance == null) return build();
-        unload();
-        return build();
+        if (beingBuilt || model != null || modelInstance != null) return false;
+        boolean build = build();
+        chunk.dirty = false;
+        chunk.onUpdated();
+        chunk.initialized = true;
+        return build;
     }
 
     @Override
@@ -207,6 +224,7 @@ public class ChunkModel extends GameObject implements RenderableProvider {
     }
 
     public void dispose() {
+        super.dispose();
         Model model = this.model;
         if (modelInstance != null) this.modelInstance = null;
         if (model != null) this.model = null;
@@ -222,51 +240,51 @@ public class ChunkModel extends GameObject implements RenderableProvider {
         return world.isChunkInvalidated(chunk);
     }
 
-	public static Lazy<Model> getGizmo() {
-		return gizmo;
-	}
+    public static Lazy<Model> getGizmo() {
+        return gizmo;
+    }
 
-	public ChunkVec getPos() {
-		return pos;
-	}
+    public ChunkVec getPos() {
+        return pos;
+    }
 
-	public ClientChunk getChunk() {
-		return chunk;
-	}
+    public ClientChunk getChunk() {
+        return chunk;
+    }
 
-	public Material getMaterial() {
-		return material;
-	}
+    public Material getMaterial() {
+        return material;
+    }
 
-	public Material getTransparentMaterial() {
-		return transparentMaterial;
-	}
+    public Material getTransparentMaterial() {
+        return transparentMaterial;
+    }
 
-	public @Nullable Model getModel() {
-		return model;
-	}
+    public @Nullable Model getModel() {
+        return model;
+    }
 
-	public @Nullable ModelInstance getModelInstance() {
-		return modelInstance;
-	}
+    public @Nullable ModelInstance getModelInstance() {
+        return modelInstance;
+    }
 
-	public @Nullable ModelInstance getGizmoInstance() {
-		return gizmoInstance;
-	}
+    public @Nullable ModelInstance getGizmoInstance() {
+        return gizmoInstance;
+    }
 
-	public Model[] getLodModels() {
-		return lodModels;
-	}
+    public Model[] getLodModels() {
+        return lodModels;
+    }
 
-	public Vector3 getRelativePosition() {
-		return relativePosition;
-	}
+    public Vector3 getRelativePosition() {
+        return relativePosition;
+    }
 
-	public boolean isBeingBuilt() {
-		return beingBuilt;
-	}
+    public boolean isBeingBuilt() {
+        return beingBuilt;
+    }
 
-	public @Nullable CompletableFuture<Void> getTask() {
-		return task;
-	}
+    public @Nullable CompletableFuture<Void> getTask() {
+        return task;
+    }
 }

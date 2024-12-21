@@ -62,6 +62,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -77,6 +80,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final NamespaceID MOON_ID = id("generated/moon");
     public static final NamespaceID SUN_ID = id("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
+    final ExecutorService executor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 4));
 
     @MonotonicNonNull
     private Material material;
@@ -248,8 +252,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
 
         // Define the vertices of the quad, with their positions, normals, and UV coordinates
-        meshBuilder.rect(
-                new VertexInfo().setPos(-2, -2, 15).setNor(0, 0, -1).setUV(0, 0),  // Bottom left
+        meshBuilder.rect(new VertexInfo().setPos(-2, -2, 15).setNor(0, 0, -1).setUV(0, 0),  // Bottom left
                 new VertexInfo().setPos(-2, 2, 15).setNor(0, 0, -1).setUV(0, 1),   // Top left
                 new VertexInfo().setPos(2, 2, 15).setNor(0, 0, -1).setUV(1, 1),    // Top right
                 new VertexInfo().setPos(2, -2, 15).setNor(0, 0, -1).setUV(1, 0)    // Bottom right
@@ -268,8 +271,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
 
         // Define the vertices of the quad, with their positions, normals, and UV coordinates
-        meshBuilder.rect(
-                new VertexInfo().setPos(-2, -2, -15).setNor(0, 0, 1).setUV(0, 0),  // Bottom left
+        meshBuilder.rect(new VertexInfo().setPos(-2, -2, -15).setNor(0, 0, 1).setUV(0, 0),  // Bottom left
                 new VertexInfo().setPos(-2, 2, -15).setNor(0, 0, 1).setUV(0, 1),   // Top left
                 new VertexInfo().setPos(2, 2, -15).setNor(0, 0, 1).setUV(1, 1),    // Top right
                 new VertexInfo().setPos(2, -2, -15).setNor(0, 0, 1).setUV(1, 0)    // Bottom right
@@ -336,9 +338,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param batch       the ModelBatch to render with
+     * @param batch         the ModelBatch to render with
      * @param sceneCategory the RenderLayer to render with
-     * @param deltaTime   the time between the last and current frame
+     * @param deltaTime     the time between the last and current frame
      */
     @Override
     public void render(ModelBatch batch, @Deprecated SceneCategory sceneCategory, float deltaTime) {
@@ -480,73 +482,65 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             ChunkModel model = this.chunkModels.get(chunk.getVec());
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
-                if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild()))
-                    try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
-                        chunk.dirty = false;
-                        if (model != null) if (model.rebuild()) {
-                            ref.chunkRendered = true;
-                            chunk.dirty = false;
-                        } else {
-                            LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
-                            continue;
-                        }
-                        else {
-                            model = new ChunkModel(chunk.getVec(), chunk, this);
-                            if (model.build()) {
-                                ref.chunkRendered = true;
-                                chunk.dirty = false;
-                                this.chunkModels.put(chunk.getVec(), model);
-                            } else {
-                                LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
-                                continue;
-                            }
-                        }
-
-                        chunk.onUpdated();
-                        chunk.initialized = true;
-                    }
+                model = revalidateChunk(ref, chunk, model);
             } else if (model == null) {
                 if (ref.chunkRendered || this.shouldIgnoreRebuild()) continue;
-                try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
-                    chunk.dirty = false;
-                    model = new ChunkModel(chunk.getVec(), chunk, this);
-                    if (model.build()) {
-                        ref.chunkRendered = true;
-                        chunk.dirty = false;
-                        chunk.initialized = true;
-                        this.chunkModels.put(chunk.getVec(), model);
-                    } else {
-                        LOGGER.warn("Failed to build chunk: {}", chunk.getVec());
-                        continue;
-                    }
-                }
+                model = buildChunk(ref, chunk);
             } else if (model.needsRebuild(world) && !(ref.chunkRendered || this.shouldIgnoreRebuild())) {
-                try (var ignoredRebuildSection = this.client.profiler.start("rebuild-chunk")) {
-                    if (model.rebuild()) {
-                        ref.chunkRendered = true;
-                        chunk.dirty = false;
-                        chunk.onUpdated();
-                        chunk.initialized = true;
-                    } else LOGGER.warn("Failed to rebuild chunk: {}", chunk.getVec());
-                }
+                model = rebuildChunk(ref, chunk, model);
                 continue;
             }
 
             this.renderBlockBreaking(batch, chunk);
             this.renderBlockModels(batch, chunk);
 
-            if (model != null) {
-                ModelInstance modelInstance = model.getModelInstance();
-                if (modelInstance != null) {
-                    modelInstance.transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-                    batch.render(model, this.environment);
-                }
+            ModelInstance modelInstance = model.getModelInstance();
+            if (modelInstance != null) {
+                modelInstance.transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+                batch.render(model, this.environment);
             }
 
             chunk.renderModels(sceneCategory);
 
             this.visibleChunks++;
         }
+    }
+
+    private @NotNull ChunkModel buildChunk(ChunkRenderRef ref, ClientChunk chunk) {
+        ChunkModel model;
+        try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
+            chunk.dirty = false;
+            model = new ChunkModel(chunk.getVec(), chunk, this);
+            model.build();
+            ref.chunkRendered = true;
+            chunk.dirty = false;
+            chunk.initialized = true;
+            this.chunkModels.put(chunk.getVec(), model);
+        }
+        return model;
+    }
+
+    private @NotNull ChunkModel revalidateChunk(ChunkRenderRef ref, ClientChunk chunk, @Nullable ChunkModel model) {
+        if (model == null) {
+            return buildChunk(ref, chunk);
+        }
+        if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild())) {
+            rebuildChunk(ref, chunk, model);
+        }
+        return model;
+    }
+
+    private ChunkModel rebuildChunk(ChunkRenderRef ref, ClientChunk chunk, ChunkModel model) {
+        try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
+            chunk.dirty = false;
+            model.rebuild();
+            ref.chunkRendered = true;
+            chunk.dirty = false;
+
+            chunk.onUpdated();
+            chunk.initialized = true;
+        }
+        return model;
     }
 
     void unload(ClientChunk chunk) {
@@ -633,11 +627,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         try {
             @Nullable QVModel model = this.qvModels.get(entity.getId());
             LocalPlayer player = QuantumClient.get().player;
-            if (player == null
-                || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64
-                || entity instanceof Player && ((Player) entity).isSpectator()) {
-                if (model != null)
-                    return;
+            if (player == null || player.getPosition(client.partialTick).dst(entity.getPosition()) > 64 || entity instanceof Player && ((Player) entity).isSpectator()) {
+                if (model != null) return;
                 return;
             }
 
@@ -740,6 +731,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void dispose() {
+        executor.shutdown();
+        try {
+            executor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new TerminationFailedException();
+        }
+
         this.disposed = true;
 
         Model skybox = this.skybox.model;

@@ -1,15 +1,11 @@
 package dev.ultreon.quantum.network;
 
-import dev.ultreon.quantum.network.packets.Packet;
-
-import java.util.function.Supplier;
-
 public interface PacketListener {
-    static PacketListener onFailure(Supplier<Packet<?>> supplier) {
+    static PacketListener onFailure(Runnable func) {
         return new PacketListener() {
             @Override
-            public Packet<?> onFailure() {
-                return supplier.get();
+            public void onFailure() {
+                func.run();
             }
         };
     }
@@ -31,9 +27,8 @@ public interface PacketListener {
             }
 
             @Override
-            public Packet<?> onFailure() {
+            public void onFailure() {
                 func.run();
-                return PacketListener.super.onFailure();
             }
         };
     }
@@ -42,7 +37,7 @@ public interface PacketListener {
 
     }
 
-    default Packet<?> onFailure() {
-        return null;
+    default void onFailure() {
+
     }
 }
