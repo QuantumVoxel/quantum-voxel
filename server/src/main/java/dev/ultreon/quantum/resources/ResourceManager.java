@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.resources;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Os;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
 import dev.ultreon.libs.commons.v0.util.IOUtils;
@@ -19,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -331,7 +334,12 @@ public class ResourceManager implements Closeable {
     }
 
     private void importResourcePackages() throws IOException {
-        Path dir = Gdx.files.external("resource-packages").file().toPath();
+        Path dir;
+        if (SharedLibraryLoader.os == Os.Android) {
+            dir = Gdx.files.external("resource-packages").file().toPath();
+        } else {
+            dir = Paths.get("./resource-packages");
+        }
         if (!Files.exists(dir)) {
             Files.createDirectories(dir);
             return;
