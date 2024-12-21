@@ -48,7 +48,6 @@ public final class Launcher {
             else System.setProperty("fabric.side", "client");
 
             System.setProperty("log4j2.formatMsgNoLookups", "true");
-            System.setProperty("fabric.development", "true");
             System.setProperty("fabric.log.disableAnsi", "true");
 
             // Copy mixinprovider.jar to ./mods/

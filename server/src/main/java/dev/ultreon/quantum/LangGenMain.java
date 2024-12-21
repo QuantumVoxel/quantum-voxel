@@ -61,10 +61,7 @@ public class LangGenMain {
 //                    """;
 //
 //            Files.writeString(pyQuantum.resolve("python.mod.json"), pythonModJson.formatted(currentVersion));
-//
-//            LangGenConfig.progressListener.onDone();
-        } else {
-            LangGenConfig.progressListener.onDone();
         }
+        LangGenConfig.progressListener.onDone();
     }
 }
