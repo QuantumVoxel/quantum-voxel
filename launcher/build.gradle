@@ -314,6 +314,10 @@ tasks.register('copyDependencies', Copy) {
 tasks.register('copyJar', Copy) {
     from(tasks.jar)
     into("$projectDir/build/jars")
+    doLast {
+        delete fileTree("$project/build/dist")
+        delete file("$project/build/dist")
+    }
 }
 
 tasks.register('package', Zip) {
@@ -364,8 +368,8 @@ jpackage {
         icon = "$rootProject.projectDir/icons/icon.icns"
         macPackageIdentifier = project_id
         macPackageName = project_name
-        appVersion = packageVersion
-        type = ImageType.DMG
+        appVersion = "1.0.0"
+        type = ImageType.APP_IMAGE
     }
 
     linux {
