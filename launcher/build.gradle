@@ -366,6 +366,7 @@ jpackage {
     mac {
         javaOptions = javaOptions
         icon = "$rootProject.projectDir/icons/icon.icns"
+        javaOptions += ["-XstartOnFirstThread"]
         macPackageIdentifier = project_id
         macPackageName = project_name
         appVersion = "1.0.0"

@@ -3,7 +3,6 @@ package dev.ultreon.quantum.launcher;
 import com.google.common.collect.Lists;
 import dev.ultreon.gameprovider.quantum.OS;
 import dev.ultreon.gameprovider.quantum.QuantumVxlGameProvider;
-import dev.ultreon.quantum.desktop.StartupHelper;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -87,7 +86,6 @@ public final class Launcher {
             }
 
             System.out.println("Setting directory to " + launchPath);
-            if (OS.isMac()) StartupHelper.startNewJvmIfRequired(false, launchPath);
             System.out.println("Exiting");
             System.exit(0);
         } else {
