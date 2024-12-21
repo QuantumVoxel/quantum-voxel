@@ -32,12 +32,12 @@ import java.util.*;
 /**
  * This class is the main entry point for the game provider of quantum.
  *
- * @since 0.1.0
  * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @since 0.1.0
  */
 @SuppressWarnings({"FieldCanBeLocal", "SameParameterValue", "unused"})
 public class QuantumVxlGameProvider implements GameProvider {
-    private static final String[] ALLOWED_EARLY_CLASS_PREFIXES = { "org.apache.logging.log4j.", "dev.ultreon.gameprovider.quantum.", "dev.ultreon.premain." };
+    private static final String[] ALLOWED_EARLY_CLASS_PREFIXES = {"org.apache.logging.log4j.", "dev.ultreon.gameprovider.quantum.", "dev.ultreon.premain."};
 
     private final GameTransformer transformer = new GameTransformer();
     private EnvType Env;
@@ -76,6 +76,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     /**
      * Get the game ID.
+     *
      * @return the game ID
      */
     @Override
@@ -85,6 +86,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     /**
      * Get the game name.
+     *
      * @return the game name
      */
     @Override
@@ -94,6 +96,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     /**
      * Get the raw game version.
+     *
      * @return the raw game version
      */
     @Override
@@ -103,6 +106,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     /**
      * Get the normalized game version.
+     *
      * @return the normalized game version
      */
     @Override
@@ -252,10 +256,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     @Override
     public Path getLaunchDirectory() {
-        if (!Objects.equals(System.getProperty("quantum.environment", "normal"), "packaged"))
-            return Path.of(".");
-
-        return QuantumVxlGameProvider.getDataDir();
+        return Path.of(".");
     }
 
     @NotNull
@@ -451,7 +452,7 @@ public class QuantumVxlGameProvider implements GameProvider {
     /**
      * Sets up the log handler for the Fabric launcher.
      *
-     * @param launcher the Fabric launcher instance
+     * @param launcher    the Fabric launcher instance
      * @param useTargetCl true if the target class loader should be used, false otherwise
      */
     private void setupLogHandler(FabricLauncher launcher, boolean useTargetCl) {
@@ -496,6 +497,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     /**
      * Unlocks the class path for the given FabricLauncher by setting allowed prefixes for gameJars and adding miscGameLibraries to the classpath.
+     *
      * @param launcher the FabricLauncher instance
      */
     @Override
