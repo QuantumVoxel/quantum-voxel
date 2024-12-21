@@ -44,7 +44,7 @@ public class LauncherConfig {
                 config.schemaVersion = 1;
                 config.windowVibrancyEnabled = true;
                 config.enableFullVibrancy = false;
-                config.useAngleGraphics = true;
+                config.useAngleGraphics = false;
                 config.frameless = false;
                 config.removeBorder = false;
             }
