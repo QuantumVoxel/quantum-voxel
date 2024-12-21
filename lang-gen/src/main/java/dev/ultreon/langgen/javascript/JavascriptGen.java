@@ -319,7 +319,7 @@ public class JavascriptGen implements LangGenerator {
                     }
                     """;
 
-            Files.writeString(LangGenConfig.stubPath.resolve("typescript/package.json"), packageJson.formatted(LangGenConfig.version));
+            Files.writeString(LangGenConfig.stubPath.resolve("typescript/package.json"), packageJson.formatted(LangGenConfig.version), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 
             OutputStream os = Files.newOutputStream(packagePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             try (GZIPOutputStream gzip = new GZIPOutputStream(os)) {

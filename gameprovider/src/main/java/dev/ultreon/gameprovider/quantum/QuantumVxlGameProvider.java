@@ -256,7 +256,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     @Override
     public Path getLaunchDirectory() {
-        return Path.of(".");
+        return getDataDir();
     }
 
     @NotNull

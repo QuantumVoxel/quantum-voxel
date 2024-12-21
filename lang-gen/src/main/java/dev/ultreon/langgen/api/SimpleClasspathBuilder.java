@@ -33,6 +33,9 @@ public class SimpleClasspathBuilder extends ClasspathBuilder {
 
     @Override
     protected void writeFile(Path output, String className, String result) throws IOException {
+        if (!Files.exists(output)) {
+            Files.createDirectories(output);
+        }
         if (result.isBlank()) {
             throw new GeneratorException("Class " + className + " has no content");
         }

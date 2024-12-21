@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -338,7 +337,7 @@ public class ResourceManager implements Closeable {
         if (SharedLibraryLoader.os == Os.Android) {
             dir = Gdx.files.external("resource-packages").file().toPath();
         } else {
-            dir = Paths.get("./resource-packages");
+            dir = GamePlatform.get().getGameDir().resolve("resource-packages");
         }
         if (!Files.exists(dir)) {
             Files.createDirectories(dir);
