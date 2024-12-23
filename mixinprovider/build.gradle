@@ -34,7 +34,43 @@ dependencies {
 
     implementation("com.github.tommyettinger:textratypist:1.1.0")
 
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version") {
+        exclude group: "org.lwjgl", module: "lwjgl"
+        exclude group: "org.lwjgl", module: "lwjgl-glfw"
+        exclude group: "org.lwjgl", module: "lwjgl-egl"
+        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+        exclude group: "org.lwjgl", module: "lwjgl-openal"
+        exclude group: "org.lwjgl", module: "lwjgl-opengl"
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+        exclude group: "org.lwjgl", module: "lwjgl-stb"
+    }
+    implementation("org.lwjgl:lwjgl:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-glfw:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-egl:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-jemalloc:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-openal:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-opengl:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-opengles:3.3.5!!")
+    implementation("org.lwjgl:lwjgl-stb:3.3.5!!")
+    implementation("org.lwjgl:lwjgl:3.3.5!!:natives-linux")
+    implementation("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-linux")
+    implementation("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-linux")
+    implementation("org.lwjgl:lwjgl-openal:3.3.5!!:natives-linux")
+    implementation("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-linux")
+    implementation("org.lwjgl:lwjgl-stb:3.3.5!!:natives-linux")
+    implementation("org.lwjgl:lwjgl:3.3.5!!:natives-macos")
+    implementation("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-macos")
+    implementation("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-macos")
+    implementation("org.lwjgl:lwjgl-openal:3.3.5!!:natives-macos")
+    implementation("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-macos")
+    implementation("org.lwjgl:lwjgl-stb:3.3.5!!:natives-macos")
+    implementation("org.lwjgl:lwjgl:3.3.5!!:natives-windows")
+    implementation("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-windows")
+    implementation("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-windows")
+    implementation("org.lwjgl:lwjgl-openal:3.3.5!!:natives-windows")
+    implementation("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-windows")
+    implementation("org.lwjgl:lwjgl-opengles:3.3.5!!:natives-windows")
+    implementation("org.lwjgl:lwjgl-stb:3.3.5!!:natives-windows")
     implementation("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")

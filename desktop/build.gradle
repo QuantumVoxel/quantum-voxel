@@ -87,27 +87,81 @@ dependencies {
     implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
     implementation api("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
 
-    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
+    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version") {
+        exclude group: "org.lwjgl", module: "lwjgl"
+        exclude group: "org.lwjgl", module: "lwjgl-glfw"
+        exclude group: "org.lwjgl", module: "lwjgl-egl"
+        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+        exclude group: "org.lwjgl", module: "lwjgl-openal"
+        exclude group: "org.lwjgl", module: "lwjgl-opengl"
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+        exclude group: "org.lwjgl", module: "lwjgl-stb"
+    }
+    implementation api("org.lwjgl:lwjgl:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-egl:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-opengles:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-opengles:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
     implementation api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
     implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
     implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
     implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
     implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
-    implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion")
+    implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion") {
+        exclude group: "org.lwjgl", module: "lwjgl"
+        exclude group: "org.lwjgl", module: "lwjgl-glfw"
+        exclude group: "org.lwjgl", module: "lwjgl-egl"
+        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+        exclude group: "org.lwjgl", module: "lwjgl-openal"
+        exclude group: "org.lwjgl", module: "lwjgl-opengl"
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+        exclude group: "org.lwjgl", module: "lwjgl-stb"
+    }
 
     // --- Win32 Libraries ---
-    implementation(api('com.github.Dgzt:gdx-lwjgl3-angle-vulkan:1.0.0'))
-    implementation(api('org.lwjgl:lwjgl-opengles:3.3.0'))
-    implementation(api('org.lwjgl:lwjgl-opengles:3.3.0:natives-windows'))
+    implementation api('com.github.Dgzt:gdx-lwjgl3-angle-vulkan:1.0.0') {
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+    }
 
     // Others
-    implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
+    implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5") {
+        exclude group: "org.lwjgl", module: "lwjgl"
+        exclude group: "org.lwjgl", module: "lwjgl-glfw"
+        exclude group: "org.lwjgl", module: "lwjgl-egl"
+        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+        exclude group: "org.lwjgl", module: "lwjgl-openal"
+        exclude group: "org.lwjgl", module: "lwjgl-opengl"
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+        exclude group: "org.lwjgl", module: "lwjgl-stb"
+    }
 
     // Apache Log4J
-    runtimeOnly api("org.apache.logging.log4j:log4j:$log4j_version")
-    runtimeOnly api("org.apache.logging.log4j:log4j-core:$log4j_version")
-    runtimeOnly api("org.apache.logging.log4j:log4j-api:$log4j_version")
-    runtimeOnly api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
+    runtimeOnly("org.apache.logging.log4j:log4j:$log4j_version")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4j_version")
+    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4j_version")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
     implementation api("org.tukaani:xz:$tukaani_xz_version")
     implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
 

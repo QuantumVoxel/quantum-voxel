@@ -53,7 +53,17 @@ configurations {
 
 dependencies {
     implementation api("org.jetbrains:annotations:24.0.1")
-    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
+        exclude group: "org.lwjgl", module: "lwjgl"
+        exclude group: "org.lwjgl", module: "lwjgl-bom"
+        exclude group: "org.lwjgl", module: "lwjgl-glfw"
+        exclude group: "org.lwjgl", module: "lwjgl-egl"
+        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+        exclude group: "org.lwjgl", module: "lwjgl-openal"
+        exclude group: "org.lwjgl", module: "lwjgl-opengl"
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+        exclude group: "org.lwjgl", module: "lwjgl-stb"
+    }
 
     implementation "it.unimi.dsi:fastutil-core:8.5.9"
     implementation "com.google.code.findbugs:jsr305:$jsr_version"
