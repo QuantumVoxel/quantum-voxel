@@ -339,8 +339,6 @@ tasks.register('packageBin', Zip) {
             rename "package.zip", "${app_name}-${project_version}.zip"
         }
     }
-
-    if (System.getProperty("os.name").toLowerCase().contains("linux")) mustRunAfter "createAppImage"
 }
 
 jpackage {
@@ -380,18 +378,6 @@ jpackage {
         licenseFile = null
         type = ImageType.APP_IMAGE
         destination = "$rootProject.projectDir/build/tmp"
-
-        tasks.register("createAppImage", Zip) {
-            def app_name = app_name
-            from fileTree("$rootProject.projectDir/build/tmp/$app_name")
-            archiveFileName = "${app_name}.zip"
-            destinationDirectory = file("$projectDir/build/dist/")
-            doLast {
-                delete files("$rootProject.projectDir/build/tmp/$app_name/**/*", "$rootProject.projectDir/build/tmp/$app_name")
-            }
-        }
-
-        finalizedBy createAppImage
 
         if (file("$rootProject.projectDir/build/tmp/$app_name").exists()) {
             delete files("$rootProject.projectDir/build/tmp/$app_name/**/*", "$rootProject.projectDir/build/tmp/$app_name")
