@@ -377,11 +377,6 @@ jpackage {
         aboutUrl = null
         licenseFile = null
         type = ImageType.APP_IMAGE
-        destination = "$rootProject.projectDir/build/tmp"
-
-        if (file("$rootProject.projectDir/build/tmp/$app_name").exists()) {
-            delete files("$rootProject.projectDir/build/tmp/$app_name/**/*", "$rootProject.projectDir/build/tmp/$app_name")
-        }
     }
 
     windows {
