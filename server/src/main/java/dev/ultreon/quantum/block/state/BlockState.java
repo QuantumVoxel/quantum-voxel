@@ -498,4 +498,8 @@ public class BlockState {
     public boolean doesRandomTick() {
         return block.doesRandomTick();
     }
+
+    public boolean isInvisible() {
+        return !block.doesRender();
+    }
 }

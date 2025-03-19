@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.ShaderContext;
@@ -14,6 +13,8 @@ import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 public class BackgroundNode extends RenderPipeline.RenderNode {
     private final Supplier<SceneShaders> shaderProvider = Shaders.SCENE;

@@ -74,7 +74,7 @@ public class Dialog extends UIContainer<Dialog> {
         revalidate();
     }
 
-    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(@NotNull Renderer renderer, float deltaTime) {
         pos.y = parent.getHeight() / 2 - size.height / 2 - 2;
         closeButton.setPos(pos.x + size.width - 21, pos.y);
 
@@ -95,11 +95,11 @@ public class Dialog extends UIContainer<Dialog> {
             renderer.popScissors();
         }
 
-        this.closeButton.render(renderer, mouseX, mouseY, deltaTime);
+        this.closeButton.render(renderer, deltaTime);
 
         this.contentBounds.set(pos.x, pos.y + 21, size.width, size.height - 21);
         if (renderer.pushScissors(this.contentBounds)) {
-            super.render(renderer, mouseX, mouseY, deltaTime);
+            super.render(renderer, deltaTime);
             renderer.popScissors();
         }
     }

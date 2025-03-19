@@ -227,7 +227,9 @@ println("Current version: $gameVersion")
 println("Project: $group:$name")
 
 afterEvaluate {
-//    tasks.getByName("javadoc", Javadoc::class) {
+    tasks.getByName("javadoc", Javadoc::class) {
+      (options as StandardJavadocDocletOptions).stylesheetFile = file("betterjdocs.css")
+    }
 //        source(subprojects.map { subproject ->
 //            if (subproject.name == "android") return@map null
 //            subproject?.extensions?.getByType(JavaPluginExtension::class.java)?.sourceSets?.getByName("main")?.allJava?.sourceDirectories

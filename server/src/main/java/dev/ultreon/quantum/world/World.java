@@ -56,7 +56,7 @@ import java.util.stream.Stream;
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
 public abstract class World implements Disposable, WorldAccess {
-    public static final int CHUNK_SIZE = 32;
+    public static final int CHUNK_SIZE = 16;
     public static final int REGION_SIZE = 32;
     public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;
@@ -239,8 +239,8 @@ public abstract class World implements Disposable, WorldAccess {
 
         Chunk chunkAt = this.getChunkAt(x, y, z);
         BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
-        if (chunkAt == null) return Blocks.BARRIER.getDefaultState();
-        if (!chunkAt.ready) return Blocks.BARRIER.getDefaultState();
+        if (chunkAt == null) return Blocks.VOID_AIR.getDefaultState();
+        if (!chunkAt.ready) return Blocks.VOID_AIR.getDefaultState();
 
         BlockVec cp = blockVec.chunkLocal();
         return chunkAt.getFast(cp.getIntX(), cp.getIntY(), cp.getIntZ());

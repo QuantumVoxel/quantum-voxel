@@ -42,8 +42,8 @@ public class ChunkLoadScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         renderer.textCenter(title == null ? TextObject.literal("Chunks loading!") : title, 2, size.width / 2, size.height / 2);
 

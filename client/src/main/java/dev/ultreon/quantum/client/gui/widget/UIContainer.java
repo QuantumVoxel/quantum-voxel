@@ -40,6 +40,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     private Layout layout = new StandardLayout();
     protected Widget focused;
+    protected Widget hoveredWidget;
 
     public UIContainer(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
@@ -69,11 +70,27 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.render(renderer, deltaTime);
+
+        for (var widget : this.widgets) {
+            if (!widget.isVisible) {
+                if (widget.ignoreBounds)
+                    this.renderChild(renderer, deltaTime, widget);
+                continue;
+            }
+
+            if (!widget.topMost) continue;
+            this.renderChild(renderer, deltaTime, widget);
+        }
+    }
+
+    @Override
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         if (renderer.pushScissors(this.getBounds())) {
-            this.renderChildren(renderer, mouseX, mouseY, deltaTime);
+            this.renderChildren(renderer, deltaTime);
             renderer.popScissors();
         }
     }
@@ -89,25 +106,62 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
         }
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+
+        for (Widget widget : widgets) {
+            widget.tick();
+        }
+    }
+
+    @Override
+    public void mouseMoved(int x, int y) {
+        for (int i = this.widgets.size() - 1; i >= 0; i--) {
+            var widget = this.widgets.get(i);
+            if (!widget.isVisible) continue;
+            if (widget.isWithinBounds(x, y)) {
+                if (widget instanceof UIContainer<?> uiContainer) {
+                    uiContainer.mouseMoved(x, y);
+                    return;
+                }
+                widget.mouseMoved(x, y);
+                if (widget == this.hoveredWidget) return;
+                widget.mouseEnter(x - widget.getX(), y - widget.getY());
+                if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
+                this.hoveredWidget = widget;
+                return;
+            }
+        }
+
+        if (this.hoveredWidget != null) {
+            this.hoveredWidget.mouseExit();
+            this.hoveredWidget = null;
+        }
+
+        super.mouseMoved(x, y);
+    }
+
     public List<? extends Widget> children() {
         return this.widgets;
     }
 
     @SuppressWarnings("GDXJavaFlushInsideLoop")
-    public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
         for (var widget : this.widgets) {
             if (!widget.isVisible) {
                 if (widget.ignoreBounds)
-                    this.renderChild(renderer, mouseX, mouseY, deltaTime, widget);
+                    this.renderChild(renderer, deltaTime, widget);
                 continue;
             }
 
-            this.renderChild(renderer, mouseX, mouseY, deltaTime, widget);
+            if (widget.topMost) continue;
+            this.renderChild(renderer, deltaTime, widget);
         }
     }
 
-    public void renderChild(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime, Widget widget) {
-        widget.render(renderer, mouseX, mouseY, deltaTime);
+    public void renderChild(@NotNull Renderer renderer, float deltaTime, Widget widget) {
+        widget.render(renderer, deltaTime);
     }
 
     public List<? extends Widget> getWidgets() {
@@ -120,20 +174,6 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     public void setLayout(Layout layout) {
         this.layout = layout;
-    }
-
-    public Widget getExactWidgetAt(int x, int y) {
-        for (int i = this.widgets.size() - 1; i >= 0; i--) {
-            var widget = this.widgets.get(i);
-            if (!widget.isVisible) continue;
-            if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?> uiContainer) {
-                    return uiContainer.getExactWidgetAt(x, y);
-                }
-                return widget;
-            }
-        }
-        return null;
     }
 
     public @NotNull List<Widget> getWidgetsAt(int x, int y) {

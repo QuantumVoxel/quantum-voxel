@@ -29,7 +29,7 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
 
     }
 
@@ -77,11 +77,11 @@ public class BindingsConfigList extends SelectionList<BindingsConfigList.ListEnt
 
             this.widget.setX(x + rowWidth - this.widget.getWidth() - 2 - 22);
             this.widget.setY(y + 2);
-            this.widget.render(gfx, mouseX, mouseY, partialTicks);
+            this.widget.render(gfx, partialTicks);
 
             this.resetBtn.setX(x + rowWidth - this.resetBtn.getWidth() - 2);
             this.resetBtn.setY(y + 2);
-            this.resetBtn.render(gfx, mouseX, mouseY, partialTicks);
+            this.resetBtn.render(gfx, partialTicks);
         }
 
         @NotNull

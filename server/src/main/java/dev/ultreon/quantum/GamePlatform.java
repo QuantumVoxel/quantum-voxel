@@ -167,10 +167,6 @@ public abstract class GamePlatform {
         return false;
     }
 
-    public void setupMacOSX() {
-
-    }
-
     public void launch(String[] argv) {
 
     }

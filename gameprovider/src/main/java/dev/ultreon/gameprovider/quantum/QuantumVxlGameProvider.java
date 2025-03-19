@@ -256,7 +256,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     @Override
     public Path getLaunchDirectory() {
-        return getDataDir();
+        return Path.of(System.getProperty("user.dir"));
     }
 
     @NotNull
@@ -537,11 +537,6 @@ public class QuantumVxlGameProvider implements GameProvider {
     public void launch(ClassLoader loader) {
         // Get the target class to launch
         var targetClass = this.entrypoint;
-
-        // Set the user directory to the launch directory
-        Path launchDirectory = this.getLaunchDirectory();
-        String absolutePath = launchDirectory.toFile().getAbsolutePath();
-        System.setProperty("user.dir", absolutePath);
 
         MethodHandle invoker;
 

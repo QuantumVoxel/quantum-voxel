@@ -58,7 +58,7 @@ public class WindowManager {
             super.renderContents(renderer, mouseX, mouseY, deltaTime);
 
             BUTTON.setPos(getX() + 10, getY() + 30);
-            BUTTON.render(renderer, mouseX, mouseY, deltaTime);
+            BUTTON.render(renderer, deltaTime);
         }
 
         @Override

@@ -56,8 +56,8 @@ public class BindingsConfigScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer gfx, int i, int j, float f) {
-        super.renderWidget(gfx, i, j, f);
+    public void renderWidget(@NotNull Renderer gfx, float f) {
+        super.renderWidget(gfx, f);
 
         TextObject title = this.getTitle();
         gfx.textCenter(title != null ? title : TextObject.literal("Bindings"), this.size.width / 2, 16 - this.font.getLineHeight() / 2, TEXT_COLOR);

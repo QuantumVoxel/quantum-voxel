@@ -83,8 +83,8 @@ public class JavascriptDebuggerScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         renderer.textLeft("Output:", 0, 30, ColorCode.GOLD);
         renderer.textLeft(output, 0, 42);

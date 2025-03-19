@@ -21,7 +21,7 @@ public class Hud implements StaticWidget {
     }
 
     @Override
-    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(@NotNull Renderer renderer, float deltaTime) {
     }
 
     private void renderCrosshair(Renderer renderer) {

@@ -44,8 +44,8 @@ public class DisconnectedScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
         renderer.textCenter(this.title, 2, this.size.width / 2, this.size.height / 3, RgbColor.WHITE);
 
         int lineY = 0;

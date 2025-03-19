@@ -35,8 +35,8 @@ public class WorldGenTestPanel extends Rectangle {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         Batch batch = renderer.getBatch();
         batch.draw(terrainTex, 0, size.height - 256);

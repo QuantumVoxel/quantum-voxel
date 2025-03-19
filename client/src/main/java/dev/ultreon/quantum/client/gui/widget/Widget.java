@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -46,6 +47,8 @@ public abstract class Widget extends GameObject implements StaticWidget {
     protected final Position pos = bounds.pos;
     @Getter
     protected final Size size = bounds.size;
+    public boolean clipped = true;
+    public boolean topMost = false;
 
     UIContainer<?> parent = UIContainer.ROOT;
     protected final long createTime = System.nanoTime();
@@ -53,6 +56,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
     protected GameFont font = this.client.font;
     private final List<RevalidateListener> revalidateListeners = new ArrayList<>();
     private final Map<NamespaceID, UIComponent> components = new HashMap<>();
+    protected final GridPoint2 mousePos = new GridPoint2(Integer.MIN_VALUE, Integer.MIN_VALUE);
 
     protected Widget(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         this.preferredSize.set(width, height);
@@ -71,18 +75,11 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     @Override
     @ApiStatus.Internal
-    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
         if (!this.isVisible) return;
 
-        if (this.isWithinBounds(mouseX, mouseY)) {
-            if (this.root != null) this.root.directHovered = this;
-            this.isHovered = true;
-        } else {
-            this.isHovered = false;
-        }
-
         this.renderBackground(renderer, deltaTime);
-        this.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        this.renderWidget(renderer, deltaTime);
     }
 
     public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
@@ -97,7 +94,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
         return this;
     }
 
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(Renderer renderer, float deltaTime) {
 
     }
 
@@ -273,7 +270,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     @CanIgnoreReturnValue
     public void mouseMove(int mouseX, int mouseY) {
-
+        this.mousePos.set(mouseX, mouseY);
     }
 
     @CanIgnoreReturnValue
@@ -302,16 +299,21 @@ public abstract class Widget extends GameObject implements StaticWidget {
         }
     }
 
-    protected void tick() {
+    public void tick() {
 
     }
 
-    protected void mouseExit() {
-
+    public void mouseExit() {
+        isHovered = false;
     }
 
-    protected void mouseEnter(int x, int y) {
+    public void mouseEnter(int x, int y) {
+        isHovered = true;
+    }
 
+    public void mouseMoved(int x, int y) {
+        mousePos.set(x, y);
+        isHovered = true;
     }
 
     public String getName() {

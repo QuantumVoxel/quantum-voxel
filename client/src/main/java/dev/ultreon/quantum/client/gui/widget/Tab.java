@@ -102,8 +102,8 @@ public class Tab extends Button<Tab> {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         renderer.blit(TEXTURE, this.getX(), this.getY() - 3, 21, 21, (isHovered ? 21 : 0), (bottom ? 42 : 0) + (selected ? 21 : 0), 21, 21, 63, 84);
 

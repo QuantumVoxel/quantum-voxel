@@ -46,14 +46,12 @@ public class DevPreviewScreen extends Screen {
      * Calls the superclass method to render the background.
      *
      * @param renderer  The Renderer object to render the widget.
-     * @param mouseX    The setX-coordinate of the mouse.
-     * @param mouseY    The setY-coordinate of the mouse.
      * @param deltaTime The time passed since the last frame.
      */
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
         renderBackground(renderer);
 
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        super.renderWidget(renderer, deltaTime);
     }
 }

@@ -2,11 +2,9 @@ package dev.ultreon.quantum.launcher;
 
 import com.google.common.collect.Lists;
 import dev.ultreon.gameprovider.quantum.OS;
-import dev.ultreon.gameprovider.quantum.QuantumVxlGameProvider;
 import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -68,22 +66,4 @@ public final class Launcher {
         KnotClient.main(args);
     }
 
-    private static void setDirectory() {
-        @NotNull Path launchPath = QuantumVxlGameProvider.getDataDir();
-        if (!launchPath.toAbsolutePath().equals(Path.of(".").toAbsolutePath())) {
-            try {
-                if (Files.notExists(launchPath))
-                    Files.createDirectories(launchPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Runtime.getRuntime().exit(4);
-            }
-
-            System.out.println("Setting directory to " + launchPath);
-            System.out.println("Exiting");
-            System.exit(0);
-        } else {
-            System.out.println("Skipping directory setup");
-        }
-    }
 }

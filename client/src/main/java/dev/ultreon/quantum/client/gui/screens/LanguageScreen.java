@@ -46,7 +46,7 @@ public class LanguageScreen extends Screen {
                 .setCallback(caller -> this.back()));
     }
 
-    private void renderItem(Renderer renderer, Locale locale, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+    private void renderItem(Renderer renderer, Locale locale, int y, boolean selected, float deltaTime) {
         if (locale.getLanguage().equalsIgnoreCase("utn") && locale.getCountry().equalsIgnoreCase("aa")) {
             renderer.textCenter("Ultanian (Ultania) - Utanïanī (Utanïa)", this.list.getX() + this.list.getWidth() / 2f, y + 4f);
             return;

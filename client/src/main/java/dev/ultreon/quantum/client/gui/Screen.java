@@ -34,6 +34,7 @@ public abstract class Screen extends UIContainer<Screen> {
     @Nullable
     protected TitleWidget titleWidget = null;
     private Dialog dialog;
+    private boolean dialogHovered;
 
     protected Screen(@Nullable String title) {
         this(title == null ? null : TextObject.literal(title));
@@ -77,42 +78,38 @@ public abstract class Screen extends UIContainer<Screen> {
     /**
      * Renders the screen, including handling dialog and title widget rendering.
      *
-     * @param renderer Renderer instance used for drawing the screen elements.
-     * @param mouseX The x-coordinate of the mouse cursor.
-     * @param mouseY The y-coordinate of the mouse cursor.
+     * @param renderer  Renderer instance used for drawing the screen elements.
      * @param deltaTime The time elapsed since the last frame, used for animations.
      */
     @Override
-    public final void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    public final void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
         if (this.titleWidget != null) {
             renderer.pushMatrix();
             renderer.translate(0, this.titleWidget.getHeight(), 0);
             renderer.scissorOffset(0, this.titleWidget.getHeight());
-            if (this.dialog != null) {
-                super.render(renderer, Integer.MIN_VALUE, Integer.MIN_VALUE, deltaTime);
-            } else {
-                super.render(renderer, mouseX, mouseY - this.titleWidget.getHeight(), deltaTime);
-            }
+
+            super.render(renderer, deltaTime);
+
             renderer.scissorOffset(0, -this.titleWidget.getHeight());
             renderer.popMatrix();
 
             if (this.dialog != null) {
                 renderer.fill(0, 0, this.size.width, this.size.height + this.titleWidget.getHeight(), DIALOG_BACKGROUND);
-                this.dialog.render(renderer, mouseX, mouseY, deltaTime);
+                this.dialog.render(renderer, deltaTime);
             }
 
-            this.titleWidget.render(renderer, mouseX, mouseY, deltaTime);
+            this.titleWidget.render(renderer, deltaTime);
             return;
         }
 
         if (this.dialog != null) {
-            renderer.blurred(() -> super.render(renderer, Integer.MIN_VALUE, Integer.MIN_VALUE, deltaTime));
+            renderer.blurred(() -> super.render(renderer, deltaTime));
             renderer.fill(0, 0, this.size.width, this.size.height, DIALOG_BACKGROUND);
-            this.dialog.render(renderer, mouseX, mouseY, deltaTime);
+            this.dialog.render(renderer, deltaTime);
             return;
         }
 
-        super.render(renderer, mouseX, mouseY, deltaTime);
+        super.render(renderer, deltaTime);
     }
 
     @Override
@@ -182,8 +179,8 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     @Override
-    public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderChildren(renderer, mouseX, mouseY, deltaTime);
+    public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
+        super.renderChildren(renderer, deltaTime);
     }
 
     /**
@@ -356,12 +353,28 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     @Override
-    protected void mouseEnter(int x, int y) {
+    public void mouseEnter(int x, int y) {
         if (this.dialog != null) {
             return;
         }
 
         super.mouseEnter(x, y);
+    }
+
+    @Override
+    public void mouseMoved(int x, int y) {
+        if (!this.isHovered) return;
+
+        if (this.dialog != null && this.dialog.isVisible() && this.dialog.getX() <= x && x <= this.dialog.getX() + this.dialog.getWidth() && this.dialog.getY() <= y && y <= this.dialog.getY() + this.dialog.getHeight()) {
+            this.dialog.mouseMoved(x, y);
+            if (this.dialog == this.hoveredWidget) return;
+            this.dialog.mouseEnter(x - this.dialog.getX(), y - this.dialog.getY());
+            if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
+            this.hoveredWidget = this.dialog;
+            return;
+        }
+
+        super.mouseMoved(x, y);
     }
 
     @Override

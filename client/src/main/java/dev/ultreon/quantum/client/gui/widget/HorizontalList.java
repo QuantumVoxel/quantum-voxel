@@ -1,13 +1,10 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector2;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
-import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
@@ -23,7 +20,6 @@ import java.util.function.Supplier;
 
 @ApiStatus.NonExtendable
 public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<HorizontalList<? extends HorizontalList.Entry>> {
-    private static final int SCROLLBAR_WIDTH = 5;
     public static final int SCROLL_SPEED = 20;
     private final List<T> entries = new ArrayList<>();
     private float scrollX = 0;
@@ -85,38 +81,29 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         if (!GamePlatform.get().hasBackPanelRemoved())
             renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.argb(0x40000000));
 
-        Vector2 vector2 = this.client.touchPosStartScl[0];
-        if (vector2 != null && vector2.dst(mouseX, mouseY) > 10 && this.startedDragging) {
-            this.dragging = true;
-            float deltaX = Gdx.input.getDeltaX(0) * this.client.getGuiScale();
-            this.scrollX -= deltaX;
-            this.scrollX = Mth.clamp(this.scrollX, 0, this.getContentHeight());
-            this.dragNotification.setSummary(TextObject.literal("Scrolling | " + this.scrollX + " | " + deltaX).setColor(RgbColor.WHITE));
-        } else if (!GamePlatform.get().isMobile()) {
-            float v = this.scrollGoal - this.scrollX;
-            boolean left = this.scrollGoal < this.scrollX;
-            float scrollX = this.scrollX + v * (deltaTime * 10);
-            if (left && scrollX < scrollGoal) this.scrollX = this.scrollGoal;
-            else if (!left && scrollX > scrollGoal) this.scrollX = this.scrollGoal;
-            else this.scrollX = scrollX;
+        float v = this.scrollGoal - this.scrollX;
+        boolean left = this.scrollGoal < this.scrollX;
+        float scrollX = this.scrollX + v * (deltaTime * 10);
+        if (left && scrollX < scrollGoal) this.scrollX = this.scrollGoal;
+        else if (!left && scrollX > scrollGoal) this.scrollX = this.scrollGoal;
+        else this.scrollX = scrollX;
 
-            if (this.scrollX < 0) {
-                this.scrollX = 0;
-                this.scrollGoal = 0;
-            }
-            if (this.scrollX > this.getContentHeight()) {
-                this.scrollX = this.getContentHeight();
-                this.scrollGoal = this.getContentHeight();
-            }
+        if (this.scrollX < 0) {
+            this.scrollX = 0;
+            this.scrollGoal = 0;
+        }
+        if (this.scrollX > this.getContentHeight()) {
+            this.scrollX = this.getContentHeight();
+            this.scrollGoal = this.getContentHeight();
         }
 
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
-            this.renderChildren(renderer, mouseX, mouseY, deltaTime);
+            this.renderChildren(renderer, deltaTime);
             renderer.popScissors();
         }
         renderer.popMatrix();
@@ -124,10 +111,10 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     @Override
-    public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
         for (T entry : this.entries) {
             if (entry.isVisible) {
-                entry.render(renderer, mouseX, mouseY, this.selectable && this.selected == entry, deltaTime);
+                entry.render(renderer, this.selectable && this.selected == entry, deltaTime);
             }
         }
     }
@@ -169,7 +156,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
             }
         }
         @Nullable T widgetAt = this.getEntryAt(x, y);
-        return widgetAt != null && widgetAt.mouseClick(x - widgetAt.getX(), y - widgetAt.getY(), button, count);
+        return widgetAt != null && widgetAt.mouseClick(x, y, button, count);
     }
 
     @Override
@@ -185,7 +172,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
 
         @Nullable T widgetAt = this.getEntryAt(x, y);
         this.pressingWidget = widgetAt;
-        return widgetAt != null && widgetAt.mousePress(x - widgetAt.getX(), y - widgetAt.getY(), button);
+        return widgetAt != null && widgetAt.mousePress(x, y, button);
     }
 
     @Override
@@ -199,7 +186,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         }
 
         @Nullable T widgetAt = this.pressingWidget;
-        return widgetAt != null && widgetAt.mouseRelease(x - widgetAt.getX(), y - widgetAt.getY(), button);
+        return widgetAt != null && widgetAt.mouseRelease(x, y, button);
     }
 
     @Override
@@ -214,10 +201,10 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY());
+            this.hoveredWidget.mouseMove(x, y);
 
             if (widgetChanged) {
-                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
+                this.hoveredWidget.mouseEnter(x, y);
             }
         }
         super.mouseMove(x, y);
@@ -238,7 +225,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
             x -= this.pos.x + this.innerXOffset;
             y -= this.pos.y + this.innerYOffset;
             if (widgetChanged) {
-                this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
+                this.hoveredWidget.mouseEnter(x, y);
             }
         }
         super.mouseMove(x, y);
@@ -252,7 +239,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         drawX -= this.pos.x + this.innerXOffset;
         dragY -= this.pos.y + this.innerYOffset;
         if (widgetAt != null)
-            return widgetAt.mouseDrag(x - widgetAt.getX(), y - widgetAt.getY(), drawX, dragY, pointer);
+            return widgetAt.mouseDrag(x, y, drawX, dragY, pointer);
         return super.mouseDrag(x, y, drawX, dragY, pointer);
     }
 
@@ -403,11 +390,11 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     public void scrollDelta(int i) {
-        this.scrollGoal = ((int)(this.scrollGoal / (this.itemWidth + this.gap))) + i * (this.itemWidth + this.gap);
+        this.scrollGoal = ((int) (this.scrollGoal / (this.itemWidth + this.gap))) + i * (this.itemWidth + this.gap);
     }
 
     public void scroll(int i) {
-        this.scrollGoal = ((int)(this.scrollGoal)) + i * SCROLL_SPEED;
+        this.scrollGoal = ((int) (this.scrollGoal)) + i * SCROLL_SPEED;
     }
 
     public abstract static class Entry extends Widget {
@@ -418,7 +405,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
             this.list = list;
         }
 
-        public void render(Renderer renderer, int mouseX, int mouseY, boolean selected, float deltaTime) {
+        public void render(Renderer renderer, boolean selected, float deltaTime) {
             float scrlX = this.list.pos.x - this.list.scrollX;
             int startX = (int) (scrlX + (((this.list.size.width) - (this.list.itemWidth + this.list.gap) * (this.list.count)) - this.list.gap)) / 2;
             this.pos.x = this.list.xOffset + ((int) (scrlX + (this.list.itemWidth + this.list.gap) * this.list.entries.indexOf(this)));
@@ -427,12 +414,12 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
             this.size.height = this.list.itemHeight;
             ItemRenderer<?> itemRenderer = this.list.itemRenderer;
 //            if (itemRenderer != null && renderer.pushScissors(this.pos.setX, this.pos.setY, this.size.width, this.size.height)) {
-                renderEntry(renderer, this.pos.x, this.pos.y, mouseX, mouseY, selected, deltaTime);
+            renderEntry(renderer, this.pos.x, this.pos.y, selected, deltaTime);
 //                renderer.popScissors();
 //            }
         }
 
-        public abstract void renderEntry(Renderer renderer, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime);
+        public abstract void renderEntry(Renderer renderer, int x, int y, boolean selected, float deltaTime);
 
         @Override
         public Entry position(Supplier<Position> position) {

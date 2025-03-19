@@ -183,7 +183,7 @@ public class ModListScreen extends Screen {
         this.back();
     }
 
-    private void renderItem(Renderer renderer, Mod mod, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+    private void renderItem(Renderer renderer, Mod mod, int y, boolean selected, float deltaTime) {
         var x = this.list.getX();
 
         renderer.textLeft(Formatter.format("[*]" + mod.getDisplayName()), x + 50, y + this.list.getItemHeight() - 34);
@@ -230,7 +230,7 @@ public class ModListScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         int x = 220;
         int y = 20;
         int xIcon = x + 84;
@@ -280,7 +280,7 @@ public class ModListScreen extends Screen {
             renderer.textMultiline(description != null ? description : "No description", x, y, ColorCode.GRAY);
         }
 
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        super.renderWidget(renderer, deltaTime);
     }
 
     public SelectionList<Mod> getList() {

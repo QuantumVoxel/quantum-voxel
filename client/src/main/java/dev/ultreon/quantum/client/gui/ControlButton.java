@@ -13,12 +13,10 @@ public class ControlButton extends IconButton {
     }
 
     @Override
-    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
         if (!this.isVisible) return;
 
-        this.isHovered = this.isWithinBounds(mouseX, mouseY);
-
         this.renderBackground(renderer, deltaTime);
-        this.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        this.renderWidget(renderer, deltaTime);
     }
 }

@@ -88,13 +88,13 @@ public class TextButton extends Button<TextButton> {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(Renderer renderer, float deltaTime) {
         Texture texture = this.client.getTextureManager().getTexture(id("textures/gui/widgets.png"));
 
         int x = this.pos.x;
         int y = this.pos.y;
 
-        this.renderButton(renderer, mouseX, mouseY, texture, x, y);
+        this.renderButton(renderer, texture, x, y);
 
         TextObject textObject = this.text.get();
         if (renderer.pushScissors(this.getBounds().shrink(2))) {

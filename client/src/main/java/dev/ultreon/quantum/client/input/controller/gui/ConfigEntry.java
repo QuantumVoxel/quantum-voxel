@@ -90,7 +90,7 @@ public abstract class ConfigEntry<T> {
             }
 
             @Override
-            public void renderWidget(@NotNull Renderer gfx, int i, int j, float f) {
+            public void renderWidget(@NotNull Renderer gfx, float f) {
                 gfx.textCenter(ConfigEntry.this.getDescription(), this.getX() + (float) this.getWidth() / 2, this.getY() + (this.getHeight() / 2 - 5), 0xffffffff);
             }
         };

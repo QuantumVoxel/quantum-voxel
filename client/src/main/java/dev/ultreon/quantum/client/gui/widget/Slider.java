@@ -14,10 +14,8 @@ import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Supplier;
 
-import static dev.ultreon.quantum.client.QuantumClient.id;
-
 public class Slider extends Widget {
-    private static final NamespaceID TEXTURE = id("textures/gui/slider.png");
+    private static final NamespaceID TEXTURE = NamespaceID.of("textures/gui/slider.png");
     private final CallbackComponent<Slider> callback;
     private final RangedValueComponent value;
     private final TextComponent text;
@@ -34,14 +32,10 @@ public class Slider extends Widget {
 
         Preconditions.checkArgument(max > min, "Max should be higher than min");
 
-        this.callback = this.register(id("callback"), new CallbackComponent<>(it -> {
+        this.callback = this.register(NamespaceID.of("callback"), new CallbackComponent<>(it -> {
         }));
-        this.value = this.register(id("value"), new RangedValueComponent(value, min, max));
-        this.text = this.register(id("text"), new TextComponent());
-    }
-
-    public static Slider of(int width, int min, int max) {
-        return new Slider(min, min, max);
+        this.value = this.register(NamespaceID.of("value"), new RangedValueComponent(value, min, max));
+        this.text = this.register(NamespaceID.of("text"), new TextComponent());
     }
 
     public static Slider of(int min, int max) {
@@ -61,14 +55,8 @@ public class Slider extends Widget {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
-
-        int newValue = this.originalValue + (this.value.max() - this.value.min()) * (mouseX - this.holdStart) / (this.size.width - 14);
-        if (this.isHolding && newValue >= this.value.min() && newValue <= this.value.max() && newValue != this.value.get()) {
-            this.value.set(newValue);
-            this.callback.call(this);
-        }
+    public void renderWidget(Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         int thumbX = this.pos.x + (this.size.width - 14) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 2;
 
@@ -78,7 +66,7 @@ public class Slider extends Widget {
         renderer.blit(Slider.TEXTURE, this.pos.x + this.size.width - 7, this.pos.y, 7, 21, 14, 0, 7, 21);
 
         // Thumb
-        if (this.isWithinBounds(mouseX, mouseY) || this.isHolding) {
+        if (isHovered || this.isHolding) {
             renderer.blit(Slider.TEXTURE, thumbX, this.pos.y, 10, 19, 33, 0, 10, 19);
         } else {
             renderer.blit(Slider.TEXTURE, thumbX, this.pos.y, 10, 19, 22, 0, 10, 19);
@@ -92,7 +80,20 @@ public class Slider extends Widget {
             renderer.textLeft(String.valueOf(this.value.get()), this.pos.x + this.size.width + 5, this.pos.y + 5, true);
         }
 
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        super.renderWidget(renderer, deltaTime);
+    }
+
+    @Override
+    public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
+        int newValue = this.originalValue + (this.value.max() - this.value.min()) * (mouseX - this.holdStart) / (this.size.width - 14);
+        if (this.isHolding && newValue >= this.value.min() && newValue <= this.value.max() && newValue != this.value.get()) {
+            this.value.set(newValue);
+            this.callback.call(this);
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override

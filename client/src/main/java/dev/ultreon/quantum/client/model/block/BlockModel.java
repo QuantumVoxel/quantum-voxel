@@ -45,4 +45,8 @@ public interface BlockModel extends LoadableResource {
     default @Nullable TextureRegion getBuriedTexture() {
         return null;
     }
+
+    default boolean hasAO() {
+        return false;
+    }
 }

@@ -140,14 +140,14 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
         }
 
         @Override
-        public void renderEntry(Renderer renderer, int x, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+        public void renderEntry(Renderer renderer, int x, int y, boolean selected, float deltaTime) {
             if (renderer.pushScissors(this.bounds)) {
                 int u;
-                if (this.isEnabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
+                if (this.isEnabled) u = isHovered ? 21 : 0;
                 else u = 42;
                 int v = this.isPressed() || selected ? 21 : 0;
 
-                Texture texture = this.client.getTextureManager().getTexture(id("textures/gui/widgets.png"));
+                Texture texture = this.client.getTextureManager().getTexture(NamespaceID.of("textures/gui/widgets.png"));
 
                 renderer.draw9Slice(texture, this.pos.x, this.pos.y, this.size.width, this.size.height, u, v, 21, 21, 5, 256, 256);
                 if (!isPressed() && wasPressed) {
@@ -165,7 +165,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                 Texture picture = null;
                 if (world.exists("picture.png")) {
                     String replace = world.getMD5Name();
-                    NamespaceID id = id("generated/worlds/" + replace + "/picture.png");
+                    NamespaceID id = NamespaceID.of("generated/worlds/" + replace + "/picture.png");
                     if (client.getTextureManager().isTextureLoaded(id)) {
                         picture = client.getTextureManager().getTexture(id);
                     } else {
@@ -184,7 +184,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                     int width = 384;
                     int height = 213;
                     float ratio = (float) width / height;
-                    renderer.blit(id("textures/gui/world/default_picture.png"), this.pos.x + 2, y1 + 2, list.itemWidth - 4, (list.itemWidth - 4) / ratio, 0, 0, 384, 213, 384, 213);
+                    renderer.blit(NamespaceID.of("textures/gui/world/default_picture.png"), this.pos.x + 2, y1 + 2, list.itemWidth - 4, (list.itemWidth - 4) / ratio, 0, 0, 384, 213, 384, 213);
                     ref.y = (int) (y1 + 2 + (list.itemWidth - 4) / ratio);
                 });
 
@@ -195,7 +195,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                     renderer.textCenter(worldSaveInfo.lastPlayedInMode().name().toLowerCase().replace("_", " "), this.pos.x + this.list.itemWidth / 2, y1 + this.size.height - 59, false);
 
                     this.button.setPos(this.pos.x + 5, y1 + this.size.height - 29);
-                    this.button.render(renderer, mouseX, mouseY, deltaTime);
+                    this.button.render(renderer, deltaTime);
                     renderer.popScissors();
                 }
 

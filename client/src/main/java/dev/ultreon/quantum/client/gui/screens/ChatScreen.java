@@ -75,10 +75,10 @@ public class ChatScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
         ChatOverlay.renderChatOverlay(this.font, renderer, true);
 
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        super.renderWidget(renderer, deltaTime);
     }
 
     @Override

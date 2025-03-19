@@ -16,7 +16,6 @@ import dev.ultreon.xeox.loader.XeoxLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModOrigin;
-import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Platform;
 import org.slf4j.LoggerFactory;
 
@@ -224,15 +223,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean isLinux() {
         return Platform.get() == Platform.LINUX;
-    }
-
-    @Override
-    @Deprecated
-    public void setupMacOSX() {
-        if (isMacOSX()) {
-            Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
-            Configuration.GLFW_CHECK_THREAD0.set(false);
-        }
     }
 
     @Override

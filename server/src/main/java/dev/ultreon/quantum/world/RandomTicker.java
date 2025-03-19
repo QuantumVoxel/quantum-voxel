@@ -31,7 +31,7 @@ public class RandomTicker implements Disposable {
         ServerChunk serverChunk = loadedChunks.get(i);
         if (serverChunk.isEmpty()) return;
 
-        serverChunk.randomTick();
+//        serverChunk.randomTick();
     }
 
     @Override

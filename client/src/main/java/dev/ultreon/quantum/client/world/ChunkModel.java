@@ -23,6 +23,7 @@ import kotlin.LazyKt;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
@@ -106,27 +107,38 @@ public class ChunkModel extends GameObject implements RenderableProvider {
 
         try {
             MeshBuilder meshBuilder = new MeshBuilder();
+            AtomicBoolean isUnloaded = new AtomicBoolean(false);
             QuantumClient.invokeAndWait(() -> meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES));
-            chunk.mesher.buildMesh(blk -> !blk.isTransparent(), meshBuilder);
+            QuantumClient.invokeAndWait(() -> {
+                if (!chunk.mesher.buildMesh(blk -> !blk.isTransparent(), meshBuilder)) {
+                    meshBuilder.clear();
+                    isUnloaded.set(true);
+                }
+            });
             QuantumClient.invokeAndWait(() -> {
                 Mesh end = meshBuilder.end();
                 modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
                 meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
             });
-            chunk.mesher.buildMesh(Block::isTransparent, meshBuilder);
             QuantumClient.invokeAndWait(() -> {
+                if (!chunk.mesher.buildMesh(Block::isTransparent, meshBuilder)) {
+                    meshBuilder.clear();
+                    isUnloaded.set(true);
+                }
+            });
+            QuantumClient.invokeAndWait(() -> {
+                if (!chunk.isLoaded() || isUnloaded.get()) {
+                    meshBuilder.clear();
+                    return;
+                }
                 Mesh end = meshBuilder.end();
                 modelBuilder.part("generated/chunk_part_transparent", end, GL_TRIANGLES, transparentMaterial);
 
                 Model model = this.model;
-                if (model != null) {
-                    model.dispose();
-                }
+                if (model != null) model.dispose();
 
                 model = this.model = modelBuilder.end();
-                if (this.model == null) {
-                    throw new IllegalStateException("Failed to generate chunk model: " + pos);
-                }
+                if (this.model == null) throw new IllegalStateException("Failed to generate chunk model: " + pos);
 
                 var modelInstance = this.modelInstance = new ModelInstance(model, 0, 0, 0);
                 modelInstance.userData = chunk;
@@ -160,30 +172,6 @@ public class ChunkModel extends GameObject implements RenderableProvider {
 
         meshBuilder.end();
         return modelBuilder.end();
-    }
-
-    public void unload() {
-        if (beingBuilt) {
-            CompletableFuture<Void> cachedTask = task;
-            if (cachedTask != null) {
-                cachedTask.cancel(true);
-            }
-            task = null;
-            return;
-        }
-
-        internalUnload();
-    }
-
-    private void internalUnload() {
-        try (var ignoredSection = QuantumClient.PROFILER.start("chunk-model-unload")) {
-            Model model = this.model;
-            if (model != null) {
-                model.dispose();
-            }
-            this.model = null;
-            modelInstance = null;
-        }
     }
 
     public boolean rebuild() {

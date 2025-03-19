@@ -30,7 +30,7 @@ public class ManualCrashOverlay implements StaticWidget {
     }
 
     @Override
-    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(@NotNull Renderer renderer, float deltaTime) {
         long millis = System.currentTimeMillis();
         if (millis > this.endTime) {
             this.crash();

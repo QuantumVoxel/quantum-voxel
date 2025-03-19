@@ -20,6 +20,7 @@ import org.apache.commons.lang3.IntegerRange;
 public final class Blocks {
     public static final Block AIR = Blocks.register("air", new Block(new Properties().replaceable().noCollision().noRendering().transparent()));
     public static final Block CAVE_AIR = Blocks.register("cave_air", new Block(new Properties().replaceable().noCollision().noRendering().transparent()));
+    public static final Block VOID_AIR = Blocks.register("void_air", new Block(new Properties().noRendering().transparent()));
     public static final Block BARRIER = Blocks.register("barrier", new Block(new Properties().soundType(SoundType.STONE).transparent().noRendering()));
     public static final Block ERROR = Blocks.register("error", new Block(new Properties().soundType(SoundType.STONE)));
     public static final GrassBlock GRASS_BLOCK = Blocks.register("grass_block", new GrassBlock(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT).doRandomTick()));

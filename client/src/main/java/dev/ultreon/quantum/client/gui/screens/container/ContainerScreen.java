@@ -92,16 +92,16 @@ public abstract class ContainerScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
-        this.renderForeground(renderer, mouseX, mouseY, deltaTime);
+        this.renderForeground(renderer, deltaTime);
     }
 
-    public void renderForeground(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderForeground(Renderer renderer, float deltaTime) {
         ItemStack cursor = this.player.getCursor();
         if (!cursor.isEmpty()) {
-            this.client.itemRenderer.render(cursor.getItem(), renderer, mouseX - 8, mouseY - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
+            this.client.itemRenderer.render(cursor.getItem(), renderer, mousePos.x - 8, mousePos.y - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
         }
     }
 

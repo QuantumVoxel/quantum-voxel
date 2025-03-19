@@ -69,11 +69,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
                     int id = theirPacketData.getId(packet);
 
+                    this.otherSide.receive(id, bos.toByteArray());
+
                     if (instance.listener() != null) {
                         instance.listener().onSuccess();
                     }
-
-                    this.otherSide.receive(id, bos.toByteArray());
                 } catch (IOException e) {
                     if (instance.listener() != null) {
                         instance.listener().onFailure();

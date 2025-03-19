@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.graphics.Color;
-import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.GameFont;
@@ -67,7 +66,7 @@ public class TabCompletePopup implements Renderable {
     }
 
     @Override
-    public void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(Renderer renderer, float deltaTime) {
         if (!this.visible || this.values.length == 0) return;
 
         var textX = this.x + 2;

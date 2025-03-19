@@ -100,14 +100,12 @@ public class CrashScreen extends Screen {
      * Renders the widget with the given renderer, mouse coordinates, and delta time.
      * Overrides the superclass method and sets the width of the list to match the scaled width of the client.
      *
-     * @param renderer the renderer to use for rendering
-     * @param mouseX the setX coordinate of the mouse
-     * @param mouseY the setY coordinate of the mouse
+     * @param renderer  the renderer to use for rendering
      * @param deltaTime the time that has passed since the last frame
      */
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         this.list.width(QuantumClient.get().getScaledWidth());
     }
@@ -115,15 +113,13 @@ public class CrashScreen extends Screen {
     /**
      * Renders the crash log details on the screen.
      *
-     * @param renderer the renderer object
-     * @param value the CrashLog object to render
-     * @param y the setY-coordinate for rendering
-     * @param mouseX the setX-coordinate of the mouse
-     * @param mouseY the setY-coordinate of the mouse
-     * @param selected whether the log is selected
+     * @param renderer  the renderer object
+     * @param value     the CrashLog object to render
+     * @param y         the setY-coordinate for rendering
+     * @param selected  whether the log is selected
      * @param deltaTime the time difference for rendering
      */
-    private void renderItem(Renderer renderer, CrashLog value, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+    private void renderItem(Renderer renderer, CrashLog value, int y, boolean selected, float deltaTime) {
         // Get the throwable object from the CrashLog
         Throwable throwable = value.getThrowable();
 

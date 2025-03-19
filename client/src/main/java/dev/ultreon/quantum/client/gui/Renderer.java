@@ -24,6 +24,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.gui.widget.CompatTypingLabel;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.world.RenderablePool;
 import dev.ultreon.quantum.item.ItemStack;
@@ -2487,7 +2488,6 @@ public class Renderer implements Disposable {
         return ScissorStack.pushScissors(rect);
     }
 
-    @Deprecated
     @CheckReturnValue
     public boolean pushScissors(int x, int y, int width, int height) {
         this.flush();
@@ -2497,7 +2497,6 @@ public class Renderer implements Disposable {
         );
     }
 
-    @Deprecated
     @CheckReturnValue
     public boolean pushScissors(float x, float y, float width, float height) {
         this.flush();
@@ -3322,5 +3321,10 @@ public class Renderer implements Disposable {
         this.layout.clear();
         this.font.markup(formatted, this.layout);
         this.font.drawGlyphs(batch, layout, x, y);
+    }
+
+    public void drawText(CompatTypingLabel label, float x, float y) {
+        label.act(Gdx.graphics.getDeltaTime());
+        label.draw(batch, 1f);
     }
 }

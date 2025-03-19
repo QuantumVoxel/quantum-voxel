@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.SceneCategory;
@@ -19,6 +18,8 @@ import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import org.checkerframework.common.reflection.qual.NewInstance;
+
+import java.util.function.Supplier;
 
 import static com.badlogic.gdx.graphics.GL30.GL_DEPTH_COMPONENT24;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;

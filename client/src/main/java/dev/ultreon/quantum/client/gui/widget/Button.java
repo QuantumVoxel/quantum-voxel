@@ -36,14 +36,14 @@ public abstract class Button<T extends Button<T>> extends Widget {
         }));
     }
 
-    protected void renderButton(Renderer renderer, int mouseX, int mouseY, Texture texture, int x, int y) {
+    protected void renderButton(Renderer renderer, Texture texture, int x, int y) {
         if (!isHovered() && pressed) {
             this.pressed = false;
         }
 
         if (shouldBeTransparent()) {
             Color color = tmp;
-            if (this.isWithinBounds(mouseX, mouseY)) {
+            if (isHovered) {
                 color.set(1, 1, 1, 0.25f);
             } else if (this.pressed) {
                 color.set(1, 1, 1, 0.4f);
@@ -57,7 +57,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
         }
 
         int u;
-        if (this.isEnabled) u = this.isWithinBounds(mouseX, mouseY) ? 21 : 0;
+        if (this.isEnabled) u = isHovered ? 21 : 0;
         else u = 42;
         int v = this.isPressed() ? 21 : 0;
 
@@ -65,7 +65,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
         v += 42 * type.yOffset;
 
         renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 9, 256, 256);
-        if (!pressed && wasPressed && !this.isWithinBounds(mouseX, mouseY)) {
+        if (!pressed && wasPressed && !isHovered) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
         }

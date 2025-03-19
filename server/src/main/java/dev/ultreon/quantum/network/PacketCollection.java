@@ -54,7 +54,8 @@ public class PacketCollection<H extends PacketHandler> {
         Preconditions.checkNotNull(buffer, "buffer");
 
         @Nullable BiConsumer<Packet<?>, PacketIO> encoder = this.encoders.get(packet.getClass());
-        if (encoder == null) throw new PacketException("Unknown packet: " + packet.getClass());
+        if (encoder == null)
+            throw new PacketException("Unknown packet: " + packet.getClass());
         encoder.accept(packet, buffer);
     }
 
@@ -70,7 +71,8 @@ public class PacketCollection<H extends PacketHandler> {
         Preconditions.checkNotNull(buffer, "buffer");
 
         Function<PacketIO, ? extends Packet<H>> decoder = this.decoders.get(id);
-        if (decoder == null) throw new PacketException("Unknown packet ID: " + id);
+        if (decoder == null)
+            throw new PacketException("Unknown packet ID: " + id);
         return decoder.apply(buffer);
     }
 
@@ -86,7 +88,8 @@ public class PacketCollection<H extends PacketHandler> {
         Preconditions.checkNotNull(params, "params");
 
         BiConsumer<Packet<H>, Pair<PacketContext, H>> handler = this.handlers.get(packet.getClass());
-        if (handler == null) throw new PacketException("Unknown packet: " + packet.getClass());
+        if (handler == null)
+            throw new PacketException("Unknown packet: " + packet.getClass());
         handler.accept(packet, params);
     }
 

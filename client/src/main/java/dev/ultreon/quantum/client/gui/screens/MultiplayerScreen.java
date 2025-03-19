@@ -50,7 +50,7 @@ public class MultiplayerScreen extends Screen {
         selectionList.setSize(196, size.height - 30);
         selectionList.drawBackground(false);
         selectionList.selectable(true);
-        selectionList.itemRenderer((renderer, value, y, mouseX, mouseY, selected, deltaTime) -> {
+        selectionList.itemRenderer((renderer, value, y, selected, deltaTime) -> {
             ServerInfo info = value.info;
 
             renderer.renderFrame(2, y, 196, selectionList.getItemHeight());

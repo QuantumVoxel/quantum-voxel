@@ -123,7 +123,7 @@ public class ChatTextEntry extends TextEntry {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(Renderer renderer, float deltaTime) {
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, this.backgroundColor);
 
         if (renderer.pushScissors(this.getBounds().shrink(1, 1, 1, 4))) {
@@ -131,7 +131,7 @@ public class ChatTextEntry extends TextEntry {
         }
 
         this.popup.y = this.getY();
-        this.popup.render(renderer, mouseX, mouseY, deltaTime);
+        this.popup.render(renderer, deltaTime);
     }
 
     public void onTabComplete(String[] options) {

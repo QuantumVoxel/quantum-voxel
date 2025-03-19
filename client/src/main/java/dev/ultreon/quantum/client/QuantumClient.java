@@ -279,7 +279,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     // Window vibrancy
     private final boolean windowVibrancyEnabled = false;
     private final Rectangle gameBounds = new Rectangle();
-    private long lastPress;
+    private long lastCBPress;
 
     // G3D model loader (libGDX 3D models)
     public final G3dModelLoader modelLoader;
@@ -494,6 +494,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private boolean shuttingDown = false;
     private GridPoint2 offset = new GridPoint2(0, 0);
     private final GameInsets insets = new GameInsets(0, 0, 0, 0);
+    private boolean hovered = false;
+    private int clicks;
+    private long lastPress;
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -1198,7 +1201,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             return false; // The next screen is null, canceling.
         }
 
+        if (cur != null) cur.mouseExit();
         this.screen = next;
+
+        GridPoint2 mouse = getMousePos();
+        this.screen.mouseEnter(mouse.x, mouse.y);
         this.screen.init(this.getScaledWidth(), this.getScaledHeight());
         this.add("Screen", next);
         KeyAndMouseInput.setCursorCaught(false);
@@ -1501,7 +1508,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             else {
                 renderer.clearColor(0, 0, 0, 0);
             }
-            loading.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
+            loading.render(renderer, deltaTime);
             renderer.popMatrix();
             renderer.end();
         }
@@ -1706,9 +1713,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.minimizeButton.setX(width - 53 - winXOff * 2);
         this.minimizeButton.setY(3);
 
-        this.closeButton.render(renderer, Gdx.input.getX() / 2, Gdx.input.getY() / 2, 0);
-        this.maximizeButton.render(renderer, Gdx.input.getX() / 2, Gdx.input.getY() / 2, 0);
-        this.minimizeButton.render(renderer, Gdx.input.getX() / 2, Gdx.input.getY() / 2, 0);
+        this.closeButton.render(renderer, 0);
+        this.maximizeButton.render(renderer, 0);
+        this.minimizeButton.render(renderer, 0);
 
         this.window.update();
     }
@@ -1881,6 +1888,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         // Update camera based on player position
         if (player != null) {
             this.camera.update(player);
+        }
+
+        Screen screen1 = screen;
+        if (screen1 != null) {
+            screen1.tick();
         }
 
         // Execute post-game tick event
@@ -2417,7 +2429,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     public GridPoint2 getMousePos() {
         GameInsets insets = GamePlatform.get().getInsets();
-        return GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched() ? this.offset.set(insets.left, insets.top) : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
+        GridPoint2 gridPoint2 = GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched() ? this.offset.set(insets.left, insets.top) : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
+        return gridPoint2;
     }
 
     @ApiStatus.Experimental
@@ -2734,6 +2747,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     }
 
     public boolean mousePress(int mouseX, int mouseY, int button) {
+        if (mouseX < 0 || mouseY < 0 || mouseX > getWidth() || mouseY > getHeight()) return false;
+
+        this.lastPress = System.currentTimeMillis();
+
         if (isCustomBorderShown() && mouseY < 44 && button == Input.Buttons.LEFT) {
             if (closeButton.isWithinBounds(mouseX - 18, mouseY - 22))
                 return closeButton.mousePress(mouseX - 18, mouseY - 22, button);
@@ -2742,8 +2759,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             if (minimizeButton.isWithinBounds(mouseX - 18, mouseY - 22))
                 return minimizeButton.mousePress(mouseX - 18, mouseY - 22, button);
 
-            if (this.lastPress - System.currentTimeMillis() + 1000L > 0) {
-                lastPress = 0;
+            if (this.lastCBPress - System.currentTimeMillis() + 1000L > 0) {
+                lastCBPress = 0;
                 window.setResizable(true);
                 if (isMac) {
                     window.maximize();
@@ -2756,13 +2773,22 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             } else {
                 this.window.setDragging(true);
             }
-            this.lastPress = System.currentTimeMillis();
+            this.lastCBPress = System.currentTimeMillis();
             return true;
         }
+
+        Screen scr = this.screen;
+        if (scr != null) {
+            GridPoint2 mouse = getMousePos();
+            scr.mousePress((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), button);
+        }
+
         return false;
     }
 
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        if (mouseX < 0 || mouseY < 0 || mouseX > getWidth() || mouseY > getHeight()) return false;
+
         mouseX /= 2;
         mouseY /= 2;
         if (isCustomBorderShown() && mouseY < 44) {
@@ -2781,6 +2807,19 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             this.window.setDragging(false);
             return true;
         }
+
+        Screen scr = this.screen;
+        if (scr != null) {
+            GridPoint2 mouse = getMousePos();
+            if (lastPress - System.currentTimeMillis() < 1000L) {
+                clicks++;
+            } else {
+                clicks = 1;
+            }
+            scr.mouseClick((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), button, clicks);
+            scr.mouseRelease((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), button);
+        }
+
         return false;
     }
 
@@ -2878,5 +2917,33 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void mouseWheel(float amountX, float amountY) {
+        if (this.screen != null) {
+            GridPoint2 mouse = getMousePos();
+            if (mouse.x < 0 || mouse.y < 0 || mouse.x > getWidth() || mouse.y > getHeight()) return;
+
+            this.screen.mouseWheel((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), amountY);
+        }
+    }
+
+    public void mouseMoved(int screenX, int screenY) {
+        lastPress = Integer.MIN_VALUE / 2;
+
+        if (this.screen != null) {
+            if (screenX < 0 || screenY < 0 || screenX > getWidth() || screenY > getHeight()) {
+                if (hovered) {
+                    this.screen.mouseExit();
+                }
+                this.hovered = false;
+                return;
+            } else if (!hovered) {
+                this.screen.mouseEnter((int) (screenX / guiScale), (int) (screenY / guiScale));
+                this.hovered = true;
+            }
+
+            this.screen.mouseMoved((int) (screenX / guiScale), (int) (screenY / guiScale));
+        }
     }
 }

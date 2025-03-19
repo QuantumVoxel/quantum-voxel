@@ -29,7 +29,7 @@ public class Notifications implements Renderable {
     }
 
     @Override
-    public void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void render(Renderer renderer, float deltaTime) {
         if (this.client.isLoading()) return;
 
         int y = (int) (Notifications.OFFSET + this.motionY);

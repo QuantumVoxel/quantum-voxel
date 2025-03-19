@@ -78,48 +78,44 @@ public abstract class TabbedUI extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
         Dialog dialog = getDialog();
-        int oldMouseY = mouseY;
-        int oldMouseX = mouseX;
-
         if (dialog != null) {
-            mouseX = Integer.MIN_VALUE;
-            mouseY = Integer.MIN_VALUE;
+            isHovered = false;
         }
 
         for (Tab tab : this.tabs) {
             if (!tab.bottom()) {
-                tab.render(renderer, mouseX, mouseY, deltaTime);
+                tab.render(renderer, deltaTime);
             }
         }
 
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+        super.renderWidget(renderer, deltaTime);
 
         renderer.renderFrame(this.frameBounds.set(contentBounds).grow(4));
 
         if (this.tab != null && renderer.pushScissors(contentBounds)) {
             TabContent content = this.tab.content();
             content.bounds(contentBounds);
-            content.render(renderer, mouseX, mouseY, deltaTime);
+            content.render(renderer, deltaTime);
             renderer.popScissors();
         }
 
         for (Tab tab : this.tabs) {
             if (tab.bottom()) {
-                tab.render(renderer, mouseX, mouseY, deltaTime);
+                tab.render(renderer, deltaTime);
             }
         }
 
         if (dialog != null) {
             renderer.fill(0, 0, this.size.width, this.size.height, RgbColor.BLACK.withAlpha(0x70));
-            dialog.render(renderer, oldMouseX, oldMouseY, deltaTime);
+            dialog.render(renderer, deltaTime);
         }
     }
 
     @Override
-    public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderChildren(renderer, mouseX, mouseY, deltaTime);
+    public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
+        super.renderChildren(renderer, deltaTime);
     }
 
     @Override

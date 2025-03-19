@@ -51,8 +51,8 @@ public class ConfigsScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer gfx, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(gfx, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer gfx, float deltaTime) {
+        super.renderWidget(gfx, deltaTime);
 
         TextObject title = this.getTitle();
         gfx.textCenter(title != null ? title : TextObject.literal("Bindings"), this.size.width / 2, 16 - this.font.getLineHeight() / 2, RgbColor.WHITE);

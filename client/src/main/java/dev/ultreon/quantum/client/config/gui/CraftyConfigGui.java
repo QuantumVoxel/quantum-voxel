@@ -43,7 +43,7 @@ public class CraftyConfigGui extends Screen {
                 .bounds(() -> new Bounds(10, 10, this.size.width - 20, this.size.height - 20)));
     }
 
-    private void renderItem(Renderer renderer, CraftyConfig value, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+    private void renderItem(Renderer renderer, CraftyConfig value, int y, boolean selected, float deltaTime) {
         String fileName = value.getFileName();
         renderer.textLeft(fileName, 20, y + 20, RgbColor.rgb(selected ? 0xFF0000 : 0xFFFFFF));
     }

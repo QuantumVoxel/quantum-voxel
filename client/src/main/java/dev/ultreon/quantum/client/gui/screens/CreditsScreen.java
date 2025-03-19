@@ -160,7 +160,7 @@ public class CreditsScreen extends TabbedUI {
         }
 
         @Override
-        public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
+        public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
             int x = 0;
             Tab tab = CreditsScreen.this.getTab();
             if (tab == null) return;
@@ -175,7 +175,7 @@ public class CreditsScreen extends TabbedUI {
                 x += widget.getWidth() + 5;
             }
 
-            super.render(renderer, mouseX, mouseY, deltaTime);
+            super.render(renderer, deltaTime);
         }
 
         @Override

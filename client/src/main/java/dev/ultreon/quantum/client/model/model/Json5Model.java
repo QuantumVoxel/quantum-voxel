@@ -85,6 +85,11 @@ public class Json5Model implements BlockModel, ItemModel {
         return new Vector3(0, -20,0);
     }
 
+    @Override
+    public boolean hasAO() {
+        return ambientOcclusion;
+    }
+
     public Table<String, BlockDataEntry<?>, Json5Model> getOverrides() {
         return this.overrides;
     }

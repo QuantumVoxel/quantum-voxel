@@ -37,7 +37,7 @@ public class Panel extends Widget {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(Renderer renderer, float deltaTime) {
         renderer.renderFrame(pos.x, pos.y, size.width, size.height);
     }
 

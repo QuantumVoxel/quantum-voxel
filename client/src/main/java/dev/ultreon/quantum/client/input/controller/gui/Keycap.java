@@ -18,8 +18,8 @@ public class Keycap extends Button<Keycap> {
     }
 
     @Override
-    public void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        super.render(renderer, mouseX, mouseY, deltaTime);
+    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.render(renderer, deltaTime);
 
         this.icon.render(renderer, this.pos.x, this.pos.y, this.isFocused);
     }

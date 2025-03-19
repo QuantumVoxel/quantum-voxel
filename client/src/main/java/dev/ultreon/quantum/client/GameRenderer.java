@@ -47,8 +47,6 @@ public class GameRenderer implements Disposable {
     private final RenderContext context;
     private float cameraBop = 0.0f;
     private float blurScale = 0.0f;
-    private int lastX;
-    private int lastY;
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
@@ -163,7 +161,7 @@ public class GameRenderer implements Disposable {
 
             if (this.client.crashOverlay != null) {
                 if (Gdx.input.isKeyPressed(Input.Keys.F1) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    this.client.crashOverlay.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
+                    this.client.crashOverlay.render(renderer, deltaTime);
                 } else {
                     this.client.crashOverlay.reset();
                 }
@@ -171,7 +169,7 @@ public class GameRenderer implements Disposable {
         }
 
         if (!this.client.isLoading()) {
-            this.client.notifications.render(renderer, Integer.MAX_VALUE, Integer.MAX_VALUE, deltaTime);
+            this.client.notifications.render(renderer, deltaTime);
         }
 
         renderer.popMatrix();
@@ -213,7 +211,6 @@ public class GameRenderer implements Disposable {
 
         if (screen != null) {
             try (var ignored = QuantumClient.PROFILER.start("screen")) {
-
                 GridPoint2 mouseOffset = this.client.getMousePos();
                 float x = GamePlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
                 float y = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
@@ -235,7 +232,8 @@ public class GameRenderer implements Disposable {
                 Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
                 renderer.getBatch().enableBlending();
                 renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
-                screen.render(renderer, (int) x, (int) y, deltaTime);
+
+                screen.render(renderer, deltaTime);
                 screen.renderTooltips(renderer, (int) x, (int) y, deltaTime);
                 WindowManager.render(renderer, (int) x, (int) y, deltaTime);
                 renderer.getBatch().enableBlending();

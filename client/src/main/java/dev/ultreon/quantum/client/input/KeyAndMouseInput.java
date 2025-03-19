@@ -482,12 +482,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         Screen currentScreen = this.client.screen;
 
-        // Check if there is a current screen
-        if (currentScreen == null)
-            return false;
+        if (currentScreen != null) {
+            client.mouseMoved(screenX, screenY);
+        }
 
-        // Scale the coordinates and pass to the current screen
-        currentScreen.mouseMove((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()));
         return false;
     }
 
@@ -512,11 +510,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         // Check if the cursor is not caught
         if (!Gdx.input.isCursorCatched()) {
-            Screen currentScreen = this.client.screen;
-            // Call mouseDrag method on the current screen if it exists
-            if (currentScreen != null) currentScreen.mouseDrag(
-                    (int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()),
-                    (int) (Gdx.input.getDeltaX(pointer) / this.client.getGuiScale()), (int) (Gdx.input.getDeltaY(pointer) / this.client.getGuiScale()), pointer);
+
         }
         return false;
     }
@@ -547,13 +541,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         // Check if the cursor is not caught and there is a current screen
         if (!Gdx.input.isCursorCatched() && currentScreen != null) {
-            int mouseX = (int) (screenX / this.client.getGuiScale());
-            int mouseY = (int) (screenY / this.client.getGuiScale());
-
-            // Check if mouse press event is canceled or pressed
-            boolean canceled = ScreenEvents.MOUSE_PRESS.factory().onMousePressScreen(mouseX, mouseY, button).isCanceled();
-            boolean pressed = client.mousePress(mouseX + client.getMousePos().x, mouseY + client.getMousePos().y, button) || currentScreen.mousePress(mouseX, mouseY, button);
-            return !canceled && pressed;
+            client.mousePress(screenX, screenY, button);
+            return false;
         }
 
         // Check if the world is null or there is already a screen active
@@ -638,26 +627,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         // Stop breaking action
         this.client.stopBreaking();
-
-        // If the cursor is caught, do not handle the event
-        if (Gdx.input.isCursorCatched())
-            return false;
-
-        // Get the current screen being displayed
-        Screen currentScreen = this.client.screen;
-        if (currentScreen == null)
-            return false;
-
-        // Handle mouse release event on the current screen
-        if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button).isCanceled()) {
-            if (!currentScreen.mouseRelease((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button)) {
-                client.mouseRelease(screenX + client.getMousePos().x, screenY + client.getMousePos().y, button);
-            }
-        }
-
-        // Handle mouse click event on the current screen
-        if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1).isCanceled())
-            currentScreen.mouseClick((int) (screenX / this.client.getGuiScale()), (int) (screenY / this.client.getGuiScale()), button, 1);
+        this.client.mouseRelease(screenX, screenY, button);
 
         return false;
     }
@@ -696,9 +666,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             return true;
         }
 
-        // Handle mouse scroll event on the current screen
-        if (currentScreen != null && !ScreenEvents.MOUSE_WHEEL.factory().onMouseWheelScreen((int) (Gdx.input.getX() / this.client.getGuiScale()), (int) (Gdx.input.getY() / this.client.getGuiScale()), amountY).isCanceled())
-            return currentScreen.mouseWheel((int) (Gdx.input.getX() / this.client.getGuiScale()), (int) (Gdx.input.getY() / this.client.getGuiScale()), amountY);
+        client.mouseWheel(amountX, amountY);
 
         return false;
     }

@@ -63,22 +63,22 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         if (this.drawBackground) {
             renderer.renderFrame(pos.x - 2, pos.y - 2, size.width + 4, size.height + 4);
         }
 
         renderer.pushMatrix();
-        this.renderChildren(renderer, mouseX, mouseY, deltaTime);
+        this.renderChildren(renderer, deltaTime);
         renderer.popMatrix();
     }
 
     @Override
-    public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
         if (renderer.pushScissors(this.getBounds())) {
             for (Entry<T> entry : this.entries) {
                 if (entry.isVisible) {
-                    entry.render(renderer, 0, mouseX, mouseY - (int) this.scrollY, this.selectable && this.selected == entry, deltaTime);
+                    entry.render(renderer, 0, this.selectable && this.selected == entry, deltaTime);
                 }
             }
             renderer.popScissors();
@@ -316,7 +316,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
             this.list = list;
         }
 
-        public void render(Renderer renderer, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+        public void render(Renderer renderer, int y, boolean selected, float deltaTime) {
             this.pos.x = this.list.pos.x;
             this.pos.y = (int) (this.list.pos.y - this.list.scrollY + (this.list.getItemHeight() + this.list.getGap()) * this.list.entries.indexOf(this));
             this.size.width = this.list.size.width;
@@ -332,7 +332,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
                     renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.BLACK.withAlpha(0x20));
                 }
 
-                itemRenderer.render(renderer, this.value, this.pos.y, mouseX, mouseY, selected, deltaTime);
+                itemRenderer.render(renderer, this.value, this.pos.y, selected, deltaTime);
                 renderer.popScissors();
             }
         }
@@ -371,6 +371,6 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @FunctionalInterface
     public interface ItemRenderer<T> {
-        void render(Renderer renderer, T value, int y, int mouseX, int mouseY, boolean selected, float deltaTime);
+        void render(Renderer renderer, T value, int y, boolean selected, float deltaTime);
     }
 }

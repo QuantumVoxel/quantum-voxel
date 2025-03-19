@@ -46,19 +46,19 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, backgroundColor);
 
         this.innerYOffset = (int) Mth.clamp(this.scrollY, 0, this.contentHeight - this.size.height);
 
-        if (!isWithinBounds(mouseX, mouseY)) {
-            mouseX = mouseY = Integer.MIN_VALUE;
+        if (!isHovered) {
+            this.hoveredWidget = null;
         }
 
         renderer.pushMatrix();
         if (renderer.pushScissors(this.getBounds())) {
             renderer.translate(0, -this.scrollY);
-            this.renderChildren(renderer, mouseX, (int) (mouseY + scrollY), deltaTime);
+            this.renderChildren(renderer, deltaTime);
             renderer.popScissors();
         }
         renderer.popMatrix();

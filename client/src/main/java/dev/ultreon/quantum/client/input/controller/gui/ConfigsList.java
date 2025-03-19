@@ -31,12 +31,12 @@ public class ConfigsList extends SelectionList<ConfigsList.ListEntry> {
     }
 
     @Override
-    public void renderChildren(@NotNull Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+    public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
         if (renderer.pushScissors(this.getBounds())) {
             for (Entry<?> entry0 : this.entries) {
                 if (!(entry0 instanceof ListEntry entry)) continue;
                 if (entry.isVisible) {
-                    entry.render(renderer, 0, mouseX, mouseY - (int) this.getScrollY(), this.isSelectable() && this.getSelected() == entry, deltaTime);
+                    entry.render(renderer, 0, this.isSelectable() && this.getSelected() == entry, deltaTime);
                 }
             }
             renderer.popScissors();
@@ -80,7 +80,7 @@ public class ConfigsList extends SelectionList<ConfigsList.ListEntry> {
             renderer.textLeft(this.configEntry.getTitle(), 2 + x, y + rowHeight / 2 - client.font.getLineHeight() / 2, 0xffffffff, true);
 
             this.widget.setPos(rowWidth - 160, y + 2);
-            this.widget.render(renderer, mouseX, mouseY, partialTicks);
+            this.widget.render(renderer, partialTicks);
         }
 
         @NotNull

@@ -65,16 +65,16 @@ public class ConfigGui extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
-        if (renderer.pushScissors(this.list.getBounds())) {
+        if (this.list != null && renderer.pushScissors(this.list.getBounds())) {
             int y = (int) (list.getY() + 16 - list.getScrollY());
             for (Widget entryWidget : this.entryWidgets) {
                 entryWidget.setY(y);
                 entryWidget.setX(list.getX() + list.getWidth() - 30 - entryWidget.getWidth());
                 this.defineRoot(entryWidget);
-                entryWidget.render(renderer, mouseX, mouseY, deltaTime);
+                entryWidget.render(renderer, deltaTime);
                 y += list.getItemHeight();
             }
             renderer.popScissors();
@@ -136,7 +136,7 @@ public class ConfigGui extends Screen {
         return super.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
     }
 
-    private void renderItem(Renderer renderer, ConfigEntry<?> value, int y, int mouseX, int mouseY, boolean selected, float deltaTime) {
+    private void renderItem(Renderer renderer, ConfigEntry<?> value, int y, boolean selected, float deltaTime) {
         String fileName = value.getKey();
         String comment = value.getComment();
         if (comment != null) {

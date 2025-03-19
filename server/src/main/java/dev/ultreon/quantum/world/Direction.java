@@ -177,4 +177,8 @@ public enum Direction implements StringSerializable {
             case DOWN -> -1;
         };
     }
+
+    public boolean isNegative() {
+        return this == Direction.DOWN || this == Direction.WEST || this == Direction.SOUTH;
+    }
 }

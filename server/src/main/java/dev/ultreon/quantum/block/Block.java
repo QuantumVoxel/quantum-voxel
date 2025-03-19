@@ -115,7 +115,7 @@ public class Block {
     }
 
     public boolean isAir() {
-        return this == Blocks.AIR || this == Blocks.CAVE_AIR;
+        return this == Blocks.AIR || this == Blocks.CAVE_AIR || this == Blocks.VOID_AIR;
     }
 
     public boolean hasCollider() {

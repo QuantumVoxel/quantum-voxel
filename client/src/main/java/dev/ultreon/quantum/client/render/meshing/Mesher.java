@@ -3,8 +3,6 @@ package dev.ultreon.quantum.client.render.meshing;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import dev.ultreon.quantum.block.Block;
 
-import java.util.List;
-
 /**
  * Turns an array of voxels into OpenGL vertices
  */
@@ -14,8 +12,9 @@ public interface Mesher {
      *
      * @param condition The condition to determine which blocks should be used for the mesh.
      * @param builder   The MeshPartBuilder to construct the mesh.
+     * @return
      */
-    void buildMesh(UseCondition condition, MeshPartBuilder builder);
+    boolean buildMesh(UseCondition condition, MeshPartBuilder builder);
 
     /**
      * Determines whether a block should be used in the mesh.

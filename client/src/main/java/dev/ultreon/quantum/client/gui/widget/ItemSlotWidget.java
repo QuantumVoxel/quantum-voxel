@@ -16,8 +16,8 @@ public class ItemSlotWidget extends Widget {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         renderer.drawItemStack(slot.getItem(), this.pos.x, this.pos.y);
 

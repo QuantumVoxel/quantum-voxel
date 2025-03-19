@@ -15,9 +15,7 @@ public interface StaticWidget {
      * Renders this widget.
      *
      * @param renderer  The renderer
-     * @param mouseX    The setX position of the mouse
-     * @param mouseY    The setY position of the mouse
      * @param deltaTime The delta time of the rendering
      */
-    void render(@NotNull Renderer renderer, int mouseX, int mouseY, @IntRange(from = 0) float deltaTime);
+    void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime);
 }

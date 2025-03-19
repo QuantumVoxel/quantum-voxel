@@ -29,5 +29,5 @@ public class KeyBinds {
     public static final KeyBind walkRightKey = KeyBindRegistry.register(new KeyBind("walkRight", Input.Keys.D, KeyBind.Type.KEY));
     public static final KeyBind jumpKey = KeyBindRegistry.register(new KeyBind("jump", Input.Keys.SPACE, KeyBind.Type.KEY));
     public static final KeyBind crouchKey = KeyBindRegistry.register(new KeyBind("crouch", Input.Keys.SHIFT_LEFT, KeyBind.Type.KEY));
-    public static final KeyBind runningKey = KeyBindRegistry.register(new KeyBind("running", OS.isMac() ? Input.Keys.ALT_LEFT : Input.Keys.CONTROL_LEFT, KeyBind.Type.KEY));
+    public static final KeyBind runningKey = KeyBindRegistry.register(new KeyBind("running", Input.Keys.CONTROL_LEFT, KeyBind.Type.KEY));
 }

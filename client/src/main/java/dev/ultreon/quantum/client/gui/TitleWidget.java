@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui;
 
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -30,8 +29,8 @@ public class TitleWidget extends Widget {
     }
 
     @Override
-    public void renderWidget(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        super.renderWidget(renderer, mouseX, mouseY, deltaTime);
+    public void renderWidget(Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
 
         NamespaceID texture = new NamespaceID("textures/gui/title.png");
 
@@ -40,16 +39,11 @@ public class TitleWidget extends Widget {
             renderer.fill(0, 0, size.width, size.height, RgbColor.WHITE.withAlpha(0x20));
 
             if (parent != null) {
-                boolean isBackHovered = isPosWithin(mouseX, mouseY, 0, 0, 80, size.height);
-                int u = isBackHovered ? 21 : 0;
-                int v = isBackPressed() ? 21 : 0;
-
-//                renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
-                if (isBackHovered) {
-                    renderer.fill(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
-                } else {
-                    renderer.box(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
-                }
+//                if (isBackHovered) {
+//                    renderer.fill(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
+//                } else {
+//                    renderer.box(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
+//                }
 
                 int yOffset = isBackPressed() ? 2 : 0;
                 renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);
@@ -60,11 +54,11 @@ public class TitleWidget extends Widget {
             renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
 
             if (parent != null) {
-                boolean isBackHovered = isPosWithin(mouseX, mouseY, 0, 0, 80, size.height);
-                int u = isBackHovered ? 21 : 0;
-                int v = isBackPressed() ? 21 : 0;
-
-                renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
+//                boolean isBackHovered = isHovered;
+//                int u = isBackHovered ? 21 : 0;
+//                int v = isBackPressed() ? 21 : 0;
+//
+//                renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
 
                 int yOffset = isBackPressed() ? 2 : 0;
                 renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);

@@ -216,7 +216,6 @@ public class Main {
         while (true) {
             try {
                 if (System.in.read() != -1) {
-                    System.exit(1);
                     break;
                 }
 

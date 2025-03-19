@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher.LightLevelData;
 import dev.ultreon.quantum.client.render.meshing.PerCornerLightData;
+import dev.ultreon.quantum.client.world.AOUtils;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.world.Direction;
 
 /**
  * NormalBlockRenderer is responsible for rendering the six faces of a block in a 3D environment.
@@ -23,7 +25,7 @@ public class NormalBlockRenderer implements BlockRenderer {
     private final ThreadLocal<VertexInfo> c11 = ThreadLocal.withInitial(VertexInfo::new);
 
     @Override
-    public void renderNorth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
+    public void renderNorth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, int[] ao, MeshPartBuilder builder) {
         var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
@@ -53,11 +55,12 @@ public class NormalBlockRenderer implements BlockRenderer {
             c11.setCol(lightData.l11, lightData.l11, lightData.l11, lightData.s11);
         }
 
+        applyAo(c00, c01, c10, c11, AOUtils.aoForSide(ao, Direction.NORTH));
         builder.rect(c00, c10, c11, c01);
     }
 
     @Override
-    public void renderSouth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
+    public void renderSouth(TextureRegion region, float x1, float y1, float x2, float y2, float z, LightLevelData lld, PerCornerLightData lightData, int[] ao, MeshPartBuilder builder) {
         var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
@@ -87,11 +90,12 @@ public class NormalBlockRenderer implements BlockRenderer {
             c11.setCol(lightData.l11, lightData.l11, lightData.l11, lightData.s11);
         }
 
+        applyAo(c00, c01, c10, c11, AOUtils.aoForSide(ao, Direction.SOUTH));
         builder.rect(c01, c11, c10, c00);
     }
 
     @Override
-    public void renderWest(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
+    public void renderWest(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, int[] ao, MeshPartBuilder builder) {
         var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
@@ -121,11 +125,12 @@ public class NormalBlockRenderer implements BlockRenderer {
             c11.setCol(lightData.l11, lightData.l11, lightData.l11, lightData.s11);
         }
 
+        applyAo(c00, c01, c10, c11, AOUtils.aoForSide(ao, Direction.WEST));
         builder.rect(c01, c11, c10, c00);
     }
 
     @Override
-    public void renderEast(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
+    public void renderEast(TextureRegion region, float z1, float y1, float z2, float y2, float x, LightLevelData lld, PerCornerLightData lightData, int[] ao, MeshPartBuilder builder) {
         var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
@@ -155,11 +160,12 @@ public class NormalBlockRenderer implements BlockRenderer {
             c11.setCol(lightData.l11, lightData.l11, lightData.l11, lightData.s11);
         }
 
+        applyAo(c00, c01, c10, c11, AOUtils.aoForSide(ao, Direction.EAST));
         builder.rect(c00, c10, c11, c01);
     }
 
     @Override
-    public void renderTop(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
+    public void renderTop(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, int[] ao, MeshPartBuilder builder) {
         var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
@@ -188,11 +194,12 @@ public class NormalBlockRenderer implements BlockRenderer {
             c11.setCol(lightData.l11, lightData.l11, lightData.l11, lightData.s11);
         }
 
+        applyAo(c00, c01, c10, c11, AOUtils.aoForSide(ao, Direction.UP));
         builder.rect(c01, c11, c10, c00);
     }
 
     @Override
-    public void renderBottom(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, MeshPartBuilder builder) {
+    public void renderBottom(TextureRegion region, float x1, float z1, float x2, float z2, float y, LightLevelData lld, PerCornerLightData lightData, int[] ao, MeshPartBuilder builder) {
         var lightLevel = lld.blockBrightness();
 
         if (region == null) return;
@@ -222,7 +229,19 @@ public class NormalBlockRenderer implements BlockRenderer {
             c11.setCol(lightData.l11, lightData.l11, lightData.l11, lightData.s11);
         }
 
+        applyAo(c00, c01, c10, c11, AOUtils.aoForSide(ao, Direction.DOWN));
         builder.rect(c00, c10, c11, c01);
+    }
+
+    private void applyAo(VertexInfo c00, VertexInfo c01, VertexInfo c10, VertexInfo c11, int ao) {
+        getMul(c00, AOUtils.hasAoCorner00(ao));
+        getMul(c01, AOUtils.hasAoCorner01(ao));
+        getMul(c10, AOUtils.hasAoCorner10(ao));
+        getMul(c11, AOUtils.hasAoCorner11(ao));
+    }
+
+    private static void getMul(VertexInfo c00, boolean ao) {
+        c00.color.add(0.2f, 0.2f, 0.2f, 0.0f).mul((float) (ao ? 0.5 : 1.0), (float) (ao ? 0.5 : 1.0), (float) (ao ? 0.5 : 1.0), 1.0f);
     }
 
     protected Color getColor(int x, int y, int z) {

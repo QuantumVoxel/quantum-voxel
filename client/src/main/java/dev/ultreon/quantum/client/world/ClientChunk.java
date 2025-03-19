@@ -25,10 +25,7 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.Vec3i;
-import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.LightSource;
-import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -269,6 +266,39 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @Override
     public boolean isEmpty() {
         return empty;
+    }
+
+    @Override
+    public BlockState getSafe(int x, int y, int z) {
+        if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+            BlockVec start = getVec().start();
+            x += start.x;
+            y += start.y;
+            z += start.z;
+
+            return clientWorld.get(x, y, z);
+        }
+
+        return get(x, y, z);
+    }
+
+    @Override
+    public int getBlockLightSafe(int x, int y, int z) {
+        if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+            BlockVec start = getVec().start();
+            x += start.x;
+            y += start.y;
+            z += start.z;
+
+            return clientWorld.getBlockLight(x, y, z);
+        }
+
+        return getBlockLight(x, y, z);
+    }
+
+    @Override
+    public int getSunlightSafe(int x, int y, int z) {
+        return !getSafe(x, y, z).isAir() ? 15 : 6;
     }
 
     public void renderModels(SceneCategory sceneCategory) {

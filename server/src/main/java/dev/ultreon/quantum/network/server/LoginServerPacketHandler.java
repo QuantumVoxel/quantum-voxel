@@ -110,19 +110,20 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
         player.connection.send(
                 new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()),
-                PacketListener.onSuccess(() -> connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(server, player, connection)))
+                PacketListener.onSuccess(() -> {
+                    connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(server, player, connection));
+                    server.placePlayer(player);
+
+                    PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
+                    player.sendAllData();
+
+                    if (!player.isSpawned()) {
+                        player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), connection);
+                    }
+
+                    PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);
+                })
         );
-
-        server.placePlayer(player);
-
-        PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
-        player.sendAllData();
-
-        if (!player.isSpawned()) {
-            player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), connection);
-        }
-
-        PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);
     }
 
     @Override
