@@ -442,7 +442,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         if (DebugFlags.LOG_CHUNK_LOAD_FAILURE.isEnabled())
             Chat.sendInfo(this, "Failed to load chunk " + vec);
 
-        ServerChunk chunk = this.world.getChunk(vec);
+        ServerChunk chunk = this.world.getChunkNoLoad(vec);
         if (chunk != null) {
             chunk.getTracker().stopTracking(this);
             this.chunkTracker.stopTracking(vec);
