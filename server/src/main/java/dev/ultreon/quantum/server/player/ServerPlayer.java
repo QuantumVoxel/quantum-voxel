@@ -266,8 +266,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     /**
      * Sends all data to the client.
-     *
-     * @apiNote Should only be called when strictly necessary.
+     * <p>
+     * API Note: Should only be called when strictly necessary.
      * Sending all data too frequently can cause lag and too much unnecessary network traffic.
      */
     @ApiStatus.Internal

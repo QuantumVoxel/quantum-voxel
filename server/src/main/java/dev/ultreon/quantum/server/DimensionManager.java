@@ -127,9 +127,9 @@ public class DimensionManager {
 
     /**
      * Retrieves a map of all ServerWorld instances managed by the DimensionManager,
-     * keyed by their RegistryKey<DimensionInfo>.
+     * keyed by their RegistryKey&lt;DimensionInfo&gt;.
      *
-     * @return a map containing the RegistryKey<DimensionInfo> as keys and the corresponding
+     * @return a map containing the RegistryKey&lt;DimensionInfo&gt; as keys and the corresponding
      * ServerWorld instances as values
      */
     public Map<RegistryKey<DimensionInfo>, ServerWorld> getWorlds() {

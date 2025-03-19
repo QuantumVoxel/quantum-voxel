@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2011 See AUTHORS file.
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p>
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,13 +22,13 @@ import com.badlogic.gdx.graphics.GL32;
 
 /**
  * Define a shader stage preset including a shader type, name and file extension.
- * 
+ * <p>
  * This class contains several shader stage presets for convenience and mainly used by ShaderProgramLoader.
  * You're not limited to the predefined ones, you can create your own to change naming convention
  * or in order to support other shader stage type (eg. Compute Shader available with OpenGL 4.3+).
- * 
+ * <p>
  * Note that geometry and tesselation shaders require GLES 3.2+ and are not supported by WebGL. 
- * 
+ * <p>
  * Shader file extension is following official convention
  * (https://www.khronos.org/opengles/sdk/tools/Reference-Compiler/) :
  * <ul>

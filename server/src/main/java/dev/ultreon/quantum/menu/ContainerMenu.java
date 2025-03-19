@@ -300,8 +300,8 @@ public abstract class ContainerMenu implements Menu {
 
     /**
      * Sends all items to the players watching the menu.
-     *
-     * @apiNote Should only be called when strictly necessary. Sending all items too frequently can cause lag and too much unnecessary network traffic.
+     * <p>
+     * API Note: Should only be called when strictly necessary. Sending all items too frequently can cause lag and too much unnecessary network traffic.
      */
     @ApiStatus.Internal
     public void onAllChanged() {

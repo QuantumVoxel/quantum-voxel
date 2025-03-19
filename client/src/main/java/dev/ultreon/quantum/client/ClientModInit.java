@@ -13,7 +13,7 @@ public interface ClientModInit extends ClientModInitializer {
      * The key for the client-side initialization entry point.
      * When the game platform invokes entry points, it uses this key to
      * identify the client-side initialization entry point.
-     *
+     * <p>
      * This would be the key to use in the {@code fabric.mod.json} file.
      */
     String ENTRYPOINT_KEY = "client-init";
