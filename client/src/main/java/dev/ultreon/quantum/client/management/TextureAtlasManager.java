@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.management;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
@@ -20,8 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static dev.ultreon.quantum.client.QuantumClient.id;
 
 public class TextureAtlasManager implements Manager<TextureAtlas> {
     private final Map<NamespaceID, TextureAtlas> atlasMap = new LinkedHashMap<>();
@@ -49,13 +48,13 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
 
         atlasMap.clear();
 
-        this.client.blocksTextureAtlas = this.register(id("block"), BlockModelRegistry.get().stitch(this.client.getTextureManager()));
+        this.client.blocksTextureAtlas = this.register(NamespaceID.of("block"), BlockModelRegistry.get().stitch(this.client.getTextureManager()));
 
-        TextureStitcher itemTextures = new TextureStitcher(id("item"));
-        for (Map.Entry<RegistryKey<Item>, Item> e : Registries.ITEM.entries()) {
-            if (e.getValue() == Items.AIR || e.getValue() instanceof BlockItem) continue;
+        TextureStitcher itemTextures = new TextureStitcher(NamespaceID.of("item"));
+        for (ObjectMap.Entry<RegistryKey<Item>, Item> e : Registries.ITEM.entries()) {
+            if (e.value == Items.AIR || e.value instanceof BlockItem) continue;
 
-            NamespaceID texId = e.getKey().id().mapPath(path -> "textures/items/" + path + ".png");
+            NamespaceID texId = e.key.id().mapPath(path -> "textures/items/" + path + ".png");
             FileHandle resource = QuantumClient.resource(texId);
             if (!resource.exists()) {
                 itemTextures.add(texId, TextureManager.MISSING_NO);
@@ -64,6 +63,6 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
             Pixmap tex = new Pixmap(resource);
             itemTextures.add(texId, tex);
         }
-        this.client.itemTextureAtlas = this.register(id("item"), itemTextures.stitch());
+        this.client.itemTextureAtlas = this.register(NamespaceID.of("item"), itemTextures.stitch());
     }
 }

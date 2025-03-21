@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 /**
  * @param <T>
  * @since 0.2.0
- * @author <a href="https://github.com/XyperCodee">XyperCode</a>
+ * @author <a href="https://github.com/XyperCodee">Qubilux</a>
  */
 public class Result<T> {
     private final Ok<T> ok;

@@ -18,6 +18,11 @@ import java.util.function.Function;
 /**
  * ModelManager is a singleton class responsible for managing 3D models.
  * It allows creation, loading, and unloading of models.
+ * <p>
+ * This is a part of the render pipeline. It is used to manage the models.
+ * </p>
+ *  
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class ModelManager {
     public static final ModelManager INSTANCE = new ModelManager();

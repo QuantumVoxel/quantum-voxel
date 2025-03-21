@@ -331,6 +331,7 @@ public abstract class Player extends LivingEntity {
         this.setGameMode(spectating ? GameMode.SPECTATOR : GameMode.SURVIVAL);
     }
 
+    @Nullable
     @Override
     public SoundEvent getHurtSound() {
         return SoundEvents.PLAYER_HURT;
@@ -479,7 +480,6 @@ public abstract class Player extends LivingEntity {
     }
 
     /**
-     * {@inheritDoc}
      * <p>
      * This also clamps the player's position to {@code -30000000..30000000}
      * And other handling of invalid positions

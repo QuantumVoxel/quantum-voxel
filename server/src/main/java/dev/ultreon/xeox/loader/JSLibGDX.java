@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.GL30;
 /**
  * LibGDX JS wrapper for XeoxJS.
  * 
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * 
  */
 public class JSLibGDX {

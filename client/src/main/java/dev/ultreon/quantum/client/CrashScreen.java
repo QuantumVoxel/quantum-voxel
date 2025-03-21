@@ -1,6 +1,14 @@
 package dev.ultreon.quantum.client;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import org.checkerframework.common.value.qual.IntRange;
+import org.jetbrains.annotations.NotNull;
+
 import com.badlogic.gdx.Gdx;
+
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -10,20 +18,19 @@ import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
-import org.checkerframework.common.value.qual.IntRange;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 /**
  * Represents a screen that displays crash logs.
+ * <p>
+ * This class extends the Screen class and provides a method to display crash logs.
+ * </p>
  *
  * @since 0.1.0
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class CrashScreen extends Screen {
-    // List of stack elements to be ignored in crash logs
+    /**
+     * List of stack elements to be ignored in crash logs.
+     */
     private static final List<String> UNUSABLE_STACK_ELEMENTS = List.of(
             "dev.ultreon.quantum.crash.", // Crash handling
             "java.", "javax.", "javafx.", // Java packages
@@ -33,8 +40,14 @@ public class CrashScreen extends Screen {
             "com.badlogic.gdx."           // libGDX packages
     );
 
-    // List of crash logs
+    /**
+     * List of crash logs to be displayed.
+     */
     private final List<CrashLog> crashes;
+
+    /**
+     * The GUI list of crash logs to be displayed.
+     */
     private SelectionList<CrashLog> list;
 
     /**
@@ -144,11 +157,21 @@ public class CrashScreen extends Screen {
         renderer.textLeft("    " + usableStackTrace, 20, y + 44, ColorCode.DARK_GRAY);
     }
 
+    /**
+     * Checks if the screen can be closed with the escape key.
+     *
+     * @return true if the screen can be closed with the escape key, false otherwise.
+     */
     @Override
     public boolean canCloseWithEsc() {
         return false;
     }
 
+    /**
+     * Checks if the screen can be closed.
+     *
+     * @return true if the screen can be closed, false otherwise.
+     */
     @Override
     public boolean canClose() {
         return false;

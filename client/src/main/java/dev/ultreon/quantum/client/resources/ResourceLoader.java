@@ -16,6 +16,11 @@ import dev.ultreon.quantum.util.NamespaceID;
 import static org.jetbrains.annotations.ApiStatus.Experimental;
 import static org.jetbrains.annotations.ApiStatus.Internal;
 
+/**
+ * A utility class for loading resources.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public class ResourceLoader {
     private static final G3dModelLoader g3djLoader = new G3dModelLoader(new JsonReader());
     private static final G3dModelLoader g3dbLoader = new G3dModelLoader(new UBJsonReader());

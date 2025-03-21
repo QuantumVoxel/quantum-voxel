@@ -2,6 +2,7 @@ package dev.ultreon.quantum.collection;
 
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -70,6 +71,7 @@ public class OrderedMap<K, V> extends AbstractMap<K, V> {
         }
     }
 
+    @Nullable
     @Override
     public V get(Object key) {
         this.validateSizes();

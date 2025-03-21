@@ -6,6 +6,8 @@ import dev.ultreon.quantum.log.LoggerFactory;
 
 /**
  * Custom logger implementation for LibGDX.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 class GdxSlf4jLogger implements ApplicationLogger {
     private final Logger LOGGER = LoggerFactory.getLogger("LibGDX");

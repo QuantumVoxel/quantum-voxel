@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -12,6 +13,7 @@ import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
+import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.render.SceneCategory;
@@ -65,6 +67,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public final ClientChunkInfo info = new ClientChunkInfo();
     public int lod;
     private boolean empty = false;
+    private BoundingBox boundingBox;
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
@@ -420,5 +423,12 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public int getSunlight(int x, int y, int z) {
 //        return get(x, y, z).isAir() ? 15 : 0;
         return 15;
+    }
+
+    public BoundingBox getBoundingBox() {
+        this.boundingBox.min.set(renderOffset).sub(WorldRenderer.HALF_CHUNK_DIMENSIONS);
+        this.boundingBox.max.set(renderOffset).add(WorldRenderer.HALF_CHUNK_DIMENSIONS);
+
+        return this.boundingBox;
     }
 }

@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.recipe;
 
-import dev.ultreon.quantum.collection.OrderedMap;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.AbstractRegistryMap;
@@ -8,71 +8,74 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+@SuppressWarnings("GDXJavaUnsafeIterator")
 public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<NamespaceID, T> {
     public static final String CATEGORY = "recipe";
-    final OrderedMap<NamespaceID, T> keyMap = new OrderedMap<>();
-    private final OrderedMap<T, NamespaceID> valueMap = new OrderedMap<>();
+    final ObjectMap<NamespaceID, T> registry = new ObjectMap<>();
     private boolean frozen = false;
 
     @Override
     public T get(NamespaceID obj) {
-        return this.keyMap.get(obj);
+        return this.registry.get(obj);
     }
 
     @Override
     public void register(NamespaceID key, T val) {
         if (this.frozen) throw new IllegalStateException("Registry is frozen");
 
-        this.keyMap.put(key, val);
-        this.valueMap.put(val, key);
+        this.registry.put(key, val);
     }
 
     @Override
-    public List<T> values() {
-        return this.keyMap.valueList();
+    public ObjectMap.Values<T> values() {
+        return this.registry.values();
     }
 
     @Override
-    public List<NamespaceID> keys() {
-        return this.keyMap.keyList();
+    public ObjectMap.Keys<NamespaceID> keys() {
+        return this.registry.keys();
     }
 
     @Override
-    public Set<Map.Entry<NamespaceID, T>> entries() throws IllegalAccessException {
-        return this.keyMap.entrySet();
+    public ObjectMap.Entries<NamespaceID, T> entries() throws IllegalAccessException {
+        return this.registry.entries();
+    }
+
+    @Override
+    protected int size() {
+        return this.registry.size;
     }
 
     public PagedList<T> getRecipes(int pageSize, @Nullable ContainerMenu inventory) {
-        List<T> values = this.keyMap.valueList();
+        ObjectMap.Values<T> values = this.registry.values();
+        PagedList<T> list = new PagedList<>(pageSize);
         if (inventory != null) {
-            values = values.stream().filter(t -> t.canCraft(inventory)).collect(Collectors.toList());
+            for (T recipe : values) {
+                if (recipe != null && recipe.canCraft(inventory)) list.add(recipe);
+            }
         }
-        return new PagedList<>(pageSize, values);
+
+        return list;
     }
 
     public NamespaceID getKey(T recipe) {
-        return this.valueMap.get(recipe);
+        return this.registry.findKey(recipe, true);
     }
 
     public T removeRecipe(NamespaceID id) {
         if (this.frozen) throw new IllegalStateException("Registry is frozen");
 
-        T recipe = this.keyMap.remove(id);
-        this.valueMap.remove(recipe);
-        return recipe;
+        return this.registry.remove(id);
     }
 
     public void freeze() {
         this.frozen = true;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<T> findRecipe(Menu menu) {
-        return this.keyMap.values().stream().filter(t -> t.canCraft(menu)).toList();
+        return Arrays.stream(this.registry.values().toArray().items).filter(t -> t.canCraft(menu)).toList();
     }
 }

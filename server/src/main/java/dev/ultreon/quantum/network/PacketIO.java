@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.network;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
@@ -1201,6 +1202,25 @@ public class PacketIO {
             this.output.flush();
         } catch (IOException e) {
             throw new PacketException(e);
+        }
+    }
+
+    public <K, V> ObjectMap<K, V> readObjectMap(Function<PacketIO, K> keyDecoder, Function<PacketIO, V> valueDecoder) {
+        int size = this.readMedium();
+        var map = new ObjectMap<K, V>(size);
+
+        for (int i = 0; i < size; i++) {
+            map.put(keyDecoder.apply(this), valueDecoder.apply(this));
+        }
+
+        return map;
+    }
+
+    public <K, V> void writeObjectMap(ObjectMap<K, V> map, BiConsumer<PacketIO, K> keyEncoder, BiConsumer<PacketIO, V> valueEncoder) {
+        this.writeMedium(map.size);
+        for (ObjectMap.Entry<K, V> entry : map.entries()) {
+            keyEncoder.accept(this, entry.key);
+            valueEncoder.accept(this, entry.value);
         }
     }
 

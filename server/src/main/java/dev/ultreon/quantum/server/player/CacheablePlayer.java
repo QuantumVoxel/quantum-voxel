@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * Base class for cached players and server players.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public interface CacheablePlayer {

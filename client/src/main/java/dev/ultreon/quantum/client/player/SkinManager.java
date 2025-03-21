@@ -10,10 +10,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * This class is used to manage the skin of the player.
+ *
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ * @since 0.1.0
+ */
 public class SkinManager implements Disposable {
     private CompletableFuture<Texture> future = loadAsync();
     private Texture localSkin;
 
+    /**
+     * This method is used to load the skin asynchronously.
+     *
+     * @return The future of the skin.
+     */
     @NotNull
     private CompletableFuture<Texture> loadAsync() {
         return CompletableFuture.supplyAsync(() -> {
@@ -31,18 +42,34 @@ public class SkinManager implements Disposable {
         });
     }
 
+    /**
+     * This method is used to get the local skin.
+     *
+     * @return The local skin.
+     */
     public Texture getLocalSkin() {
         return getOrNull();
     }
 
+    /**
+     * This method is used to get the local skin or null if it is not loaded.
+     *
+     * @return The local skin or null if it is not loaded.
+     */
     private Texture getOrNull() {
         return future.getNow(null);
     }
 
+    /**
+     * This method is used to reload the resources.
+     */
     public void reloadResources() {
 
     }
 
+    /**
+     * This method is used to reload the skin.
+     */
     public void reload() {
         if (getOrNull() == null) return;
         getOrNull().dispose();
@@ -51,6 +78,9 @@ public class SkinManager implements Disposable {
         ClientReloadEvent.SKIN_RELOAD.factory().onSkinReload();
     }
 
+    /**
+     * This method is used to dispose of the skin.
+     */
     @Override
     public void dispose() {
         if (!future.isDone()) future.cancel(true);

@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Represents the game window using LWJGL3.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public abstract class GameWindow {

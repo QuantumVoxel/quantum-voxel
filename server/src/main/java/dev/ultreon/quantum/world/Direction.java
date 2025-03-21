@@ -10,6 +10,7 @@ import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.rng.RNG;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -150,7 +151,7 @@ public enum Direction implements StringSerializable {
     }
 
     @Override
-    public String serialize() {
+    public @NotNull String serialize() {
         return name().toLowerCase();
     }
 

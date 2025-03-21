@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.api.commands.selector;
 
+import org.jetbrains.annotations.Nullable;
+
 public enum SelectorKey {
     TAG('#'),
     TYPE('!'),
@@ -13,7 +15,7 @@ public enum SelectorKey {
 
     private final char key;
 
-    private SelectorKey(char key) {
+    SelectorKey(char key) {
         this.key = key;
     }
 
@@ -26,7 +28,7 @@ public enum SelectorKey {
         return this.key;
     }
 
-    public static SelectorKey fromKey(char key) {
+    public static @Nullable SelectorKey fromKey(char key) {
         for (SelectorKey k : values()) {
             if (k.symbol() == key) {
                 return k;

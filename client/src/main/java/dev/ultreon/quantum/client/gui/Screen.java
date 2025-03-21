@@ -6,6 +6,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.UIPath;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.client.util.Resizer;
@@ -16,38 +17,78 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.List;
 
 /**
  * Represents an abstract screen in the UI.
  * This class provides a framework for managing and rendering a screen, including its title, background, and dialog if any.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public abstract class Screen extends UIContainer<Screen> {
     private static final Color BACKGOUND_OVERLAY = new Color(0, 0, 0, 0.25f);
     private static final Color DIALOG_BACKGROUND = new Color(0, 0, 0, 0.45f);
     private final Resizer resizer;
     protected @Nullable TextObject title;
+
+    /**
+     * The parent screen of this screen.
+     */
     public @Nullable Screen parentScreen;
+
+    /**
+     * The widget that is currently being hovered over.
+     */
     public Widget directHovered;
-    public @Nullable Widget focused;
+
+    /**
+     * The widget that is currently focused on.
+     */
+    public @Nullable Widget focused;    
+
+    /**
+     * The title widget of this screen.
+     */
     @Nullable
     protected TitleWidget titleWidget = null;
+
     private Dialog dialog;
     private boolean dialogHovered;
 
+    /**
+     * Creates a new screen with the given title.
+     *
+     * @param title the title of the screen.
+     */
     protected Screen(@Nullable String title) {
         this(title == null ? null : TextObject.literal(title));
     }
 
+    /**
+     * Creates a new screen with the given title.
+     *
+     * @param title the title of the screen.
+     */
     protected Screen(@Nullable TextObject title) {
         this(title, QuantumClient.get().screen);
     }
 
+    /**
+     * Creates a new screen with the given title and parent screen.
+     *
+     * @param title the title of the screen.
+     * @param parent the parent screen of this screen.
+     */
     protected Screen(@Nullable String title, @Nullable Screen parent) {
         this(title == null ? null : TextObject.literal(title), parent);
     }
 
+    /**
+     * Creates a new screen with the given title and parent screen.
+     *
+     * @param title the title of the screen.
+     * @param parent the parent screen of this screen.
+     */
     protected Screen(@Nullable TextObject title, @Nullable Screen parent) {
         super(Screen.width(), Screen.height());
         this.parentScreen = parent;
@@ -58,6 +99,12 @@ public abstract class Screen extends UIContainer<Screen> {
         this.resizer = new Resizer(7680, 4320);
     }
 
+    /**
+     * Resizes the screen.
+     *
+     * @param width the width of the screen.
+     * @param height the height of the screen.
+     */
     public final void resize(int width, int height) {
         if (this.titleWidget != null) {
             height -= this.titleWidget.getHeight();
@@ -67,10 +114,25 @@ public abstract class Screen extends UIContainer<Screen> {
         this.resized(width, height);
     }
 
+    /**
+     * Initializes the screen. Called when the screen is created.
+     * You can use this method to add widgets to the screen.
+     * 
+     * @see #add(Widget)
+     */
     protected void init() {
 
     }
 
+    /**
+     * Called when the screen is resized.
+     * You can use this method to resize widgets to the new screen size.
+     *
+     * @param width the width of the screen.
+     * @param height the height of the screen.
+     * 
+     * @see #add(Widget)
+     */
     public void resized(int width, int height) {
 
     }
@@ -80,6 +142,8 @@ public abstract class Screen extends UIContainer<Screen> {
      *
      * @param renderer  Renderer instance used for drawing the screen elements.
      * @param deltaTime The time elapsed since the last frame, used for animations.
+     * 
+     * @see #renderChildren(Renderer, float)
      */
     @Override
     public final void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
@@ -112,34 +176,60 @@ public abstract class Screen extends UIContainer<Screen> {
         super.render(renderer, deltaTime);
     }
 
+    /**
+     * Revalidates the screen.
+     */
     @Override
     public void revalidate() {
         super.revalidate();
+        TitleWidget titleWidget1 = this.titleWidget;
 
-        if (this.titleWidget != null) {
-            this.titleWidget.revalidate();
+        if (titleWidget1 != null) {
+            titleWidget1.revalidate();
         }
-
-        if (this.dialog != null) {
-            this.dialog.revalidate();
+        
+        Dialog dialog1 = this.dialog;
+        if (dialog1 != null) {
+            dialog1.revalidate();
         }
 
         this.isVisible = true;
     }
 
+    /**
+     * Gets the name of the screen.
+     *
+     * @return the name of the screen.
+     */
     @Override
     public final String getName() {
-        return "Screen";
+        return getClass().getSimpleName() + "[" + this.createTime + "]";
     }
 
+    /**
+     * Gets the width of the screen.
+     *
+     * @return the width of the screen.
+     */
     private static int width() {
         return QuantumClient.get().getScaledWidth();
     }
 
+    /**
+     * Gets the height of the screen.
+     *
+     * @return the height of the screen.
+     */
     private static int height() {
         return QuantumClient.get().getScaledHeight();
     }
 
+    /**
+     * Initializes the screen.
+     *
+     * @param width the width of the screen.
+     * @param height the height of the screen.
+     */
     public final void init(int width, int height) {
         this.setSize(width, height);
         GuiBuilder builder = new GuiBuilder(this);
@@ -148,6 +238,12 @@ public abstract class Screen extends UIContainer<Screen> {
         this.init();
     }
 
+    /**
+     * Builds the screen.
+     *
+     * @param builder the builder to build the screen.
+     * @deprecated Use {@link #init()} and {@link #resized(int, int)} instead.
+     */
     @Deprecated
     public void build(@NotNull GuiBuilder builder) {
 
@@ -248,10 +344,10 @@ public abstract class Screen extends UIContainer<Screen> {
 
     @Override
     @ApiStatus.Experimental
-    public Path path() {
+    public UIPath path() {
         UIContainer<?> screen = this.parentScreen;
         if (screen == null) screen = UIContainer.ROOT;
-        return screen.path().resolve("OldScreen[" + this.createTime + "]");
+        return screen.path().append(this);
     }
 
     public @Nullable TextObject getTitle() {

@@ -11,6 +11,11 @@ import org.checkerframework.common.returnsreceiver.qual.This;
 /**
  * The EntityTextures class manages a mapping between entity attributes and their associated textures.
  * It allows setting and retrieving textures for given attributes, as well as creating materials based on the defined textures.
+ * <p>
+ * This is a part of the render pipeline. It is used to manage the textures for entities.
+ * </p>
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class EntityTextures {
     private final LongMap<Texture> textureMap = new LongMap<>();

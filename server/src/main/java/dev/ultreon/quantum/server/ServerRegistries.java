@@ -10,6 +10,8 @@ import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class ServerRegistries {
@@ -64,6 +66,6 @@ public class ServerRegistries {
 
     @SuppressWarnings("unchecked")
     public Stream<ServerRegistry<?>> stream() {
-        return registries.values().stream().map(ServerRegistry.class::cast);
+        return Arrays.stream(registries.values().toArray().toArray(ServerRegistry.class)).filter(Objects::nonNull).map(ServerRegistry.class::cast);
     }
 }

@@ -9,10 +9,10 @@ import dev.ultreon.quantum.client.model.block.ModelProperties;
 import dev.ultreon.quantum.client.model.entity.renderer.*;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.registry.BlockRenderTypeRegistry;
+import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
-import dev.ultreon.quantum.client.render.RenderEffect;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.FaceProperties;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.registry.Registries;
@@ -24,7 +24,7 @@ import java.util.Locale;
  * Register rendering for entities, blocks, etc.
  *
  * @since 0.1.0
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class RenderingRegistration {
     /**
@@ -60,7 +60,8 @@ public class RenderingRegistration {
      */
     private static void registerBlockRenderTypes() {
         // Register the RenderType.WATER render type for the Blocks.WATER block.
-        BlockRenderTypeRegistry.register(Blocks.WATER, RenderEffect.WATER);
+        BlockRenderPassRegistry.register(Blocks.WATER, RenderPass.WATER);
+        BlockRenderPassRegistry.register(Blocks.LEAVES, RenderPass.CUTOUT);
 
         // Call the onRegister() method of the BLOCK_RENDER_TYPES factory.
         ClientRegistrationEvents.BLOCK_RENDER_TYPES.factory().onRegister();

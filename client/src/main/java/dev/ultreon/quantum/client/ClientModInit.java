@@ -6,6 +6,8 @@ import net.fabricmc.api.ClientModInitializer;
  * ClientModInit is an interface for client-side mod initialization.
  * It provides a way for mods to perform initialization tasks that are
  * specific to the client-side environment.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public interface ClientModInit extends ClientModInitializer {
 

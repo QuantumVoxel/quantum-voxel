@@ -10,7 +10,7 @@ import static dev.ultreon.quantum.world.World.*;
 /**
  * Represents a region position in the world.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public final class RegionVec extends Vec3i {
     /**

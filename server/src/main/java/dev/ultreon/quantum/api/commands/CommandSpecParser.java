@@ -15,7 +15,7 @@ import static dev.ultreon.quantum.server.util.Utils.reprChar;
 /**
  * Command overload specification parser.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 class CommandSpecParser {
     private final int line = 0;

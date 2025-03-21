@@ -32,7 +32,7 @@ import java.util.*;
 /**
  * This class is the main entry point for the game provider of quantum.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @SuppressWarnings({"FieldCanBeLocal", "SameParameterValue", "unused"})

@@ -14,7 +14,7 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
 /**
  * Represents the position of a chunk in the world.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Serializable {
     // Region chunk size

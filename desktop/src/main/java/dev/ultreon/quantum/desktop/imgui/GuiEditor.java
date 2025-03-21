@@ -35,7 +35,7 @@ public class GuiEditor {
                     client.shapes.getBatch().end();
                 }
             }
-            ImGuiEx.text("Widget:", () -> widgets.stream().findFirst().map(widget -> widget.path().getFileName()).orElse(null));
+            ImGuiEx.text("Widget:", () -> widgets.stream().findFirst().map(widget -> widget.path().toString()).orElse(null));
         }
 
         if (currentScreen != null) {
@@ -65,7 +65,7 @@ public class GuiEditor {
     }
 
     private static void renderWidgetTools(int index, Widget widget) {
-        if (ImGui.collapsingHeader("Widget #" + index + ": " + widget.path().getFileName())) {
+        if (ImGui.collapsingHeader("Widget #" + index + ": " + widget.path().toString())) {
             ImGui.treePush();
             var path = widget.path().toString();
 

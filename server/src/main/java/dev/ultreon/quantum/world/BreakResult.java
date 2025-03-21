@@ -3,7 +3,7 @@ package dev.ultreon.quantum.world;
 /**
  * Enum representing the result of a block breaking operation.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public enum BreakResult {
     /**

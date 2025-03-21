@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
  * Interface for a clipboard.
  * <p>
  * This interface provides methods for copying and pasting text to/from the clipboard.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public interface IClipboard {
     /**

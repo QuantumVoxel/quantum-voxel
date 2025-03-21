@@ -13,16 +13,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+/**
+ * A file handle for resources.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public class ResourceFileHandle extends FileHandle {
     private final NamespaceID id;
     private final @Nullable Resource resource;
 
+    /**
+     * Constructs a new ResourceFileHandle with the given namespace ID.
+     * 
+     * @param id The namespace ID of the resource.
+     */
     public ResourceFileHandle(NamespaceID id) {
         super(id.toString());
         this.id = id;
         this.resource = QuantumClient.get().getResourceManager().getResource(id);
     }
 
+    /**
+     * Constructs a new ResourceFileHandle with the given resource.
+     * 
+     * @param resource The resource.
+     */
     public ResourceFileHandle(@NotNull Resource resource) {
         super("generated_" + UUID.randomUUID().toString().replace("-", ""));
 
@@ -32,14 +47,29 @@ public class ResourceFileHandle extends FileHandle {
         this.resource = resource;
     }
 
+    /**
+     * Gets the namespace ID of the resource.
+     * 
+     * @return The namespace ID of the resource.
+     */
     public NamespaceID getId() {
         return this.id;
     }
 
+    /**
+     * Gets the resource.
+     * 
+     * @return The resource.
+     */
     public @Nullable Resource getResource() {
         return this.resource;
     }
 
+    /**
+     * Reads the resource.
+     * 
+     * @return The resource.
+     */
     @Override
     public InputStream read() {
         if (this.resource == null) throw new GdxRuntimeException(String.format("Resource %s not found", this.id));
@@ -50,6 +80,11 @@ public class ResourceFileHandle extends FileHandle {
         }
     }
 
+    /**
+     * Checks if the resource exists.
+     * 
+     * @return True if the resource exists, false otherwise.
+     */
     @Override
     public boolean exists() {
         return this.resource != null;

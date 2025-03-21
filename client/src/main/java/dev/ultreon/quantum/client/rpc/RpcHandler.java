@@ -6,12 +6,16 @@ import java.util.ServiceLoader;
  * This interface represents a handler for RPC (Rich Presence) operations.
  * Implementations of this interface should define the methods for starting,
  * stopping, and setting the activity for the RPC.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public interface RpcHandler {
     Iterable<RpcHandler> HANDLERS = ServiceLoader.load(RpcHandler.class);
 
     /**
      * Starts the RPC handler, initializing any necessary resources or connections.
+     * 
+     * @see #close()
      */
     void start();
 
@@ -19,6 +23,8 @@ public interface RpcHandler {
      * Closes the RPC handler, releasing any allocated resources.
      * This method should be called before the application shuts down to ensure
      * that resources are properly released and any necessary cleanup is performed.
+     * 
+     * @see #start()
      */
     void close();
 

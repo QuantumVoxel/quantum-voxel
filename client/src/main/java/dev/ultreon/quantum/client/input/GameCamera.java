@@ -19,7 +19,7 @@ import lombok.Getter;
  * The camera used for the game.
  * Originates at 0,0,0. The world is rendered relative to the camera.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public class GameCamera extends PerspectiveCamera {

@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @see <a href="https://spec.json5.org/">JSON5 Specification</a>
  * @see Json5
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public abstract class CraftyConfig {
     public static final String ENTRYPOINT_KEY = "config";

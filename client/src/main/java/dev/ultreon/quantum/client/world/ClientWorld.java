@@ -67,9 +67,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public static int VOID_Y_START = 20;
     public static int VOID_Y_END = 0;
     @NotNull
-    private final QuantumClient client;
+    public final QuantumClient client;
     private final RegistryKey<DimensionInfo> dimension;
-    private final Map<ChunkVec, ClientChunk> chunks = new ConcurrentHashMap<>();
+    private final Map<Long, ClientChunk> chunks = new ConcurrentHashMap<>();
     private int chunkRefresh;
     private ChunkVec oldChunkVec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
     private long time = 0;
@@ -158,7 +158,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
         // Try to remove the chunk from the chunk map
         synchronized (this.chunks){
-            ClientChunk removedChunk = this.chunks.remove(pos);
+            ClientChunk removedChunk = this.chunks.remove(chunkKey(pos.x, pos.y, pos.z));
             boolean removed = removedChunk != null;
             if (removed) {
                 // If the chunk was removed, decrement the total number of chunks
@@ -186,13 +186,19 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @Override
     public @Nullable ClientChunk getChunk(@NotNull ChunkVec pos) {
         synchronized (this.chunks) {
-            return this.chunks.get(pos);
+            return this.chunks.get(chunkKey(pos.x, pos.y, pos.z));
         }
+    }
+
+    static long chunkKey(int x, int y, int z) {
+        return (((long) x) & 0xFFFFF) | ((((long) y) & 0xFFFFF) << 20) | ((((long) z) & 0xFFFFF) << 40);
     }
 
     @Override
     public ClientChunk getChunk(int x, int y, int z) {
-        return (ClientChunk) super.getChunk(x, y, z);
+        synchronized (this.chunks) {
+            return this.chunks.get(chunkKey(x, y, z));
+        }
     }
 
     @Override
@@ -201,6 +207,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     @Override
+    @Nullable
     public ClientChunk getChunkAt(int x, int y, int z) {
         return (ClientChunk) super.getChunkAt(x, y, z);
     }
@@ -649,11 +656,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @Override
     public int getBlockLight(int x, int y, int z) {
         ClientChunk chunk = getChunkAt(x, y, z);
-        if (chunk != null) {
-            return (byte) chunk.getBlockLight(toLocalBlockVec(x, y, z, this.tmp));
-        } else {
-            return 0;
-        }
+        if (chunk == null) return 0;
+        return (byte) chunk.getBlockLight(toLocalBlockVec(x, y, z, this.tmp));
     }
 
     @Override
@@ -828,7 +832,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         // Get the current chunk at the given position
         ClientChunk chunk;
         synchronized (this.chunks) {
-            chunk = this.chunks.get(pos);
+            chunk = this.chunks.get(chunkKey(pos.x, pos.y, pos.z));
         }
 
         // If the chunk doesn't exist, set it to the new data
@@ -876,7 +880,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             QuantumClient.invoke(() -> player.pendingChunks.remove(pos));
 
             // Add the chunk to the map of chunks
-            this.chunks.put(pos, chunk);
+            this.chunks.put(chunkKey(pos.x, pos.y, pos.z), chunk);
             // Increment the total number of chunks
             this.totalChunks++;
             // Mark the chunk as ready
@@ -886,7 +890,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
     }
 
-    public Gizmo getEntityGizmo(Entity entity) {
+    public @Nullable Gizmo getEntityGizmo(Entity entity) {
         return this.entityGizmos.get(entity.getId());
     }
 
@@ -924,11 +928,13 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         this.oldChunkVec = player.getChunkVec();
 
         // Iterate over the chunks
-        for (Iterator<Map.Entry<ChunkVec, ClientChunk>> iterator = this.chunks.entrySet().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Map.Entry<Long, ClientChunk>> iterator = this.chunks.entrySet().iterator(); iterator.hasNext(); ) {
             // Get the chunk entry
-            Map.Entry<ChunkVec, ClientChunk> entry = iterator.next();
-            ChunkVec chunkVec = entry.getKey();
+            Map.Entry<Long, ClientChunk> entry = iterator.next();
+
+            // Get the chunk
             ClientChunk clientChunk = entry.getValue();
+            ChunkVec chunkVec = clientChunk.getVec();
 
             // Check if the distance between the chunk and the player's position is greater than the render distance
             if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance / CHUNK_SIZE) {
@@ -972,7 +978,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public boolean isLoaded(ChunkVec chunkVec) {
-        return this.chunks.containsKey(chunkVec);
+        return this.chunks.containsKey(chunkKey(chunkVec.x, chunkVec.y, chunkVec.z));
     }
 
     @Override

@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.SharedLibraryLoader;
 /**
  * Class used to check for which operating system the game is running on.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public class OS {

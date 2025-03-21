@@ -862,6 +862,7 @@ public class ServerWorld extends World implements Audience {
         this.spawnPoint.set(spawnX, this.getHeight(spawnX, spawnZ) + 1, spawnZ);
     }
 
+    @NotNull
     @Override
     @Blocking
     public BlockVec getSpawnPoint() {
@@ -1418,7 +1419,7 @@ public class ServerWorld extends World implements Audience {
      * The region class.
      * Note: This class is not thread safe.
      *
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since 0.1.0
      */
     @NotThreadSafe
@@ -1912,15 +1913,15 @@ public class ServerWorld extends World implements Audience {
         }
 
         public void initialize() {
-            CaveCarver caveCarver = new CaveCarver(this);
-            caveCarver.generateCaves();
+//            CaveCarver caveCarver = new CaveCarver(this);
+//            caveCarver.generateCaves();
         }
     }
 
     /**
      * Represents a collection of regions.
      *
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since 0.1.0
      */
     public static class RegionStorage {

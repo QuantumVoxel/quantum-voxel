@@ -23,6 +23,7 @@ import com.google.common.collect.Table;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
+import de.marhali.json5.Json5Primitive;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -101,8 +102,12 @@ public class Json5ModelLoader {
             overrides = loadOverrides((RegistryKey<Block>) key, overridesJson5);
         }
 
+        Json5Object displayJson = root.getAsJson5Object("display");
+        if (displayJson == null)
+            displayJson = new Json5Object();
+
         // TODO: Allow display properties.
-        Display display = new Display();
+        Display display = Display.read(displayJson);
 
         return new Json5Model(key, textureElements, modelElements, ambientOcclusion, display, overrides);
     }
@@ -584,7 +589,15 @@ public class Json5ModelLoader {
         }
 
     public static final class Display {
-        public Display() {
+        public String renderPass;
+
+        public Display(String renderPass) {
+        }
+
+        public static Display read(Json5Object display) {
+            Json5Primitive renderPassJson = display.getAsJson5Primitive("renderPass");
+            String renderPass = renderPassJson != null ? renderPassJson.getAsString() : "opaque";
+            return new Display(renderPass);
         }
 
         @Override

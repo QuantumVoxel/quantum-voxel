@@ -8,10 +8,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public abstract class BaseSelector<T> {
-    protected SelectorKey key;
-    protected String stringValue;
-    protected CommandError error;
-    protected Result<T> result;
+    protected @Nullable SelectorKey key;
+    protected @Nullable String stringValue;
+    protected @Nullable CommandError error;
+    protected @Nullable Result<T> result;
 
     public BaseSelector(Parsed parsed) {
         this.error = parsed.error();
@@ -23,26 +23,36 @@ public abstract class BaseSelector<T> {
         this(BaseSelector.parseSelector(text));
     }
 
-    public SelectorKey getKey() {
+    public @Nullable SelectorKey getKey() {
         return this.key;
     }
 
     protected abstract Result<T> calculateData();
 
-    public String getStringValue() {
+    public @Nullable String getStringValue() {
         return this.stringValue;
     }
 
     public @Nullable T getValue() {
-        return this.result.value();
+        if (this.result != null) {
+            return this.result.value();
+        }
+        return null;
     }
 
     public boolean hasError() {
-        return this.result.hasError();
+        if (this.result != null) {
+            return this.result.hasError();
+        }
+        return false;
     }
 
-    public CommandError getError(){
-        return this.result == null ? null : this.result.error();
+    public @Nullable CommandError getError() {
+        Result<T> res = this.result;
+        if (res == null) {
+            return null;
+        }
+        return res == null ? null : res.error();
     }
 
     public static final class Result<T> {
@@ -54,9 +64,9 @@ public abstract class BaseSelector<T> {
             this.error = error;
         }
 
-            public boolean hasError() {
-                return this.error != null;
-            }
+        public boolean hasError() {
+            return this.error != null;
+        }
 
         public @Nullable T value() {
             return value;
@@ -70,9 +80,9 @@ public abstract class BaseSelector<T> {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (Result) obj;
+            var that = (Result<?>) obj;
             return Objects.equals(this.value, that.value) &&
-                   Objects.equals(this.error, that.error);
+                    Objects.equals(this.error, that.error);
         }
 
         @Override
@@ -83,57 +93,41 @@ public abstract class BaseSelector<T> {
         @Override
         public String toString() {
             return "Result[" +
-                   "value=" + value + ", " +
-                   "error=" + error + ']';
+                    "value=" + value + ", " +
+                    "error=" + error + ']';
         }
 
     }
 
-    public static final class Parsed {
-        private final SelectorKey key;
-        private final String value;
-        private final CommandError error;
-
-        public Parsed(SelectorKey key, String value, CommandError error) {
-            this.key = key;
-            this.value = value;
-            this.error = error;
+    public record Parsed(@Nullable SelectorKey key, @Nullable String value, @Nullable CommandError error) {
+        public boolean hasError() {
+            return this.error != null;
         }
-
-            public boolean hasError() {
-                return this.error != null;
-            }
 
         @Override
         public String toString() {
-            return this.key.toString() + this.value;
+            if (this.key != null) {
+                return this.key.toString() + this.value;
+            }
+            if (this.value != null) {
+                return this.value;
+            }
+            return "<null>";
         }
 
-        public SelectorKey key() {
+        @Override
+        public @Nullable SelectorKey key() {
             return key;
         }
 
-        public String value() {
+        @Override
+        public @Nullable String value() {
             return value;
         }
 
-        public CommandError error() {
+        @Override
+        public @Nullable CommandError error() {
             return error;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (Parsed) obj;
-            return Objects.equals(this.key, that.key) &&
-                   Objects.equals(this.value, that.value) &&
-                   Objects.equals(this.error, that.error);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(key, value, error);
         }
 
     }

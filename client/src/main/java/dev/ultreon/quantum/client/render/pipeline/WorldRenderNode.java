@@ -10,9 +10,22 @@ import dev.ultreon.quantum.client.shaders.provider.GameShaders;
 
 import java.io.PrintStream;
 
+/**
+ * The world render node.
+ * <p>
+ * This node is responsible for rendering the world in some way.
+ * </p>
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
     private Shader shader;
 
+    /**
+     * Dumps the info.
+     *
+     * @param stream The stream.
+     */
     @Override
     public void dumpInfo(PrintStream stream) {
         super.dumpInfo(stream);
@@ -25,9 +38,31 @@ public abstract class WorldRenderNode extends RenderPipeline.RenderNode {
         }
     }
 
+    /**
+     * Requires the model.
+     *
+     * @return True if the model is required, false otherwise. Generally true for world nodes.
+     */
     @Override
     public boolean requiresModel() {
         return true;
     }
 
+    /**
+     * Gets the shader.
+     *
+     * @return The shader.
+     */
+    public Shader getShader() {
+        return this.shader;
+    }
+
+    /**
+     * Sets the shader.
+     *
+     * @param shader The shader.
+     */
+    public void setShader(Shader shader) {
+        this.shader = shader;
+    }
 }

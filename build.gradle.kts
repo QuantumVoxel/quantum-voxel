@@ -49,6 +49,7 @@ plugins {
   id("idea")
   id("maven-publish")
   id("java")
+  id("org.jetbrains.kotlin.jvm") version "1.9.22"
   id("application")
   id("org.jreleaser") version "1.14.0" apply false
   id("io.freefair.javadoc-links") version "8.3"
@@ -203,6 +204,12 @@ subprojects {
     options.encoding = "UTF-8"
   }
 
+  java {
+    toolchain {
+      languageVersion.set(JavaLanguageVersion.of(21))
+    }
+  }
+
   tasks.withType(Jar::class.java).configureEach {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     archiveBaseName.set("quantum-${project.name}")
@@ -218,7 +225,7 @@ tasks.withType(Jar::class.java).configureEach {
 }
 
 tasks.withType(JavaCompile::class.java).configureEach {
-  options.encoding = "UTF-8" // Use the UTF-8 charset for Java compilation
+  options.encoding = "UTF-8"
 }
 println("Java: " + System.getProperty("java.version") + " JVM: " + System.getProperty("java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch"))
 println("OS: " + System.getProperty("os.name") + " Version: " + System.getProperty("os.version"))

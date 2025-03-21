@@ -16,7 +16,7 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
 /**
  * Represents a block position in the world.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public final class BlockVec extends Vec3i implements Point, Cloneable {
     private final BlockVecSpace space;

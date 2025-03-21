@@ -4,16 +4,26 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.PerCornerLightData;
+import dev.ultreon.quantum.client.render.pipeline.WorldRenderNode;
 
 /**
  * The BlockRenderer interface provides methods for rendering the various faces of a block
  * in a 3D environment. Implementations of this interface are responsible for generating
  * the mesh data for each face of the block based on the given texture region and light data.
+ * 
+ * <p>
+ * This is a part of the render pipeline. It is used to render the block faces. 
+ * </p>
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ * @see WorldRenderNode
  */
 public interface BlockRenderer {
 
     /**
      * Renders the north face of a block using the specified texture region and mesh data.
+     * Accepts a texture region, and the coordinates of the face. And a mesh builder to build the mesh.
+     * This is used to render the north face(s) of a block.
      *
      * @param region     the texture region to use for this face of the block
      * @param x1         the x-coordinate of the first vertex of the face
@@ -30,6 +40,8 @@ public interface BlockRenderer {
 
     /**
      * Renders the south face of a block in a 3D environment using the given texture region and light data.
+     * Accepts a texture region, and the coordinates of the face. And a mesh builder to build the mesh.
+     * This is used to render the south face(s) of a block.
      *
      * @param region     the texture region to use for the face
      * @param x1         the x-coordinate of the first corner of the face
@@ -47,6 +59,8 @@ public interface BlockRenderer {
     /**
      * Renders the west face of a block using the specified texture region, coordinates, light data,
      * and mesh builder.
+     * Accepts a texture region, and the coordinates of the face. And a mesh builder to build the mesh.
+     * This is used to render the west face(s) of a block.
      *
      * @param region     the texture region to use for the face
      * @param z1         the starting z-coordinate of the face
@@ -63,6 +77,8 @@ public interface BlockRenderer {
 
     /**
      * Renders the east face of a block using the provided texture region, coordinates, light data, and mesh builder.
+     * Accepts a texture region, and the coordinates of the face. And a mesh builder to build the mesh.
+     * This is used to render the east face(s) of a block.
      *
      * @param region     The texture region to use for rendering the block face.
      * @param z1         The starting z-coordinate of the block face.
@@ -79,6 +95,8 @@ public interface BlockRenderer {
 
     /**
      * Renders the top face of a block.
+     * Accepts a texture region, and the coordinates of the face. And a mesh builder to build the mesh.
+     * This is used to render the top face(s) of a block.
      *
      * @param region     The texture region to apply for this face.
      * @param x1         The starting x-coordinate for this face.
@@ -96,6 +114,8 @@ public interface BlockRenderer {
     /**
      * Renders the bottom face of a block in a 3D environment based on the given texture region
      * and light data.
+     * Accepts a texture region, and the coordinates of the face. And a mesh builder to build the mesh.
+     * This is used to render the bottom face(s) of a block.
      *
      * @param region     The texture region to use for the bottom face of the block.
      * @param x1         The starting x-coordinate of the bottom face.

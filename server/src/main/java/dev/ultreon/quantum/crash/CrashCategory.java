@@ -15,7 +15,7 @@ import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 /**
- * @author <a href="https://github.com/XyperCodee">XyperCode</a>
+ * @author <a href="https://github.com/XyperCodee">Qubilux</a>
  */
 public class CrashCategory {
     protected final List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();

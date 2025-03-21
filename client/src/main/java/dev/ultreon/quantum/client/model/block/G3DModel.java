@@ -39,6 +39,11 @@ public class G3DModel implements BlockModel {
     }
 
     @Override
+    public String getRenderPass() {
+        return "transparent";
+    }
+
+    @Override
     public boolean isCustom() {
         return true;
     }

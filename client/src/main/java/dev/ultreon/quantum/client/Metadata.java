@@ -10,6 +10,8 @@ import java.util.Objects;
 /**
  * This class represents the metadata of the application.
  * It holds the version of the application.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class Metadata {
 

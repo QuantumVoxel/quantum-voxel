@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Dedicated server main class.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @ApiStatus.Internal

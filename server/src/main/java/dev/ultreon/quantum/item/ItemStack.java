@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * A class that holds items with a certain amount and with data.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @see Item
  */
 public class ItemStack {

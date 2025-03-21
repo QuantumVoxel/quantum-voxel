@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * The Xeox modloader for Quantum.
  * 
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  * @see XeoxMod
  */
@@ -45,7 +45,7 @@ public class XeoxLoader {
     /**
      * Loads all mods from the mods directory.
      * 
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since 0.1.0
      */
     @Internal
@@ -63,7 +63,7 @@ public class XeoxLoader {
     /**
      * Constructs all mods from the mod files.
      * 
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since 0.1.0
      */
     @Internal
@@ -77,7 +77,7 @@ public class XeoxLoader {
     /**
      * Initializes all mods.
      * 
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since 0.1.0
      */
     @Internal
@@ -108,7 +108,7 @@ public class XeoxLoader {
      * Imports a mod into the mods directory.
      *
      * @return
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since 0.1.0
      */
     public Result<Void> importMod(File file) {

@@ -254,7 +254,7 @@ jar {
     manifest {
         //noinspection GroovyAssignabilityCheck
         attributes 'Implementation-Title': 'Quantum Voxel',
-                'Implementation-Vendor': 'Ultreon Team',
+                'Implementation-Vendor': 'Ultreon Studios',
                 project_version: project.project_version,
                 'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
                 'Multi-Release': 'true'

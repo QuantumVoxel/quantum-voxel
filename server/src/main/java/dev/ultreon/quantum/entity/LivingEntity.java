@@ -96,7 +96,6 @@ public abstract class LivingEntity extends Entity {
     }
 
     /**
-     * {@inheritDoc}
      * <p>
      * This method represents the tick behavior for the {@link LivingEntity}.
      */

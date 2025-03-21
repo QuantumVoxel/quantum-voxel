@@ -1,5 +1,8 @@
 package dev.ultreon.quantum.registry;
 
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
+
 import java.util.*;
 
 /**
@@ -10,6 +13,7 @@ import java.util.*;
  */
 public abstract class AbstractRegistryMap<K, V> {
     protected final HashMap<K, V> registry = new HashMap<>();
+    private final Array<V> temp = new Array<>();
 
     protected AbstractRegistryMap() throws IllegalStateException {
 
@@ -19,17 +23,26 @@ public abstract class AbstractRegistryMap<K, V> {
 
     public abstract void register(K key, V val);
 
-    public abstract List<V> values();
+    public abstract ObjectMap.Values<V> values();
 
-    public abstract List<K> keys();
+    public abstract ObjectMap.Keys<K> keys();
 
-    public abstract Set<Map.Entry<K, V>> entries() throws IllegalAccessException;
+    public abstract ObjectMap.Entries<K, V> entries() throws IllegalAccessException;
 
+    @Deprecated
     public V random() {
         return this.random(new Random());
     }
 
+    @Deprecated
     private V random(Random random) {
-        return this.values().get(random.nextInt(this.values().size()));
+        temp.clear();
+        return this.values().toArray(temp).get(random.nextInt(this.size()));
+    }
+
+    protected abstract int size();
+
+    public boolean isEmpty() {
+        return this.size() == 0;
     }
 }

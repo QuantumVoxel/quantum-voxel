@@ -40,7 +40,7 @@ public class DebugOverlay {
             page = 0;
             this.client.setShowDebugHud(true);
         }
-        if (page >= ClientRegistries.DEBUG_PAGE.values().size()) {
+        if (page >= ClientRegistries.DEBUG_PAGE.size()) {
             this.client.setShowDebugHud(false);
         }
 
@@ -50,7 +50,7 @@ public class DebugOverlay {
     public void prevPage() {
         var page = this.page - 1;
         if (!this.client.isShowDebugHud()) {
-            page = ClientRegistries.DEBUG_PAGE.values().size() - 1;
+            page = ClientRegistries.DEBUG_PAGE.size() - 1;
             this.client.setShowDebugHud(true);
         }
         if (page < 0) {
@@ -61,7 +61,7 @@ public class DebugOverlay {
     }
 
     private DebugPage getPage() {
-        if (ClientRegistries.DEBUG_PAGE.entries().isEmpty()) {
+        if (ClientRegistries.DEBUG_PAGE.isEmpty()) {
             return DebugPage.EMPTY;
         }
         return ClientRegistries.DEBUG_PAGE.byId(this.page);

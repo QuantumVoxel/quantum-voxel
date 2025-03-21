@@ -17,7 +17,7 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 /**
  * Represents a mod file.
  * 
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  * @see XeoxMod
  */

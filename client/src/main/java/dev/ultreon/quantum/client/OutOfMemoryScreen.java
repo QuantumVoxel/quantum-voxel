@@ -13,30 +13,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents a screen displayed when the Java Virtual Machine (JVM) encounters an
  * {@link OutOfMemoryError}.
- * <p>
- * In a game, out of memory errors can occur when the game tries to allocate more memory than
- * is available on the system. This can happen for a few reasons:
- * <ul>
- *     <li>The game tries to allocate too much memory at once, such as when loading a large
- *     world or map.</li>
- *     <li>The game tries to allocate too much memory over time, such as when generating
- *     terrain or generating a large number of objects.</li>
- *     <li>The system running the game has too little memory available, making it impossible
- *     for the game to allocate more memory.</li>
- *     <li>The game or a modification has a memory leak.</li>
- * </ul>
- * <p>
- * When an out of memory error occurs, the game should display a screen informing the player
- * that the game has run out of memory and suggesting that the player try the following:
- * Some things you can try to fix this problem:
- * <ul>
- *     <li>Try restarting the game.</li>
- *     <li>Going back to the main menu to free up some memory.</li>
- * </ul>
- * <p>
- * This screen can help the player understand what's going on and offers them clear steps
- * to fix the issue. It can prevent the game from crashing, which is a more user-friendly
- * approach.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class OutOfMemoryScreen extends Screen {
     /**

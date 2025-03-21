@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.render;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.utils.Disposable;
@@ -18,11 +17,13 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Interface for rendering a terrain within a game environment. Provides methods for managing
  * rendering processes, loading and unloading chunks, and handling entities and particle effects.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public interface TerrainRenderer extends Disposable {
     /**
      * Retrieves the current game environment.
-     *
+     * 
      * @return the current Environment instance.
      */
     Environment getEnvironment();
@@ -40,16 +41,15 @@ public interface TerrainRenderer extends Disposable {
      * @param batch The ModelBatch used for rendering models.
      * @param deltaTime The time elapsed since the last frame, in seconds.
      */
-    void renderBackground(ModelBatch batch, float deltaTime);
+    void renderBackground(RenderBufferSource batch, float deltaTime);
 
     /**
      * Renders the terrain using the specified model batch and render layer with a given delta time.
      *
      * @param batch       the model batch used for rendering
-     * @param sceneCategory the render layer that defines collections of model instances and animations
      * @param deltaTime   the time passed since the last frame, used for animations and updates
      */
-    void render(ModelBatch batch, SceneCategory sceneCategory, float deltaTime);
+    void render(RenderBufferSource batch, float deltaTime);
 
     /**
      * Gathers rendering data for a specified entity to be processed by the renderer.
@@ -57,7 +57,7 @@ public interface TerrainRenderer extends Disposable {
      * @param entity The entity that needs to be collected for rendering.
      * @param batch The ModelBatch used to handle the rendering of the specified entity.
      */
-    void collectEntity(Entity entity, ModelBatch batch);
+    void collectEntity(Entity entity, RenderBufferSource batch);
 
     /**
      * Returns the number of currently loaded chunks by the terrain renderer.
@@ -160,10 +160,10 @@ public interface TerrainRenderer extends Disposable {
     /**
      * Renders the foreground elements of the terrain within the game environment.
      *
-     * @param modelBatch The model batch used for rendering.
-     * @param deltaTime  The time passed since the last frame, used for animations and updates.
+     * @param batch     The model batch used for rendering.
+     * @param deltaTime The time passed since the last frame, used for animations and updates.
      */
-    void renderForeground(ModelBatch modelBatch, float deltaTime);
+    void renderForeground(RenderBufferSource batch, float deltaTime);
 
     /**
      * Sets the world environment for rendering.

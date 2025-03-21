@@ -114,10 +114,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         try {
             // Get the spawn point for the player
-            BlockVec spawnPoint = this.server.submit(this.world::getSpawnPoint).join();
+            @NotNull BlockVec spawnPoint = this.server.submit(this.world::getSpawnPoint).join();
 
             // Calculate the spawn position
-            Vec3d spawnAt = spawnPoint.vec().d().add(0.5, 0, 0.5);
+            @NotNull Vec3d spawnAt = spawnPoint.vec().d().add(0.5, 0, 0.5);
 
             // Set player's position, health, and status
             this.setPosition(spawnAt);
@@ -158,7 +158,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     @Override
-    public void onDeath(DamageSource source) {
+    public void onDeath(@NotNull DamageSource source) {
         super.onDeath(source);
 
         // Remove the player from the world if it exists in the world
@@ -300,7 +300,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     /**
-     * {@inheritDoc}
      * <p>
      * Also updates player old positions and send packets to nearby players.
      */
@@ -465,7 +464,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     /**
-     * {@inheritDoc}
      * To play the sound, this will send a {@link S2CPlaySoundPacket} over to the client.
      *
      * @param sound  The sound event to be played. Can be null.

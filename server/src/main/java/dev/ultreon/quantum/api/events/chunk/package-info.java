@@ -1,0 +1,14 @@
+
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+@FieldsAreNonnullByDefault
+@TypeParametersAreNonnullByDefault
+@TypeUsesAreNonnullByDefault
+package dev.ultreon.quantum.api.events.chunk;
+
+import dev.ultreon.quantum.FieldsAreNonnullByDefault;
+import dev.ultreon.quantum.MethodsReturnNonnullByDefault;
+import dev.ultreon.quantum.TypeParametersAreNonnullByDefault;
+import dev.ultreon.quantum.TypeUsesAreNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;

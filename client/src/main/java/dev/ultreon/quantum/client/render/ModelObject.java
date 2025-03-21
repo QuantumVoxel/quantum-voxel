@@ -15,7 +15,9 @@ import java.util.Objects;
  * <p>
  * The class implements the {@link Disposable} interface to allow for proper resource
  * management, specifically to clear the resources associated with the contained renderables.
- *
+ * </p> 
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @param shaderProvider Provides shaders for the renderables in this model object.
  * @param model Contains the model instance that represents the 3D geometry.
  * @param renderables An array of renderable objects that are part of this model object.
@@ -29,8 +31,11 @@ public record ModelObject(GameShaders shaderProvider, ModelInstance model,
      * This method iterates over each {@code Renderable} in the {@code renderables} array,
      * setting their {@code meshPart.mesh} and {@code userData} to {@code null}, effectively
      * releasing these resources.
+     * </p>
+     * 
      * <p>
      * Finally, it clears the {@code renderables} array to ensure that all references are removed.
+     * </p>
      */
     public void dispose() {
         for (Renderable renderable : renderables) {

@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Default implementation of IClipboard. Uses Gdx's clipboard implementation.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class DefaultClipboard implements IClipboard {
     private final Clipboard gdxClipboard;

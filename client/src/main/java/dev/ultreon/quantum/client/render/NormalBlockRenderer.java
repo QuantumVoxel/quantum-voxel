@@ -14,6 +14,8 @@ import dev.ultreon.quantum.world.Direction;
  * NormalBlockRenderer is responsible for rendering the six faces of a block in a 3D environment.
  * This class provides methods to render the north, south, west, east, top, and bottom faces of a block,
  * taking into account the texture region and lighting data provided.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class NormalBlockRenderer implements BlockRenderer {
     private static final float TEXTURE_PERCENTAGE = 16f / 2048f;
@@ -233,6 +235,15 @@ public class NormalBlockRenderer implements BlockRenderer {
         builder.rect(c00, c10, c11, c01);
     }
 
+    /**
+     * Applies the AO (Ambient Occlusion) to the vertices.
+     * 
+     * @param c00 The first vertex.
+     * @param c01 The second vertex.
+     * @param c10 The third vertex.
+     * @param c11 The fourth vertex.
+     * @param ao The AO value.
+     */
     private void applyAo(VertexInfo c00, VertexInfo c01, VertexInfo c10, VertexInfo c11, int ao) {
         getMul(c00, AOUtils.hasAoCorner00(ao));
         getMul(c01, AOUtils.hasAoCorner01(ao));
@@ -240,29 +251,70 @@ public class NormalBlockRenderer implements BlockRenderer {
         getMul(c11, AOUtils.hasAoCorner11(ao));
     }
 
+    /**
+     * Gets the multiplier for the vertex.
+     * 
+     * @param c00 The vertex.
+     * @param ao The AO value.
+     */
     private static void getMul(VertexInfo c00, boolean ao) {
         c00.color.add(0.2f, 0.2f, 0.2f, 0.0f).mul((float) (ao ? 0.5 : 1.0), (float) (ao ? 0.5 : 1.0), (float) (ao ? 0.5 : 1.0), 1.0f);
     }
 
+    /**
+     * Gets the color for the vertex.
+     * 
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     * @param z The z coordinate.
+     * @return The color.
+     */
     protected Color getColor(int x, int y, int z) {
         return RgbColor.WHITE;
     }
 
+    /**
+     * Initializes the renderer.
+     */
     private static void initialize() {
     }
 
+    /**
+     * Gets the U coordinate for the texture.
+     * 
+     * @param region The texture region.
+     * @return The U coordinate.
+     */
     public static float getU(TextureRegion region) {
         return region.getU() / (1 + NormalBlockRenderer.TEXTURE_PERCENTAGE);
     }
 
+    /**
+     * Gets the V coordinate for the texture.
+     * 
+     * @param region The texture region.
+     * @return The V coordinate.
+     */
     public static float getV(TextureRegion region) {
         return region.getV();
     }
 
+    /**
+     * Gets the U2 coordinate for the texture.
+     * 
+     * @param region The texture region.
+     * @return The U2 coordinate.
+     */
     public static float getU2(TextureRegion region) {
         return region.getU2() / (1 + NormalBlockRenderer.TEXTURE_PERCENTAGE);
     }
 
+    /**
+     * Gets the V2 coordinate for the texture.
+     * 
+     * @param region The texture region.
+     * @return The V2 coordinate.
+     */
     public static float getV2(TextureRegion region) {
         return region.getV2();
     }

@@ -1,9 +1,10 @@
 package dev.ultreon.quantum.recipe;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IdentityMap;
+import com.badlogic.gdx.utils.ObjectMap;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
-import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
@@ -18,8 +19,6 @@ import dev.ultreon.quantum.util.PagedList;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class RecipeManager {
@@ -120,8 +119,8 @@ public class RecipeManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Recipe> Collection<T> getRecipes(RecipeType<T> type) {
-        return (Collection<T>) Collections.unmodifiableCollection(this.registryMap.get(type).values());
+    public <T extends Recipe> Array<Recipe> getRecipes(RecipeType<T> type) {
+        return this.registryMap.get(type).values().toArray();
     }
 
     public NamespaceID getKey(RecipeType<?> type, Recipe recipe) {
@@ -159,7 +158,7 @@ public class RecipeManager {
         return (List<R>) recipeRegistry.findRecipe(menu);
     }
 
-    public <T extends Recipe> OrderedMap<NamespaceID, Recipe> getRegistry(RecipeType<T> type) {
-        return this.registryMap.get(type).keyMap;
+    public <T extends Recipe> ObjectMap<NamespaceID, Recipe> getRegistry(RecipeType<T> type) {
+        return this.registryMap.get(type).registry;
     }
 }

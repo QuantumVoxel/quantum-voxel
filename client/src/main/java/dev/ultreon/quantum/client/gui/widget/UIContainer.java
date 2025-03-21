@@ -1,18 +1,19 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-import dev.ultreon.quantum.client.api.events.gui.WidgetEvents;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.gui.UIPath;
 import dev.ultreon.quantum.client.gui.widget.layout.Layout;
 import dev.ultreon.quantum.client.gui.widget.layout.StandardLayout;
+import dev.ultreon.quantum.client.api.events.gui.WidgetEvents;
 import dev.ultreon.quantum.client.input.controller.GuiNavigator;
+
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,13 +25,13 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     @SuppressWarnings("rawtypes")
     public static final UIContainer<?> ROOT = new UIContainer(Integer.MAX_VALUE, Integer.MAX_VALUE) {
         @Override
-        public Path path() {
-            return Path.of("/");
+        public UIPath path() {
+            return new UIPath(this);
         }
 
         @Override
         public String getName() {
-            return "<ROOT>";
+            return "//?";
         }
     };
 

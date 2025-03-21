@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static java.lang.Integer.max;
 
 /**
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @version 5.1
  */
 public class WordGenerator {

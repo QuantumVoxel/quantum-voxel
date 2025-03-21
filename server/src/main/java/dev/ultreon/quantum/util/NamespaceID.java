@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  *  String name = id.toString();
  * </pre>
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public final class NamespaceID {

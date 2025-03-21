@@ -36,6 +36,10 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 /**
  * The GameRenderer class is responsible for rendering the game world and overlays.
  * It handles the rendering pipeline, update cycles, and camera adjustments.
+ * <p>
+ * This class is not thread-safe. And should only be used on the main/render thread.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
@@ -196,10 +200,25 @@ public class GameRenderer implements Disposable {
         return this.cameraBop = bop;
     }
 
+    /**
+     * Renders the world with the given blur scale (for when a screen is open) and delta time.
+     * This uses the {@link RenderPipeline} to render the world.
+     * 
+     * @param blurScale The blur scale.
+     * @param deltaTime The time elapsed since the last frame.
+     */
     void renderWorld(float blurScale, float deltaTime) {
         this.pipeline.render(this.modelBatch, blurScale, deltaTime);
     }
 
+    /**
+     * Renders the overlays.
+     *
+     * @param renderer The renderer used for rendering the overlays.
+     * @param screen The screen to render the overlays on.
+     * @param world The world to render the overlays on.
+     * @param deltaTime The time elapsed since the last frame.
+     */
     private void renderOverlays(Renderer renderer, @Nullable Screen screen, ClientWorldAccess world, float deltaTime) {
         if (world != null) {
             try (var ignored = QuantumClient.PROFILER.start("hud")) {
@@ -250,10 +269,20 @@ public class GameRenderer implements Disposable {
         }
     }
 
+    /**
+     * Gets the render context.
+     * 
+     * @return The render context.
+     */
     public RenderContext getContext() {
         return this.context;
     }
 
+    /**
+     * Disposes of the GameRenderer.
+     * 
+     * @see #dispose()
+     */
     @Override
     public void dispose() {
         this.depthFbo.dispose();

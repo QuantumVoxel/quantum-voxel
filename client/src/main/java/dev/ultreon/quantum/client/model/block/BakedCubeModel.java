@@ -38,24 +38,25 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final VertexInfo V_01 = new VertexInfo();
     private static final VertexInfo V_10 = new VertexInfo();
     private static final VertexInfo V_11 = new VertexInfo();
+    private String renderPass;
 
-    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, Model model) {
-        this(resourceId, all, all, all, all, all, all, model);
+    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, Model model, String renderPass) {
+        this(resourceId, all, all, all, all, all, all, model, renderPass);
     }
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                            TextureRegion left, TextureRegion right,
-                           TextureRegion front, TextureRegion back, Model model) {
-        this(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(), model);
+                           TextureRegion front, TextureRegion back, Model model, String renderPass) {
+        this(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(), model, renderPass);
     }
 
-    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, ModelProperties properties, Model model) {
-        this(resourceId, all, all, all, all, all, all, properties, model);
+    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, ModelProperties properties, Model model, String renderPass) {
+        this(resourceId, all, all, all, all, all, all, properties, model, renderPass);
     }
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                            TextureRegion left, TextureRegion right,
-                           TextureRegion front, TextureRegion back, ModelProperties properties, Model model) {
+                           TextureRegion front, TextureRegion back, ModelProperties properties, Model model, String renderPass) {
         super(resourceId, model);
         this.top = top;
         this.bottom = bottom;
@@ -65,6 +66,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         this.back = back;
 
         this.properties = properties;
+        this.renderPass = renderPass;
     }
 
     public synchronized static BakedCubeModel defaultModel() {
@@ -72,32 +74,32 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
             return DEFAULT.get();
         }
 
-        BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("block/default"), TextureManager.DEFAULT_TEX_REG);
+        BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("block/default"), TextureManager.DEFAULT_TEX_REG, "opaque");
         DEFAULT.set(bakedCubeModel);
         return bakedCubeModel;
     }
 
-    public static BakedCubeModel of(NamespaceID resourceId, TextureRegion all) {
+    public static BakedCubeModel of(NamespaceID resourceId, TextureRegion all, String renderPass) {
         return new BakedCubeModel(resourceId, all, all, all, all, all, all, ModelProperties.builder().build(),
-                createModel(resourceId, all, all, all, all, all, all));
+                createModel(resourceId, all, all, all, all, all, all), renderPass);
     }
 
     public static BakedCubeModel of(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
-                                    TextureRegion front, TextureRegion back) {
+                                    TextureRegion front, TextureRegion back, String renderPass) {
         return new BakedCubeModel(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(),
-                createModel(resourceId, top, bottom, left, right, front, back));
+                createModel(resourceId, top, bottom, left, right, front, back), renderPass);
     }
 
     public static BakedCubeModel of(NamespaceID resourceId, TextureRegion all, ModelProperties properties) {
-        return new BakedCubeModel(resourceId, all, properties, createModel(resourceId, all, all, all, all, all, all));
+        return new BakedCubeModel(resourceId, all, properties, createModel(resourceId, all, all, all, all, all, all), properties.renderPass);
     }
 
     public static BakedCubeModel of(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
                                     TextureRegion left, TextureRegion right,
                                     TextureRegion front, TextureRegion back, ModelProperties properties) {
         return new BakedCubeModel(resourceId, top, bottom, left, right, front, back, properties,
-                createModel(resourceId, top, bottom, left, right, front, back));
+                createModel(resourceId, top, bottom, left, right, front, back), properties.renderPass);
     }
 
     public static Model createModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
@@ -325,6 +327,11 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     @Override
     public boolean hasAO() {
         return true;
+    }
+
+    @Override
+    public String getRenderPass() {
+        return renderPass;
     }
 
     @Override

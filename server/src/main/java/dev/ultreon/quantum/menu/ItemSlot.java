@@ -9,7 +9,7 @@ import dev.ultreon.quantum.item.ItemStack;
  * Item slot for {@link ContainerMenu}.
  *
  * @see ItemStack
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class ItemSlot {
     private final ContainerMenu container;

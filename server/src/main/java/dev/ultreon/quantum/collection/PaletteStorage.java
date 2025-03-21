@@ -34,7 +34,7 @@ import java.util.function.Predicate;
  * While the data itself is stored without any duplicates.</p>
  *
  * @param <D> the data type.
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 @ApiStatus.Experimental
 public class PaletteStorage<D> implements Disposable, Storage<D> {

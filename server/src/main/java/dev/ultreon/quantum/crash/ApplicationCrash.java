@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Exception that is thrown when an application crash occurs
  *
- * @author <a href="https://github.com/XyperCodee">XyperCode</a>
+ * @author <a href="https://github.com/XyperCodee">Qubilux</a>
  * @see ApplicationCrash
  * @since 0.1.0
  */

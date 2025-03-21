@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Development preview screen. Shows up when the game is still in development.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public class DevPreviewScreen extends Screen {

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Implements {@link Mod} for {@link ModContainer}
  * 
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public class FabricMod implements Mod {

@@ -32,7 +32,7 @@ import java.util.Map;
  * It manages server-specific functionalities such as player connections, world storage, and
  * server language. It provides methods for starting, shutting down, and handling server crashes.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @SuppressWarnings("GDXJavaStaticResource")
@@ -142,7 +142,6 @@ public class DedicatedServer extends QuantumServer {
     }
 
     /**
-     * {@inheritDoc}
      * <p>
      * This will shutdown the server for the dedicated server.
      */
@@ -163,7 +162,6 @@ public class DedicatedServer extends QuantumServer {
     }
 
     /**
-     * {@inheritDoc}
      * This will crash and halt the server for the dedicated server.
      */
     @Override

@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * A class that handles Discord Rich Presence integration. The Discord IPC client is used to send
  * Rich Presence updates to Discord.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class DiscordRPC implements RpcHandler {
     /**
@@ -30,6 +32,10 @@ public class DiscordRPC implements RpcHandler {
      * A flag that indicates whether the Rich Presence has been updated since the last update.
      */
     private volatile boolean updated;
+
+    /**
+     * The Discord IPC client.
+     */
     private IPCClient client;
 
     /**

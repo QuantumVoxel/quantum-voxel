@@ -12,6 +12,7 @@ import dev.ultreon.quantum.api.commands.selector.*;
 import dev.ultreon.quantum.api.commands.variables.*;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.entity.*;
+import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.gamerule.Rule;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -19,6 +20,7 @@ import dev.ultreon.quantum.registry.*;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
+import dev.ultreon.quantum.server.player.CachedPlayer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.server.util.Utils;
 import dev.ultreon.quantum.util.GameMode;
@@ -106,7 +108,7 @@ public class CommandData {
         }
     }
 
-    public CommandStatus getStatus() {
+    public @Nullable CommandStatus getStatus() {
         return this.status0;
     }
 
@@ -139,7 +141,7 @@ public class CommandData {
         }
         Chat.sendError(s, "[light red]Overloads:", name);
         for (var entry : this.overloads0.entrySet()) {
-            Chat.sendError(s, "  [#cccccc]" + entry.getKey().toString(), name);
+            Chat.sendError(s, "  [#cccccc]" + entry.getKey(), name);
             Chat.sendError(s, "    [#888888]$value", name);
         }
         Chat.sendError(s, "[light red]Aliases:", name);
@@ -409,14 +411,18 @@ public class CommandData {
         return new ArrayList<>();
     }
 
-    private static @Nullable ServerPlayer readPlayer(CommandReader ctx) throws CommandParseException {
+    private static ServerPlayer readPlayer(CommandReader ctx) throws CommandParseException {
         var parsed = new PlayerBaseSelector(ctx.getSender(), ctx.getArgument());
         ctx.readString();
         var error = parsed.getError();
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
         }
-        return (ServerPlayer) parsed.getValue();
+        Player value = parsed.getValue();
+        if (value == null) {
+            throw new CommandParseException.NotFound("player", ctx.getOffset());
+        }
+        return (ServerPlayer) value;
     }
 
     private static Entity readEntity(CommandReader ctx) throws CommandParseException {
@@ -441,13 +447,17 @@ public class CommandData {
         return value;
     }
 
-    private static @Nullable CommandSender readCommandSender(CommandReader ctx) throws CommandParseException {
+    private static CommandSender readCommandSender(CommandReader ctx) throws CommandParseException {
         var parsed = new CommandSenderBaseSelector(ctx.getSender(), ctx.readString());
         var error = parsed.getError();
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
         }
-        return parsed.getValue();
+        CommandSender value = parsed.getValue();
+        if (value == null) {
+            throw new CommandParseException.NotFound("command sender", ctx.getOffset());
+        }
+        return value;
     }
 
     private static Weather readWeather(CommandReader ctx) throws CommandParseException {
@@ -490,7 +500,9 @@ public class CommandData {
         Selector selector = commandReader.readSelector();
         SelectorKey key = selector.getKey();
         if (key != SelectorKey.VARIABLE) throw new CommandParseException.Invalid("variable assignment", commandReader.getOffset());
-        return new PlayerVariable(PlayerVariables.get(serverPlayer), selector.getStringValue());
+        String stringValue = selector.getStringValue();
+        if (stringValue == null) throw new CommandParseException.Invalid("variable assignment", commandReader.getOffset());
+        return new PlayerVariable(PlayerVariables.get(serverPlayer), stringValue);
     }
 
     private Rule<?> readRule(CommandReader ctx) throws CommandParseException {
@@ -505,7 +517,11 @@ public class CommandData {
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
         }
-        return parsed.getValue();
+        CacheablePlayer value = parsed.getValue();
+        if (value == null) {
+            throw new CommandParseException.NotFound("player", ctx.getOffset());
+        }
+        return value;
     }
 
     private static CacheablePlayer readOfflinePlayer(CommandReader ctx) throws CommandParseException {
@@ -514,7 +530,11 @@ public class CommandData {
         if (error != null) {
             throw new CommandParseException(error, ctx.getOffset());
         }
-        return parsed.getValue();
+        CachedPlayer value = parsed.getValue();
+        if (value == null) {
+            throw new CommandParseException.NotFound("player", ctx.getOffset());
+        }
+        return value;
     }
 
     /**
@@ -595,14 +615,16 @@ public class CommandData {
         return Registries.ITEM.get(id);
     }
 
-    private static @Nullable ItemStack readItemStackRef(CommandReader ctx) throws CommandParseException {
+    private static ItemStack readItemStackRef(CommandReader ctx) throws CommandParseException {
         var sender = ctx.getSender();
         var string = ctx.readString();
         if (sender instanceof LivingEntity) {
             var selector = new ItemBaseSelector(ctx.getSender(), string);
             CommandError error = selector.getError();
             if (error != null) throw new CommandParseException(error, ctx.getOffset());
-            return selector.getValue();
+            ItemStack value = selector.getValue();
+            if (value == null) throw new CommandParseException.NotFound("item stack", ctx.getOffset());
+            return value;
         }
         throw new CommandParseException("Not ran from a living entity.");
     }
@@ -773,9 +795,9 @@ public class CommandData {
     static <T> List<String> complete(CommandReader ctx, Registry<T> registry) throws CommandParseException {
         var currentArgument = ctx.readString();
         List<String> list = new ArrayList<>();
-        for (var id : registry.ids()) {
+        for (var id : registry.keys()) {
             try {
-                TabCompleting.addIfStartsWith(list, id, currentArgument);
+                TabCompleting.addIfStartsWith(list, id.id(), currentArgument);
             } catch (Exception ignored) {
 
             }
@@ -783,7 +805,7 @@ public class CommandData {
         return list;
     }
 
-    static <T> List<String> complete(CommandReader ctx, RegistryKey<Registry<T>> key) throws CommandParseException {
+    public static <T> List<String> complete(CommandReader ctx, RegistryKey<Registry<T>> key) throws CommandParseException {
         QuantumServer server = ctx.getServer();
         Registry<T> registry = server.getRegistries().get(key);
         return complete(ctx, registry);
@@ -818,6 +840,7 @@ public class CommandData {
         List<String> list = new ArrayList<>();
         list.add(currentArgument);
         var parts = CommandData.dropLastWhile(List.of(currentArgument.split(":")), String::isEmpty);
+        if (parts == null) return Collections.emptyList();
         if (parts.size() > 4) {
             return List.of();
         }
@@ -841,6 +864,7 @@ public class CommandData {
         List<String> list = new ArrayList<>();
         list.add(currentArgument);
         var parts = CommandData.dropLastWhile(List.of(currentArgument.split(":")), String::isEmpty);
+        if (parts == null) return Collections.emptyList();
         if (parts.size() > 3) {
             return List.of();
         }
@@ -860,6 +884,7 @@ public class CommandData {
         List<String> list = new ArrayList<>();
         list.add(currentArgument);
         var parts = CommandData.dropLastWhile(List.of(currentArgument.split("-")), String::isEmpty);
+        if (parts == null) return Collections.emptyList();
         if (parts.size() > 3) {
             return List.of();
         }
@@ -884,6 +909,7 @@ public class CommandData {
         list.add(date);
         {
             var parts = CommandData.dropLastWhile(List.of(date.split("-")), String::isEmpty);
+            if (parts == null) return Collections.emptyList();
             if (parts.size() > 3) {
                 return List.of(" ");
             }
@@ -904,6 +930,7 @@ public class CommandData {
             var time = ctx.readString();
             list.add(time);
             var parts = CommandData.dropLastWhile(List.of(time.split(":")), String::isEmpty);
+            if (parts == null) return Collections.emptyList();
             if (parts.size() > 3) {
                 return List.of();
             }
@@ -920,7 +947,7 @@ public class CommandData {
         return list;
     }
 
-    public static <T> List<T> dropLastWhile(List<T> list, Predicate<T> o) {
+    public static <T> @Nullable List<T> dropLastWhile(List<T> list, Predicate<T> o) {
         if (list == null || list.isEmpty()) return null;
         ListIterator<T> iterator = list.listIterator(list.size());
         while (iterator.hasNext()) {
@@ -967,7 +994,11 @@ public class CommandData {
             if (command != null) {
                 String s1 = ctx.readMessage();
 
-                return command.onTabComplete(sender, commandCtx, s, s1.split(" "));
+                List<String> strings = command.onTabComplete(sender, commandCtx, s, s1.split(" "));
+                if (strings == null) {
+                    return Collections.emptyList();
+                }
+                return strings;
             }
 
             return List.of();

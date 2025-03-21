@@ -90,6 +90,11 @@ public class Json5Model implements BlockModel, ItemModel {
         return ambientOcclusion;
     }
 
+    @Override
+    public String getRenderPass() {
+        return display.renderPass;
+    }
+
     public Table<String, BlockDataEntry<?>, Json5Model> getOverrides() {
         return this.overrides;
     }

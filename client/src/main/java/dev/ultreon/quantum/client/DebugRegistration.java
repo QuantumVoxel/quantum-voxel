@@ -7,7 +7,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.glutils.GLVersion;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Ellipse;
+import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.GridPoint3;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+
 import dev.ultreon.quantum.client.player.ClientPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -16,13 +24,18 @@ import dev.ultreon.quantum.debug.inspect.InspectionRoot;
 
 /**
  * Debug registration for quantum.
+ * <p>
+ * This class registers auto fillers and formatters for inspection.
+ * </p>
  *
  * @since 0.1.0
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class DebugRegistration {
     /**
      * Registers auto fillers and formatters for inspection.
+     * 
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      */
     public static void registerAutoFillers() {
         // Register auto filler for ClientChunk class

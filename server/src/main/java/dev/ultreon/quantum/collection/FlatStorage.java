@@ -9,7 +9,6 @@ import dev.ultreon.ubo.types.MapType;
 import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;
 import it.unimi.dsi.fastutil.shorts.Short2ReferenceFunction;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
@@ -75,7 +74,7 @@ public class FlatStorage<D> implements Storage<D> {
     @Override
     public MapType save(MapType outputData, Function<D, MapType> encoder) {
         ListType<MapType> data = new ListType<>();
-        for (@Nullable D entry : this.data) if (entry != null) data.add(encoder.apply(entry));
+        for (D entry : this.data) if (entry != null) data.add(encoder.apply(entry));
 
         outputData.put("Data", data);
         return outputData;

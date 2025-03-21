@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.GamePlatform;
@@ -26,6 +25,14 @@ import java.util.function.Supplier;
 import static com.badlogic.gdx.Gdx.gl;
 import static com.badlogic.gdx.graphics.GL20.*;
 
+/**
+ * The main render node.
+ * <p>
+ * This node is responsible for rendering the main scene.
+ * </p>
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public class MainRenderNode extends RenderNode {
     private Mesh quad = createFullScreenQuad();
     private final Supplier<ShaderProgram> program = ShaderPrograms.MAIN;
@@ -35,14 +42,13 @@ public class MainRenderNode extends RenderNode {
     /**
      * Renders the scene with the given textures and parameters.
      *
-     * @param textures   The map containing textures.
-     * @param modelBatch The ModelBatch used for rendering.
-     * @param camera     The GameCamera representing the camera.
-     * @param deltaTime  The time passed since the last frame.
+     * @param textures  The map containing textures.
+     * @param camera    The GameCamera representing the camera.
+     * @param deltaTime The time passed since the last frame.
      */
     @NewInstance
     @Override
-    public void render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, float deltaTime) {
+    public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
         // Extract textures
         if (vignetteTex == null) {
             vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
@@ -58,7 +64,7 @@ public class MainRenderNode extends RenderNode {
         Texture foregroundTex = textures.get("foreground");
 
         // End modelBatch and begin rendering
-        modelBatch.end();
+        client.renderBuffers().end();
         client.renderer.begin();
         client.renderer.getBatch().enableBlending();
         client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -99,6 +105,18 @@ public class MainRenderNode extends RenderNode {
         client.renderer.getBatch().enableBlending();
     }
 
+    /**
+     * Renders the scene with the given textures and parameters.
+     *
+     * @param skyboxTex The skybox texture.
+     * @param diffuseTex The diffuse texture.
+     * @param normalTex The normal texture.
+     * @param reflectiveTex The reflective texture.
+     * @param depthTex The depth texture.
+     * @param positionTex The position texture.
+     * @param specularTex The specular texture.
+     * @param foregroundTex The foreground texture.
+     */
     private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex, Texture foregroundTex) {
         client.spriteBatch.enableBlending();
 
@@ -135,11 +153,22 @@ public class MainRenderNode extends RenderNode {
         }
     }
 
+    /**
+     * Draws the diffuse texture.
+     *
+     * @param diffuseTexture The diffuse texture.
+     */
     private void drawDiffuse(@NotNull Texture diffuseTexture) {
         client.spriteBatch.setShader(null);
         client.spriteBatch.draw(diffuseTexture, 0, 0, client.getWidth(), client.getHeight());
     }
 
+    /**
+     * Draws the diffuse texture with the given opacity.
+     *
+     * @param diffuseTexture The diffuse texture.
+     * @param opacity The opacity.
+     */
     private void drawDiffuse(@NotNull Texture diffuseTexture, float opacity) {
         client.spriteBatch.setShader(null);
         client.spriteBatch.setColor(1, 1, 1, opacity);
@@ -147,6 +176,12 @@ public class MainRenderNode extends RenderNode {
         client.spriteBatch.setColor(1, 1, 1, 1);
     }
 
+    /**
+     * Resizes the quad.
+     *
+     * @param width The width.
+     * @param height The height.
+     */
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
@@ -155,12 +190,22 @@ public class MainRenderNode extends RenderNode {
         quad = createFullScreenQuad();
     }
 
+    /**
+     * Dumps the info.
+     *
+     * @param stream The stream.
+     */
     @Override
     public void dumpInfo(PrintStream stream) {
         super.dumpInfo(stream);
         stream.println("Shader Handle: " + program.get().getHandle());
     }
 
+    /**
+     * Creates a full screen quad.
+     *
+     * @return The full screen quad.
+     */
     public Mesh createFullScreenQuad() {
         float[] vertices = new float[20];
         int i = 0;
@@ -198,6 +243,11 @@ public class MainRenderNode extends RenderNode {
         return mesh;
     }
 
+    /**
+     * Blurs the scene.
+     *
+     * @param blurScale The blur scale.
+     */
     public void blur(float blurScale) {
         blurScale = blurScale;
     }

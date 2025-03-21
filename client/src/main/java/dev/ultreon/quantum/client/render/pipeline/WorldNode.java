@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
@@ -12,24 +11,26 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.SceneCategory;
-import dev.ultreon.quantum.client.shaders.Shaders;
-import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
-import java.util.function.Supplier;
-
 import static com.badlogic.gdx.graphics.GL30.GL_DEPTH_COMPONENT24;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 
+/**
+ * The world node.
+ * <p>
+ * This node is responsible for rendering the world.
+ * </p>
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public class WorldNode extends WorldRenderNode {
-    private final Supplier<SceneShaders> shaderProvider = Shaders.SCENE;
 
     @NewInstance
     @Override
-    public void render(ObjectMap<String, Texture> textures, ModelBatch modelBatch, GameCamera camera, float deltaTime) {
+    public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         var localPlayer = this.client.player;
@@ -41,15 +42,15 @@ public class WorldNode extends WorldRenderNode {
         }
         var position = localPlayer.getPosition(client.partialTick);
         Array<Entity> toSort = new Array<>(world.getAllEntities());
-        worldRenderer.render(modelBatch, client.worldCat, deltaTime);
+        worldRenderer.render(client.renderBuffers(), deltaTime);
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);
             return Double.compare(d1, d2);
         });
-        for (Entity entity : toSort) {
+        for (Entity entity : toSort.toArray(Entity.class)) {
             if (entity instanceof LocalPlayer) continue;
-            worldRenderer.collectEntity(entity, modelBatch);
+            worldRenderer.collectEntity(entity, client.renderBuffers());
         }
 
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();
@@ -57,11 +58,9 @@ public class WorldNode extends WorldRenderNode {
             particleSystem.begin();
             particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
             particleSystem.end();
-            modelBatch.render(particleSystem);
+//            modelBatch.render(particleSystem);
+            // TODO add particle system
         }
-
-
-        modelBatch.render(client.worldCat);
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
 

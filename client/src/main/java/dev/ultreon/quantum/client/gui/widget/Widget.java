@@ -240,8 +240,8 @@ public abstract class Widget extends GameObject implements StaticWidget {
     /**
      * @return path to the widget.
      */
-    public Path path() {
-        return this.parent.path().resolve(String.format("%s[%d]", this.getName(), this.createTime));
+    public UIPath path() {
+        return this.parent.path().append(this);
     }
 
     public final boolean isWithinBounds(int x, int y) {

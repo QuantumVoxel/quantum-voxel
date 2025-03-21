@@ -17,7 +17,7 @@ import java.util.Objects;
  * Pre-main class for quantum.
  * <p style="color: red;">NOTE: Internal API!</p>
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 @ApiStatus.Internal
 public final class Launcher {

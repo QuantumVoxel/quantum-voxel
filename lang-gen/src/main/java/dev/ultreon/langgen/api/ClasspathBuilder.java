@@ -1,6 +1,7 @@
 package dev.ultreon.langgen.api;
 
 import dev.ultreon.langgen.LangGenConfig;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -158,7 +159,7 @@ public abstract class ClasspathBuilder extends ClasspathWrapper implements NameT
         try {
             Files.walkFileTree(libsDir, new SimpleFileVisitor<>() {
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
                     if (file.getFileName().toString().endsWith(".jar")) {
                         urls.add(file.toUri().toURL());
                     }
@@ -175,7 +176,7 @@ public abstract class ClasspathBuilder extends ClasspathWrapper implements NameT
         try {
             Files.walkFileTree(root, new SimpleFileVisitor<>() {
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
                     if (file.getFileName().toString().endsWith(".jmod")) {
                         try (FileSystem fs = FileSystems.newFileSystem(file, Collections.emptyMap())) {
                             urls.add(fs.getPath("/").toUri().toURL());

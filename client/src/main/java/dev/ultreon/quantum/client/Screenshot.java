@@ -20,7 +20,7 @@ import java.nio.file.Path;
  *
  * @since 0.1.0
  * @see Pixmap
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class Screenshot {
     private final Pixmap pixmap;

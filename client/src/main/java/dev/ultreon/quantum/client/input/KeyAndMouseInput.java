@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 /**
  * The input for the desktop client.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public final class KeyAndMouseInput extends GameInput implements InputProcessor {

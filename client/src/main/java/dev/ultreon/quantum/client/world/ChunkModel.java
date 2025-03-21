@@ -1,65 +1,68 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
-import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.Block;
+import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.render.RenderBuffer;
+import dev.ultreon.quantum.client.render.RenderBufferSource;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
+import java.nio.IntBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
-import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
-public class ChunkModel extends GameObject implements RenderableProvider {
+public class ChunkModel extends GameObject {
     private static final Lazy<Model> gizmo = LazyKt.lazy(ChunkModel::createBorderGizmo);
     private static final Color CHUNK_GIZMO_COLOR = new Color(0.0f, 1.0f, 0.0f, 1.0f);
     private final ChunkVec pos;
     private final ClientChunk chunk;
     private final Material material;
-    private final Material transparentMaterial;
     private final WorldRenderer worldRenderer;
     @Nullable
-    private Model model = null;
-    @Nullable
-    private ModelInstance modelInstance = null;
-    @Nullable
     private ModelInstance gizmoInstance = null;
+    private final Array<RenderPass> usedPasses = new Array<>();
 
-    private final Model[] lodModels = new Model[ClientConfig.lodLevels];
-    private final Vector3 relativePosition = new Vector3();
     private boolean beingBuilt;
 
-    @Nullable
-    private CompletableFuture<Void> task;
+    private final ChunkModelBuilder chunkModelBuilder;
+    private final MeshBuilder meshBuilder = new MeshBuilder();
+    private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
 
     public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
         this.material = renderer.getMaterial();
-        this.transparentMaterial = renderer.getTransparentMaterial();
         this.pos = pos;
         this.chunk = chunk;
         this.worldRenderer = renderer;
+        this.chunkModelBuilder = new ChunkModelBuilder(chunk);
+
+        if (Gdx.gl30 != null) {
+            IntBuffer buf = BufferUtils.newIntBuffer(1);
+            Gdx.gl30.glGenQueries(1, buf);
+        }
     }
 
     public boolean build() {
-        if (beingBuilt || model != null || modelInstance != null) return true;
+        if (beingBuilt) return true;
         generateModel();
         chunk.dirty = false;
         chunk.initialized = true;
@@ -71,78 +74,61 @@ public class ChunkModel extends GameObject implements RenderableProvider {
         this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
 
         this.beingBuilt = true;
-        CompletableFuture.runAsync(() -> {
-            if (modelInstance == null) {
-                ChunkVec pos = chunk.getVec();
-                ModelBuilder modelBuilder = QuantumClient.invokeAndWait(() -> {
-                    ModelBuilder builder = new ModelBuilder();
-                    builder.begin();
-                    return builder;
-                });
-
-
-                buildAsync(modelBuilder, pos);
-            }
-            QuantumClient.invokeAndWait(chunk::loadCustomRendered);
-
-            chunk.dirty = false;
-            QuantumClient.invoke(() -> {
-                chunk.onUpdated();
-                chunk.initialized = true;
+        if (meshes.isEmpty()) {
+            ChunkVec pos = chunk.getVec();
+            QuantumClient.invokeAndWait(() -> {
+                ModelBuilder builder = new ModelBuilder();
+                builder.begin();
+                return builder;
             });
-            this.beingBuilt = false;
-        }, worldRenderer.executor);
+
+
+            buildAsync(pos);
+        }
+        QuantumClient.invokeAndWait(chunk::loadCustomRendered);
+
+        chunk.dirty = false;
+        QuantumClient.invoke(() -> {
+            chunk.onUpdated();
+            chunk.initialized = true;
+        });
+        this.beingBuilt = false;
     }
 
-    private void buildAsync(ModelBuilder modelBuilder, ChunkVec pos) {
+    @SuppressWarnings("GDXJavaUnsafeIterator")
+    private void buildAsync(ChunkVec pos) {
         long millis = System.currentTimeMillis();
 
         if (chunk.isUniform()) {
-            QuantumClient.invokeAndWait(() -> {
-                var model = this.model = new Model();
-                this.modelInstance = new ModelInstance(model);
-            });
             return;
         }
 
         try {
-            MeshBuilder meshBuilder = new MeshBuilder();
-            AtomicBoolean isUnloaded = new AtomicBoolean(false);
-            QuantumClient.invokeAndWait(() -> meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES));
-            QuantumClient.invokeAndWait(() -> {
-                if (!chunk.mesher.buildMesh(blk -> !blk.isTransparent(), meshBuilder)) {
-                    meshBuilder.clear();
-                    isUnloaded.set(true);
-                }
-            });
-            QuantumClient.invokeAndWait(() -> {
-                Mesh end = meshBuilder.end();
-                modelBuilder.part("generated/chunk_part_solid", end, GL_TRIANGLES, material);
-                meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL_TRIANGLES);
-            });
-            QuantumClient.invokeAndWait(() -> {
-                if (!chunk.mesher.buildMesh(Block::isTransparent, meshBuilder)) {
-                    meshBuilder.clear();
-                    isUnloaded.set(true);
-                }
-            });
-            QuantumClient.invokeAndWait(() -> {
-                if (!chunk.isLoaded() || isUnloaded.get()) {
-                    meshBuilder.clear();
-                    return;
-                }
-                Mesh end = meshBuilder.end();
-                modelBuilder.part("generated/chunk_part_transparent", end, GL_TRIANGLES, transparentMaterial);
+            for (ObjectMap.Entry<RenderPass, ChunkMesh> model : this.meshes.entries()) {
+                if (model != null) model.value.dispose();
+            }
+            AtomicBoolean passed = new AtomicBoolean(false);
+            RenderBufferSource bufferSource = QuantumClient.get().renderBuffers();
+            chunkModelBuilder.begin(bufferSource);
 
-                Model model = this.model;
-                if (model != null) model.dispose();
+            if (!chunk.mesher.buildMesh((blk, model, pass) -> {
+                if (model == null) return false;
+                boolean b = pass.name().equals(model.getRenderPass());
+                if (b) {
+                    passed.set(true);
+                }
 
-                model = this.model = modelBuilder.end();
-                if (this.model == null) throw new IllegalStateException("Failed to generate chunk model: " + pos);
+                return b;
+            }, chunkModelBuilder)) {
+                return;
+            }
 
-                var modelInstance = this.modelInstance = new ModelInstance(model, 0, 0, 0);
-                modelInstance.userData = chunk;
-            });
+            if (!passed.get()) {
+                meshBuilder.clear();
+                return;
+            }
+
+            chunkModelBuilder.end(meshes, bufferSource);
         } catch (Throwable t) {
             CrashLog crashLog = new CrashLog("Failed to generate chunk model: " + pos, t);
             CrashCategory category = new CrashCategory("Chunk Details");
@@ -152,7 +138,15 @@ public class ChunkModel extends GameObject implements RenderableProvider {
             QuantumClient.crash(crashLog);
         } finally {
             this.beingBuilt = false;
-            task = null;
+        }
+    }
+
+    @SuppressWarnings("GDXJavaUnsafeIterator")
+    private void reset() {
+        meshBuilder.clear();
+        for (ObjectMap.Entry<RenderPass, ChunkMesh> entry : this.meshes.entries()) {
+            if (entry == null) continue;
+            entry.value.dispose();
         }
     }
 
@@ -174,54 +168,26 @@ public class ChunkModel extends GameObject implements RenderableProvider {
         return modelBuilder.end();
     }
 
-    public boolean rebuild() {
-        if (beingBuilt || model != null || modelInstance != null) return false;
-        boolean build = build();
+    public void rebuild() {
+        if (beingBuilt) return;
+        build();
         chunk.dirty = false;
         chunk.onUpdated();
         chunk.initialized = true;
-        return build;
     }
 
-    @Override
-    public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
-        ModelInstance cModelInstance = modelInstance;
-        Model cModel = model;
-        if (cModelInstance == null || cModel == null) return;
-
-        int count = array.size;
-        cModelInstance.getRenderables(array, pool);
-        ValueTracker.trackRenderables(array.size - count);
-
-        cModelInstance.transform.getTranslation(relativePosition);
-
-        float lodThreshold = ClientConfig.lodThreshold * 16.0f;
-        float dst = relativePosition.dst(0, 0, 0);
-        chunk.lod = (int) (dst / lodThreshold);
-
-        for (int i = 0; i < array.size; i++) {
-            Renderable renderable = array.get(i);
-            renderable.userData = chunk;
-        }
-
-        ModelInstance cGizmoInstance = gizmoInstance;
-        if (cGizmoInstance != null && GamePlatform.get().areChunkBordersVisible()) {
-            cGizmoInstance.transform = cModelInstance.transform;
-            cGizmoInstance.getRenderables(array, pool);
-        }
-    }
-
+    @SuppressWarnings("GDXJavaUnsafeIterator")
     public void dispose() {
         super.dispose();
-        Model model = this.model;
-        if (modelInstance != null) this.modelInstance = null;
-        if (model != null) this.model = null;
         if (gizmoInstance != null) gizmoInstance = null;
-        if (model != null) model.dispose();
+        for (ObjectMap.Entry<RenderPass, ChunkMesh> instance : meshes.entries()) {
+            instance.value.dispose();
+        }
+        meshes.clear();
     }
 
     public boolean isLoaded() {
-        return modelInstance != null && model != null;
+        return !meshes.isEmpty();
     }
 
     public boolean needsRebuild(ClientWorld world) {
@@ -244,35 +210,17 @@ public class ChunkModel extends GameObject implements RenderableProvider {
         return material;
     }
 
-    public Material getTransparentMaterial() {
-        return transparentMaterial;
+    @SuppressWarnings("GDXJavaUnsafeIterator")
+    public void setTranslation(float x, float y, float z) {
+        for (ChunkMesh instance : meshes.values()) {
+            instance.instance.worldTransform.setTranslation(x, y, z);
+        }
     }
 
-    public @Nullable Model getModel() {
-        return model;
-    }
-
-    public @Nullable ModelInstance getModelInstance() {
-        return modelInstance;
-    }
-
-    public @Nullable ModelInstance getGizmoInstance() {
-        return gizmoInstance;
-    }
-
-    public Model[] getLodModels() {
-        return lodModels;
-    }
-
-    public Vector3 getRelativePosition() {
-        return relativePosition;
-    }
-
-    public boolean isBeingBuilt() {
-        return beingBuilt;
-    }
-
-    public @Nullable CompletableFuture<Void> getTask() {
-        return task;
+    @SuppressWarnings("GDXJavaUnsafeIterator")
+    public void render(GameCamera camera, RenderBufferSource bufferSource) {
+        for (ObjectMap.Entry<RenderPass, ChunkMesh> instance : meshes.entries()) {
+            instance.value.render(camera, bufferSource);
+        }
     }
 }

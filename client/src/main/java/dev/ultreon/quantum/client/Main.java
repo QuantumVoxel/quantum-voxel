@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +43,7 @@ import static io.github.libsdl4j.api.SdlSubSystemConst.*;
 /**
  * LibGDX wrapper for Quantum Voxel to handle uncaught exceptions.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @ApiStatus.Internal
@@ -98,7 +99,7 @@ public final class Main implements ApplicationListener {
         if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
 
         glProfiler.setListener(error -> {
-            String stackTrace = ExceptionUtils.getStackTrace(new Exception());
+            String stackTrace = String.join("\n", Arrays.stream(new Exception().getStackTrace()).map(stackTraceElement -> "    at " + stackTraceElement.toString()).toArray(String[]::new));
             Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
         });
 

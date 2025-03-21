@@ -143,7 +143,7 @@ public abstract class ClientPlayer extends Player {
      * @return A CommandResult representing the result of the execution, or null if no result.
      */
     @Override
-    public CommandResult execute(String input) {
+    public @NotNull CommandResult execute(@NotNull String input) {
         this.client.connection.send(new C2SCommandPacket(input));
         return null;
     }

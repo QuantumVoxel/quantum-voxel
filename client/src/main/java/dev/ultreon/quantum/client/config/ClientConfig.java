@@ -12,7 +12,7 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 /**
  * This is the client configuration.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @ConfigInfo(fileName = "quantum-client")

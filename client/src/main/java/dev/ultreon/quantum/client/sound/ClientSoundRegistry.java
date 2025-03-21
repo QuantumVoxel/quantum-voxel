@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.sound;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -22,8 +23,8 @@ public class ClientSoundRegistry {
     public void registerSounds() {
         Registry<SoundEvent> soundEvents = Registries.SOUND_EVENT;
         Map<NamespaceID, Sound> soundMap = new HashMap<>();
-        for (Map.Entry<RegistryKey<SoundEvent>, SoundEvent> entry : soundEvents.entries()) {
-            NamespaceID key = entry.getKey().id();
+        for (ObjectMap.Entry<RegistryKey<SoundEvent>, SoundEvent> entry : soundEvents.entries()) {
+            NamespaceID key = entry.key.id();
             Sound sound = Gdx.audio.newSound(Gdx.files.internal(String.format("assets/%s/sounds/%s.ogg", key.getDomain(), key.getPath().replaceAll("\\.", "/"))));
 
             soundMap.put(key, sound);

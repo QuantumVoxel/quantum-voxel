@@ -12,7 +12,7 @@ import java.util.Map;
  * QuantumVxlLogHandler class that implements LogHandler interface.
  * Responsible for handling logging operations.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public class QuantumVxlLogHandler implements LogHandler {

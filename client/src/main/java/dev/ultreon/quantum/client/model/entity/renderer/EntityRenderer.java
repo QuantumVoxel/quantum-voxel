@@ -13,6 +13,7 @@ import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.WorldRenderContext;
 import dev.ultreon.quantum.client.render.EntityTextures;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.util.Vec3d;
@@ -53,9 +54,13 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
         if (instance.getModel().getInstance().userData == null)
             instance.getModel().getInstance().userData = Shaders.MODEL_VIEW.get();
         instance.translate(0, -1.625, 0);
-        instance.render(context);
+        instance.render(context, context.getBufferSource().getBuffer(getRenderPass(context)));
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    private RenderPass getRenderPass(WorldRenderContext<E> context) {
+        return RenderPass.ENTITY_TRANSPARENT;
     }
 
     public abstract void animate(EntityModelInstance<E> instance, WorldRenderContext<E> context);

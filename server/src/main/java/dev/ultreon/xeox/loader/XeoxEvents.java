@@ -7,7 +7,7 @@ import org.mozilla.javascript.ScriptableObject;
 /**
  * Xeox Events for Quantum.
  * 
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  * @see XeoxLoader
  */

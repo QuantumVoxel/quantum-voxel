@@ -10,7 +10,7 @@ import java.util.UUID;
  * Represents a player from the cache, this implementation can be stored in collections.
  * <p>Use {@link #isOnline()} to check if the player is online, and then get the {@link ServerPlayer} instance from the server.</p>
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @see QuantumServer#getPlayer(UUID)
  * @see QuantumServer#getPlayer(String)
  * @since 0.1.0

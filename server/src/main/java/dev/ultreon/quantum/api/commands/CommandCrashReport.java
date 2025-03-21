@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * Represents a command crash report.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class CommandCrashReport {
     private final Throwable throwable;

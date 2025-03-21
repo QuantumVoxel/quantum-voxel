@@ -86,7 +86,7 @@ import java.util.stream.Stream;
  * The {@link QuantumServer} class represents the core server component of the QuantumGaming platform.
  * It manages all server operations including world data, player management, network communication, and more.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")

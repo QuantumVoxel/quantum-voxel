@@ -6,26 +6,17 @@ import dev.ultreon.quantum.world.Direction;
 import java.util.Objects;
 
 public class ModelProperties {
-    public final FaceProperties top;
-    public final FaceProperties bottom;
-    public final FaceProperties left;
-    public final FaceProperties right;
-    public final FaceProperties front;
-    public final FaceProperties back;
-    public final Direction rotation;
+    public FaceProperties top;
+    public FaceProperties bottom;
+    public FaceProperties left;
+    public FaceProperties right;
+    public FaceProperties front;
+    public FaceProperties back;
+    public Direction rotation;
+    public String renderPass = "opaque";
 
-    public ModelProperties(FaceProperties top, FaceProperties bottom, FaceProperties left, FaceProperties right, FaceProperties front, FaceProperties back, Direction rotation) {
-        this.top = top;
-        this.bottom = bottom;
-        this.left = left;
-        this.right = right;
-        this.front = front;
-        this.back = back;
-        this.rotation = rotation;
-    }
+    public ModelProperties() {
 
-    public ModelProperties(FaceProperties all, Direction rotation) {
-        this(all, all, all, all, all, all, rotation);
     }
 
     @Override
@@ -60,6 +51,7 @@ public class ModelProperties {
         private FaceProperties front = new FaceProperties();
         private FaceProperties back = new FaceProperties();
         private Direction horizontalRotation = Direction.NORTH;
+        private String renderPass = "opaque";
 
         public Builder top(FaceProperties top) {
             this.top = top;
@@ -91,8 +83,22 @@ public class ModelProperties {
             return this;
         }
 
+        public Builder renderPass(String renderPass) {
+            this.renderPass = renderPass;
+            return this;
+        }
+
         public ModelProperties build() {
-            return new ModelProperties(this.top, this.bottom, this.left, this.right, this.front, this.back, this.horizontalRotation);
+            ModelProperties modelProperties = new ModelProperties();
+            modelProperties.top = this.top;
+            modelProperties.bottom = this.bottom;
+            modelProperties.left = this.left;
+            modelProperties.right = this.right;
+            modelProperties.front = this.front;
+            modelProperties.back = this.back;
+            modelProperties.rotation = this.horizontalRotation;
+            modelProperties.renderPass = this.renderPass;
+            return modelProperties;
         }
 
         public Builder rotateHorizontal(Direction direction) {

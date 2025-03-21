@@ -1,5 +1,9 @@
 package dev.ultreon.quantum.client;
 
+import java.nio.file.Path;
+import java.util.ServiceLoader;
+import java.util.function.Consumer;
+
 import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.data.DataGenerator;
@@ -12,13 +16,21 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
-import java.nio.file.Path;
-import java.util.ServiceLoader;
-import java.util.function.Consumer;
-
+/**
+ * A class that implements the DataGeneratorClient interface.
+ *
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ * @since 0.1.0
+ */
 public non-sealed class DataGeneratorClient implements DesktopMain, Runnable {
+    /**
+     * The writer for the data generator.
+     */
     private final ResourceWriter writer;
 
+    /**
+     * Constructs a new DataGeneratorClient.
+     */
     public DataGeneratorClient() {
         super();
 
@@ -35,6 +47,13 @@ public non-sealed class DataGeneratorClient implements DesktopMain, Runnable {
         thread.start();
     }
 
+    /**
+     * Initializes the entrypoints for the data generator.
+     *
+     * @param type The type of entrypoint.
+     * @param entrypointClass The class of the entrypoint.
+     * @param consumer The consumer for the entrypoint.
+     */
     private static <T> void initEntrypoints(String type, Class<T> entrypointClass, Consumer<T> consumer) {
         for (EntrypointContainer<T> entrypoint : FabricLoader.getInstance().getEntrypointContainers(type, entrypointClass)) {
             ModContainer provider = entrypoint.getProvider();
@@ -43,31 +62,52 @@ public non-sealed class DataGeneratorClient implements DesktopMain, Runnable {
         }
     }
 
+    /**
+     * Resizes the data generator.
+     *
+     * @param width The width of the data generator.
+     * @param height The height of the data generator.
+     */
     @Override
     public void resize(int width, int height) {
 
     }
 
+    /**
+     * Renders the data generator.
+     */
     @Override
     public void render() {
 
     }
 
+    /**
+     * Pauses the data generator.
+     */
     @Override
     public void pause() {
 
     }
 
+    /**
+     * Resumes the data generator.
+     */
     @Override
     public void resume() {
 
     }
 
+    /**
+     * Disposes of the data generator.
+     */
     @Override
     public void dispose() {
 
     }
 
+    /**
+     * Runs the data generator.
+     */
     @Override
     public void run() {
         for (DataGenerator dataGenerator : ServiceLoader.load(DataGenerator.class)) {

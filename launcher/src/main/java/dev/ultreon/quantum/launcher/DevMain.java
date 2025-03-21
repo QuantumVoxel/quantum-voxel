@@ -7,7 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
  * Development main class.
  * <p style="color: red;">NOTE: Internal API!</p>
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 @ApiStatus.Internal
 public final class DevMain {

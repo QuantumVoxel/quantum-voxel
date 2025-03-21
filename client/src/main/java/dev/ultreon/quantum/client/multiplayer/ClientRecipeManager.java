@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.multiplayer;
 
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.network.packets.s2c.S2CRecipeSyncPacket;
@@ -21,8 +22,12 @@ public class ClientRecipeManager {
 
     }
 
+    @SuppressWarnings("GDXJavaUnsafeIterator")
     public <T extends Recipe> void onPacket(S2CRecipeSyncPacket<T> packet) {
-        this.recipes.computeIfAbsent(packet.type(), k -> new HashMap<>()).putAll(packet.recipes());
+        Map<NamespaceID, Recipe> namespaceIDRecipeMap = this.recipes.computeIfAbsent(packet.type(), k -> new HashMap<>());
+        for (ObjectMap.Entry<NamespaceID, ? extends T> entry : packet.recipes()) {
+            namespaceIDRecipeMap.put(entry.key, entry.value);
+        }
     }
 
     public void clear() {

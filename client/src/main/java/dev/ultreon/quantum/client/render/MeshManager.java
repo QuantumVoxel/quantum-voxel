@@ -19,7 +19,14 @@ import java.util.function.Function;
 
 /**
  * MeshManager is a singleton class responsible for managing and creating various mesh shapes for 3D rendering.
+ * <p>
+ * This is a part of the render pipeline. It is used to manage the meshes.
+ * </p>
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ * @deprecated Managing meshes is now done manually.
  */
+@Deprecated
 public class MeshManager {
     public static final MeshManager INSTANCE = new MeshManager();
     private final MeshBuilder builder = new MeshBuilder();

@@ -78,10 +78,7 @@ import dev.ultreon.quantum.client.player.SkinManager;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
-import dev.ultreon.quantum.client.render.MeshManager;
-import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.SceneCategory;
-import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
@@ -98,6 +95,7 @@ import dev.ultreon.quantum.client.util.PlayerView;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -165,10 +163,10 @@ import static dev.ultreon.mixinprovider.PlatformOS.isMac;
 /**
  * This class is the main entry point for the Quantum Voxel Client.
  * It is responsible for initializing and running the game.
- * It also provides access to the game's main components and resources.
+ * It also provides access to the game's main elements and resources.
  *
- * @author <a href="https://github.com/Ultreon">Ultreon Team</a>
- * @see <a href="https://github.com/Ultreon/quantum-voxel">QuantumVoxel</a>
+ * @author <a href="https://github.com/Ultreon">Ultreon Studios</a>
+ * @see <a href="https://github.com/Ultreon/quantum-voxel">Quantum Voxel</a>
  * @since <i>Always :smirk:</i>
  */
 @SuppressWarnings("UnusedReturnValue")
@@ -251,7 +249,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     // Render pipeline
     private final RenderPipeline pipeline;
 
-    // Game clipboard
+    /**
+     * The clipboard for the game.
+     */
     public final IClipboard clipboard = createClipboard();
 
     // Particle batches (currently disabled), so this is a TODO
@@ -344,7 +344,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     // Generic renderers
     @Nullable
-    public TerrainRenderer worldRenderer;
+    public WorldRenderer worldRenderer;
     public ItemRenderer itemRenderer;
     private GameRenderer gameRenderer;
 
@@ -497,6 +497,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private boolean hovered = false;
     private int clicks;
     private long lastPress;
+    private RenderBufferSource renderBuffers = new RenderBufferSource();
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -528,7 +529,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      * NOTE: This method should not be called.
      *
      * @param argv the arguments to pass to the game
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      * @since <i>Always :smirk:</i>
      */
     QuantumClient(String[] argv) {
@@ -720,6 +721,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Returns a shader file handle for the given namespace ID.
+     *
+     * @param id the namespace ID of the shader.
+     * @return the shader file handle.
+     */
     public static @NotNull FileHandle shader(NamespaceID id) {
         if (GamePlatform.get().isAngleGLES()) {
             return resource(new NamespaceID(id.getDomain(), "shaders/angle/" + id.getPath()));
@@ -763,6 +770,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         QuantumClient.crashHook = crashHook;
     }
 
+    /**
+     * This method is used to reload the config.
+     */
     void onReloadConfig() {
         if (ClientConfig.fullscreen) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
@@ -802,6 +812,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         });
     }
 
+    /**
+     * Sets the fps limit for the game.
+     *
+     * @param limit the fps limit.
+     */
     public static void setFpsLimit(int limit) {
         Gdx.graphics.setForegroundFPS(limit);
     }
@@ -819,6 +834,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     /**
      * Makes a screenshot of the game.
+     *
+     * @return the screenshot.
      */
     public CompletableFuture<Screenshot> screenshot() {
         this.triggerScreenshot = true;
@@ -828,6 +845,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     /**
      * Makes a screenshot of the game.
+     *
+     * @param worldOnly whether to only screenshot the world.
+     * @return the screenshot.
      */
     public CompletableFuture<Screenshot> screenshot(boolean worldOnly) {
         this.screenshotWorldOnly = worldOnly;
@@ -836,6 +856,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return this.screenshotFuture;
     }
 
+    /**
+     * Logs a debug message.
+     */
     public static void logDebug() {
         if (QuantumClient.isPackaged()) QuantumClient.LOGGER.warn("Running in the JPackage environment.");
         QuantumClient.LOGGER.debug("Java Version: {}", System.getProperty("java.version"));
@@ -843,6 +866,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         QuantumClient.LOGGER.debug("Operating System: {} {} {}", System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"));
     }
 
+    /**
+     * Gets the icons for the game.
+     *
+     * @return the icons for the game.
+     */
     public static String[] getIcons() {
         int[] sizes = QuantumClient.SIZES;
         if (!isMac) {
@@ -878,12 +906,20 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return GamePlatform.get().getGameDir();
     }
 
+    /**
+     * Sets the automatic scale for the game.
+     *
+     * @param b whether to set the automatic scale.
+     */
     public void setAutomaticScale(boolean b) {
         this.autoScale = b;
         this.guiScale = this.calcMaxGuiScale();
         this.resize(this.width, this.height);
     }
 
+    /**
+     * Starts the development world.
+     */
     public void startDevWorld() {
         WorldStorage storage = new WorldStorage("worlds/dev");
         try {
@@ -1299,12 +1335,19 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         renderer.finish();
     }
 
+    /**
+     * Renders the game.
+     *
+     * @param deltaTime the delta time.
+     */
     private void doRender(float deltaTime) {
+        // If the width or height is 0, set them to the current width and height.
         if (this.width == 0 || this.height == 0) {
             this.width = Gdx.graphics.getWidth();
             this.height = Gdx.graphics.getHeight();
         }
 
+        // If the deferred width or height is not null and the width or height is not equal to the deferred width or height, set the width and height to the deferred width and height.
         if (deferredWidth != null && deferredHeight != null && (width != deferredWidth || height != deferredHeight)) {
             width = deferredWidth;
             height = deferredHeight;
@@ -1312,6 +1355,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             this.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
 
+        // If the screenshot world only flag is true, clear the screen, render the world, and set the capture screenshot and trigger screenshot flags to false.
+        // Then, grab a screenshot, complete the screenshot future, clear the screen, set the screenshot world only flag to false, and set the capture screenshot and trigger screenshot flags to false.
         if (this.screenshotWorldOnly) {
             ScreenUtils.clear(0, 0, 0, 0, true);
             this.gameRenderer.renderWorld(0f, deltaTime);
@@ -1324,10 +1369,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             this.screenshotWorldOnly = false;
         }
 
+        // If the trigger screenshot flag is true, prepare the screenshot.
         if (this.triggerScreenshot) this.prepareScreenshot();
 
+        // If the game bounds are not set, set them to the draw offset and the width and height.
         try (var ignored0 = PROFILER.start("renderGame")) {
             gameBounds.set(getDrawOffset().x, getDrawOffset().y, width, height);
+
+            // If the scissor stack is pushed, render the game.
             if (ScissorStack.pushScissors(gameBounds)) {
                 try {
                     this.renderGame(renderer, deltaTime);
@@ -1337,20 +1386,26 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             }
         }
 
+        // If the capture screenshot flag is true and the screenshot world only flag is false, handle the screenshot.
         if (this.captureScreenshot && !this.screenshotWorldOnly) this.handleScreenshot();
 
+        // If the screenshot world only flag is false and the screenshot flash time is greater than the current time minus 200, draw the screenshot flash.
         if (!this.screenshotWorldOnly && this.screenshotFlashTime > System.currentTimeMillis() - 200) {
             this.renderer.begin();
             this.shapes.filledRectangle(0, 0, this.width, this.height, this.tmpColor.set(1, 1, 1, 1 - (System.currentTimeMillis() - this.screenshotFlashTime) / 200f));
             this.renderer.end();
         }
 
+        // If the custom border is shown and the loading flag is false, draw the custom border.
         if (this.isCustomBorderShown() && !loading) this.drawCustomBorder(renderer);
 
+        // If the ImGui flag is true, render the ImGui.
         if (this.imGui) {
             GamePlatform.get().renderImGui();
         }
 
+        // If the window is dragging, get the texture for the cursor, and draw it.
+        // This is used to not have the cursor look disconnected from the window.
         if (this.window.isDragging()) {
             Texture texture = null;
             if (this.cursor0 == clickCursor) {
@@ -1367,6 +1422,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Prepares the screenshot.
+     */
     private void prepareScreenshot() {
         this.screenshotScale = 1;
 
@@ -1386,6 +1444,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         ScreenUtils.clear(0, 0, 0, 1, true);
     }
 
+    /**
+     * Draws the custom border.
+     *
+     * @param renderer the renderer.
+     */
     private void drawCustomBorder(Renderer renderer) {
         this.renderer.begin();
         renderer.pushMatrix();
@@ -1395,6 +1458,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.renderer.end();
     }
 
+    /**
+     * Handles the screenshot.
+     *
+     * @param renderer the renderer.
+     */
     private void handleScreenshot() {
         this.captureScreenshot = false;
 
@@ -1405,6 +1473,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
+    /**
+     * Renders the game.
+     *
+     * @param renderer the renderer.
+     * @param deltaTime the delta time.
+     * @return whether the game was rendered.
+     */
     private boolean renderGame(Renderer renderer, float deltaTime) {
         if (Gdx.graphics.getFrameId() == 2) {
             this.firstRender();
@@ -1447,6 +1522,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return false;
     }
 
+    /**
+     * Renders the main game.
+     *
+     * @param renderer the renderer.
+     * @param deltaTime the delta time.
+     */
     private void renderMain(Renderer renderer, float deltaTime) {
         Player player = this.player;
         if (player == null) {
@@ -1487,6 +1568,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         RenderEvents.POST_RENDER_GAME.factory().onRenderGame(gameRenderer, renderer, deltaTime);
     }
 
+    /**
+     * Sets the cursor.
+     *
+     * @param cursor the cursor.
+     */
     private void setCursor(Cursor cursor) {
         this.cursor0 = cursor;
         if (this.window.isDragging()) {
@@ -1497,6 +1583,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Renders the loading overlay.
+     *
+     * @param renderer the renderer.
+     * @param deltaTime the delta time.
+     * @param loading the loading overlay.
+     */
     private void renderLoadingOverlay(Renderer renderer, float deltaTime, LoadingOverlay loading) {
         try (var ignored = QuantumClient.PROFILER.start("loading")) {
             renderer.begin();
@@ -1514,6 +1607,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Starts the loading of the game.
+     */
     private void startLoading() {
         this.startDevLoading = false;
 
@@ -1557,6 +1653,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         });
     }
 
+    /**
+     * Renders the LibGDX splash.
+     *
+     * @param renderer the renderer.
+     */
     private void renderLibGDXSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("libGdxSplash")) {
             if (this.libGDXSplashTime == 0L) {
@@ -1577,6 +1678,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Renders the Ultreon splash.
+     *
+     * @param renderer the renderer.
+     */
     private void renderUltreonSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
             if (this.ultreonSplashTime == 0L) {
@@ -1618,6 +1724,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return GamePlatform.get().getMod("quantum").orElseThrow().getVersion();
     }
 
+    /**
+     * Tries to tick the client.
+     */
     private void tryClientTick() {
         var canTick = false;
 
@@ -1655,6 +1764,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Updates the activity.
+     */
     private void updateActivity() {
         if (this.activity != this.oldActivity) {
             this.oldActivity = this.activity;
@@ -1663,6 +1775,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Saves a screenshot.
+     */
     private void saveScreenshot() {
         if (this.spriteBatch.isDrawing()) this.spriteBatch.flush();
         if (this.modelBatch.getCamera() != null) this.modelBatch.flush();
@@ -1679,6 +1794,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.screenshotFuture.complete(grabbed);
     }
 
+    /**
+     * Renders the first frame.
+     */
     private void firstRender() {
 //        if (PlatformOS.isWindows) {
 //            InputStream resourceAsStream = QuantumClient.class.getResourceAsStream("/assets/quantum/native/acrylic.dll");
@@ -1697,6 +1815,13 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         GamePlatform.get().setVisible(true);
     }
 
+    /**
+     * Renders the window.
+     *
+     * @param renderer the renderer.
+     * @param width the width.
+     * @param height the height.
+     */
     private void renderWindow(Renderer renderer, int width, int height) {
         boolean maximized = window.isMaximized();
         int winXOff = maximized ? 18 : 0;
@@ -1720,17 +1845,32 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.window.update();
     }
 
+    /**
+     * Gets the window offset.
+     *
+     * @return the window offset.
+     */
     private GridPoint2 getWindowOffset() {
         if (window.isMaximized()) return MAXIMIZE_OFF;
         return ZERO;
     }
 
+    /**
+     * Crashes the game.
+     *
+     * @param throwable the throwable.
+     */
     public static void crash(Throwable throwable) {
         QuantumClient.LOGGER.error("Game crash triggered:", throwable);
         var crashLog = new CrashLog("An unexpected error occurred", throwable);
         QuantumClient.crash(crashLog);
     }
 
+    /**
+     * Crashes the game.
+     *
+     * @param crashLog the crash log.
+     */
     public static void crash(CrashLog crashLog) {
         try {
             Callback<CrashLog> handler = QuantumClient.crashHook;
@@ -1753,6 +1893,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Fills the game info.
+     *
+     * @param crashLog the crash log.
+     */
     @SuppressWarnings("UnstableApiUsage")
     @ApiStatus.Internal
     public void fillGameInfo(CrashLog crashLog) {
@@ -1766,6 +1911,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         crashLog.addCategory(client);
     }
 
+    /**
+     * Crashes the game.
+     *
+     * @param crash the crash.
+     */
     private static void crash(ApplicationCrash crash) {
         if (crashing) {
             LOGGER.error("Double crash detected, ignoring.");
@@ -1789,6 +1939,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Cleans up a disposable.
+     *
+     * @param disposable the disposable.
+     */
     private static void cleanUp(@Nullable Disposable disposable) {
         if (disposable == null) return;
 
@@ -1801,6 +1956,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Cleans up a shutdownable.
+     *
+     * @param disposable the disposable.
+     */
     private static void cleanUp(@Nullable Shutdownable disposable) {
         if (disposable == null) return;
 
@@ -1813,6 +1973,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Cleans up an executor service.
+     *
+     * @param disposable the disposable.
+     */
     private static void cleanUp(@Nullable ExecutorService disposable) {
         if (disposable == null) return;
 
@@ -1825,6 +1990,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Cleans up an auto closeable.
+     *
+     * @param disposable the disposable.
+     */
     private static void cleanUp(@Nullable AutoCloseable disposable) {
         if (disposable == null) return;
 
@@ -1899,6 +2069,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         ClientTickEvents.POST_GAME_TICK.factory().onGameTick(this);
     }
 
+    /**
+     * Handles the block breaking.
+     *
+     * @param breaking the breaking.
+     * @param hitResult the hit result.
+     */
     private void handleBlockBreaking(BlockVec breaking, BlockHit hitResult) {
         @Nullable ClientWorldAccess world = this.world;
         if (world == null) return;
@@ -1927,6 +2103,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Resets the breaking.
+     *
+     * @param hitResult the hit result.
+     */
     private void resetBreaking(BlockHit hitResult) {
         LocalPlayer player = this.player;
 
@@ -2013,6 +2194,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         OverlayManager.resize(ceil(getWidth() / this.getGuiScale()), ceil(height / this.getGuiScale()));
     }
 
+    /**
+     * Disposes of the client.
+     */
     @Override
     public void dispose() {
         if (!QuantumClient.isOnRenderThread()) {
@@ -2122,48 +2306,101 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Checks if the game is in dev mode.
+     *
+     * @return whether the game is in dev mode.
+     */
     public boolean isDevMode() {
         return this.isDevMode;
     }
 
+    /**
+     * Gets the width of the game.
+     *
+     * @return the width of the game.
+     */ 
     public int getWidth() {
         GameInsets insets = GamePlatform.get().getInsets();
         return GamePlatform.get().isShowingImGui() ? insets.width : Gdx.graphics.getWidth();
     }
 
+    /**
+     * Gets the height of the game.
+     *
+     * @return the height of the game.
+     */ 
     public int getHeight() {
         GameInsets insets = GamePlatform.get().getInsets();
         return GamePlatform.get().isShowingImGui() ? insets.height : Gdx.graphics.getHeight();
     }
 
+    /**
+     * Gets the texture manager.
+     *
+     * @return the texture manager.
+     */ 
     public TextureManager getTextureManager() {
         return this.textureManager;
     }
 
+    /**
+     * Starts the world.
+     *
+     * @param storage the storage.
+     */
     public void startWorld(WorldStorage storage) {
         this.showScreen(new WorldLoadScreen(storage));
     }
 
+    /**
+     * Starts the world.
+     *
+     * @param path the path.
+     */
     public void startWorld(Path path) {
         this.showScreen(new WorldLoadScreen(new WorldStorage(path)));
     }
 
+    /**
+     * Gets the GUI scale.
+     *
+     * @return the GUI scale.
+     */
     public float getGuiScale() {
         return this.guiScale;
     }
 
+    /**
+     * Gets the scaled width.
+     *
+     * @return the scaled width.
+     */
     public int getScaledWidth() {
         return ceil(getWidth() / this.getGuiScale());
     }
 
+    /**
+     * Gets the scaled height.
+     *
+     * @return the scaled height.
+     */
     public int getScaledHeight() {
         return ceil(getHeight() / this.getGuiScale());
     }
 
+    /**
+     * Exits the world to the title screen.
+     */
     public void exitWorldToTitle() {
         this.exitWorldAndThen(() -> this.showScreen(new TitleScreen()));
     }
 
+    /**
+     * Exits the world and then runs a runnable.
+     *
+     * @param afterExit the runnable.
+     */
     public void exitWorldAndThen(Runnable afterExit) {
         this.closingWorld = true;
         this.renderWorld = false;
@@ -2207,10 +2444,22 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         });
     }
 
+    /**
+     * Checks if the world is closing.
+     *
+     * @return whether the world is closing.
+     */
     public boolean isClosingWorld() {
         return this.closingWorld;
     }
 
+    /**
+     * Schedules a task.
+     *
+     * @param task the task.
+     * @param timeMillis the time in milliseconds.
+     * @return the scheduled future.
+     */
     public ScheduledFuture<Void> schedule(Task<?> task, long timeMillis) {
         return this.scheduler.schedule(() -> {
             try {
@@ -2222,6 +2471,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }, timeMillis, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Schedules a task.
+     *
+     * @param task the task.
+     * @param time the time.
+     * @param unit the unit.
+     * @return the scheduled future.
+     */
     public ScheduledFuture<Void> schedule(Task<?> task, long time, TimeUnit unit) {
         return this.scheduler.schedule(() -> {
             try {
@@ -2233,14 +2490,29 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }, time, unit);
     }
 
+    /**
+     * Gets the resource manager.
+     *
+     * @return the resource manager.
+     */
     public ResourceManager getResourceManager() {
         return this.resourceManager;
     }
 
+    /**
+     * Plays a sound.
+     *
+     * @param event the event.
+     */
     public void playSound(ClientSound event) {
         event.getSound().play();
     }
 
+    /**
+     * Tries to shutdown the game.
+     *
+     * @return whether the game was shutdown.
+     */
     public boolean tryShutdown() {
         if (WindowEvents.WINDOW_CLOSE_REQUESTED.factory().onWindowCloseRequested(this.window).isCanceled()) {
             return false;
@@ -2270,6 +2542,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return false;
     }
 
+    /**
+     * Checks if files were dropped.
+     *
+     * @param files the files.
+     * @return whether the files were dropped.
+     */
     public boolean filesDropped(String[] files) {
         var currentScreen = this.screen;
         var handles = Arrays.stream(files).map(FileHandle::new).collect(Collectors.toList());
@@ -2281,10 +2559,21 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return false;
     }
 
+    /**
+     * Adds a future.
+     *
+     * @param future the future.
+     */ 
     public void addFuture(CompletableFuture<?> future) {
         this.futures.add(future);
     }
 
+    /**
+     * Gets the block model.
+     *
+     * @param block the block.
+     * @return the block model.
+     */
     public @NotNull BlockModel getBlockModel(BlockState block) {
         List<Pair<Predicate<BlockState>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
 
@@ -2374,6 +2663,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.breakingBlock = blockHitResult.getBlockMeta();
     }
 
+    /**
+     * Stops the breaking process.
+     */
     public void stopBreaking() {
         Hit hit = this.hit;
         LocalPlayer player = this.player;
@@ -2391,6 +2683,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.breakingBlock = null;
     }
 
+    /**
+     * Gets the break progress.
+     *
+     * @return the break progress.
+     */
     public float getBreakProgress() {
         BlockVec breaking = this.breaking;
         @Nullable ClientWorldAccess world = this.world;
@@ -2398,6 +2695,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return world.getBreakProgress(new BlockVec(breaking));
     }
 
+    /**
+     * Calculates the maximum GUI scale.
+     *
+     * @return the maximum GUI scale.
+     */
     public int calcMaxGuiScale() {
         var windowWidth = getWidth();
         var windowHeight = getHeight();
@@ -2414,48 +2716,99 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return Math.max(min, 1);
     }
 
+    /**
+     * Checks if the game is playing.
+     *
+     * @return whether the game is playing.
+     */ 
     public boolean isPlaying() {
         return this.world != null && this.screen == null;
     }
 
+    /**
+     * Gets the config directory.
+     *
+     * @return the config directory.
+     */
     public static FileHandle getConfigDir() {
         return QuantumClient.instance.configDir;
     }
 
+    /**
+     * Gets the draw offset.
+     *
+     * @return the draw offset.
+     */
     public GridPoint2 getDrawOffset() {
         GameInsets insets = GamePlatform.get().getInsets();
         return this.offset.set(0, 0);
     }
 
+    /**
+     * Gets the mouse position.
+     *
+     * @return the mouse position.
+     */
     public GridPoint2 getMousePos() {
         GameInsets insets = GamePlatform.get().getInsets();
         GridPoint2 gridPoint2 = GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched() ? this.offset.set(insets.left, insets.top) : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
         return gridPoint2;
     }
 
+    /**
+     * Checks if the custom border is shown.
+     *
+     * @return whether the custom border is shown.
+     */
     @ApiStatus.Experimental
     public boolean isCustomBorderShown() {
 //        return GamePlatform.get().isDesktop() && !loading;
         return false;
     }
 
+    /**
+     * Checks if the game is loading.
+     *
+     * @return whether the game is loading.
+     */ 
     public boolean isLoading() {
         return this.loading;
     }
 
+    /**
+     * Gets the game environment.
+     *
+     * @return the game environment.
+     */ 
     public static GameEnvironment getGameEnv() {
         if (QuantumClient.instance == null) return GameEnvironment.UNKNOWN;
         return QuantumClient.instance.gameEnv;
     }
 
+    /**
+     * Gets the singleplayer server.
+     *
+     * @return the singleplayer server.
+     */ 
     public IntegratedServer getSingleplayerServer() {
         return this.integratedServer;
     }
 
+    /**
+     * Checks if the game is singleplayer.
+     *
+     * @return whether the game is singleplayer.
+     */ 
     public boolean isSinglePlayer() {
         return this.integratedServer != null && !this.integratedServer.isOpenToLan();
     }
 
+    /**
+     * Plays a sound.
+     *
+     * @param soundEvent the sound event.
+     * @param volume the volume.
+     */ 
     public void playSound(@NotNull SoundEvent soundEvent, float volume) {
         Preconditions.checkNotNull(soundEvent);
         Preconditions.checkArgument(volume >= 0.0F && volume <= 1.0F, "Volume must be between 0.0F and 1.0F");
@@ -2472,6 +2825,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Starts the integrated server.
+     */
     public void startIntegratedServer() {
         var mem = ClientTcpConnection.connectToLocalServer().unwrap();
         this.connection = mem;
@@ -2488,6 +2844,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.connection.initiate(new LoginClientPacketHandlerImpl(this.connection), new C2SLoginPacket(this.user.name()));
     }
 
+    /**
+     * Connects to a server.
+     *
+     * @param host the host.
+     * @param port the port.
+     */
     public void connectToServer(String host, int port) {
         this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
@@ -2513,10 +2875,20 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return this.currentTps;
     }
 
+    /**
+     * Sets the activity.
+     *
+     * @param activity the activity.
+     */ 
     public void setActivity(GameActivity activity) {
         this.activity = activity;
     }
 
+    /**
+     * Sets the full screen.
+     *
+     * @param fullScreen the full screen.
+     */ 
     public void setFullScreen(boolean fullScreen) {
         if (Gdx.graphics.isFullscreen() != fullScreen) {
             if (fullScreen) {
@@ -2552,10 +2924,20 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Sets the player view.
+     *
+     * @param playerView the player view.
+     */
     public void setPlayerView(PlayerView playerView) {
         this.playerView = playerView;
     }
 
+    /**
+     * Gets the player view.
+     *
+     * @return the player view.
+     */
     public PlayerView getPlayerView() {
         return this.playerView;
     }
@@ -2581,23 +2963,48 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.resize(this.width, this.height);
     }
 
+    /**
+     * Gets the multiplayer data.
+     * If the game is not in multiplayer, this will return null.
+     *
+     * @return the multiplayer data.
+     * @see #isSinglePlayer()
+     */ 
     public @Nullable MultiplayerData getMultiplayerData() {
         return this.multiplayerData;
     }
 
+    /**
+     * Checks if the world is rendering.
+     *
+     * @return whether the world is rendering.
+     */ 
     public boolean isRenderingWorld() {
         return this.world != null && this.worldRenderer != null && this.renderWorld;
     }
 
+    /**
+     * Converts the client to a string.
+     *
+     * @return the string.
+     */ 
     @Override
     public @NotNull String toString() {
         return "QuantumClient[" + this.user + "]";
     }
 
+    /**
+     * Runs a task in the tick queue.
+     *
+     * @param func the task.
+     */ 
     public void runInTick(Runnable func) {
         this.serverTickQueue.add(func);
     }
 
+    /**
+     * Polls the server tick queue.
+     */ 
     @ApiStatus.Internal
     public void pollServerTick() {
         Runnable task;
@@ -2606,10 +3013,20 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Gets the user.
+     *
+     * @return the user.
+     */ 
     public User getUser() {
         return this.user;
     }
 
+    /**
+     * Gets the environment.
+     *
+     * @return the environment.
+     */ 
     public Environment getEnvironment() {
         if (this.worldRenderer != null) {
             return this.worldRenderer.getEnvironment();
@@ -2617,27 +3034,55 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return this.defaultEnv;
     }
 
+    /**
+     * Gets the pipeline.
+     *
+     * @return the pipeline.
+     */ 
     public RenderPipeline getPipeline() {
         return pipeline;
     }
 
+    /**
+     * Gets the window.
+     *
+     * @return the window.
+     */ 
     public GameWindow getWindow() {
         return window;
     }
 
+    /**
+     * Gets the skin manager.
+     *
+     * @return the skin manager.
+     */ 
     public SkinManager getSkinManager() {
         return skinManager;
     }
 
+    /**
+     * Checks if the debug HUD is shown.
+     *
+     * @return whether the debug HUD is shown.
+     */ 
     public boolean isShowDebugHud() {
         return ClientConfig.enableDebugUtils;
     }
 
+    /**
+     * Sets whether the debug HUD is shown.
+     *
+     * @param showDebugHud whether the debug HUD is shown.
+     */ 
     public void setShowDebugHud(boolean showDebugHud) {
         ClientConfig.enableDebugUtils = showDebugHud;
         this.newConfig.save();
     }
 
+    /**
+     * Reloads the resources asynchronously.
+     */ 
     public void reloadResourcesAsync() {
         if (!isOnRenderThread()) {
             invokeAndWait(this::reloadResourcesAsync);
@@ -2695,62 +3140,124 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Gets the material manager.
+     *
+     * @return the material manager.
+     */ 
     public MaterialManager getMaterialManager() {
         return materialManager;
     }
 
+    /**
+     * Gets the shader provider manager.
+     *
+     * @return the shader provider manager.
+     */ 
     public ShaderProviderManager getShaderProviderManager() {
         return shaderProviderManager;
     }
 
+    /**
+     * Gets the shader program manager.
+     *
+     * @return the shader program manager.
+     */ 
     public ShaderProgramManager getShaderProgramManager() {
         return shaderProgramManager;
     }
 
+    /**
+     * Disconnects the client.
+     *
+     * @param message the message.
+     */ 
     public void onDisconnect(String message) {
         this.showScreen(new DisconnectedScreen(message, !connection.isMemoryConnection()));
     }
 
+    /**
+     * Cycles the player view.
+     */ 
     public void cyclePlayerView() {
-        if (this.playerView == PlayerView.FIRST_PERSON) {
-            this.playerView = PlayerView.THIRD_PERSON;
-        } else if (this.playerView == PlayerView.THIRD_PERSON) {
-            this.playerView = PlayerView.THIRD_PERSON_FRONT;
-        } else if (this.playerView == PlayerView.THIRD_PERSON_FRONT) {
-            this.playerView = PlayerView.FIRST_PERSON;
-        }
+        this.playerView = switch (this.playerView) {
+            case FIRST_PERSON -> PlayerView.THIRD_PERSON;
+            case THIRD_PERSON -> PlayerView.THIRD_PERSON_FRONT;
+            case THIRD_PERSON_FRONT -> PlayerView.FIRST_PERSON;
+        };
     }
 
+    /**
+     * Attacks an entity.
+     *
+     * @param entity the entity.
+     */ 
     public void attack(Entity entity) {
         if (entity == null) return;
         this.connection.send(new C2SAttackPacket(entity));
     }
 
+    /**
+     * Gets the asset manager.
+     *
+     * @return the asset manager.
+     */ 
     public AssetManager getAssetManager() {
         return assetManager;
     }
 
+    /**
+     * Gets the mod config screen.
+     *
+     * @param caller the mod that to get the config screen for.
+     * @return the mod config screen.
+     */ 
     public ConfigScreenFactory getModConfigScreen(Mod caller) {
         return cfgScreenFactories.get(caller.getName());
     }
 
+    /**
+     * Sets the mod config screen.
+     *
+     * @param caller the mod that to get the config screen for.
+     * @param factory the factory to set as the config screen for the mod.
+     */ 
     public void setModConfigScreen(Mod caller, ConfigScreenFactory factory) {
         cfgScreenFactories.put(caller.getName(), factory);
     }
 
+    /**
+     * Gets the cubemap manager.
+     *
+     * @return the cubemap manager.
+     */ 
     public CubemapManager getCubemapManager() {
         return cubemapManager;
     }
 
+    /**
+     * Checks if the window vibrancy is enabled.
+     *
+     * @return whether the window vibrancy is enabled.
+     */ 
     public boolean isWindowVibrancyEnabled() {
         return windowVibrancyEnabled;
     }
 
+    /**
+     * Checks if a mouse button is pressed.
+     *
+     * @param mouseX the mouse X coordinate.
+     * @param mouseY the mouse Y coordinate.
+     * @param button the button.
+     * @return whether the button is pressed.
+     */ 
     public boolean mousePress(int mouseX, int mouseY, int button) {
         if (mouseX < 0 || mouseY < 0 || mouseX > getWidth() || mouseY > getHeight()) return false;
 
         this.lastPress = System.currentTimeMillis();
 
+        // Close, maximize, and minimize buttons
         if (isCustomBorderShown() && mouseY < 44 && button == Input.Buttons.LEFT) {
             if (closeButton.isWithinBounds(mouseX - 18, mouseY - 22))
                 return closeButton.mousePress(mouseX - 18, mouseY - 22, button);
@@ -2777,6 +3284,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             return true;
         }
 
+        // Handle mouse press events for the current screen
         Screen scr = this.screen;
         if (scr != null) {
             GridPoint2 mouse = getMousePos();
@@ -2786,11 +3294,23 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return false;
     }
 
+    /**
+     * Handles mouse release events.
+     *
+     * @param mouseX the mouse X coordinate.
+     * @param mouseY the mouse Y coordinate.
+     * @param button the button.
+     * @return whether the button was released.
+     */ 
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
+        // Check if the mouse is outside the window
         if (mouseX < 0 || mouseY < 0 || mouseX > getWidth() || mouseY > getHeight()) return false;
 
+        // Scale mouse coordinates
         mouseX /= 2;
         mouseY /= 2;
+
+        // Close, maximize, and minimize buttons
         if (isCustomBorderShown() && mouseY < 44) {
             closeButton.mouseRelease(mouseX, mouseY, button);
             maximizeButton.mouseRelease(mouseX, mouseY, button);
@@ -2805,9 +3325,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 this.window.minimize();
 
             this.window.setDragging(false);
-            return true;
         }
 
+        // Handle mouse release events for the current screen
         Screen scr = this.screen;
         if (scr != null) {
             GridPoint2 mouse = getMousePos();
@@ -2859,9 +3379,12 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         return this.scheduler.scheduleAtFixedRate(func, initialDelay, interval, unit);
     }
 
+    /**
+     * Shuts down the client, waiting for all tasks to complete.
+     */ 
     @SuppressWarnings("BusyWait")
     @Override
-    public synchronized void shutdown() {
+    public void shutdown() {
         try {
             if (this.shuttingDown) return;
             this.shuttingDown = true;
@@ -2878,12 +3401,15 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                     shutdownScreen.setMessage("Waiting for executor services to terminate");
                 }
                 LOGGER.info("Waiting for executor services to terminate");
-                Thread.sleep(1000);
+                
+                executor.awaitTermination(1, TimeUnit.SECONDS);
+                scheduler.awaitTermination(1, TimeUnit.SECONDS);
             }
 
             if (this.integratedServer != null) {
                 this.integratedServer.shutdown();
 
+                // Wait for the server to terminate
                 while (!this.integratedServer.isShutdown()) {
                     if (this.screen instanceof ShutdownScreen shutdownScreen) {
                         shutdownScreen.setMessage("Waiting for server to terminate");
@@ -2895,7 +3421,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
             CommonConstants.LOGGER.info("Shutting down RPC handler");
             RpcHandler.disable();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             QuantumClient.LOGGER.error("Failed to shutdown background tasks", e);
             Runtime.getRuntime().halt(1); // Forcefully terminate the process
         }
@@ -2904,6 +3430,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         Gdx.app.exit();
     }
 
+    /**
+     * Updates the viewport.
+     */ 
     public void updateViewport() {
         if (!insets.equals(GamePlatform.get().getInsets())) {
             resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -2911,39 +3440,69 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         }
     }
 
+    /**
+     * Runs a task asynchronously.
+     *
+     * @param o the task.
+     * @return the future.
+     */ 
     public CompletableFuture<Void> runAsyncTask(Runnable o) {
         return CompletableFuture.runAsync(o, executor);
     }
 
+    /**
+     * Sets the user.
+     *
+     * @param user the user.
+     */ 
     public void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Handles mouse wheel events.
+     *
+     * @param amountX the amount of X movement.
+     * @param amountY the amount of Y movement.
+     */ 
     public void mouseWheel(float amountX, float amountY) {
-        if (this.screen != null) {
+        Screen scr = this.screen;
+        if (scr != null) {
             GridPoint2 mouse = getMousePos();
             if (mouse.x < 0 || mouse.y < 0 || mouse.x > getWidth() || mouse.y > getHeight()) return;
 
-            this.screen.mouseWheel((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), amountY);
+            scr.mouseWheel((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), amountY);
         }
     }
 
+    /**
+     * Handles mouse moved events.
+     *
+     * @param screenX the screen X coordinate.
+     * @param screenY the screen Y coordinate.
+     */ 
     public void mouseMoved(int screenX, int screenY) {
         lastPress = Integer.MIN_VALUE / 2;
 
-        if (this.screen != null) {
+        // Handle mouse moved events for the current screen
+        Screen scr = this.screen;
+        if (scr != null) {
             if (screenX < 0 || screenY < 0 || screenX > getWidth() || screenY > getHeight()) {
                 if (hovered) {
-                    this.screen.mouseExit();
+                    scr.mouseExit();
                 }
                 this.hovered = false;
                 return;
             } else if (!hovered) {
-                this.screen.mouseEnter((int) (screenX / guiScale), (int) (screenY / guiScale));
+                scr.mouseEnter((int) (screenX / guiScale), (int) (screenY / guiScale));
                 this.hovered = true;
             }
 
-            this.screen.mouseMoved((int) (screenX / guiScale), (int) (screenY / guiScale));
+            scr.mouseMoved((int) (screenX / guiScale), (int) (screenY / guiScale));
         }
+    }
+
+    public RenderBufferSource renderBuffers() {
+        return renderBuffers;
     }
 }

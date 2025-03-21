@@ -18,25 +18,55 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A manager for fonts. This class is responsible for loading and managing fonts.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public class FontManager implements Disposable, ContextAwareReloadable {
+    /**
+     * The default font.
+     */
     public static final GameFont DEFAULT = new GameFont();
+
+    /**
+     * The map of fonts.
+     */
     private final Map<NamespaceID, GameFont> fonts = new HashMap<>();
 
     FontManager() {
         // No-op
     }
 
+    /**
+     * Gets a font by its id.
+     * 
+     * @param id The id of the font.
+     * @return The font.
+     */
     public Font getFont(NamespaceID id) {
         if (this.fonts.containsKey(id)) return this.fonts.get(id);
         return null;
     }
 
+    /**
+     * Registers a font with the given id.
+     * 
+     * @param id The id of the font.
+     * @param font The font.
+     * @return The font.
+     */
     @CanIgnoreReturnValue
     public GameFont registerFont(NamespaceID id, GameFont font) {
         this.fonts.put(id, font);
         return font;
     }
 
+    /**
+     * Registers all fonts in the given resource manager.
+     * 
+     * @param resourceManager The resource manager.
+     */
     public void registerFonts(ResourceManager resourceManager) {
         Set<NamespaceID> ids = new HashSet<>();
         for (ResourceCategory fontCategory : resourceManager.getResourceCategory("font")) {
@@ -51,11 +81,20 @@ public class FontManager implements Disposable, ContextAwareReloadable {
         }
     }
 
+    /**
+     * Loads a font from the given namespace id.
+     * 
+     * @param namespaceID The namespace id.
+     * @return The font.
+     */
     private GameFont loadFont(NamespaceID namespaceID) {
         @NotNull FileHandle handle = QuantumClient.resource(namespaceID.mapPath(path -> "font/" + path + ".fnt"));
         return QuantumClient.invokeAndWait(() -> new GameFont(new BitmapFont(handle, false), Font.DistanceFieldType.STANDARD, 0f, 0f, 0f, 0f, false));
     }
 
+    /**
+     * Disposes of the font manager.
+     */
     @Override
     public void dispose() {
         for (Font font : this.fonts.values()) {
@@ -65,6 +104,12 @@ public class FontManager implements Disposable, ContextAwareReloadable {
         this.fonts.clear();
     }
 
+    /**
+     * Reloads the font manager.
+     * 
+     * @param resourceManager The resource manager.
+     * @param context The reload context.
+     */
     @Override
     public void reload(ResourceManager resourceManager, ReloadContext context) {
         this.dispose();

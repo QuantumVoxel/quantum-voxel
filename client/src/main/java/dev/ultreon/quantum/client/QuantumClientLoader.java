@@ -54,7 +54,15 @@ import java.util.*;
 
 import static com.badlogic.gdx.math.MathUtils.ceil;
 
+/**
+ * A class that loads the QuantumClient.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */ 
 class QuantumClientLoader implements Runnable {
+    /**
+     * Registers the debug pages.
+     */
     private static void registerDebugPages() {
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("simple"), new SimpleDebugPage());
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("generic"), new GenericDebugPage());
@@ -64,12 +72,20 @@ class QuantumClientLoader implements Runnable {
         ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("inspector"), new InspectorDebugPage());
     }
 
+    /**
+     * Runs the QuantumClientLoader.
+     */
     @Override
     public void run() {
         QuantumClient client = QuantumClient.get();
         load(client);
     }
 
+    /**
+     * Loads the QuantumClient.
+     * 
+     * @param client The QuantumClient.
+     */
     @SuppressWarnings("UnstableApiUsage")
     void load(QuantumClient client) {
         var argList = Arrays.asList(client.argv);
@@ -265,10 +281,21 @@ class QuantumClientLoader implements Runnable {
         OverlayManager.resize(ceil(client.getWidth() / client.getGuiScale()), ceil(client.getHeight() / client.getGuiScale()));
     }
 
+    /**
+     * Creates a new KeyAndMouseInput.
+     * 
+     * @param quantumClient The QuantumClient.
+     * @return The KeyAndMouseInput.
+     */
     private KeyAndMouseInput createInput(QuantumClient quantumClient) {
         return new KeyAndMouseInput(quantumClient, quantumClient.camera);
     }
 
+    /**
+     * Loads the languages.
+     * 
+     * @param client The QuantumClient.
+     */
     private void loadLanguages(QuantumClient client) {
         var internal = QuantumClient.resource(new NamespaceID("languages.json5"));
         Json5Element parse = CommonConstants.JSON5.parse(internal.reader());
@@ -298,6 +325,12 @@ class QuantumClientLoader implements Runnable {
         LanguageRegistry.doRegistration(id -> registerLanguage(id, client));
     }
 
+    /**
+     * Registers a language.
+     * 
+     * @param id The ID of the language.
+     * @param quantumClient The QuantumClient.
+     */
     private void registerLanguage(NamespaceID id, QuantumClient quantumClient) {
         var s = id.getPath().split("_", 2);
         var locale = s.length == 1 ? Locale.of(s[0]) : Locale.of(s[0], s[1]);
@@ -305,6 +338,9 @@ class QuantumClientLoader implements Runnable {
         LanguageManager.INSTANCE.load(locale, id, quantumClient.getResourceManager());
     }
 
+    /**
+     * Registers the menu screens.
+     */
     private void registerMenuScreens() {
         MenuRegistry.registerScreen(MenuTypes.INVENTORY, InventoryScreen::new);
         MenuRegistry.registerScreen(MenuTypes.ADVANCED_CRAFTING, AdvancedCraftingScreen::new);
@@ -312,6 +348,9 @@ class QuantumClientLoader implements Runnable {
         MenuRegistry.registerScreen(MenuTypes.BLAST_FURNACE, BlastFurnaceScreen::new);
     }
 
+    /**
+     * Stitches the textures.
+     */
     private void stitchTextures() {
     }
 }

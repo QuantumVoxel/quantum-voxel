@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.render.RenderBuffer;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -83,7 +84,7 @@ public class EntityModelInstance<T extends Entity> {
         return this.transform.getTranslation(out);
     }
 
-    public void render(WorldRenderContext<? super T> context) {
+    public void render(WorldRenderContext<? super T> context, RenderBuffer buffer) {
         WorldRenderContextImpl<? super T> ctx = (WorldRenderContextImpl<? super T>) context;
         ModelInstance instance;
 
@@ -97,7 +98,7 @@ public class EntityModelInstance<T extends Entity> {
 
             instance.calculateTransforms();
 
-            ctx.getModelBatch().render(instance);
+            buffer.render(instance);
         }
     }
 

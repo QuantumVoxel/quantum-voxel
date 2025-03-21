@@ -25,7 +25,7 @@ public class ConsoleCommandSender implements CommandSender {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "Console";
     }
 
@@ -35,12 +35,12 @@ public class ConsoleCommandSender implements CommandSender {
     }
 
     @Override
-    public TextObject getDisplayName() {
+    public @NotNull TextObject getDisplayName() {
         return Formatter.format(this.getPublicName());
     }
 
     @Override
-    public UUID getUuid() {
+    public @NotNull UUID getUuid() {
         return UUID.nameUUIDFromBytes("Hello Console".getBytes());
     }
 

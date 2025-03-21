@@ -44,16 +44,16 @@ import java.util.UUID;
  * Entities can be loaded from a {@link MapType} object using the {@link #loadFrom(World, MapType)} method.
  * And they can be saved to a {@link MapType} object using the {@link #save(MapType)} method.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @see World#spawn(Entity)
  * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities">Entities</a>
  */
 public abstract class Entity extends GameObject implements CommandSender {
     private final EntityType<? extends Entity> type;
     protected WorldAccess world;
-    protected double x;
-    protected double y;
-    protected double z;
+    public double x;
+    public double y;
+    public double z;
     public float xRot;
     public float yRot;
     private int id = -1;

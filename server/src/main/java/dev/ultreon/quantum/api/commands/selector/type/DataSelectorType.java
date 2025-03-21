@@ -1,8 +1,9 @@
 package dev.ultreon.quantum.api.commands.selector.type;
 
-public class DataSelectorType extends SelectorType {
+import org.jetbrains.annotations.Nullable;
 
-    public DataSelectorType(Object value) {
+public class DataSelectorType extends SelectorType {
+    public DataSelectorType(@Nullable Object value) {
         super(value);
     }
 }

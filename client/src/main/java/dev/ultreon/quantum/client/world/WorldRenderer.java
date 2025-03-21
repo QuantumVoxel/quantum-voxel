@@ -39,9 +39,8 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.entity.renderer.EntityRenderer;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.SceneCategory;
-import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
+import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -71,14 +70,15 @@ import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.*;
 import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
+@SuppressWarnings("GDXJavaUnsafeIterator")
 public final class WorldRenderer implements DisposableContainer, TerrainRenderer {
     public static final float SCALE = 1;
     private static final Vec3d TMP_3D_A = new Vec3d();
     private static final Vec3d TMp_3D_B = new Vec3d();
     public static final String OUTLINE_CURSOR_ID = CommonConstants.strId("outline_cursor");
     public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
-    public static final NamespaceID MOON_ID = id("generated/moon");
-    public static final NamespaceID SUN_ID = id("generated/sun");
+    public static final NamespaceID MOON_ID = NamespaceID.of("generated/moon");
+    public static final NamespaceID SUN_ID = NamespaceID.of("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
     final ExecutorService executor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 4));
 
@@ -92,8 +92,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private Environment environment;
     private int visibleChunks;
     private int loadedChunks;
-    private static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
-    private static final Vector3 HALF_CHUNK_DIMENSIONS = WorldRenderer.CHUNK_DIMENSIONS.cpy().scl(0.5f);
+    static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+    static final Vector3 HALF_CHUNK_DIMENSIONS = WorldRenderer.CHUNK_DIMENSIONS.cpy().scl(0.5f);
 
     private ClientWorld world;
     private final QuantumClient client = QuantumClient.get();
@@ -121,10 +121,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Vector3 sunDirection = new Vector3();
     private final Vector3 tmp2 = new Vector3();
     private final BlendingAttribute attribute = new BlendingAttribute(0.5f);
+    private @Nullable Vector3 lastCamPos;
+    private @Nullable Vector3 lastCamDir;
+    private @Nullable Vec3d lastPlayerPos;
+    private Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
 
     public WorldRenderer(@NotNull ClientWorld world) {
         this.world = world;
-
         this.setup();
     }
 
@@ -155,7 +158,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     private void setupBreaking() {
         // Breaking animation meshes.
-        this.setBreakingTex(this.client.getTextureManager().getTexture(id("textures/break_stages.png")));
+        this.setBreakingTex(this.client.getTextureManager().getTexture(NamespaceID.of("textures/break_stages.png")));
 
         Array<TextureRegion> breakingTexRegions = new Array<>(new TextureRegion[6]);
         for (int i = 0; i < 6; i++) {
@@ -170,7 +173,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         boundingBox.max.add(v);
 
         for (int i = 0; i < 6; i++) {
-            BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("break_stage/stub_" + i), breakingTexRegions.get(i));
+            BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("break_stage/stub_" + i), breakingTexRegions.get(i), "transparent");
             Model model = bakedCubeModel.getModel();
 
             this.breakingModels.add(model);
@@ -180,7 +183,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private void setupDynamicSkybox() {
         ModelBuilder modelBuilder = new ModelBuilder();
         Material material = new Material();
-        material.id = id("generated/skybox_material").toString();
+        material.id = NamespaceID.of("generated/skybox_material").toString();
         material.set(ColorAttribute.createDiffuse(0, 1, 0, 1));
         material.set(new BlendingAttribute());
         material.set(new DepthTestAttribute(GL_LEQUAL, true));
@@ -188,7 +191,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         this.skybox.model = modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 
-        SceneCategory background = client.backgroundCat;
         ModelInstance modelInstance = new ModelInstance(this.skybox.model, 0, 0, 0);
         modelInstance.userData = Shaders.SKYBOX.get();
         this.skybox.modelInstance = modelInstance;
@@ -199,12 +201,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.material.set(TextureAttribute.createDiffuse(blockTex));
         this.material.set(TextureAttribute.createEmissive(emissiveBlockTex));
         this.material.set(new DepthTestAttribute(GL_LEQUAL));
-        this.setTransparentMaterial(new Material());
-        this.getTransparentMaterial().set(TextureAttribute.createDiffuse(blockTex));
-        this.getTransparentMaterial().set(TextureAttribute.createEmissive(emissiveBlockTex));
-        this.getTransparentMaterial().set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        this.getTransparentMaterial().set(new DepthTestAttribute(GL_LEQUAL));
-        this.getTransparentMaterial().set(FloatAttribute.createAlphaTest(0.01f));
+        this.transparentMaterial = new Material();
+        this.transparentMaterial.set(TextureAttribute.createDiffuse(blockTex));
+        this.transparentMaterial.set(TextureAttribute.createEmissive(emissiveBlockTex));
+        this.transparentMaterial.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        this.transparentMaterial.set(new DepthTestAttribute(GL_LEQUAL));
+        this.transparentMaterial.set(FloatAttribute.createAlphaTest(0.01f));
     }
 
     /**
@@ -214,27 +216,27 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         // Create the sun model with sun material and texture
         Model sunModel = ModelManager.INSTANCE.generateModel(SUN_ID, modelBuilder -> {
             Material sunMat = new Material();
-            sunMat.id = id("generated/sun_material").toString();
-            sunMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/sun.png"))));
+            sunMat.id = NamespaceID.of("generated/sun_material").toString();
+            sunMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(NamespaceID.of("textures/environment/sun.png"))));
             sunMat.set(new DepthTestAttribute(GL_LEQUAL, true));
             sunMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE));
             sunMat.set(IntAttribute.createCullFace(0));
             sunMat.set(FogAttribute.createFog(1, 1, 1));
 
-            modelBuilder.part(id("generated/sun_part").toString(), createSun(), GL_TRIANGLES, sunMat);
+            modelBuilder.part(NamespaceID.of("generated/sun_part").toString(), createSun(), GL_TRIANGLES, sunMat);
         });
 
         // Create the moon model with moon material and texture
         Model moonModel = ModelManager.INSTANCE.generateModel(MOON_ID, modelBuilder -> {
             Material moonMat = new Material();
-            moonMat.id = id("generated/moon_material").toString();
-            moonMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(id("textures/environment/moon.png"))));
+            moonMat.id = NamespaceID.of("generated/moon_material").toString();
+            moonMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(NamespaceID.of("textures/environment/moon.png"))));
             moonMat.set(new DepthTestAttribute(GL_LEQUAL, true));
             moonMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE));
             moonMat.set(IntAttribute.createCullFace(0));
             moonMat.set(FogAttribute.createFog(1, 1, 1));
 
-            modelBuilder.part(id("generated/moon_part").toString(), createMoon(), GL_TRIANGLES, moonMat);
+            modelBuilder.part(NamespaceID.of("generated/moon_part").toString(), createMoon(), GL_TRIANGLES, moonMat);
         });
 
         // Create ModelInstances for sun and moon
@@ -327,23 +329,29 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param deltaTime the time between the last and current frame
      */
     @Override
-    public void renderBackground(ModelBatch batch, float deltaTime) {
+    public void renderBackground(RenderBufferSource batch, float deltaTime) {
         updateBackground();
 
-        batch.render(this.skybox, environment);
-        batch.render(this.sun);
-        batch.render(this.moon);
+        batch.getBuffer(RenderPass.SKYBOX).render(this.skybox.modelInstance);
+
+        CelestialBody sun = this.sun;
+        if (sun != null) {
+            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun.getModelInstance());
+        }
+        CelestialBody moon = this.moon;
+        if (moon != null) {
+            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon.getModelInstance());
+        }
     }
 
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
      * @param batch         the ModelBatch to render with
-     * @param sceneCategory the RenderLayer to render with
      * @param deltaTime     the time between the last and current frame
      */
     @Override
-    public void render(ModelBatch batch, @Deprecated SceneCategory sceneCategory, float deltaTime) {
+    public void render(RenderBufferSource batch, float deltaTime) {
         var player = this.client.player;
         if (player == null) return;
         if (this.disposed) return;
@@ -363,11 +371,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         // Collect the chunks to render.
         try (var ignored = QuantumClient.PROFILER.start("chunks")) {
-            this.collectChunks(batch, sceneCategory, chunks, positions, player, ref);
+            this.collectChunks(batch, chunks, positions, player, ref);
         }
 
         // Render the cursor.
-        @NotNull Hit gameCursor = null;
+        @Nullable Hit gameCursor = null;
         if (this.client.cursor != null) gameCursor = this.client.cursor;
         if (gameCursor instanceof BlockHit blockHit && blockHit.isCollide() && !this.client.hideHud && !player.isSpectator()) {
             try (var ignored = QuantumClient.PROFILER.start("cursor")) {
@@ -379,17 +387,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
                 // Render the outline.
                 if (lastHitResult != null && this.lastHitResult.equals(blockHit)) {
-                    ModelManager.INSTANCE.unloadModel(id("generated/selection_outline"));
+                    ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
                     cursor = null;
                 }
 
                 this.lastHitResult = blockHit;
 
-                if (this.cursor != null) ModelManager.INSTANCE.unloadModel(id("generated/selection_outline"));
+                if (this.cursor != null) ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
 
-                Model model = ModelManager.INSTANCE.generateModel(id("generated/selection_outline"), modelBuilder -> {
+                Model model = ModelManager.INSTANCE.generateModel(NamespaceID.of("generated/selection_outline"), modelBuilder -> {
                     Material material = new Material();
-                    material.id = id("generated/selection_outline_material").toString();
+                    material.id = NamespaceID.of("generated/selection_outline_material").toString();
                     material.set(ColorAttribute.createDiffuse(1f, 1f, 1f, 1f));
                     material.set(IntAttribute.createCullFace(GL_FRONT));
 
@@ -408,7 +416,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             attribute.opacity = MathUtils.sinDeg((System.currentTimeMillis() % 360) / 1000f) / 90f + 0.5f;
             material.set(attribute);
 
-            if (this.cursor != null) batch.render(this.cursor);
+//            if (this.cursor != null) batch.getBuffer(RenderPass.TRANSPARENT).render(this.cursor);
         }
 
         drawSelf:
@@ -436,14 +444,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 return Double.compare(dst2, dst1);
             });
             for (Gizmo gizmo : toSort) {
-                batch.render(gizmo);
-                batch.flush();
-                Gdx.gl.glFlush();
+                batch.getBuffer(gizmo.outline ? RenderPass.GIZMO_OUTLINE : RenderPass.GIZMO).render(gizmo.instance);
             }
         }
     }
 
-    public void renderForeground(ModelBatch batch, float deltaTime) {
+    public void renderForeground(RenderBufferSource batch, float deltaTime) {
         Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
@@ -452,7 +458,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         if (world != null) this.world = (ClientWorld) world;
     }
 
-    private void collectChunks(ModelBatch batch, SceneCategory sceneCategory, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
+    private void collectChunks(RenderBufferSource bufferSource, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
         for (var chunk : chunks) {
             if (chunk.isEmpty()) continue;
 
@@ -473,12 +479,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
             chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
 
-            try (var ignoredFrustumCullingSection = PROFILER.start("frustum-culling")) {
-                if (chunk.visible && !this.client.camera.frustum.boundsInFrustum(chunk.renderOffset.cpy().add(WorldRenderer.HALF_CHUNK_DIMENSIONS), WorldRenderer.CHUNK_DIMENSIONS)) {
-                    chunk.visible = false;
-                    continue;
-                } else if (!chunk.visible) chunk.visible = true;
-            }
+            if (frustumCulling(chunk)) continue;
 
             ChunkModel model = this.chunkModels.get(chunk.getVec());
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
@@ -487,23 +488,47 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 if (ref.chunkRendered || this.shouldIgnoreRebuild()) continue;
                 model = buildChunk(ref, chunk);
             } else if (model.needsRebuild(world) && !(ref.chunkRendered || this.shouldIgnoreRebuild())) {
-                model = rebuildChunk(ref, chunk, model);
+                rebuildChunk(ref, chunk, model);
                 continue;
             }
 
-            this.renderBlockBreaking(batch, chunk);
-            this.renderBlockModels(batch, chunk);
+            model.render(client.camera, bufferSource);
 
-            ModelInstance modelInstance = model.getModelInstance();
-            if (modelInstance != null) {
-                modelInstance.transform.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
-                batch.render(model, this.environment);
-            }
+            this.renderBlockBreaking(bufferSource, chunk);
+            this.renderBlockModels(bufferSource, chunk);
 
-            chunk.renderModels(sceneCategory);
+            model.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
 
             this.visibleChunks++;
         }
+    }
+
+    private boolean frustumCulling(ClientChunk chunk) {
+        try (var ignoredFrustumCullingSection = PROFILER.start("frustum-culling")) {
+            if (lastCamPos != null && lastCamDir != null && lastPlayerPos != null) {
+                if (client.camera.position.epsilonEquals(lastCamPos, 0.1f)) return false;
+                if (client.camera.direction.epsilonEquals(lastCamDir, 0.1f)) return false;
+                if (client.player != null && client.player.x - lastPlayerPos.x < 0.1f && client.player.y - lastPlayerPos.y < 0.1f && client.player.z - lastPlayerPos.z < 0.1f
+                        && client.player.x - lastPlayerPos.x > -0.1f && client.player.y - lastPlayerPos.y > -0.1f && client.player.z - lastPlayerPos.z > -0.1f)
+                    return false;
+                lastCamPos.set(client.camera.position);
+                lastCamDir.set(client.camera.direction);
+                if (client.player != null) lastPlayerPos.set(client.player.getPosition(0));
+            } else {
+                lastCamPos = new Vector3(client.camera.position);
+                lastCamDir = new Vector3(client.camera.direction);
+                if (client.player != null) lastPlayerPos = new Vec3d(client.player.getPosition(0));
+            }
+
+            if (chunk.visible && !this.client.camera.frustum.boundsInFrustum(chunk.getBoundingBox())) {
+                chunk.visible = false;
+                return true;
+            } else if (!chunk.visible) {
+                chunk.visible = true;
+            }
+        }
+
+        return !chunk.visible;
     }
 
     private @NotNull ChunkModel buildChunk(ChunkRenderRef ref, ClientChunk chunk) {
@@ -530,7 +555,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return model;
     }
 
-    private ChunkModel rebuildChunk(ChunkRenderRef ref, ClientChunk chunk, ChunkModel model) {
+    private void rebuildChunk(ChunkRenderRef ref, ClientChunk chunk, ChunkModel model) {
         try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
             chunk.dirty = false;
             model.rebuild();
@@ -540,7 +565,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             chunk.onUpdated();
             chunk.initialized = true;
         }
-        return model;
     }
 
     void unload(ClientChunk chunk) {
@@ -576,7 +600,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
 
-    private void renderBlockModels(ModelBatch batch, ClientChunk chunk) {
+    private void renderBlockModels(RenderBufferSource bufferSource, ClientChunk chunk) {
         for (var entry : chunk.getCustomRendered().entrySet())
             try (var ignored = this.client.profiler.start("render-block")) {
                 BlockVec localVec = entry.getKey();
@@ -600,11 +624,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 modelInstance.userData = Shaders.MODEL_VIEW.get();
                 modelInstance.transform.setTranslation(translation);
 
-                batch.render(modelInstance, this.environment);
+                bufferSource.getBuffer(BlockRenderPassRegistry.get(blockState.getBlock())).render(modelInstance);
             }
     }
 
-    private void renderBlockBreaking(ModelBatch batch, ClientChunk chunk) {
+    private void renderBlockBreaking(RenderBufferSource batch, ClientChunk chunk) {
         for (var entry : chunk.getBreaking().entrySet()) {
             BlockVec pos = entry.getKey();
 
@@ -614,7 +638,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             modelInstance.transform.setToTranslationAndScaling(translation, this.tmp2.set(1.1f, 1.1f, 1.1f));
             modelInstance.userData = Shaders.MODEL_VIEW.get();
 
-            batch.render(modelInstance, environment);
+            batch.getBuffer(RenderPass.TRANSPARENT).render(modelInstance);
         }
     }
 
@@ -623,7 +647,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
-    public void collectEntity(Entity entity, ModelBatch batch) {
+    public void collectEntity(Entity entity, RenderBufferSource batch) {
         try {
             @Nullable QVModel model = this.qvModels.get(entity.getId());
             LocalPlayer player = QuantumClient.get().player;
@@ -648,8 +672,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 this.qvModels.put(entity.getId(), model);
             }
 
-            batch.flush();
-
             EntityModelInstance<@NotNull Entity> instance = new EntityModelInstance<>(model, entity);
             WorldRenderContextImpl<Entity> context = new WorldRenderContextImpl<>(batch, entity, entity.getWorld(), WorldRenderer.SCALE, player.getPosition(client.partialTick));
 
@@ -658,10 +680,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             renderer.animate(instance, context);
             renderer.render(instance, context);
 
-            batch.flush();
-
             Gizmo entityGizmo = world.getEntityGizmo(entity);
-            if (entityGizmo != null) entityGizmo.position.set(entity.getPosition());
+            if (entityGizmo != null)
+                entityGizmo.position.set(entity.getPosition());
             Gdx.gl.glCullFace(GL_BACK);
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Failed to render entity {}", entity.getId(), e);
@@ -677,10 +698,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public static void buildOutlineBox(float width, float height, float depth, MeshPartBuilder meshBuilder) {
         BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, depth)));
-    }
-
-    public static void buildLine(float thickness, float x1, float y1, float z1, float x2, float y2, float z2, MeshPartBuilder meshBuilder) {
-        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(x1 - thickness, y1 - thickness, z1 - thickness), new Vector3(x2 + thickness, y2 + thickness, z2 + thickness)));
     }
 
     @NotNull
@@ -745,7 +762,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.skybox.modelInstance = null;
         if (skybox != null) skybox.dispose();
 
-        ModelManager.INSTANCE.unloadModel(id("generated/skybox"));
+        ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/skybox"));
 
         for (var entry : chunkModels.entrySet()) {
             ClientChunk first = entry.getValue().getChunk();
@@ -835,7 +852,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             material.set(new DepthTestAttribute(GL_LEQUAL, true));
             var world = this.world;
-            if (world == null) return;
 
             long daytime = world.getDaytime();
 
@@ -883,6 +899,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
+    @Nullable
     public ParticleSystem getParticleSystem() {
         return particleSystem;
     }
@@ -927,6 +944,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public void setBreakingTex(Texture breakingTex) {
         this.breakingTex = breakingTex;
+    }
+
+    public RenderBuffer[] buffers() {
+        return this.buffers.toArray(RenderBuffer.class);
     }
 
     private static class ChunkRenderRef {

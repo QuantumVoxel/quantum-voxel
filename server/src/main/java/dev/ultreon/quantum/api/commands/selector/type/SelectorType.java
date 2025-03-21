@@ -1,13 +1,15 @@
 package dev.ultreon.quantum.api.commands.selector.type;
 
-public abstract class SelectorType {
-  private final Object value;
+import org.jetbrains.annotations.Nullable;
 
-  public SelectorType(Object value) {
+public abstract class SelectorType {
+  private final @Nullable Object value;
+
+  public SelectorType(@Nullable Object value) {
     this.value = value;
   }
 
-  public Object getValue() {
+  public @Nullable Object getValue() {
     return this.value;
   }
 }

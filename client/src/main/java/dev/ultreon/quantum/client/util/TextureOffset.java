@@ -10,7 +10,7 @@ import java.util.Objects;
  *
  * @since 0.1.0
  * @see Texture
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public final class TextureOffset {
     private final int u;

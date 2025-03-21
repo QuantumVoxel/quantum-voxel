@@ -1,7 +1,20 @@
 package dev.ultreon.quantum.client;
 
+import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.badlogic.gdx.graphics.Color;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
+
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.debug.BoxGizmo;
 import dev.ultreon.quantum.client.debug.Gizmo;
@@ -20,29 +33,17 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerChunk;
+import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
 
 /**
  * The IntegratedServer class represents a server integrated into the client system for local play.
  * This class provides various methods to manage the server, including starting it, loading players,
  * saving data, handling crashes, and more.
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 public class IntegratedServer extends QuantumServer {
@@ -71,6 +72,19 @@ public class IntegratedServer extends QuantumServer {
         }
     }
 
+    /**
+     * Starts the server.
+     * <p>
+     * This method starts the server by creating a new {@link MemoryNetworker} and calling the super method.
+     * </p>
+     * <p>
+     * This method is called when the server is started.
+     * </p>
+     *
+     * @see QuantumServer#start()
+     * @see #start()
+     * @see #shutdown()
+     */
     @Override
     public void start() {
         this.networker = new MemoryNetworker(this, MemoryConnectionContext.get());
@@ -146,6 +160,13 @@ public class IntegratedServer extends QuantumServer {
         }
     }
 
+    /**
+     * Crashes the server.
+     * <p>
+     * This method crashes the server by shutting down the server and writing the crash log to the log file.
+     * </p>
+     * 
+     */
     @Override
     public void crash(CrashLog crashLog) {
         this.shutdown();
@@ -154,16 +175,32 @@ public class IntegratedServer extends QuantumServer {
         client.delayCrash(crashLog);
     }
 
+    /**
+     * Called when the termination of the server fails.
+     * <p>
+     * This method is called when the termination of the server fails.
+     * </p>
+     */
     @Override
     protected void onTerminationFailed() {
         client.delayCrash(new CrashLog("onTerminationFailed", new Throwable("Failed termination of integrated server.")));
     }
 
+    /**
+     * Gets the render distance for the client.
+     *
+     * @return the render distance for the client.
+     */
     @Override
     public int getRenderDistance() {
         return ClientConfig.renderDistance;
     }
 
+    /**
+     * Gets the render distance for entities.
+     *
+     * @return the render distance for entities.
+     */
     @Override
     public int getEntityRenderDistance() {
         return ClientConfig.entityRenderDistance / CHUNK_SIZE;
@@ -275,6 +312,7 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
+    @SuppressWarnings("ConvertToTryWithResources")
     public void close() {
         this.timer.cancel();
 
@@ -298,7 +336,8 @@ public class IntegratedServer extends QuantumServer {
 
     @Override
     public UUID getHost() {
-        return this.host != null ? this.host.getUuid() : null;
+        ServerPlayer theHost = this.host;
+        return theHost != null ? theHost.getUuid() : null;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.server;
 
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
@@ -95,9 +96,9 @@ public class DimensionManager {
     public void load(ServerRegistries registries) {
         Registry<DimensionInfo> dimRegistry = registries.get(RegistryKeys.DIMENSION);
         Registry<ChunkGenerator> chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
-        for (Map.Entry<RegistryKey<DimensionInfo>, DimensionInfo> e : dimRegistry.entries()) {
-            RegistryKey<DimensionInfo> key = e.getKey();
-            DimensionInfo info = e.getValue();
+        for (ObjectMap.Entry<RegistryKey<DimensionInfo>, DimensionInfo> e : dimRegistry.entries()) {
+            RegistryKey<DimensionInfo> key = e.key;
+            DimensionInfo info = e.value;
             RegistryKey<ChunkGenerator> chunkGenKey = info.generatorKey();
             ChunkGenerator chunkGenerator = chunkGenRegistry.get(chunkGenKey);
 

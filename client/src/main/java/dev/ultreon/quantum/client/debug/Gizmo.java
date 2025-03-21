@@ -23,7 +23,7 @@ public abstract class Gizmo implements RenderableProvider {
     
     private final QuantumClient client = QuantumClient.get();
     public final String category;
-    private ModelInstance instance;
+    public ModelInstance instance;
     public final Vec3d position = new Vec3d();
     public final Vector3 size = new Vector3();
     public final Color color = new Color(1.0F, 1.0F, 1.0F, 1.0F);

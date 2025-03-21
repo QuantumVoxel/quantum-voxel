@@ -49,4 +49,6 @@ public interface BlockModel extends LoadableResource {
     default boolean hasAO() {
         return false;
     }
+
+    String getRenderPass();
 }

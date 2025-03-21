@@ -33,7 +33,7 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
  * <p style="color: red;">NOTE: This class isn't meant to be extended</p>
  * <p style="color: red;">NOTE: This class isn't thread safe</p>
  *
- * @author <a href="https://github.com/XyperCode">XyperCode</a>
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
 @NotThreadSafe
@@ -648,7 +648,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     /**
      * Chunk status for client chunk load response.
      *
-     * @author <a href="https://github.com/XyperCode">XyperCode</a>
+     * @author <a href="https://github.com/XyperCode">Qubilux</a>
      */
     public enum Status {
         SUCCESS,

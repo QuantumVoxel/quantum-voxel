@@ -6,11 +6,14 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.api.commands.selector.SelectorKey;
 import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
+import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.gamerule.Rule;
+import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
@@ -89,8 +92,8 @@ public class TabCompleting {
 
     public static List<String> entityTypes(List<String> list, String currentArgument, boolean includePlayer) {
         for (var entityType : Registries.ENTITY_TYPE.entries()) {
-            var key = entityType.getKey();
-            if (!includePlayer && entityType != EntityTypes.PLAYER)
+            var key = entityType.key;
+            if (!includePlayer && entityType.value != EntityTypes.PLAYER)
                 continue;
 
             TabCompleting.addIfStartsWith(list, key, currentArgument);
@@ -99,8 +102,8 @@ public class TabCompleting {
     }
 
     public static List<String> biomes(List<String> list, String currentArgument) {
-        for (var biome : QuantumServer.get().getRegistries().get(RegistryKeys.BIOME).ids()) {
-            var key = biome.toString();
+        for (var biome : QuantumServer.get().getRegistries().get(RegistryKeys.BIOME).keys()) {
+            var key = biome.id().toString();
             TabCompleting.addIfStartsWith(list, key, currentArgument);
         }
         return list;
@@ -138,15 +141,15 @@ public class TabCompleting {
     }
 
     public static List<String> blocks(List<String> list, String currentArgument) {
-        for (NamespaceID id : Registries.BLOCK.ids()) {
-            TabCompleting.addIfStartsWith(list, id, currentArgument);
+        for (RegistryKey<Block> id : Registries.BLOCK.keys()) {
+            TabCompleting.addIfStartsWith(list, id.id(), currentArgument);
         }
         return list;
     }
 
     public static List<String> items(List<String> list, String currentArgument) {
-        for (NamespaceID id : Registries.ITEM.ids()) {
-            TabCompleting.addIfStartsWith(list, id, currentArgument);
+        for (RegistryKey<Item> id : Registries.ITEM.keys()) {
+            TabCompleting.addIfStartsWith(list, id.id(), currentArgument);
         }
         return list;
     }

@@ -10,13 +10,31 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Local data class for storing user-specific data.
+ * 
+ * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ */
 public class LocalData {
+    /**
+     * The username of the user.
+     */
     public String username;
+
+    /**
+     * The servers of the user.
+     */
     public List<ServerInfo> servers = new ArrayList<>();
 
+    /**
+     * Constructs a new LocalData instance.
+     */
     private LocalData() {
     }
 
+    /**
+     * Saves the local data to the file.
+     */
     public void save() {
         FileHandle data = QuantumClient.data("localdata.ubo");
         try (OutputStream write = data.write(false)) {
@@ -37,6 +55,11 @@ public class LocalData {
         }
     }
 
+    /**
+     * Loads the local data from the file.
+     * 
+     * @return The local data.
+     */
     public static LocalData load() {
         LocalData localData = new LocalData();
         FileHandle data = QuantumClient.data("localdata.ubo");
