@@ -23,7 +23,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * The OverworldGenerator is responsible for generating the terrain of the Overworld.
@@ -74,8 +74,8 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     @Override
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
         BlockVec offset = chunk.getOffset();
-        for (var x = 0; x < CHUNK_SIZE; x++) {
-            for (var z = 0; z < CHUNK_SIZE; z++) {
+        for (var x = 0; x < CS; x++) {
+            for (var z = 0; z < CS; z++) {
                 int groundPos = carver.carve(chunk, offset.x + x, offset.z + z);
 
                 var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);

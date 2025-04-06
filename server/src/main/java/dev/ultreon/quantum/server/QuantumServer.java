@@ -130,8 +130,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private final ResourceManager resourceManager;
     protected InspectionNode<QuantumServer> node;
     private InspectionNode<Object> playersNode;
+    @ShowInNodeView
     protected int port;
-    protected int entityRenderDistance = 6 * World.CHUNK_SIZE;
+    @ShowInNodeView
+    protected int entityRenderDistance = 6 * World.CS;
     private int chunkRefresh;
     private long onlineTicks;
     protected volatile boolean running = false;
@@ -148,6 +150,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     protected final DimensionManager dimManager = new DimensionManager(this);
     private final Biomes biomes;
     private final NoiseConfigs noiseConfigs;
+
+    @ShowInNodeView
     private long seed;
 
     /**
@@ -184,6 +188,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         this.noiseConfigs = new NoiseConfigs(this);
         this.biomes = new Biomes(this);
+        this.add("Noise Configs", noiseConfigs);
+        this.add("Biomes", biomes);
 
         if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
             this.node = parentNode.createNode("server", () -> this);
@@ -197,11 +203,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             this.node.create("onlineTicks", () -> this.onlineTicks);
         }
 
+        this.add("Dimension Manager", this.dimManager);
+
         this.resourceManager = new ResourceManager("data");
         URL serverResource = QuantumServer.class.getResource("/.quantum-server-resources");
         if (serverResource == null) {
             throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
         }
+        this.add("Resource Manager", this.resourceManager);
         String serverPath = serverResource.toString();
 
         if (serverPath.startsWith("jar:")) {

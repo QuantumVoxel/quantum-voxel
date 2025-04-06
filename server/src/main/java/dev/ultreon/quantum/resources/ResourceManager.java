@@ -11,6 +11,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.events.ResourceEvent;
 import dev.ultreon.quantum.resources.android.DeferredResourcePackage;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class ResourceManager implements Closeable {
+public class ResourceManager extends GameObject implements Closeable {
     protected final List<ResourcePackage> resourcePackages = new ArrayList<>();
     public static Logger logger = (level, msg, t) -> {};
     private final String root;
@@ -212,6 +213,7 @@ public class ResourceManager implements Closeable {
 
     private void addImported(ResourcePackage pkg) {
         this.resourcePackages.add(pkg);
+        this.add(pkg.getName(), pkg);
         ResourceEvent.IMPORTED.factory().onImported(pkg);
     }
 
@@ -313,6 +315,7 @@ public class ResourceManager implements Closeable {
 
     public void reload() {
         for (ResourcePackage resourcePackage : this.resourcePackages) {
+            this.remove(resourcePackage);
             resourcePackage.close();
         }
 

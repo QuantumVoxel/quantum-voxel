@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.LOGGER;
 import static java.lang.System.currentTimeMillis;
 
@@ -72,8 +72,8 @@ public final class ServerChunk extends Chunk {
             LOGGER.debug("Loading chunk at {}", pos);
         }
 
-        var storage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Blocks.AIR.getDefaultState());
-        var biomeStorage = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, world.getServer().getBiomes().getDefaultKey());
+        var storage = new PaletteStorage<>(CS * CS * CS, Blocks.AIR.getDefaultState());
+        var biomeStorage = new PaletteStorage<>(CS * CS, world.getServer().getBiomes().getDefaultKey());
 
         MapType blockData = chunkData.getMap("Blocks");
         storage.load(blockData, BlockState::load);
@@ -247,10 +247,10 @@ public final class ServerChunk extends Chunk {
 
 
         // Calculate x, y, and z
-        int randX = index % CHUNK_SIZE;
-        int randYZ = index / CHUNK_SIZE;
-        int randY = randYZ % CHUNK_SIZE;
-        int randZ = randYZ / CHUNK_SIZE;
+        int randX = index % CS;
+        int randYZ = index / CS;
+        int randY = randYZ % CS;
+        int randZ = randYZ / CS;
 
         if (GamePlatform.get().isDevEnvironment()) {
             BlockState blockState = this.get(randX, randY, randZ);

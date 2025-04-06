@@ -417,7 +417,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     private void handleClientLoadChunk(@NotNull ChunkVec vec) {
         // Handle the chunk status accordingly
-        if (vec.dst(this.getChunkVec()) * World.CHUNK_SIZE > this.server.getRenderDistance()) {
+        if (vec.dst(this.getChunkVec()) * World.CS > this.server.getRenderDistance()) {
             this.sendPacket(new S2CChunkUnloadPacket(vec));
             return;
         }

@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * An abstract class implementing the ChunkGenerator interface, providing a base
@@ -71,8 +71,8 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
      * @param chunk The chunk for which the terrain features are being generated. Must not be null.
      */
     protected void generateFeatures(BuilderChunk chunk) {
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
+        for (int x = 0; x < CS; x++) {
+            for (int z = 0; z < CS; z++) {
                 int height = chunk.getWorld().getHeight(chunk.getOffset().x + x, chunk.getOffset().z + z, HeightmapType.WORLD_SURFACE);
                 chunk.getBiomeGenerator(x, z).generateTerrainFeatures(chunk, x, z, height);
             }
@@ -89,8 +89,8 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
      * @param chunk The BuilderChunk instance where the structures will be generated. Must not be null.
      */
     protected void generateStructures(BuilderChunk chunk) {
-        for (var x = 0; x < CHUNK_SIZE; x++) {
-            for (var z = 0; z < CHUNK_SIZE; z++) {
+        for (var x = 0; x < CS; x++) {
+            for (var z = 0; z < CS; z++) {
                 chunk.getBiomeGenerator(x, z).generateStructureFeatures(chunk);
             }
         }

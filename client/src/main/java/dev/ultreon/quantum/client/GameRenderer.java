@@ -31,7 +31,7 @@ import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * The GameRenderer class is responsible for rendering the game world and overlays.
@@ -111,7 +111,7 @@ public class GameRenderer implements Disposable {
                 }
 
                 this.client.camera.update(player);
-                this.client.camera.far = ((float) ClientConfig.renderDistance / CHUNK_SIZE - 1) * World.CHUNK_SIZE / WorldRenderer.SCALE;
+                this.client.camera.far = ((float) ClientConfig.renderDistance / CS - 1) * World.CS / WorldRenderer.SCALE;
 
                 var rotation = this.tmp.set(player.xHeadRot, player.yRot);
                 var quaternion = new Quaternion();
@@ -131,6 +131,7 @@ public class GameRenderer implements Disposable {
 
         client.backgroundCat.update(deltaTime);
         client.mainCat.update(deltaTime);
+        client.worldCat.update(deltaTime);
 
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
 

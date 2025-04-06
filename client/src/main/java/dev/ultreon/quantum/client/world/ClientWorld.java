@@ -37,8 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
@@ -69,7 +67,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @NotNull
     public final QuantumClient client;
     private final RegistryKey<DimensionInfo> dimension;
-    private final Map<Long, ClientChunk> chunks = new ConcurrentHashMap<>();
+    private final ClientChunkManager chunkManager = new ClientChunkManager(this);
     private int chunkRefresh;
     private ChunkVec oldChunkVec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
     private long time = 0;
@@ -93,6 +91,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         super();
         this.client = client;
         this.dimension = dimension;
+
+        this.add("Chunk Manager", chunkManager);
     }
 
     public void toggleGizmoCategory(String category) {
@@ -135,7 +135,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public int getRenderDistance() {
-        return ClientConfig.renderDistance / CHUNK_SIZE;
+        return ClientConfig.renderDistance / CS;
     }
 
     /**
@@ -157,8 +157,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         // Try to remove the chunk from the chunk map
-        synchronized (this.chunks){
-            ClientChunk removedChunk = this.chunks.remove(chunkKey(pos.x, pos.y, pos.z));
+        synchronized (this.chunkManager){
+            ClientChunk removedChunk = this.chunkManager.remove(pos.x, pos.y, pos.z);
             boolean removed = removedChunk != null;
             if (removed) {
                 // If the chunk was removed, decrement the total number of chunks
@@ -170,7 +170,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
                     LOGGER.warn("Removed chunk mismatch: {} != {}", removedChunk, chunk);
 
                 this.totalChunks--;
-                removedChunk.dispose();
+                this.chunkManager.remove((GameObject) removedChunk);
             }
 
             // Return true if the chunk was removed, false otherwise
@@ -185,9 +185,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public @Nullable ClientChunk getChunk(@NotNull ChunkVec pos) {
-        synchronized (this.chunks) {
-            return this.chunks.get(chunkKey(pos.x, pos.y, pos.z));
-        }
+        return this.chunkManager.get(pos.x, pos.y, pos.z);
     }
 
     static long chunkKey(int x, int y, int z) {
@@ -196,9 +194,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public ClientChunk getChunk(int x, int y, int z) {
-        synchronized (this.chunks) {
-            return this.chunks.get(chunkKey(x, y, z));
-        }
+        return chunkManager.get(x, y, z);
     }
 
     @Override
@@ -214,7 +210,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public Collection<ClientChunk> getLoadedChunks() {
-        return this.chunks.values();
+        return this.chunkManager.getAllChunks();
     }
 
     @Override
@@ -459,8 +455,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         BlockVec offset = chunk.getOffset();
-        for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
-            for (int z = offset.x; z < offset.x + CHUNK_SIZE; z++) {
+        for (int x = offset.x; x < offset.x + CS; x++) {
+            for (int z = offset.x; z < offset.x + CS; z++) {
                 setInitialSunlight(x, z);
             }
         }
@@ -680,8 +676,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         super.updateLightSources(offset, lights);
 
         // Update sunlight for each block in the chunk
-        for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
-            for (int z = offset.z; z < offset.z + CHUNK_SIZE; z++) {
+        for (int x = offset.x; x < offset.x + CS; x++) {
+            for (int z = offset.z; z < offset.z + CS; z++) {
                 setInitialSunlight(x, z);
             }
         }
@@ -701,7 +697,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @Override
     public boolean isLoaded(@NotNull Chunk chunk) {
         if (chunk instanceof ClientChunk clientChunk) {
-            return this.chunks.containsValue(clientChunk);
+            return this.chunkManager.contains(clientChunk);
         }
 
         return false;
@@ -831,9 +827,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public void loadChunk(ChunkVec pos, ClientChunk data) {
         // Get the current chunk at the given position
         ClientChunk chunk;
-        synchronized (this.chunks) {
-            chunk = this.chunks.get(chunkKey(pos.x, pos.y, pos.z));
-        }
+        chunk = this.chunkManager.get(pos.x, pos.y, pos.z);
 
         // If the chunk doesn't exist, set it to the new data
         if (chunk == null) {
@@ -861,15 +855,15 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         QuantumClient.invoke(() -> {
             BoxGizmo gizmo = new BoxGizmo("chunk");
             gizmo.position.set(data.getOffset().vec().d().add(8.0, 8.0, 8.0));
-            gizmo.size.set(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+            gizmo.size.set(CS, CS, CS);
             gizmo.color.set(1.0F, 0.0F, 0.0F, 1.0F);
             gizmo.outline = true;
             this.addGizmo(gizmo);
         });
 
         // Calculate the distance between the chunk and the player
-        synchronized (this.chunks) {
-            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance / CHUNK_SIZE) {
+        synchronized (this.chunkManager) {
+            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance / CS) {
                 player.pendingChunks.remove(pos);
 
                 // If the distance is greater than the render distance, send a skip chunk status packet and return
@@ -880,7 +874,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
             QuantumClient.invoke(() -> player.pendingChunks.remove(pos));
 
             // Add the chunk to the map of chunks
-            this.chunks.put(chunkKey(pos.x, pos.y, pos.z), chunk);
+            this.chunkManager.add(chunk);
+            this.chunkManager.add("Chunk " + pos, chunk);
             // Increment the total number of chunks
             this.totalChunks++;
             // Mark the chunk as ready
@@ -928,16 +923,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         this.oldChunkVec = player.getChunkVec();
 
         // Iterate over the chunks
-        for (Iterator<Map.Entry<Long, ClientChunk>> iterator = this.chunks.entrySet().iterator(); iterator.hasNext(); ) {
-            // Get the chunk entry
-            Map.Entry<Long, ClientChunk> entry = iterator.next();
-
-            // Get the chunk
-            ClientChunk clientChunk = entry.getValue();
-            ChunkVec chunkVec = clientChunk.getVec();
+        for (Iterator<ClientChunk> iterator = this.chunkManager.iterator(); iterator.hasNext(); ) {
+            ClientChunk clientChunk = iterator.next();
+            ChunkVec chunkVec = clientChunk.vec;
 
             // Check if the distance between the chunk and the player's position is greater than the render distance
-            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance / CHUNK_SIZE) {
+            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance / CS) {
                 // Remove the chunk from the map and dispose it
                 iterator.remove();
                 clientChunk.dispose();
@@ -978,7 +969,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
 
     @Override
     public boolean isLoaded(ChunkVec chunkVec) {
-        return this.chunks.containsKey(chunkKey(chunkVec.x, chunkVec.y, chunkVec.z));
+        return this.chunkManager.contains(chunkVec.x, chunkVec.y, chunkVec.z);
     }
 
     @Override
@@ -1009,11 +1000,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @Override
     public void dispose() {
         super.dispose();
-
-        synchronized (this.chunks) {
-            this.chunks.forEach((ChunkVec, clientChunk) -> clientChunk.dispose());
-            this.chunks.clear();
-        }
+        chunkManager.dispose();
     }
 
     @Override

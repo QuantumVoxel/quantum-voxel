@@ -20,6 +20,6 @@ public class ServerConfig extends CraftyConfig {
     public static int maxPlayers = 10;
 
     @ConfigEntry(path = "server.renderDistance", comment = "The render distance of the server.")
-    @Ranged(min = World.CHUNK_SIZE * 2, max = 256)
+    @Ranged(min = World.CS * 2, max = 256)
     public static int renderDistance = 128;
 }

@@ -71,7 +71,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler {
     private final IConnection<ClientPacketHandler, ServerPacketHandler> connection;
@@ -143,7 +143,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 }
 
                 double dst = pos.dst(player.getChunkVec());
-                if (dst > (double) ClientConfig.renderDistance / CHUNK_SIZE) {
+                if (dst > (double) ClientConfig.renderDistance / CS) {
                     this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                     return;
                 }

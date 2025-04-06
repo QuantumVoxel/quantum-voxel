@@ -1,11 +1,13 @@
 package dev.ultreon.quantum.resources;
 
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.util.*;
 
-public class ResourcePackage implements Closeable {
+public class ResourcePackage extends GameObject implements Closeable {
     protected final Map<NamespaceID, StaticResource> resources;
     protected final Map<String, ResourceCategory> categories;
     private boolean locked;
@@ -52,5 +54,9 @@ public class ResourcePackage implements Closeable {
         for (StaticResource resource : this.resources.values()) {
             resource.close();
         }
+    }
+
+    public @NotNull String getName() {
+        return this.getClass().getSimpleName();
     }
 }

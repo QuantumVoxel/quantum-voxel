@@ -4,10 +4,11 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2f;
 
-public final class NoiseConfigs {
+public final class NoiseConfigs extends GameObject {
     public static final RegistryKey<NoiseConfig> EMPTY = RegistryKey.of(RegistryKeys.NOISE_CONFIG, new NamespaceID("empty"));
     public static final RegistryKey<NoiseConfig> BIOME_MAP = RegistryKey.of(RegistryKeys.NOISE_CONFIG, new NamespaceID("biome_map"));
 

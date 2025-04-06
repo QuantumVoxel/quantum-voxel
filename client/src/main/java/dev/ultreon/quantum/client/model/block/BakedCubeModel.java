@@ -13,6 +13,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.BakedModel;
 import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -38,7 +39,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final VertexInfo V_01 = new VertexInfo();
     private static final VertexInfo V_10 = new VertexInfo();
     private static final VertexInfo V_11 = new VertexInfo();
-    private String renderPass;
+    private final String renderPass;
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion all, Model model, String renderPass) {
         this(resourceId, all, all, all, all, all, all, model, renderPass);
@@ -330,8 +331,8 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     }
 
     @Override
-    public String getRenderPass() {
-        return renderPass;
+    public RenderPass getRenderPass() {
+        return RenderPass.byName(renderPass);
     }
 
     @Override

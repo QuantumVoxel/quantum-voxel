@@ -31,17 +31,16 @@ public class ChunkModelBuilder {
     public ObjectMap<RenderPass, ChunkMesh> end(ObjectMap<RenderPass, ChunkMesh> meshes, RenderBufferSource bufferSource) {
         started = false;
 
-        builders.clear();
-
-        ObjectMap<RenderPass, Renderable> renderables = new ObjectMap<>();
         for (ObjectMap.Entry<RenderPass, MeshBuilder> entry : this.builders.entries()) {
-            if (entry == null) continue;
-            RenderBuffer buffer = bufferSource.getBuffer(entry.key);
+            if (entry == null)
+                continue;
             RenderPass pass = entry.key;
             MeshBuilder builder = entry.value;
             Mesh part = builder.end();
             meshes.put(pass, new ChunkMesh(pass, part, chunk));
         }
+
+        builders.clear();
 
         return meshes;
     }

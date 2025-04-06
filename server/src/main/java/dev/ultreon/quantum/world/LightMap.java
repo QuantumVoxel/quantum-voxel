@@ -3,14 +3,14 @@ package dev.ultreon.quantum.world;
 import java.util.Arrays;
 import java.util.Stack;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 public class LightMap {
     private byte[] data;
 
-    private final int width = CHUNK_SIZE;
-    private final int height = CHUNK_SIZE;
-    private final int depth = CHUNK_SIZE;
+    private final int width = CS;
+    private final int height = CS;
+    private final int depth = CS;
     private final Stack<Integer> stack = new Stack<>();
 
     public LightMap(int size) {

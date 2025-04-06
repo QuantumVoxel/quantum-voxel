@@ -5,16 +5,18 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.util.GameObject;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
-public class RenderBufferSource implements Disposable {
+public class RenderBufferSource extends GameObject implements Disposable {
     private static final Array<RenderBufferSource> MANAGED = new Array<>();
 
     private final ObjectMap<RenderPass, RenderBuffer> buffers = new ObjectMap<>();
     private final ObjectMap<RenderPass, RenderBuffer> backBuffers = new ObjectMap<>();
     private @Nullable GameCamera camera;
     private boolean started;
+    public long timeSpan;
 
     public RenderBufferSource() {
         MANAGED.add(this);
@@ -29,10 +31,12 @@ public class RenderBufferSource implements Disposable {
 
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void flush() {
+        long start = System.nanoTime() / 1000;
         for (RenderBuffer pass : this.buffers.values()) {
             if (pass == null || !pass.isStarted()) continue;
             pass.flush();
         }
+        this.timeSpan = System.nanoTime() / 1000 - start;
     }
 
     public RenderBuffer getBuffer(RenderPass pass) {
@@ -50,11 +54,14 @@ public class RenderBufferSource implements Disposable {
 
         buffer.begin(camera);
         buffers.put(pass, buffer);
+        if (!this.getChildren().contains(buffer, true))
+            this.add("Source " + pass.name(), buffer);
         return buffer;
     }
 
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void end() {
+        long start = System.nanoTime() / 1000;
         for (ObjectMap.Entry<RenderPass, RenderBuffer> entry : this.buffers.entries()) {
             if (entry == null) continue;
             RenderPass pass = entry.key;
@@ -68,6 +75,8 @@ public class RenderBufferSource implements Disposable {
 
         this.camera = null;
         this.started = false;
+
+        this.timeSpan = System.nanoTime() / 1000 - start;
     }
 
     @Override

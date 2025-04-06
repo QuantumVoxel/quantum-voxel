@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * The BuilderChunk class is an extension of the Chunk class,
@@ -39,7 +39,7 @@ public final class BuilderChunk extends Chunk {
         this.thread = thread;
         this.region = region;
         this.rng = new JavaRNG(this.world.getSeed() + (pos.getIntX() ^ ((long) pos.getIntZ() << 4)) & 0x3FFFFFFF);
-        this.biomeData = new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, world.getServer().getBiomes().plains.create(this.world, world.getSeed()));
+        this.biomeData = new PaletteStorage<>(CS * CS, world.getServer().getBiomes().plains.create(this.world, world.getSeed()));
     }
 
     @Override

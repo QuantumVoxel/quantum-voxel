@@ -31,11 +31,11 @@ public interface Point {
     }
 
     default ChunkVec chunk() {
-        return new ChunkVec(getIntX() / World.CHUNK_SIZE, getIntY() / World.CHUNK_SIZE, getIntZ() / World.CHUNK_SIZE, ChunkVecSpace.WORLD);
+        return new ChunkVec(getIntX() / World.CS, getIntY() / World.CS, getIntZ() / World.CS, ChunkVecSpace.WORLD);
     }
 
     default RegionVec region() {
-        return new RegionVec(getIntX() / World.CHUNK_SIZE / World.REGION_SIZE, getIntY() / World.CHUNK_SIZE / World.REGION_SIZE, getIntZ() / World.CHUNK_SIZE / World.REGION_SIZE);
+        return new RegionVec(getIntX() / World.CS / World.REGION_SIZE, getIntY() / World.CS / World.REGION_SIZE, getIntZ() / World.CS / World.REGION_SIZE);
     }
 
     default Point offset(int x, int y, int z) {
@@ -47,11 +47,11 @@ public interface Point {
     }
 
     default Point offset(ChunkVec vec) {
-        return offset(vec.x * World.CHUNK_SIZE, vec.y * World.CHUNK_SIZE, vec.z * World.CHUNK_SIZE);
+        return offset(vec.x * World.CS, vec.y * World.CS, vec.z * World.CS);
     }
 
     default Point offset(RegionVec vec) {
-        return offset(vec.x * World.CHUNK_SIZE * World.REGION_SIZE, vec.y * World.CHUNK_SIZE * World.REGION_SIZE, vec.z * World.CHUNK_SIZE * World.REGION_SIZE);
+        return offset(vec.x * World.CS * World.REGION_SIZE, vec.y * World.CS * World.REGION_SIZE, vec.z * World.CS * World.REGION_SIZE);
     }
 
     double dst(Point point);

@@ -13,10 +13,7 @@ import dev.ultreon.quantum.client.registry.BlockRendererRegistry;
 import dev.ultreon.quantum.client.render.BlockRenderer;
 import dev.ultreon.quantum.client.render.NormalBlockRenderer;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.AOUtils;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
-import dev.ultreon.quantum.client.world.ClientChunkAccess;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.client.world.*;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
@@ -30,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * Mesher using the "greedy meshing" technique.
@@ -63,6 +60,7 @@ import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
  *  []
  * </pre>
  */
+@SuppressWarnings("t")
 public class GreedyMesher implements Mesher {
     private static final int OFF_X = 0;
     private static final int OFF_Z = 0;
@@ -99,9 +97,9 @@ public class GreedyMesher implements Mesher {
             bright.l11 = 1;
         }
 
-        int width = World.CHUNK_SIZE;
-        int depth = World.CHUNK_SIZE;
-        int height = World.CHUNK_SIZE;
+        int width = World.CS;
+        int depth = World.CS;
+        int height = World.CS;
         // Top, bottom
         for (int y = 0; y < height; y++) {
             boolean[][] topMask = new boolean[width][depth];
@@ -126,8 +124,7 @@ public class GreedyMesher implements Mesher {
                         }
 
                         RenderPass pass = BlockRenderPassRegistry.get(curBlock.getBlock());
-                        if (blockModel == null || pass == null || !pass.name().equals(blockModel.getRenderPass())
-                                || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
+                        if (pass == null || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
                             continue;
 
                         int bottomNeighborY = y - 1;
@@ -136,11 +133,11 @@ public class GreedyMesher implements Mesher {
                         @Nullable ClientChunkAccess topNeighborChunk = this.chunk;
                         if (bottomNeighborY < 0) {
                             bottomNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY() - 1, this.chunk.getVec().getIntZ());
-                            bottomNeighborY += World.CHUNK_SIZE;
+                            bottomNeighborY += World.CS;
                         }
-                        if (topNeighborY >= World.CHUNK_SIZE) {
+                        if (topNeighborY >= World.CS) {
                             topNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY() + 1, this.chunk.getVec().getIntZ());
-                            topNeighborY -= World.CHUNK_SIZE;
+                            topNeighborY -= World.CS;
                         }
                         if (topNeighborChunk != null) {
                             BlockState westNeighborBlk = topNeighborChunk.get(x, topNeighborY, z);
@@ -213,8 +210,7 @@ public class GreedyMesher implements Mesher {
                         }
 
                         RenderPass pass = BlockRenderPassRegistry.get(curBlock.getBlock());
-                        if (blockModel == null || pass == null || !pass.name().equals(blockModel.getRenderPass())
-                                || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
+                        if (pass == null || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
                             continue;
 
                         int westNeighborX = x - 1;
@@ -223,11 +219,11 @@ public class GreedyMesher implements Mesher {
                         @Nullable ClientChunkAccess eastNeighborChunk = this.chunk;
                         if (westNeighborX < 0) {
                             westNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX() - 1, this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ());
-                            westNeighborX += World.CHUNK_SIZE;
+                            westNeighborX += World.CS;
                         }
-                        if (eastNeighborX >= World.CHUNK_SIZE) {
+                        if (eastNeighborX >= World.CS) {
                             eastNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX() + 1, this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ());
-                            eastNeighborX -= World.CHUNK_SIZE;
+                            eastNeighborX -= World.CS;
                         }
                         if (westNeighborChunk != null) {
                             BlockState westNeighborBlk = westNeighborChunk.get(westNeighborX, y, z);
@@ -301,20 +297,19 @@ public class GreedyMesher implements Mesher {
                         }
 
                         RenderPass pass = BlockRenderPassRegistry.get(curBlock.getBlock());
-                        if (blockModel == null || pass == null || !pass.name().equals(blockModel.getRenderPass())
-                                || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
+                        if (pass == null || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
                             continue;
 
                         int northNeighborZ = z + 1;
                         int southNeighborZ = z - 1;
                         @Nullable ClientChunkAccess northNeighborChunk = this.chunk;
                         @Nullable ClientChunkAccess southNeighborChunk = this.chunk;
-                        if (northNeighborZ >= World.CHUNK_SIZE) {
+                        if (northNeighborZ >= World.CS) {
                             northNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ() + 1);
-                            northNeighborZ -= World.CHUNK_SIZE;
+                            northNeighborZ -= World.CS;
                         } else if (southNeighborZ < 0) {
                             southNeighborChunk = this.chunk.getWorld().getChunk(this.chunk.getVec().getIntX(), this.chunk.getVec().getIntY(), this.chunk.getVec().getIntZ() - 1);
-                            southNeighborZ += World.CHUNK_SIZE;
+                            southNeighborZ += World.CS;
                         }
 
                         if (northNeighborChunk != null) {
@@ -406,7 +401,7 @@ public class GreedyMesher implements Mesher {
 
     @Nullable
     private ClientChunkAccess adjustCoordinatesForChunk(ClientWorldAccess world, int x, int y, int z) {
-        int chunkSize = CHUNK_SIZE;
+        int chunkSize = CS;
 
         if (x < 0 || x >= chunkSize) {
             x = (x + chunkSize) % chunkSize;
@@ -498,17 +493,14 @@ public class GreedyMesher implements Mesher {
 
         if (used[newX][y]) return false;  // If already used, cannot merge
 
-        int[] calculate = AOUtils.calculate(chunk, realX, realY, realZ);
-        if (!Arrays.equals(ao, calculate)) return false;
-
         BlockState newBlock = this.block(this.chunk, realX, realY, realZ);
         if (newBlock.isInvisible()) return false;
 
         float newLight = 15;
         PerCornerLightData newPcld = null;
 
-        if (this.perCornerLight) newPcld = lightDataArray[newX][y];
-        else newLight = this.calcLightLevel(side, realX, realY, realZ);
+//        if (this.perCornerLight) newPcld = lightDataArray[newX][y];
+//        else newLight = this.calcLightLevel(side, realX, realY, realZ);
 
         return mergeCond.shouldMerge(block, ll, lightData, newBlock, newLight, newPcld);
     }
@@ -527,8 +519,8 @@ public class GreedyMesher implements Mesher {
             float lLight = 15;
             PerCornerLightData lPcld = null;
 
-            if (this.perCornerLight) lPcld = lightDataArray[lx][endY];
-            else lLight = this.calcLightLevel(side, realX, realY, realZ);
+//            if (this.perCornerLight) lPcld = lightDataArray[lx][endY];
+//            else lLight = this.calcLightLevel(side, realX, realY, realZ);
 
             if (!mergeCond.shouldMerge(block, ll, lightData, lBlk, lLight, lPcld)) return false;
         }
@@ -599,24 +591,24 @@ public class GreedyMesher implements Mesher {
                     int fixedSy = sy;
                     int fixedSx = sx;
                     if (sz < 0) {
-                        fixedSz = CHUNK_SIZE + sz;
+                        fixedSz = CS + sz;
                         getChunk = true;
-                    } else if (sz >= CHUNK_SIZE) {
-                        fixedSz = sz - CHUNK_SIZE;
+                    } else if (sz >= CS) {
+                        fixedSz = sz - CS;
                         getChunk = true;
                     }
                     if (sy < 0) {
-                        fixedSy = CHUNK_SIZE + sy;
+                        fixedSy = CS + sy;
                         getChunk = true;
-                    } else if (sy >= CHUNK_SIZE) {
-                        fixedSy = sy - CHUNK_SIZE;
+                    } else if (sy >= CS) {
+                        fixedSy = sy - CS;
                         getChunk = true;
                     }
                     if (sx < 0) {
-                        fixedSx = CHUNK_SIZE + sx;
+                        fixedSx = CS + sx;
                         getChunk = true;
-                    } else if (sx >= CHUNK_SIZE) {
-                        fixedSx = sx - CHUNK_SIZE;
+                    } else if (sx >= CS) {
+                        fixedSx = sx - CS;
                         getChunk = true;
                     }
                     if (getChunk) sChunk = this.chunk.getWorld().getChunk(getChunkX, getChunkY, getChunkZ);
@@ -693,24 +685,24 @@ public class GreedyMesher implements Mesher {
                     int fixedSy = sy;
                     int fixedSx = sx;
                     if (sz < 0) {
-                        fixedSz = CHUNK_SIZE + sz;
+                        fixedSz = CS + sz;
                         getChunk = true;
-                    } else if (sz >= CHUNK_SIZE) {
-                        fixedSz = sz - CHUNK_SIZE;
+                    } else if (sz >= CS) {
+                        fixedSz = sz - CS;
                         getChunk = true;
                     }
                     if (sy < 0) {
-                        fixedSy = CHUNK_SIZE + sy;
+                        fixedSy = CS + sy;
                         getChunk = true;
-                    } else if (sy >= CHUNK_SIZE) {
-                        fixedSy = sy - CHUNK_SIZE;
+                    } else if (sy >= CS) {
+                        fixedSy = sy - CS;
                         getChunk = true;
                     }
                     if (sx < 0) {
-                        fixedSx = CHUNK_SIZE + sx;
+                        fixedSx = CS + sx;
                         getChunk = true;
-                    } else if (sx >= CHUNK_SIZE) {
-                        fixedSx = sx - CHUNK_SIZE;
+                    } else if (sx >= CS) {
+                        fixedSx = sx - CS;
                         getChunk = true;
                     }
                     if (getChunk) sChunk = this.chunk.getWorld().getChunk(getChunkX, getChunkY, getChunkZ);
@@ -739,24 +731,15 @@ public class GreedyMesher implements Mesher {
         RenderPass pass1 = BlockRenderPassRegistry.get(id1.getBlock());
         RenderPass pass2 = BlockRenderPassRegistry.get(id2.getBlock());
 
-        if (pass1 != pass2) return false;
+        if (pass1 == null || pass2 == null) return false;
+        if (!pass1.equals(pass2)) return false;
 
         boolean sameBlock = Objects.equals(id1, id2);
-        boolean sameLight = light1 == light2;
-        boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're a different block
-
-        if (this.perCornerLight) sameLight = lightData1.equals(lightData2);
 
         // Other block renderers may alter shape unpredictably
-        boolean considerAsSame = sameLight && !sameBlock && tooDarkToTell
-                && QuantumClient.get().getBlockModel(id1) == QuantumClient.get().getBlockModel(id2)
-                && GreedyMesher.isFullCubeRender(id1.getBlock()) && GreedyMesher.isFullCubeRender(id2.getBlock())
-                && (!id1.isTransparent() && !id2.isTransparent());
-
-        if (considerAsSame)
-            sameBlock = true; // Consider them the same block
-
-        return sameBlock && sameLight;
+        boolean considerAsSame = !sameBlock && QuantumClient.get().getBlockModel(id1).equals(QuantumClient.get().getBlockModel(id2)) && GreedyMesher.isFullCubeRender(id1.getBlock()) && GreedyMesher.isFullCubeRender(id2.getBlock());
+        if (considerAsSame) sameBlock = true; // Consider them the same block
+        return sameBlock;
     }
 
     @Override
@@ -768,11 +751,13 @@ public class GreedyMesher implements Mesher {
         List<Face> faces;
         try (var ignoredSection = QuantumClient.PROFILER.start("chunk-get-faces")) {
             faces = this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+            if (chunk instanceof ClientChunk clientChunk)
+                clientChunk.faceCount = faces.size();
         }
 
         try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
             if (section != null) section.addStat("face-count", faces.size());
-            for (Face f : faces) f.render(builder);
+            for (Face f : faces) f.bake(builder);
         }
         return true;
     }
@@ -854,7 +839,7 @@ public class GreedyMesher implements Mesher {
          * @param modelBuilder the ChunkModelBuilder which is used to build the mesh for the face
          */
         @SuppressWarnings("unused")
-        public void render(ChunkModelBuilder modelBuilder) {
+        public void bake(ChunkModelBuilder modelBuilder) {
             MeshPartBuilder builder = modelBuilder.get(renderPass);
             try (var ignored = QuantumClient.PROFILER.start("face")) {
                 LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);

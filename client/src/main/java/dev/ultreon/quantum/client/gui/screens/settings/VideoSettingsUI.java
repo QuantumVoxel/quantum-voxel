@@ -15,7 +15,7 @@ import dev.ultreon.quantum.text.TextObject;
 
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 public class VideoSettingsUI {
     static final TextObject TITLE = TextObject.translation("quantum.screen.options.video.title");
@@ -34,7 +34,7 @@ public class VideoSettingsUI {
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .setCallback(this::setFov));
 
-        builder.add(TextObject.translation("quantum.screen.options.video.renderDistance"), Slider.of(CHUNK_SIZE, 256)
+        builder.add(TextObject.translation("quantum.screen.options.video.renderDistance"), Slider.of(CS, 256)
                 .value(ClientConfig.renderDistance)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .setCallback(this::setRenderDistance));

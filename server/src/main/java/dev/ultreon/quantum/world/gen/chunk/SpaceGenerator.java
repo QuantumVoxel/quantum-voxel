@@ -9,7 +9,7 @@ import dev.ultreon.quantum.world.gen.carver.Carver;
 import dev.ultreon.quantum.world.gen.carver.FloatingIslandsCarver;
 import org.jetbrains.annotations.NotNull;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * The SpaceGenerator class extends the functionality of SimpleChunkGenerator to create
@@ -33,11 +33,11 @@ public class SpaceGenerator extends SimpleChunkGenerator {
 
     @Override
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
+        for (int x = 0; x < CS; x++) {
+            for (int z = 0; z < CS; z++) {
                 carver.carve(chunk, x, z);
 
-                for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int y = 0; y < CS; y++) {
                     // Set biomes to registry key "quantum:space"
                     chunk.setBiomeGenerator(x, z, space);
                 }

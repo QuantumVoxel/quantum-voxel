@@ -121,7 +121,13 @@ public record RenderPass(String name, Supplier<? extends ShaderProvider> shader,
         return MANAGED.toArray(RenderPass.class);
     }
 
-    public void nopInit() {
+    public static RenderPass byName(String renderPass) {
+        RenderPass pass = ClientRegistries.RENDER_EFFECT.get(new NamespaceID(CommonConstants.NAMESPACE, renderPass));
+        if (pass == null) throw new IllegalArgumentException("Unknown render pass: " + renderPass);
+        return pass;
+    }
+
+    public static void nopInit() {
         // Load class
     }
 

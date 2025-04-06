@@ -33,7 +33,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerChunk;
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
@@ -203,7 +203,7 @@ public class IntegratedServer extends QuantumServer {
      */
     @Override
     public int getEntityRenderDistance() {
-        return ClientConfig.entityRenderDistance / CHUNK_SIZE;
+        return ClientConfig.entityRenderDistance / CS;
     }
 
     /**
@@ -407,7 +407,7 @@ public class IntegratedServer extends QuantumServer {
                 Gizmo gizmo = new BoxGizmo("request-chunk");
                 gizmo.color.set(0F, 0F, 1F, 1F);
                 gizmo.position.set(globalVec.blockInWorldSpace(0, 0, 0).vec().d().add(8, 8, 8));
-                gizmo.size.set(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+                gizmo.size.set(CS, CS, CS);
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
@@ -497,7 +497,7 @@ public class IntegratedServer extends QuantumServer {
                 Gizmo gizmo = new BoxGizmo("loaded-chunk");
                 gizmo.color.set(0F, 1.0F, 1F, 1F);
                 gizmo.position.set(loadedChunk.getOffset().vec().d());
-                gizmo.size.set(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+                gizmo.size.set(CS, CS, CS);
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
@@ -521,7 +521,7 @@ public class IntegratedServer extends QuantumServer {
                 Gizmo gizmo = new BoxGizmo("failed-chunk");
                 gizmo.color.set(1F, 0F, 1F, 1F);
                 gizmo.position.set(d.add(8, 8, 8));
-                gizmo.size.set(CHUNK_SIZE - 1, CHUNK_SIZE - 1, CHUNK_SIZE - 1);
+                gizmo.size.set(CS - 1, CS - 1, CS - 1);
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 

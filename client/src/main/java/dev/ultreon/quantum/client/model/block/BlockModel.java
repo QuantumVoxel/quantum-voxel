@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.SceneCategory;
+import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.resources.LoadableResource;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -18,7 +19,7 @@ public interface BlockModel extends LoadableResource {
 
     boolean isCustom();
 
-    default void render(Vector3 pos, SceneCategory sceneCategory) {
+    default void render(Vector3 pos, NodeCategory nodeCategory) {
         // Do nothing
     }
 
@@ -50,5 +51,5 @@ public interface BlockModel extends LoadableResource {
         return false;
     }
 
-    String getRenderPass();
+    RenderPass getRenderPass();
 }

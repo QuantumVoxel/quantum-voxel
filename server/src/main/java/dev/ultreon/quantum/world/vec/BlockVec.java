@@ -10,7 +10,7 @@ import org.checkerframework.common.reflection.qual.NewInstance;
 
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
 /**
@@ -171,7 +171,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec offset(ChunkVec pos) {
-        return this.offset(pos.getIntX() * CHUNK_SIZE, 0, pos.getIntZ() * CHUNK_SIZE);
+        return this.offset(pos.getIntX() * CS, 0, pos.getIntZ() * CS);
     }
 
     @Override
@@ -205,7 +205,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
                 if (region.getIntY() < 0) ry -= REGION_SIZE;
                 if (region.getIntZ() < 0) rz -= REGION_SIZE;
 
-                yield new ChunkVec(rx + this.x / CHUNK_SIZE, ry + this.y / CHUNK_SIZE, rz + this.z / CHUNK_SIZE, ChunkVecSpace.REGION);
+                yield new ChunkVec(rx + this.x / CS, ry + this.y / CS, rz + this.z / CS, ChunkVecSpace.REGION);
             }
 
             case WORLD -> new ChunkVec(this.x, this.y, this.z, ChunkVecSpace.WORLD);
@@ -218,35 +218,35 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
 
         return switch (toSpace) {
             case REGION -> {
-                int rx = this.x % (CHUNK_SIZE * REGION_SIZE);
-                int ry = this.y % (CHUNK_SIZE * REGION_SIZE);
-                int rz = this.z % (CHUNK_SIZE * REGION_SIZE);
+                int rx = this.x % (CS * REGION_SIZE);
+                int ry = this.y % (CS * REGION_SIZE);
+                int rz = this.z % (CS * REGION_SIZE);
 
-                if (this.x < 0) rx += CHUNK_SIZE * REGION_SIZE;
-                if (this.y < 0) ry += CHUNK_SIZE * REGION_SIZE;
-                if (this.x < 0) rz += CHUNK_SIZE * REGION_SIZE;
+                if (this.x < 0) rx += CS * REGION_SIZE;
+                if (this.y < 0) ry += CS * REGION_SIZE;
+                if (this.x < 0) rz += CS * REGION_SIZE;
 
                 yield new BlockVec(rx, ry, rz, BlockVecSpace.REGION);
             }
             case CHUNK -> {
-                int cx = this.x % CHUNK_SIZE;
-                int cy = this.y % CHUNK_SIZE;
-                int cz = this.z % CHUNK_SIZE;
+                int cx = this.x % CS;
+                int cy = this.y % CS;
+                int cz = this.z % CS;
 
-                if (this.x < 0) cx += CHUNK_SIZE;
-                if (this.y < 0) cy += CHUNK_SIZE;
-                if (this.z < 0) cz += CHUNK_SIZE;
+                if (this.x < 0) cx += CS;
+                if (this.y < 0) cy += CS;
+                if (this.z < 0) cz += CS;
 
                 yield new BlockVec(cx, cy, cz, BlockVecSpace.CHUNK);
             }
             case SECTION -> {
-                int sx = this.x % CHUNK_SIZE;
-                int sy = this.y % CHUNK_SIZE;
-                int sz = this.z % CHUNK_SIZE;
+                int sx = this.x % CS;
+                int sy = this.y % CS;
+                int sz = this.z % CS;
 
-                if (this.x < 0) sx += CHUNK_SIZE;
-                if (this.y < 0) sy += CHUNK_SIZE;
-                if (this.z < 0) sz += CHUNK_SIZE;
+                if (this.x < 0) sx += CS;
+                if (this.y < 0) sy += CS;
+                if (this.z < 0) sz += CS;
 
                 yield new BlockVec(sx, sy, sz, BlockVecSpace.SECTION);
             }
@@ -255,37 +255,37 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec chunkLocal() {
-        int cx = this.x % CHUNK_SIZE;
-        int cy = this.y % CHUNK_SIZE;
-        int cz = this.z % CHUNK_SIZE;
+        int cx = this.x % CS;
+        int cy = this.y % CS;
+        int cz = this.z % CS;
 
-        if (this.x < 0 && cx != 0) cx += CHUNK_SIZE;
-        if (this.y < 0 && cy != 0) cy += CHUNK_SIZE;
-        if (this.z < 0 && cz != 0) cz += CHUNK_SIZE;
+        if (this.x < 0 && cx != 0) cx += CS;
+        if (this.y < 0 && cy != 0) cy += CS;
+        if (this.z < 0 && cz != 0) cz += CS;
 
         return new BlockVec(cx, cy, cz, BlockVecSpace.CHUNK);
     }
 
     public BlockVec sectionLocal() {
-        int sx = this.x % CHUNK_SIZE;
-        int sy = this.y % CHUNK_SIZE;
-        int sz = this.z % CHUNK_SIZE;
+        int sx = this.x % CS;
+        int sy = this.y % CS;
+        int sz = this.z % CS;
 
-        if (this.x < 0 && sx != 0) sx += CHUNK_SIZE;
-        if (this.y < 0 && sy != 0) sy += CHUNK_SIZE;
-        if (this.z < 0 && sz != 0) sz += CHUNK_SIZE;
+        if (this.x < 0 && sx != 0) sx += CS;
+        if (this.y < 0 && sy != 0) sy += CS;
+        if (this.z < 0 && sz != 0) sz += CS;
 
         return new BlockVec(sx, sy, sz, BlockVecSpace.SECTION);
     }
 
     public BlockVec regionLocal() {
-        int rx = this.x % (CHUNK_SIZE * REGION_SIZE);
-        int ry = this.y % (CHUNK_SIZE * REGION_SIZE);
-        int rz = this.z % (CHUNK_SIZE * REGION_SIZE);
+        int rx = this.x % (CS * REGION_SIZE);
+        int ry = this.y % (CS * REGION_SIZE);
+        int rz = this.z % (CS * REGION_SIZE);
 
-        if (this.x < 0) rx += CHUNK_SIZE * REGION_SIZE;
-        if (this.y < 0) ry += CHUNK_SIZE * REGION_SIZE;
-        if (this.z < 0) rz += CHUNK_SIZE * REGION_SIZE;
+        if (this.x < 0) rx += CS * REGION_SIZE;
+        if (this.y < 0) ry += CS * REGION_SIZE;
+        if (this.z < 0) rz += CS * REGION_SIZE;
 
         return new BlockVec(rx, ry, rz, BlockVecSpace.REGION);
     }
@@ -302,29 +302,29 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     public BlockVec offsetRegion(RegionVec region) {
         if (this.space != BlockVecSpace.WORLD) throw new IllegalStateException("Cannot offset in this space: " + this.space);
 
-        return new BlockVec(this.x + region.getIntX() * (REGION_SIZE * CHUNK_SIZE), this.y, this.z + region.getIntZ() * (REGION_SIZE * CHUNK_SIZE), this.space);
+        return new BlockVec(this.x + region.getIntX() * (REGION_SIZE * CS), this.y, this.z + region.getIntZ() * (REGION_SIZE * CS), this.space);
     }
 
     public RegionVec region() {
-        int rx = this.x / (CHUNK_SIZE * REGION_SIZE);
-        int ry = this.y / (CHUNK_SIZE * REGION_SIZE);
-        int rz = this.z / (CHUNK_SIZE * REGION_SIZE);
+        int rx = this.x / (CS * REGION_SIZE);
+        int ry = this.y / (CS * REGION_SIZE);
+        int rz = this.z / (CS * REGION_SIZE);
 
-        if (this.x < 0 && this.x % (CHUNK_SIZE * REGION_SIZE) != 0) rx--;
-        if (this.y < 0 && this.y % (CHUNK_SIZE * REGION_SIZE) != 0) ry--;
-        if (this.z < 0 && this.z % (CHUNK_SIZE * REGION_SIZE) != 0) rz--;
+        if (this.x < 0 && this.x % (CS * REGION_SIZE) != 0) rx--;
+        if (this.y < 0 && this.y % (CS * REGION_SIZE) != 0) ry--;
+        if (this.z < 0 && this.z % (CS * REGION_SIZE) != 0) rz--;
 
         return new RegionVec(rx, ry, rz);
     }
 
     public ChunkVec chunk() {
-        int cx = this.x / CHUNK_SIZE;
-        int cy = this.y / CHUNK_SIZE;
-        int cz = this.z / CHUNK_SIZE;
+        int cx = this.x / CS;
+        int cy = this.y / CS;
+        int cz = this.z / CS;
 
-        if (this.x < 0 && this.x % CHUNK_SIZE != 0) cx--;
-        if (this.y < 0 && this.y % CHUNK_SIZE != 0) cy--;
-        if (this.z < 0 && this.z % CHUNK_SIZE != 0) cz--;
+        if (this.x < 0 && this.x % CS != 0) cx--;
+        if (this.y < 0 && this.y % CS != 0) cy--;
+        if (this.z < 0 && this.z % CS != 0) cz--;
 
         return switch (this.space) {
             case WORLD -> new ChunkVec(cx, cy, cz, ChunkVecSpace.WORLD);

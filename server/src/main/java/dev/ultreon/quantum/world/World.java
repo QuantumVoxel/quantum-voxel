@@ -55,8 +55,11 @@ import java.util.stream.Stream;
 @SuppressWarnings({"UnusedReturnValue", "unused", "GDXJavaUnsafeIterator"})
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
-public abstract class World implements Disposable, WorldAccess {
-    public static final int CHUNK_SIZE = 16;
+public abstract class World extends GameObject implements Disposable, WorldAccess {
+    public static final int CS = 16;
+    public static final int CS_2 = CS * CS;
+    public static final int CS_3 = CS_2 * CS;
+
     public static final int REGION_SIZE = 32;
     public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;
@@ -351,15 +354,15 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     public Heightmap heightMapAt(int x, int z, HeightmapType type) {
         return switch (type) {
-            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CHUNK_SIZE));
-            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CHUNK_SIZE));
+            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
+            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
         };
     }
 
     public Heightmap heightMapAt(@NotNull ChunkVec vec, HeightmapType type) {
         return switch (type) {
-            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CHUNK_SIZE));
-            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CHUNK_SIZE));
+            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
+            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
         };
     }
 
@@ -588,6 +591,7 @@ public abstract class World implements Disposable, WorldAccess {
     @Override
     @ApiStatus.Internal
     public void dispose() {
+        super.dispose();
         this.disposed = true;
     }
 
@@ -722,8 +726,8 @@ public abstract class World implements Disposable, WorldAccess {
      */
     @Override
     public boolean isSpawnChunk(ChunkVec pos) {
-        int x = pos.getIntX() * CHUNK_SIZE;
-        int z = pos.getIntZ() * CHUNK_SIZE;
+        int x = pos.getIntX() * CS;
+        int z = pos.getIntZ() * CS;
 
         return this.spawnPoint.x - 1 <= x && this.spawnPoint.x + 1 >= x &&
                this.spawnPoint.z - 1 <= z && this.spawnPoint.z + 1 >= z;

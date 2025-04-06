@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 public class TreeGenerator {
     @MonotonicNonNull
@@ -72,10 +72,10 @@ public class TreeGenerator {
     }
 
     private double[][] generateMatrix(Chunk chunkData, NoiseInstance noise) {
-        var noiseMax = new double[CHUNK_SIZE][CHUNK_SIZE];
-        var xMax = chunkData.getOffset().x + CHUNK_SIZE;
+        var noiseMax = new double[CS][CS];
+        var xMax = chunkData.getOffset().x + CS;
         var xMin = chunkData.getOffset().x;
-        var zMax = chunkData.getOffset().z + CHUNK_SIZE;
+        var zMax = chunkData.getOffset().z + CS;
         var zMin = chunkData.getOffset().z;
         int xIndex = 0, zIndex = 0;
 

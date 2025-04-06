@@ -5,6 +5,7 @@ import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.dimension.Dimension;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
@@ -19,7 +20,7 @@ import java.util.Map;
 /**
  * Manages dimension and world relationships within a QuantumServer context.
  */
-public class DimensionManager {
+public class DimensionManager extends GameObject {
     private final QuantumServer server;
     private final Map<RegistryKey<DimensionInfo>, Dimension> dimensions = new HashMap<>();
     private final Map<RegistryKey<DimensionInfo>, ServerWorld> worlds = new HashMap<>();
@@ -77,6 +78,7 @@ public class DimensionManager {
                     data = storage.read("world.ubo");
                 ServerWorld world = new ServerWorld(server, key, storage, dimension.generator(), e.getValue().info().seed().orElse(seed ^ key.hashCode()), data);
                 this.worlds.put(key, world);
+                this.add("World " + key.id(), world);
 
                 world.load();
             } catch (IOException ex) {

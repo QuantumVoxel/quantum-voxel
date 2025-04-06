@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.world.ChunkReader;
 import dev.ultreon.quantum.world.WorldReader;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 @SuppressWarnings("UnqualifiedStaticUsage")
 public class WorldRayCaster {
@@ -72,7 +72,7 @@ public class WorldRayCaster {
             loc.set(abs).sub(chunk.getOffset().x, chunk.getOffset().y, chunk.getOffset().z);
 
             if (loc.x < 0 || loc.y < 0 || loc.z < 0 ||
-                    loc.x >= CHUNK_SIZE || loc.y >= CHUNK_SIZE || loc.z >= CHUNK_SIZE) {
+                loc.x >= CS || loc.y >= CS || loc.z >= CS) {
                 chunk = null;
                 continue;
             }

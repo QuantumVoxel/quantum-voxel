@@ -10,7 +10,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * HellGenerator is a specialized chunk generator designed to create a hellish
@@ -37,8 +37,8 @@ public class HellGenerator extends SimpleChunkGenerator {
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
         BlockVec offset = chunk.getOffset();
 
-        for (int x = offset.x; x < offset.x + CHUNK_SIZE; x++) {
-            for (int z = offset.z; z < offset.z + CHUNK_SIZE; z++) {
+        for (int x = offset.x; x < offset.x + CS; x++) {
+            for (int z = offset.z; z < offset.z + CS; z++) {
                 this.carver.carve(chunk, x, z);
             }
         }

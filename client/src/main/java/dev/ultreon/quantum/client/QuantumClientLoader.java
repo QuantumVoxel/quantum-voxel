@@ -34,6 +34,7 @@ import dev.ultreon.quantum.client.particle.ParticleControllers;
 import dev.ultreon.quantum.client.particle.ParticleEmitters;
 import dev.ultreon.quantum.client.registry.LanguageRegistry;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.shaders.Shaders;
@@ -164,7 +165,9 @@ class QuantumClientLoader implements Runnable {
 
         QuantumClient.LOGGER.info("Registering stuff");
 
+
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
+            RenderPass.nopInit();
             Registries.nopInit();
             RegistryEvents.REGISTRY_CREATION.factory().onRegistryCreation();
         });

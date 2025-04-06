@@ -13,10 +13,10 @@ import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
-import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.render.SceneCategory;
+import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
@@ -26,6 +26,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
+import dev.ultreon.quantum.util.ShowInNodeView;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -40,7 +41,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
+import static dev.ultreon.quantum.world.World.CS_2;
 
 public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private static final int[] dx = {-1, 0, 1, 0, 0, 0};
@@ -50,6 +52,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     final Mesher mesher;
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
+    public final Vector3 deltaOffset = new Vector3();
 
     public volatile boolean dirty;
     public boolean initialized = false;
@@ -66,8 +69,19 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final Stack<Integer> stack = new Stack<>();
     public final ClientChunkInfo info = new ClientChunkInfo();
     public int lod;
+    public MeshStatus meshStatus = MeshStatus.UNMESHED;
+    public long meshDuration = 0L;
+    public String meshLog = "";
+    public int vertexCount;
+    public int indexCount;
+    public int faceCount;
+    public int meshVertices;
     private boolean empty = false;
     private BoundingBox boundingBox;
+
+    @ShowInNodeView
+    private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
+    private final int[] opqueColumnMask = new int[CS_2];
 
     /**
      * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
@@ -89,10 +103,29 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         });
 
         this.mesher = new GreedyMesher(this, false);
+
+        for (int i = 0; i < CS; i++) {
+            for (int j = 0; j < CS; j++) {
+                int opque = 0;
+                int index = index(i, j);
+                for (int k = 0; k < CS; k++) {
+                    BlockState state = this.storage.get(index);
+                    if (!state.isAir() && !state.isInvisible()) {
+                        opque |= 1 << k;
+                    }
+                }
+
+                this.opqueColumnMask[index] = opque;
+            }
+        }
     }
 
-    private int index(int x, int y, int z) {
-        return (z * CHUNK_SIZE + y) * CHUNK_SIZE + x;
+    public int index(int x, int z) {
+        return (z * CS) + x;
+    }
+
+    public int index(int x, int y, int z) {
+        return (z * CS + y) * CS + x;
     }
 
     @Override
@@ -273,7 +306,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     public BlockState getSafe(int x, int y, int z) {
-        if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+        if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
             BlockVec start = getVec().start();
             x += start.x;
             y += start.y;
@@ -287,7 +320,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     public int getBlockLightSafe(int x, int y, int z) {
-        if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+        if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
             BlockVec start = getVec().start();
             x += start.x;
             y += start.y;
@@ -304,14 +337,14 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         return !getSafe(x, y, z).isAir() ? 15 : 6;
     }
 
-    public void renderModels(SceneCategory sceneCategory) {
+    public void renderModels(NodeCategory nodeCategory) {
         for (BlockVec pos : this.addedModels.keySet()) {
             ModelInstance model = this.addedModels.get(pos);
             model.userData = Shaders.MODEL_VIEW.get();
             this.addedModels.remove(pos);
             BlockObject value = new BlockObject(model);
             this.models.put(pos, value);
-            sceneCategory.add("Block Object", value);
+            nodeCategory.add("Block Object", value);
         }
 
         for (BlockVec pos : this.models.keySet()) {
@@ -397,14 +430,14 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             if (lightMap.getBlockLight(idx) != oldValue) continue;
 
             lightMap.setBlockLight(idx, newValue);
-            int x = idx % CHUNK_SIZE;
-            int y = (idx / CHUNK_SIZE) % CHUNK_SIZE;
-            int z = idx / (CHUNK_SIZE * CHUNK_SIZE);
+            int x = idx % CS;
+            int y = (idx / CS) % CS;
+            int z = idx / (CS * CS);
             for (int i = 0; i < 6; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
                 int nz = z + dz[i];
-                if (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_SIZE && nz >= 0 && nz < CHUNK_SIZE) {
+                if (nx >= 0 && nx < CS && ny >= 0 && ny < CS && nz >= 0 && nz < CS) {
                     int lightReduction = get(nx, ny, nz).getLightReduction();
                     if (lightReduction == 0) continue;
                     if (lightMap.getSunlight(nx, ny, nz) > lightReduction) continue;
@@ -430,5 +463,19 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.boundingBox.max.set(renderOffset).add(WorldRenderer.HALF_CHUNK_DIMENSIONS);
 
         return this.boundingBox;
+    }
+
+    public void addMesh(ChunkMesh chunkMesh) {
+        this.meshes.put(chunkMesh.pass, chunkMesh);
+        this.add("Mesh " + chunkMesh.pass.name(), chunkMesh);
+    }
+
+    public void removeMesh(ChunkMesh chunkMesh) {
+        this.meshes.remove(chunkMesh.pass);
+        this.remove(chunkMesh);
+    }
+
+    public int[] getOpaqueMask() {
+        return opqueColumnMask;
     }
 }

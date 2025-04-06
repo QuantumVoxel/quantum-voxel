@@ -8,7 +8,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.NotNull;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * FlatWorldCarver is an implementation of the Carver interface designed to carve a flat terrain in a chunk.
@@ -19,7 +19,7 @@ public class FlatWorldCarver implements Carver {
         Heightmap worldSurface = chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE);
         Heightmap motionBlocking = chunk.getWorld().heightMapAt(x, z, HeightmapType.MOTION_BLOCKING);
 
-        for (int y = chunk.getOffset().y; y < CHUNK_SIZE; y++) {
+        for (int y = chunk.getOffset().y; y < CS; y++) {
             BlockVec vec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
 
             if (y < 0) chunk.set(vec.x, vec.y, vec.z, Blocks.STONE.getDefaultState());

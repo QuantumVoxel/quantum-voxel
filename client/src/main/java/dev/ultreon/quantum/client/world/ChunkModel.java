@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
@@ -15,12 +15,12 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.input.GameCamera;
-import dev.ultreon.quantum.client.render.RenderBuffer;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.util.GameObject;
+import dev.ultreon.quantum.util.ShowInNodeView;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import kotlin.Lazy;
 import kotlin.LazyKt;
@@ -42,6 +42,7 @@ public class ChunkModel extends GameObject {
     private ModelInstance gizmoInstance = null;
     private final Array<RenderPass> usedPasses = new Array<>();
 
+    @ShowInNodeView
     private boolean beingBuilt;
 
     private final ChunkModelBuilder chunkModelBuilder;
@@ -98,8 +99,11 @@ public class ChunkModel extends GameObject {
     @SuppressWarnings("GDXJavaUnsafeIterator")
     private void buildAsync(ChunkVec pos) {
         long millis = System.currentTimeMillis();
+        chunk.meshStatus = MeshStatus.MESHING;
 
         if (chunk.isUniform()) {
+            chunk.meshStatus = MeshStatus.UNIFORM;
+            chunk.meshDuration = System.currentTimeMillis() - millis;
             return;
         }
 
@@ -112,23 +116,21 @@ public class ChunkModel extends GameObject {
             chunkModelBuilder.begin(bufferSource);
 
             if (!chunk.mesher.buildMesh((blk, model, pass) -> {
-                if (model == null) return false;
-                boolean b = pass.name().equals(model.getRenderPass());
-                if (b) {
-                    passed.set(true);
+                if (model == null) {
+                    return true;
                 }
-
+                boolean b = pass.equals(model.getRenderPass());
+                chunk.meshLog += "Meshing " + blk + " in " + pass + " (MRP: " + model.getRenderPass() + ")" + ": " + b + "\n";
                 return b;
             }, chunkModelBuilder)) {
-                return;
-            }
-
-            if (!passed.get()) {
-                meshBuilder.clear();
+                chunk.meshStatus = MeshStatus.SKIPPED;
+                chunk.meshDuration = System.currentTimeMillis() - millis;
                 return;
             }
 
             chunkModelBuilder.end(meshes, bufferSource);
+            chunk.meshStatus = MeshStatus.MESHED;
+            chunk.meshDuration = System.currentTimeMillis() - millis;
         } catch (Throwable t) {
             CrashLog crashLog = new CrashLog("Failed to generate chunk model: " + pos, t);
             CrashCategory category = new CrashCategory("Chunk Details");
@@ -219,8 +221,13 @@ public class ChunkModel extends GameObject {
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
     public void render(GameCamera camera, RenderBufferSource bufferSource) {
+        this.chunk.vertexCount = 0;
+        this.chunk.indexCount = 0;
         for (ObjectMap.Entry<RenderPass, ChunkMesh> instance : meshes.entries()) {
             instance.value.render(camera, bufferSource);
+
+            this.chunk.vertexCount += instance.value.numVertices;
+            this.chunk.indexCount += instance.value.numIndices;
         }
     }
 }

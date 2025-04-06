@@ -9,6 +9,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.NamespaceID;
 
@@ -91,8 +92,8 @@ public class Json5Model implements BlockModel, ItemModel {
     }
 
     @Override
-    public String getRenderPass() {
-        return display.renderPass;
+    public RenderPass getRenderPass() {
+        return RenderPass.byName(display.renderPass);
     }
 
     public Table<String, BlockDataEntry<?>, Json5Model> getOverrides() {

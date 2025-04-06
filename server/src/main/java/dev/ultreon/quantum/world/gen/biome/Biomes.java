@@ -4,6 +4,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.gen.feature.*;
@@ -16,7 +17,7 @@ import kotlin.ranges.IntRange;
  * These biomes include various landscapes and climatic regions such as forests, deserts, and oceans.
  * The class provides methods to initialize and register biomes.
  */
-public class Biomes {
+public class Biomes extends GameObject {
     private final QuantumServer server;
 
     public final Biome void_;

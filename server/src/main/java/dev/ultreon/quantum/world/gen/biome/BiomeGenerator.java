@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * The BiomeGenerator class is responsible for generating terrain and features for a given biome in the world.
@@ -66,7 +66,7 @@ public class BiomeGenerator implements Disposable {
      * @param groundPos the ground position at the specified coordinates
      */
     public void generateTerrainFeatures(BuilderChunk chunk, int x, int z, int groundPos) {
-        for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int y = 0; y < CS; y++) {
             BlockVec blockInWorld = chunk.getVec().blockInWorldSpace(x, y, z);
 
             for (var feature : this.undergroundFeatures) {
@@ -108,11 +108,11 @@ public class BiomeGenerator implements Disposable {
      */
     public void generateTerrainLayers(BuilderChunk chunk, int x, int z, int groundPos) {
         RNG rng = chunk.getRNG();
-        if (chunk.getVec().y > 256 / CHUNK_SIZE)
+        if (chunk.getVec().y > 256 / CS)
             return;
 
         BlockVec offset = chunk.getOffset();
-        for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int y = 0; y < CS; y++) {
             if (chunk.get(x, y, z).isAir()) continue;
 
             for (var layer : this.layers) {

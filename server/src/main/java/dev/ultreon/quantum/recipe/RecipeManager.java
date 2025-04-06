@@ -14,6 +14,7 @@ import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.resources.StaticResource;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import lombok.Getter;
@@ -21,10 +22,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class RecipeManager {
-    @Getter
+public class RecipeManager extends GameObject {
     private final QuantumServer server;
-    private IdentityMap<RecipeType<?>, RecipeRegistry<Recipe>> registryMap = new IdentityMap<>();
+    public IdentityMap<RecipeType<?>, RecipeRegistry<Recipe>> registryMap = new IdentityMap<>();
 
     public RecipeManager(QuantumServer server) {
         this.server = server;
@@ -160,5 +160,9 @@ public class RecipeManager {
 
     public <T extends Recipe> ObjectMap<NamespaceID, Recipe> getRegistry(RecipeType<T> type) {
         return this.registryMap.get(type).registry;
+    }
+
+    public QuantumServer getServer() {
+        return server;
     }
 }

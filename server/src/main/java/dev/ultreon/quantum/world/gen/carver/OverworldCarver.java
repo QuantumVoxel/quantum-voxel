@@ -17,7 +17,7 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongLists;
 import org.jetbrains.annotations.NotNull;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * The OverworldCarver class is responsible for carving terrain within a chunk.
@@ -51,7 +51,7 @@ public class OverworldCarver implements Carver {
         if (height < 0) height = 0;
 
         // Carve the world into shape.
-        for (int y = offset.y; y < offset.y + CHUNK_SIZE; y++) {
+        for (int y = offset.y; y < offset.y + CS; y++) {
             BlockVec vec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
             if (y <= groundPos) {
 //                if (y <= World.SEA_LEVEL) {

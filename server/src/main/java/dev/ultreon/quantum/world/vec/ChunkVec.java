@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
 /**
@@ -18,7 +18,7 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
  */
 public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Serializable {
     // Region chunk size
-    public static final int RCS = REGION_SIZE * CHUNK_SIZE;
+    public static final int RCS = REGION_SIZE * CS;
 
     @Serial
     private static final long serialVersionUID = 782820744815861493L;
@@ -99,7 +99,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return The origin of the chunk.
      */
     public Vec3d getChunkOrigin() {
-        return new Vec3d(this.x * CHUNK_SIZE, this.y * CHUNK_SIZE, this.z * CHUNK_SIZE);
+        return new Vec3d(this.x * CS, this.y * CS, this.z * CS);
     }
 
     /**
@@ -215,13 +215,13 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return the position of the first block in this chunk.
      */
     public BlockVec start() {
-        int cx = this.x * CHUNK_SIZE;
-        int cy = this.y * CHUNK_SIZE;
-        int cz = this.z * CHUNK_SIZE;
+        int cx = this.x * CS;
+        int cy = this.y * CS;
+        int cz = this.z * CS;
 
-        if (this.x < 0) cx -= CHUNK_SIZE;
-        if (this.y < 0) cy -= CHUNK_SIZE;
-        if (this.z < 0) cz -= CHUNK_SIZE;
+        if (this.x < 0) cx -= CS;
+        if (this.y < 0) cy -= CS;
+        if (this.z < 0) cz -= CS;
 
         return new BlockVec(cx, cy, cz, this.space.block());
     }
@@ -232,15 +232,15 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @return the position of the last block in this chunk.
      */
     public BlockVec end() {
-        int cx = this.x * CHUNK_SIZE;
-        int cy = this.y * CHUNK_SIZE;
-        int cz = this.z * CHUNK_SIZE;
+        int cx = this.x * CS;
+        int cy = this.y * CS;
+        int cz = this.z * CS;
 
-        if (this.x < 0) cx += CHUNK_SIZE;
-        if (this.y < 0) cy += CHUNK_SIZE;
-        if (this.z < 0) cz += CHUNK_SIZE;
+        if (this.x < 0) cx += CS;
+        if (this.y < 0) cy += CS;
+        if (this.z < 0) cz += CS;
 
-        return new BlockVec(cx + CHUNK_SIZE - 1, cy + CHUNK_SIZE - 1, cz + CHUNK_SIZE - 1, this.space.block());
+        return new BlockVec(cx + CS - 1, cy + CS - 1, cz + CS - 1, this.space.block());
     }
 
     /**
@@ -259,24 +259,24 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
                 if (region == null)
                     throw new IllegalArgumentException("Region cannot be null when converting from region space");
 
-                int rx = this.x * CHUNK_SIZE;
-                int ry = this.y * CHUNK_SIZE;
-                int rz = this.z * CHUNK_SIZE;
+                int rx = this.x * CS;
+                int ry = this.y * CS;
+                int rz = this.z * CS;
 
-                rx = rx % (REGION_SIZE * CHUNK_SIZE);
-                ry = ry % (REGION_SIZE * CHUNK_SIZE);
-                rz = rz % (REGION_SIZE * CHUNK_SIZE);
+                rx = rx % (REGION_SIZE * CS);
+                ry = ry % (REGION_SIZE * CS);
+                rz = rz % (REGION_SIZE * CS);
 
-                rx += region.x * REGION_SIZE * CHUNK_SIZE;
-                ry += region.y * REGION_SIZE * CHUNK_SIZE;
-                rz += region.z * REGION_SIZE * CHUNK_SIZE;
+                rx += region.x * REGION_SIZE * CS;
+                ry += region.y * REGION_SIZE * CS;
+                rz += region.z * REGION_SIZE * CS;
 
                 yield new BlockVec(rx + x, ry + y, rz + z, BlockVecSpace.WORLD);
             }
             case WORLD -> {
-                int cx = this.x * CHUNK_SIZE;
-                int cy = this.y * CHUNK_SIZE;
-                int cz = this.z * CHUNK_SIZE;
+                int cx = this.x * CS;
+                int cy = this.y * CS;
+                int cz = this.z * CS;
 
                 yield new BlockVec(cx + x, cy + y, cz + z, BlockVecSpace.WORLD);
             }
@@ -320,13 +320,13 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     public BlockVec blockAt(int x, int y, int z) {
-        int cx = this.x * CHUNK_SIZE + x;
-        int cy = this.y * CHUNK_SIZE + y;
-        int cz = this.z * CHUNK_SIZE + z;
+        int cx = this.x * CS + x;
+        int cy = this.y * CS + y;
+        int cz = this.z * CS + z;
 
-        if (this.x < 0) cx += CHUNK_SIZE;
-        if (this.y < 0) cy += CHUNK_SIZE;
-        if (this.z < 0) cz += CHUNK_SIZE;
+        if (this.x < 0) cx += CS;
+        if (this.y < 0) cy += CS;
+        if (this.z < 0) cz += CS;
 
         return new BlockVec(cx, cy, cz, this.space.block());
     }

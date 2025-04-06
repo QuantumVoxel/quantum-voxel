@@ -36,7 +36,6 @@ import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.gen.FeatureData;
 import dev.ultreon.quantum.world.gen.StructureData;
 import dev.ultreon.quantum.world.gen.StructureInstance;
-import dev.ultreon.quantum.world.gen.carver.CaveCarver;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
@@ -1264,10 +1263,10 @@ public class ServerWorld extends World implements Audience {
      * The spawn point is set randomly.
      */
     public void setupSpawn() {
-        int spawnChunkX = MathUtils.random(-CHUNK_SIZE * 2, 31);
-        int spawnChunkZ = MathUtils.random(-CHUNK_SIZE * 2, 31);
-        int spawnX = MathUtils.random(spawnChunkX * CHUNK_SIZE, spawnChunkX * CHUNK_SIZE + 15);
-        int spawnZ = MathUtils.random(spawnChunkZ * CHUNK_SIZE, spawnChunkZ * CHUNK_SIZE + 15);
+        int spawnChunkX = MathUtils.random(-CS * 2, 31);
+        int spawnChunkZ = MathUtils.random(-CS * 2, 31);
+        int spawnX = MathUtils.random(spawnChunkX * CS, spawnChunkX * CS + 15);
+        int spawnZ = MathUtils.random(spawnChunkZ * CS, spawnChunkZ * CS + 15);
 
         QuantumServer.invokeAndWait(() -> this.setSpawnPoint(spawnX, spawnZ));
     }
@@ -1355,7 +1354,7 @@ public class ServerWorld extends World implements Audience {
         return getOrOpenRegionAt(vec).caveCache.stream().filter(vec3d -> {
             BlockVec start = vec.start().regionLocal();
             return vec3d.x >= start.x && vec3d.y >= start.y && vec3d.z >= start.z &&
-                   vec3d.x < start.x + CHUNK_SIZE && vec3d.y < start.y + CHUNK_SIZE && vec3d.z < start.z + CHUNK_SIZE;
+                   vec3d.x < start.x + CS && vec3d.y < start.y + CS && vec3d.z < start.z + CS;
         });
     }
 

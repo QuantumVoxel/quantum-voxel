@@ -26,7 +26,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
 
 import static dev.ultreon.libs.commons.v0.Mth.lerp;
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 /**
  * Represents a chunk in the world.
@@ -43,7 +43,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     protected static final int MAX_LIGHT_LEVEL = 15;
     protected static final float[] lightLevelMap = new float[Chunk.MAX_LIGHT_LEVEL + 1];
 
-    private final @NotNull ChunkVec vec;
+    public final @NotNull ChunkVec vec;
     final @NotNull Map<BlockVec, Float> breaking = new HashMap<>();
     protected boolean active;
     protected boolean ready;
@@ -54,7 +54,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     protected final @NotNull World world;
 
     public final @NotNull Storage<BlockState> storage;
-    protected final @NotNull LightMap lightMap = new LightMap(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE);
+    protected final @NotNull LightMap lightMap = new LightMap(CS * CS * CS);
     public final @NotNull Storage<RegistryKey<Biome>> biomeStorage;
 
     static {
@@ -86,7 +86,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
                     int height,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, size, height, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
+        this(world, size, height, vec, storage, new PaletteStorage<>(CS * CS, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      */
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec) {
-        this(world, vec, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Blocks.AIR.getDefaultState()));
+        this(world, vec, new PaletteStorage<>(CS * CS * CS, Blocks.AIR.getDefaultState()));
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, vec, storage, new PaletteStorage<>(CHUNK_SIZE * CHUNK_SIZE, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
+        this(world, vec, storage, new PaletteStorage<>(CS * CS, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
     /**
@@ -149,7 +149,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         if (vec.getSpace() != ChunkVecSpace.WORLD)
             throw new IllegalArgumentException("ChunkVec must be in world space");
 
-        this.offset = new BlockVec(vec.getIntX() * CHUNK_SIZE, vec.getIntY() * CHUNK_SIZE, vec.getIntZ() * CHUNK_SIZE, BlockVecSpace.WORLD);
+        this.offset = new BlockVec(vec.getIntX() * CS, vec.getIntY() * CS, vec.getIntZ() * CS, BlockVecSpace.WORLD);
 
         this.vec = vec;
         this.storage = storage;
@@ -327,8 +327,8 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @return the index of the block in the chunk array, or -1 if the block is out of bounds
      */
     private int getIndex(int x, int y, int z) {
-        if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
-            return z * (CHUNK_SIZE * CHUNK_SIZE) + y * CHUNK_SIZE + x;
+        if (x >= 0 && x < CS && y >= 0 && y < CS && z >= 0 && z < CS) {
+            return z * (CS * CS) + y * CS + x;
         }
         return -1; // Out of bounds
     }
@@ -342,7 +342,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @return true if the coordinates are out of bounds
      */
     public boolean isOutOfBounds(int x, int y, int z) {
-        return x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE;
+        return x < 0 || x >= CS || y < 0 || y >= CS || z < 0 || z >= CS;
     }
 
     /**
@@ -430,6 +430,10 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         return this.active;
     }
 
+    /**
+     * @deprecated use {@link #vec)} instead.
+     */
+    @Deprecated
     public @NotNull ChunkVec getVec() {
         return this.vec;
     }
@@ -466,7 +470,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @return The found position.
      */
     public @Nullable Integer ascend(int x, int y, int z) {
-        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE)
+        if (x < 0 || x >= CS || y < 0 || y >= CS || z < 0 || z >= CS)
             return null;
 
         for (; y < y + 256; y++) {
@@ -487,7 +491,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @return The found position.
      */
     public @Nullable Integer ascend(int x, int y, int z, int height) {
-        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE)
+        if (x < 0 || x >= CS || y < 0 || y >= CS || z < 0 || z >= CS)
             return null;
 
         for (; y < y + height; y++) {
@@ -501,7 +505,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     }
 
     protected int toFlatIndex(int x, int z) {
-        return x + z * CHUNK_SIZE;
+        return x + z * CS;
     }
 
     /**

@@ -7,7 +7,7 @@ import dev.ultreon.quantum.world.gen.carver.Carver;
 import dev.ultreon.quantum.world.gen.carver.FlatWorldCarver;
 import org.jetbrains.annotations.NotNull;
 
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 public class TestGenerator extends SimpleChunkGenerator {
     private final FlatWorldCarver carver;
@@ -20,8 +20,8 @@ public class TestGenerator extends SimpleChunkGenerator {
 
     @Override
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
-        for (int x = chunk.getOffset().x; x < chunk.getOffset().x + CHUNK_SIZE; x++) {
-            for (int z = chunk.getOffset().z; z < chunk.getOffset().z + CHUNK_SIZE; z++) {
+        for (int x = chunk.getOffset().x; x < chunk.getOffset().x + CS; x++) {
+            for (int z = chunk.getOffset().z; z < chunk.getOffset().z + CS; z++) {
                 this.carver.carve(chunk, x, z);
             }
         }

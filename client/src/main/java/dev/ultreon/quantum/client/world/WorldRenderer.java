@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.*;
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public final class WorldRenderer implements DisposableContainer, TerrainRenderer {
@@ -92,7 +92,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private Environment environment;
     private int visibleChunks;
     private int loadedChunks;
-    static final Vector3 CHUNK_DIMENSIONS = new Vector3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+    static final Vector3 CHUNK_DIMENSIONS = new Vector3(CS, CS, CS);
     static final Vector3 HALF_CHUNK_DIMENSIONS = WorldRenderer.CHUNK_DIMENSIONS.cpy().scl(0.5f);
 
     private ClientWorld world;
@@ -242,6 +242,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         // Create ModelInstances for sun and moon
         this.sun = new CelestialBody(sunModel);
         this.moon = new CelestialBody(moonModel);
+
+        world.add("Sun", this.sun);
+        world.add("Moon", this.moon);
     }
 
     /**
@@ -336,11 +339,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         CelestialBody sun = this.sun;
         if (sun != null) {
-            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun.getModelInstance());
+            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun);
         }
         CelestialBody moon = this.moon;
         if (moon != null) {
-            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon.getModelInstance());
+            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon);
         }
     }
 
@@ -477,7 +480,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             Vec3i chunkOffset = chunk.getOffset();
             Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
-            chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+            chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z).add(chunk.deltaOffset);
 
             if (frustumCulling(chunk)) continue;
 
@@ -704,8 +707,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private static List<ClientChunk> chunksInViewSorted(Collection<ClientChunk> chunks, Player player) {
         List<ClientChunk> list = new ArrayList<>(chunks);
         list = list.stream().sorted((o1, o2) -> {
-            Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CHUNK_SIZE, o1.getOffset().y + (float) CHUNK_SIZE, o1.getOffset().z + (float) CHUNK_SIZE);
-            Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CHUNK_SIZE, o2.getOffset().y + (float) CHUNK_SIZE, o2.getOffset().z + (float) CHUNK_SIZE);
+            Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CS, o1.getOffset().y + (float) CS, o1.getOffset().z + (float) CS);
+            Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CS, o2.getOffset().y + (float) CS, o2.getOffset().z + (float) CS);
             return Double.compare(mid1.dst(player.getPosition()), mid2.dst(player.getPosition()));
         }).collect(Collectors.toList());
         return list;

@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.render.ModelManager;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.resources.ResourceLoader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -39,8 +40,8 @@ public class G3DModel implements BlockModel {
     }
 
     @Override
-    public String getRenderPass() {
-        return "transparent";
+    public RenderPass getRenderPass() {
+        return RenderPass.TRANSPARENT;
     }
 
     @Override

@@ -169,7 +169,7 @@ import static dev.ultreon.mixinprovider.PlatformOS.isMac;
  * @see <a href="https://github.com/Ultreon/quantum-voxel">Quantum Voxel</a>
  * @since <i>Always :smirk:</i>
  */
-@SuppressWarnings("UnusedReturnValue")
+@SuppressWarnings({"UnusedReturnValue", "deprecation", "t"})
 public non-sealed class QuantumClient extends PollingExecutorService implements DeferredDisposable, DesktopMain {
     // Public constants
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumClient");
@@ -232,9 +232,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     public TouchInput touchInput;
     public VirtualKeyboard virtualKeyboard;
 
-    public SceneCategory backgroundCat = new SceneCategory();
-    public SceneCategory worldCat = new SceneCategory();
-    public SceneCategory mainCat = new SceneCategory();
+    public NodeCategory backgroundCat = new NodeCategory();
+    public NodeCategory worldCat = new NodeCategory();
+    public NodeCategory mainCat = new NodeCategory();
 
     // Local data
     public LocalData localData = LocalData.load();
@@ -497,7 +497,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private boolean hovered = false;
     private int clicks;
     private long lastPress;
-    private RenderBufferSource renderBuffers = new RenderBufferSource();
+    private final RenderBufferSource renderBuffers = new RenderBufferSource();
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -536,6 +536,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         super(QuantumClient.PROFILER);
 
         this.mainCat.add("Client", this);
+        this.add("Render Buffers", this.renderBuffers);
 
         ModApi.init();
 
@@ -586,6 +587,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         // Initialize the resource manager, texture manager, and resource loader
         this.resourceManager = new ResourceManager("assets");
+        this.add("Resource Manager", resourceManager);
 
         // Initialize shader provider and shader program manager. These should be initialized after the resource manager.
         this.shaderProviderManager = new ShaderProviderManager();
@@ -1460,8 +1462,6 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     /**
      * Handles the screenshot.
-     *
-     * @param renderer the renderer.
      */
     private void handleScreenshot() {
         this.captureScreenshot = false;
@@ -2266,7 +2266,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
                 QuantumClient.cleanUp(this.textureManager);
 
                 // Dispose resources
-                QuantumClient.cleanUp(this.resourceManager);
+                QuantumClient.cleanUp((AutoCloseable) this.resourceManager);
                 QuantumClient.cleanUp(this.skinManager);
 
                 // Dispose cursors
@@ -2834,6 +2834,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         MemoryConnectionContext.set(mem);
 
         this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
+        this.mainCat.add("Client World", this.world);
 
         this.integratedServer.start();
 

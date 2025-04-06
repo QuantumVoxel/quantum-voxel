@@ -11,10 +11,11 @@ import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import org.jetbrains.annotations.Nullable;
 
-public class Skybox implements RenderableProvider, Disposable {
+public class Skybox extends GameObject implements RenderableProvider, Disposable {
     public static final Color NULL_COLOR = new Color(0, 0, 0, 0);
     private final static int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
 

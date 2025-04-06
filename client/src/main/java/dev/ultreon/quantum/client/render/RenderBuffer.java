@@ -9,8 +9,9 @@ import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.world.RenderablePool;
+import dev.ultreon.quantum.util.GameObject;
 
-public class RenderBuffer implements Disposable {
+public class RenderBuffer extends GameObject implements Disposable {
     private static final Array<RenderBuffer> MANAGED = new Array<>();
 
     private final ModelBatch modelBatch;
@@ -20,6 +21,11 @@ public class RenderBuffer implements Disposable {
     private boolean started = false;
     private final Array<Renderable> buffer = new Array<>(16);
     private final RenderablePool pool = new RenderablePool();
+    private int currentRenderCount;
+    public int renderCount;
+    public int lastRenderCount;
+    public long timeSpan;
+    public long timePerRender;
 
     public RenderBuffer(RenderPass pass) {
         this.shader = pass.createShader();
@@ -33,6 +39,7 @@ public class RenderBuffer implements Disposable {
         if (!started) throw new IllegalStateException("RenderBuffer not started");
         instance.shader = shader.getShader(instance);
         this.modelBatch.render(instance);
+        this.currentRenderCount++;
     }
 
     public void render(Array<Renderable> renderables) {
@@ -41,6 +48,7 @@ public class RenderBuffer implements Disposable {
             if (renderable == null) continue;
             renderable.shader = shader.getShader(renderable);
             this.modelBatch.render(renderable);
+            this.currentRenderCount++;
         }
     }
 
@@ -50,6 +58,7 @@ public class RenderBuffer implements Disposable {
             if (renderable == null) continue;
             renderable.shader = shader.getShader(renderable);
             this.modelBatch.render(renderable);
+            this.currentRenderCount++;
         }
     }
 
@@ -60,6 +69,7 @@ public class RenderBuffer implements Disposable {
             if (renderable == null) continue;
             renderable.shader = shader.getShader(renderable);
             this.modelBatch.render(renderable);
+            this.currentRenderCount++;
         }
     }
 
@@ -69,6 +79,7 @@ public class RenderBuffer implements Disposable {
             if (renderable == null) continue;
             renderable.shader = shader.getShader(renderable);
             this.modelBatch.render(renderable);
+            this.currentRenderCount++;
         }
     }
 
@@ -77,6 +88,7 @@ public class RenderBuffer implements Disposable {
 
         provider.getRenderables(buffer, pool);
         render(buffer);
+        this.currentRenderCount += buffer.size;
         buffer.clear();
     }
 
@@ -85,6 +97,7 @@ public class RenderBuffer implements Disposable {
         for (RenderableProvider provider : providers) {
             provider.getRenderables(buffer, pool);
             render(buffer);
+            this.currentRenderCount += buffer.size;
             buffer.clear();
         }
     }
@@ -99,13 +112,20 @@ public class RenderBuffer implements Disposable {
                 renderable.shader = shader.getShader(renderable);
                 this.modelBatch.render(renderable);
             }
+            this.currentRenderCount += buffer.size;
             buffer.clear();
         }
     }
 
     public void flush() {
+        long startTime = System.nanoTime() / 1000;
         if (!started) throw new IllegalStateException("RenderBuffer not started");
         this.modelBatch.flush();
+        this.timeSpan = System.nanoTime() / 1000 - startTime;
+        this.lastRenderCount = this.renderCount;
+        this.renderCount = currentRenderCount;
+        this.timePerRender = this.timeSpan / this.renderCount;
+        this.currentRenderCount = 0;
     }
 
     public void dispose() {

@@ -44,7 +44,7 @@ public class StandaloneRenderer extends GameComponent implements RendererCompone
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, GameObject gameObject) {
-        modelInstance.transform.set(gameObject.transform);
+        modelInstance.transform.set(gameObject.combined);
         modelInstance.calculateTransforms();
 
         modelInstance.getRenderables(renderables, pool);

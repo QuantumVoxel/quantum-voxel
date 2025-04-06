@@ -59,7 +59,7 @@ import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
-import static dev.ultreon.quantum.world.World.CHUNK_SIZE;
+import static dev.ultreon.quantum.world.World.CS;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
@@ -252,7 +252,7 @@ public class LocalPlayer extends ClientPlayer {
         if (connection == null) {
             return;
         }
-        int renderDistance = Math.max(2, ClientConfig.renderDistance / CHUNK_SIZE);
+        int renderDistance = Math.max(2, ClientConfig.renderDistance / CS);
 
         for (ClientChunkAccess chunk : this.clientWorld.getLoadedChunks()) {
             if (chunk.getVec().dst(chunkVec) > renderDistance) {
