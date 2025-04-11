@@ -15,6 +15,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
+import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
@@ -64,7 +65,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final Map<BlockVec, ModelInstance> addedModels = new ConcurrentHashMap<>();
     private final Map<BlockVec, BlockObject> models = new ConcurrentHashMap<>();
     private final Array<BlockVec> removedModels = new Array<>();
-    public boolean visible;
     private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
     private final Stack<Integer> stack = new Stack<>();
     public final ClientChunkInfo info = new ClientChunkInfo();
@@ -77,7 +77,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public int faceCount;
     public int meshVertices;
     private boolean empty = false;
-    private BoundingBox boundingBox;
+    private final BoundingBox boundingBox = new BoundingBox();
 
     @ShowInNodeView
     private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
@@ -183,7 +183,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             this.tmp1.setZero();
 
             if (this.client.connection != null) {
-                this.client.connection.send(new C2SChunkStatusPacket(this.getVec(), Chunk.Status.UNLOADED));
+                this.client.connection.send(new C2SChunkStatusPacket(this.vec, Chunk.Status.UNLOADED));
             }
         }
     }
@@ -307,7 +307,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @Override
     public BlockState getSafe(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
-            BlockVec start = getVec().start();
+            BlockVec start = vec.start();
             x += start.x;
             y += start.y;
             z += start.z;
@@ -321,7 +321,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @Override
     public int getBlockLightSafe(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
-            BlockVec start = getVec().start();
+            BlockVec start = vec.start();
             x += start.x;
             y += start.y;
             z += start.z;
@@ -477,5 +477,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     public int[] getOpaqueMask() {
         return opqueColumnMask;
+    }
+
+    public void render(RenderBufferSource source) {
+        for (ChunkMesh chunkMesh : this.meshes.values()) {
+            chunkMesh.render(client.camera, source);
+        }
     }
 }

@@ -177,4 +177,9 @@ public class FlatStorage<D> implements Storage<D> {
     public D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void setUniform(D value) {
+        Arrays.fill(this.data, value);
+    }
 }

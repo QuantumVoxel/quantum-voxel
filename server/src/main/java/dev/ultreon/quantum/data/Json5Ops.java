@@ -17,6 +17,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+@SuppressWarnings("DataFlowIssue")
 public class Json5Ops implements DynamicOps<Json5Element> {
     public static final Json5Ops INSTANCE = new Json5Ops(false);
     public static final Json5Ops COMPRESSED = new Json5Ops(true);
@@ -34,14 +35,18 @@ public class Json5Ops implements DynamicOps<Json5Element> {
 
     @Override
     public <U> U convertTo(final DynamicOps<U> outOps, final Json5Element input) {
-        if (input instanceof Json5Object) {
-            return convertMap(outOps, input);
-        }
-        if (input instanceof Json5Array) {
-            return convertList(outOps, input);
-        }
-        if (input instanceof Json5Null) {
-            return outOps.empty();
+        switch (input) {
+            case Json5Object ignored -> {
+                return convertMap(outOps, input);
+            }
+            case Json5Array ignored -> {
+                return convertList(outOps, input);
+            }
+            case Json5Null ignored -> {
+                return outOps.empty();
+            }
+            default -> {
+            }
         }
         final Json5Primitive primitive = input.getAsJson5Primitive();
         if (primitive.isString()) {
@@ -378,6 +383,7 @@ public class Json5Ops implements DynamicOps<Json5Element> {
         return new Json5Ops.Json5RecordBuilder();
     }
 
+    @SuppressWarnings("ConstantValue")
     private class Json5RecordBuilder extends RecordBuilder.AbstractStringBuilder<Json5Element, Json5Object> {
         protected Json5RecordBuilder() {
             super(Json5Ops.this);

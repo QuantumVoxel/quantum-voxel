@@ -38,10 +38,10 @@ public interface TerrainRenderer extends Disposable {
     /**
      * Renders the background of the terrain.
      *
-     * @param batch The ModelBatch used for rendering models.
+     * @param bufferSource The {@link RenderBufferSource} used for rendering models.
      * @param deltaTime The time elapsed since the last frame, in seconds.
      */
-    void renderBackground(RenderBufferSource batch, float deltaTime);
+    void renderBackground(RenderBufferSource bufferSource, float deltaTime);
 
     /**
      * Renders the terrain using the specified model batch and render layer with a given delta time.

@@ -63,4 +63,12 @@ public interface Point {
     default BlockVec asBlockVec() {
         return new BlockVec(getIntX(), getIntY(), getIntZ(), BlockVecSpace.WORLD);
     }
+
+    default boolean equals(int i, int i1, int i2) {
+        return i == getIntX() && i1 == getIntY() && i2 == getIntZ();
+    }
+
+    default boolean equals(double x, double y, double z) {
+        return x == getX() && y == getY() && z == getZ();
+    }
 }

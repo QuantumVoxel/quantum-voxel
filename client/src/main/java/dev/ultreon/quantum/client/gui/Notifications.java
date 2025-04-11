@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.icon.Icon;
-import dev.ultreon.quantum.client.util.Renderable;
+import dev.ultreon.quantum.client.util.GuiRenderable;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.util.RgbColor;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Notifications implements Renderable {
+public class Notifications implements GuiRenderable {
     private static final int HEIGHT = 41;
     private static final int WIDTH = 150;
     private static final int OFFSET = 5;

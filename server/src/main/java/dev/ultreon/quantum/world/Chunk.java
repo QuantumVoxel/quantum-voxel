@@ -356,7 +356,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     @Override
     public void dispose() {
         synchronized (this) {
-            if (this.disposed) throw new ValidationError("Chunk is already disposed");
+            if (this.disposed) return;
             this.disposed = true;
             this.ready = false;
             this.breaking.clear();
@@ -424,6 +424,11 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     @Override
     public @NotNull World getWorld() {
         return this.world;
+    }
+
+    @Override
+    public void reset() {
+        // No-op
     }
 
     public boolean isActive() {

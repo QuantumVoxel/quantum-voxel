@@ -38,11 +38,11 @@ public record RenderPass(String name, Supplier<? extends ShaderProvider> shader,
     private static final Array<RenderPass> MANAGED = new Array<>();
 
     public static final RenderPass SKYBOX = RenderPass.register(new RenderPass("skybox", Shaders.SKYBOX, () -> Utils.make(new Material(), material -> {
-        material.set(new DepthTestAttribute(GL_LEQUAL));
+        material.set(new DepthTestAttribute(false));
     })));
     public static final RenderPass CELESTIAL_BODIES = RenderPass.register(new RenderPass("celestial_bodies", Shaders.SKYBOX, () -> Utils.make(new Material(), material -> {
         material.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        material.set(new DepthTestAttribute(GL_LEQUAL));
+        material.set(new DepthTestAttribute(false));
     })));
     public static final RenderPass OPAQUE = RenderPass.register(new RenderPass("opaque", Shaders.SCENE, () -> Utils.make(new Material(), material -> {
         QuantumClient client = QuantumClient.get();

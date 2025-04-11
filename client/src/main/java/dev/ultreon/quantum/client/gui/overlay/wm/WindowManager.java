@@ -26,8 +26,8 @@ public class WindowManager {
             super.renderContents(renderer, mouseX, mouseY, deltaTime);
 
             renderer.textLeft("[white]FPS: [aqua]" + Gdx.graphics.getFramesPerSecond(), getX() + 10, getY() + 30);
-            renderer.textLeft("[white]Width: [aqua]" + Gdx.graphics.getWidth(), getX() + 10, getY() + 50);
-            renderer.textLeft("[white]Height: [aqua]" + Gdx.graphics.getHeight(), getX() + 10, getY() + 70);
+            renderer.textLeft("[white]Width: [aqua]" + QuantumClient.get().getWidth(), getX() + 10, getY() + 50);
+            renderer.textLeft("[white]Height: [aqua]" + QuantumClient.get().getHeight(), getX() + 10, getY() + 70);
 
             renderer.textLeft("[white]Mouse X: [aqua]" + mouseX, getX() + 10, getY() + 90);
             renderer.textLeft("[white]Mouse Y: [aqua]" + mouseY, getX() + 10, getY() + 110);

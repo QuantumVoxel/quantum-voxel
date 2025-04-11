@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.component.GameComponent;
-import org.jetbrains.annotations.Nullable;
 
 public class InstanceRenderer extends GameComponent implements RendererComponent {
     private final ModelInstance instance;
@@ -27,12 +26,4 @@ public class InstanceRenderer extends GameComponent implements RendererComponent
         return instance;
     }
 
-    public ShaderProvider getShaderProvider() {
-        return shaderProvider;
-    }
-
-    @Override
-    public void setShaderProvider(@Nullable ShaderProvider provider) {
-        shaderProvider = provider;
-    }
 }

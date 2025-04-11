@@ -52,10 +52,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
-import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
-import dev.ultreon.quantum.world.gen.chunk.OverworldGenerator;
-import dev.ultreon.quantum.world.gen.chunk.SpaceGenerator;
-import dev.ultreon.quantum.world.gen.chunk.TestGenerator;
+import dev.ultreon.quantum.world.gen.chunk.*;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.ubo.types.MapType;
@@ -114,6 +111,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         thread1.setPriority(3);
         return thread1;
     };
+    private static final boolean CHUNK_DEBUG = System.getProperty("quantum.chunk.debug", "false").equals("true");
+
     //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
@@ -248,7 +247,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     private void loadRegistries() {
         var chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
-        chunkGenRegistry.register(ChunkGenerator.OVERWORLD, new OverworldGenerator(this.registries.biomes()));
+        chunkGenRegistry.register(ChunkGenerator.OVERWORLD, CHUNK_DEBUG ? new DebugGenerator(this.registries.biomes()) :  new OverworldGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.TEST, new TestGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.FLOATING_ISLANDS, new SpaceGenerator(this.registries.biomes()));
 

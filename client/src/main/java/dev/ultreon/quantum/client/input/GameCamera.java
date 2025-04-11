@@ -41,21 +41,22 @@ public class GameCamera extends PerspectiveCamera {
     public GameCamera(float fieldOfViewY, float viewportWidth, float viewportHeight) {
         super(fieldOfViewY, viewportWidth, viewportHeight);
 
-        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            this.node = this.client.inspection.createNode("camera", () -> this);
-            this.node.create("position", () -> this.position);
-            this.node.create("direction", () -> this.direction);
-            this.node.create("up", () -> this.up);
-            this.node.create("near", () -> this.near);
-            this.node.create("far", () -> this.far);
-            this.node.create("viewportWidth", () -> this.viewportWidth);
-            this.node.create("viewportHeight", () -> this.viewportHeight);
-            this.node.create("fieldOfView", () -> this.fov);
-            this.node.create("hitPosition", () -> this.hitResult.getVec());
-            this.node.create("relHitPosition", () -> this.hitPosition);
-            this.node.create("eyePosition", () -> this.camPos);
-            this.node.create("playerPosition", () -> this.player.getPosition(client.partialTick));
+        if (!DebugFlags.INSPECTION_ENABLED.isEnabled()) {
+            return;
         }
+        this.node = this.client.inspection.createNode("camera", () -> this);
+        this.node.create("position", () -> this.position);
+        this.node.create("direction", () -> this.direction);
+        this.node.create("up", () -> this.up);
+        this.node.create("near", () -> this.near);
+        this.node.create("far", () -> this.far);
+        this.node.create("viewportWidth", () -> this.viewportWidth);
+        this.node.create("viewportHeight", () -> this.viewportHeight);
+        this.node.create("fieldOfView", () -> this.fov);
+        this.node.create("hitPosition", () -> this.hitResult.getVec());
+        this.node.create("relHitPosition", () -> this.hitPosition);
+        this.node.create("eyePosition", () -> this.camPos);
+        this.node.create("playerPosition", () -> this.player.getPosition(client.partialTick));
     }
 
     public float getFovModifier() {
@@ -77,6 +78,39 @@ public class GameCamera extends PerspectiveCamera {
         this.player = player;
 
         float deltaTime = Gdx.graphics.getDeltaTime();
+        smoothFps(deltaTime);
+
+        if (this.client.isInThirdPerson()) {
+            updateThirdPerson(lookVec);
+        } else {
+//            this.updateThirdPerson(lookVec);
+            updateFirstPerson(lookVec);
+        }
+
+        cameraBop(player, deltaTime);
+
+        super.update(true);
+    }
+
+    private void cameraBop(LocalPlayer player, float deltaTime) {
+        float duration = 0.5f;
+        if (player.isWalking()) this.walking = true;
+        if (!this.walking) this.cameraBop = 0;
+        else this.updateWalkAnim(player, this.cameraBop, deltaTime, duration);
+    }
+
+    private void updateFirstPerson(Vec3d lookVec) {
+        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
+            this.node.remove("hitPosition");
+            this.node.remove("eyePosition");
+            this.node.remove("playerPosition");
+        }
+        // Set the camera's position to zero, and set the camera's direction to the player's look vector.
+        this.position.set(0, 0, 0);
+        this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
+    }
+
+    private void smoothFps(float deltaTime) {
         if (fovModifierGoal != fovModifier) {
             if (fovModifierGoal > fovModifier) {
                 fovModifier += deltaTime * 12f * Math.abs(fovModifier - fovModifierGoal);
@@ -88,27 +122,6 @@ public class GameCamera extends PerspectiveCamera {
         }
 
         this.fieldOfView = fov * fovModifier;
-
-        if (this.client.isInThirdPerson()) {
-            this.updateThirdPerson(lookVec);
-        } else {
-//            this.updateThirdPerson(lookVec);
-            if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-                this.node.remove("hitPosition");
-                this.node.remove("eyePosition");
-                this.node.remove("playerPosition");
-            }
-            // Set the camera's position to zero, and set the camera's direction to the player's look vector.
-            this.position.set(0, 0, 0);
-            this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
-        }
-
-        float duration = 0.5f;
-        if (player.isWalking()) this.walking = true;
-        if (!this.walking) this.cameraBop = 0;
-        else this.updateWalkAnim(player, this.cameraBop, deltaTime, duration);
-
-        super.update(true);
     }
 
     private void updateWalkAnim(LocalPlayer player, float cameraBop, float delta, float duration) {

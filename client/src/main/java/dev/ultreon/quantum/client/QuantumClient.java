@@ -498,6 +498,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private int clicks;
     private long lastPress;
     private final RenderBufferSource renderBuffers = new RenderBufferSource();
+    private int cachedWidth;
+    private int cachedHeight;
 
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
@@ -659,7 +661,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         this.spriteBatch = deferDispose(new SpriteBatch());
 
         // Set the projection matrix for the spriteBatch
-        this.spriteBatch.getProjectionMatrix().setToOrtho(0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1000000);
+        this.spriteBatch.getProjectionMatrix().setToOrtho(0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), 0, 0, 1000000);
 
         this.shapes = new ShapeDrawer(this.spriteBatch, white);
         this.renderer = new Renderer(this.shapes);
@@ -1218,7 +1220,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             next = new TitleScreen();
 
         if (next == null) {
-            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return cur == null || this.closeScreen(cur);
         }
@@ -1234,7 +1236,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
         if (cur != null && this.closeScreen(next, cur))
             return false; // Close was canceled
         if (next == null) {
-            Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
             return false; // The next screen is null, canceling.
         }
@@ -1289,6 +1291,14 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+
+        if (this.cachedWidth != this.getWidth() || this.cachedHeight != this.getHeight()) {
+            this.cachedWidth = this.getWidth();
+            this.cachedHeight = this.getHeight();
+            this.resize(this.getWidth(), this.getHeight());
+        }
+
+        Gdx.gl.glViewport(0, 0, this.getWidth(), this.getHeight());
 
         Disposable disposable;
         while ((disposable = this.disposalQueue.poll()) != null) {
@@ -1345,8 +1355,8 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
     private void doRender(float deltaTime) {
         // If the width or height is 0, set them to the current width and height.
         if (this.width == 0 || this.height == 0) {
-            this.width = Gdx.graphics.getWidth();
-            this.height = Gdx.graphics.getHeight();
+            this.width = QuantumClient.get().getWidth();
+            this.height = QuantumClient.get().getHeight();
         }
 
         // If the deferred width or height is not null and the width or height is not equal to the deferred width or height, set the width and height to the deferred width and height.
@@ -1354,7 +1364,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             width = deferredWidth;
             height = deferredHeight;
 
-            this.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            this.resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
         }
 
         // If the screenshot world only flag is true, clear the screen, render the world, and set the capture screenshot and trigger screenshot flags to false.
@@ -1468,9 +1478,10 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
         this.saveScreenshot();
         this.fbo.end();
+        Gdx.gl.glViewport(0, 0, getWidth(), getHeight());
         this.fbo.dispose();
 
-        this.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
 
     /**
@@ -2145,6 +2156,15 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
             QuantumClient.invokeAndWait(() -> this.resize(width, height));
             return;
         }
+        int expectedWidth = getWidth();
+        int expectedHeight = getHeight();
+
+        if (expectedWidth == 0 && expectedHeight == 0) {
+            return;
+        }
+
+        this.cachedWidth = width;
+        this.cachedHeight = height;
 
         // Set the projection matrix for the spriteBatch
         this.spriteBatch.getProjectionMatrix().setToOrtho(0, width, height, 0, 0, 1000000);
@@ -2322,6 +2342,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */ 
     public int getWidth() {
         GameInsets insets = GamePlatform.get().getInsets();
+        if (insets.width == 0) return Gdx.graphics.getWidth();
         return GamePlatform.get().isShowingImGui() ? insets.width : Gdx.graphics.getWidth();
     }
 
@@ -2332,6 +2353,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */ 
     public int getHeight() {
         GameInsets insets = GamePlatform.get().getInsets();
+        if (insets.height == 0) return Gdx.graphics.getHeight();
         return GamePlatform.get().isShowingImGui() ? insets.height : Gdx.graphics.getHeight();
     }
 
@@ -2751,8 +2773,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */
     public GridPoint2 getMousePos() {
         GameInsets insets = GamePlatform.get().getInsets();
-        GridPoint2 gridPoint2 = GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched() ? this.offset.set(insets.left, insets.top) : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
-        return gridPoint2;
+        return GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched() ? this.offset.set(insets.mouseX, insets.mouseY) : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
     }
 
     /**
@@ -3436,7 +3457,7 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      */ 
     public void updateViewport() {
         if (!insets.equals(GamePlatform.get().getInsets())) {
-            resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
             insets.set(GamePlatform.get().getInsets());
         }
     }

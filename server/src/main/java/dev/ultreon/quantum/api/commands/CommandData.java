@@ -219,10 +219,11 @@ public class CommandData {
         CommandData.registerArgument("date-time", CommandData::readDateTime, CommandData::completeDateTime);
         CommandData.registerArgument("dimension", CommandData::readDimension, CommandData::completeDimensions);
         CommandData.registerArgument("double", CommandReader::readDouble, CommandData::completeFloats);
-        CommandData.registerArgument("duration", CommandData::readDuration, CommandData::completeFloats);
+        CommandData.registerArgument("duration", CommandData::readDuration, CommandData::completeDuration);
         CommandData.registerArgument("entity", CommandData::readEntity, CommandData::completeEntities);
         CommandData.registerArgument("entity-type", CommandData::readEntityTypeExceptPlayer, CommandData::completeEntityTypesExceptPlayer);
         CommandData.registerArgument("entity-type-all", CommandData::readEntityType, CommandData::completeEntityTypes);
+        CommandData.registerArgument("float", CommandReader::readFloat, CommandData::completeFloats);
         CommandData.registerArgument("game-mode", CommandData::readGamemode, CommandData::completeGameMode);
         CommandData.registerArgument("give-item", CommandData::readItem, CommandData::completeItems);
         CommandData.registerArgument("int", CommandReader::readInt, CommandData::completeInts);
@@ -835,7 +836,7 @@ public class CommandData {
         return AnyPlayerBaseSelector.tabComplete(sender, commandCtx, ctx.readString());
     }
 
-    private List<String> completeDuration(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
+    private static List<String> completeDuration(CommandSender sender, CommandContext commandCtx, CommandReader ctx, String[] args) throws CommandParseException {
         var currentArgument = ctx.readString();
         List<String> list = new ArrayList<>();
         list.add(currentArgument);

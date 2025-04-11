@@ -32,4 +32,6 @@ public interface Storage<D> extends Cloneable {
     boolean isUniform();
 
     D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate);
+
+    void setUniform(D value);
 }

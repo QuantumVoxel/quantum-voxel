@@ -20,7 +20,7 @@ public class InitialPermissionsPacket implements Packet<InGameClientPacketHandle
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeList(this.permissions, (buf, permission) -> buffer.writeUTF(this.permissions.toString(), 128));
+        buffer.writeList(this.permissions, (buf, permission) -> buffer.writeString(this.permissions.toString(), 128));
     }
 
     @Override

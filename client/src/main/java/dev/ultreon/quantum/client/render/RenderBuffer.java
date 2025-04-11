@@ -124,7 +124,8 @@ public class RenderBuffer extends GameObject implements Disposable {
         this.timeSpan = System.nanoTime() / 1000 - startTime;
         this.lastRenderCount = this.renderCount;
         this.renderCount = currentRenderCount;
-        this.timePerRender = this.timeSpan / this.renderCount;
+        if (renderCount == 0) this.timePerRender = 0;
+        else this.timePerRender = this.timeSpan / this.renderCount;
         this.currentRenderCount = 0;
     }
 

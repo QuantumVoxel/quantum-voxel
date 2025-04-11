@@ -1,18 +1,16 @@
 package dev.ultreon.quantum.client.render.pipeline;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.input.GameCamera;
-import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -20,7 +18,6 @@ import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
-import java.util.function.Supplier;
 
 import static com.badlogic.gdx.Gdx.gl;
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -35,7 +32,6 @@ import static com.badlogic.gdx.graphics.GL20.*;
  */
 public class MainRenderNode extends RenderNode {
     private Mesh quad = createFullScreenQuad();
-    private final Supplier<ShaderProgram> program = ShaderPrograms.MAIN;
     private float blurScale = 0f;
     private Texture vignetteTex;
 
@@ -63,19 +59,17 @@ public class MainRenderNode extends RenderNode {
         Texture specularTex = textures.get("specular");
         Texture foregroundTex = textures.get("foreground");
 
-        // End modelBatch and begin rendering
-        client.renderBuffers().end();
-        client.renderer.begin();
-        client.renderer.getBatch().enableBlending();
-        client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         // Handle blur effect
         if (blurScale > 0f) {
-            client.renderer.blurred(blurScale, ClientConfig.blurRadius * blurScale, true, 1, () -> {
-                render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex, foregroundTex);
-            });
+            client.renderer.blurred(
+                    blurScale,
+                    ClientConfig.blurRadius * blurScale,
+                    true,
+                    1,
+                    () -> render(textures)
+            );
         } else {
-            render(skyboxTex, diffuseTex, normalTex, reflectiveTex, depthTex, positionTex, specularTex, foregroundTex);
+            render(textures);
         }
 
         // Disable blending and end rendering
@@ -89,20 +83,35 @@ public class MainRenderNode extends RenderNode {
         if (GamePlatform.get().showRenderPipeline()) {
             client.renderer.begin();
             client.renderer.getBatch().enableBlending();
-            client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
             client.spriteBatch.flush();
-            client.spriteBatch.draw(positionTex, (float) (Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.draw(positionTex, (float) (QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
             client.spriteBatch.flush();
-            client.spriteBatch.draw(normalTex, (float) (2 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.draw(normalTex, (float) (2 * QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
             client.spriteBatch.flush();
-            client.spriteBatch.draw(foregroundTex, (float) (3 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.draw(foregroundTex, (float) (3 * QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
             client.spriteBatch.flush();
-            client.spriteBatch.draw(skyboxTex, (float) (4 * Gdx.graphics.getWidth()) / 5, 0, (float) Gdx.graphics.getWidth() / 5, (float) Gdx.graphics.getHeight() / 5);
+            client.spriteBatch.draw(skyboxTex, (float) (4 * QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
             client.renderer.end();
         }
 
         // Enable blending and set blend function
         client.renderer.getBatch().enableBlending();
+    }
+
+    private void render(ObjectMap<String, Texture> textures) {
+        Texture texture = textures.get("skybox");
+        if (texture != null) {
+            client.spriteBatch.begin();
+            client.spriteBatch.draw(texture, 0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
+            client.spriteBatch.end();
+        }
+
+        // End modelBatch and begin rendering
+        client.renderBuffers().end();
+        client.renderer.begin();
+        client.renderer.getBatch().enableBlending();
+        client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     /**
@@ -129,7 +138,7 @@ public class MainRenderNode extends RenderNode {
             if (!buriedBlock.isAir()) {
                 TextureRegion texture = client.getBlockModel(buriedBlock).getBuriedTexture();
                 if (!client.player.isSpectator() && texture != null && texture != TextureManager.DEFAULT_TEX_REG && texture.getTexture() != null && texture.getTexture() != TextureManager.DEFAULT_TEX_REG.getTexture()) {
-                    client.spriteBatch.draw(texture, 0, Gdx.graphics.getHeight(), Gdx.graphics.getWidth(), -Gdx.graphics.getHeight());
+                    client.spriteBatch.draw(texture, 0, QuantumClient.get().getHeight(), QuantumClient.get().getWidth(), -QuantumClient.get().getHeight());
                     client.renderer.fill(0, 0, client.getWidth(), client.getHeight(), new Color(0, 0, 0, 0.5f));
                 }
             }
@@ -198,7 +207,6 @@ public class MainRenderNode extends RenderNode {
     @Override
     public void dumpInfo(PrintStream stream) {
         super.dumpInfo(stream);
-        stream.println("Shader Handle: " + program.get().getHandle());
     }
 
     /**

@@ -20,7 +20,7 @@ public class BlastFurnaceBlock extends EntityBlock {
     }
 
     @Override
-    protected void defineState(BlockStateDefinition definition) {
+    protected void defineState(BlockStateDefinition.Builder definition) {
         super.defineState(definition);
 
         definition.set(StateProperties.LIT, false);

@@ -16,7 +16,7 @@ public record C2SRequestTabComplete(String input) implements Packet<InGameServer
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeUTF(this.input, 32768);
+        buffer.writeString(this.input, 32768);
     }
 
     @Override

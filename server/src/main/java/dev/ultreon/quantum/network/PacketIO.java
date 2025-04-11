@@ -115,14 +115,27 @@ public class PacketIO {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    public String readString() {
+        int len = this.readShort();
+        byte[] bytes = new byte[len];
+        this.readBytes0(bytes);
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
     @CanIgnoreReturnValue
-    public PacketIO writeUTF(String string, int max) {
+    public PacketIO writeString(String string, int max) {
         if (max < 0) throw new IllegalArgumentException(CommonConstants.EX_INVALID_DATA);
         byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > max) throw new PacketOverflowException("string", bytes.length, max);
         this.writeShort(bytes.length);
         this.writeBytes0(bytes);
         return this;
+    }
+
+    public void writeString(String string) {
+        byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+        this.writeShort(bytes.length);
+        this.writeBytes0(bytes);
     }
 
     public byte[] readByteArray(int max) {
@@ -156,8 +169,8 @@ public class PacketIO {
     }
 
     public void writeId(NamespaceID id) {
-        this.writeUTF(id.getDomain(), 100);
-        this.writeUTF(id.getPath(), 200);
+        this.writeString(id.getDomain(), 100);
+        this.writeString(id.getPath(), 200);
     }
 
     public byte readByte() {
@@ -185,6 +198,15 @@ public class PacketIO {
         }
     }
 
+    public PacketIO writeByte(byte value) {
+        try {
+            this.output.writeByte(value);
+            return this;
+        } catch (IOException e) {
+            throw new PacketException(e);
+        }
+    }
+
     public short readShort() {
         try {
             return this.input.readShort();
@@ -202,6 +224,15 @@ public class PacketIO {
     }
 
     public PacketIO writeShort(int value) {
+        try {
+            this.output.writeShort(value);
+            return this;
+        } catch (IOException e) {
+            throw new PacketException(e);
+        }
+    }
+
+    public PacketIO writeShort(short value) {
         try {
             this.output.writeShort(value);
             return this;
@@ -1147,6 +1178,15 @@ public class PacketIO {
 
     public <T extends Enum<T>> T readEnum(T fallback) {
         return EnumUtils.byOrdinal(this.readByte(), fallback);
+    }
+
+    public <T extends Enum<T>> T readEnum(Class<T> type) {
+        T[] enumConstants = type.getEnumConstants();
+        byte b = this.readByte();
+        if (b >= enumConstants.length) {
+            throw new PacketException("Invalid enum ordinal: " + b + " for " + type);
+        }
+        return enumConstants[b];
     }
 
     public void writeEnum(Enum<?> value) {

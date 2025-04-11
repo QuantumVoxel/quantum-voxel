@@ -18,9 +18,9 @@ public record S2CTabCompletePacket(@Nullable List<String> options) implements Pa
     @Override
     public void toBytes(PacketIO buffer) {
         if (this.options != null) {
-            buffer.writeList(this.options, (buf, elem) -> buf.writeUTF(elem, 64));
+            buffer.writeList(this.options, (buf, elem) -> buf.writeString(elem, 64));
         } else {
-            buffer.writeList(List.<String>of(), (buf, elem) -> buf.writeUTF(elem, 64));
+            buffer.writeList(List.<String>of(), (buf, elem) -> buf.writeString(elem, 64));
         }
     }
 

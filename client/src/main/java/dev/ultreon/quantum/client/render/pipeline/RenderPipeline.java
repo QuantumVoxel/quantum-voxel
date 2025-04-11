@@ -148,6 +148,7 @@ public class RenderPipeline implements Disposable {
         RenderPipeline.capture(node);
 
         frameBuffer.end();
+        Gdx.gl.glViewport(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
 
     /**
@@ -174,6 +175,7 @@ public class RenderPipeline implements Disposable {
 
 
         frameBuffer.end();
+        Gdx.gl.glViewport(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
 
     /**
@@ -188,7 +190,7 @@ public class RenderPipeline implements Disposable {
      */
     private static void capture(RenderNode node) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F8)) {
-            Pixmap screenshot = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
+            Pixmap screenshot = Pixmap.createFromFrameBuffer(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
             PixmapIO.writePNG(QuantumClient.data("FBO_" + node.getClass().getSimpleName() + ".png"), screenshot, Deflater.DEFAULT_COMPRESSION, true);
 
             // Dump info about the node.
@@ -318,7 +320,7 @@ public class RenderPipeline implements Disposable {
          * @return the frame buffer.
          */
         protected FrameBuffer createFrameBuffer() {
-            return new FrameBuffer(this.getFormat(), Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+            return new FrameBuffer(this.getFormat(), QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
         }
 
         /**

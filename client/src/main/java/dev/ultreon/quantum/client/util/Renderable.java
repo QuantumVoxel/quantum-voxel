@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.util;
 
-import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.render.RenderBufferSource;
 
 public interface Renderable {
-    void render(Renderer renderer, float deltaTime);
+    void render(RenderBufferSource source);
 }

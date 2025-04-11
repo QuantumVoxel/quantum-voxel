@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.shaders.Shaders;
@@ -29,16 +30,19 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
     /**
      * Renders the world.
      *
-     * @param batch the batch.
+     * @param bufferSource the {@link RenderBufferSource} to use for rendering the world.
      */
-    public void renderWorld(RenderBufferSource batch) {
+    public void renderWorld(RenderBufferSource bufferSource) {
         @Nullable ClientWorldAccess world = this.client.world;
         @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
         LocalPlayer localPlayer = this.client.player;
 
         if (world != null && worldRenderer != null && this.client.renderWorld && localPlayer != null) {
-            worldRenderer.renderBackground(batch, Gdx.graphics.getDeltaTime());
+            worldRenderer.renderBackground(bufferSource, Gdx.graphics.getDeltaTime());
         }
+
+        bufferSource.getBuffer(RenderPass.SKYBOX).flush();
+        bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
     }
 
     /**

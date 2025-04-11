@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.shaders.provider.*;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import static dev.ultreon.quantum.client.QuantumClient.get;
 import static dev.ultreon.quantum.client.QuantumClient.id;
@@ -25,8 +25,8 @@ public class Shaders {
      * @see DepthShaderProvider
      */
     public static final Supplier<DepthShaderProvider> DEPTH = Shaders.register("depth", () -> new MyDepthShaderProvider(
-            QuantumClient.shader(id("depth.vert")),
-            QuantumClient.shader(id("depth.frag"))
+            QuantumClient.shader(NamespaceID.of("depth.vert")),
+            QuantumClient.shader(NamespaceID.of("depth.frag"))
     ));
 
     /**
@@ -42,24 +42,16 @@ public class Shaders {
      * @see SceneShaders
      */
     public static final Supplier<SceneShaders> SCENE = Shaders.register("world", () -> new SceneShaders(
-            QuantumClient.resource(id("shaders/scene.vert")),
-            QuantumClient.resource(id("shaders/scene.frag")),
-            QuantumClient.resource(id("shaders/scene.geom"))));
+            QuantumClient.resource(NamespaceID.of("shaders/scene.vert")),
+            QuantumClient.resource(NamespaceID.of("shaders/scene.frag")),
+            QuantumClient.resource(NamespaceID.of("shaders/scene.geom"))));
 
     /**
      * The skybox shader provider. Located in {@code shaders/skybox.vert} and {@code shaders/skybox.frag}.
      */
     public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaders(
-            QuantumClient.shader(id("skybox.vert")),
-            QuantumClient.shader(id("skybox.frag"))
-    ));
-
-    /**
-     * The skybox debug shader provider. Located in {@code shaders/skybox.vert} and {@code shaders/skybox_debug.frag}.
-     */
-    public static final Supplier<DefaultShaderProvider> SKYBOX_DEBUG = Shaders.register("skybox_debug", () -> new SkyboxShaders(
-            QuantumClient.shader(id("skybox.vert")),
-            QuantumClient.shader(id("skybox_debug.frag"))
+            QuantumClient.shader(NamespaceID.of("skybox.vert")),
+            QuantumClient.shader(NamespaceID.of("skybox.frag"))
     ));
 
     /**
@@ -68,9 +60,9 @@ public class Shaders {
      * @see ModelShaders
      */
     public static final Supplier<ModelShaders> MODEL_VIEW = Shaders.register("model_view", () -> new ModelShaders(
-            QuantumClient.shader(id("model.vert")),
-            QuantumClient.shader(id("model.frag")),
-            QuantumClient.shader(id("model.geom"))));
+            QuantumClient.shader(NamespaceID.of("model.vert")),
+            QuantumClient.shader(NamespaceID.of("model.frag")),
+            QuantumClient.shader(NamespaceID.of("model.geom"))));
 
     /**
      * The gizmo shader provider. Located in {@code shaders/gizmo.vert}, {@code shaders/gizmo.frag}, and {@code shaders/gizmo.geom}.
@@ -78,18 +70,9 @@ public class Shaders {
      * @see GizmoShaders
      */
     public static final Supplier<GizmoShaders> GIZMO = Shaders.register("gizmo", () -> new GizmoShaders(
-            QuantumClient.shader(id("gizmo.vert")),
-            QuantumClient.shader(id("gizmo.frag")),
-            QuantumClient.shader(id("gizmo.geom"))));
-
-    /**
-     * The outline shader provider. Located in {@code shaders/outline.vert} and {@code shaders/outline.frag}.
-     * 
-     * @see OutlineShaderProvider
-     */
-    public static final Supplier<OutlineShaderProvider> OUTLINE = Shaders.register("outline", () -> new OutlineShaderProvider(
-            QuantumClient.shader(id("outline.vert")),
-            QuantumClient.shader(id("outline.frag"))));
+            QuantumClient.shader(NamespaceID.of("gizmo.vert")),
+            QuantumClient.shader(NamespaceID.of("gizmo.frag")),
+            QuantumClient.shader(NamespaceID.of("gizmo.geom"))));
 
     /**
      * The gizmo outline shader provider. Located in {@code shaders/gizmo_outline.vert} and {@code shaders/gizmo_outline.frag}.
@@ -97,8 +80,8 @@ public class Shaders {
      * @see GizmoOutlineShaders
      */
     public static final Supplier<GizmoOutlineShaders> GIZMO_OUTLINE = Shaders.register("gizmo_outline", () -> new GizmoOutlineShaders(
-            QuantumClient.shader(id("gizmo_outline.vert")),
-            QuantumClient.shader(id("gizmo_outline.frag"))
+            QuantumClient.shader(NamespaceID.of("gizmo_outline.vert")),
+            QuantumClient.shader(NamespaceID.of("gizmo_outline.frag"))
     ));
 
     /**
@@ -109,7 +92,7 @@ public class Shaders {
      * @return The registered shader provider.
      */
     private static <T extends ShaderProvider> Supplier<T> register(String name, Supplier<T> provider) {
-        return get().getShaderProviderManager().register(id(name), provider);
+        return get().getShaderProviderManager().register(NamespaceID.of(name), provider);
     }
 
     /**

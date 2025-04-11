@@ -4,6 +4,7 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.util.Vec3d;
@@ -32,6 +33,7 @@ public final class BuilderChunk extends Chunk {
     private @Nullable List<Vec3i> biomeCenters;
     private final @NotNull ServerWorld.Region region;
     private final @NotNull RNG rng;
+    private final QuantumServer server;
 
     public BuilderChunk(@NotNull ServerWorld world, @NotNull Thread thread, ChunkVec pos, ServerWorld.@NotNull Region region) {
         super(world, pos);
@@ -40,6 +42,7 @@ public final class BuilderChunk extends Chunk {
         this.region = region;
         this.rng = new JavaRNG(this.world.getSeed() + (pos.getIntX() ^ ((long) pos.getIntZ() << 4)) & 0x3FFFFFFF);
         this.biomeData = new PaletteStorage<>(CS * CS, world.getServer().getBiomes().plains.create(this.world, world.getSeed()));
+        this.server = world.getServer();
     }
 
     @Override
@@ -135,4 +138,7 @@ public final class BuilderChunk extends Chunk {
         return new BuilderFork(this, x, y, z, this.world.getGenerator());
     }
 
+    public QuantumServer getServer() {
+        return server;
+    }
 }

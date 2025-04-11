@@ -15,7 +15,7 @@ public record S2CDisconnectPacket<T extends ClientPacketHandler>(String message)
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeUTF(this.message, 300);
+        buffer.writeString(this.message, 300);
     }
 
     @Override

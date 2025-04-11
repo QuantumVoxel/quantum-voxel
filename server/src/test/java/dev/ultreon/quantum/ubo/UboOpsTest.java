@@ -3,6 +3,7 @@ package dev.ultreon.quantum.ubo;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ultreon.quantum.data.UboOps;
 import dev.ultreon.ubo.types.DataType;
 import dev.ultreon.ubo.types.MapType;
 import org.junit.jupiter.api.DisplayName;

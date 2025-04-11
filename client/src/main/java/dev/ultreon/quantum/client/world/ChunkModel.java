@@ -15,6 +15,9 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.model.block.BlockModel;
+import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
+import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.crash.CrashCategory;
@@ -115,7 +118,9 @@ public class ChunkModel extends GameObject {
             RenderBufferSource bufferSource = QuantumClient.get().renderBuffers();
             chunkModelBuilder.begin(bufferSource);
 
-            if (!chunk.mesher.buildMesh((blk, model, pass) -> {
+            if (!chunk.mesher.meshVoxels((blk) -> {
+                RenderPass pass = BlockRenderPassRegistry.get(blk.getBlock());
+                BlockModel model = BlockModelRegistry.get().get(blk);
                 if (model == null) {
                     return true;
                 }

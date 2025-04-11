@@ -18,7 +18,7 @@ public class AddPermissionPacket implements Packet<InGameClientPacketHandler> {
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeUTF(this.permission.toString(), 128);
+        buffer.writeString(this.permission.toString(), 128);
     }
 
     @Override

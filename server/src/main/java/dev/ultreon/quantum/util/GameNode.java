@@ -24,6 +24,8 @@ public abstract class GameNode implements Disposable {
     public boolean enabled = true;
     public String name;
     public String description;
+
+    @HiddenNode
     public GameNode parent;
     protected int activeCount;
     protected boolean updateAnyways;

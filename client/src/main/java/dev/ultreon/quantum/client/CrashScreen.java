@@ -96,7 +96,7 @@ public class CrashScreen extends Screen {
                 new SelectionList<CrashLog>(itemSize)
                         .entries(crashes)
                         .itemRenderer(this::renderItem)
-                        .bounds(() -> new Bounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
+                        .bounds(() -> new Bounds(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight())
                         ));
 
         // Define the file destination for saving crash reports

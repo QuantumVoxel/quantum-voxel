@@ -29,4 +29,6 @@ public interface ChunkAccess extends ChunkReader {
 
     @Override
     WorldAccess getWorld();
+
+    void reset();
 }

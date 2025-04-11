@@ -595,4 +595,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     public ChunkVecSpace getSpace() {
         return space;
     }
+
+    public boolean equals(int x, int y, int z) {
+        return x == getIntX() && y == getIntY() && z == getIntZ();
+    }
 }

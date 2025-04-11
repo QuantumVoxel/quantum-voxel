@@ -9,12 +9,12 @@ import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.component.GameComponent;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.RendererComponent;
-import org.jetbrains.annotations.Nullable;
 
 public class StandaloneRenderer extends GameComponent implements RendererComponent {
     private final Model model;
     private final ModelInstance modelInstance;
-    private ShaderProvider shaderProvider;
+    private final ShaderProvider shaderProvider;
+    private boolean disposed = false;
 
     public StandaloneRenderer(Model model, ShaderProvider shaderProvider) {
         this.model = model;
@@ -38,6 +38,8 @@ public class StandaloneRenderer extends GameComponent implements RendererCompone
 
     @Override
     public void dispose() {
+        if (disposed) return;
+        disposed = true;
         super.dispose();
         model.dispose();
     }
@@ -55,13 +57,4 @@ public class StandaloneRenderer extends GameComponent implements RendererCompone
         return modelInstance;
     }
 
-    @Override
-    public ShaderProvider getShaderProvider() {
-        return shaderProvider;
-    }
-
-    @Override
-    public void setShaderProvider(@Nullable ShaderProvider provider) {
-
-    }
 }

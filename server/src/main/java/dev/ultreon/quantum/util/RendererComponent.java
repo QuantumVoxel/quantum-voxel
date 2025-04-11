@@ -3,10 +3,8 @@ package dev.ultreon.quantum.util;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.jetbrains.annotations.Nullable;
 
 public interface RendererComponent extends RenderableProvider {
     /**
@@ -33,8 +31,4 @@ public interface RendererComponent extends RenderableProvider {
     }
 
     ModelInstance getInstance();
-
-    ShaderProvider getShaderProvider();
-
-    void setShaderProvider(@Nullable ShaderProvider provider);
 }

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,5 +58,19 @@ public abstract class StatePropertyKey<T> {
 
     public String getName() {
         return name;
+    }
+
+    public List<T> allPossibleValues() {
+        return List.of(possibleValues);
+    }
+
+    public int size() {
+        return possibleValues.length;
+    }
+
+    public abstract int indexOf(T value);
+
+    public T valueByIndex(int valueIndex) {
+        return possibleValues[valueIndex];
     }
 }

@@ -15,7 +15,7 @@ public record C2SLoginPacket(String name) implements Packet<LoginServerPacketHan
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeUTF(this.name, 20);
+        buffer.writeString(this.name, 20);
     }
 
     @Override

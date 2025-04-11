@@ -3,11 +3,9 @@ package dev.ultreon.quantum.client;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 
+import dev.ultreon.quantum.client.world.ClientChunk;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -380,7 +378,9 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
             if (terrainRenderer instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("built-chunk");
+                ClientChunk chunk = clientWorld.getChunk(builtChunk.vec);
+                if (chunk == null) return;
+                Gizmo gizmo = new BoxGizmo(chunk, "built_chunk_indicator", "built-chunk");
                 gizmo.color.set(1F, 0.8F, 0F, 1F);
                 gizmo.position.set(builtChunk.getOffset().vec().d().add(8, 8, 8));
                 gizmo.size.set(15.5f, 15.5f, 15.5f);
@@ -404,7 +404,9 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
             if (terrainRenderer instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("request-chunk");
+                ClientChunk chunk = clientWorld.getChunk(globalVec);
+                if (chunk == null) return;
+                Gizmo gizmo = new BoxGizmo(chunk, "request_chunk_indicator", "request-chunk");
                 gizmo.color.set(0F, 0F, 1F, 1F);
                 gizmo.position.set(globalVec.blockInWorldSpace(0, 0, 0).vec().d().add(8, 8, 8));
                 gizmo.size.set(CS, CS, CS);
@@ -428,7 +430,9 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
             if (terrainRenderer instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("sent-chunk");
+                ClientChunk chunk = clientWorld.getChunk(serverChunk.vec);
+                if (chunk == null) return;
+                Gizmo gizmo = new BoxGizmo(chunk, "sent_chunk_indicator", "sent-chunk");
                 gizmo.color.set(0F, 1F, 0F, 1F);
                 gizmo.position.set(serverChunk.getOffset().vec().d().add(8, 8, 8));
                 gizmo.size.set(15.5f, 15.5f, 15.5f);
@@ -452,7 +456,7 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess world = this.client.world;
             if (world instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("unloaded-chunk");
+                Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld), "unloaded_chunk_indicator", "unloaded-chunk");
                 gizmo.color.set(1.0F, 0.5F, 1F, 1F);
                 gizmo.position.set(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
                 gizmo.size.set((float) boundingBox.getWidth(), (float) boundingBox.getHeight(), (float) boundingBox.getDepth());
@@ -470,7 +474,9 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
             if (terrainRenderer instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("unloaded-chunk");
+                ClientChunk chunk = clientWorld.getChunk(unloadedChunk.vec);
+                if (chunk == null) return;
+                Gizmo gizmo = new BoxGizmo(chunk, "unloaded_chunk_indicator", "unloaded-chunk");
                 gizmo.color.set(1.0F, 0.5F, 1F, 1F);
                 gizmo.position.set(unloadedChunk.getOffset().vec().d().add(8, 8, 8));
                 gizmo.size.set(15.5f, 15.5f, 15.5f);
@@ -494,7 +500,7 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
             if (terrainRenderer instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("loaded-chunk");
+                Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld.getChunk(loadedChunk.vec)), "loaded_chunk_indicator", "loaded-chunk");
                 gizmo.color.set(0F, 1.0F, 1F, 1F);
                 gizmo.position.set(loadedChunk.getOffset().vec().d());
                 gizmo.size.set(CS, CS, CS);
@@ -518,7 +524,7 @@ public class IntegratedServer extends QuantumServer {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
             if (terrainRenderer instanceof ClientWorld clientWorld) {
-                Gizmo gizmo = new BoxGizmo("failed-chunk");
+                Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld), "failed_chunk_indicator", "failed-chunk");
                 gizmo.color.set(1F, 0F, 1F, 1F);
                 gizmo.position.set(d.add(8, 8, 8));
                 gizmo.size.set(CS - 1, CS - 1, CS - 1);

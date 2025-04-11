@@ -20,7 +20,7 @@ public record C2SDisconnectPacket<T extends ServerPacketHandler>(String message)
         if (message1.length() > 300) {
             message1 = message1.substring(0, 297) + "...";
         }
-        buffer.writeUTF(message1, 300);
+        buffer.writeString(message1, 300);
     }
 
     @Override

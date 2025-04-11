@@ -10,12 +10,14 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.render.RenderBufferSource;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.shaders.Shaders;
-import dev.ultreon.quantum.util.GameObject;
+import dev.ultreon.quantum.client.util.RenderObject;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import org.jetbrains.annotations.Nullable;
 
-public class Skybox extends GameObject implements RenderableProvider, Disposable {
+public class Skybox extends RenderObject implements RenderableProvider, Disposable {
     public static final Color NULL_COLOR = new Color(0, 0, 0, 0);
     private final static int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
 
@@ -28,6 +30,10 @@ public class Skybox extends GameObject implements RenderableProvider, Disposable
     @Nullable public Model model;
     @Nullable public ModelInstance modelInstance;
     public static boolean debug = false;
+
+    public Skybox() {
+        renderPass = RenderPass.SKYBOX;
+    }
 
     public void update(long daytime) {
         timeMix(daytime, ClientWorld.DAY_TOP_COLOR, ClientWorld.NIGHT_TOP_COLOR, topColor);
@@ -89,6 +95,11 @@ public class Skybox extends GameObject implements RenderableProvider, Disposable
             Renderable renderable = renderables.get(i);
             renderable.userData = Shaders.SKYBOX.get();
         }
+    }
+
+    @Override
+    public void render(RenderBufferSource bufferSource) {
+
     }
 
     @Override

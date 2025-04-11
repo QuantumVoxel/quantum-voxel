@@ -6,7 +6,6 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.DataSizes;
 import dev.ultreon.quantum.util.Result;
 import org.apache.commons.lang3.SystemProperties;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,7 +114,7 @@ public final class CrashLog extends CrashCategory {
         }
 
         for (CrashCategory category : this.categories) {
-            cs.append(System.lineSeparator()).append(category.toString());
+            cs.append(System.lineSeparator()).append(category);
         }
 
         StringWriter sw = new StringWriter();
@@ -135,7 +134,7 @@ public final class CrashLog extends CrashCategory {
     }
 
     @CanIgnoreReturnValue
-    public Result<Void> defaultSave() {
+    public Result<@Nullable Void> defaultSave() {
         File file = new File("game-crashes");
         if (!file.exists()) {
             try {
@@ -150,7 +149,7 @@ public final class CrashLog extends CrashCategory {
     }
 
     @CanIgnoreReturnValue
-    public Result<Void> writeToFile(File file) {
+    public Result<@Nullable Void> writeToFile(File file) {
         try (FileOutputStream stream = new FileOutputStream(file)) {
             this.writeToStream(stream);
         } catch (IOException e) {
@@ -167,13 +166,5 @@ public final class CrashLog extends CrashCategory {
 
     public void writeToLog() {
         StringUtils.splitIntoLines(this.toString()).forEach(CommonConstants.LOGGER::error);
-    }
-
-    @ApiStatus.Internal
-    public void addLog(CrashLog crashLog) {
-        CrashCategory crashCategory = new CrashCategory(crashLog.getDetails(), crashLog.getThrowable());
-        crashCategory.entries.addAll(crashLog.entries);
-
-        this.categories.add(crashCategory);
     }
 }

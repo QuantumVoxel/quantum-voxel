@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.input.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.debug.ValueTracker;
@@ -54,13 +55,11 @@ public class WorldNode extends WorldRenderNode {
         }
 
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();
-        if (particleSystem != null) {
-            particleSystem.begin();
-            particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
-            particleSystem.end();
+        particleSystem.begin();
+        particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
+        particleSystem.end();
 //            modelBatch.render(particleSystem);
-            // TODO add particle system
-        }
+        // TODO add particle system
 
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
 
@@ -74,7 +73,7 @@ public class WorldNode extends WorldRenderNode {
 
     @Override
     protected FrameBuffer createFrameBuffer() {
-        return new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
+        return new GLFrameBuffer.FrameBufferBuilder(QuantumClient.get().getWidth(), QuantumClient.get().getHeight())
                 .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888)
                 .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
                 .addBasicColorTextureAttachment(Pixmap.Format.RGB888)

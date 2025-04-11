@@ -275,7 +275,7 @@ public final class Main implements ApplicationListener {
         List<String> string = StringUtils.splitIntoLines(crashLog.toString().replace("\t", "    "));
         for (int i = 0; i < string.size(); i++) {
             String line = string.get(i);
-            this.font.draw(this.batch, line, 10, Gdx.graphics.getHeight() - 30 - i * (this.font.getLineHeight() + 2));
+            this.font.draw(this.batch, line, 10, QuantumClient.get().getHeight() - 30 - i * (this.font.getLineHeight() + 2));
         }
 
         this.batch.end();

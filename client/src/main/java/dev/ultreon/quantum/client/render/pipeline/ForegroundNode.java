@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.ObjectMap;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.input.GameCamera;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
@@ -59,7 +60,7 @@ public class ForegroundNode extends WorldRenderNode {
      */
     @Override
     protected FrameBuffer createFrameBuffer() {
-        return new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
+        return new GLFrameBuffer.FrameBufferBuilder(QuantumClient.get().getWidth(), QuantumClient.get().getHeight())
                 .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888)
                 .addDepthRenderBuffer(GL_DEPTH_COMPONENT24)
                 .build();

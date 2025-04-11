@@ -84,8 +84,8 @@ public class Renderer implements Disposable {
     private int scissorOffsetY;
     private boolean blurred;
 
-    private FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
-    private FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+    private FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
+    private FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
 
     public static final int FBO_SIZE = 1024;
 
@@ -2478,7 +2478,7 @@ public class Renderer implements Disposable {
         if (rect.width < 1) return false;
         if (rect.height < 1) return false;
 
-        rect.y = Gdx.graphics.getHeight() - rect.y - rect.height;
+        rect.y = QuantumClient.get().getHeight() - rect.y - rect.height;
 
         if (!Gdx.gl.glIsEnabled(GL20.GL_SCISSOR_TEST)) {
             Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
@@ -2951,13 +2951,14 @@ public class Renderer implements Disposable {
             if (blurTargetA != null) blurTargetA.dispose();
             if (blurTargetB != null) blurTargetB.dispose();
 
-            blurTargetA = new FrameBuffer(Format.RGBA8888, getWidth(), getHeight(), false);
-            blurTargetB = new FrameBuffer(Format.RGBA8888, getWidth(), getHeight(), false);
+            blurTargetA = new FrameBuffer(Format.RGBA8888, client.getWidth(), client.getHeight(), false);
+            blurTargetB = new FrameBuffer(Format.RGBA8888, client.getWidth(), client.getHeight(), false);
 
             TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
 
             //Start rendering to an offscreen color buffer
             blurTargetA.begin();
+            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
             clearColor(0x00000000);
             clear();
 
@@ -2976,6 +2977,7 @@ public class Renderer implements Disposable {
 
             //finish rendering to the offscreen buffer
             blurTargetA.end();
+            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getWidth());
 
             //now let's start blurring the offscreen image
             batch.setShader(blurShader);
@@ -2991,6 +2993,7 @@ public class Renderer implements Disposable {
 
             //our first blur pass goes to target B
             blurTargetB.begin();
+            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
             clear();
 
             //we want to render FBO target A into target B
@@ -3005,6 +3008,7 @@ public class Renderer implements Disposable {
 
             //finish rendering target B
             blurTargetB.end();
+            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
 
             //now we can render to the screen using the vertical blur shader
 
@@ -3020,7 +3024,7 @@ public class Renderer implements Disposable {
             //draw target B to the screen with a vertical blur effect
             fboRegion.setTexture(blurTargetB.getColorBufferTexture());
             this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0, getWidth(), getHeight());
+            batch.draw(fboRegion, 0, 0, client.getWidth() * client.getGuiScale(), client.getHeight() * client.getGuiScale());
 
             //reset to default shader without blurs
             batch.setShader(null);

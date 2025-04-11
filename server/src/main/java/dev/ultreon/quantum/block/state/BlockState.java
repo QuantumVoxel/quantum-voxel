@@ -20,7 +20,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,21 +36,14 @@ import java.util.Objects;
  * @since 0.1.0
  */
 public class BlockState {
-    private final @NotNull Block block;
-    private final StatePropertyKey<?>[] keys;
-    private final Object[] entries;
+    @Nullable BlockStateDefinition def;
+    final int id;
 
     /**
      * Constructs a new {@link BlockState} object.
-     *
-     * @param block   the block associated with these properties
-     * @param keys    the mapping of property keys to their indices
-     * @param entries the entries of the properties
      */
-    public BlockState(@NotNull Block block, StatePropertyKey<?>[] keys, Object[] entries) {
-        this.block = block;
-        this.keys = keys;
-        this.entries = entries;
+    BlockState(int id) {
+        this.id = id;
     }
 
     /**
@@ -70,15 +62,22 @@ public class BlockState {
         return block.readBlockState(packetBuffer);
     }
 
+    public static BlockState empty(BlockStateDefinition definition) {
+        BlockState blockState = new BlockState(0);
+        blockState.def = definition;
+        return blockState;
+    }
+
     /**
      * Writes the block properties to the given {@link PacketIO} buffer.
      *
      * @param encode the buffer to write to
      */
     public void write(PacketIO encode) {
-        encode.writeVarInt(Registries.BLOCK.getRawId(block));
+        assert def != null;
+        encode.writeVarInt(Registries.BLOCK.getRawId(def.block));
 
-        block.writeBlockState(encode, this);
+        def.block.writeBlockState(encode, this);
     }
 
     /**
@@ -98,7 +97,8 @@ public class BlockState {
      * @return the {@link Block} associated with this {@link BlockState} object
      */
     public @NotNull Block getBlock() {
-        return block;
+        assert def != null;
+        return def.block;
     }
 
 
@@ -116,23 +116,11 @@ public class BlockState {
     @SafeVarargs
     @SuppressWarnings("unchecked")
     public final <T> T getProperty(String name, T... typeGetter) {
-        Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-
-        int idx = -1;
-        for (int i = 0; i < keys.length; i++) {
-            if (keys[i].name.equals(name)) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx == -1)
-            throw new IllegalArgumentException("No entry named '" + name + "'");
-
-        if (!type.isInstance(entries[idx]))
-            throw new IllegalArgumentException("Entry '" + name + "' is not of type " + type.getSimpleName());
-
-        return (T) entries[idx];
+        assert def != null;
+        Object o = get(def.keyByName(name));
+        Class<?> componentType = typeGetter.getClass().getComponentType();
+        if (componentType.isInstance(o)) return (T) o;
+        throw new IllegalArgumentException("Key " + name + " is not of type " + componentType.getName());
     }
 
     /**
@@ -153,62 +141,14 @@ public class BlockState {
     }
 
     /**
-     * Creates a new {@link BlockState} instance with the specified entry set to the specified value.
-     *
-     * @param name  the name of the entry to set
-     * @param value the value to set the entry to
-     * @param <T>   the type of the entry
-     * @return a new {@link BlockState} instance with the specified entry set to the specified value
-     * @throws IllegalArgumentException if the entry with the specified name does not exist, or if the entry
-     *                                  is not of the specified type
-     */
-    public final <T> BlockState with(String name, T value) {
-        int i = ArrayUtils.indexOf(keys, name);
-        if (i == -1)
-            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
-
-        StatePropertyKey<T> key = null;
-        for (StatePropertyKey<?> keyEntry : keys) {
-            if (keyEntry.name.equals(name)) {
-                key = (StatePropertyKey<T>) keyEntry;
-                break;
-            }
-        }
-
-        if (key == null)
-            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
-
-        if (!key.type.isInstance(value))
-            throw new IllegalArgumentException("Value must be of type " + key.type.getSimpleName());
-
-        Object[] newEntries = Arrays.copyOf(entries, entries.length);
-        newEntries[i] = value;
-        return new BlockState(block, keys, newEntries);
-    }
-
-    /**
-     * Sets the entry with the specified name to the specified value.
-     *
-     * @param name  the name of the entry to set
-     * @param entry the entry to set
-     * @throws IllegalArgumentException if the entry with the specified name does not exist
-     */
-    public <T> void setEntry(StatePropertyKey<T> name, T entry) {
-        int i = ArrayUtils.indexOf(keys, name);
-        if (i == -1)
-            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
-
-        entries[i] = entry;
-    }
-
-    /**
      * Checks if the block has the specified entry.
      *
      * @param name the name of the entry to check
      * @return true if the block has the specified entry, false otherwise
      */
-    public boolean hasEntry(StatePropertyKey<?> name) {
-        return ArrayUtils.contains(keys, name);
+    public boolean has(StatePropertyKey<?> name) {
+        assert def != null;
+        return ArrayUtils.contains(def.keys, name);
     }
 
     /**
@@ -217,7 +157,8 @@ public class BlockState {
      * @return true if the block is air, false otherwise
      */
     public boolean isAir() {
-        return block.isAir();
+        assert def != null;
+        return def.block.isAir();
     }
 
     /**
@@ -227,14 +168,15 @@ public class BlockState {
      */
     public MapType save() {
         MapType map = new MapType();
-        NamespaceID id = Registries.BLOCK.getId(block);
+        assert def != null;
+        NamespaceID id = Registries.BLOCK.getId(def.block);
         if (id == null)
-            throw new IllegalArgumentException("Block " + block + " isn't registered");
+            throw new IllegalArgumentException("Block " + def.block + " isn't registered");
 
         map.putString("block", id.toString());
 
         MapType entriesData = new MapType();
-        block.saveBlockState(entriesData, this);
+        def.block.saveBlockState(entriesData, this);
 
         map.put("Entries", entriesData);
         return map;
@@ -247,7 +189,8 @@ public class BlockState {
      * @param blockVec    the position of the block
      */
     public void onPlace(ServerWorld serverWorld, BlockVec blockVec) {
-        this.block.onPlace(serverWorld, blockVec, this);
+        assert this.def != null;
+        this.def.block.onPlace(serverWorld, blockVec, this);
     }
 
     /**
@@ -256,7 +199,8 @@ public class BlockState {
      * @return true if the block is water, false otherwise
      */
     public boolean isWater() {
-        return block == Blocks.WATER;
+        assert def != null;
+        return def.block == Blocks.WATER;
     }
 
     /**
@@ -265,7 +209,8 @@ public class BlockState {
      * @return true if the block has a collider, false otherwise
      */
     public boolean hasCollider() {
-        return block.hasCollider();
+        assert def != null;
+        return def.block.hasCollider();
     }
 
     /**
@@ -274,7 +219,8 @@ public class BlockState {
      * @return true if the block is a fluid, false otherwise
      */
     public boolean isFluid() {
-        return block.isFluid();
+        assert def != null;
+        return def.block.isFluid();
     }
 
     /**
@@ -286,7 +232,8 @@ public class BlockState {
      * @return the bounding box of the block
      */
     public @NotNull BoundingBox getBoundingBox(int x, int y, int z) {
-        return block.getBoundingBox(x, y, z, this);
+        assert def != null;
+        return def.block.getBoundingBox(x, y, z, this);
     }
 
     /**
@@ -295,7 +242,8 @@ public class BlockState {
      * @return true if the block is replaceable, false otherwise
      */
     public boolean isReplaceable() {
-        return block.isReplaceable();
+        assert def != null;
+        return def.block.isReplaceable();
     }
 
     /**
@@ -304,7 +252,8 @@ public class BlockState {
      * @return the effective tool for the block, or null if none
      */
     public @Nullable ToolType getEffectiveTool() {
-        return block.getEffectiveTool();
+        assert def != null;
+        return def.block.getEffectiveTool();
     }
 
     /**
@@ -313,7 +262,8 @@ public class BlockState {
      * @return the hardness of the block
      */
     public float getHardness() {
-        return block.getHardness();
+        assert def != null;
+        return def.block.getHardness();
     }
 
     /**
@@ -322,7 +272,8 @@ public class BlockState {
      * @return true if the block requires a tool to be broken, false otherwise
      */
     public boolean isToolRequired() {
-        return block.isToolRequired();
+        assert def != null;
+        return def.block.isToolRequired();
     }
 
     /**
@@ -331,7 +282,8 @@ public class BlockState {
      * @return the loot generator for the block, or null if none
      */
     public @Nullable LootGenerator getLootGen() {
-        return block.getLootGen(this);
+        assert def != null;
+        return def.block.getLootGen(this);
     }
 
     /**
@@ -340,44 +292,33 @@ public class BlockState {
      * @return true if the block is transparent, false otherwise
      */
     public boolean isTransparent() {
-        return block.isTransparent();
+        assert def != null;
+        return def.block.isTransparent();
     }
 
     /**
      * Creates a new copy of this block state with the given entry overridden.
      *
-     * @param name  the name of the entry
+     * @param key  the key of the entry
      * @param value the value of the entry
      * @return a new copy of this block state with the given entry overridden
      */
-    public <T> @NotNull BlockState withEntry(@NotNull StatePropertyKey<T> name, @NotNull T value) {
-        StatePropertyKey<?>[] keys = this.keys;
-        int index = ArrayUtils.indexOf(keys, name);
+    public <T> @NotNull BlockState withEntry(@NotNull StatePropertyKey<T> key, @NotNull T value) {
+        assert def != null;
+        PropertyInfo info = def.propertyMap.get(key);
+        int valueIndex = key.indexOf(value);
 
-        if (index == -1)
-            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
+        if (valueIndex >= (1 << info.bits)) throw new IllegalArgumentException("Value index too large for bitmask!");
 
-        Object[] newEntries = Arrays.copyOf(entries, entries.length);
-        newEntries[index] = value;
-
-        return new BlockState(block, keys, newEntries);
+        int newId = (id & ~info.mask) | (valueIndex << info.offset);
+        return def.byId(newId);
     }
 
-    /**
-     * Creates a new copy of this block state with the given entry overridden.
-     *
-     * @param name  the name of the entry
-     * @param value the value of the entry
-     * @return a new copy of this block state with the given entry overridden
-     */
-    @SuppressWarnings("unchecked")
-    public <T> @NotNull BlockState withEntry(@NotNull String name, @NotNull T value) {
-        StatePropertyKey<T> key = (StatePropertyKey<T>) block.getDefinition().byName(name);
-
-        if (key == null)
-            throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
-
-        return withEntry(key, value);
+    public <T> T get(StatePropertyKey<T> key) {
+        assert def != null;
+        PropertyInfo info = def.getInfo(key);
+        int valueIndex = (id >>> info.offset) & ((1 << info.bits) - 1);
+        return key.valueByIndex(valueIndex); // your implementation
     }
 
     /**
@@ -388,18 +329,23 @@ public class BlockState {
     @Override
     public @NotNull String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(Registries.BLOCK.getId(block)).append("[");
 
-        for (int i = 0; i < keys.length; i++) {
-            if (entries[i] instanceof StringSerializable serializable)
-                builder.append(keys[i].name).append("=").append(serializable.serialize());
-            else
-                builder.append(keys[i].name).append("=").append(entries[i]);
-            if (i < keys.length - 1)
-                builder.append(", ");
+        // Block ID (optional fallback name)
+        assert def != null;
+        String blockId = def.block.getId().toString();
+        builder.append(blockId);
+
+        // State properties
+        builder.append('[');
+        boolean first = true;
+        for (StatePropertyKey<?> key : def.keys) {
+            if (!first) builder.append(',');
+            first = false;
+
+            Object value = get(key); // Extracts the actual value (like "north", "false", etc.)
+            builder.append(key.getName()).append('=').append(value);
         }
-
-        builder.append("]");
+        builder.append(']');
 
         return builder.toString();
     }
@@ -415,7 +361,9 @@ public class BlockState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BlockState that = (BlockState) o;
-        return Objects.equals(block, that.block) && Arrays.equals(entries, that.entries);
+        assert that.def != null;
+        assert def != null;
+        return Objects.equals(def.block, that.def.block) && id == that.id;
     }
 
     /**
@@ -425,7 +373,8 @@ public class BlockState {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(block, Arrays.hashCode(entries));
+        assert def != null;
+        return Objects.hash(def.block, id);
     }
 
     /**
@@ -435,7 +384,8 @@ public class BlockState {
      * @param offset      the {@code BlockVec} to update the block at
      */
     public void update(World serverWorld, BlockVec offset) {
-        this.block.update(serverWorld, offset, this);
+        assert def != null;
+        def.block.update(serverWorld, offset, this);
     }
 
     /**
@@ -445,7 +395,8 @@ public class BlockState {
      * @return {@code true} if the block can be replaced, {@code false} otherwise
      */
     public boolean canBeReplacedBy(UseItemContext context) {
-        return block.canBeReplacedBy(context, this);
+        assert def != null;
+        return def.block.canBeReplacedBy(context, this);
     }
 
     /**
@@ -455,7 +406,8 @@ public class BlockState {
      * @return {@code true} if this {@code BlockProperties} represents the given {@code Block}, {@code false} otherwise
      */
     public boolean is(Block block) {
-        return this.block == block;
+        assert def != null;
+        return def.block == block;
     }
 
     /**
@@ -466,7 +418,8 @@ public class BlockState {
      * @param breaker  the {@code Player} who destroyed the block
      */
     public void onDestroy(World world, BlockVec breaking, Player breaker) {
-        this.block.onDestroy(world, breaking, this, breaker);
+        assert def != null;
+        def.block.onDestroy(world, breaking, this, breaker);
     }
 
     /**
@@ -475,7 +428,8 @@ public class BlockState {
      * @return the light level emitted by the block
      */
     public int getLight() {
-        return block.getLight(this);
+        assert def != null;
+        return def.block.getLight(this);
     }
 
     /**
@@ -484,22 +438,26 @@ public class BlockState {
      * @return the reduction of light level emitted by the block
      */
     public int getLightReduction() {
-        return block.getLightReduction(this);
-    }
-
-    public Object get(int i) {
-        return entries[i];
+        assert def != null;
+        return def.block.getLightReduction(this);
     }
 
     public void randomTick(ServerChunk chunk, BlockVec position) {
-        block.randomTick(chunk.getWorld(), position, this);
+        assert def != null;
+        def.block.randomTick(chunk.getWorld(), position, this);
     }
 
     public boolean doesRandomTick() {
-        return block.doesRandomTick();
+        assert def != null;
+        return def.block.doesRandomTick();
     }
 
     public boolean isInvisible() {
-        return !block.doesRender();
+        assert def != null;
+        return !def.block.doesRender();
+    }
+
+    public int getStateId() {
+        return id;
     }
 }

@@ -17,7 +17,7 @@ public record C2SChatPacket(String message) implements Packet<InGameServerPacket
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeUTF(this.message, 1024);
+        buffer.writeString(this.message, 1024);
     }
 
     @Override

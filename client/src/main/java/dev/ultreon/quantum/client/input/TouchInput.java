@@ -61,7 +61,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         GamePlatform.get().setMouseCaptured(caught);
         if (!caught) {
             // TODO: Fix cursor position
-            GamePlatform.get().setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            GamePlatform.get().setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
         }
     }
 

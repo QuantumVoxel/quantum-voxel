@@ -6,13 +6,13 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.client.util.Renderable;
+import dev.ultreon.quantum.client.util.GuiRenderable;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.util.RgbColor;
 
 import java.util.Arrays;
 
-public class TabCompletePopup implements Renderable {
+public class TabCompletePopup implements GuiRenderable {
     public static final Color OVERLOW_COLOR = new Color(0xff4040ff);
     public int x;
     public int y;

@@ -66,8 +66,8 @@ public class GameRenderer implements Disposable {
 
         this.context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
 
-        this.depthFbo = new FrameBuffer(Pixmap.Format.RGB888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        this.depthFbo = new FrameBuffer(Pixmap.Format.RGB888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
+        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
     }
 
     public void resize(int width, int height) {

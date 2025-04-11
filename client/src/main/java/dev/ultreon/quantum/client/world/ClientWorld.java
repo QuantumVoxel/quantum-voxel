@@ -12,7 +12,9 @@ import dev.ultreon.quantum.client.debug.BoxGizmo;
 import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
+import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.util.Renderable;
 import dev.ultreon.quantum.client.util.Rot;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.entity.Entity;
@@ -43,7 +45,7 @@ import static com.badlogic.gdx.math.MathUtils.lerp;
 import static java.lang.Math.max;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
-public final class ClientWorld extends World implements Disposable, ClientWorldAccess {
+public final class ClientWorld extends World implements Disposable, Renderable, ClientWorldAccess {
     public static final int DAY_CYCLE = 24000;
 
     public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
@@ -76,10 +78,9 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     private final Queue<LightData> panelQueue = new Queue<>();
     private final ObjectIntMap<LightData> panelMap = new ObjectIntMap<>();
 
-    private final IntMap<Gizmo> entityGizmos = new IntMap<>();
-
     private final ObjectMap<String, Array<Gizmo>> gizmos = new ObjectMap<>();
     private final ObjectSet<String> enabledCategories = new ObjectSet<>();
+    private final ClientEntityManager entityManager = new ClientEntityManager(this);
 
     /**
      * Constructor for creating an instance of ClientWorld.
@@ -93,6 +94,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         this.dimension = dimension;
 
         this.add("Chunk Manager", chunkManager);
+        this.add("Entity Manager", entityManager);
     }
 
     public void toggleGizmoCategory(String category) {
@@ -193,7 +195,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     @Override
-    public ClientChunk getChunk(int x, int y, int z) {
+    public @Nullable ClientChunk getChunk(int x, int y, int z) {
         return chunkManager.get(x, y, z);
     }
 
@@ -853,7 +855,7 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         }
 
         QuantumClient.invoke(() -> {
-            BoxGizmo gizmo = new BoxGizmo("chunk");
+            BoxGizmo gizmo = new BoxGizmo(data, "chunk_bounds", "chunk");
             gizmo.position.set(data.getOffset().vec().d().add(8.0, 8.0, 8.0));
             gizmo.size.set(CS, CS, CS);
             gizmo.color.set(1.0F, 0.0F, 0.0F, 1.0F);
@@ -886,7 +888,17 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     }
 
     public @Nullable Gizmo getEntityGizmo(Entity entity) {
-        return this.entityGizmos.get(entity.getId());
+        RenderEntity entity1 = entityManager.getEntity(entity.getId());
+        if (entity1 == null) return null;
+        return entity1.boundsGizmo;
+    }
+
+    public @Nullable RenderEntity getRenderEntity(Entity entity) {
+        return entityManager.getEntity(entity.getId());
+    }
+
+    public void removeEntity(Entity entity) {
+        entityManager.removeEntity(entity);
     }
 
     /**
@@ -1000,7 +1012,6 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @Override
     public void dispose() {
         super.dispose();
-        chunkManager.dispose();
     }
 
     @Override
@@ -1021,11 +1032,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
         entity.setId(id);
         entity.setPosition(position);
         entity.onPipeline(pipeline);
-        BoxGizmo boxGizmo = new BoxGizmo("entity-bounds");
+        BoxGizmo boxGizmo = new BoxGizmo(entity, "entity_bounds", "entity-bounds");
         boxGizmo.position.set(position);
         boxGizmo.size.set(entity.getSize().width(), entity.getSize().height(), entity.getSize().width());
         boxGizmo.outline = true;
-        this.entityGizmos.put(id, boxGizmo);
+        RenderEntity renderEntity = this.entityManager.addEntity(entity);
+        renderEntity.boundsGizmo = boxGizmo;
         this.addGizmo(boxGizmo);
         this.entitiesById.put(id, entity);
     }
@@ -1034,7 +1046,8 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     @CanIgnoreReturnValue
     public Entity removeEntity(int id) {
         Entity remove = this.entitiesById.remove(id);
-        this.removeGizmo(this.entityGizmos.remove(id));
+        Gizmo boundsGizmo = this.entityManager.removeEntity(remove).boundsGizmo;
+        if (boundsGizmo != null) this.removeGizmo(boundsGizmo);
         @Nullable TerrainRenderer worldRenderer = client.worldRenderer;
         if (worldRenderer != null) {
             worldRenderer.removeEntity(id);
@@ -1074,5 +1087,12 @@ public final class ClientWorld extends World implements Disposable, ClientWorldA
     public void addEntity(Entity entity) {
         if (entity.getId() == -1) throw new IllegalArgumentException("Entity ID not set");
         this.entitiesById.put(entity.getId(), entity);
+    }
+
+    @Override
+    public void render(RenderBufferSource source) {
+        for (ClientChunk chunk : this.chunkManager) {
+            chunk.render(source);
+        }
     }
 }

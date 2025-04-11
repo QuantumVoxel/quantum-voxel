@@ -2,7 +2,6 @@ package dev.ultreon.quantum.util;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -157,15 +156,6 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
     public String toString() {
         if (name != null) return name;
         return this.getClass().getSimpleName();
-    }
-
-    public ShaderProvider getShaderProvider() {
-        if (renderer == null) return null;
-        return renderer.getShaderProvider();
-    }
-
-    public void setShaderProvider(@Nullable ShaderProvider provider) {
-        this.renderer.setShaderProvider(provider);
     }
 
     @Nullable

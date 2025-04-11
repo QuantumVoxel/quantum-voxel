@@ -6,11 +6,11 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.UIPath;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2f;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Represents an abstract screen in the UI.
  * This class provides a framework for managing and rendering a screen, including its title, background, and dialog if any.
- * 
+ *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public abstract class Screen extends UIContainer<Screen> {
@@ -44,7 +44,7 @@ public abstract class Screen extends UIContainer<Screen> {
     /**
      * The widget that is currently focused on.
      */
-    public @Nullable Widget focused;    
+    public @Nullable Widget focused;
 
     /**
      * The title widget of this screen.
@@ -117,7 +117,7 @@ public abstract class Screen extends UIContainer<Screen> {
     /**
      * Initializes the screen. Called when the screen is created.
      * You can use this method to add widgets to the screen.
-     * 
+     *
      * @see #add(Widget)
      */
     protected void init() {
@@ -130,7 +130,7 @@ public abstract class Screen extends UIContainer<Screen> {
      *
      * @param width the width of the screen.
      * @param height the height of the screen.
-     * 
+     *
      * @see #add(Widget)
      */
     public void resized(int width, int height) {
@@ -142,7 +142,7 @@ public abstract class Screen extends UIContainer<Screen> {
      *
      * @param renderer  Renderer instance used for drawing the screen elements.
      * @param deltaTime The time elapsed since the last frame, used for animations.
-     * 
+     *
      * @see #renderChildren(Renderer, float)
      */
     @Override
@@ -187,7 +187,7 @@ public abstract class Screen extends UIContainer<Screen> {
         if (titleWidget1 != null) {
             titleWidget1.revalidate();
         }
-        
+
         Dialog dialog1 = this.dialog;
         if (dialog1 != null) {
             dialog1.revalidate();
@@ -256,7 +256,8 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderBackground(Renderer renderer) {
-        if (this.client.world != null && this.client.worldRenderer != null && this.client.renderWorld) this.renderTransparentBackground(renderer);
+        if (this.client.world != null && this.client.worldRenderer != null && this.client.renderWorld)
+            this.renderTransparentBackground(renderer);
         else this.renderSolidBackground(renderer);
     }
 
@@ -295,15 +296,15 @@ public abstract class Screen extends UIContainer<Screen> {
             int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
             renderer.scale(1 / client.getGuiScale(), 1 / client.getGuiScale());
             renderer.blurred(true, () -> {
-                Vec2f thumbnail = this.resizer.thumbnail(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+                Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
                 float drawWidth = thumbnail.x;
                 float drawHeight = thumbnail.y;
 
-                float drawX = (Gdx.graphics.getWidth() - drawWidth) / 2;
-                float drawY = (Gdx.graphics.getHeight() - drawHeight) / 2;
+                float drawX = (this.size.width - drawWidth) / 2;
+                float drawY = (this.size.height - drawHeight) / 2;
 
-                renderer.blit(QuantumClient.id("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
+                renderer.blit(NamespaceID.of("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
             });
             renderer.flush();
             renderer.scale(client.getGuiScale(), client.getGuiScale());

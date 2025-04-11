@@ -16,34 +16,6 @@ import java.util.function.Supplier;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class ShaderPrograms {
-    /**
-     * The XOR shader program. Located in the `shaders/xor.vert` and `shaders/xor.frag` files.
-     */
-    public static final Supplier<ShaderProgram> XOR = ShaderPrograms.register("xor");
-    /**
-     * The outline shader program. Located in the `shaders/outline.vert` and `shaders/outline.frag` files.
-     */
-    public static final Supplier<ShaderProgram> OUTLINE = ShaderPrograms.register("outline");
-    /**
-     * The main shader program. Located in the `shaders/main.vert` and `shaders/main.frag` files.
-     */
-    public static final Supplier<ShaderProgram> MAIN = ShaderPrograms.register("main");
-    /**
-     * The default shader program. Located in the `shaders/default.vert` and `shaders/default.frag` files.
-     */
-    public static final Supplier<ShaderProgram> DEFAULT = ShaderPrograms.register("default");
-    /**
-     * The depth shader program. Located in the `shaders/depth.vert` and `shaders/depth.frag` files.
-     */
-    public static final Supplier<ShaderProgram> DEPTH = ShaderPrograms.register("depth");
-    /**
-     * The scene shader program. Located in the `shaders/scene.vert` and `shaders/scene.frag` files.
-     */
-    public static final Supplier<ShaderProgram> SCENE = ShaderPrograms.register("scene");
-    /**
-     * The skybox shader program. Located in the `shaders/skybox.vert` and `shaders/skybox.frag` files.
-     */
-    public static final Supplier<ShaderProgram> SKYBOX = ShaderPrograms.register("skybox");
 
     /**
      * Registers a shader program.

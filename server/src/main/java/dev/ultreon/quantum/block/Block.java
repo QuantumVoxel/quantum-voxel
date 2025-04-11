@@ -92,9 +92,10 @@ public class Block {
         this.soundType = properties.soundType;
         this.doesRandomTick = properties.doesRandomTick;
 
-        this.definition = new BlockStateDefinition(this);
-        this.defineState(getDefinition());
-        this.defaultState = getDefinition().build();
+        var definitionBuilder = BlockStateDefinition.builder(this);
+        defineState(definitionBuilder);
+        this.definition = definitionBuilder.build();
+        this.defaultState = BlockState.empty();
     }
 
     public void onStateReload() {
@@ -105,7 +106,7 @@ public class Block {
      *
      * @param definition The BlockStateDefinition object used to set up the block's properties.
      */
-    protected void defineState(BlockStateDefinition definition) {
+    protected void defineState(BlockStateDefinition.Builder definition) {
 
     }
 
@@ -217,7 +218,7 @@ public class Block {
     }
 
     public boolean doesOcclude() {
-        return this.occlude && !this.hasCustomRender;
+        return this.occlude;
     }
 
     public boolean shouldGreedyMerge() {

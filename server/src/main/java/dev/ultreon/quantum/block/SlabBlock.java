@@ -4,7 +4,6 @@ import dev.ultreon.quantum.block.state.*;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import org.jetbrains.annotations.NotNull;
 
 public class SlabBlock extends Block {
     public SlabBlock() {
@@ -32,7 +31,7 @@ public class SlabBlock extends Block {
     }
 
     @Override
-    protected void defineState(BlockStateDefinition definition) {
+    protected void defineState(BlockStateDefinition.Builder definition) {
         super.defineState(definition);
 
         definition.set(StateProperties.SLAB_TYPE, Type.BOTTOM);
@@ -41,7 +40,7 @@ public class SlabBlock extends Block {
     @Override
     public BlockState onPlacedBy(BlockState blockMeta, BlockVec pos, UseItemContext context) {
         double y = context.result().getVec().y % 1;
-        return blockMeta.withEntry("type", y < 0.5 ? Type.TOP : Type.BOTTOM);
+        return blockMeta.withEntry(StateProperties.SLAB_TYPE, y < 0.5 ? Type.TOP : Type.BOTTOM);
     }
 
     public enum Type implements StringSerializable {

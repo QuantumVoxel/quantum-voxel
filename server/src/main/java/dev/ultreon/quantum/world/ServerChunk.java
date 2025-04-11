@@ -18,6 +18,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.SanityCheckException;
+import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -50,8 +51,9 @@ public final class ServerChunk extends Chunk {
 
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
-    private long trackDuration = 10000L;
+    private final long trackDuration = 10000L;
     private final AtomicInteger rTick = new AtomicInteger(0);
+    private boolean scheduledSend = false;
 
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
@@ -100,8 +102,15 @@ public final class ServerChunk extends Chunk {
                 this.original = false;
             }
 
+            this.scheduledSend = true;
+
             return result;
         }
+    }
+
+    @Override
+    protected void setFast(Vec3i pos, BlockState block) {
+        setFast(pos.x, pos.y, pos.z, block);
     }
 
     public void load(@NotNull MapType chunkData) {
@@ -193,6 +202,12 @@ public final class ServerChunk extends Chunk {
         return this.world;
     }
 
+    @Override
+    public void reset() {
+        this.storage.setUniform(Blocks.AIR.getDefaultState());
+        sendChunk();
+    }
+
     public boolean shouldSave() {
         return modified && ready;
     }
@@ -206,23 +221,27 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
+        scheduledSend = false;
         if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
-            this.world.unloadChunk(this, this.getVec());
+            this.world.unloadChunk(this, this.vec);
             return;
         }
 
         this.world.getServer().onChunkSent(this);
-        this.sendAllViewers(new S2CChunkDataPacket(this.getVec(), this.info, this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
+        this.sendAllViewers(new S2CChunkDataPacket(this.vec, this.info, this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
 
     }
 
     public void tick() {
         Collection<BlockEntity> blockEntities;
+
         synchronized (this){
             if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
-                this.world.unloadChunk(this, this.getVec());
+                this.world.unloadChunk(this, this.vec);
                 return;
             } else if (isBeingTracked()) {
+                if (scheduledSend) this.sendChunk();
+
                 lastTracked = System.currentTimeMillis();
             }
 
@@ -258,7 +277,7 @@ public final class ServerChunk extends Chunk {
                 throw new SanityCheckException("Block state is not the same as the random tick block state");
         }
 
-        random.randomTick(this, getVec().blockInWorldSpace(new BlockVec(randX, randY, randZ, BlockVecSpace.CHUNK)));
+        random.randomTick(this, vec.blockInWorldSpace(new BlockVec(randX, randY, randZ, BlockVecSpace.CHUNK)));
         return true;
     }
 

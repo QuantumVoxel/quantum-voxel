@@ -17,7 +17,7 @@ public record S2CCommandSyncPacket(List<String> commands) implements Packet<InGa
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeList(this.commands, (buf, s) -> buf.writeUTF(s, 64));
+        buffer.writeList(this.commands, (buf, s) -> buf.writeString(s, 64));
     }
 
     @Override

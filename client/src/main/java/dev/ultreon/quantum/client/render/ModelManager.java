@@ -196,7 +196,6 @@ public class ModelManager {
             try {
                 removed.dispose();
             } catch (Exception e) {
-                QuantumClient.LOGGER.debug("Error unloading model {}:", id, e);
                 return false;
             }
             return true;

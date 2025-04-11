@@ -1,144 +1,149 @@
 package dev.ultreon.quantum.block.state;
 
-import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.ubo.types.*;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.SequencedMap;
+import java.util.*;
 
 public class BlockStateDefinition {
-    private final Block block;
-    private final Map<String, StatePropertyKey<?>> propertyByName = new HashMap<>();
-    private final SequencedMap<StatePropertyKey<?>, Object> properties = new LinkedHashMap<>();
-    private StatePropertyKey<?>[] keys;
-    private Object[] defaults;
+    private final int totalBits;
+    public Block block;
+    Map<StatePropertyKey<?>, PropertyInfo> propertyMap = new HashMap<>();
+    private final BlockState[] states;
+    private @Nullable BlockState defaultState;
+    final StatePropertyKey<?>[] keys;
 
-    public BlockStateDefinition(Block block) {
+    private BlockStateDefinition(Block block, BlockState[] array, StatePropertyKey<?>[] keys) {
         this.block = block;
-    }
-
-    public <T> BlockStateDefinition set(StatePropertyKey<T> key, T value) {
-        properties.put(key, value);
-        propertyByName.put(key.name, key);
-        return this;
-    }
-
-    public BlockState build() {
-        if (keys != null || defaults != null) throw new IllegalStateException("Block state definition already built");
-        int idx = 0;
-        StatePropertyKey<?>[] keys = new StatePropertyKey[properties.size()];
-        Object[] defaults = new Object[properties.size()];
-
-        for (Map.Entry<StatePropertyKey<?>, Object> entry : properties.sequencedEntrySet()) {
-            keys[idx] = entry.getKey();
-            defaults[idx] = entry.getValue();
-            idx++;
-        }
-
+        this.states = array;
         this.keys = keys;
-        this.defaults = defaults;
-        return new BlockState(block, keys, defaults);
+
+        int offset = 0;
+        for (StatePropertyKey<?> key : keys) {
+            int size = key.size();
+            int bits = Integer.SIZE - Integer.numberOfLeadingZeros(size - 1); // ceil(log2(size))
+            if (offset + bits > 32) throw new IllegalStateException("Too many bits!");
+            propertyMap.put(key, new PropertyInfo(offset, bits));
+            offset += bits;
+        }
+        this.totalBits = offset;
     }
 
-    public BlockState read(@NotNull PacketIO packetBuffer) {
-        int size = packetBuffer.readMedium();
-        Object[] values = new Object[size];
-        for (int i = 0; i < size; i++) {
-            StatePropertyKey<?> key = keys[i];
-            Object property = properties.get(key);
-            if (property == null)
-                throw new IllegalStateException("Property " + key + " does not exist in block " + block);
+    public BlockState byId(int state) {
+        return this.states[state];
+    }
 
-            Object read = key.read(packetBuffer);
-            values[i] = read;
+    <T> PropertyInfo getInfo(StatePropertyKey<T> key) {
+        return propertyMap.get(key);
+    }
+
+    public int size() {
+        return this.states.length;
+    }
+
+    public BlockState getDefault() {
+        if (defaultState == null)
+            throw new IllegalStateException("Default state has not been set.");
+        return defaultState;
+    }
+
+    public void setDefault(BlockState state) {
+        this.defaultState = state;
+    }
+
+    public BlockState getFirst() {
+        return states[0];
+    }
+
+    public static Builder builder(Block block) {
+        return new Builder(block);
+    }
+
+    public <T> int startIndexOf(@NotNull StatePropertyKey<T> name) {
+        int defIndex = 0;
+        for (StatePropertyKey<?> key : keys) {
+            if (key == name) return defIndex;
+            defIndex += key.size();
+        }
+        throw new IllegalArgumentException("Entry " + name + " does not exist in block " + block);
+    }
+
+    public StatePropertyKey<?> keyByName(String name) {
+        for (StatePropertyKey<?> key : keys) {
+            if (key.name.equals(name)) {
+                return key;
+            }
         }
 
-        return new BlockState(block, keys, values);
+        throw new IllegalArgumentException("Key with name " + name + " is not in state definition");
     }
 
-    public void write(BlockState state, @NotNull PacketIO packetBuffer) {
-        packetBuffer.writeMedium(properties.size());
-        for (int i = 0; i < properties.size(); i++) {
-            StatePropertyKey<?> key = keys[i];
-            key.write(packetBuffer, state.get(i));
+    public int getTotalBits() {
+        return totalBits;
+    }
+
+    public static class Builder {
+        private final Block block;
+        private final Set<StatePropertyKey<?>> keys = new HashSet<>();
+
+        private Builder(Block block) {
+            this.block = block;
         }
-    }
 
-    public BlockState load(MapType entriesData) {
-        Object[] properties = new Object[keys.length];
+        public BlockStateDefinition build() {
+            StatePropertyKey<?>[] keys = keys().stream().sorted(Comparator.comparing(StatePropertyKey::getName)).toArray(StatePropertyKey[]::new);
+            return new BlockStateDefinition(block, generateAllBlockStates(keys).toArray(BlockState[]::new), keys);
+        }
 
-        for (String key : entriesData.keys()) {
-            DataType<?> dataType = entriesData.get(key);
+        public Builder add(StatePropertyKey<?> key) {
+            this.keys.add(key);
+            return this;
+        }
 
-            StatePropertyKey<?> propertyKey = propertyByName.get(key);
-            if (propertyKey != null) {
-                int idx = ArrayUtils.indexOf(keys, propertyKey);
-                switch (dataType) {
-                    case IntType intType -> {
-                        int value = intType.getValue();
-                        properties[idx] = value;
-                    }
-                    case BooleanType booleanType -> {
-                        boolean value = booleanType.getValue();
-                        properties[idx] = value;
-                    }
-                    case StringType type -> {
-                        String value = type.getValue();
-                        properties[idx] = value;
-                    }
-                    case ByteType type -> {
-                        Byte value = type.getValue();
+        public static List<Map<StatePropertyKey<?>, Object>> generateAllBlockStates(StatePropertyKey<?>[] keys) {
+            List<Map<StatePropertyKey<?>, Object>> result = new ArrayList<>();
 
-                        for (Object e : propertyKey.type.getEnumConstants()) {
-                            if (((Enum)e).ordinal() == value) {
-                                properties[idx] = e;
-                                break;
-                            }
-                        }
-                        properties[idx] = defaults[idx];
-                    }
-                    case null, default ->
-                            throw new IllegalArgumentException("Unsupported property data type: " + (dataType == null ? "null" : dataType.getClass().getSimpleName()));
+            List<List<Object>> valueLists = new ArrayList<>();
+            for (StatePropertyKey<?> key : keys) {
+                valueLists.add((List<Object>) key.allPossibleValues());
+            }
+
+            List<List<Object>> combinations = cartesianProduct(valueLists);
+
+            for (List<Object> values : combinations) {
+                Map<StatePropertyKey<?>, Object> state = new LinkedHashMap<>();
+                for (int i = 0; i < keys.length; i++) {
+                    state.put(keys[i], values.get(i));
                 }
+                result.add(state);
             }
+
+            return result;
         }
 
-        return new BlockState(block, keys, properties);
-    }
+        // Cartesian product of a list of lists
+        public static <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
+            List<List<T>> result = new ArrayList<>();
+            result.add(new ArrayList<>());
 
-    public void save(BlockState state, MapType entriesData) {
-        for (int i = 0; i < keys.length; i++) {
-            StatePropertyKey<?> key = keys[i];
-            Object value = state.get(i);
-
-            if (value!= null) {
-                DataType<?> dataType = switch (value) {
-                    case Integer ignored -> new IntType((int) value);
-                    case Boolean ignored -> new BooleanType((boolean) value);
-                    case String string -> new StringType(string);
-                    case Enum<?> enum_ -> new ByteType(enum_.ordinal());
-                    default ->
-                            throw new IllegalArgumentException("Unsupported property value type: " + value.getClass().getName());
-                };
-
-                entriesData.put(key.name, dataType);
-            } else {
-                throw new NullPointerException("Invalid state property value! Cannot be null");
+            for (List<T> list : lists) {
+                List<List<T>> newResult = new ArrayList<>();
+                for (List<T> prefix : result) {
+                    for (T item : list) {
+                        List<T> next = new ArrayList<>(prefix);
+                        next.add(item);
+                        newResult.add(next);
+                    }
+                }
+                result = newResult;
             }
+
+            return result;
         }
-    }
 
-    public <T> StatePropertyKey<?> byName(@NotNull String name) {
-        return propertyByName.get(name);
-    }
-
-    public StatePropertyKey<?>[] keys() {
-        return keys;
+        public List<StatePropertyKey<?>> keys() {
+            return keys.stream().sorted(Comparator.comparing(StatePropertyKey::getName)).toList();
+        }
     }
 }

@@ -1,9 +1,8 @@
-package dev.ultreon.quantum.ubo;
+package dev.ultreon.quantum.data;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import dev.ultreon.quantum.block.Block;
 import dev.ultreon.ubo.DataTypeRegistry;
 import dev.ultreon.ubo.types.*;
 
@@ -11,9 +10,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"PatternVariableCanBeUsed", "unchecked", "rawtypes", "DataFlowIssue"})
 public class UboOps implements DynamicOps<DataType<?>> {
     public static final UboOps INSTANCE = new UboOps();
 
@@ -24,57 +23,42 @@ public class UboOps implements DynamicOps<DataType<?>> {
 
     @Override
     public <U> U convertTo(DynamicOps<U> outOps, DataType<?> input) {
-        if (input instanceof MapType mapType) {
-            return convertMap(outOps, input);
-        } else if (input instanceof ListType<?> listType) {
-            return convertList(outOps, input);
-        } else if (input instanceof StringType stringType) {
-            return outOps.createString(stringType.getValue());
-        } else if (input instanceof ByteType byteType) {
-            return outOps.createByte(byteType.getValue());
-        } else if (input instanceof ShortType shortType) {
-            return outOps.createShort(shortType.getValue());
-        } else if (input instanceof IntType intType) {
-            return outOps.createInt(intType.getValue());
-        } else if (input instanceof LongType longType) {
-            return outOps.createLong(longType.getValue());
-        } else if (input instanceof FloatType floatType) {
-            return outOps.createFloat(floatType.getValue());
-        } else if (input instanceof DoubleType doubleType) {
-            return outOps.createDouble(doubleType.getValue());
-        } else if (input instanceof BooleanType booleanType) {
-            return outOps.createBoolean(booleanType.getValue());
-        } else if (input instanceof UUIDType uuidType) {
-            return outOps.createString(uuidType.getValue().toString());
-        } else if (input instanceof BitSetType bitsetType) {
-            return outOps.createByteList(ByteBuffer.wrap(bitsetType.getValue().toByteArray()));
-        } else if (input instanceof ByteArrayType byteArrayType) {
-            return outOps.createByteList(ByteBuffer.wrap(byteArrayType.getValue()));
-        } else if (input instanceof ShortArrayType shortArrayType) {
-            Short[] value = new Short[shortArrayType.getValue().length];
-            for (int i = 0; i < shortArrayType.getValue().length; i++) {
-                value[i] = shortArrayType.getValue()[i];
+        return switch (input) {
+            case MapType ignored -> convertMap(outOps, input);
+            case ListType<?> ignored -> convertList(outOps, input);
+            case StringType stringType -> outOps.createString(stringType.getValue());
+            case ByteType byteType -> outOps.createByte(byteType.getValue());
+            case ShortType shortType -> outOps.createShort(shortType.getValue());
+            case IntType intType -> outOps.createInt(intType.getValue());
+            case LongType longType -> outOps.createLong(longType.getValue());
+            case FloatType floatType -> outOps.createFloat(floatType.getValue());
+            case DoubleType doubleType -> outOps.createDouble(doubleType.getValue());
+            case BooleanType booleanType -> outOps.createBoolean(booleanType.getValue());
+            case UUIDType uuidType -> outOps.createString(uuidType.getValue().toString());
+            case BitSetType bitsetType -> outOps.createByteList(ByteBuffer.wrap(bitsetType.getValue().toByteArray()));
+            case ByteArrayType byteArrayType -> outOps.createByteList(ByteBuffer.wrap(byteArrayType.getValue()));
+            case ShortArrayType shortArrayType -> {
+                Short[] value = new Short[shortArrayType.getValue().length];
+                for (int i = 0; i < shortArrayType.getValue().length; i++) {
+                    value[i] = shortArrayType.getValue()[i];
+                }
+                yield outOps.createList(Arrays.stream(value).map(outOps::createShort));
             }
-            return outOps.createList(Arrays.stream(value).map(outOps::createShort));
-        } else if (input instanceof IntArrayType intArrayType) {
-            return outOps.createIntList(Arrays.stream(intArrayType.getValue()));
-        } else if (input instanceof LongArrayType longArrayType) {
-            return outOps.createLongList(Arrays.stream(longArrayType.getValue()));
-        } else if (input instanceof FloatArrayType floatArrayType) {
-            Float[] value = new Float[floatArrayType.getValue().length];
-            for (int i = 0; i < floatArrayType.getValue().length; i++) {
-                value[i] = floatArrayType.getValue()[i];
+            case IntArrayType intArrayType -> outOps.createIntList(Arrays.stream(intArrayType.getValue()));
+            case LongArrayType longArrayType -> outOps.createLongList(Arrays.stream(longArrayType.getValue()));
+            case FloatArrayType floatArrayType -> {
+                Float[] value = new Float[floatArrayType.getValue().length];
+                for (int i = 0; i < floatArrayType.getValue().length; i++) {
+                    value[i] = floatArrayType.getValue()[i];
+                }
+                yield outOps.createList(Arrays.stream(value).map(outOps::createFloat));
             }
-            return outOps.createList(Arrays.stream(value).map(outOps::createFloat));
-        } else if (input instanceof DoubleArrayType doubleArrayType) {
-            return outOps.createList(Arrays.stream(doubleArrayType.getValue()).mapToObj(outOps::createDouble));
-        } else if (input instanceof BigIntType bigIntType) {
-            return outOps.createNumeric(bigIntType.getValue());
-        } else if (input instanceof BigDecType bigDecimalType) {
-            return outOps.createNumeric(bigDecimalType.getValue());
-        } else {
-            return null;
-        }
+            case DoubleArrayType doubleArrayType ->
+                    outOps.createList(Arrays.stream(doubleArrayType.getValue()).mapToObj(outOps::createDouble));
+            case BigIntType bigIntType -> outOps.createNumeric(bigIntType.getValue());
+            case BigDecType bigDecimalType -> outOps.createNumeric(bigDecimalType.getValue());
+            default -> null;
+        };
     }
 
     @Override
@@ -122,14 +106,14 @@ public class UboOps implements DynamicOps<DataType<?>> {
 
     @Override
     public DataResult<DataType<?>> mergeToMap(DataType<?> map, DataType<?> key, DataType<?> value) {
-        if (!(map instanceof MapType mapType)) return DataResult.error(() -> "Value is not a map", map);
+        if (!(map instanceof MapType)) return DataResult.error(() -> "Value is not a map", map);
         ((MapType) map).put((String) key.getValue(), value);
         return DataResult.success(map);
     }
 
     @Override
     public DataResult<Stream<Pair<DataType<?>, DataType<?>>>> getMapValues(DataType<?> input) {
-        if (!(input instanceof MapType mapType)) return DataResult.error(() -> "Value is not a map", null);
+        if (!(input instanceof MapType)) return DataResult.error(() -> "Value is not a map", null);
         return DataResult.success(((Map<String, DataType<?>>) input.getValue()).entrySet().stream().map(e -> Pair.of(new StringType(e.getKey()), e.getValue())));
     }
 

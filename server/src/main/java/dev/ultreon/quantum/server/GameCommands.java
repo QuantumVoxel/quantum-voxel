@@ -31,6 +31,11 @@ public final class GameCommands {
         CommandRegistry.register(new SetVarCommand());
         CommandRegistry.register(new EntityCommand());
         CommandRegistry.register(new ItemCommand());
+        CommandRegistry.register(new DeleteChunkCommand());
+        CommandRegistry.register(new FillCommand());
+        CommandRegistry.register(new FillSphereCommand());
+        CommandRegistry.register(new PositionCommand());
+        CommandRegistry.register(new ReplaceCommand());
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             CommandRegistry.register(new JSCommand());

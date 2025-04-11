@@ -244,8 +244,8 @@ class QuantumClientLoader implements Runnable {
         client.itemRenderer.loadModels(client);
 
         if (client.deferredWidth != null && client.deferredHeight != null) {
-            client.camera.viewportWidth = client.deferredWidth;
-            client.camera.viewportHeight = client.deferredHeight;
+            client.camera.viewportWidth = client.getWidth();
+            client.camera.viewportHeight = client.getHeight();
             client.camera.update();
         }
 

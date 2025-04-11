@@ -214,6 +214,7 @@ public class DiscordRPC implements RpcHandler {
         });
 
         CompletableFuture.runAsync(() -> {
+            CommonConstants.LOGGER.info("Attempting to connect to Discord...");
             try {
                 client.connect();
             } catch (NoDiscordClientException e) {

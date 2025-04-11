@@ -318,6 +318,13 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         return get(rand);
     }
 
+    @Override
+    public void setUniform(D value) {
+        this.data.clear();
+        this.data.add(value);
+        Arrays.fill(this.palette, (short) 0);
+    }
+
     private int[] findIndexes(short[] arr, int[] val) {
         int[] indexes = new int[arr.length];
         int count = 0;

@@ -31,7 +31,7 @@ public record S2CAddPlayerPacket(int id, UUID uuid, String name,
     public void toBytes(PacketIO buffer) {
         buffer.writeInt(this.id);
         buffer.writeUuid(this.uuid);
-        buffer.writeUTF(this.name, 20);
+        buffer.writeString(this.name, 20);
         buffer.writeVec3d(this.position);
     }
 

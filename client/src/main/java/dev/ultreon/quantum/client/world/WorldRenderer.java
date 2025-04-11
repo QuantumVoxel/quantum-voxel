@@ -124,7 +124,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private @Nullable Vector3 lastCamPos;
     private @Nullable Vector3 lastCamDir;
     private @Nullable Vec3d lastPlayerPos;
-    private Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
+    private final Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
 
     public WorldRenderer(@NotNull ClientWorld world) {
         this.world = world;
@@ -328,22 +328,22 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param batch     the ModelBatch to render with
+     * @param bufferSource     the ModelBatch to render with
      * @param deltaTime the time between the last and current frame
      */
     @Override
-    public void renderBackground(RenderBufferSource batch, float deltaTime) {
+    public void renderBackground(RenderBufferSource bufferSource, float deltaTime) {
         updateBackground();
 
-        batch.getBuffer(RenderPass.SKYBOX).render(this.skybox.modelInstance);
+        bufferSource.getBuffer(RenderPass.SKYBOX).render(this.skybox.modelInstance);
 
         CelestialBody sun = this.sun;
         if (sun != null) {
-            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun);
+            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun);
         }
         CelestialBody moon = this.moon;
         if (moon != null) {
-            batch.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon);
+            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon);
         }
     }
 
@@ -353,6 +353,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param batch         the ModelBatch to render with
      * @param deltaTime     the time between the last and current frame
      */
+    @SuppressWarnings("t")
     @Override
     public void render(RenderBufferSource batch, float deltaTime) {
         var player = this.client.player;
@@ -446,9 +447,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 }
                 return Double.compare(dst2, dst1);
             });
-            for (Gizmo gizmo : toSort) {
-                batch.getBuffer(gizmo.outline ? RenderPass.GIZMO_OUTLINE : RenderPass.GIZMO).render(gizmo.instance);
-            }
         }
     }
 
@@ -461,16 +459,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         if (world != null) this.world = (ClientWorld) world;
     }
 
+    @SuppressWarnings("t")
     private void collectChunks(RenderBufferSource bufferSource, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
         for (var chunk : chunks) {
             if (chunk.isEmpty()) continue;
 
-            if (positions.contains(chunk.getVec(), false)) {
-                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.getVec());
+            if (positions.contains(chunk.vec, false)) {
+                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.vec);
                 continue;
             }
 
-            positions.add(chunk.getVec());
+            positions.add(chunk.vec);
 
             if (!chunk.isReady()) continue;
             if (chunk.isDisposed()) {
@@ -481,10 +480,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             Vec3i chunkOffset = chunk.getOffset();
             Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
             chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z).add(chunk.deltaOffset);
+            chunk.getBoundingBox().min.set(renderOffsetC.x - 16, renderOffsetC.y - 16, renderOffsetC.z - 16);
+            chunk.getBoundingBox().max.set(renderOffsetC.x + 16, renderOffsetC.y + 16, renderOffsetC.z + 16);
 
             if (frustumCulling(chunk)) continue;
 
-            ChunkModel model = this.chunkModels.get(chunk.getVec());
+            ChunkModel model = this.chunkModels.get(chunk.vec);
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
                 model = revalidateChunk(ref, chunk, model);
             } else if (model == null) {
@@ -523,27 +524,27 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 if (client.player != null) lastPlayerPos = new Vec3d(client.player.getPosition(0));
             }
 
-            if (chunk.visible && !this.client.camera.frustum.boundsInFrustum(chunk.getBoundingBox())) {
-                chunk.visible = false;
+            if (chunk.enabled && !this.client.camera.frustum.boundsInFrustum(chunk.getBoundingBox())) {
+                chunk.enabled = false;
                 return true;
-            } else if (!chunk.visible) {
-                chunk.visible = true;
+            } else if (!chunk.enabled) {
+                chunk.enabled = true;
             }
         }
 
-        return !chunk.visible;
+        return !chunk.enabled;
     }
 
     private @NotNull ChunkModel buildChunk(ChunkRenderRef ref, ClientChunk chunk) {
         ChunkModel model;
         try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
             chunk.dirty = false;
-            model = new ChunkModel(chunk.getVec(), chunk, this);
+            model = new ChunkModel(chunk.vec, chunk, this);
             model.build();
             ref.chunkRendered = true;
             chunk.dirty = false;
             chunk.initialized = true;
-            this.chunkModels.put(chunk.getVec(), model);
+            this.chunkModels.put(chunk.vec, model);
         }
         return model;
     }
@@ -579,14 +580,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         if (client.screen instanceof WorldLoadScreen)
             QuantumClient.LOGGER.warn("Chunk unloaded when loading game: ", new Throwable());
 
-        ChunkModel chunkModel = chunkModels.remove(chunk.getVec());
+        ChunkModel chunkModel = chunkModels.remove(chunk.vec);
         if (chunkModel == null) {
-            LOGGER.warn("Tried to unload a chunk that didn't exist: {}", chunk.getVec());
+            LOGGER.warn("Tried to unload a chunk that didn't exist: {}", chunk.vec);
             return;
         }
         client.worldCat.remove(chunkModel);
         if (chunkModel.getChunk() != chunk)
-            throw new DeprecationCheckException("Model's chunk and chunk mismatch: " + chunk.getVec());
+            throw new DeprecationCheckException("Model's chunk and chunk mismatch: " + chunk.vec);
 
 
         chunkModel.dispose();
@@ -611,7 +612,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
                 BlockState blockState = entry.getValue();
                 BlockModel blockModel = BlockModelRegistry.get().get(blockState);
-                BlockVec globalVec = chunk.getVec().blockInWorldSpace(localVec);
+                BlockVec globalVec = chunk.vec.blockInWorldSpace(localVec);
                 if (!blockInstances.containsKey(globalVec) && blockModel != null) {
                     Model model = blockModel.getModel();
                     if (model != null) {
@@ -902,8 +903,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
-    @Nullable
-    public ParticleSystem getParticleSystem() {
+    public @NotNull ParticleSystem getParticleSystem() {
         return particleSystem;
     }
 
@@ -915,7 +915,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             return null;
         }
 
-        ChunkModel model = this.chunkModels.get(chunk.getVec());
+        ChunkModel model = this.chunkModels.get(chunk.vec);
 
         if (model != null) {
             model.rebuild();

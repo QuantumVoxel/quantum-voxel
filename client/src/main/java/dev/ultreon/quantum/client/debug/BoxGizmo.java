@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
+import dev.ultreon.quantum.util.GameObject;
 import kotlin.Lazy;
 import kotlin.LazyKt;
 
@@ -13,8 +14,10 @@ public class BoxGizmo extends Gizmo {
     private static final Lazy<Model> model = LazyKt.lazy(BoxGizmo::createModel);
     private static final Lazy<Model> outlineModel = LazyKt.lazy(BoxGizmo::createOutlineModel);
 
-    public BoxGizmo(String category) {
+    public BoxGizmo(GameObject attach, String name, String category) {
         super(category);
+
+        attach.add("Gizmo '" + name + "'", this);
     }
 
     private static Model createModel() {

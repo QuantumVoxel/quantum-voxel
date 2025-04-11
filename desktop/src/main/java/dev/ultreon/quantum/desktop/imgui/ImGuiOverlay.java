@@ -46,6 +46,7 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.RegionVec;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.ImGuiStyle;
 import imgui.ImVec2;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
@@ -126,6 +127,8 @@ public class ImGuiOverlay {
     private static final Map<NamespaceID, TextEditor> textEditors = new HashMap<>();
     private static TextEditorLanguageDefinition glsl;
     private static final Map<NamespaceID, TextEditorCoordinates> textEditorPos = new HashMap<>();
+    private static boolean firstLoop = true;
+    private static ImInt gameDockId;
 
     public static void setupImGui() {
         if (GamePlatform.get().isAngleGLES()) return;
@@ -214,7 +217,7 @@ public class ImGuiOverlay {
 
     private static void process(QuantumClient client) {
         if (frameBufferPixels != null) frameBufferPixels.getTexture().dispose();
-        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, Gdx.graphics.getHeight() - bounds.height, bounds.width, bounds.height);
+        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, QuantumClient.get().getHeight() - bounds.height, bounds.width, bounds.height);
 
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
@@ -228,8 +231,24 @@ public class ImGuiOverlay {
 
         ImGui.begin("MainDockingArea", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar);
         int id = ImGui.getID("MainDockingArea");
-        ImGui.dockSpace(id);
+        int dockSpace = ImGui.dockSpace(id);
         ImGui.end();
+
+        if (firstLoop) {
+            firstLoop = false;
+
+            gameDockId = new ImInt(dockSpace);
+
+            ImInt sceneDock = new ImInt(imgui.internal.ImGui.dockBuilderSplitNode(gameDockId.get(), ImGuiDir.Left, 0.15f, null, gameDockId));
+            ImInt nodeDock = new ImInt(imgui.internal.ImGui.dockBuilderSplitNode(gameDockId.get(), ImGuiDir.Right, 0.3f, null, gameDockId));
+            ImInt assetDock = new ImInt(imgui.internal.ImGui.dockBuilderSplitNode(gameDockId.get(), ImGuiDir.Down, 0.3f, null, gameDockId));
+            imgui.internal.ImGui.dockBuilderDockWindow("Node View", nodeDock.get());
+            imgui.internal.ImGui.dockBuilderDockWindow("Scene View", sceneDock.get());
+            imgui.internal.ImGui.dockBuilderDockWindow("Asset View", assetDock.get());
+            imgui.internal.ImGui.dockBuilderDockWindow("Game", gameDockId.get());
+            imgui.internal.ImGui.dockBuilderFinish(gameDockId.get());
+        }
+
 
         ImGui.getStyle().setWindowPadding(8, 8);
         ImGui.getStyle().setWindowBorderSize(1);
@@ -297,9 +316,16 @@ public class ImGuiOverlay {
     }
 
     private static void showGame(QuantumClient ignoredClient) {
-        if (ImGui.begin("Game", ImGuiWindowFlags.AlwaysAutoResize)) {
-            bounds.left = (int) ((ImGui.getMousePosX() - ImGui.getCursorPosX() - ImGui.getWindowPosX()) * ImGui.getWindowDpiScale());
-            bounds.top = (int) ((ImGui.getMousePosY() - ImGui.getCursorPosY() - ImGui.getWindowPosY()) * ImGui.getWindowDpiScale());
+        ImGuiStyle style = ImGui.getStyle();
+
+        // Save the original padding if needed
+        ImVec2 originalPadding = new ImVec2(style.getWindowPadding());
+
+        // Set the padding to 0 (or any value you need)
+        style.setWindowPadding(0, 0);
+        if (ImGui.begin("Game", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
+            bounds.mouseX = (int) ((ImGui.getMousePosX() - ImGui.getCursorPosX() - ImGui.getWindowPosX()) * ImGui.getWindowDpiScale());
+            bounds.mouseY = (int) ((ImGui.getMousePosY() - ImGui.getCursorPosY() - ImGui.getWindowPosY()) * ImGui.getWindowDpiScale());
             float contentRegionAvailX = ImGui.getContentRegionAvailX();
             float contentRegionAvailY = ImGui.getContentRegionAvailY();
             bounds.width = (int) (contentRegionAvailX * ImGui.getWindowDpiScale());
@@ -307,26 +333,15 @@ public class ImGuiOverlay {
 
             TextureRegion gameTex = frameBufferPixels;
             ImGui.image(gameTex.getTexture().getTextureObjectHandle(), contentRegionAvailX, contentRegionAvailY, frameBufferPixels.getU(), frameBufferPixels.getV(), frameBufferPixels.getU2(), frameBufferPixels.getV2(), 1, 1, 1, 1);
-
-            ImGui.setCursorPos(50, 50);
-
-            if (ImGui.beginChild("GameOverlay", 200, 200, true)) {
-                ImGui.text("Insets: " + bounds.left + ", " + bounds.top + ", " + bounds.width + ", " + bounds.height);
-                ImGui.text("Pos: " + ImGui.getWindowPosX() + ", " + ImGui.getWindowPosY());
-                ImGui.text("Size: " + ImGui.getWindowSizeX() + ", " + ImGui.getWindowSizeY());
-                ImGui.text("Dpi: " + ImGui.getWindowDpiScale());
-                ImGui.text("Viewport Pos: " + ImGui.getWindowViewport().getPosX() + ", " + ImGui.getWindowViewport().getPosY());
-                ImGui.text("Viewport Size: " + ImGui.getWindowViewport().getSizeX() + ", " + ImGui.getWindowViewport().getSizeY());
-                ImGui.text("Viewport Dpi: " + ImGui.getWindowViewport().getDpiScale());
-                ImGui.text("Mouse Pos: " + ImGui.getMousePosX() + ", " + ImGui.getMousePosY());
-            }
-            ImGui.endChild();
         }
         ImGui.end();
+
+        // Restore the original padding
+        style.setWindowPadding(originalPadding.x, originalPadding.y);
     }
 
     private static void showAssetView(QuantumClient client) {
-        if (ImGui.begin("Asset View")) {
+        if (ImGui.begin("Asset View", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
             // Show a list of all assets
             ResourceManager resourceManager = client.getResourceManager();
             if (ImGui.treeNodeEx("Assets", ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.OpenOnArrow | (resourceManager == null ? ImGuiTreeNodeFlags.Leaf : 0)) && resourceManager != null) {
@@ -393,7 +408,7 @@ public class ImGuiOverlay {
     }
 
     private static void showNodeView(QuantumClient ignoredClient) {
-        if (ImGui.begin("Node View")) {
+        if (ImGui.begin("Node View", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
             GameNode sel = selected;
 
             if (sel != null) {
@@ -1034,7 +1049,7 @@ public class ImGuiOverlay {
     }
 
     private static void showSceneView() {
-        if (ImGui.begin("Scene View", ImGuiWindowFlags.AlwaysAutoResize)) {
+        if (ImGui.begin("Scene View", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
             // Recursively render the scene view
             if (ImGui.treeNode(System.identityHashCode(QuantumClient.get().backgroundCat), "Background")) {
                 renderGameNode(QuantumClient.get().backgroundCat);

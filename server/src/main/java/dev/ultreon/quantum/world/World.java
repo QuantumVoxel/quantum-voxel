@@ -301,7 +301,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public Chunk getChunk(int x, int y, int z) {
+    public @Nullable Chunk getChunk(int x, int y, int z) {
         return this.getChunk(new ChunkVec(x, y, z, ChunkVecSpace.WORLD));
     }
 
