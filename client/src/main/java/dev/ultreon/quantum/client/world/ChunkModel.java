@@ -118,9 +118,7 @@ public class ChunkModel extends GameObject {
             RenderBufferSource bufferSource = QuantumClient.get().renderBuffers();
             chunkModelBuilder.begin(bufferSource);
 
-            if (!chunk.mesher.meshVoxels((blk) -> {
-                RenderPass pass = BlockRenderPassRegistry.get(blk.getBlock());
-                BlockModel model = BlockModelRegistry.get().get(blk);
+            if (!chunk.mesher.buildMesh((blk, model, pass) -> {
                 if (model == null) {
                     return true;
                 }

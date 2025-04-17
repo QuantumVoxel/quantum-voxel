@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -7,6 +8,10 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.world.Direction;
 
 public class AOUtils {
+    private static final Color DEEP_AO = new Color(0f, 0f, 0f, 0.8f);
+    private static final Color LIGHT_AO = new Color(0f, 0f, 0f, 0.4f);
+    private static final Color NO_AO = new Color(0f, 0f, 0f, 0f);
+
     // AO Arrays
     public static boolean hasAO(int[] ao) {
         for (int i : ao) if (i != 0) return true;
@@ -154,8 +159,56 @@ public class AOUtils {
         return array;
     }
 
-    private static BlockModel getModelAt(ClientChunkAccess chunk, int x, int y, int z) {
+    public static BlockModel getModelAt(ClientChunkAccess chunk, int x, int y, int z) {
         BlockState state = chunk.getSafe(x, y, z);
         return QuantumClient.get().getBlockModel(state);
+    }
+
+    public static Color getAoCorner00(int ao) {
+        if (hasAoCorner00(ao)) {
+            if (hasAoCorner01(ao) && hasAoCorner10(ao)) {
+                return DEEP_AO;
+            }
+
+            return LIGHT_AO;
+        }
+
+        return NO_AO;
+    }
+
+    public static Color getAoCorner01(int ao) {
+        if (hasAoCorner01(ao)) {
+            if (hasAoCorner00(ao) && hasAoCorner11(ao)) {
+                return DEEP_AO;
+            }
+
+            return LIGHT_AO;
+        }
+
+        return NO_AO;
+    }
+
+    public static Color getAoCorner10(int ao) {
+        if (hasAoCorner10(ao)) {
+            if (hasAoCorner00(ao) && hasAoCorner11(ao)) {
+                return DEEP_AO;
+            }
+
+            return LIGHT_AO;
+        }
+
+        return NO_AO;
+    }
+
+    public static Color getAoCorner11(int ao) {
+        if (hasAoCorner11(ao)) {
+            if (hasAoCorner00(ao) && hasAoCorner10(ao)) {
+                return DEEP_AO;
+            }
+
+            return LIGHT_AO;
+        }
+
+        return NO_AO;
     }
 }

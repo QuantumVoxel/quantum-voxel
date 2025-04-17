@@ -17,6 +17,7 @@ import dev.ultreon.quantum.world.Direction;
  * 
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
+@Deprecated
 public class NormalBlockRenderer implements BlockRenderer {
     public static final NormalBlockRenderer INSTANCE = new NormalBlockRenderer();
     private static final float TEXTURE_PERCENTAGE = 16f / 2048f;

@@ -19,6 +19,7 @@ import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.render.meshing.CulledMesher;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.shaders.Shaders;
@@ -102,7 +103,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             }
         });
 
-        this.mesher = new GreedyMesher(this, false);
+        this.mesher = new CulledMesher(this);
 
         for (int i = 0; i < CS; i++) {
             for (int j = 0; j < CS; j++) {

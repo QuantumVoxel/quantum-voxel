@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.quantum.block.Block;
+import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,9 +16,12 @@ public class BlockStateDefinition {
     private @Nullable BlockState defaultState;
     final StatePropertyKey<?>[] keys;
 
-    private BlockStateDefinition(Block block, BlockState[] array, StatePropertyKey<?>[] keys) {
+    private BlockStateDefinition(Block block, StatePropertyKey<?>[] keys) {
+        List<BlockState> states = new ArrayList<>();
+        fillStates(keys, states);
+
         this.block = block;
-        this.states = array;
+        this.states = states.toArray(new BlockState[0]);
         this.keys = keys;
 
         int offset = 0;
@@ -30,7 +35,20 @@ public class BlockStateDefinition {
         this.totalBits = offset;
     }
 
+    private void fillStates(StatePropertyKey<?>[] keys, List<BlockState> states) {
+        int maxId = 0;
+        for (StatePropertyKey<?> statePropertyKey : keys) {
+            for (int j = 0; j < statePropertyKey.size(); j++) {
+                BlockState state = new BlockState(maxId);
+                state.def = this;
+                states.add(state);
+                maxId++;
+            }
+        }
+    }
+
     public BlockState byId(int state) {
+        if (keys.length == 0) return getDefault();
         return this.states[state];
     }
 
@@ -83,6 +101,31 @@ public class BlockStateDefinition {
         return totalBits;
     }
 
+    public BlockState empty() {
+        return BlockState.empty(this);
+    }
+
+    public BlockState load(MapType entriesData) {
+        BlockState blockState = new BlockState(0);
+        blockState.def = this;
+        for (StatePropertyKey<?> key : keys) {
+            DataType<?> value = entriesData.get(key.name);
+            key.load(blockState, value);
+        }
+        return blockState;
+    }
+
+    public void save(BlockState blockState, MapType entriesData) {
+        for (StatePropertyKey<?> key : keys) {
+            DataType<?> value = key.save(blockState);
+            entriesData.put(key.name, value);
+        }
+    }
+
+    public Collection<StatePropertyKey<?>> keys() {
+        return propertyMap.keySet();
+    }
+
     public static class Builder {
         private final Block block;
         private final Set<StatePropertyKey<?>> keys = new HashSet<>();
@@ -93,7 +136,7 @@ public class BlockStateDefinition {
 
         public BlockStateDefinition build() {
             StatePropertyKey<?>[] keys = keys().stream().sorted(Comparator.comparing(StatePropertyKey::getName)).toArray(StatePropertyKey[]::new);
-            return new BlockStateDefinition(block, generateAllBlockStates(keys).toArray(BlockState[]::new), keys);
+            return new BlockStateDefinition(block, keys);
         }
 
         public Builder add(StatePropertyKey<?> key) {
@@ -101,45 +144,9 @@ public class BlockStateDefinition {
             return this;
         }
 
-        public static List<Map<StatePropertyKey<?>, Object>> generateAllBlockStates(StatePropertyKey<?>[] keys) {
-            List<Map<StatePropertyKey<?>, Object>> result = new ArrayList<>();
-
-            List<List<Object>> valueLists = new ArrayList<>();
-            for (StatePropertyKey<?> key : keys) {
-                valueLists.add((List<Object>) key.allPossibleValues());
-            }
-
-            List<List<Object>> combinations = cartesianProduct(valueLists);
-
-            for (List<Object> values : combinations) {
-                Map<StatePropertyKey<?>, Object> state = new LinkedHashMap<>();
-                for (int i = 0; i < keys.length; i++) {
-                    state.put(keys[i], values.get(i));
-                }
-                result.add(state);
-            }
-
-            return result;
-        }
-
-        // Cartesian product of a list of lists
-        public static <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
-            List<List<T>> result = new ArrayList<>();
-            result.add(new ArrayList<>());
-
-            for (List<T> list : lists) {
-                List<List<T>> newResult = new ArrayList<>();
-                for (List<T> prefix : result) {
-                    for (T item : list) {
-                        List<T> next = new ArrayList<>(prefix);
-                        next.add(item);
-                        newResult.add(next);
-                    }
-                }
-                result = newResult;
-            }
-
-            return result;
+        public Builder add(StatePropertyKey<?>... keys) {
+            this.keys.addAll(Arrays.asList(keys));
+            return this;
         }
 
         public List<StatePropertyKey<?>> keys() {

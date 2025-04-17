@@ -51,8 +51,7 @@ public class Block {
     private final @Nullable ToolLevel toolLevel;
     private final int lightReduction;
     private final SoundType soundType;
-    private final BlockState defaultState;
-    private final BlockStateDefinition definition;
+    protected final BlockStateDefinition definition;
     private final boolean doesRandomTick;
 
     /**
@@ -95,7 +94,7 @@ public class Block {
         var definitionBuilder = BlockStateDefinition.builder(this);
         defineState(definitionBuilder);
         this.definition = definitionBuilder.build();
-        this.defaultState = BlockState.empty();
+        this.definition.setDefault(BlockState.empty(definition));
     }
 
     public void onStateReload() {
@@ -246,7 +245,7 @@ public class Block {
     }
 
     public final @NotNull BlockState getDefaultState() {
-        return defaultState;
+        return definition.getDefault();
     }
 
     /**
@@ -352,11 +351,12 @@ public class Block {
     }
 
     public BlockState readBlockState(@NotNull PacketIO buffer) {
-        return getDefinition().read(buffer);
+        int stateId = buffer.readInt();
+        return definition.byId(stateId);
     }
 
     public void writeBlockState(PacketIO buffer, BlockState state) {
-        getDefinition().write(state, buffer);
+        buffer.writeInt(state.getStateId());
     }
 
     public BlockState loadBlockState(MapType data) {

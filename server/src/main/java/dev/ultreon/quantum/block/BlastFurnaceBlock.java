@@ -17,14 +17,15 @@ import org.jetbrains.annotations.NotNull;
 public class BlastFurnaceBlock extends EntityBlock {
     public BlastFurnaceBlock(Properties properties) {
         super(properties);
+
+        definition.setDefault(definition.empty().with(StateProperties.LIT, false).with(StateProperties.FACING, Direction.UP));
     }
 
     @Override
     protected void defineState(BlockStateDefinition.Builder definition) {
         super.defineState(definition);
 
-        definition.set(StateProperties.LIT, false);
-        definition.set(StateProperties.FACING, Direction.NORTH);
+        definition.add(StateProperties.LIT, StateProperties.FACING);
     }
 
     @Override

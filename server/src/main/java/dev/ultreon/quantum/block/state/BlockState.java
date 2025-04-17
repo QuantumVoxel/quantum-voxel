@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 public class BlockState {
     @Nullable BlockStateDefinition def;
-    final int id;
+    private final int id;
 
     /**
      * Constructs a new {@link BlockState} object.
@@ -303,7 +303,7 @@ public class BlockState {
      * @param value the value of the entry
      * @return a new copy of this block state with the given entry overridden
      */
-    public <T> @NotNull BlockState withEntry(@NotNull StatePropertyKey<T> key, @NotNull T value) {
+    public <T> @NotNull BlockState with(@NotNull StatePropertyKey<T> key, @NotNull T value) {
         assert def != null;
         PropertyInfo info = def.propertyMap.get(key);
         int valueIndex = key.indexOf(value);

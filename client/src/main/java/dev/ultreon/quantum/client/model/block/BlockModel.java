@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.resources.LoadableResource;
+import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -26,6 +27,8 @@ public interface BlockModel extends LoadableResource {
     default void loadInto(BlockVec pos, ClientChunk chunk) {
         // Do nothing
     }
+
+    void bakeInto(int x, int y, int z, int cullface, RenderPass defaultRenderPass, ClientChunk chunk, ChunkModelBuilder builder, int[] ao);
 
     Model getModel();
 

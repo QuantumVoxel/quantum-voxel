@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.google.common.base.Preconditions;
@@ -29,6 +30,9 @@ import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
+import dev.ultreon.quantum.client.render.RenderBuffer;
+import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -185,7 +189,7 @@ public class Json5ModelLoader {
             Json5Element cullface = faceData.get("cullface");
             String cullFace = cullface == null ? null : cullface.getAsString();
 
-            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace));
+            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace, null));
         }
 
         return faceElems;
@@ -214,20 +218,22 @@ public class Json5ModelLoader {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-        public static final class FaceElement {
+    public static final class FaceElement {
         private final String texture;
         private final UVs uvs;
         private final int rotation;
         private final int tintindex;
         private final String cullface;
+        private final @Nullable String pass;
 
         public FaceElement(String texture, UVs uvs, int rotation, int tintindex,
-                           String cullface) {
+                           String cullface, @Nullable String pass) {
             this.texture = texture;
             this.uvs = uvs;
             this.rotation = rotation;
             this.tintindex = tintindex;
             this.cullface = cullface;
+            this.pass = pass;
         }
 
         public String texture() {
@@ -248,6 +254,10 @@ public class Json5ModelLoader {
 
         public String cullface() {
             return cullface;
+        }
+        
+        public @Nullable String pass() {
+            return pass;
         }
 
         @Override
@@ -277,7 +287,7 @@ public class Json5ModelLoader {
                    "cullface=" + cullface + ']';
         }
 
-        }
+    }
 
     public static final class UVs {
         private final float x1;
@@ -321,9 +331,9 @@ public class Json5ModelLoader {
             if (obj == null || obj.getClass() != this.getClass()) return false;
             var that = (UVs) obj;
             return Float.floatToIntBits(this.x1) == Float.floatToIntBits(that.x1) &&
-                    Float.floatToIntBits(this.y1) == Float.floatToIntBits(that.y1) &&
-                    Float.floatToIntBits(this.x2) == Float.floatToIntBits(that.x2) &&
-                    Float.floatToIntBits(this.y2) == Float.floatToIntBits(that.y2);
+                   Float.floatToIntBits(this.y1) == Float.floatToIntBits(that.y1) &&
+                   Float.floatToIntBits(this.x2) == Float.floatToIntBits(that.x2) &&
+                   Float.floatToIntBits(this.y2) == Float.floatToIntBits(that.y2);
         }
 
         @Override
@@ -334,18 +344,18 @@ public class Json5ModelLoader {
         @Override
         public String toString() {
             return "UVs[" +
-                    "x1=" + x1 + ", " +
-                    "y1=" + y1 + ", " +
-                    "x2=" + x2 + ", " +
-                    "y2=" + y2 + ']';
+                   "x1=" + x1 + ", " +
+                   "y1=" + y1 + ", " +
+                   "x2=" + x2 + ", " +
+                   "y2=" + y2 + ']';
         }
 
 
     }
 
     public static final class ModelElement {
-            private static final Vector3 tmp = new Vector3();
-            private static final Quaternion tmpQ = new Quaternion();
+        private static final Vector3 tmp = new Vector3();
+        private static final Quaternion tmpQ = new Quaternion();
         private final Map<Direction, FaceElement> blockFaceFaceElementMap;
         private final boolean shade;
         private final ElementRotation rotation;
@@ -353,121 +363,269 @@ public class Json5ModelLoader {
         private final Vector3 to;
 
 
-            public ModelElement(Map<Direction, FaceElement> blockFaceFaceElementMap, boolean shade, ElementRotation rotation, Vector3 from, Vector3 to) {
-                Preconditions.checkNotNull(blockFaceFaceElementMap);
-                Preconditions.checkNotNull(rotation);
-                Preconditions.checkNotNull(from);
-                Preconditions.checkNotNull(to);
-                this.blockFaceFaceElementMap = blockFaceFaceElementMap;
-                this.shade = shade;
-                this.rotation = rotation;
-                this.from = from;
-                this.to = to;
-            }
+        public ModelElement(Map<Direction, FaceElement> blockFaceFaceElementMap, boolean shade, ElementRotation rotation, Vector3 from, Vector3 to) {
+            Preconditions.checkNotNull(blockFaceFaceElementMap);
+            Preconditions.checkNotNull(rotation);
+            Preconditions.checkNotNull(from);
+            Preconditions.checkNotNull(to);
+            this.blockFaceFaceElementMap = blockFaceFaceElementMap;
+            this.shade = shade;
+            this.rotation = rotation;
+            this.from = from;
+            this.to = to;
+        }
 
-            public void bake(int idx, ModelBuilder modelBuilder, Map<String, NamespaceID> textureElements) {
-                Vector3 from = this.from();
-                Vector3 to = this.to();
+        public void bake(int idx, ModelBuilder modelBuilder, Map<String, NamespaceID> textureElements) {
+            Vector3 from = this.from();
+            Vector3 to = this.to();
 
-                ModelBuilder nodeBuilder = new ModelBuilder();
-                nodeBuilder.begin();
+            ModelBuilder nodeBuilder = new ModelBuilder();
+            nodeBuilder.begin();
 
-                MeshBuilder meshBuilder = new MeshBuilder();
-                VertexInfo v00 = new VertexInfo();
-                VertexInfo v01 = new VertexInfo();
-                VertexInfo v10 = new VertexInfo();
-                VertexInfo v11 = new VertexInfo();
-                for (Map.Entry<Direction, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
-                    Direction direction = entry.getKey();
-                    FaceElement faceElement = entry.getValue();
-                    String texRef = faceElement.texture;
-                    NamespaceID texture;
+            MeshBuilder meshBuilder = new MeshBuilder();
+            VertexInfo v00 = new VertexInfo();
+            VertexInfo v01 = new VertexInfo();
+            VertexInfo v10 = new VertexInfo();
+            VertexInfo v11 = new VertexInfo();
+            for (Map.Entry<Direction, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
+                Direction direction = entry.getKey();
+                FaceElement faceElement = entry.getValue();
+                String texRef = faceElement.texture;
+                NamespaceID texture;
 
-                    if (texRef.equals("#missing")) texture = new NamespaceID("textures/block/error.png");
-                    else if (texRef.startsWith("#")) texture = textureElements.get(texRef.substring(1));
-                    else texture = NamespaceID.parse(texRef).mapPath(path -> "textures/" + path + ".png");
+                if (texRef.equals("#missing")) texture = new NamespaceID("textures/block/error.png");
+                else if (texRef.startsWith("#")) texture = textureElements.get(texRef.substring(1));
+                else texture = NamespaceID.parse(texRef).mapPath(path -> "textures/" + path + ".png");
 
-                    meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
-                    v00.setCol(Color.WHITE);
-                    v01.setCol(Color.WHITE);
-                    v10.setCol(Color.WHITE);
-                    v11.setCol(Color.WHITE);
+                meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
+                v00.setCol(Color.WHITE);
+                v01.setCol(Color.WHITE);
+                v10.setCol(Color.WHITE);
+                v11.setCol(Color.WHITE);
 
-                    v00.setNor(direction.getNormal());
-                    v01.setNor(direction.getNormal());
-                    v10.setNor(direction.getNormal());
-                    v11.setNor(direction.getNormal());
+                v00.setNor(direction.getNormal());
+                v01.setNor(direction.getNormal());
+                v10.setNor(direction.getNormal());
+                v11.setNor(direction.getNormal());
 
-                    v00.setUV(faceElement.uvs.x1, faceElement.uvs.y2);
-                    v01.setUV(faceElement.uvs.x1, faceElement.uvs.y1);
-                    v10.setUV(faceElement.uvs.x2, faceElement.uvs.y2);
-                    v11.setUV(faceElement.uvs.x2, faceElement.uvs.y1);
+                v00.setUV(faceElement.uvs.x1, faceElement.uvs.y2);
+                v01.setUV(faceElement.uvs.x1, faceElement.uvs.y1);
+                v10.setUV(faceElement.uvs.x2, faceElement.uvs.y2);
+                v11.setUV(faceElement.uvs.x2, faceElement.uvs.y1);
 
-                    switch (direction) {
-                        case UP:
-                            v00.setPos(to.x, to.y, from.z);
-                            v01.setPos(to.x, to.y, to.z);
-                            v10.setPos(from.x, to.y, from.z);
-                            v11.setPos(from.x, to.y, to.z);
-                            break;
-                        case DOWN:
-                            v00.setPos(from.x, from.y, from.z);
-                            v01.setPos(from.x, from.y, to.z);
-                            v10.setPos(to.x, from.y, from.z);
-                            v11.setPos(to.x, from.y, to.z);
-                            break;
-                        case WEST:
-                            v00.setPos(from.x, from.y, from.z);
-                            v01.setPos(from.x, to.y, from.z);
-                            v10.setPos(from.x, from.y, to.z);
-                            v11.setPos(from.x, to.y, to.z);
-                            break;
-                        case EAST:
-                            v00.setPos(to.x, from.y, to.z);
-                            v01.setPos(to.x, to.y, to.z);
-                            v10.setPos(to.x, from.y, from.z);
-                            v11.setPos(to.x, to.y, from.z);
-                            break;
-                        case NORTH:
-                            v00.setPos(to.x, from.y, from.z);
-                            v01.setPos(to.x, to.y, from.z);
-                            v10.setPos(from.x, from.y, from.z);
-                            v11.setPos(from.x, to.y, from.z);
-                            break;
-                        case SOUTH:
-                            v00.setPos(from.x, from.y, to.z);
-                            v01.setPos(from.x, to.y, to.z);
-                            v10.setPos(to.x, from.y, to.z);
-                            v11.setPos(to.x, to.y, to.z);
-                            break;
-                    }
-
-                    meshBuilder.rect(v00, v10, v11, v01);
-
-                    Material material = new Material();
-                    material.set(TextureAttribute.createDiffuse(QuantumClient.get().getTextureManager().getTexture(texture)));
-                    material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
-                    material.set(new FloatAttribute(FloatAttribute.AlphaTest));
-                    material.set(new DepthTestAttribute(GL20.GL_LEQUAL));
-                    nodeBuilder.part(idx + "." + direction.name(), meshBuilder.end(), GL20.GL_TRIANGLES, material);
+                switch (direction) {
+                    case UP:
+                        v00.setPos(to.x, to.y, from.z);
+                        v01.setPos(to.x, to.y, to.z);
+                        v10.setPos(from.x, to.y, from.z);
+                        v11.setPos(from.x, to.y, to.z);
+                        break;
+                    case DOWN:
+                        v00.setPos(from.x, from.y, from.z);
+                        v01.setPos(from.x, from.y, to.z);
+                        v10.setPos(to.x, from.y, from.z);
+                        v11.setPos(to.x, from.y, to.z);
+                        break;
+                    case WEST:
+                        v00.setPos(from.x, from.y, from.z);
+                        v01.setPos(from.x, to.y, from.z);
+                        v10.setPos(from.x, from.y, to.z);
+                        v11.setPos(from.x, to.y, to.z);
+                        break;
+                    case EAST:
+                        v00.setPos(to.x, from.y, to.z);
+                        v01.setPos(to.x, to.y, to.z);
+                        v10.setPos(to.x, from.y, from.z);
+                        v11.setPos(to.x, to.y, from.z);
+                        break;
+                    case NORTH:
+                        v00.setPos(to.x, from.y, from.z);
+                        v01.setPos(to.x, to.y, from.z);
+                        v10.setPos(from.x, from.y, from.z);
+                        v11.setPos(from.x, to.y, from.z);
+                        break;
+                    case SOUTH:
+                        v00.setPos(from.x, from.y, to.z);
+                        v01.setPos(from.x, to.y, to.z);
+                        v10.setPos(to.x, from.y, to.z);
+                        v11.setPos(to.x, to.y, to.z);
+                        break;
                 }
 
-                Model end = nodeBuilder.end();
-                Node node = modelBuilder.node("[" + idx + "]", end);
+                meshBuilder.rect(v00, v10, v11, v01);
 
-                Vector3 originVec = rotation.originVec;
-                Axis axis = rotation.axis;
-                float angle = rotation.angle;
-                boolean rescale = rotation.rescale; // TODO: implement
-
-                node.localTransform.translate(originVec.x, originVec.y, originVec.z);
-                node.localTransform.rotate(axis.getVector(), angle);
-                node.localTransform.translate(-originVec.x, -originVec.y, -originVec.z);
-                node.scale.set(node.localTransform.getScale(tmp));
-                node.translation.set(node.localTransform.getTranslation(tmp));
-                node.rotation.set(node.localTransform.getRotation(tmpQ));
+                Material material = new Material();
+                material.set(TextureAttribute.createDiffuse(QuantumClient.get().getTextureManager().getTexture(texture)));
+                material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+                material.set(new FloatAttribute(FloatAttribute.AlphaTest));
+                material.set(new DepthTestAttribute(GL20.GL_LEQUAL));
+                nodeBuilder.part(idx + "." + direction.name(), meshBuilder.end(), GL20.GL_TRIANGLES, material);
             }
 
+            Model end = nodeBuilder.end();
+            Node node = modelBuilder.node("[" + idx + "]", end);
+
+            Vector3 originVec = rotation.originVec;
+            Axis axis = rotation.axis;
+            float angle = rotation.angle;
+            boolean rescale = rotation.rescale; // TODO: implement
+
+            node.localTransform.translate(originVec.x, originVec.y, originVec.z);
+            node.localTransform.rotate(axis.getVector(), angle);
+            node.localTransform.translate(-originVec.x, -originVec.y, -originVec.z);
+            node.scale.set(node.localTransform.getScale(tmp));
+            node.translation.set(node.localTransform.getTranslation(tmp));
+            node.rotation.set(node.localTransform.getRotation(tmpQ));
+        }
+
+        public void bakeInto(int idx, ChunkModelBuilder modelBuilder, RenderPass defaultPass, int cullface, int x, int y, int z, Map<String, NamespaceID> textureElements) {
+            Vector3 from = this.from();
+            Vector3 to = this.to();
+
+            ModelBuilder nodeBuilder = new ModelBuilder();
+            nodeBuilder.begin();
+
+            MeshBuilder meshBuilder = new MeshBuilder();
+            VertexInfo v00 = new VertexInfo();
+            VertexInfo v01 = new VertexInfo();
+            VertexInfo v10 = new VertexInfo();
+            VertexInfo v11 = new VertexInfo();
+            for (Map.Entry<Direction, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
+                if ((cullface >> entry.getKey().ordinal() & 1) == 1) continue;
+                Direction direction = entry.getKey();
+                FaceElement faceElement = entry.getValue();
+                String texRef = faceElement.texture;
+                NamespaceID texture;
+
+                if (texRef.equals("#missing")) texture = new NamespaceID("textures/block/error.png");
+                else if (texRef.startsWith("#")) texture = textureElements.get(texRef.substring(1));
+                else texture = NamespaceID.parse(texRef).mapPath(path -> "textures/" + path + ".png");
+
+                meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
+                v00.setCol(Color.WHITE);
+                v01.setCol(Color.WHITE);
+                v10.setCol(Color.WHITE);
+                v11.setCol(Color.WHITE);
+
+                v00.setNor(direction.getNormal());
+                v01.setNor(direction.getNormal());
+                v10.setNor(direction.getNormal());
+                v11.setNor(direction.getNormal());
+
+                v00.setUV(faceElement.uvs.x1, faceElement.uvs.y2);
+                v01.setUV(faceElement.uvs.x1, faceElement.uvs.y1);
+                v10.setUV(faceElement.uvs.x2, faceElement.uvs.y2);
+                v11.setUV(faceElement.uvs.x2, faceElement.uvs.y1);
+
+                switch (direction) {
+                    case UP:
+                        v00.setPos(to.x, to.y, from.z);
+                        v01.setPos(to.x, to.y, to.z);
+                        v10.setPos(from.x, to.y, from.z);
+                        v11.setPos(from.x, to.y, to.z);
+                        break;
+                    case DOWN:
+                        v00.setPos(from.x, from.y, from.z);
+                        v01.setPos(from.x, from.y, to.z);
+                        v10.setPos(to.x, from.y, from.z);
+                        v11.setPos(to.x, from.y, to.z);
+                        break;
+                    case WEST:
+                        v00.setPos(from.x, from.y, from.z);
+                        v01.setPos(from.x, to.y, from.z);
+                        v10.setPos(from.x, from.y, to.z);
+                        v11.setPos(from.x, to.y, to.z);
+                        break;
+                    case EAST:
+                        v00.setPos(to.x, from.y, to.z);
+                        v01.setPos(to.x, to.y, to.z);
+                        v10.setPos(to.x, from.y, from.z);
+                        v11.setPos(to.x, to.y, from.z);
+                        break;
+                    case NORTH:
+                        v00.setPos(to.x, from.y, from.z);
+                        v01.setPos(to.x, to.y, from.z);
+                        v10.setPos(from.x, from.y, from.z);
+                        v11.setPos(from.x, to.y, from.z);
+                        break;
+                    case SOUTH:
+                        v00.setPos(from.x, from.y, to.z);
+                        v01.setPos(from.x, to.y, to.z);
+                        v10.setPos(to.x, from.y, to.z);
+                        v11.setPos(to.x, to.y, to.z);
+                        break;
+                }
+
+
+                rotate(v00, v01, v10, v11, rotation);
+
+                v00.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
+                v01.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
+                v10.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
+                v11.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
+
+                modelBuilder.get(faceElement.pass == null ? defaultPass : RenderPass.byName(faceElement.pass)).rect(v00, v10, v11, v01);
+            }
+        }
+    private boolean rotate(
+      VertexInfo v00,
+      VertexInfo v01,
+      VertexInfo v10,
+      VertexInfo v11,
+      ElementRotation rotation
+    ) {
+      Vector3 originVec = rotation.originVec;
+      Axis axis = rotation.axis;
+      float angle = rotation.angle;
+      boolean rescale = rotation.rescale; // TODO: implement
+
+      // Rotate the vertices
+      rotate(v00.position, originVec, axis, angle, v00.position);
+      rotate(v01.position, originVec, axis, angle, v01.position);
+      rotate(v10.position, originVec, axis, angle, v10.position);
+      rotate(v11.position, originVec, axis, angle, v11.position);
+
+      return true;
+    }
+
+    public Vector3 rotate(
+      Vector3 position,
+      Vector3 originVec,
+      Axis axis,
+      float degrees,
+      Vector3 out
+    ) {
+      return rotateVector(position, originVec, degrees, axis.getVector(), out);
+    }
+
+    private final Color aoColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+    // Reusable instances
+    private final Vector3 tempVector = new Vector3();
+
+    private final Matrix4 rotationMatrix = new Matrix4();
+
+    private Vector3 rotateVector(
+      Vector3 vector,
+      Vector3 origin,
+      float angleDegrees,
+      Vector3 axis,
+      Vector3 result
+    ) {
+      // Step 1: Translate the vector to the origin
+      tempVector.set(vector).sub(origin);
+
+      // Step 2: Create a rotation matrix
+      rotationMatrix.setToRotation(axis, angleDegrees);
+
+      // Step 3: Apply the rotation matrix to the translated vector
+      tempVector.mul(rotationMatrix);
+
+      // Step 4: Translate the vector back
+      result.set(tempVector).add(origin);
+
+      return result;
+    }
         public Map<Direction, FaceElement> blockFaceFaceElementMap() {
             return blockFaceFaceElementMap;
         }
@@ -515,7 +673,7 @@ public class Json5ModelLoader {
                    "to=" + to + ']';
         }
 
-        }
+    }
 
     public static final class ElementRotation {
         private final Vector3 originVec;
@@ -530,20 +688,20 @@ public class Json5ModelLoader {
             this.rescale = rescale;
         }
 
-            public static ElementRotation deserialize(@Nullable Json5Object rotation) {
-                if (rotation == null) {
-                    return new ElementRotation(new Vector3(0, 0, 0), Axis.Y, 0, false);
-                }
-
-                Json5Array origin = rotation.getAsJson5Array("origin");
-                String axis = rotation.get("axis").getAsString();
-                float angle = rotation.get("angle").getAsFloat();
-                Json5Element rescale1 = rotation.get("rescale");
-                boolean rescale = rescale1 != null && rescale1.getAsBoolean();
-
-                Vector3 originVec = new Vector3(origin.get(0).getAsFloat(), origin.get(1).getAsFloat(), origin.get(2).getAsFloat());
-                return new ElementRotation(originVec, Axis.valueOf(axis.toUpperCase(Locale.ROOT)), angle, rescale);
+        public static ElementRotation deserialize(@Nullable Json5Object rotation) {
+            if (rotation == null) {
+                return new ElementRotation(new Vector3(0, 0, 0), Axis.Y, 0, false);
             }
+
+            Json5Array origin = rotation.getAsJson5Array("origin");
+            String axis = rotation.get("axis").getAsString();
+            float angle = rotation.get("angle").getAsFloat();
+            Json5Element rescale1 = rotation.get("rescale");
+            boolean rescale = rescale1 != null && rescale1.getAsBoolean();
+
+            Vector3 originVec = new Vector3(origin.get(0).getAsFloat(), origin.get(1).getAsFloat(), origin.get(2).getAsFloat());
+            return new ElementRotation(originVec, Axis.valueOf(axis.toUpperCase(Locale.ROOT)), angle, rescale);
+        }
 
         public Vector3 originVec() {
             return originVec;
@@ -586,7 +744,7 @@ public class Json5ModelLoader {
                    "rescale=" + rescale + ']';
         }
 
-        }
+    }
 
     public static final class Display {
         public String renderPass;
@@ -616,5 +774,5 @@ public class Json5ModelLoader {
         }
 
 
-        }
+    }
 }

@@ -7,6 +7,7 @@ import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.ubo.types.MapType;
 import org.checkerframework.common.reflection.qual.NewInstance;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
      * @param y the y-coordinate.
      * @param z the z-coordinate.
      */
-    @Deprecated
+    @ApiStatus.Internal
     public BlockVec(int x, int y, int z) {
         this(x, y, z, BlockVecSpace.WORLD);
     }

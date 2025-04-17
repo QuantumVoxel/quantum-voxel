@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.quantum.network.PacketIO;
+import dev.ultreon.ubo.types.DataType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.ArrayUtils;
@@ -73,4 +74,8 @@ public abstract class StatePropertyKey<T> {
     public T valueByIndex(int valueIndex) {
         return possibleValues[valueIndex];
     }
+
+    public abstract void load(BlockState blockState, DataType<?> value);
+
+    public abstract DataType<?> save(BlockState blockState);
 }
