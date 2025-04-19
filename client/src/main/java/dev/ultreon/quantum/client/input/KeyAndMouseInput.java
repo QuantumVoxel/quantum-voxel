@@ -34,6 +34,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.BitSet;
 import java.util.stream.IntStream;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+
 /**
  * The input for the desktop client.
  *
@@ -59,6 +62,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     private static final BitSet PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
     private static final BitSet WAS_PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
     private long lastKeyCancelFrame;
+    private float partialSelect;
 
     public KeyAndMouseInput(QuantumClient client, Camera camera) {
         super(client, camera);
@@ -564,7 +568,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
         // Get the position and metadata of the current and next blocks
         BlockVec pos = hit.getBlockVec();
-        if (hit instanceof BlockHit blockHitResult){
+        if (hit instanceof BlockHit blockHitResult) {
             assert world != null;
             BlockState block = world.get(new BlockVec(pos));
 
@@ -656,13 +660,14 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Handle hotbar scrolling with the mouse wheel
         Player player = this.client.player;
         if (currentScreen == null && player != null) {
-            int scrollAmount = (int) amountY;
-            int i = (player.selected + scrollAmount) % 9;
+            this.partialSelect += amountY;
 
-            if (i < 0)
-                i += 9;
+            if (Math.abs(partialSelect) >= 1f) {
+                int steps = (int) Math.signum(partialSelect);
+                player.selected = Math.floorMod(player.selected + steps, 9);
+                partialSelect = 0;
+            }
 
-            player.selected = i;
             return true;
         }
 
