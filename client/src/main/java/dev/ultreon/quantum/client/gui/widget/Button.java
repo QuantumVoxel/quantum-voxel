@@ -43,47 +43,47 @@ public abstract class Button<T extends Button<T>> extends Widget {
             this.pressed = false;
         }
 
-        if (shouldBeTransparent()) {
-            Color color = tmp;
-            if (isHovered) {
-                color.set(1, 1, 1, 0.25f);
-            } else if (this.pressed) {
-                color.set(1, 1, 1, 0.4f);
-            } else if (this.isEnabled) {
-                color.set(1, 1, 1, 0.1f);
-            } else {
-                color.set(1, 1, 1, 0.05f);
-            }
-            renderer.fill(x, y, this.size.width, this.size.height, color);
-            return;
-        }
-
-        int u;
-        if (this.isEnabled) u = isHovered ? 21 : 0;
-        else u = 42;
-        int v = 0;
-
-        u += 63 * type.xOffset;
-        v += 42 * type.yOffset;
-
-        float yOffsetGoal = isHovered && isEnabled ? 2f : 0f;
-        if (this.pressed && isEnabled) {
-            yOffsetGoal = -1f;
-        }
-        if (yOffset > yOffsetGoal) {
-            yOffset -= (yOffset - yOffsetGoal) * Gdx.graphics.getDeltaTime() * 8f;
-        } else if (yOffset < yOffsetGoal) {
-            yOffset += (yOffsetGoal - yOffset) * Gdx.graphics.getDeltaTime() * 8f;
-        }
+        calculateOffset();
 
         renderer.fill(x + 1, y + this.size.height, this.size.width - 2, 1, Renderer.DARK_TRANSPARENT);
 
-        renderer.draw9Slice(texture, x, y - yOffset, this.size.width, this.size.height - 3, u, v, 21, 18, 3, 256, 256);
-        renderer.draw9Slice(texture, x, y + this.size.height - yOffset - 3, this.size.width, 3 + yOffset, u, v + 18, 21, 3, 1, 256, 256);
+        if (!isEnabled) {
+            renderer.drawDisabledPlatform(pos.x, pos.y, size.width, size.height, yOffset);
+        } else if (isHovered) {
+            renderer.drawHighlightPlatform(pos.x, pos.y, size.width, size.height, yOffset);
+        } else {
+            renderer.drawPlatform(pos.x, pos.y, size.width, size.height, yOffset);
+        }
+
         if (!pressed && wasPressed && !isHovered) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
         }
+    }
+
+    private void calculateOffset() {
+        float yOffsetGoal = calculateGoal();
+        if (yOffset > yOffsetGoal) {
+            if (yOffset < yOffsetGoal + 0.3f) yOffset = yOffsetGoal;
+            yOffset -= (yOffset - yOffsetGoal) * Gdx.graphics.getDeltaTime() * 8f;
+        } else if (yOffset < yOffsetGoal) {
+            if (yOffset > yOffsetGoal - 0.3f) yOffset = yOffsetGoal;
+            yOffset += (yOffsetGoal - yOffset) * Gdx.graphics.getDeltaTime() * 8f;
+        }
+    }
+
+    private float calculateGoal() {
+        float yOffsetGoal;
+        if (type.inset) {
+            yOffsetGoal = isHovered && isEnabled ? 2f : 0f;
+            if (this.pressed && isEnabled)
+                yOffsetGoal = -2f;
+        } else {
+            yOffsetGoal = isHovered && isEnabled ? 4f : 2f;
+            if (this.pressed && isEnabled)
+                yOffsetGoal = 1f;
+        }
+        return yOffsetGoal;
     }
 
     private boolean shouldBeTransparent() {
@@ -159,20 +159,17 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     public enum Type {
-        DARK(0, 0),
-        LIGHT(1, 0),
-        @Deprecated
-        DARK_EMBED(0, 0),
-        @Deprecated
-        LIGHT_EMBED(1, 0);
+        DARK(0, false),
+        LIGHT(1, false),
+        DARK_EMBED(0, true),
+        LIGHT_EMBED(1, true);
 
         private final int xOffset;
-        private final int yOffset;
+        private final boolean inset;
 
-        Type(int xOffset, int yOffset) {
-
+        Type(int xOffset, boolean inset) {
             this.xOffset = xOffset;
-            this.yOffset = yOffset;
+            this.inset = inset;
         }
     }
 }

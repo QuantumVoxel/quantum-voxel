@@ -7,7 +7,6 @@ import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.RgbColor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -95,7 +94,7 @@ public abstract class TabbedUI extends Screen {
         super.renderWidget(renderer, deltaTime);
 
         Bounds grow = this.frameBounds.set(contentBounds).grow(4);
-        renderer.renderPopoutFrame(grow.pos.x, grow.pos.y - 3, grow.size.width, grow.size.height);
+        renderer.drawPlatform(grow.pos.x, grow.pos.y - 3, grow.size.width, grow.size.height);
 
         if (this.tab != null && renderer.pushScissors(contentBounds)) {
             TabContent content = this.tab.content();

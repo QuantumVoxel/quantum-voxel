@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Callback;
@@ -32,6 +32,7 @@ public class TextEntry extends Widget {
 
     private int selectFrom = -1;
     private int selectTo = -1;
+    private float yOffset = 0f;
 
     /**
      * @param width  the width of the text entry.
@@ -77,27 +78,27 @@ public class TextEntry extends Widget {
 
     @Override
     public void renderWidget(Renderer renderer, float deltaTime) {
-        final int u = this.isEnabled ? this.isFocused ? 12 : 0 : 24;
+        float yOffsetGoal = isHovered && isEnabled ? 2f : 0f;
+        if (this.isFocused && isEnabled) {
+            yOffsetGoal = -3f;
+        }
+        if (yOffset > yOffsetGoal) {
+            yOffset -= (yOffset - yOffsetGoal) * Gdx.graphics.getDeltaTime() * 8f;
+        } else if (yOffset < yOffsetGoal) {
+            yOffset += (yOffsetGoal - yOffset) * Gdx.graphics.getDeltaTime() * 8f;
+        }
 
-        final int v = 0;
-        final int tx = this.pos.x;
-        final int ty = this.pos.y - 2;
-        final int tw = this.size.width;
-        final int th = this.size.height + 3;
+        renderer.blitColor(RgbColor.WHITE);
 
-        Texture texture = this.client.getTextureManager().getTexture(id("textures/gui/text_entry.png"));
-        renderer.blitColor(RgbColor.WHITE)
-                .blit(texture, tx, ty, 4, 4, u, v, 4, 4, 36, 12)
-                .blit(texture, tx + 4, ty, tw - 8, 4, 4 + u, v, 4, 4, 36, 12)
-                .blit(texture, tx + tw - 4, ty, 4, 4, 8 + u, v, 4, 4, 36, 12)
-                .blit(texture, tx, ty + 4, 4, th - 8, u, 4 + v, 4, 4, 36, 12)
-                .blit(texture, tx + 4, ty + 4, tw - 8, th - 8, 4 + u, 4 + v, 4, 4, 36, 12)
-                .blit(texture, tx + tw - 4, ty + 4, 4, th - 8, 8 + u, 4 + v, 4, 4, 36, 12)
-                .blit(texture, tx, ty + th - 4, 4, 4, u, 8 + v, 4, 4, 36, 12)
-                .blit(texture, tx + 4, ty + th - 4, tw - 8, 4, 4 + u, 8 + v, 4, 4, 36, 12)
-                .blit(texture, tx + tw - 4, ty + th - 4, 4, 4, 8 + u, 8 + v, 4, 4, 36, 12);
+        if (!isEnabled) {
+            renderer.drawDisabledPlatform(pos.x, pos.y, size.width, size.height, yOffset);
+        } else if (isHovered) {
+            renderer.drawHighlightPlatform(pos.x, pos.y, size.width, size.height, yOffset);
+        } else {
+            renderer.drawPlatform(pos.x, pos.y, size.width, size.height, yOffset);
+        }
 
-        if (renderer.pushScissors(this.getBounds().shrink(1, 1, 1, 4))) {
+        if (renderer.pushScissors(this.getBounds().shrink(1, 1, 1, 4).move(0, Math.max(0, -yOffset)))) {
             renderText(renderer);
         }
     }
@@ -114,20 +115,20 @@ public class TextEntry extends Widget {
             int beforeWidth = renderer.textWidth(before);
             int selectedWidth = renderer.textWidth(selected);
 
-            renderer.textLeft(before, this.pos.x + 5, this.pos.y + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), false);
-            renderer.fill(this.pos.x + 5 + beforeWidth, (int) (this.pos.y + this.font.getLineHeight()), selectedWidth, 10, RgbColor.WHITE.withAlpha(0x80));
-            renderer.textLeft(selected, this.pos.x + 5 + beforeWidth, this.pos.y + this.font.getLineHeight(), RgbColor.RED, false);
-            renderer.textLeft(after, this.pos.x + 5 + beforeWidth + selectedWidth, this.pos.y + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), false);
+            renderer.textLeft(before, this.pos.x + 5, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), true);
+            renderer.fill(this.pos.x + 5 + beforeWidth, (int) (this.pos.y - yOffset + this.font.getLineHeight()), selectedWidth, 10, RgbColor.WHITE.withAlpha(0x80));
+            renderer.textLeft(selected, this.pos.x + 5 + beforeWidth, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.RED, true);
+            renderer.textLeft(after, this.pos.x + 5 + beforeWidth + selectedWidth, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), true);
         } else {
-            renderer.textLeft(this.value, this.pos.x + 5, this.pos.y + this.font.getLineHeight(), false);
+            renderer.textLeft(this.value, this.pos.x + 5, this.pos.y - yOffset + this.font.getLineHeight(), true);
         }
         TextObject hintObj = this.hint.get();
         if (this.value.isEmpty() && hintObj != null) {
-            renderer.textLeft(hintObj, this.pos.x + 5, this.pos.y + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), false);
+            renderer.textLeft(hintObj, this.pos.x + 5, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), true);
         }
 
         if (this.isFocused) {
-            renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y + 5, this.pos.x + 3 + this.cursorX, this.pos.y + this.size.height - 6, Color.WHITE);
+            renderer.line(this.pos.x + 3 + this.cursorX, this.pos.y - yOffset + 5, this.pos.x + 3 + this.cursorX, this.pos.y - yOffset + this.size.height - 6, Color.WHITE);
         }
 
         renderer.popScissors();

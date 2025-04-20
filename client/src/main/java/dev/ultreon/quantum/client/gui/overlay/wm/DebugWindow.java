@@ -19,7 +19,7 @@ public abstract class DebugWindow {
 
     public final void render(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
         renderer.renderFrame(x, y, width, height);
-        renderer.renderPopoutFrame(x, y, width, 20);
+        renderer.drawPlatform(x, y, width, 20);
 
         renderer.textCenter(title, x + width / 2, y + 5, RgbColor.WHITE, true);
 

@@ -80,9 +80,9 @@ public class WorldSelectionScreen extends Screen {
 
     private void renderWorldItem(Renderer renderer, WorldStorage worldStorage, int y, boolean selected, float delta) {
         if (selected) {
-            renderer.renderHighlightPopoutFrame(0, y - 1, this.getWidth(), 60, 2);
+            renderer.drawHighlightPlatform(0, y - 1, this.getWidth(), 60, 2);
         } else {
-            renderer.renderPopoutFrame(0, y - 3, this.getWidth(), 60, 4);
+            renderer.drawPlatform(0, y - 3, this.getWidth(), 60, 4);
         }
 
         renderer.setColor(RgbColor.WHITE);

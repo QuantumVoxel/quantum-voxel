@@ -2486,6 +2486,7 @@ public class Renderer implements Disposable {
 
     ////////////////////////////
     //     Transformation     //
+
     ////////////////////////////
     @CanIgnoreReturnValue
     public Renderer translate(float x, float y) {
@@ -2549,6 +2550,7 @@ public class Renderer implements Disposable {
 
     ///////////////////////////
     //     Miscellaneous     //
+
     ///////////////////////////
     @Deprecated
     @ApiStatus.Experimental
@@ -2858,29 +2860,11 @@ public class Renderer implements Disposable {
 
     @Deprecated
     public void renderFrame(int x, int y, int w, int h) {
-        renderPopoutFrame(x, y - 3, w, h, 3);
+        drawPlatform(x, y - 3, w, h, 3);
     }
 
-    public void renderPopoutFrame(int x, int y, int w, int h) {
-        renderPopoutFrame(x, y, w, h, 3);
-    }
-
-    /**
-     * Renders a popout frame at the specified position and dimensions with a specified depth offset.
-     *
-     * @param x the x-coordinate at the top-left corner of the frame
-     * @param y the y-coordinate at the top-left corner of the frame
-     * @param width the width of the frame
-     * @param height the height of the frame
-     * @param depth the depth of the frame
-     */
-    public void renderPopoutFrame(float x, float y, float width, float height, float depth) {
-        y += depth;
-        height += depth;
-        depth -= 3;
-        draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height - 3, 0, 0, 21, 18, 3, 256, 256);
-        draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth - 3, width, 3 + depth, 0, 18, 21, 3, 1, 256, 256);
-        fill(x + 1, y + height, width - 2, 1, DARK_TRANSPARENT);
+    public void drawPlatform(int x, int y, int w, int h) {
+        drawPlatform(x, y, w, h, 3);
     }
 
     /**
@@ -2892,13 +2876,110 @@ public class Renderer implements Disposable {
      * @param height the height of the frame
      * @param depth the depth of the frame
      */
-    public void renderHighlightPopoutFrame(float x, float y, float width, float height, float depth) {
-        y += depth;
-        height += depth;
-        depth -= 3;
-        draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height - 3, 21, 0, 21, 18, 3, 256, 256);
-        draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth - 3, width, 3 + depth, 21, 18, 21, 3, 1, 256, 256);
-        fill(x + 1, y + height, width - 2, 1, DARK_TRANSPARENT);
+    public void drawPlatform(float x, float y, float width, float height, float depth) {
+        if (depth <= -1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 6, 21, 21, 7, 1, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 6, 28, 21, 12, 3, 3, 0, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 6, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth > -1f && depth < -0.1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 6, 21, 21, 7, -depth, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 6, 28, 21, 13 + depth, 3, 3, -depth, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 6, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth >= 0f && depth < 1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 0, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 0, 18, 21, 3, 0, 1, depth - 1, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth, DARK_TRANSPARENT);
+        } else if (depth >= 1f && depth <= 2f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 0, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 0, 18, 21, 3, depth, 1, 1, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
+        } else {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 0, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 0, 18, 21, 3, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
+        }
+    }
+
+    public void drawDisabledPlatform(int x, int y, int w, int h) {
+        drawDisabledPlatform(x, y, w, h, 3);
+    }
+
+    /**
+     * Renders a popout frame at the specified position and dimensions with a specified depth offset.
+     *
+     * @param x the x-coordinate at the top-left corner of the frame
+     * @param y the y-coordinate at the top-left corner of the frame
+     * @param width the width of the frame
+     * @param height the height of the frame
+     * @param depth the depth of the frame
+     */
+    public void drawDisabledPlatform(float x, float y, float width, float height, float depth) {
+        if (depth <= -1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 8, 21, 21, 7, 1, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 8, 28, 21, 12, 3, 3, 0, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 8, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth > -1f && depth < -0.1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 8, 21, 21, 7, -depth, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 8, 28, 21, 13 + depth, 3, 3, -depth, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 8, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth >= 0f && depth < 1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 42, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 42, 18, 21, 3, 0, 1, depth - 1, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth, DARK_TRANSPARENT);
+        } else if (depth >= 1f && depth <= 2f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 42, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 42, 18, 21, 3, depth, 1, 1, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
+        } else {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 42, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 42, 18, 21, 3, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
+        }
+    }
+
+    /**
+     * Renders a popout frame at the specified position and dimensions with a specified depth offset.
+     *
+     * @param x the x-coordinate at the top-left corner of the frame
+     * @param y the y-coordinate at the top-left corner of the frame
+     * @param width the width of the frame
+     * @param height the height of the frame
+     */
+    public void drawHighlightPlatform(float x, float y, float width, float height) {
+        drawHighlightPlatform(x, y, width, height, 3);
+    }
+
+    /**
+     * Renders a popout frame at the specified position and dimensions with a specified depth offset.
+     *
+     * @param x the x-coordinate at the top-left corner of the frame
+     * @param y the y-coordinate at the top-left corner of the frame
+     * @param width the width of the frame
+     * @param height the height of the frame
+     * @param depth the depth of the frame
+     */
+    public void drawHighlightPlatform(float x, float y, float width, float height, float depth) {
+        if (depth <= -1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 7, 21, 21, 7, 1, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 7, 28, 21, 12, 3, 3, 0, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 7, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth > -1f && depth < -0.1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 7, 21, 21, 7, -depth, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 7, 28, 21, 13 + depth, 3, 3, -depth, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 7, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth >= 0f && depth < 1f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 21, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 21, 18, 21, 3, 0, 1, depth - 1, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth, DARK_TRANSPARENT);
+        } else if (depth >= 1f && depth <= 2f) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 21, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 21, 18, 21, 3, depth, 1, 1, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
+        } else {
+            draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height, 21, 0, 21, 18, 3, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 21, 18, 21, 3, 1, 256, 256);
+            fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
+        }
     }
 
     public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
@@ -3002,6 +3083,24 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
+    public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float insetTop, float insetRight, float insetBottom, float insetLeft, float texWidth, float texHeight) {
+        this
+                // top
+                .blit(texture, x, y, insetLeft, insetTop, u, v, insetLeft, insetTop, texWidth, texHeight) // left
+                .blit(texture, x + insetLeft, y, width - insetLeft - insetRight, insetTop, insetLeft + u, v, uWidth - insetLeft - insetRight, insetTop, texWidth, texHeight) // center
+                .blit(texture, x + width - insetRight, y, insetRight, insetTop, uWidth - insetRight + u, v, insetRight, insetTop, texWidth, texHeight) // right
+
+                // center
+                .blit(texture, x, y + insetTop, insetLeft, height - insetTop - insetBottom, u, insetTop + v, insetLeft, vHeight - insetTop - insetBottom, texWidth, texHeight) // left
+                .blit(texture, x + insetLeft, y + insetTop, width - insetLeft - insetRight, height - insetTop - insetBottom, insetLeft + u, insetTop + v, uWidth - insetLeft - insetRight, vHeight - insetTop - insetBottom, texWidth, texHeight) // center
+                .blit(texture, x + width - insetRight, y + insetTop, insetRight, height - insetTop - insetBottom, uWidth - insetRight + u, insetTop + v, insetRight, vHeight - insetTop - insetBottom, texWidth, texHeight) // right
+
+                // bottom
+                .blit(texture, x, y + height - insetBottom, insetLeft, insetBottom, u, vHeight - insetBottom + v, insetLeft, insetBottom, texWidth, texHeight) // left
+                .blit(texture, x + insetLeft, y + height - insetBottom, width - insetLeft - insetRight, insetBottom, insetLeft + u, vHeight - insetBottom + v, uWidth - insetLeft - insetRight, insetBottom, texWidth, texHeight) // center
+                .blit(texture, x + width - insetRight, y + height - insetBottom, insetRight, insetBottom, uWidth - insetRight + u, vHeight - insetBottom + v, insetRight, insetBottom, texWidth, texHeight); // right
+    }
+
     public void begin() {
         if (this.batch.isDrawing()) {
             QuantumClient.LOGGER.warn("Batch still drawing", new Exception());
@@ -3038,62 +3137,62 @@ public class Renderer implements Disposable {
     }
 
     final String VERT = """
-                    attribute vec4 a_position;
-                    attribute vec4 a_color;
-                    attribute vec2 a_texCoord0;
-                    uniform mat4 u_projTrans;
-
-                    varying vec4 vColor;
-                    varying vec2 vTexCoord;
-
-                    void main() {
-                    \tvColor = a_color;
-                    \tvTexCoord = a_texCoord0;
-                    \tgl_Position =  u_projTrans * a_position;
-                    }
-                    """;
+            attribute vec4 a_position;
+            attribute vec4 a_color;
+            attribute vec2 a_texCoord0;
+            uniform mat4 u_projTrans;
+            
+            varying vec4 vColor;
+            varying vec2 vTexCoord;
+            
+            void main() {
+            \tvColor = a_color;
+            \tvTexCoord = a_texCoord0;
+            \tgl_Position =  u_projTrans * a_position;
+            }
+            """;
 
     final String FRAG = """
-                    // Fragment shader
-                    #ifdef GL_ES
-                    precision highp float;
-                    #endif
-                    
-                    #define pi 3.14159265
-                    
-                    varying vec4 vColor;
-                    varying vec2 vTexCoord;
-                    
-                    uniform sampler2D u_texture;
-                    uniform vec2 iResolution;
-                    uniform float iBlurRadius; // Radius of the blur
-                    uniform vec2 iBlurDirection; // Direction of the blur
-                    uniform vec4 iClamp;
-                    
-                    // Function to calculate Gaussian weights
-                    float gaussian(float x, float sigma) {
-                        return exp(-0.5 * (x * x) / (sigma * sigma)) / (sigma * sqrt(2.0 * pi));
-                    }
-                    
-                    void main() {
-                        float sigma = iBlurRadius;  // Sigma is usually proportional to the radius
-                        vec4 color = vec4(0.0);
-                        float total = 0.0;
-                    
-                        vec2 iPos = vTexCoord * iResolution;
-                    
-                        // Gaussian kernel size depends on the radius (optimize for reasonable radius)
-                        for (int i = -int(iBlurRadius); i <= int(iBlurRadius); i++) {
-                            float weight = gaussian(float(i), sigma);
-                            vec2 offset = vec2(float(i) / (iResolution.x), float(i) / (iResolution.y)) * iBlurDirection; // Horizontal blur
-                    
-                            color += texture2D(u_texture, vTexCoord + offset) * weight;
-                            total += weight;
-                        }
-                    
-                        gl_FragColor = color / total;  // Normalize by total weight
-                    }
-                    """;
+            // Fragment shader
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+            
+            #define pi 3.14159265
+            
+            varying vec4 vColor;
+            varying vec2 vTexCoord;
+            
+            uniform sampler2D u_texture;
+            uniform vec2 iResolution;
+            uniform float iBlurRadius; // Radius of the blur
+            uniform vec2 iBlurDirection; // Direction of the blur
+            uniform vec4 iClamp;
+            
+            // Function to calculate Gaussian weights
+            float gaussian(float x, float sigma) {
+                return exp(-0.5 * (x * x) / (sigma * sigma)) / (sigma * sqrt(2.0 * pi));
+            }
+            
+            void main() {
+                float sigma = iBlurRadius;  // Sigma is usually proportional to the radius
+                vec4 color = vec4(0.0);
+                float total = 0.0;
+            
+                vec2 iPos = vTexCoord * iResolution;
+            
+                // Gaussian kernel size depends on the radius (optimize for reasonable radius)
+                for (int i = -int(iBlurRadius); i <= int(iBlurRadius); i++) {
+                    float weight = gaussian(float(i), sigma);
+                    vec2 offset = vec2(float(i) / (iResolution.x), float(i) / (iResolution.y)) * iBlurDirection; // Horizontal blur
+            
+                    color += texture2D(u_texture, vTexCoord + offset) * weight;
+                    total += weight;
+                }
+            
+                gl_FragColor = color / total;  // Normalize by total weight
+            }
+            """;
 
     @ApiStatus.Experimental
     public void blurred(Runnable block) {

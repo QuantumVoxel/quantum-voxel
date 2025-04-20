@@ -38,7 +38,7 @@ public class Panel extends Widget {
 
     @Override
     public void renderWidget(Renderer renderer, float deltaTime) {
-        renderer.renderPopoutFrame(pos.x, pos.y, size.width, size.height);
+        renderer.drawPlatform(pos.x, pos.y, size.width, size.height);
     }
 
     @Override
