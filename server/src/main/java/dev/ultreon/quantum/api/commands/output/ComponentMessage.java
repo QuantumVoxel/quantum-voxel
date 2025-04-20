@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands.output;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.text.TextObject;
 
+@Deprecated
 public class ComponentMessage implements CommandResult {
     private final TextObject component;
 

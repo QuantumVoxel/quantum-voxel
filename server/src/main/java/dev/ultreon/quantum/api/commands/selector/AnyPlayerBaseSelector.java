@@ -12,6 +12,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Deprecated
 public class AnyPlayerBaseSelector extends BaseSelector<CacheablePlayer> {
     private final CommandSender sender;
 

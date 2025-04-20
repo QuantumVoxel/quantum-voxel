@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands;
 
+@Deprecated
 public class OverloadConflictException extends RuntimeException {
     private final String[] aliases;
 

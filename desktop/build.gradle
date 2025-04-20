@@ -42,7 +42,6 @@ apply plugin: 'idea'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java'
 apply plugin: 'java-library'
-apply plugin: 'maven-publish'
 apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
 
 //****************************//
@@ -276,21 +275,4 @@ tasks.withType(Jar).configureEach {
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
-}
-
-publishing {
-    repositories {
-        if (project.hasProperty('gitLabPrivateToken')) {
-            maven {
-                url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
-                credentials(HttpHeaderCredentials) {
-                    name = "Private-Token"
-                    value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
-            }
-        }
-    }
 }

@@ -12,6 +12,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
+/**
+ * A shader implementation specifically designed for rendering a skybox.
+ * The SkyboxShader extends the DefaultShader class and provides the necessary
+ * uniforms and setters to handle skybox-specific color interpolation and rendering.
+ */
 public class SkyboxShader extends DefaultShader {
     public final int u_topColor;
     public final int u_midColor;

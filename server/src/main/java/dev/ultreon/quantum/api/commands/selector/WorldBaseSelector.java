@@ -12,6 +12,7 @@ import dev.ultreon.quantum.world.WorldAccess;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class WorldBaseSelector extends BaseSelector<World> {
     private final CommandSender sender;
 

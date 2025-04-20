@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Objects;
 
+@Deprecated
 public final class CommandSpec {
     private final String commandName;
     private final List<CommandParameter> arguments;

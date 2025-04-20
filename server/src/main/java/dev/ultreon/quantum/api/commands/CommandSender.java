@@ -1,10 +1,11 @@
 package dev.ultreon.quantum.api.commands;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.api.commands.error.CommandError;
 import dev.ultreon.quantum.api.commands.output.BasicCommandResult;
 import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.api.neocommand.CommandError;
+import dev.ultreon.quantum.api.neocommand.Commands;
 import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.text.Formatter;
@@ -72,9 +73,24 @@ public interface CommandSender {
      * @param input The input string containing the command and arguments.
      * @return
      */
+    @Nullable
+    @Deprecated
     @CanIgnoreReturnValue
     default CommandResult execute(String input) {
-        return execute(input, true);
+        return CompatCommandResult.wrap(runCommand(input, true));
+    }
+
+    /**
+     * Executes a command with the given input string. This method is a shorthand
+     * for {@link #runCommand(String, boolean)} with `sendToChat` set to true by default.
+     *
+     * @param input The input string containing the command and arguments.
+     *              The first slash should already be removed from the input.
+     * @return The result of executing the command as a {@link dev.ultreon.quantum.api.neocommand.CommandResult}.
+     *         Returns <code>null</code> if the input is empty or the command execution fails.
+     */
+    default dev.ultreon.quantum.api.neocommand.CommandResult runCommand(String input) {
+        return runCommand(input, true);
     }
 
     /**
@@ -89,14 +105,34 @@ public interface CommandSender {
      * @param input The input string containing the command and arguments.
      * @return
      */
+    @Nullable
+    @Deprecated
     @CanIgnoreReturnValue
     default CommandResult execute(String input, boolean sendToChat) {
+        return CompatCommandResult.wrap(runCommand(input, sendToChat));
+    }
+
+    /**
+     * Executes a command with the provided input string, optionally sending the output to chat.
+     * This method processes the input by parsing the command and its arguments,
+     * then executes it within the context of the command sender.
+     * If the input is empty, the method returns null and no further action is taken.
+     *
+     * @param input The input string containing the command and its arguments.
+     *              The first slash should already be removed, and the string is trimmed internally.
+     * @param sendToChat A boolean value indicating whether the command's output should be sent to the chat.
+     *                   If true, the output (or error, if applicable) will be displayed in the chat.
+     * @return The result of executing the command as a {@link dev.ultreon.quantum.api.neocommand.CommandResult}.
+     *         Returns null if the input is empty, or if executing the command fails.
+     */
+    @CanIgnoreReturnValue
+    default @NotNull dev.ultreon.quantum.api.neocommand.CommandResult runCommand(String input, boolean sendToChat) {
         // Trim the input to remove any leading or trailing whitespace
         var commandline = input.trim();
 
         // If the input is empty, do nothing
         if (commandline.isEmpty()) {
-            return null;
+            return dev.ultreon.quantum.api.neocommand.CommandResult.success();
         }
 
         // Separate the command and arguments
@@ -117,25 +153,11 @@ public interface CommandSender {
         QuantumServer.LOGGER.info("{} ran command: {}", this.getName(), commandline);
 
         // Retrieve the base command from the registry
-        Command baseCommand = CommandRegistry.get(command);
-        if (baseCommand == null) {
-            // If the command is not found, send an error message
-            BasicCommandResult basicCommandResult = new BasicCommandResult("Unknown command: " + command, BasicCommandResult.MessageType.ERROR);
-            basicCommandResult.send(this);
-            return basicCommandResult;
-        }
-
-        CommandResult commandResult = baseCommand.onCommand(this, new CommandContext(command), command, argv);
+        dev.ultreon.quantum.api.neocommand.CommandResult result = Commands.execute(this.getServer(), this, command);
         if (sendToChat) {
-            if (commandResult instanceof CommandError error) {
-                // Command has an error
-                error.send(this, baseCommand.data());
-            } else {
-                // Command has an output
-                commandResult.send(this);
-            }
+            result.send(this);
         }
-        return commandResult;
+        return result;
     }
 
     @Nullable QuantumServer getServer();

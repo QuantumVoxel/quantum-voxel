@@ -82,60 +82,60 @@ public final class CubeModel {
     public BakedCubeModel bake(NamespaceID resourceId, TextureAtlas texture) {
         if (!isOnRenderThread()) return QuantumClient.invokeAndWait(() -> this.bake(resourceId, texture));
         try {
-            TextureRegion topTex = texture.get(this.top);
-            TextureRegion bottomTex = texture.get(this.bottom);
-            TextureRegion leftTex = texture.get(this.left);
-            TextureRegion rightTex = texture.get(this.right);
-            TextureRegion frontTex = texture.get(this.front);
-            TextureRegion backTex = texture.get(this.back);
+            TextureRegion topTex = texture.getDiffuse(this.top);
+            TextureRegion bottomTex = texture.getDiffuse(this.bottom);
+            TextureRegion leftTex = texture.getDiffuse(this.left);
+            TextureRegion rightTex = texture.getDiffuse(this.right);
+            TextureRegion frontTex = texture.getDiffuse(this.front);
+            TextureRegion backTex = texture.getDiffuse(this.back);
 
             switch (this.properties.rotation) {
                 case NORTH:
                     break;
                 case EAST:
-                    frontTex = texture.get(this.left);
-                    backTex = texture.get(this.right);
-                    leftTex = texture.get(this.back);
-                    rightTex = texture.get(this.front);
+                    frontTex = texture.getDiffuse(this.left);
+                    backTex = texture.getDiffuse(this.right);
+                    leftTex = texture.getDiffuse(this.back);
+                    rightTex = texture.getDiffuse(this.front);
 
                     // Rotate top and bottom tex
                     topTex = rotate(topTex, 1);
                     bottomTex = rotate(bottomTex, 1);
                     break;
                 case SOUTH:
-                    frontTex = texture.get(this.back);
-                    backTex = texture.get(this.front);
-                    leftTex = texture.get(this.right);
-                    rightTex = texture.get(this.left);
+                    frontTex = texture.getDiffuse(this.back);
+                    backTex = texture.getDiffuse(this.front);
+                    leftTex = texture.getDiffuse(this.right);
+                    rightTex = texture.getDiffuse(this.left);
 
                     // Rotate top and bottom tex
                     topTex = rotate(topTex, 2);
                     bottomTex = rotate(bottomTex, 2);
                     break;
                 case WEST:
-                    frontTex = texture.get(this.right);
-                    backTex = texture.get(this.left);
-                    leftTex = texture.get(this.front);
-                    rightTex = texture.get(this.back);
+                    frontTex = texture.getDiffuse(this.right);
+                    backTex = texture.getDiffuse(this.left);
+                    leftTex = texture.getDiffuse(this.front);
+                    rightTex = texture.getDiffuse(this.back);
 
                     // Rotate top and bottom tex
                     topTex = rotate(topTex, 3);
                     bottomTex = rotate(bottomTex, 3);
                     break;
                 case UP:
-                    frontTex = texture.get(this.top);
-                    backTex = texture.get(this.bottom);
-                    leftTex = texture.get(this.left);
-                    rightTex = texture.get(this.right);
+                    frontTex = texture.getDiffuse(this.top);
+                    backTex = texture.getDiffuse(this.bottom);
+                    leftTex = texture.getDiffuse(this.left);
+                    rightTex = texture.getDiffuse(this.right);
 
                     leftTex = rotate(leftTex, 1);
                     rightTex = rotate(rightTex, 1);
                     break;
                 case DOWN:
-                    frontTex = texture.get(this.bottom);
-                    backTex = texture.get(this.top);
-                    leftTex = texture.get(this.left);
-                    rightTex = texture.get(this.right);
+                    frontTex = texture.getDiffuse(this.bottom);
+                    backTex = texture.getDiffuse(this.top);
+                    leftTex = texture.getDiffuse(this.left);
+                    rightTex = texture.getDiffuse(this.right);
 
                     leftTex = rotate(leftTex, 3);
                     rightTex = rotate(rightTex, 3);

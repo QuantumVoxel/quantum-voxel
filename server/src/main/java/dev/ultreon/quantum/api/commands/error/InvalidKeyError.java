@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands.error;
 
+@Deprecated
 public class InvalidKeyError extends InvalidValueError {
     private static final String WHAT = "key";
 

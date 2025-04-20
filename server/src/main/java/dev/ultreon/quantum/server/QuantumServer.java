@@ -1132,4 +1132,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public Thread thread() {
         return thread;
     }
+
+    public Stream<Entity> getEntities() {
+        return this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class)));
+    }
 }

@@ -226,7 +226,7 @@ public class ModListScreen extends Screen {
     protected void renderBackground(Renderer renderer) {
         super.renderBackground(renderer);
 
-        renderer.renderFrame(-2, -2, this.list.getWidth() + 4, this.size.height + 4);
+        renderer.renderFrame(-2, 0, this.list.getWidth() + 4, this.size.height);
     }
 
     @Override

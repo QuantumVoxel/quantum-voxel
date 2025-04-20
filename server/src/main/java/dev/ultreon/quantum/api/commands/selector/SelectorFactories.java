@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands.selector;
 import dev.ultreon.quantum.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public class SelectorFactories {
     public static final SelectorFactory<PlayerBaseSelector> PLAYER = PlayerBaseSelector::new;
     public static final SelectorFactory<AnyPlayerBaseSelector> ANY_PLAYER = AnyPlayerBaseSelector::new;

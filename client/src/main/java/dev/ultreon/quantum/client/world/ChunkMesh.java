@@ -5,10 +5,9 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.component.GameComponent;
 import dev.ultreon.quantum.util.GameObject;
 
 public class ChunkMesh extends GameObject implements Disposable {
@@ -30,9 +29,6 @@ public class ChunkMesh extends GameObject implements Disposable {
         numVertices = mesh.getNumVertices();
         numIndices = mesh.getNumIndices();
         instance.userData = chunk;
-        instance.worldTransform.idt();
-        instance.material = pass.createMaterial();
-        instance.shader = pass.createShader().getShader(instance);
 
         this.chunk = chunk;
 

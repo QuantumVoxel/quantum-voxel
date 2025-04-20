@@ -72,7 +72,8 @@ public class TitleScreen extends Screen {
                 .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50 + 10 + 100, 2 * this.size.height / 3 - 100, 100, 150))
                 .setCallback(this::quitGame));
 
-        this.modSidebar = builder.add(new ModSidebar(this));
+        // FIXME Mod sidebar
+//        this.modSidebar = builder.add(new ModSidebar(this));
 
         if (GamePlatform.get().isMobile()) {
             this.quitButton.isEnabled = false;

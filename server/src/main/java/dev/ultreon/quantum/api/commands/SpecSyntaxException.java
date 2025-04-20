@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands;
 
+@Deprecated
 public class SpecSyntaxException extends RuntimeException {
     private final String message;
     private final int column;

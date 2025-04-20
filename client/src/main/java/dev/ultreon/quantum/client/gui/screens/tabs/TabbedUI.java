@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.screens.tabs;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Tab;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class TabbedUI extends Screen {
+    private static final Color DARK_70 = new Color(0, 0, 0, 0.4375f);
     private int selected;
     private boolean bottomSelected;
     private List<Tab> tabs;
@@ -92,7 +94,8 @@ public abstract class TabbedUI extends Screen {
 
         super.renderWidget(renderer, deltaTime);
 
-        renderer.renderFrame(this.frameBounds.set(contentBounds).grow(4));
+        Bounds grow = this.frameBounds.set(contentBounds).grow(4);
+        renderer.renderPopoutFrame(grow.pos.x, grow.pos.y - 3, grow.size.width, grow.size.height);
 
         if (this.tab != null && renderer.pushScissors(contentBounds)) {
             TabContent content = this.tab.content();
@@ -108,7 +111,7 @@ public abstract class TabbedUI extends Screen {
         }
 
         if (dialog != null) {
-            renderer.fill(0, 0, this.size.width, this.size.height, RgbColor.BLACK.withAlpha(0x70));
+            renderer.fill(0, 0, this.size.width, this.size.height, DARK_70);
             dialog.render(renderer, deltaTime);
         }
     }
@@ -252,6 +255,28 @@ public abstract class TabbedUI extends Screen {
         }
 
         return super.mousePress(mouseX, oldMouseY, button);
+    }
+
+    @Override
+    public void mouseMoved(int x, int y) {
+        if (this.titleWidget != null && isPosWithin(x, y, 0, 0, this.titleWidget.getWidth(), this.titleWidget.getHeight())) {
+            this.titleWidget.mouseMove(x, y);
+            return;
+        }
+
+        int oldMouseY = y;
+        if (this.titleWidget != null) {
+            y -= this.titleWidget.getHeight();
+        }
+
+        for (Tab tab : this.tabs) {
+            if (tab.isWithinBounds(x, y)) {
+                tab.mouseMove(x, y);
+                return;
+            }
+        }
+
+        super.mouseMoved(x, oldMouseY);
     }
 
     @Override

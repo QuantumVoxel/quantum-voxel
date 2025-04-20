@@ -8,6 +8,7 @@ import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.texture.TextureManager;
+import dev.ultreon.quantum.client.world.CelestialBody;
 import dev.ultreon.quantum.item.BlockItem;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.Items;
@@ -23,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 public class TextureAtlasManager implements Manager<TextureAtlas> {
+    public static final @NotNull NamespaceID BLOCK_ATLAS_ID = NamespaceID.of("block");
+    public static final @NotNull NamespaceID ITEM_ATLAS_ID = NamespaceID.of("item");
+    public static final @NotNull NamespaceID ENVIRONMENT_ID = NamespaceID.of("environment");
     private final Map<NamespaceID, TextureAtlas> atlasMap = new LinkedHashMap<>();
     private final QuantumClient client;
 
@@ -40,6 +44,7 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
         return atlasMap.get(id);
     }
 
+    @SuppressWarnings("GDXJavaUnsafeIterator")
     @Override
     public void reload(ReloadContext context) {
         for (TextureAtlas atlas : List.copyOf(atlasMap.values())) {
@@ -48,9 +53,9 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
 
         atlasMap.clear();
 
-        this.client.blocksTextureAtlas = this.register(NamespaceID.of("block"), BlockModelRegistry.get().stitch(this.client.getTextureManager()));
+        this.client.blocksTextureAtlas = this.register(BLOCK_ATLAS_ID, BlockModelRegistry.get().stitch(this.client.getTextureManager()));
 
-        TextureStitcher itemTextures = new TextureStitcher(NamespaceID.of("item"));
+        TextureStitcher itemTextures = new TextureStitcher(ITEM_ATLAS_ID);
         for (ObjectMap.Entry<RegistryKey<Item>, Item> e : Registries.ITEM.entries()) {
             if (e.value == Items.AIR || e.value instanceof BlockItem) continue;
 
@@ -63,6 +68,17 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
             Pixmap tex = new Pixmap(resource);
             itemTextures.add(texId, tex);
         }
-        this.client.itemTextureAtlas = this.register(NamespaceID.of("item"), itemTextures.stitch());
+        TextureStitcher environmentTextures = new TextureStitcher(ENVIRONMENT_ID);
+        for (NamespaceID e : CelestialBody.REGISTRY) {
+            NamespaceID texId = e.mapPath(path -> "textures/environment/" + path + ".png");
+            FileHandle resource = QuantumClient.resource(texId);
+            if (!resource.exists()) {
+                environmentTextures.add(texId, TextureManager.MISSING_NO);
+                continue;
+            }
+            Pixmap tex = new Pixmap(resource);
+            environmentTextures.add(texId, tex);
+        }
+        this.client.itemTextureAtlas = this.register(ITEM_ATLAS_ID, environmentTextures.stitch());
     }
 }

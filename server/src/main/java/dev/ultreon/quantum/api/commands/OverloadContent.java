@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 
 import java.util.function.Function;
 
+@Deprecated
 public class OverloadContent {
     private String name;
     private int size;

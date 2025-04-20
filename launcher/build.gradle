@@ -44,7 +44,6 @@ apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'groovy'
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'maven-publish'
 
 //****************************//
 // Setting up main properties //
@@ -389,23 +388,6 @@ jpackage {
                 from configurations.natives_win.collect {  it.isDirectory() ? it : zipTree(it) }
                 into "$projectDir/build/dist/$jpackage.appName/natives"
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            }
-        }
-    }
-}
-
-publishing {
-    repositories {
-        if (hasProperty('gitLabPrivateToken')) {
-            maven {
-                url "https://gitlab.com/api/v4/projects/59634919/packages/maven"
-                credentials(HttpHeaderCredentials) {
-                    name = "Private-Token"
-                    value = gitLabPrivateToken // the variable resides in $GRADLE_USER_HOME/gradle.properties
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
             }
         }
     }

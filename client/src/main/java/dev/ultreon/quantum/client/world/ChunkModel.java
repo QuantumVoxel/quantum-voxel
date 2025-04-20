@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -14,10 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.input.GameCamera;
-import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
-import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
+import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.crash.CrashCategory;
@@ -119,9 +115,7 @@ public class ChunkModel extends GameObject {
             chunkModelBuilder.begin(bufferSource);
 
             if (!chunk.mesher.buildMesh((blk, model, pass) -> {
-                if (model == null) {
-                    return true;
-                }
+                if (model == null) return true;
                 boolean b = pass.equals(model.getRenderPass());
                 chunk.meshLog += "Meshing " + blk + " in " + pass + " (MRP: " + model.getRenderPass() + ")" + ": " + b + "\n";
                 return b;

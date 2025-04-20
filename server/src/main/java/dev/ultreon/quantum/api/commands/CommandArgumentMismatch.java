@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * <p>
  * Always check your arguments before making a command :wink:
  */
+@Deprecated
 public class CommandArgumentMismatch extends IllegalArgumentException {
     private final Class<?>[] parameterTypes;
     private final ArrayList<Object> callArgs;

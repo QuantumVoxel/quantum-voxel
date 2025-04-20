@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import static dev.ultreon.quantum.api.commands.CommandParseException.*;
 
+@Deprecated
 public class CommandReader {
     private static final ThreadLocal<CommandReader> instance = new ThreadLocal<>();
     private static final char EOA = 0;

@@ -7,6 +7,9 @@ import dev.ultreon.quantum.api.commands.Command;
 import dev.ultreon.quantum.api.commands.CommandContext;
 import dev.ultreon.quantum.api.commands.TabCompleting;
 import dev.ultreon.quantum.api.commands.perms.Permission;
+import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
+import dev.ultreon.quantum.api.neocommand.CommandReader;
+import dev.ultreon.quantum.api.neocommand.Commands;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.debug.DebugFlags;
@@ -657,32 +660,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void tabComplete(String input) {
-        if (input.startsWith("/")) {
-            input = input.substring(1);
-            if (!input.contains(" ")) {
-                this.connection.send(new S2CTabCompletePacket(TabCompleting.commands(new ArrayList<>(), input)));
-                return;
-            }
-
-            String command;
-            String[] argv;
-            argv = input.split(" ");
-            command = argv[0];
-            argv = ArrayUtils.remove(argv, 0);
-
-            Command baseCommand = CommandRegistry.get(command);
-            if (baseCommand == null) {
-                return;
-            }
-
-            if (input.endsWith(" ")) {
-                argv = ArrayUtils.add(argv, "");
-            }
-
-            List<String> options = baseCommand.onTabComplete(this, new CommandContext(command), command, argv);
-            if (options == null) options = Collections.emptyList();
-            this.connection.send(new S2CTabCompletePacket(options));
-        }
+        List<String> options = Commands.complete(this, server, input.split(" "));
+        if (options == null || options.isEmpty()) return;
+        this.connection.send(new S2CTabCompletePacket(options));
     }
 
     public void onMessageSent(String message) {
@@ -836,5 +816,13 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
             this.world.stopTrackingChunk(vec, this);
         }
+    }
+
+    public Object getVariable(String var) {
+        return PlayerVariables.get(this).getVariable(var);
+    }
+
+    public Collection<String> getVariableNames(Class<?> clazz) {
+        return PlayerVariables.get(this).getVariablesByType(clazz).sorted().toList();
     }
 }

@@ -52,7 +52,7 @@ public final class WorldSaveInfo {
                 Objects.requireNonNull(GameMode.byOrdinal(infoData.getInt("gamemode", GameMode.SURVIVAL.ordinal()))),
                 GameMode.byOrdinal(infoData.getInt("lastPlayedIn", GameMode.SURVIVAL.ordinal())),
                 infoData.getString("name", "unnamed world"),
-                DateTime.ofEpochMilli(infoData.getLong("lastSave"), ZoneOffset.UTC)
+                DateTime.ofEpochSecond(infoData.getLong("lastSave"), ZoneOffset.UTC)
         );
     }
 

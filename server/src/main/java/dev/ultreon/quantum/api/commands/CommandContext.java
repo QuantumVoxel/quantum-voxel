@@ -7,6 +7,7 @@ import java.util.Objects;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
+@Deprecated
 public final class CommandContext {
     private final String name;
 

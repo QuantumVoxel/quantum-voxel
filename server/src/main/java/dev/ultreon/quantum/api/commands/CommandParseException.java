@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands;
 import dev.ultreon.quantum.api.commands.error.CommandError;
 import dev.ultreon.quantum.server.chat.Chat;
 
+@Deprecated
 public class CommandParseException extends Exception {
     private final String originalMessage;
     private final int offset;

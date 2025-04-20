@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands.error;
 import dev.ultreon.quantum.api.commands.MessageCode;
 import dev.ultreon.quantum.world.World;
 
+@Deprecated
 public class NotFoundInWorldError extends CommandError {
 
     public NotFoundInWorldError(String WHAT) {

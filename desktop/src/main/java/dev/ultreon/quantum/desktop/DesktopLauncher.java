@@ -205,7 +205,7 @@ public class DesktopLauncher {
         config.useVsync(false);
         config.setForegroundFPS(0);
         config.setIdleFPS(10);
-        config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
+        config.setBackBufferConfig(4, 4, 4, 4, 8, 0, 0);
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES32, 4, 1);
         config.setInitialVisible(false);
@@ -223,7 +223,7 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.useVsync(false);
         config.setForegroundFPS(0);
-        config.setBackBufferConfig(4, 4, 4, 4, 8, 4, 0);
+        config.setBackBufferConfig(4, 4, 4, 4, 8, 0, 0);
         config.setHdpiMode(HdpiMode.Pixels);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);

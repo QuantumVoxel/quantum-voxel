@@ -53,7 +53,7 @@ public class DedicatedServerGui extends JFrame {
         if (!command.isEmpty()) {
             QuantumServer server = QuantumServer.get();
             if (server == null) return;
-            server.getConsoleSender().execute(command);
+            server.getConsoleSender().runCommand(command);
             this.commandField.setText("");
         }
     }

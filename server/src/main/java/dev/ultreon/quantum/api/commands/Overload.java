@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Deprecated
 public class Overload {
     private final List<CommandParameter> params;
     private final CommandSpec spec;

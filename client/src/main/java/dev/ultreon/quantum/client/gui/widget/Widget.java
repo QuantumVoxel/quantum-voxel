@@ -10,12 +10,10 @@ import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import lombok.Getter;
 import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,12 +25,9 @@ import java.util.function.Supplier;
  * It provides functionality related to rendering, positioning, and interaction within the UI.
  * Widget instances manage their bounds, components and handle various user interactions.
  */
-@SuppressWarnings("unchecked")
 public abstract class Widget extends GameObject implements StaticWidget {
     protected boolean ignoreBounds = false;
-    @Getter
     private final Position preferredPos = new Position(0, 0);
-    @Getter
     private final Size preferredSize = new Size(0, 0);
     public boolean isVisible = true;
     public boolean isEnabled = true;
@@ -41,11 +36,8 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     @ApiStatus.Internal
     protected Screen root;
-    @Getter
     protected final Bounds bounds = new Bounds();
-    @Getter
     protected final Position pos = bounds.pos;
-    @Getter
     protected final Size size = bounds.size;
     public boolean clipped = true;
     public boolean topMost = false;

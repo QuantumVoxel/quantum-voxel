@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Deprecated
 public class CommandParserImpl {
     private static final List<CommandParserImpl> parsers = new ArrayList<>();
     

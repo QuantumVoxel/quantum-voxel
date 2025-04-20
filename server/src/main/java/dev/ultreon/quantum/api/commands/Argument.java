@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands;
 
+@Deprecated
 public abstract class Argument<T> {
     private final T value;
 

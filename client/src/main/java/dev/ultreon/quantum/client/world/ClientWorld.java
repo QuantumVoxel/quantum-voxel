@@ -58,7 +58,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     public static final Color DAY_BOTTOM_COLOR = new Color(0xc1d3f1ff);
     public static final Color NIGHT_TOP_COLOR = new Color(0x01010bff);
     public static final Color NIGHT_BOTTOM_COLOR = new Color(0x0a0c16ff);
-    public static final Color SUN_RISE_COLOR = new Color(0xff3000ff);
+    public static final Color SUN_RISE_COLOR = new Color(0xff6000ff);
     public static final Color VOID_COLOR = new Color(0x0a0a0aff);
 
     public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x)), ATLAS_SIZE.get().y));
@@ -1002,10 +1002,10 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     static Color mixColors(Color color1, Color color2, Color output, double percent) {
         percent = Mth.clamp(percent, 0.0, 1.0);
         double inversePercent = 1.0 - percent;
-        int redPart = (int) (color1.r * percent + color2.r * inversePercent);
-        int greenPart = (int) (color1.g * percent + color2.g * inversePercent);
-        int bluePart = (int) (color1.b * percent + color2.b * inversePercent);
-        int alphaPart = (int) (color1.a * percent + color2.a * inversePercent);
+        float redPart = (float) (color1.r * percent + color2.r * inversePercent);
+        float greenPart = (float) (color1.g * percent + color2.g * inversePercent);
+        float bluePart = (float) (color1.b * percent + color2.b * inversePercent);
+        float alphaPart = (float) (color1.a * percent + color2.a * inversePercent);
         return output.set(redPart, greenPart, bluePart, alphaPart);
     }
 

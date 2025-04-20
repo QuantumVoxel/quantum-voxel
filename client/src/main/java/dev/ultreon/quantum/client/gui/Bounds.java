@@ -219,4 +219,25 @@ public final class Bounds implements Copyable<Bounds> {
         return Objects.hash(pos, size);
     }
 
+    public Bounds move(float x, float y) {
+        return move((int) Math.floor(x), (int) Math.floor(y), this.size.width, this.size.height + ((float) Math.floor(y) != y ? 1 : 0));
+    }
+
+    public Bounds move(float x, float y, float width, float height) {
+        return move((int) Math.floor(x), (int) Math.floor(y), (int) Math.ceil(width), (int) Math.ceil(height));
+    }
+
+    public Bounds move(int x, int y, int width, int height) {
+        this.pos.x += x;
+        this.pos.y += y;
+        this.size.width = width;
+        this.size.height = height;
+        return this;
+    }
+
+    public Bounds move(int x, int y) {
+        this.pos.x += x;
+        this.pos.y += y;
+        return this;
+    }
 }

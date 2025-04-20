@@ -1,5 +1,6 @@
 package dev.ultreon.quantum;
 
+import dev.ultreon.quantum.api.neocommand.CommandRegistration;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntityTypes;
 import dev.ultreon.quantum.entity.EntityTypes;
@@ -25,7 +26,7 @@ public class CommonRegistries {
 
         registerFuels();
 
-        GameCommands.register();
+        CommandRegistration.register();
     }
 
     private static void registerFuels() {

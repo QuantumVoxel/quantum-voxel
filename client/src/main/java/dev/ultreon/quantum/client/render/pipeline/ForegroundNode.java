@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;

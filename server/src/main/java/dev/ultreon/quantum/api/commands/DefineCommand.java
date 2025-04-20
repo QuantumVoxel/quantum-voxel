@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * @see #value()
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface DefineCommand {
     /**
      * The specification of the command overload.

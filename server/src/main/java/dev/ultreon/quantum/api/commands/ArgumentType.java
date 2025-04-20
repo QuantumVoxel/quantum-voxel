@@ -5,6 +5,7 @@ import dev.ultreon.quantum.api.commands.error.CommandError;
 import java.util.*;
 import java.util.regex.Pattern;
 
+@Deprecated
 public abstract class ArgumentType<T> {
     protected final String id;
     protected int argsNeeded = 1;

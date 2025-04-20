@@ -107,12 +107,12 @@ public class TitleButton extends Button<TitleButton> {
         TextObject textObject = this.text.get();
         if (textObject != null) {
             if (this.icon != null) {
-                renderer.blit(this.icon, x + size.width / 2f - 32, y + size.width / 2f - 32, 64, 64, 0, 0, 64, 64, 64, 64);
+                renderer.blit(this.icon, x + size.width / 2f - 32, y - yOffset + size.width / 2f - 32, 64, 64, 0, 0, 64, 64, 64, 64);
             }
 
-            renderer.line(x + 40, y + this.size.height - 30, x + this.size.width - 40, y + this.size.height - 30, (this.isEnabled ? this.textColor.get().withAlpha(0x80) : this.textColor.get().withAlpha(0x40)).toGdx());
+            renderer.line(x + 40, y - yOffset + this.size.height - 30, x + this.size.width - 40, y - yOffset + this.size.height - 30, (this.isEnabled ? this.textColor.get().withAlpha(0x80) : this.textColor.get().withAlpha(0x40)).toGdx());
 
-            renderer.textCenter(textObject, x + this.size.width / 2, y + (this.size.height - 20 - this.font.getLineHeight() + getButtonContentOffset()), this.isEnabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
+            renderer.textCenter(textObject, x + this.size.width / 2, y - yOffset + (this.size.height - 20 - this.font.getLineHeight() + getButtonContentOffset()), this.isEnabled ? this.textColor.get() : this.textColor.get().withAlpha(0x80));
         }
     }
 

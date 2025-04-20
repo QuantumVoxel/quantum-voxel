@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands.error;
 
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public class InvalidFloatError extends InvalidValueError {
     private static final String WHAT = "float";
 

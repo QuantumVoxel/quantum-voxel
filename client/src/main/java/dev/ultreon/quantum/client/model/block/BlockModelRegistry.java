@@ -11,6 +11,7 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
+import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.model.model.Json5Model;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
@@ -86,7 +87,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public TextureAtlas stitch(TextureManager textureManager) {
-        TextureStitcher stitcher = new TextureStitcher(QuantumClient.id("block"));
+        TextureStitcher stitcher = new TextureStitcher(TextureAtlasManager.BLOCK_ATLAS_ID);
 
         this.registry.values().stream().flatMap(Collection::stream).map(pair -> pair.getSecond().get().all()).forEach(this.TEXTURES::addAll);
 

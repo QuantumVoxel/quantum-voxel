@@ -70,6 +70,7 @@
   "quantum.screen.worlds.edit.too_old": "This world is too old to edit.",
   "quantum.screen.world_load.loading_world": "Loading World",
   "quantum.screen.language": "Language",
+  "quantum.screen.credits": "Credits",
   "quantum.screen.message.saving_world": "Saving World...",
   "quantum.screen.message.joining_server": "Joining Server...",
   "quantum.screen.credits.title": "Credits",

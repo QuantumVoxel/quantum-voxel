@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands.error;
 
+@Deprecated
 public class TargetPlayerNotFoundError extends TargetNotFoundError {
     private final String name;
 

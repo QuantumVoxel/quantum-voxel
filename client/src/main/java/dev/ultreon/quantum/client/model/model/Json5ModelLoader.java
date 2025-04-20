@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.google.common.base.Preconditions;
@@ -30,9 +29,6 @@ import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.client.render.RenderBuffer;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -42,6 +38,7 @@ import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -49,18 +46,47 @@ import java.util.*;
 
 import static dev.ultreon.quantum.CommonConstants.JSON5;
 
+/**
+ * The Json5ModelLoader class is responsible for loading and processing JSON5 formatted models
+ * for blocks and items in a resource management context. This class provides methods to load
+ * models and their associated data such as textures, elements, and overrides.
+ * <p>
+ * The class supports both block and item models, providing utility methods to map their attributes
+ * from JSON5 files to internal data structures for rendering purposes.
+ * <p>
+ * It uses a ResourceManager for accessing model resources and registry keys to identify them.
+ */
 public class Json5ModelLoader {
     private final ResourceManager resourceManager;
-    private RegistryKey<?> key;
 
+    /**
+     * Constructs a new Json5ModelLoader instance, initializing it with the specified ResourceManager.
+     *
+     * @param resourceManager the resource manager to be used for loading resources
+     */
     public Json5ModelLoader(ResourceManager resourceManager) {
         this.resourceManager = resourceManager;
     }
 
+    /**
+     * Default constructor for the Json5ModelLoader class.
+     * Initializes the Json5ModelLoader using the default resource manager obtained
+     * from the QuantumClient.
+     */
     public Json5ModelLoader() {
         this(QuantumClient.get().getResourceManager());
     }
 
+    /**
+     * Loads a {@link Json5Model} associated with the given {@link Block}.
+     * This method attempts to resolve the resource path for the block's JSON5 model file,
+     * retrieves the resource, and parses it into a {@link Json5Model}.
+     * If the resource is not found, it returns null.
+     *
+     * @param block the {@link Block} whose model is to be loaded
+     * @return the loaded {@link Json5Model}, or null if the resource cannot be found
+     * @throws IOException if an I/O error occurs during reading of the resource
+     */
     public Json5Model load(Block block) throws IOException {
         NamespaceID namespaceID = block.getId().mapPath(path -> "models/blocks/" + path + ".json5");
         Resource resource = this.resourceManager.getResource(namespaceID);
@@ -70,6 +96,16 @@ public class Json5ModelLoader {
         return this.load(Registries.BLOCK.getKey(block), JSON5.parse(resource.openReader()));
     }
 
+    /**
+     * Loads a {@link Json5Model} associated with the specified {@link Item}.
+     * This method attempts to resolve the resource path for the item's JSON5 model file,
+     * retrieves the resource, and parses it into a {@link Json5Model}. If the resource
+     * cannot be found, this method returns null.
+     *
+     * @param item the {@link Item} whose model is to be loaded
+     * @return the loaded {@link Json5Model}, or null if the resource cannot be found
+     * @throws IOException if an I/O error occurs during reading of the resource
+     */
     public Json5Model load(Item item) throws IOException {
         NamespaceID namespaceID = item.getId().mapPath(path -> "models/items/" + path + ".json5");
         Resource resource = this.resourceManager.getResource(namespaceID);
@@ -79,9 +115,21 @@ public class Json5ModelLoader {
         return this.load(Registries.ITEM.getKey(item), JSON5.parse(resource.openReader()));
     }
 
+    /**
+     * Loads a {@link Json5Model} based on the provided registry key and model data.
+     * Validates the registry key to ensure it belongs to either blocks or items,
+     * parses the textures, elements, display properties, and other model-related
+     * configurations from the given JSON5 element, and constructs the model.
+     *
+     * @param key the {@link RegistryKey} for which the model needs to be loaded;
+     *            must belong to either {@code RegistryKeys.BLOCK} or {@code RegistryKeys.ITEM}
+     * @param modelData the JSON5 representation of the model data
+     * @return the constructed {@link Json5Model} containing all the parsed and processed model data
+     * @throws IllegalArgumentException if the provided registry key does not belong to blocks or items
+     */
     @SuppressWarnings("SpellCheckingInspection")
     public Json5Model load(RegistryKey<?> key, Json5Element modelData) {
-        if (!key.parent().equals(RegistryKeys.BLOCK) && !key.parent().equals(RegistryKeys.ITEM)) {
+        if (!Objects.equals(key.parent(), RegistryKeys.BLOCK) && !Objects.equals(key.parent(), RegistryKeys.ITEM)) {
             throw new IllegalArgumentException("Invalid model key, must be block or item: " + key);
         }
 
@@ -120,15 +168,14 @@ public class Json5ModelLoader {
         Table<String, BlockDataEntry<?>, Json5Model> overrides = HashBasedTable.create();
         Block block = Registries.BLOCK.get(key);
         BlockState meta = block.getDefaultState();
+
         for (Map.Entry<String, Json5Element> entry : overridesJson5.entrySet()) {
             String keyName = entry.getKey();
             Json5Element overrideElem = entry.getValue();
             Json5Object overrideObj = overrideElem.getAsJson5Object();
 
             Json5Model model = load(key, overrideObj);
-            BlockDataEntry<?> entry1 = meta.getProperty(keyName);
-            if (entry1 == null)
-                throw new IllegalArgumentException("Invalid model override: " + keyName);
+            BlockDataEntry<?> entry1 = meta.get(keyName);
 
             if (model == null)
                 throw new IllegalArgumentException("Invalid model override: " + keyName);
@@ -137,14 +184,6 @@ public class Json5ModelLoader {
         }
 
         return overrides;
-    }
-
-    private GridPoint2 loadVec2i(Json5Array textureSize, GridPoint2 defaultValue) {
-        if (textureSize == null)
-            return defaultValue;
-        if (textureSize.size() != 2)
-            throw new IllegalArgumentException("Invalid 'texture_size' array: " + textureSize);
-        return new GridPoint2(textureSize.get(0).getAsInt(), textureSize.get(1).getAsInt());
     }
 
     private List<ModelElement> loadElements(Json5Array elements, int textureWidth, int textureHeight) {
@@ -189,7 +228,7 @@ public class Json5ModelLoader {
             Json5Element cullface = faceData.get("cullface");
             String cullFace = cullface == null ? null : cullface.getAsString();
 
-            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace, null));
+            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace));
         }
 
         return faceElems;
@@ -224,16 +263,14 @@ public class Json5ModelLoader {
         private final int rotation;
         private final int tintindex;
         private final String cullface;
-        private final @Nullable String pass;
 
         public FaceElement(String texture, UVs uvs, int rotation, int tintindex,
-                           String cullface, @Nullable String pass) {
+                           String cullface) {
             this.texture = texture;
             this.uvs = uvs;
             this.rotation = rotation;
             this.tintindex = tintindex;
             this.cullface = cullface;
-            this.pass = pass;
         }
 
         public String texture() {
@@ -254,10 +291,6 @@ public class Json5ModelLoader {
 
         public String cullface() {
             return cullface;
-        }
-        
-        public @Nullable String pass() {
-            return pass;
         }
 
         @Override
@@ -478,154 +511,6 @@ public class Json5ModelLoader {
             node.rotation.set(node.localTransform.getRotation(tmpQ));
         }
 
-        public void bakeInto(int idx, ChunkModelBuilder modelBuilder, RenderPass defaultPass, int cullface, int x, int y, int z, Map<String, NamespaceID> textureElements) {
-            Vector3 from = this.from();
-            Vector3 to = this.to();
-
-            ModelBuilder nodeBuilder = new ModelBuilder();
-            nodeBuilder.begin();
-
-            MeshBuilder meshBuilder = new MeshBuilder();
-            VertexInfo v00 = new VertexInfo();
-            VertexInfo v01 = new VertexInfo();
-            VertexInfo v10 = new VertexInfo();
-            VertexInfo v11 = new VertexInfo();
-            for (Map.Entry<Direction, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
-                if ((cullface >> entry.getKey().ordinal() & 1) == 1) continue;
-                Direction direction = entry.getKey();
-                FaceElement faceElement = entry.getValue();
-                String texRef = faceElement.texture;
-                NamespaceID texture;
-
-                if (texRef.equals("#missing")) texture = new NamespaceID("textures/block/error.png");
-                else if (texRef.startsWith("#")) texture = textureElements.get(texRef.substring(1));
-                else texture = NamespaceID.parse(texRef).mapPath(path -> "textures/" + path + ".png");
-
-                meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
-                v00.setCol(Color.WHITE);
-                v01.setCol(Color.WHITE);
-                v10.setCol(Color.WHITE);
-                v11.setCol(Color.WHITE);
-
-                v00.setNor(direction.getNormal());
-                v01.setNor(direction.getNormal());
-                v10.setNor(direction.getNormal());
-                v11.setNor(direction.getNormal());
-
-                v00.setUV(faceElement.uvs.x1, faceElement.uvs.y2);
-                v01.setUV(faceElement.uvs.x1, faceElement.uvs.y1);
-                v10.setUV(faceElement.uvs.x2, faceElement.uvs.y2);
-                v11.setUV(faceElement.uvs.x2, faceElement.uvs.y1);
-
-                switch (direction) {
-                    case UP:
-                        v00.setPos(to.x, to.y, from.z);
-                        v01.setPos(to.x, to.y, to.z);
-                        v10.setPos(from.x, to.y, from.z);
-                        v11.setPos(from.x, to.y, to.z);
-                        break;
-                    case DOWN:
-                        v00.setPos(from.x, from.y, from.z);
-                        v01.setPos(from.x, from.y, to.z);
-                        v10.setPos(to.x, from.y, from.z);
-                        v11.setPos(to.x, from.y, to.z);
-                        break;
-                    case WEST:
-                        v00.setPos(from.x, from.y, from.z);
-                        v01.setPos(from.x, to.y, from.z);
-                        v10.setPos(from.x, from.y, to.z);
-                        v11.setPos(from.x, to.y, to.z);
-                        break;
-                    case EAST:
-                        v00.setPos(to.x, from.y, to.z);
-                        v01.setPos(to.x, to.y, to.z);
-                        v10.setPos(to.x, from.y, from.z);
-                        v11.setPos(to.x, to.y, from.z);
-                        break;
-                    case NORTH:
-                        v00.setPos(to.x, from.y, from.z);
-                        v01.setPos(to.x, to.y, from.z);
-                        v10.setPos(from.x, from.y, from.z);
-                        v11.setPos(from.x, to.y, from.z);
-                        break;
-                    case SOUTH:
-                        v00.setPos(from.x, from.y, to.z);
-                        v01.setPos(from.x, to.y, to.z);
-                        v10.setPos(to.x, from.y, to.z);
-                        v11.setPos(to.x, to.y, to.z);
-                        break;
-                }
-
-
-                rotate(v00, v01, v10, v11, rotation);
-
-                v00.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
-                v01.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
-                v10.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
-                v11.position.scl(1 / 16F).add((float) x, (float) y, (float) z);
-
-                modelBuilder.get(faceElement.pass == null ? defaultPass : RenderPass.byName(faceElement.pass)).rect(v00, v10, v11, v01);
-            }
-        }
-    private boolean rotate(
-      VertexInfo v00,
-      VertexInfo v01,
-      VertexInfo v10,
-      VertexInfo v11,
-      ElementRotation rotation
-    ) {
-      Vector3 originVec = rotation.originVec;
-      Axis axis = rotation.axis;
-      float angle = rotation.angle;
-      boolean rescale = rotation.rescale; // TODO: implement
-
-      // Rotate the vertices
-      rotate(v00.position, originVec, axis, angle, v00.position);
-      rotate(v01.position, originVec, axis, angle, v01.position);
-      rotate(v10.position, originVec, axis, angle, v10.position);
-      rotate(v11.position, originVec, axis, angle, v11.position);
-
-      return true;
-    }
-
-    public Vector3 rotate(
-      Vector3 position,
-      Vector3 originVec,
-      Axis axis,
-      float degrees,
-      Vector3 out
-    ) {
-      return rotateVector(position, originVec, degrees, axis.getVector(), out);
-    }
-
-    private final Color aoColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-
-    // Reusable instances
-    private final Vector3 tempVector = new Vector3();
-
-    private final Matrix4 rotationMatrix = new Matrix4();
-
-    private Vector3 rotateVector(
-      Vector3 vector,
-      Vector3 origin,
-      float angleDegrees,
-      Vector3 axis,
-      Vector3 result
-    ) {
-      // Step 1: Translate the vector to the origin
-      tempVector.set(vector).sub(origin);
-
-      // Step 2: Create a rotation matrix
-      rotationMatrix.setToRotation(axis, angleDegrees);
-
-      // Step 3: Apply the rotation matrix to the translated vector
-      tempVector.mul(rotationMatrix);
-
-      // Step 4: Translate the vector back
-      result.set(tempVector).add(origin);
-
-      return result;
-    }
         public Map<Direction, FaceElement> blockFaceFaceElementMap() {
             return blockFaceFaceElementMap;
         }
@@ -675,18 +560,23 @@ public class Json5ModelLoader {
 
     }
 
-    public static final class ElementRotation {
-        private final Vector3 originVec;
-        private final Axis axis;
-        private final float angle;
-        private final boolean rescale;
-
-        public ElementRotation(Vector3 originVec, Axis axis, float angle, boolean rescale) {
-            this.originVec = originVec;
-            this.axis = axis;
-            this.angle = angle;
-            this.rescale = rescale;
-        }
+    /**
+     * Represents a rotational transformation applied to an element, defined by its origin, axis,
+     * angle of rotation, and an optional rescaling flag.
+     * <p>
+     * This class is used to manage rotation information for elements in a 3D space, where the
+     * rotation is specified with respect to a defined origin vector and a chosen axis (X, Y, or Z).
+     * The amount of rotation is determined by an angle measured in degrees, and optionally, the
+     * transformation can apply rescaling to maintain proportionality.
+     * <p>
+     * Instances of this class are immutable and provide methods to retrieve the properties of the rotation.
+     *
+     * @param originVec the origin vector representing the point around which the element is rotated
+     * @param axis the axis of rotation (X, Y, or Z)
+     * @param angle the angle of rotation in degrees
+     * @param rescale whether to apply rescaling after the rotation
+     */
+    public record ElementRotation(Vector3 originVec, Axis axis, float angle, boolean rescale) {
 
         public static ElementRotation deserialize(@Nullable Json5Object rotation) {
             if (rotation == null) {
@@ -703,40 +593,8 @@ public class Json5ModelLoader {
             return new ElementRotation(originVec, Axis.valueOf(axis.toUpperCase(Locale.ROOT)), angle, rescale);
         }
 
-        public Vector3 originVec() {
-            return originVec;
-        }
-
-        public Axis axis() {
-            return axis;
-        }
-
-        public float angle() {
-            return angle;
-        }
-
-        public boolean rescale() {
-            return rescale;
-        }
-
         @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (ElementRotation) obj;
-            return Objects.equals(this.originVec, that.originVec) &&
-                   Objects.equals(this.axis, that.axis) &&
-                   Float.floatToIntBits(this.angle) == Float.floatToIntBits(that.angle) &&
-                   this.rescale == that.rescale;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(originVec, axis, angle, rescale);
-        }
-
-        @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "ElementRotation[" +
                    "originVec=" + originVec + ", " +
                    "axis=" + axis + ", " +
@@ -744,12 +602,14 @@ public class Json5ModelLoader {
                    "rescale=" + rescale + ']';
         }
 
+
     }
 
     public static final class Display {
         public String renderPass;
 
         public Display(String renderPass) {
+            this.renderPass = renderPass;
         }
 
         public static Display read(Json5Object display) {

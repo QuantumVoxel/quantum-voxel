@@ -4,6 +4,7 @@ import dev.ultreon.quantum.api.commands.CommandSender;
 
 import java.util.Objects;
 
+@Deprecated
 public final class StringMessage implements CommandResult {
     private final String text;
 

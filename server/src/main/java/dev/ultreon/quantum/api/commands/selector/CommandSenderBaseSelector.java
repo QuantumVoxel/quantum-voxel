@@ -12,6 +12,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Deprecated
 public class CommandSenderBaseSelector extends BaseSelector<CommandSender> {
     private final CommandSender sender;
 

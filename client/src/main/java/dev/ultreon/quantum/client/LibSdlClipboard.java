@@ -10,7 +10,10 @@ import org.jetbrains.annotations.Nullable;
  * using SDL 2.
  * 
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
+ * @deprecated Use {@link DefaultClipboard} instead, this class will be removed in future version.
+ *             Deprecation due to compatibility issues with macOS.
  */
+@Deprecated(forRemoval = true)
 public class LibSdlClipboard implements IClipboard {
     /**
      * Copies the given text to the clipboard.

@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands;
 
 import dev.ultreon.quantum.api.commands.output.BasicCommandResult;
 
+@Deprecated
 public enum CommandFlag {
 
     DANGEROUS(

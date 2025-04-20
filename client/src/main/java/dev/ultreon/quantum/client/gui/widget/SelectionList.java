@@ -35,8 +35,10 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private ItemRenderer<T> itemRenderer = null;
     private Callback<T> onSelected = value -> {
     };
-    private final int gap = 0;
+    private int gap = 0;
     private boolean drawBackground;
+    private boolean drawButtons = true;
+    private boolean cutButtons = true;
 
     public SelectionList(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         super(width, height);
@@ -56,6 +58,20 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     public SelectionList(int itemHeight) {
         this();
         this.itemHeight(itemHeight);
+    }
+
+    public SelectionList<T> gap(int gap) {
+        this.gap = gap;
+        return this;
+    }
+
+    public SelectionList<T> drawButtons(boolean drawButtons) {
+        this.drawButtons = drawButtons;
+        return this;
+    }
+
+    public boolean isDrawButtons() {
+        return drawButtons;
     }
 
     public boolean isSelectable() {
@@ -306,6 +322,11 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this.scrollY;
     }
 
+    public SelectionList<T> cutButtons(boolean b) {
+        this.cutButtons = b;
+        return this;
+    }
+
     public static class Entry<T> extends Widget {
         private final T value;
         private final SelectionList<T> list;
@@ -322,19 +343,28 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
             this.size.width = this.list.size.width;
             this.size.height = this.list.getItemHeight();
             ItemRenderer<T> itemRenderer = this.list.itemRenderer;
+            if (!list.cutButtons) {
+                render(renderer, selected, deltaTime, itemRenderer);
+                return;
+            }
             if (itemRenderer != null && renderer.pushScissors(this.bounds)) {
+                render(renderer, selected, deltaTime, itemRenderer);
+                renderer.popScissors();
+            }
+        }
 
-                NamespaceID texture = id("textures/gui/list.png");
+        private void render(Renderer renderer, boolean selected, float deltaTime, ItemRenderer<T> itemRenderer) {
+            NamespaceID texture = NamespaceID.of("textures/gui/list.png");
+            if (list.drawButtons) {
                 renderer.draw9Slice(texture, this.pos.x, this.pos.y, this.size.width, this.size.height, 0, 0, 15, 15, 5, 256, 256);
                 if (selected) {
                     renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.WHITE.withAlpha(0x20));
                 } else {
                     renderer.fill(this.pos.x, this.pos.y, this.size.width, this.size.height, RgbColor.BLACK.withAlpha(0x20));
                 }
-
-                itemRenderer.render(renderer, this.value, this.pos.y, selected, deltaTime);
-                renderer.popScissors();
             }
+
+            itemRenderer.render(renderer, this.value, this.pos.y, selected, deltaTime);
         }
 
         public T getValue() {

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@Deprecated
 public class CommandRegistry {
     private static final Map<String, Command> COMMAND_MAP = new HashMap<>();
 

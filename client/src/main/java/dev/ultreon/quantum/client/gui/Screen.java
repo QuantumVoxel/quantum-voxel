@@ -139,6 +139,7 @@ public abstract class Screen extends UIContainer<Screen> {
 
     /**
      * Renders the screen, including handling dialog and title widget rendering.
+     * This method delegates the rendering of the screen elements to the {@link #renderChildren(Renderer, float)} method.
      *
      * @param renderer  Renderer instance used for drawing the screen elements.
      * @param deltaTime The time elapsed since the last frame, used for animations.
@@ -239,7 +240,8 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     /**
-     * Builds the screen.
+     * Builds the screen. Called when the screen is created.
+     * You can use this method to add widgets to the screen
      *
      * @param builder the builder to build the screen.
      * @deprecated Use {@link #init()} and {@link #resized(int, int)} instead.
@@ -275,6 +277,12 @@ public abstract class Screen extends UIContainer<Screen> {
         super.renderBackground(renderer, deltaTime);
     }
 
+    /**
+     * Renders the child components of the current screen.
+     *
+     * @param renderer  the renderer used to draw the child components.
+     * @param deltaTime the time elapsed since the last frame, used for animations.
+     */
     @Override
     public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
         super.renderChildren(renderer, deltaTime);

@@ -6,6 +6,7 @@ import java.io.EOFException;
  * This class represents a simple String input/output stream.
  * Based ont the idea of Python's StringIO.
  */
+@Deprecated
 public class StringIO {
     private final String string;
     private int offset = 0;

@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Deprecated
 public class TabCompleting {
     public static List<String> onlinePlayers(String currentArgument) {
         return TabCompleting.onlinePlayers(new ArrayList<>(), currentArgument);

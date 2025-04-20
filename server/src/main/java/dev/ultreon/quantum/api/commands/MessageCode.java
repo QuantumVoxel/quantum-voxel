@@ -5,6 +5,7 @@ package dev.ultreon.quantum.api.commands;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
+@Deprecated
 public enum MessageCode {
     EMPTY("UC-0", 0),
     NO_PERMISSION("UC-2", 2),

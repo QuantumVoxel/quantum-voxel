@@ -1,9 +1,6 @@
 package dev.ultreon.quantum.server;
 
-import dev.ultreon.quantum.registry.Registry;
-import dev.ultreon.quantum.registry.RegistryKey;
-import dev.ultreon.quantum.registry.RegistryKeys;
-import dev.ultreon.quantum.registry.ServerRegistry;
+import dev.ultreon.quantum.registry.*;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.DimensionInfo;
@@ -62,6 +59,15 @@ public class ServerRegistries {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> ServerRegistry<T> get(RegistryKey<Registry<T>> registryKey) {
         return (ServerRegistry<T>) registries.get((RegistryKey) registryKey);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <T> Registry<T> getOrGeneric(RegistryKey<Registry<T>> registryKey) {
+        ServerRegistry<T> tServerRegistry = (ServerRegistry<T>) registries.get((RegistryKey) registryKey);
+        if (tServerRegistry == null) {
+            return (Registry<T>) Registries.REGISTRY.get(registryKey.id());
+        }
+        return tServerRegistry;
     }
 
     @SuppressWarnings("unchecked")

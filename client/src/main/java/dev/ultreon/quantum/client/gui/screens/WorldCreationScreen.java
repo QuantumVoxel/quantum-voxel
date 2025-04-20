@@ -31,7 +31,7 @@ public class WorldCreationScreen extends Screen {
     private TextButton createButton;
     private String worldName = "";
     private long seed;
-    private GameMode gameMode = GameMode.SURVIVAL;
+    private final GameMode gameMode = GameMode.SURVIVAL;
 
     public WorldCreationScreen() {
         super(TextObject.translation("quantum.screen.world_creation.title"));

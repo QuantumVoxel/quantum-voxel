@@ -7,12 +7,12 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.resources.ResourceLoader;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import org.jetbrains.annotations.ApiStatus;
 
-@Deprecated(forRemoval = true)
+@ApiStatus.Experimental
 public class G3DModel implements BlockModel {
     private final NamespaceID resource;
     private final ModelConfig config;
@@ -55,11 +55,6 @@ public class G3DModel implements BlockModel {
         var instance = new ModelInstance(model);
         instance.transform.setToTranslationAndScaling(new Vector3(config.translation), new Vector3().add(config.scale));
         chunk.addModel(pos, instance);
-    }
-
-    @Override
-    public void bakeInto(int x, int y, int z, int cullface, RenderPass defaultRenderPass, ClientChunk chunk, ChunkModelBuilder builder, int[] ao) {
-        // Do nothing - Unsupported
     }
 
     @Override

@@ -48,6 +48,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class CommandData {
     private final Command executor;
     private final Map<CommandSpec, String> overloads0 = new HashMap<>();

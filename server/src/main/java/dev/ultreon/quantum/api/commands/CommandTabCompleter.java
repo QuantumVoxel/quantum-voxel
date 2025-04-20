@@ -5,6 +5,7 @@ import java.util.List;
 /**
  * Interface for command tab completer
  */
+@Deprecated
 public interface CommandTabCompleter {
     /**
      * Tab complete method for command tab completer

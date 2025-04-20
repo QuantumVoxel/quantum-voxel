@@ -27,46 +27,59 @@ public class PlayerInput {
     private int flyCountdown = 0;
 
     public void tick(@NotNull Player player, float speed) {
-        this.vel.set(0, 0, 0);
+        vel.set(0, 0, 0);
 
-        this.moveX = 0;
-        this.moveY = 0;
+        moveX = 0;
+        moveY = 0;
 
-        this.forward = KeyBinds.walkForwardsKey.isPressed() && Gdx.input.isCursorCatched();
-        this.backward = KeyBinds.walkBackwardsKey.isPressed() && Gdx.input.isCursorCatched();
-        this.strafeLeft = KeyBinds.walkLeftKey.isPressed() && Gdx.input.isCursorCatched();
-        this.strafeRight = KeyBinds.walkRightKey.isPressed() && Gdx.input.isCursorCatched();
-        this.up = KeyBinds.jumpKey.isPressed() && Gdx.input.isCursorCatched();
-        this.down = KeyBinds.crouchKey.isPressed() && Gdx.input.isCursorCatched();
+        forward = KeyBinds.walkForwardsKey.isPressed() && Gdx.input.isCursorCatched();
+        backward = KeyBinds.walkBackwardsKey.isPressed() && Gdx.input.isCursorCatched();
+        strafeLeft = KeyBinds.walkLeftKey.isPressed() && Gdx.input.isCursorCatched();
+        strafeRight = KeyBinds.walkRightKey.isPressed() && Gdx.input.isCursorCatched();
+        up = KeyBinds.jumpKey.isPressed() && Gdx.input.isCursorCatched();
+        down = KeyBinds.crouchKey.isPressed() && Gdx.input.isCursorCatched();
         player.setRunning(KeyBinds.runningKey.isPressed() && Gdx.input.isCursorCatched());
 
-        if (this.flyCountdown > 0) {
-            this.flyCountdown--;
+        toggleFlight(player);
 
-            if (KeyBinds.jumpKey.isJustPressed() && player.isAllowFlight() && !player.isSpectator())
-                player.setFlying(!player.isFlying());
-        } else if (KeyBinds.jumpKey.isJustPressed() && player.isAllowFlight()) {
-            this.flyCountdown = ClientConfig.doublePressDelay;
+        move();
+        controllerMove();
+
+        rotate(player);
+
+        tmp.set(-moveX, 0, moveY).nor().scl(speed).rotate(player.xHeadRot, 0, 1, 0);
+        vel.set(tmp);
+    }
+
+    private void toggleFlight(@NotNull Player player) {
+        if (flyCountdown <= 0) {
+            if (KeyBinds.jumpKey.isJustPressed() && player.isAllowFlight())
+                flyCountdown = ClientConfig.doublePressDelay;
+
+            return;
         }
+        flyCountdown--;
 
-        this.move();
-        this.controllerMove();
+        if (!KeyBinds.jumpKey.isJustPressed() || !player.isAllowFlight() || player.isSpectator())
+            return;
 
-        if (this.moveX > 0)
+        player.setFlying(!player.isFlying());
+        flyCountdown = 0;
+    }
+
+    private void rotate(@NotNull Player player) {
+        if (moveX > 0)
             player.xRot = Math.max(player.xRot - 45 / (player.xHeadRot - player.xRot + 50), player.xRot - 90);
-        else if (this.moveX < -0)
+        else if (moveX < -0)
             player.xRot = Math.min(player.xRot + 45 / (player.xRot - player.xHeadRot + 50), player.xRot + 90);
-        else if (this.moveY != 0 && player.xRot > player.xHeadRot)
+        else if (moveY != 0 && player.xRot > player.xHeadRot)
             player.xRot = Math.max(player.xRot - (45 / (player.xRot - player.xHeadRot)), player.xHeadRot);
-        else if (this.moveY != 0 && player.xRot < player.xHeadRot)
+        else if (moveY != 0 && player.xRot < player.xHeadRot)
             player.xRot = Math.min(player.xRot + (45 / (player.xHeadRot - player.xRot)), player.xHeadRot);
-
-        this.tmp.set(-this.moveX, 0, moveY).nor().scl(speed).rotate(player.xHeadRot, 0, 1, 0);
-        this.vel.set(this.tmp);
     }
 
     private void controllerMove() {
-        if (!ControllerInput.isControllerConnected() || this.moveX != 0 || this.moveY != 0)
+        if (!ControllerInput.isControllerConnected() || moveX != 0 || moveY != 0)
             return;
         if (!(GameInput.getCurrent() instanceof ControllerInput))
             return;
@@ -77,39 +90,39 @@ public class PlayerInput {
             if (joystick == null)
                 return;
 
-            this.moveX = -joystick.x;
-            this.moveY = joystick.y;
+            moveX = -joystick.x;
+            moveY = joystick.y;
         }
     }
 
     private void move() {
         if (!(GameInput.getCurrent() instanceof KeyAndMouseInput)) return;
-        if (!this.forward && !this.backward && !this.strafeLeft && !this.strafeRight)
+        if (!forward && !backward && !strafeLeft && !strafeRight)
             return;
 
-        if (this.forward)
-            this.moveY += 1;
+        if (forward)
+            moveY += 1;
 
-        if (this.backward)
-            this.moveY -= 1;
+        if (backward)
+            moveY -= 1;
 
-        if (this.strafeLeft)
-            this.moveX -= 1;
+        if (strafeLeft)
+            moveX -= 1;
 
-        if (this.strafeRight)
-            this.moveX += 1;
+        if (strafeRight)
+            moveX += 1;
     }
 
     @Deprecated
     public Vec3d getVel() {
-        return Utils.toCoreLibs(this.vel);
+        return Utils.toCoreLibs(vel);
     }
 
     public Vector3 getVelocity() {
-        return this.vel;
+        return vel;
     }
 
     public boolean isWalking() {
-        return this.forward || this.backward || this.strafeLeft || this.strafeRight;
+        return forward || backward || strafeLeft || strafeRight;
     }
 }

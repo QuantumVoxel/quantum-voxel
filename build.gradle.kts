@@ -291,7 +291,9 @@ val publishProjects =
     project(":server"),
     project(":gameprovider"),
     project(":mixinprovider"),
-    project(":lang-gen")
+    project(":lang-gen"),
+    project(":quantum-api"),
+    project(":kwantum-api")
   )
 
 publishProjects.forEach {
@@ -357,9 +359,27 @@ publishProjects.forEach {
   it.publishing {
     repositories {
       maven {
-        it.mkdir("build/staging-deploy")
-        name = "Staging"
-        url = uri("file://${projectDir.path.replace("\\", "/")}/build/staging-deploy")
+        name = "UltreonMavenReleases"
+        url = uri("https://maven.ultreon.dev/releases")
+        credentials {
+          username = findProperty("ultreonmvn.name") as? String ?: getenv("ULTREON_MVN_NAME")
+          password = findProperty("ultreonmvn.secret") as? String ?: getenv("ULTREON_MVN_SEC")
+        }
+        authentication {
+          create<BasicAuthentication>("basic")
+        }
+      }
+
+      maven {
+        name = "UltreonMavenSnapshots"
+        url = uri("https://maven.ultreon.dev/snapshots")
+        credentials {
+          username = findProperty("ultreonmvn.name") as? String ?: getenv("ULTREON_MVN_NAME")
+          password = findProperty("ultreonmvn.secret") as? String ?: getenv("ULTREON_MVN_SEC")
+        }
+        authentication {
+          create<BasicAuthentication>("basic")
+        }
       }
     }
 

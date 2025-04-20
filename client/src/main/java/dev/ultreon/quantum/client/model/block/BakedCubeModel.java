@@ -15,9 +15,6 @@ import dev.ultreon.quantum.client.model.BakedModel;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.texture.TextureManager;
-import dev.ultreon.quantum.client.world.AOUtils;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
-import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
@@ -30,8 +27,6 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final LazyValue<BakedCubeModel> DEFAULT = new LazyValue<>();
     private static final Vector3 from = new Vector3(-8f, 8f, -8f);
     private static final Vector3 to = new Vector3(8f, 24f, 8f);
-    private static final Color TRANSPARENT = new Color(0f, 0f, 0f, 0f);
-    private static final Color AO_COLOR = new Color(0.5f, 0f, 0f, 0f);
     private final TextureRegion top;
     private final TextureRegion bottom;
     private final TextureRegion left;
@@ -300,78 +295,6 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         finishRect(region, builder);
     }
 
-    private static void createTop(TextureRegion region, MeshPartBuilder builder, int ao) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 1, 0).setCol(AOUtils.getAoCorner00(ao));
-        V_01.setPos(-1 + 1, 1, 0).setCol(AOUtils.getAoCorner01(ao));
-        V_10.setPos(-1 + 1, 1, 1).setCol(AOUtils.getAoCorner10(ao));
-        V_11.setPos(-1, 1, 1).setCol(AOUtils.getAoCorner11(ao));
-
-        setNor(0, 1, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createBottom(TextureRegion region, MeshPartBuilder builder, int ao) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 0).setCol(AOUtils.getAoCorner00(ao));
-        V_01.setPos(-1, 0, 1).setCol(AOUtils.getAoCorner01(ao));
-        V_10.setPos(-1 + 1, 0, 1).setCol(AOUtils.getAoCorner10(ao));
-        V_11.setPos(-1 + 1, 0, 0).setCol(AOUtils.getAoCorner11(ao));
-
-        setNor(0, -1, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createLeft(TextureRegion region, MeshPartBuilder builder, int ao) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 0).setCol(AOUtils.getAoCorner00(ao));
-        V_01.setPos(-1, 1, 0).setCol(AOUtils.getAoCorner01(ao));
-        V_10.setPos(-1, 1, 1).setCol(AOUtils.getAoCorner10(ao));
-        V_11.setPos(-1, 0, 1).setCol(AOUtils.getAoCorner11(ao));
-
-        setNor(-1, 0, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createRight(TextureRegion region, MeshPartBuilder builder, int ao) {
-        if (region == null) return;
-
-        V_00.setPos(-1 + 1, 0, 0).setCol(AOUtils.getAoCorner00(ao));
-        V_01.setPos(-1 + 1, 0, 1).setCol(AOUtils.getAoCorner01(ao));
-        V_10.setPos(-1 + 1, 1, 1).setCol(AOUtils.getAoCorner10(ao));
-        V_11.setPos(-1 + 1, 1, 0).setCol(AOUtils.getAoCorner11(ao));
-
-        setNor(1, 0, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createFront(TextureRegion region, MeshPartBuilder builder, int ao) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 0).setCol(AOUtils.getAoCorner00(ao));
-        V_01.setPos(-1 + 1, 0, 0).setCol(AOUtils.getAoCorner01(ao));
-        V_10.setPos(-1 + 1, 1, 0).setCol(AOUtils.getAoCorner10(ao));
-        V_11.setPos(-1, 1, 0).setCol(AOUtils.getAoCorner11(ao));
-
-        setNor(0, 0, 1);
-        finishRect(region, builder);
-    }
-
-    private static void createBack(TextureRegion region, MeshPartBuilder builder, int ao) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 1);
-        V_01.setPos(-1, 1, 1);
-        V_10.setPos(-1 + 1, 1, 1);
-        V_11.setPos(-1 + 1, 0, 1);
-
-        setNor(0, 0, -1);
-        finishRect(region, builder);
-    }
-
     private static void setNor(int x, int y, int z) {
         V_00.setNor(x, y, z);
         V_01.setNor(x, y, z);
@@ -395,16 +318,6 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
 
     public boolean isCustom() {
         return false;
-    }
-
-    @Override
-    public void bakeInto(int x, int y, int z, int cullface, RenderPass defaultRenderPass, ClientChunk chunk, ChunkModelBuilder builder, int[] ao) {
-        if ((cullface >> Direction.UP.ordinal() & 1) == 0) createTop(top, builder.get(defaultRenderPass), ao[Direction.UP.ordinal()]);
-        if ((cullface >> Direction.DOWN.ordinal() & 1) == 0) createBottom(bottom, builder.get(defaultRenderPass), ao[Direction.DOWN.ordinal()]);
-        if ((cullface >> Direction.NORTH.ordinal() & 1) == 0) createFront(front, builder.get(defaultRenderPass), ao[Direction.NORTH.ordinal()]);
-        if ((cullface >> Direction.SOUTH.ordinal() & 1) == 0) createBack(back, builder.get(defaultRenderPass), ao[Direction.SOUTH.ordinal()]);
-        if ((cullface >> Direction.WEST.ordinal() & 1) == 0) createLeft(left, builder.get(defaultRenderPass), ao[Direction.WEST.ordinal()]);
-        if ((cullface >> Direction.EAST.ordinal() & 1) == 0) createRight(right, builder.get(defaultRenderPass), ao[Direction.EAST.ordinal()]);
     }
 
     @Override

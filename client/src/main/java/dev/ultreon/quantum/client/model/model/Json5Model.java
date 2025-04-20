@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.model.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.google.common.collect.Table;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
@@ -9,13 +10,12 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
-import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Json5Model implements BlockModel, ItemModel {
     public final Map<String, NamespaceID> textureElements;
@@ -39,7 +39,7 @@ public class Json5Model implements BlockModel, ItemModel {
     }
 
     public Model bake() {
-        return ModelManager.INSTANCE.generateModel(id, modelBuilder -> {
+        return ModelManager.INSTANCE.generateModel(id, (Consumer<ModelBuilder>)  modelBuilder -> {
             for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
                 Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
                 modelElement.bake(i, modelBuilder, textureElements);
@@ -64,14 +64,6 @@ public class Json5Model implements BlockModel, ItemModel {
     @Override
     public boolean isCustom() {
         return true;
-    }
-
-    @Override
-    public void bakeInto(int x, int y, int z, int cullface, RenderPass defaultRenderPass, ClientChunk chunk, ChunkModelBuilder builder, int[] ao) {
-        for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
-            Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
-            modelElement.bakeInto(i, builder, defaultRenderPass, cullface, x, y, z, textureElements);
-        }
     }
 
     @Override

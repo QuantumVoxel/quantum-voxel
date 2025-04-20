@@ -1,11 +1,10 @@
-package dev.ultreon.quantum.client.input;
+package dev.ultreon.quantum.client.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.util.PlayerView;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
@@ -13,7 +12,6 @@ import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
-import lombok.Getter;
 
 /**
  * The camera used for the game.

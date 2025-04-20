@@ -3,6 +3,7 @@ package dev.ultreon.quantum.server.dedicated;
 import dev.ultreon.quantum.CommonLoader;
 import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.api.neocommand.CommandRegistration;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.GameCommands;
 
@@ -23,6 +24,6 @@ public class ServerLoader {
         CommonRegistries.register();
 
         // Register game commands
-        GameCommands.register();
+        CommandRegistration.register();
     }
 }

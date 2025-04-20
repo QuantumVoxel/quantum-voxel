@@ -23,7 +23,6 @@ import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -36,9 +35,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
-import static io.github.libsdl4j.api.Sdl.SDL_Init;
-import static io.github.libsdl4j.api.Sdl.SDL_Quit;
-import static io.github.libsdl4j.api.SdlSubSystemConst.*;
 
 /**
  * LibGDX wrapper for Quantum Voxel to handle uncaught exceptions.
@@ -158,7 +154,6 @@ public final class Main implements ApplicationListener {
     }
 
     private void createClient() {
-        this.sdl = SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_SENSOR);
         this.client = new QuantumClient(this.argv);
     }
 
@@ -330,9 +325,6 @@ public final class Main implements ApplicationListener {
     @Override
     public void dispose() {
         try {
-            if (this.sdl != null)
-                SDL_Quit();
-
             if (this.glProfiler != null) {
                 this.glProfiler.disable();
                 logger.info("GL Draw Calls = {}", this.glProfiler.getDrawCalls());

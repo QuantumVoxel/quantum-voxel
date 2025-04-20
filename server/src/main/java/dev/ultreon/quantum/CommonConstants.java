@@ -10,6 +10,8 @@ import dev.ultreon.quantum.world.rng.JavaRNG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
+
 public class CommonConstants {
     public static final String EX_NOT_ON_RENDER_THREAD = "Current thread is not the rendering thread.";
     public static final String EX_FAILED_TO_LOAD_CONFIG = "Failed to load config file!";
@@ -132,6 +134,7 @@ public class CommonConstants {
     public static final Vector2 VECTOR2_3_S = new Vector2();
     public static final JavaRNG RANDOM = new JavaRNG();
     public static final int DEFAULT_LOD_LEVEL = 0;
+    public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private CommonConstants() {
 

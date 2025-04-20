@@ -18,7 +18,6 @@ import dev.ultreon.quantum.client.render.pipeline.WorldRenderNode;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @see WorldRenderNode
  */
-@Deprecated
 public interface BlockRenderer {
 
     /**

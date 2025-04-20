@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 /**
  * Interface for command parameters
  */
+@Deprecated
 public interface CommandParameter {
 
     /**

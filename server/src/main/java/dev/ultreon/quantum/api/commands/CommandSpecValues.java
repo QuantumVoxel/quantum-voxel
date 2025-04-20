@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 /**
  * Custom HashSet implementation for storing command specification values.
  */
+@Deprecated
 public class CommandSpecValues extends HashSet<String> {
     /**
      * Constructs an empty CommandSpecValues with an initial capacity sufficient to hold the specified number of elements.

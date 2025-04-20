@@ -23,7 +23,7 @@ public record C2SCommandPacket(String input) implements Packet<InGameServerPacke
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         ServerPlayer player = ctx.getPlayer();
         if (player != null) {
-            player.execute(this.input);
+            player.runCommand(this.input);
         }
     }
 

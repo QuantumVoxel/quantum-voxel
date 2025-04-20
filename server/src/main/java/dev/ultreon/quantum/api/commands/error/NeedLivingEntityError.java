@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands.error;
 
 import dev.ultreon.quantum.api.commands.MessageCode;
 
+@Deprecated
 public class NeedLivingEntityError extends CommandError {
 
     public NeedLivingEntityError() {

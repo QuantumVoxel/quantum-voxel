@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands.selector;
 
+@Deprecated
 public class Selector extends BaseSelector<String> {
 
     public Selector(String text) {

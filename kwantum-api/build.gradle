@@ -29,31 +29,3 @@ processResources {
         expand "version": project.version
     }
 }
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = "dev.ultreon"
-            artifactId = "mixinprovider"
-            version = project.version
-            from components.java
-        }
-    }
-
-    repositories {
-        if (findProperty("gitLabPrivateToken") != null) {
-            maven {
-                name = "GitLabMaven"
-                url = uri("https://gitlab.com/api/v4/projects/59634919/packages/maven")
-                credentials(HttpHeaderCredentials) {
-                    name = "Private-Token"
-                    value = findProperty("gitLabPrivateToken").toString()
-                    // the variable resides in $GRADLE_USER_HOME/gradle.properties
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
-            }
-        }
-    }
-}

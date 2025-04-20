@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands.error;
 
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public class InvalidCoordinateError extends InvalidValueError {
 
     public InvalidCoordinateError(String which) {

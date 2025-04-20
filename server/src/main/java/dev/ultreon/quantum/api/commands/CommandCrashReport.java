@@ -19,6 +19,7 @@ import java.util.UUID;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
+@Deprecated
 public class CommandCrashReport {
     private final Throwable throwable;
     private final String alias;

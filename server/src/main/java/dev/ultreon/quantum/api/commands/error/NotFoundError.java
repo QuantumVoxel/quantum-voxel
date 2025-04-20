@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands.error;
 
 import dev.ultreon.quantum.api.commands.MessageCode;
 
+@Deprecated
 public class NotFoundError extends CommandError {
 
     public NotFoundError(String what) {

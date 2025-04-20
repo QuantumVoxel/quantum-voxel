@@ -126,6 +126,7 @@ public class RenderingRegistration {
      * Registers entity renderers.
      */
     public static void registerEntityRenderers() {
+        // Register the entity models
         EntityModelRegistry entityModelManager = QuantumClient.get().entityModelManager;
         entityModelManager.registerBBModel(EntityTypes.PLAYER, QuantumClient.id("player"));
         entityModelManager.registerBBModel(EntityTypes.SOMETHING, QuantumClient.id("something"));

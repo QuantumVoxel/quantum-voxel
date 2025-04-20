@@ -3,6 +3,7 @@
 @FieldsAreNonnullByDefault
 @TypeParametersAreNonnullByDefault
 @TypeUsesAreNonnullByDefault
+@Deprecated
 package dev.ultreon.quantum.api.commands.selector;
 
 import dev.ultreon.quantum.FieldsAreNonnullByDefault;

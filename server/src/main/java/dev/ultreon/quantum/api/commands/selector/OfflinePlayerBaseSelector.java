@@ -10,6 +10,7 @@ import dev.ultreon.quantum.server.player.CachedPlayer;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Deprecated
 public class OfflinePlayerBaseSelector extends BaseSelector<CachedPlayer> {
     public OfflinePlayerBaseSelector(CommandSender sender, Parsed parsed) {
         super(parsed);

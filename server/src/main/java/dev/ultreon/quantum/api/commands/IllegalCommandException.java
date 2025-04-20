@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands;
 
+@Deprecated
 public class IllegalCommandException extends RuntimeException {
     private final MessageCode code;
 

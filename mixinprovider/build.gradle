@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'maven-publish'
 }
 
 version = '0.1.0'
@@ -83,6 +82,7 @@ dependencies {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
+    implementation("io.github.llamalad7:mixinextras-fabric:0.4.1")
 }
 
 processResources {

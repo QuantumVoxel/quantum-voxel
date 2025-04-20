@@ -17,6 +17,7 @@ import static dev.ultreon.quantum.server.util.Utils.reprChar;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
+@Deprecated
 class CommandSpecParser {
     private final int line = 0;
     private @Nullable StringIO io = null;

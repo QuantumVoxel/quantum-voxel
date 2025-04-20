@@ -8,6 +8,7 @@ import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
 
+@Deprecated
 public class PositionCommand extends Command {
     public PositionCommand() {
         super();

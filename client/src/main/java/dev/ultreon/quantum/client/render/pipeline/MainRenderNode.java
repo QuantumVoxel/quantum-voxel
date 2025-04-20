@@ -10,7 +10,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.NamespaceID;

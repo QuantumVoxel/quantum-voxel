@@ -1,16 +1,19 @@
 package dev.ultreon.quantum.client;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
- * Represents a user with a name.
- * <p>
- * The User record provides implementations for toString and equals methods.
+ * The User class represents a record with a single immutable property, `name`.
+ * This record is used to encapsulate user information with methods for
+ * string representation and equality checking.
+ *
+ * @param name the name of the user
  */
 public record User(String name) {
-
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return name;
     }
 

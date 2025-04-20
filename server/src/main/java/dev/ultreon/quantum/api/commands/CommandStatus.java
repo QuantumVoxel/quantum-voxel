@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands;
 /**
  * Enum representing the status of a command.
  */
+@Deprecated
 public enum CommandStatus {
     WIP("Work in progress"),
     DONE("Completed"),

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands.error;
 
+@Deprecated
 public class PlayerIsOnlineError extends CommandError {
     private final String name;
 

@@ -7,7 +7,9 @@ import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.util.GameMode;
 import net.fabricmc.loader.api.FabricLoader;
 
+@Deprecated
 public final class GameCommands {
+    @Deprecated
     public static void register() {
         CommandRegistry.register(new TeleportCommand());
         CommandRegistry.register(new TpDimCommand());

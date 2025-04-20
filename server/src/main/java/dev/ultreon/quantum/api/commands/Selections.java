@@ -4,19 +4,21 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.ServerWorld;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class Selections {
-    private Player player = null;
-    private Entity entity = null;
-    private ServerWorld world = null;
-    private ServerChunk chunk = null;
+    private @Nullable Player player = null;
+    private @Nullable Entity entity = null;
+    private @Nullable ServerWorld world = null;
+    private @Nullable ServerChunk chunk = null;
     protected PositionCommand.PositionSelection positions = new PositionCommand.PositionSelection();
-    private static Map<CommandSender, Selections> selections = new HashMap<>();
+    private static final Map<CommandSender, Selections> selections = new HashMap<>();
 
-    public Player getPlayer() {
+    public @Nullable Player getPlayer() {
         return player;
     }
 
@@ -25,7 +27,7 @@ public class Selections {
         this.entity = player;
     }
 
-    public Entity getEntity() {
+    public @Nullable Entity getEntity() {
         return entity;
     }
 
@@ -44,7 +46,7 @@ public class Selections {
         }
     }
 
-    public ServerWorld getWorld() {
+    public @Nullable ServerWorld getWorld() {
         return world;
     }
 
@@ -52,7 +54,7 @@ public class Selections {
         this.world = world;
     }
 
-    public ServerChunk getChunk() {
+    public @Nullable ServerChunk getChunk() {
         return chunk;
     }
 

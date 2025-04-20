@@ -19,6 +19,8 @@ public class ValueTracker {
     private static int flushRequests;
     private static int renderableCount;
     private static int chunkTracks;
+    private static int shaderSwitches;
+    private static int textureBindings;
 
     public static long getMeshDisposes() {
         return ValueTracker.meshDisposes;
@@ -181,5 +183,21 @@ public class ValueTracker {
     public static int getAverageRenderables() {
         if (chunkTracks == 0) return 0;
         return renderableCount / chunkTracks;
+    }
+
+    public static void setShaderSwitches(int switches) {
+        shaderSwitches = switches;
+    }
+
+    public static int getShaderSwitches() {
+        return shaderSwitches;
+    }
+
+    public static void setTextureBindings(int textureBindings) {
+        ValueTracker.textureBindings = textureBindings;
+    }
+
+    public static int getTextureBindings() {
+        return textureBindings;
     }
 }

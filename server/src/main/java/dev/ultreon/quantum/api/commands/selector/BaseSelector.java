@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+@Deprecated
 public abstract class BaseSelector<T> {
     protected @Nullable SelectorKey key;
     protected @Nullable String stringValue;

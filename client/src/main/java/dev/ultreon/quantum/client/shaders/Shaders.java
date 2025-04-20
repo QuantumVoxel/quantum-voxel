@@ -10,7 +10,6 @@ import dev.ultreon.quantum.client.shaders.provider.*;
 import dev.ultreon.quantum.util.NamespaceID;
 
 import static dev.ultreon.quantum.client.QuantumClient.get;
-import static dev.ultreon.quantum.client.QuantumClient.id;
 
 /**
  * The Shaders class provides a collection of shader providers for the game.
@@ -41,7 +40,7 @@ public class Shaders {
      * 
      * @see SceneShaders
      */
-    public static final Supplier<SceneShaders> SCENE = Shaders.register("world", () -> new SceneShaders(
+    public static final Supplier<SceneShaders> WORLD = Shaders.register("world", () -> new SceneShaders(
             QuantumClient.resource(NamespaceID.of("shaders/scene.vert")),
             QuantumClient.resource(NamespaceID.of("shaders/scene.frag")),
             QuantumClient.resource(NamespaceID.of("shaders/scene.geom"))));

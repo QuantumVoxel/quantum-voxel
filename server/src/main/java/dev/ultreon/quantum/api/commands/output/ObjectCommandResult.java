@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands.output;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.server.chat.Chat;
 
+@Deprecated
 public class ObjectCommandResult implements CommandResult {
     private final Object object;
     private final Type type;

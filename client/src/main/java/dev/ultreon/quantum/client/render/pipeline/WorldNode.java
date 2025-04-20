@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;

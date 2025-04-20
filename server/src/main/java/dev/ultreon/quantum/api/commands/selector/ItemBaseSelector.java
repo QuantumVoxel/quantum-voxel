@@ -12,6 +12,7 @@ import dev.ultreon.quantum.util.Numbers;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class ItemBaseSelector extends BaseSelector<ItemStack> {
     private final CommandSender sender;
 

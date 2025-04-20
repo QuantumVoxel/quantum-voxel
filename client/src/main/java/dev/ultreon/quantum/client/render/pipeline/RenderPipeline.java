@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 import dev.ultreon.quantum.client.ClientRegistries;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.RenderBuffer;
 import dev.ultreon.quantum.debug.ValueTracker;

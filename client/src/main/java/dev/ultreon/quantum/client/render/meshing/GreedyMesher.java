@@ -13,10 +13,7 @@ import dev.ultreon.quantum.client.registry.BlockRendererRegistry;
 import dev.ultreon.quantum.client.render.BlockRenderer;
 import dev.ultreon.quantum.client.render.NormalBlockRenderer;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.AOUtils;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
-import dev.ultreon.quantum.client.world.ClientChunkAccess;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
+import dev.ultreon.quantum.client.world.*;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
@@ -63,7 +60,7 @@ import static dev.ultreon.quantum.world.World.CS;
  *  []
  * </pre>
  */
-@Deprecated(since = "0.2.0")
+@SuppressWarnings("t")
 public class GreedyMesher implements Mesher {
     private static final int OFF_X = 0;
     private static final int OFF_Z = 0;
@@ -127,8 +124,7 @@ public class GreedyMesher implements Mesher {
                         }
 
                         RenderPass pass = BlockRenderPassRegistry.get(curBlock.getBlock());
-                        if (blockModel == null || pass == null || !pass.name().equals(blockModel.getRenderPass())
-                                || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
+                        if (pass == null || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
                             continue;
 
                         int bottomNeighborY = y - 1;
@@ -214,8 +210,7 @@ public class GreedyMesher implements Mesher {
                         }
 
                         RenderPass pass = BlockRenderPassRegistry.get(curBlock.getBlock());
-                        if (blockModel == null || pass == null || !pass.name().equals(blockModel.getRenderPass())
-                                || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
+                        if (pass == null || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
                             continue;
 
                         int westNeighborX = x - 1;
@@ -302,8 +297,7 @@ public class GreedyMesher implements Mesher {
                         }
 
                         RenderPass pass = BlockRenderPassRegistry.get(curBlock.getBlock());
-                        if (blockModel == null || pass == null || !pass.name().equals(blockModel.getRenderPass())
-                                || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
+                        if (pass == null || !condition.shouldUse(curBlock.getBlock(), blockModel, pass))
                             continue;
 
                         int northNeighborZ = z + 1;
@@ -499,17 +493,14 @@ public class GreedyMesher implements Mesher {
 
         if (used[newX][y]) return false;  // If already used, cannot merge
 
-        int[] calculate = AOUtils.calculate(chunk, realX, realY, realZ);
-        if (!Arrays.equals(ao, calculate)) return false;
-
         BlockState newBlock = this.block(this.chunk, realX, realY, realZ);
         if (newBlock.isInvisible()) return false;
 
         float newLight = 15;
         PerCornerLightData newPcld = null;
 
-        if (this.perCornerLight) newPcld = lightDataArray[newX][y];
-        else newLight = this.calcLightLevel(side, realX, realY, realZ);
+//        if (this.perCornerLight) newPcld = lightDataArray[newX][y];
+//        else newLight = this.calcLightLevel(side, realX, realY, realZ);
 
         return mergeCond.shouldMerge(block, ll, lightData, newBlock, newLight, newPcld);
     }
@@ -528,8 +519,8 @@ public class GreedyMesher implements Mesher {
             float lLight = 15;
             PerCornerLightData lPcld = null;
 
-            if (this.perCornerLight) lPcld = lightDataArray[lx][endY];
-            else lLight = this.calcLightLevel(side, realX, realY, realZ);
+//            if (this.perCornerLight) lPcld = lightDataArray[lx][endY];
+//            else lLight = this.calcLightLevel(side, realX, realY, realZ);
 
             if (!mergeCond.shouldMerge(block, ll, lightData, lBlk, lLight, lPcld)) return false;
         }
@@ -740,24 +731,15 @@ public class GreedyMesher implements Mesher {
         RenderPass pass1 = BlockRenderPassRegistry.get(id1.getBlock());
         RenderPass pass2 = BlockRenderPassRegistry.get(id2.getBlock());
 
-        if (pass1 != pass2) return false;
+        if (pass1 == null || pass2 == null) return false;
+        if (!pass1.equals(pass2)) return false;
 
         boolean sameBlock = Objects.equals(id1, id2);
-        boolean sameLight = light1 == light2;
-        boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're a different block
-
-        if (this.perCornerLight) sameLight = lightData1.equals(lightData2);
 
         // Other block renderers may alter shape unpredictably
-        boolean considerAsSame = sameLight && !sameBlock && tooDarkToTell
-                && QuantumClient.get().getBlockModel(id1) == QuantumClient.get().getBlockModel(id2)
-                && GreedyMesher.isFullCubeRender(id1.getBlock()) && GreedyMesher.isFullCubeRender(id2.getBlock())
-                && (!id1.isTransparent() && !id2.isTransparent());
-
-        if (considerAsSame)
-            sameBlock = true; // Consider them the same block
-
-        return sameBlock && sameLight;
+        boolean considerAsSame = !sameBlock && QuantumClient.get().getBlockModel(id1).equals(QuantumClient.get().getBlockModel(id2)) && GreedyMesher.isFullCubeRender(id1.getBlock()) && GreedyMesher.isFullCubeRender(id2.getBlock());
+        if (considerAsSame) sameBlock = true; // Consider them the same block
+        return sameBlock;
     }
 
     @Override
@@ -769,11 +751,13 @@ public class GreedyMesher implements Mesher {
         List<Face> faces;
         try (var ignoredSection = QuantumClient.PROFILER.start("chunk-get-faces")) {
             faces = this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
+            if (chunk instanceof ClientChunk clientChunk)
+                clientChunk.faceCount = faces.size();
         }
 
         try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
             if (section != null) section.addStat("face-count", faces.size());
-            for (Face f : faces) f.render(builder);
+            for (Face f : faces) f.bake(builder);
         }
         return true;
     }
@@ -799,7 +783,6 @@ public class GreedyMesher implements Mesher {
      * The Face class represents a single face of a block in the game world. This includes the coordinates, lighting
      * information, and rendering details required to draw the face on the screen.
      */
-    @Deprecated
     public static class Face {
 
         private final Direction side;
@@ -856,7 +839,7 @@ public class GreedyMesher implements Mesher {
          * @param modelBuilder the ChunkModelBuilder which is used to build the mesh for the face
          */
         @SuppressWarnings("unused")
-        public void render(ChunkModelBuilder modelBuilder) {
+        public void bake(ChunkModelBuilder modelBuilder) {
             MeshPartBuilder builder = modelBuilder.get(renderPass);
             try (var ignored = QuantumClient.PROFILER.start("face")) {
                 LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);

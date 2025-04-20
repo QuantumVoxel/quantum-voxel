@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.api.commands.error;
 
+@Deprecated
 public class InvalidLocationError extends InvalidValueError {
     public static final String WHAT = "location";
 

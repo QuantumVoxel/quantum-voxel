@@ -92,7 +92,7 @@ public class ItemRenderer implements Disposable {
             renderer.blitColor(RgbColor.WHITE);
             renderer.blit((TextureRegion) null, x, y, 16, 16);
         } else {
-            TextureRegion texture = this.client.itemTextureAtlas.get(curKey.mapPath(path -> "textures/items/" + path + ".png"));
+            TextureRegion texture = this.client.itemTextureAtlas.getDiffuse(curKey.mapPath(path -> "textures/items/" + path + ".png"));
             renderer.blitColor(RgbColor.WHITE);
             renderer.blit(texture, x, y, 16, 16);
         }

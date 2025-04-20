@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
+@Deprecated
 public class IndexedCommandSpecValues implements Iterable<IndexedCommandSpecValues.Entry> {
     private final IntMap<CommandSpecValues> mapping = new IntMap<>();
 

@@ -35,7 +35,6 @@ import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Vec4i;
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +48,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static dev.ultreon.quantum.CommonConstants.id;
+
 /**
  * The Renderer class is responsible for rendering shapes, textures, and various graphics elements.
  * It provides methods to set properties such as color and stroke width, and draw shapes like circles, rectangles,
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"unused", "IntegerDivisionInFloatingPointContext"})
 public class Renderer implements Disposable {
+    public static final com.badlogic.gdx.graphics.Color DARK_TRANSPARENT = new com.badlogic.gdx.graphics.Color(0, 0, 0, 0.4f);
     private static final int TAB_WIDTH = 32;
     public static final float OVERLAY_ZINDEX = 2000;
     public static final int TOOLTIP_ZINDEX = 100;
@@ -78,8 +80,6 @@ public class Renderer implements Disposable {
     private final GlStateStack glState = new GlStateStack();
     private final TextureRegion tmpUv = new TextureRegion();
     private final Quaternion tmpQ = new Quaternion();
-    private int width;
-    private int height;
     private int scissorOffsetX;
     private int scissorOffsetY;
     private boolean blurred;
@@ -94,7 +94,7 @@ public class Renderer implements Disposable {
     private float iTime;
     private boolean hexItems;
     private long shouldCheckMathDay;
-    private com.badlogic.gdx.graphics.Color fontColor = new com.badlogic.gdx.graphics.Color();
+    private final com.badlogic.gdx.graphics.Color fontColor = new com.badlogic.gdx.graphics.Color();
     private final Layout layout = new Layout();
     private String layoutText = "";
 
@@ -876,6 +876,120 @@ public class Renderer implements Disposable {
      */
     @CanIgnoreReturnValue
     public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight, Color backgroundColor) {
+        this.setColor(backgroundColor);
+        this.rect(x, y, width, height);
+        Texture tex = this.textureManager.getTexture(id);
+        this.batch.setColor(this.blitColor.toGdx());
+        this.tmpUv.setTexture(tex);
+        this.tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
+        this.batch.draw(tmpUv, x, y + height, width, -height);
+        return this;
+    }
+
+    /**
+     * Draws a texture at the specified coordinates with a background color and the specified width and height.
+     * This also allows you to specify the UV coordinates of the texture.
+     * And the UV width and height.
+     *
+     * @param tex             the texture to draw
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
+     * @param uWidth          the texture uv width
+     * @param vHeight         the texture uv height
+     * @param texWidth        the texture width
+     * @param texHeight       the texture height
+     * @param backgroundColor the background color to use
+     * @return this
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int, Color)
+     */
+    @ApiStatus.Internal
+    @CanIgnoreReturnValue
+    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight, Color backgroundColor) {
+        this.setColor(backgroundColor);
+        this.rect(x, y, width, height);
+        this.batch.setColor(this.blitColor.toGdx());
+        tmpUv.setTexture(tex);
+        tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
+        this.batch.draw(tmpUv, x, y + height, width, -height);
+        return this;
+    }
+
+    /**
+     * Draws a texture at the specified coordinates
+     *
+     * @param tex       the texture to draw
+     * @param x         the setX coordinate
+     * @param y         the setY coordinate
+     * @param width     the width
+     * @param height    the height
+     * @param u         the texture u coordinate of the region
+     * @param v         the texture v coordinate of the region
+     * @param uWidth    the texture uv width
+     * @param vHeight   the texture uv height
+     * @param texWidth  the texture width
+     * @param texHeight the texture height
+     * @return this
+     * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int)
+     */
+    @ApiStatus.Internal
+    @CanIgnoreReturnValue
+    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight) {
+        this.batch.setColor(this.blitColor.toGdx());
+        this.tmpUv.setTexture(tex);
+        this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
+        this.batch.draw(tmpUv, x, y + height, width, -height);
+        return this;
+    }
+
+    /**
+     * Draws a texture by id at the specified coordinates
+     *
+     * @param id        the texture identifier
+     * @param x         the setX coordinate
+     * @param y         the setY coordinate
+     * @param width     the width
+     * @param height    the height
+     * @param u         the texture u coordinate of the region
+     * @param v         the texture v coordinate of the region
+     * @param uWidth    the texture uv width
+     * @param vHeight   the texture uv height
+     * @param texWidth  the texture width
+     * @param texHeight the texture height
+     * @return this
+     */
+    @CanIgnoreReturnValue
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight) {
+        this.batch.setColor(this.blitColor.toGdx());
+        Texture tex = this.textureManager.getTexture(id);
+        this.tmpUv.setTexture(tex);
+        this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
+        this.batch.draw(this.tmpUv, x, y + height, width, -height);
+        return this;
+    }
+
+    /**
+     * Draws a texture by id at the specified coordinates
+     *
+     * @param id              the texture identifier
+     * @param x               the setX coordinate
+     * @param y               the setY coordinate
+     * @param width           the width
+     * @param height          the height
+     * @param u               the texture u coordinate of the region
+     * @param v               the texture v coordinate of the region
+     * @param uWidth          the texture uv width
+     * @param vHeight         the texture uv height
+     * @param texWidth        the texture width
+     * @param texHeight       the texture height
+     * @param backgroundColor the background color
+     * @return this
+     */
+    @CanIgnoreReturnValue
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
@@ -2617,6 +2731,13 @@ public class Renderer implements Disposable {
     }
 
     @CanIgnoreReturnValue
+    public Renderer fill(float x, float y, float width, float height, com.badlogic.gdx.graphics.Color rgb) {
+        this.setColor(rgb);
+        this.rect(x, y, width, height);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
     public Renderer box(int x, int y, int width, int height, com.badlogic.gdx.graphics.Color rgb) {
         this.setColor(rgb);
         this.rectLine(x, y, width, height);
@@ -2735,12 +2856,49 @@ public class Renderer implements Disposable {
         this.shapes.polygon(vertices, thickness, JoinType.POINTY);
     }
 
+    @Deprecated
     public void renderFrame(int x, int y, int w, int h) {
-        renderFrame(NamespaceID.of("textures/gui/frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
+        renderPopoutFrame(x, y - 3, w, h, 3);
     }
 
     public void renderPopoutFrame(int x, int y, int w, int h) {
-        renderFrame(NamespaceID.of("textures/gui/popout_frame.png"), x, y, w, h, 0, 0, 4, 4, 12, 12);
+        renderPopoutFrame(x, y, w, h, 3);
+    }
+
+    /**
+     * Renders a popout frame at the specified position and dimensions with a specified depth offset.
+     *
+     * @param x the x-coordinate at the top-left corner of the frame
+     * @param y the y-coordinate at the top-left corner of the frame
+     * @param width the width of the frame
+     * @param height the height of the frame
+     * @param depth the depth of the frame
+     */
+    public void renderPopoutFrame(float x, float y, float width, float height, float depth) {
+        y += depth;
+        height += depth;
+        depth -= 3;
+        draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height - 3, 0, 0, 21, 18, 3, 256, 256);
+        draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth - 3, width, 3 + depth, 0, 18, 21, 3, 1, 256, 256);
+        fill(x + 1, y + height, width - 2, 1, DARK_TRANSPARENT);
+    }
+
+    /**
+     * Renders a popout frame at the specified position and dimensions with a specified depth offset.
+     *
+     * @param x the x-coordinate at the top-left corner of the frame
+     * @param y the y-coordinate at the top-left corner of the frame
+     * @param width the width of the frame
+     * @param height the height of the frame
+     * @param depth the depth of the frame
+     */
+    public void renderHighlightPopoutFrame(float x, float y, float width, float height, float depth) {
+        y += depth;
+        height += depth;
+        depth -= 3;
+        draw9Slice(id("textures/gui/widgets.png"), x, y - depth, width, height - 3, 21, 0, 21, 18, 3, 256, 256);
+        draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth - 3, width, 3 + depth, 21, 18, 21, 3, 1, 256, 256);
+        fill(x + 1, y + height, width - 2, 1, DARK_TRANSPARENT);
     }
 
     public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
@@ -2808,6 +2966,42 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
+    public void draw9Slice(Texture texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float inset, float texWidth, float texHeight) {
+        this
+                // top
+                .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y, width - inset * 2, inset, inset + u, v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y, inset, inset, uWidth - inset + u, v, inset, inset, texWidth, texHeight) // right
+
+                // center
+                .blit(texture, x, y + inset, inset, height - inset * 2, u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + inset, width - inset * 2, height - inset * 2, inset + u, inset + v, uWidth - inset * 2, vHeight - inset * 2, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + inset, inset, height - inset * 2, uWidth - inset + u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // right
+
+                // bottom
+                .blit(texture, x, y + height - inset, inset, inset, u, vHeight - inset + v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + height - inset, width - inset * 2, inset, inset + u, vHeight - inset + v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
+    }
+
+    public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float inset, float texWidth, float texHeight) {
+        this
+                // top
+                .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y, width - inset * 2, inset, inset + u, v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y, inset, inset, uWidth - inset + u, v, inset, inset, texWidth, texHeight) // right
+
+                // center
+                .blit(texture, x, y + inset, inset, height - inset * 2, u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + inset, width - inset * 2, height - inset * 2, inset + u, inset + v, uWidth - inset * 2, vHeight - inset * 2, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + inset, inset, height - inset * 2, uWidth - inset + u, inset + v, inset, vHeight - inset * 2, texWidth, texHeight) // right
+
+                // bottom
+                .blit(texture, x, y + height - inset, inset, inset, u, vHeight - inset + v, inset, inset, texWidth, texHeight) // left
+                .blit(texture, x + inset, y + height - inset, width - inset * 2, inset, inset + u, vHeight - inset + v, uWidth - inset * 2, inset, texWidth, texHeight) // center
+                .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
+    }
+
     public void begin() {
         if (this.batch.isDrawing()) {
             QuantumClient.LOGGER.warn("Batch still drawing", new Exception());
@@ -2843,7 +3037,6 @@ public class Renderer implements Disposable {
         }
     }
 
-    @Language("GLSL")
     final String VERT = """
                     attribute vec4 a_position;
                     attribute vec4 a_color;
@@ -2860,7 +3053,6 @@ public class Renderer implements Disposable {
                     }
                     """;
 
-    @Language("GLSL")
     final String FRAG = """
                     // Fragment shader
                     #ifdef GL_ES
@@ -3040,8 +3232,6 @@ public class Renderer implements Disposable {
     }
 
     public void resize(int width, int height) {
-        this.width = width;
-        this.height = height;
     }
 
     @Override

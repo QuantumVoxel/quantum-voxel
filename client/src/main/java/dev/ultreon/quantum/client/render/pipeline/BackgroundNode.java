@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.render.pipeline;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class BackgroundNode extends RenderPipeline.RenderNode {
-    private final Supplier<SceneShaders> shaderProvider = Shaders.SCENE;
+    private final Supplier<SceneShaders> shaderProvider = Shaders.WORLD;
 
     /**
      * Renders the world.

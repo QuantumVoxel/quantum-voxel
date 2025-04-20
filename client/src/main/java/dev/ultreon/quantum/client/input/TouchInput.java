@@ -39,7 +39,7 @@ public class TouchInput extends GameInput implements InputProcessor {
     public static final KeyBind COMMAND_KEY = KeyBinds.commandKey;
     public static final KeyBind FULL_SCREEN_KEY = KeyBinds.fullScreenKey;
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
-    private Vector2 cursorPos;
+    private final Vector2 cursorPos = new Vector2();
 
     public TouchInput(QuantumClient client, Camera camera) {
         super(client, camera);

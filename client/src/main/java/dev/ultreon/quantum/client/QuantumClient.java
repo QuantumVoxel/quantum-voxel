@@ -39,6 +39,7 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.mixinprovider.PlatformOS;
+import dev.ultreon.mixinprovider.ValueTrackingDebug;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -89,10 +90,7 @@ import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.texture.TextureManager;
-import dev.ultreon.quantum.client.util.DeferredDisposable;
-import dev.ultreon.quantum.client.util.GG;
-import dev.ultreon.quantum.client.util.PlayerView;
-import dev.ultreon.quantum.client.util.Resizer;
+import dev.ultreon.quantum.client.util.*;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -101,6 +99,7 @@ import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.Debugger;
+import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.debug.inspect.InspectionNode;
 import dev.ultreon.quantum.debug.inspect.InspectionRoot;
 import dev.ultreon.quantum.debug.profiler.Profiler;
@@ -1290,6 +1289,11 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
      * This is invoked by libGDX.</p>
      */
     public void render() {
+        ValueTracker.setShaderSwitches(ValueTrackingDebug.glUseProgram);
+        ValueTracker.setTextureBindings(ValueTrackingDebug.glActiveTexture);
+        ValueTrackingDebug.glUseProgram = 0;
+        ValueTrackingDebug.glActiveTexture = 0;
+
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         if (this.cachedWidth != this.getWidth() || this.cachedHeight != this.getHeight()) {
@@ -3526,5 +3530,9 @@ public non-sealed class QuantumClient extends PollingExecutorService implements 
 
     public RenderBufferSource renderBuffers() {
         return renderBuffers;
+    }
+
+    public TextureAtlas getAtlas(NamespaceID id) {
+        return textureAtlasManager.get(id);
     }
 }

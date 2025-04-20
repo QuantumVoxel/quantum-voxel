@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class EntityBaseSelector<T extends Entity> extends BaseSelector<T> {
     private final CommandSender sender;
     private final Class<T> clazz;

@@ -36,7 +36,7 @@ public class FlatItemModel implements ItemModel {
 
         modelBuilder.begin();
         MeshPartBuilder item1 = modelBuilder.part("item", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, material);
-        TextureRegion r = client.itemTextureAtlas.get(item.getId().mapPath(path -> "textures/items/" + path + ".png"));
+        TextureRegion r = client.itemTextureAtlas.getDiffuse(item.getId().mapPath(path -> "textures/items/" + path + ".png"));
         if (r == null) {
             QuantumClient.LOGGER.warn("Missing item texture {}", item.getId().mapPath(path -> "textures/items/" + path + ".png"));
         }

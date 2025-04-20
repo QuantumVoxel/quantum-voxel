@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.render.pipeline;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.client.input.GameCamera;
+import dev.ultreon.quantum.client.util.GameCamera;
 import org.checkerframework.common.reflection.qual.NewInstance;
 
 /**

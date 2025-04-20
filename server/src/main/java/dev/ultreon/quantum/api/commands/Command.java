@@ -22,6 +22,7 @@ import java.util.*;
 import static dev.ultreon.quantum.api.commands.CommandData.dropLastWhile;
 
 @SuppressWarnings("LeakingThis")
+@Deprecated
 public abstract class Command {
     private static final List<Runnable> loaders = new ArrayList<>();
     private static final List<Command> incompleteCommands = new ArrayList<>();

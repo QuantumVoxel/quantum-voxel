@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -70,6 +71,14 @@ import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.*;
 import static dev.ultreon.quantum.world.World.CS;
 
+/**
+ * The {@code WorldRenderer} class is responsible for rendering the game world based on the client-side
+ * world state. It handles the rendering of chunks, entities, particles, dynamic lighting,
+ * skyboxes, and special effects such as block breaking animations.
+ *
+ * This class provides functionality for managing rendering contexts, creating and disposing
+ * of rendering resources, and updating the visual state of the world.
+ */
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public final class WorldRenderer implements DisposableContainer, TerrainRenderer {
     public static final float SCALE = 1;
@@ -125,12 +134,22 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private @Nullable Vector3 lastCamDir;
     private @Nullable Vec3d lastPlayerPos;
     private final Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
+    private final Color fogColor = new Color(0.6F, 0.7F, 1.0F, 1.0F);
 
+    /**
+     * Constructs a WorldRenderer instance for rendering a given client world.
+     *
+     * @param world the client world to be rendered, must not be null
+     */
     public WorldRenderer(@NotNull ClientWorld world) {
         this.world = world;
         this.setup();
+        world.add("Skybox", skybox);
     }
 
+    /**
+     * Initializes various graphical components and environment settings for the client.
+     */
     private void setup() {
         Texture blockTex = this.client.blocksTextureAtlas.getTexture();
         Texture emissiveBlockTex = this.client.blocksTextureAtlas.getEmissiveTexture();
@@ -180,6 +199,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
+    /**
+     * Configures and initializes a dynamic skybox for the scene.
+     * This method creates a cube model with specific material properties and attributes,
+     * representing a skybox that dynamically integrates with the rendering pipeline.
+     */
     private void setupDynamicSkybox() {
         ModelBuilder modelBuilder = new ModelBuilder();
         Material material = new Material();
@@ -196,6 +220,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.skybox.modelInstance = modelInstance;
     }
 
+    /**
+     * Initializes and sets up the materials used in the rendering process, including
+     * both opaque and transparent materials with appropriate texture attributes, blending,
+     * and depth testing settings.
+     *
+     * @param blockTex the texture used for the diffuse property of the materials
+     * @param emissiveBlockTex the texture used for the emissive property of the materials
+     */
     private void setupMaterials(Texture blockTex, Texture emissiveBlockTex) {
         this.material = new Material();
         this.material.set(TextureAttribute.createDiffuse(blockTex));
@@ -217,11 +249,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         Model sunModel = ModelManager.INSTANCE.generateModel(SUN_ID, modelBuilder -> {
             Material sunMat = new Material();
             sunMat.id = NamespaceID.of("generated/sun_material").toString();
-            sunMat.set(TextureAttribute.createDiffuse(this.client.getTextureManager().getTexture(NamespaceID.of("textures/environment/sun.png"))));
-            sunMat.set(new DepthTestAttribute(GL_LEQUAL, true));
-            sunMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE));
-            sunMat.set(IntAttribute.createCullFace(0));
-            sunMat.set(FogAttribute.createFog(1, 1, 1));
 
             modelBuilder.part(NamespaceID.of("generated/sun_part").toString(), createSun(), GL_TRIANGLES, sunMat);
         });
@@ -240,11 +267,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         });
 
         // Create ModelInstances for sun and moon
-        this.sun = new CelestialBody(sunModel);
-        this.moon = new CelestialBody(moonModel);
+        sun = new CelestialBody(sunModel);
+        moon = new CelestialBody(moonModel);
 
-        world.add("Sun", this.sun);
-        world.add("Moon", this.moon);
+        world.add("Sun", sun);
+        world.add("Moon", moon);
     }
 
     /**
@@ -335,7 +362,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public void renderBackground(RenderBufferSource bufferSource, float deltaTime) {
         updateBackground();
 
-        bufferSource.getBuffer(RenderPass.SKYBOX).render(this.skybox.modelInstance);
+        this.skybox.render0(bufferSource);
 
         CelestialBody sun = this.sun;
         if (sun != null) {
@@ -353,7 +380,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param batch         the ModelBatch to render with
      * @param deltaTime     the time between the last and current frame
      */
-    @SuppressWarnings("t")
     @Override
     public void render(RenderBufferSource batch, float deltaTime) {
         var player = this.client.player;
@@ -362,7 +388,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         // Update the skybox and environment.
         this.skybox.update(this.world.getDaytime());
-        this.environment.set(new ColorAttribute(ColorAttribute.Fog, this.skybox.bottomColor));
+        this.fogColor.set(this.skybox.bottomColor);
 
         // Get the loaded chunks and sort them by distance from the player.
         var chunks = WorldRenderer.chunksInViewSorted(this.world.getLoadedChunks(), player);
@@ -382,47 +408,54 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         @Nullable Hit gameCursor = null;
         if (this.client.cursor != null) gameCursor = this.client.cursor;
         if (gameCursor instanceof BlockHit blockHit && blockHit.isCollide() && !this.client.hideHud && !player.isSpectator()) {
-            try (var ignored = QuantumClient.PROFILER.start("cursor")) {
-                // Block outline.
-                Vec3i pos = blockHit.getBlockVec();
-                Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
-                var boundingBox = blockHit.getBlock().getBoundingBox(0, 0, 0, blockHit.getBlockMeta());
-                renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
-
-                // Render the outline.
-                if (lastHitResult != null && this.lastHitResult.equals(blockHit)) {
-                    ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
-                    cursor = null;
-                }
-
-                this.lastHitResult = blockHit;
-
-                if (this.cursor != null) ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
-
-                Model model = ModelManager.INSTANCE.generateModel(NamespaceID.of("generated/selection_outline"), modelBuilder -> {
-                    Material material = new Material();
-                    material.id = NamespaceID.of("generated/selection_outline_material").toString();
-                    material.set(ColorAttribute.createDiffuse(1f, 1f, 1f, 1f));
-                    material.set(IntAttribute.createCullFace(GL_FRONT));
-
-
-                    var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
-                    var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
-                    var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
-
-                    WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, material));
-                });
-
-                this.cursor = new ModelInstance(model, renderOffsetC.x - 0.05f, renderOffsetC.y - 0.05f, renderOffsetC.z - 0.05f);
-                this.cursor.userData = Shaders.DEFAULT.get();
-            }
-
-            attribute.opacity = MathUtils.sinDeg((System.currentTimeMillis() % 360) / 1000f) / 90f + 0.5f;
-            material.set(attribute);
-
-//            if (this.cursor != null) batch.getBuffer(RenderPass.TRANSPARENT).render(this.cursor);
+            renderCursor(blockHit, player);
         }
 
+        renderSelf(batch);
+        renderGizmos(deltaTime);
+    }
+
+    private void renderCursor(BlockHit blockHit, LocalPlayer player) {
+        try (var ignored = QuantumClient.PROFILER.start("cursor")) {
+            // Block outline.
+            Vec3i pos = blockHit.getBlockVec();
+            Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
+            var boundingBox = blockHit.getBlock().getBoundingBox(0, 0, 0, blockHit.getBlockMeta());
+            renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
+
+            // Render the outline.
+            if (lastHitResult != null && this.lastHitResult.equals(blockHit)) {
+                ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
+                cursor = null;
+            }
+
+            this.lastHitResult = blockHit;
+
+            if (this.cursor != null) ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
+
+            Model model = ModelManager.INSTANCE.generateModel(NamespaceID.of("generated/selection_outline"), modelBuilder -> {
+                Material material = new Material();
+                material.id = NamespaceID.of("generated/selection_outline_material").toString();
+                material.set(ColorAttribute.createDiffuse(1f, 1f, 1f, 1f));
+                material.set(IntAttribute.createCullFace(GL_FRONT));
+
+
+                var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
+                var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
+                var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
+
+                WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, material));
+            });
+
+            this.cursor = new ModelInstance(model, renderOffsetC.x - 0.05f, renderOffsetC.y - 0.05f, renderOffsetC.z - 0.05f);
+            this.cursor.userData = Shaders.DEFAULT.get();
+        }
+
+        attribute.opacity = MathUtils.sinDeg((System.currentTimeMillis() % 360) / 1000f) / 90f + 0.5f;
+        material.set(attribute);
+    }
+
+    private void renderSelf(RenderBufferSource batch) {
         drawSelf:
         try (var ignored = QuantumClient.PROFILER.start("(Local Player)")) {
             LocalPlayer localPlayer = this.client.player;
@@ -433,7 +466,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             this.collectEntity(localPlayer, batch);
         }
+    }
 
+    private void renderGizmos(float deltaTime) {
         for (String category : world.getEnabledGizmoCategories()) {
             Gizmo[] gizmos = world.getGizmos(category);
             List<Gizmo> toSort = new ArrayList<>();
@@ -509,20 +544,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     private boolean frustumCulling(ClientChunk chunk) {
         try (var ignoredFrustumCullingSection = PROFILER.start("frustum-culling")) {
-            if (lastCamPos != null && lastCamDir != null && lastPlayerPos != null) {
-                if (client.camera.position.epsilonEquals(lastCamPos, 0.1f)) return false;
-                if (client.camera.direction.epsilonEquals(lastCamDir, 0.1f)) return false;
-                if (client.player != null && client.player.x - lastPlayerPos.x < 0.1f && client.player.y - lastPlayerPos.y < 0.1f && client.player.z - lastPlayerPos.z < 0.1f
-                        && client.player.x - lastPlayerPos.x > -0.1f && client.player.y - lastPlayerPos.y > -0.1f && client.player.z - lastPlayerPos.z > -0.1f)
-                    return false;
-                lastCamPos.set(client.camera.position);
-                lastCamDir.set(client.camera.direction);
-                if (client.player != null) lastPlayerPos.set(client.player.getPosition(0));
-            } else {
-                lastCamPos = new Vector3(client.camera.position);
-                lastCamDir = new Vector3(client.camera.direction);
-                if (client.player != null) lastPlayerPos = new Vec3d(client.player.getPosition(0));
-            }
+            if (updateCamPos()) return false;
 
             if (chunk.enabled && !this.client.camera.frustum.boundsInFrustum(chunk.getBoundingBox())) {
                 chunk.enabled = false;
@@ -535,6 +557,33 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return !chunk.enabled;
     }
 
+    private boolean updateCamPos() {
+        if (lastCamPos != null && lastCamDir != null && lastPlayerPos != null) {
+            if (client.camera.position.epsilonEquals(lastCamPos, 0.1f)) return true;
+            if (client.camera.direction.epsilonEquals(lastCamDir, 0.1f)) return true;
+            if (client.player != null && client.player.x - lastPlayerPos.x < 0.1f && client.player.y - lastPlayerPos.y < 0.1f && client.player.z - lastPlayerPos.z < 0.1f
+                    && client.player.x - lastPlayerPos.x > -0.1f && client.player.y - lastPlayerPos.y > -0.1f && client.player.z - lastPlayerPos.z > -0.1f)
+                return true;
+            lastCamPos.set(client.camera.position);
+            lastCamDir.set(client.camera.direction);
+            if (client.player != null) lastPlayerPos.set(client.player.getPosition(0));
+        } else {
+            lastCamPos = new Vector3(client.camera.position);
+            lastCamDir = new Vector3(client.camera.direction);
+            if (client.player != null) lastPlayerPos = new Vec3d(client.player.getPosition(0));
+        }
+        return false;
+    }
+
+    /**
+     * Builds a chunk model for the specified chunk using the provided render reference.
+     * This method processes the chunk to create a new render model and updates its state
+     * within the system.
+     *
+     * @param ref   the reference object that tracks information about the chunk rendering state
+     * @param chunk the client chunk for which the model is to be built
+     * @return the created chunk model
+     */
     private @NotNull ChunkModel buildChunk(ChunkRenderRef ref, ClientChunk chunk) {
         ChunkModel model;
         try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
@@ -549,6 +598,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return model;
     }
 
+    /**
+     * Revalidates a chunk model by determining whether it needs to be rebuilt or reused based on
+     * the provided rendering references and client chunk data. If the given model is null, it creates
+     * a new chunk model. Otherwise, it checks the current rendering conditions to decide whether to
+     * rebuild the chunk or reuse the existing model.
+     *
+     * @param ref   the reference object that tracks information about the chunk rendering state
+     * @param chunk the client chunk containing the data for the chunk to be rendered
+     * @param model the existing chunk model, or null if a new model needs to be created
+     * @return the validated chunk model, either reused or newly built
+     */
     private @NotNull ChunkModel revalidateChunk(ChunkRenderRef ref, ClientChunk chunk, @Nullable ChunkModel model) {
         if (model == null) {
             return buildChunk(ref, chunk);
@@ -559,6 +619,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return model;
     }
 
+    /**
+     * Rebuilds the rendering model for a given chunk. This method processes the chunk, updates
+     * its rendering state, and marks it as initialized and ready for rendering.
+     *
+     * @param ref   the reference object that tracks the chunk rendering state
+     *              and indicates whether the chunk has been rendered
+     * @param chunk the client chunk containing data that needs to be rendered
+     * @param model the rendering model associated with the chunk,
+     *              which will be rebuilt during this method
+     */
     private void rebuildChunk(ChunkRenderRef ref, ClientChunk chunk, ChunkModel model) {
         try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
             chunk.dirty = false;
@@ -571,6 +641,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
+    /**
+     * Unloads the specified client chunk from the world renderer. This method removes the
+     * chunk's associated rendering model, ensures proper disposal of resources, and updates
+     * internal tracking systems. It is designed to be thread-safe and will schedule execution
+     * on the render thread if needed.
+     *
+     * @param chunk the client chunk to be unloaded
+     */
     void unload(ClientChunk chunk) {
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.unload(chunk));
@@ -604,6 +682,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         ValueTracker.setChunkMeshFrees(ValueTracker.getChunkMeshFrees() + 1);
     }
 
+    /**
+     * Renders the block models for a given client chunk using the specified buffer source.
+     * This method processes the "custom rendered" blocks within the chunk and ensures that
+     * block models are instantiated, transformed, and rendered per the current chunk state.
+     * Existing models may be reused or removed based on the chunk's rendering data.
+     *
+     * @param bufferSource the buffer source used for rendering the block models
+     * @param chunk        the client chunk that contains the blocks and associated rendering data
+     */
     private void renderBlockModels(RenderBufferSource bufferSource, ClientChunk chunk) {
         for (var entry : chunk.getCustomRendered().entrySet())
             try (var ignored = this.client.profiler.start("render-block")) {
@@ -632,6 +719,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
     }
 
+    /**
+     * Renders block breaking effects for a given client chunk. This method iterates through
+     * the breaking blocks within the chunk, creates and transforms corresponding models,
+     * and renders them using the provided buffer source.
+     *
+     * @param batch the buffer source used for rendering the breaking block models
+     * @param chunk the client chunk that contains the blocks and their breaking states
+     */
     private void renderBlockBreaking(RenderBufferSource batch, ClientChunk chunk) {
         for (var entry : chunk.getBreaking().entrySet()) {
             BlockVec pos = entry.getKey();
@@ -650,6 +745,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return false;
     }
 
+    /**
+     * Collects and prepares an entity for rendering, ensuring valid models and renderers are present,
+     * and handles exceptions during the rendering process.
+     *
+     * @param entity The entity to be collected and rendered. It should have a valid ID and position
+     *               within the acceptable rendering distance.
+     * @param batch  The render buffer source used for rendering the entity. It provides access
+     *               to the batch rendering context necessary for entity rendering.
+     */
     @Override
     public void collectEntity(Entity entity, RenderBufferSource batch) {
         try {
@@ -750,11 +854,23 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return this.world;
     }
 
+    /**
+     * Disposes all resources and performs cleanup for the {@code WorldRenderer}.
+     * This includes shutting down executor services, releasing models, instances,
+     * and disposables, as well as clearing all internal structures.
+     *
+     * Once this method is executed, the renderer is marked as disposed
+     * and cannot be reused.
+     *
+     * Throws:
+     * - {@link TerminationFailedException} if the executor service fails
+     *   to terminate within the defined timeout period.
+     */
     @Override
     public void dispose() {
         executor.shutdown();
         try {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
+            boolean ignored = executor.awaitTermination(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new TerminationFailedException();
         }
@@ -788,6 +904,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return this.disposed;
     }
 
+    /**
+     * Defers the disposal of the given disposable object within the {@code WorldRenderer} lifecycle.
+     * If the {@code WorldRenderer} is already disposed, the provided disposable will be immediately disposed.
+     * Otherwise, the disposable is added to the internal disposables list for future disposal when
+     * the {@code WorldRenderer} itself is disposed.
+     *
+     * @param <T>         the type of the disposable, which must extend {@link Disposable}
+     * @param disposable  the disposable object to defer for disposal; cannot be null
+     * @return the same disposable object that was passed in
+     * @throws NullPointerException if the provided disposable is null
+     */
     @Override
     public <T extends Disposable> T deferDispose(T disposable) {
         Preconditions.checkNotNull(disposable, "Disposable cannot be null");
@@ -802,6 +929,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return disposable;
     }
 
+    /**
+     * Reloads the rendering context by resetting and reinitializing the necessary resources, models, and materials
+     * for the rendering system. This method is responsible for handling textures, model instances, dynamic skyboxes,
+     * breaking animations, environment setups, and particles.
+     *
+     * @param context the {@code ReloadContext} object that handles the submission of reload tasks
+     * @param materialManager the {@code MaterialManager} responsible for managing material allocations and updates
+     */
     @Override
     public void reload(ReloadContext context, MaterialManager materialManager) {
         context.submit(() -> {
@@ -834,6 +969,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         });
     }
 
+    /**
+     * Unloads the chunk identified by the specified ChunkVec if it exists in the world.
+     *
+     * @param chunkVec the chunk coordinates used to identify the chunk to be unloaded
+     */
     private void unload(ChunkVec chunkVec) {
         ClientChunk clientChunk = this.world.getChunk(chunkVec);
         if (clientChunk != null) this.unload(clientChunk);
@@ -844,33 +984,15 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         return skybox;
     }
 
+    /**
+     * Updates the background to reflect the current configuration setting for the visibility
+     * of the sun and moon. Depending on whether the display of the sun and moon is enabled
+     * in the application configuration, this method adjusts their visibility accordingly.
+     */
     @Override
     public void updateBackground() {
         if (ClientConfig.showSunAndMoon) {
-            if (!wasSunMoonShown) {
-                if (this.sun != null) this.sun.setVisible(true);
-                if (this.moon != null) this.moon.setVisible(true);
-            }
-
-            wasSunMoonShown = true;
-
-            material.set(new DepthTestAttribute(GL_LEQUAL, true));
-            var world = this.world;
-
-            long daytime = world.getDaytime();
-
-            // Sun angle
-            float sunAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);
-
-            // Moon on the opposite side
-            float moonAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);
-
-            if (this.sun != null)
-                this.sun.transform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
-            if (this.moon != null)
-                this.moon.transform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, moonAngle * MathUtils.radDeg - 180);
-
-            this.sunDirection.setZero().setLength(1).rotate(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
+            updateSunMoon();
         } else if (wasSunMoonShown) {
             if (this.sun != null) this.sun.setVisible(false);
             if (this.moon != null) this.moon.setVisible(false);
@@ -879,11 +1001,46 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
+    private void updateSunMoon() {
+        if (!wasSunMoonShown) {
+            if (this.sun != null) this.sun.setVisible(true);
+            if (this.moon != null) this.moon.setVisible(true);
+        }
+
+        wasSunMoonShown = true;
+
+        material.set(new DepthTestAttribute(GL_LEQUAL, true));
+        var world = this.world;
+
+        long daytime = world.getDaytime();
+
+        // Sun angle
+        float sunAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);
+
+        // Moon on the opposite side
+        float moonAngle = (float) ((daytime % 24000) / 24000.0 * Math.PI * 2);
+
+        if (this.sun != null)
+            this.sun.transform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
+        if (this.moon != null)
+            this.moon.transform.setToRotation(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, moonAngle * MathUtils.radDeg - 180);
+
+        this.sunDirection.setZero().setLength(1).rotate(Vector3.Z, ClientWorld.SKYBOX_ROTATION.getDegrees()).rotate(Vector3.Y, sunAngle * MathUtils.radDeg - 180);
+    }
+
     @Override
     public void remove(ClientChunkAccess clientChunk) {
         this.unload(clientChunk.getVec());
     }
 
+    /**
+     * Adds particles to the particle system with the given position, motion, and count.
+     *
+     * @param obtained The particle effect to be added.
+     * @param position The position where the particles should be spawned.
+     * @param motion   The initial motion of the particles.
+     * @param count    The number of particles to spawn.
+     */
     @Override
     public void addParticles(ParticleEffect obtained, Vec3d position, Vec3d motion, int count) {
         LocalPlayer player = client.player;
@@ -895,6 +1052,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         particleSystem.add(obtained);
     }
 
+    /**
+     * Unloads a chunk from the client by removing its corresponding chunk model
+     * and releasing any associated resources.
+     *
+     * @param clientChunk the client chunk access object that represents the chunk
+     *                    to be unloaded
+     */
     @Override
     public void unload(ClientChunkAccess clientChunk) {
         ChunkModel remove = this.chunkModels.remove(clientChunk.getVec());
@@ -951,6 +1115,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public RenderBuffer[] buffers() {
         return this.buffers.toArray(RenderBuffer.class);
+    }
+
+    public Color getFogColor() {
+        return fogColor;
     }
 
     private static class ChunkRenderRef {

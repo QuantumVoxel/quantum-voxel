@@ -13,7 +13,6 @@ import java.util.Map;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
-@Deprecated
 public class BlockRendererRegistry {
     /**
      * The map of block renderers.
@@ -30,7 +29,6 @@ public class BlockRendererRegistry {
      * @param block the block.
      * @param blockRenderer the block renderer.
      */
-
     public static void register(Block block, BlockRenderer blockRenderer) {
         BlockRendererRegistry.MAP.put(block, blockRenderer);
     }

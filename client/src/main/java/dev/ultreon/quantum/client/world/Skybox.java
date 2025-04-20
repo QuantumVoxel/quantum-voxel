@@ -98,11 +98,6 @@ public class Skybox extends RenderObject implements RenderableProvider, Disposab
     }
 
     @Override
-    public void render(RenderBufferSource bufferSource) {
-
-    }
-
-    @Override
     public void dispose() {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
@@ -112,5 +107,14 @@ public class Skybox extends RenderObject implements RenderableProvider, Disposab
         this.modelInstance = null;
         if (model != null)
             model.dispose();
+    }
+
+    public void render0(RenderBufferSource bufferSource) {
+        super.render(bufferSource);
+    }
+
+    @Override
+    public void render(RenderBufferSource bufferSource) {
+
     }
 }

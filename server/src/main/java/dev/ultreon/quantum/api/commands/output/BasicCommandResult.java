@@ -3,6 +3,7 @@ package dev.ultreon.quantum.api.commands.output;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.server.chat.Chat;
 
+@Deprecated
 public class BasicCommandResult implements CommandResult {
     private final String message;
     private final MessageType type;
@@ -10,6 +11,30 @@ public class BasicCommandResult implements CommandResult {
     public BasicCommandResult(String message, MessageType type) {
         this.message = message;
         this.type = type;
+    }
+
+    public static CommandResult server(String s) {
+        return new BasicCommandResult(s, MessageType.SERVER);
+    }
+
+    public static CommandResult success(String s) {
+        return new BasicCommandResult(s, MessageType.SUCCESS);
+    }
+
+    public static CommandResult info(String s) {
+        return new BasicCommandResult(s, MessageType.INFO);
+    }
+
+    public static CommandResult warning(String s) {
+        return new BasicCommandResult(s, MessageType.WARNING);
+    }
+
+    public static CommandResult error(String s) {
+        return new BasicCommandResult(s, MessageType.ERROR);
+    }
+
+    public static CommandResult fatal(String s) {
+        return new BasicCommandResult(s, MessageType.FATAL);
     }
 
     @Override

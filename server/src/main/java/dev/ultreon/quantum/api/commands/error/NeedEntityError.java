@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands.error;
 
 import dev.ultreon.quantum.api.commands.MessageCode;
 
+@Deprecated
 public class NeedEntityError extends CommandError {
     public NeedEntityError() {
         super(MessageCode.NEED_ENTITY, "You need to be a entity to use this command!");

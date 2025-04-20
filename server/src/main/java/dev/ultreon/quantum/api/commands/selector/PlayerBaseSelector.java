@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Deprecated
 public class PlayerBaseSelector extends BaseSelector<Player> {
 
     private final CommandSender sender;

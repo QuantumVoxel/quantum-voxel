@@ -9,6 +9,7 @@ import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 
+@Deprecated
 public abstract class CommandError implements CommandResult {
     protected final String message;
     private final MessageCode messageCode;

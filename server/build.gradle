@@ -38,7 +38,6 @@ apply plugin: 'scala'
 apply plugin: 'groovy'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java-library'
-apply plugin: 'maven-publish'
 
 @Language("jvm-class-name")
 def mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotServer'

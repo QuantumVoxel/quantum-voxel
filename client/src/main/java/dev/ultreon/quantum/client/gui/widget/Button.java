@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.GamePlatform;
@@ -22,6 +23,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     public boolean pressed;
     public boolean wasPressed;
     private final Color tmp = new Color();
+    protected float yOffset = 0f;
 
     protected Button(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
         this(width, height, Type.DARK);
@@ -59,12 +61,25 @@ public abstract class Button<T extends Button<T>> extends Widget {
         int u;
         if (this.isEnabled) u = isHovered ? 21 : 0;
         else u = 42;
-        int v = this.isPressed() ? 21 : 0;
+        int v = 0;
 
         u += 63 * type.xOffset;
         v += 42 * type.yOffset;
 
-        renderer.draw9Slice(texture, x, y, this.size.width, this.size.height, u, v, 21, 21, 9, 256, 256);
+        float yOffsetGoal = isHovered && isEnabled ? 2f : 0f;
+        if (this.pressed && isEnabled) {
+            yOffsetGoal = -1f;
+        }
+        if (yOffset > yOffsetGoal) {
+            yOffset -= (yOffset - yOffsetGoal) * Gdx.graphics.getDeltaTime() * 8f;
+        } else if (yOffset < yOffsetGoal) {
+            yOffset += (yOffsetGoal - yOffset) * Gdx.graphics.getDeltaTime() * 8f;
+        }
+
+        renderer.fill(x + 1, y + this.size.height, this.size.width - 2, 1, Renderer.DARK_TRANSPARENT);
+
+        renderer.draw9Slice(texture, x, y - yOffset, this.size.width, this.size.height - 3, u, v, 21, 18, 3, 256, 256);
+        renderer.draw9Slice(texture, x, y + this.size.height - yOffset - 3, this.size.width, 3 + yOffset, u, v + 18, 21, 3, 1, 256, 256);
         if (!pressed && wasPressed && !isHovered) {
             this.wasPressed = false;
             this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
@@ -140,15 +155,16 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     protected float getButtonContentOffset() {
-        if (shouldBeTransparent()) return 1;
-        return isPressed() ? 2 : 0;
+        return shouldBeTransparent() ? 1 : 0;
     }
 
     public enum Type {
         DARK(0, 0),
         LIGHT(1, 0),
-        DARK_EMBED(2, 0),
-        LIGHT_EMBED(3, 0);
+        @Deprecated
+        DARK_EMBED(0, 0),
+        @Deprecated
+        LIGHT_EMBED(1, 0);
 
         private final int xOffset;
         private final int yOffset;

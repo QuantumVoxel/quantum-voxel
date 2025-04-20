@@ -10,7 +10,6 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.gui.JavascriptDebuggerScreen;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
@@ -19,7 +18,6 @@ import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBindRegistry;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
-import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.debug.DebugFlags;
@@ -33,9 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
 import java.util.stream.IntStream;
-
-import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
 
 /**
  * The input for the desktop client.
@@ -64,23 +59,17 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     private long lastKeyCancelFrame;
     private float partialSelect;
 
+    private final DevKeyHandler devKeyHandler = new DevKeyHandler();
+
     public KeyAndMouseInput(QuantumClient client, Camera camera) {
         super(client, camera);
     }
 
     @Override
     protected void switchOut() {
-        for (int key : PRESSED.stream().toArray()) {
-            this.keyUp(key);
-        }
+        for (int key : PRESSED.stream().toArray()) this.keyUp(key);
 
-        for (KeyBind keyBind : KeyBindRegistry.getAll()) {
-            keyBind.release();
-        }
-    }
-
-    private void release(int key) {
-
+        for (KeyBind keyBind : KeyBindRegistry.getAll()) keyBind.release();
     }
 
     public static boolean isKeyDown(int keycode) {
@@ -111,10 +100,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * @param caught true to set the cursor to be caught, false for uncaught
      */
     public static void setCursorCaught(boolean caught) {
-        if (Gdx.input.isCursorCatched() == caught) {
-            // Already in that state
-            return;
-        }
+        // Already in that state
+        if (Gdx.input.isCursorCatched() == caught) return;
 
         Gdx.input.setCursorCatched(caught);
     }
@@ -165,9 +152,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     public boolean keyDown(int keyCode) {
         GameInput.switchTo(this);
 
-        if (WindowManager.keyPress(keyCode)) {
-            return true;
-        }
+        if (WindowManager.keyPress(keyCode)) return true;
 
         if (!isActive()) return false;
 
@@ -175,7 +160,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         PRESSED.set(keyCode);
 
-        // Invoke key press event for the current screen
+        // Invoke the key press event for the current screen
         Screen currentScreen = this.client.screen;
         if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
             ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
@@ -187,76 +172,14 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Handle key press for player
         Player player = this.client.player;
 
-        if (KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) {
-            this.handleImGuiKey();
-        }
+        if (KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
 
-        if (KeyAndMouseInput.isAltDown() && GamePlatform.get().isDevEnvironment()) {
-            if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
-                this.client.viewMode = 0;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
-                this.client.viewMode = 1;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) {
-                this.client.viewMode = 2;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_4)) {
-                this.client.viewMode = 3;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_5)) {
-                this.client.viewMode = 4;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_6)) {
-                this.client.viewMode = 5;
-            }
-        }
+        devKeyHandler.handleViewMode(this);
 
-        if (KeyAndMouseInput.isCtrlDown() && GamePlatform.get().isDevEnvironment()) {
-            if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
-                this.client.showScreen(new JavascriptDebuggerScreen());
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
-                TerrainRenderer worldRenderer = this.client.worldRenderer;
-                if (worldRenderer != null) {
-                    worldRenderer.reloadChunks();
-                }
-            } else if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) {
-                ClientWorldAccess world = this.client.world;
-                if (world instanceof ClientWorld clientWorld) {
-                    clientWorld.toggleGizmoCategory("entity-bounds");
-                }
-            }
-        }
+        devKeyHandler.handleDevKeys(this);
 
         if (player != null) {
-            if (KeyAndMouseInput.IM_GUI_FOCUS_KEY.is(keyCode)) {
-                this.handleImGuiFocus();
-            } else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen == null) {
-                player.openInventory();
-            } else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen) {
-                this.client.showScreen(null);
-            } else if (KeyAndMouseInput.CHAT_KEY.is(keyCode) && currentScreen == null) {
-                this.client.showScreen(new ChatScreen());
-            } else if (KeyAndMouseInput.COMMAND_KEY.is(keyCode) && currentScreen == null) {
-                this.client.showScreen(new ChatScreen("/"));
-            } else if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) {
-                this.handleDebugKey();
-            } else if (KeyAndMouseInput.INSPECT_KEY.is(keyCode)) {
-                this.handleInspectKey();
-            } else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) {
-                this.client.screenshot();
-            } else if (KeyAndMouseInput.HIDE_HUD_KEY.is(keyCode)) {
-                this.client.hideHud = !this.client.hideHud;
-            } else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) {
-                this.client.setFullScreen(!this.client.isFullScreen());
-            } else if (KeyAndMouseInput.THIRD_PERSON_KEY.is(keyCode)) {
-                this.client.cyclePlayerView();
-            } else if (this.client.world != null
-                       && KeyAndMouseInput.PAUSE_KEY.is(keyCode)
-                       && Gdx.input.isCursorCatched()) {
-                this.client.showScreen(new PauseScreen());
-            } else if (KeyAndMouseInput.PAUSE_KEY.is(keyCode)
-                       && !Gdx.input.isCursorCatched()
-                       && this.client.screen instanceof PauseScreen) {
-                this.client.showScreen(null);
-            } else if (KeyAndMouseInput.DROP_ITEM_KEY.is(keyCode)) {
-                player.dropItem();
-            }
+            handleKeyBinds(keyCode, currentScreen, player);
         }
         if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
             return false;
@@ -269,6 +192,24 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
     }
 
+    @SuppressWarnings("t")
+    private void handleKeyBinds(int keyCode, Screen currentScreen, Player player) {
+        if (KeyAndMouseInput.IM_GUI_FOCUS_KEY.is(keyCode)) handleImGuiFocus();
+        else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen == null) player.openInventory();
+        else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen) client.showScreen(null);
+        else if (KeyAndMouseInput.CHAT_KEY.is(keyCode) && currentScreen == null) client.showScreen(new ChatScreen());
+        else if (KeyAndMouseInput.COMMAND_KEY.is(keyCode) && currentScreen == null) client.showScreen(new ChatScreen("/"));
+        else if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
+        else if (KeyAndMouseInput.INSPECT_KEY.is(keyCode)) handleInspectKey();
+        else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) client.screenshot();
+        else if (KeyAndMouseInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
+        else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(!client.isFullScreen());
+        else if (KeyAndMouseInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
+        else if (client.world != null && KeyAndMouseInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched()) client.showScreen(new PauseScreen());
+        else if (KeyAndMouseInput.PAUSE_KEY.is(keyCode) && !Gdx.input.isCursorCatched() && client.screen instanceof PauseScreen) client.showScreen(null);
+        else if (KeyAndMouseInput.DROP_ITEM_KEY.is(keyCode)) player.dropItem();
+    }
+
     @Override
     public boolean keyUp(int keyCode) {
         if (!KEYS.get(keyCode)) return false;
@@ -279,7 +220,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         PRESSED.clear(keyCode);
 
-        Screen currentScreen = this.client.screen;
+        Screen currentScreen = client.screen;
         if (currentScreen != null) {
             ScreenEvents.KEY_RELEASE.factory().onKeyReleaseScreen(keyCode);
             return currentScreen.keyRelease(keyCode);
@@ -289,7 +230,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     }
 
     /**
-     * Update method that handles player input and interactions.
+     * Update the method that handles player input and interactions.
      *
      * @param deltaTime The time passed since the last update
      */
@@ -308,7 +249,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         }
 
         // Handle various input events
-        handleInputEvents(player, currentScreen);
+        handleInputEvents();
 
         // Check for player interaction with the world
         handlePlayerInteraction(player, currentScreen);
@@ -317,39 +258,35 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     private static void cycleGamemode(Player player) {
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
             switch (player.getGamemode()) {
-                case SURVIVAL -> player.execute("gm spectator");
-                case BUILDER -> player.execute("gm survival");
-                case BUILDER_PLUS -> player.execute("gm builder");
-                case ADVENTUROUS -> player.execute("gm builder_plus");
-                case SPECTATOR -> player.execute("gm adventurous");
+                case SURVIVAL -> player.runCommand("gm spectator");
+                case BUILDER -> player.runCommand("gm survival");
+                case BUILDER_PLUS -> player.runCommand("gm builder");
+                case ADVENTUROUS -> player.runCommand("gm builder_plus");
+                case SPECTATOR -> player.runCommand("gm adventurous");
             }
             return;
         }
         switch (player.getGamemode()) {
-            case SURVIVAL -> player.execute("gm builder");
-            case BUILDER -> player.execute("gm builder_plus");
-            case BUILDER_PLUS -> player.execute("gm adventurous");
-            case ADVENTUROUS -> player.execute("gm spectator");
-            case SPECTATOR -> player.execute("gm survival");
+            case SURVIVAL -> player.runCommand("gm builder");
+            case BUILDER -> player.runCommand("gm builder_plus");
+            case BUILDER_PLUS -> player.runCommand("gm adventurous");
+            case ADVENTUROUS -> player.runCommand("gm spectator");
+            case SPECTATOR -> player.runCommand("gm survival");
         }
     }
 
     /**
      * Handles different input events like opening inventory, chat, debug keys, etc.
      *
-     * @param player The player object
-     * @param currentScreen The current screen
      */
-    private void handleInputEvents(Player player, Screen currentScreen) {
-        if (Gdx.input.isKeyPressed(Input.Keys.F12)) {
-            if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
+    private void handleInputEvents() {
+        if (Gdx.input.isKeyPressed(Input.Keys.F12))
+            if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT))
                 QuantumClient.get().reloadResourcesAsync();
-            }
-        }
     }
 
     /**
-     * Handles player interaction with the world based on mouse button pressed.
+     * Handles player interaction with the world based on the mouse button pressed.
      *
      * @param player        The player object
      * @param currentScreen The current screen
@@ -364,22 +301,21 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         Hit hit = this.client.hit;
         if (hit == null) return;
 
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             this.doPlayerInteraction(Input.Buttons.LEFT, hit, world, player);
-        } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+        else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
             this.doPlayerInteraction(Input.Buttons.RIGHT, hit, world, player);
-        } else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+        else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE))
             this.doPlayerInteraction(Input.Buttons.MIDDLE, hit, world, player);
-        } else if (Gdx.input.isButtonPressed(Input.Buttons.BACK)) {
+        else if (Gdx.input.isButtonPressed(Input.Buttons.BACK))
             this.doPlayerInteraction(Input.Buttons.BACK, hit, world, player);
-        } else if (Gdx.input.isButtonPressed(Input.Buttons.FORWARD)) {
+        else if (Gdx.input.isButtonPressed(Input.Buttons.FORWARD))
             this.doPlayerInteraction(Input.Buttons.FORWARD, hit, world, player);
-        }
 
     }
 
     /**
-     * Toggles the ImGui visibility and cursor caught status based on configuration.
+     * Toggles the ImGui visibility and cursor-caught status based on configuration.
      */
     private void handleImGuiKey() {
         // Check if debug utils are enabled in the configuration
@@ -397,10 +333,9 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     private void handleInspectKey() {
         // Check if debug utilities are enabled and inspection is enabled
-        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            // Toggle the inspection mode
+        // to Toggle the inspection mode
+        if (ClientConfig.enableDebugUtils && DebugFlags.INSPECTION_ENABLED.isEnabled())
             this.client.inspection.setInspecting(!this.client.inspection.isInspecting());
-        }
     }
 
     /**
@@ -408,22 +343,17 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     private void handleDebugKey() {
         // Check if the left shift key is pressed
-        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            // If pressed, navigate to the previous page in debug GUI
-            this.client.debugGui.prevPage();
-        } else {
-            // If not pressed, navigate to the next page in debug GUI
-            this.client.debugGui.nextPage();
-        }
+        // If not pressed, navigate to the next page in debug GUI
+        // If pressed, navigate to the previous page in debug GUI
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) this.client.debugGui.prevPage();
+        else this.client.debugGui.nextPage();
 
         // Check if debug HUD is not shown
-        if (!this.client.isShowDebugHud()) {
-            // Disable profiling
-            QuantumClient.PROFILER.setProfiling(false);
-        } else if (ClientConfig.enableDebugUtils && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            // Enable profiling if debug HUD is shown and specific conditions are met
-            QuantumClient.PROFILER.setProfiling(true);
-        }
+        // Disable profiling
+        if (!this.client.isShowDebugHud()) QuantumClient.PROFILER.setProfiling(false);
+        else // Enable profiling if debug HUD is shown and specific conditions are met
+            if (ClientConfig.enableDebugUtils && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                QuantumClient.PROFILER.setProfiling(true);
     }
 
     /**
@@ -433,9 +363,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * then toggles the cursor catch status.
      */
     private void handleImGuiFocus() {
-        if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null) {
+        if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null)
             KeyAndMouseInput.setCursorCaught(!Gdx.input.isCursorCatched());
-        }
     }
 
     /**
@@ -472,13 +401,11 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        // Adjust screen coordinates based on draw offset
+        // Adjust screen coordinates based on the draw offset
         screenX = this.client.getMousePos().x;
         screenY = this.client.getMousePos().y;
 
-        if (WindowManager.mouseMoved(screenX, screenY)) {
-            return true;
-        }
+        if (WindowManager.mouseMoved(screenX, screenY)) return true;
 
         // Check if the cursor is already caught
         if (Gdx.input.isCursorCatched())
@@ -486,9 +413,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
         Screen currentScreen = this.client.screen;
 
-        if (currentScreen != null) {
-            client.mouseMoved(screenX, screenY);
-        }
+        if (currentScreen != null) client.mouseMoved(screenX, screenY);
 
         return false;
     }
@@ -508,15 +433,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         screenX = this.client.getMousePos().x;
         screenY = this.client.getMousePos().y;
 
-        if (WindowManager.mouseDragged(screenX, screenY)) {
-            return true;
-        }
-
-        // Check if the cursor is not caught
-        if (!Gdx.input.isCursorCatched()) {
-
-        }
-        return false;
+        return WindowManager.mouseDragged(screenX, screenY);
     }
 
     /**
@@ -534,9 +451,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         screenX = this.client.getMousePos().x;
         screenY = this.client.getMousePos().y;
 
-        if (WindowManager.mousePress(screenX, screenY, button)) {
-            return true;
-        }
+        if (WindowManager.mousePress(screenX, screenY, button)) return true;
 
         Screen currentScreen = this.client.screen;
         @Nullable ClientWorldAccess world = this.client.world;
@@ -553,7 +468,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         if (world == null || this.client.screen != null)
             return false;
 
-        // Check if player and hit result are not null
+        // Check if the player and hit result are not null
         return player != null && hit != null;
     }
 
@@ -568,50 +483,46 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
         // Get the position and metadata of the current and next blocks
         BlockVec pos = hit.getBlockVec();
-        if (hit instanceof BlockHit blockHitResult) {
-            assert world != null;
-            BlockState block = world.get(new BlockVec(pos));
+        if (!(hit instanceof BlockHit blockHitResult)) {
+            if (!(hit instanceof EntityHit entityHitResult) || !entityHitResult.isCollide()) return;
+            // + Miss
 
-            // Check if the hit result is valid and the current block is not air
-            if (!blockHitResult.isCollide() || block.isAir())
-                return;
-
-            // Handle left button input for block breaking
-            if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
-                // Check for instant mine ability
-                if (player.abilities.instaMine) {
-                    // Send a block break packet if instant mine is active
-                    this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getBlockVec())));
-                    return;
-                }
-
-                // Start breaking the block
-                this.client.startBreaking();
-                return;
-            } else {
-                // Stop breaking if the left button is not pressed
-                this.client.stopBreaking();
-            }
-
-            // Handle right button input for using items on the next block
-            if (button == Input.Buttons.RIGHT) {
-                this.useItem(player, world, blockHitResult);
-            }
-        } else if (hit instanceof EntityHit entityHitResult) {
-            if (!entityHitResult.isCollide()) {
-                // + Miss
-                return;
-            }
-
-            if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
+            if (button == Input.Buttons.LEFT && player.abilities.blockBreak)
                 this.client.attack(entityHitResult.getEntity());
-            }
+            return;
         }
+        assert world != null;
+        BlockState block = world.get(new BlockVec(pos));
+
+        // Check if the hit result is valid and the current block is not air
+        if (!blockHitResult.isCollide() || block.isAir())
+            return;
+
+        // Handle left button input for block breaking
+        // Stop breaking if the left button is not pressed
+        if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
+            // Check for instant mine ability
+            if (player.abilities.instaMine) {
+                // Send a block break packet if instant mine is active
+                this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getBlockVec())));
+                return;
+            }
+
+            // Start breaking the block
+            this.client.startBreaking();
+            return;
+        }
+
+        // Stop breaking if the left button is not pressed
+        this.client.stopBreaking();
+
+        // Handle right button input for using items on the next block
+        if (button == Input.Buttons.RIGHT) this.useItem(player, world, blockHitResult);
     }
 
     /**
      * Called when the user releases a touch or mouse button.
-     * Stops breaking action, and handles mouse events.
+     * Stops breaking action and handles mouse events.
      *
      * @param screenX The setX coordinate of the touch or mouse release event
      * @param screenY The setY coordinate of the touch or mouse release event
@@ -625,9 +536,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         screenX = this.client.getMousePos().x;
         screenY = this.client.getMousePos().y;
 
-        if (WindowManager.mouseRelease(screenX, screenY, button)) {
-            return true;
-        }
+        if (WindowManager.mouseRelease(screenX, screenY, button)) return true;
 
         // Stop breaking action
         this.client.stopBreaking();
@@ -653,26 +562,26 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     public boolean scrolled(float amountX, float amountY) {
         Screen currentScreen = this.client.screen;
 
-        if (WindowManager.mouseScroll(Gdx.input.getX(), Gdx.input.getY(), amountY)) {
-            return true;
-        }
+        // Check if ImGui overlay is shown
+        if (WindowManager.mouseScroll(Gdx.input.getX(), Gdx.input.getY(), amountY)) return true;
 
         // Handle hotbar scrolling with the mouse wheel
         Player player = this.client.player;
-        if (currentScreen == null && player != null) {
-            this.partialSelect += amountY;
-
-            if (Math.abs(partialSelect) >= 1f) {
-                int steps = (int) Math.signum(partialSelect);
-                player.selected = Math.floorMod(player.selected + steps, 9);
-                partialSelect = 0;
-            }
-
+        if (currentScreen != null || player == null) {
+            client.mouseWheel(amountX, amountY);
             return true;
         }
 
-        client.mouseWheel(amountX, amountY);
+        this.partialSelect += amountY;
 
-        return false;
+        // Handle smooth scrolling
+        if (Math.abs(partialSelect) >= 1f) {
+            int steps = (int) Math.signum(partialSelect);
+            player.selected = Math.floorMod(player.selected + steps, 9);
+            partialSelect = 0;
+        }
+
+        // Return true to indicate that the scroll event was handled
+        return true;
     }
 }

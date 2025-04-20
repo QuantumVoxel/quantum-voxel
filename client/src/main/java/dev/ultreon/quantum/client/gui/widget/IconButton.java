@@ -36,9 +36,9 @@ public class IconButton extends Button<IconButton> {
 
         if (this.isPressed()) y += 2;
         renderer.blitColor(RgbColor.WHITE.darker().darker());
-        this.icon.render(renderer, x + 3, y + 4, icon.width(), icon.height(), deltaTime);
+        this.icon.render(renderer, x + 3, y - yOffset + 4, icon.width(), icon.height(), deltaTime);
         renderer.blitColor(RgbColor.WHITE);
-        this.icon.render(renderer, x + 3, y + 3, icon.width(), icon.height(), deltaTime);
+        this.icon.render(renderer, x + 3, y - yOffset + 3, icon.width(), icon.height(), deltaTime);
     }
 
     @Override

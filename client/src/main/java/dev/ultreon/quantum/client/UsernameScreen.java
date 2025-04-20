@@ -10,6 +10,14 @@ import dev.ultreon.quantum.text.TextObject;
 
 import java.util.regex.Pattern;
 
+/**
+ * Represents a Username screen in the Quantum application. This screen allows users
+ * to input a username, validate it against specific rules, or skip the process
+ * to proceed with a default "Anonymous" username.
+ *
+ * This class initializes and manages various UI components such as input fields,
+ * error messages, and navigation buttons to handle user actions effectively.
+ */
 public class UsernameScreen extends Screen {
     private static final Pattern USERNAME_REGEX = Pattern.compile("^[a-zA-Z0-9_][a-zA-Z0-9_]+[a-zA-Z0-9_]$");
 

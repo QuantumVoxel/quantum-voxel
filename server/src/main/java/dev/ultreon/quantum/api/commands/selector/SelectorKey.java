@@ -2,6 +2,7 @@ package dev.ultreon.quantum.api.commands.selector;
 
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated
 public enum SelectorKey {
     TAG('#'),
     TYPE('!'),

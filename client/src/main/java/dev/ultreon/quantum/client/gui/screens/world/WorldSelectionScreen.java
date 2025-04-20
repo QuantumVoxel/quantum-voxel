@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.gui.screens.WorldCreationScreen;
 import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
+import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,17 +15,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WorldSelectionScreen extends Screen {
     public static final Path WORLDS_DIR = QuantumClient.data("worlds").file().toPath();
-    private static final int ENTRY_WIDTH = 200;
-    private WorldCardList worldList;
+    private SelectionList<WorldStorage> worldList;
     private WorldStorage selected;
     private TextButton createButton;
     private TextButton playButton;
@@ -38,24 +40,24 @@ public class WorldSelectionScreen extends Screen {
 
     @Override
     public void build(@NotNull GuiBuilder builder) {
-        this.worldList = builder.add(WorldCardList.create(() -> calculateMaxEntries(this.size.width)))
-                .worlds(this.locateWorlds())
+        this.worldList = builder.add(new SelectionList<WorldStorage>())
+                .entries(this.locateWorlds())
                 .selectable(true)
-                .xOffset(60)
                 .callback(this::selectWorld)
-                .count(() -> calculateMaxEntries(size.width))
-                .bounds(() -> new Bounds(0, 0, this.getWidth(), this.getHeight() - 41));
+                .itemRenderer(this::renderWorldItem)
+                .itemHeight(60)
+                .drawBackground(true)
+                .drawButtons(false)
+                .cutButtons(false)
+                .bounds(() -> new Bounds(0, 0, this.getWidth(), this.getHeight() - 38));
 
-        builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, 60, this.getHeight() - 41)).backgroundColor(RgbColor.rgba(0, 0, 0, .2f)));
-        builder.add(Rectangle.create().bounds(() -> new Bounds(this.getWidth() - 60, 0, 60, this.getHeight() - 41)).backgroundColor(RgbColor.rgba(0, 0, 0, .2f)));
+        builder.add(Rectangle.create())
+                .bounds(() -> new Bounds(2, this.getHeight() - 40, this.getWidth() - 4, 46))
+                .backgroundColor(RgbColor.BLACK.withAlpha(0x40));
 
-        this.prevButton = builder.add(TextButton.of(TextObject.literal("<"), 150)
-                .bounds(() -> new Bounds(20, this.getHeight() / 2 - (this.getHeight() / 2 - 40) - 20, 20, this.getHeight() - 80))
-                .setCallback(caller -> scrollLeft()));
-
-        this.nextButton = builder.add(TextButton.of(TextObject.literal(">"), 150)
-                .bounds(() -> new Bounds(this.getWidth() - 40, this.getHeight() / 2 - (this.getHeight() / 2 - 40) - 20, 20, this.getHeight() - 80))
-                .setCallback(caller -> scrollRight()));
+        builder.add(Rectangle.create())
+                .bounds(() -> new Bounds(1, this.getHeight() - 39, this.getWidth() - 2, 44))
+                .backgroundColor(RgbColor.BLACK.withAlpha(0x40));
 
         builder.add(Panel.create()
                 .bounds(() -> new Bounds(-5, this.getHeight() - 41, this.getWidth() + 10, 46)));
@@ -76,20 +78,23 @@ public class WorldSelectionScreen extends Screen {
                 .setType(Button.Type.DARK_EMBED));
     }
 
-    private void selectWorld(WorldCardList.Entry entry) {
-        this.selectWorld(entry.getWorld());
-    }
+    private void renderWorldItem(Renderer renderer, WorldStorage worldStorage, int y, boolean selected, float delta) {
+        if (selected) {
+            renderer.renderHighlightPopoutFrame(0, y - 1, this.getWidth(), 60, 2);
+        } else {
+            renderer.renderPopoutFrame(0, y - 3, this.getWidth(), 60, 4);
+        }
 
-    private void scrollLeft() {
-        this.worldList.scrollDelta(-1);
-    }
+        renderer.setColor(RgbColor.WHITE);
+        renderer.textLeft(worldStorage.getName(), 10, y + 10);
 
-    private void scrollRight() {
-        this.worldList.scrollDelta(1);
-    }
-
-    private int calculateMaxEntries(int width) {
-        return (width - 80) / ENTRY_WIDTH;
+        WorldSaveInfo worldSaveInfo = worldStorage.loadInfo();
+        if (worldSaveInfo == null) {
+            renderer.textLeft(TextObject.translation("quantum.screen.world_selection.unsaved"), 10, y + 30, RgbColor.rgb(0xa0a0a0));
+            return;
+        }
+        String lowerCase = worldSaveInfo.gamemode().name().toLowerCase(Locale.ROOT);
+        renderer.textLeft(lowerCase + " - " + LocalDateTime.ofEpochSecond(worldSaveInfo.lastSave().toEpochSecond(), 0, ZoneOffset.UTC).format(CommonConstants.DATE_FORMAT) + " - Gen " + worldSaveInfo.generatorVersion(), 10, y + 30, RgbColor.rgb(0x808080));
     }
 
     private void deleteWorld(TextButton caller) {
@@ -102,7 +107,7 @@ public class WorldSelectionScreen extends Screen {
                     try {
                         selected.delete();
                         worldList.clear();
-                        worldList.worlds(this.locateWorlds());
+                        worldList.entries(this.locateWorlds());
                     } catch (IOException e) {
                         CommonConstants.LOGGER.error("Failed to delete world", e);
                     } finally {
@@ -155,7 +160,7 @@ public class WorldSelectionScreen extends Screen {
         return worlds;
     }
 
-    public WorldCardList getWorldList() {
+    public SelectionList<WorldStorage> getWorldList() {
         return this.worldList;
     }
 

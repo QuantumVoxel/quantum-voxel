@@ -4,6 +4,7 @@ import dev.ultreon.libs.collections.v0.iterator.IntIterable;
 import dev.ultreon.libs.collections.v0.iterator.IntIterator;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public class Range implements IntIterable {
     private final int start;
     private final int end;

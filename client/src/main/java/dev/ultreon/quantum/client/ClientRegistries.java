@@ -6,8 +6,10 @@ import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRende
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.gui.debug.DebugPage;
+import dev.ultreon.quantum.client.gui.widget.HorizontalList;
 import dev.ultreon.quantum.client.registry.ClientRegistry;
 import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.world.CelestialBody;
 import dev.ultreon.quantum.registry.Registry;
 
 /**
