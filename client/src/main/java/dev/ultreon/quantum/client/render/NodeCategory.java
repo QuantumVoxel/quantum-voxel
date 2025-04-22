@@ -58,7 +58,8 @@ public class NodeCategory extends GameObject implements RenderableProvider {
      */
     public void update(float delta) {
         for (GameNode child : getChildren()) {
-            if (child instanceof GameObject gameObject) {
+            if (child instanceof GameObject) {
+                GameObject gameObject = (GameObject) child;
                 gameObject.combined.set(gameObject.transform)
                         .translate(gameObject.translation)
                         .rotate(Vector3.X, gameObject.rotation.x)

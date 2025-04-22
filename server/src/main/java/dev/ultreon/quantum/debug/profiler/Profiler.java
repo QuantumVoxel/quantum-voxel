@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.debug.profiler;
 
 import com.badlogic.gdx.utils.Disposable;
-import net.fabricmc.loader.api.FabricLoader;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Nullable;
 

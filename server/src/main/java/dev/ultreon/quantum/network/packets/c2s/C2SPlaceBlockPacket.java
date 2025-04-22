@@ -6,7 +6,20 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public record C2SPlaceBlockPacket(int x, int y, int z, BlockState block) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SPlaceBlockPacket implements Packet<InGameServerPacketHandler> {
+    private final int x;
+    private final int y;
+    private final int z;
+    private final BlockState block;
+
+    public C2SPlaceBlockPacket(int x, int y, int z, BlockState block) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.block = block;
+    }
 
     public static C2SPlaceBlockPacket read(PacketIO buffer) {
         var x = buffer.readVarInt();
@@ -39,4 +52,37 @@ public record C2SPlaceBlockPacket(int x, int y, int z, BlockState block) impleme
                ", block=" + block +
                '}';
     }
+
+    public int x() {
+        return x;
+    }
+
+    public int y() {
+        return y;
+    }
+
+    public int z() {
+        return z;
+    }
+
+    public BlockState block() {
+        return block;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SPlaceBlockPacket) obj;
+        return this.x == that.x &&
+               this.y == that.y &&
+               this.z == that.z &&
+               Objects.equals(this.block, that.block);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z, block);
+    }
+
 }

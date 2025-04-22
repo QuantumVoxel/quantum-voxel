@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.Vec3d;
 
-public record S2CPlayerSetPosPacket(Vec3d pos) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CPlayerSetPosPacket implements Packet<InGameClientPacketHandler> {
+    private final Vec3d pos;
+
+    public S2CPlayerSetPosPacket(Vec3d pos) {
+        this.pos = pos;
+    }
 
     public S2CPlayerSetPosPacket(double x, double y, double z) {
         this(new Vec3d(x, y, z));
@@ -34,4 +41,22 @@ public record S2CPlayerSetPosPacket(Vec3d pos) implements Packet<InGameClientPac
                "pos=" + pos +
                '}';
     }
+
+    public Vec3d pos() {
+        return pos;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CPlayerSetPosPacket) obj;
+        return Objects.equals(this.pos, that.pos);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos);
+    }
+
 }

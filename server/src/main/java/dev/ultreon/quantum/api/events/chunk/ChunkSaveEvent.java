@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.api.events.chunk;
 
 import dev.ultreon.quantum.world.ServerChunk;
-import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 public class ChunkSaveEvent extends ServerChunkEvent {

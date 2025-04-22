@@ -9,6 +9,7 @@ repositories {
     gradlePluginPortal()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    maven { url "https://jitpack.io" }
 }
 
 
@@ -21,29 +22,28 @@ dependencies {
         exclude group: "org.graalvm.polyglot"
         exclude group: "org.graalvm"
     }
-    api 'com.github.sebdomdev:open-file-dialog:1.0.1'
     api 'com.android.support:appcompat-v7:33.0.0'
-    api "com.badlogicgames.gdx:gdx-backend-android:$gdx_version"
+    api "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
     api 'androidx.appcompat:appcompat:1.6.1'
     api 'androidx.constraintlayout:constraintlayout:2.1.4'
-    natives "com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-armeabi-v7a"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-arm64-v8a"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-x86"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-x86_64"
-    api "com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version"
-    api "com.badlogicgames.gdx:gdx-freetype:$gdx_version"
-    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-armeabi-v7a"
-    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-arm64-v8a"
-    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-x86"
-    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-x86_64"
-    api "com.badlogicgames.ashley:ashley:$ashley_version"
-    api "com.badlogicgames.gdx:gdx-ai:$ai_version"
-    api "com.badlogicgames.gdx-controllers:gdx-controllers-android:$gdx_controllers_version"
-    api "com.badlogicgames.gdx:gdx-box2d:$gdx_version"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-armeabi-v7a"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-arm64-v8a"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-x86"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-x86_64"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+    api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+    api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
+    api "com.badlogicgames.ashley:ashley:$ashleyVersion"
+    api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+    api "com.badlogicgames.gdx-controllers:gdx-controllers-android:$gdxControllersVersion"
+    api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86_64"
 
     api "com.badlogicgames.gdx-video:gdx-video-android:$gdxVideoVersion"
     api files("deps/androidawt-1.0.4.aar")
@@ -103,7 +103,7 @@ tasks.register('run', Exec) {
 }
 android {
     buildToolsVersion "33.0.1"
-    compileSdkVersion 33
+    compileSdkVersion 34
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -148,8 +148,8 @@ android {
         versionName "0.1.0"
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     buildTypes {
         release {

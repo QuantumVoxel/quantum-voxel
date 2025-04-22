@@ -1,38 +1,31 @@
-#version 320 es
 
 #ifdef GL_ES
 precision highp float;
 #endif
 
-in vec3 a_position;
+attribute vec3 a_position;
 uniform mat4 u_projViewTrans;
 
-in vec4 a_color;
-in vec3 a_normal;
+attribute vec4 a_color;
+attribute vec3 a_normal;
 uniform mat3 u_normalMatrix;
 
-in vec2 a_texCoord0;
+attribute vec2 a_texCoord0;
 
 uniform vec4 u_diffuseUVTransform;
 uniform vec4 u_emissiveUVTransform;
 uniform mat4 u_worldTrans;
 uniform vec4 u_cameraPosition;
 
-out VS_OUT {
-	vec3 normal;
-	vec2 diffuseUV;
-	vec2 emissiveUV;
-	vec4 color;
-	vec3 position;
-	float fog;
-} gs_out;
+varying vec3 v_normal;
+varying vec3 v_modelNormal;
+varying vec2 v_diffuseUV;
+varying vec2 v_emissiveUV;
+varying vec4 v_color;
+varying vec3 v_position;
+varying float v_fog;
 
 void main() {
-	vec2 v_diffuseUV;
-	vec2 v_emissiveUV;
-	vec4 v_color;
-	vec3 v_position;
-	float v_fog;
 
 	v_diffuseUV = a_texCoord0;
 	v_position = a_position.xyz;
@@ -50,12 +43,13 @@ void main() {
 	float fog = dot(flen, flen) * u_cameraPosition.w;
 	v_fog = min(fog, 1.0);
 
-	gs_out.diffuseUV = v_diffuseUV;
-	gs_out.emissiveUV = v_emissiveUV;
-	gs_out.color = v_color;
-    gs_out.position = v_position;
-	gs_out.normal = a_normal;
-	gs_out.fog = v_fog;
+	v_diffuseUV = v_diffuseUV;
+	v_emissiveUV = v_emissiveUV;
+	v_color = v_color;
+    v_position = v_position;
+	v_normal = a_normal;
+	v_modelNormal = a_normal;
+	v_fog = v_fog;
 
 	gl_Position = u_projViewTrans * pos;
 }

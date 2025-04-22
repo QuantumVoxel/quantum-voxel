@@ -14,7 +14,6 @@ import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
-import org.checkerframework.common.reflection.qual.NewInstance;
 
 import static com.badlogic.gdx.graphics.GL30.GL_DEPTH_COMPONENT24;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
@@ -29,7 +28,6 @@ import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
  */
 public class WorldNode extends WorldRenderNode {
 
-    @NewInstance
     @Override
     public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -64,21 +62,11 @@ public class WorldNode extends WorldRenderNode {
         ValueTracker.setObtainedRenderables(this.pool().getObtained());
 
         textures.put("diffuse", this.getFrameBuffer().getTextureAttachments().get(0));
-        textures.put("reflective", this.getFrameBuffer().getTextureAttachments().get(1));
-        textures.put("depth", this.getFrameBuffer().getTextureAttachments().get(2));
-        textures.put("position", this.getFrameBuffer().getTextureAttachments().get(3));
-        textures.put("normal", this.getFrameBuffer().getTextureAttachments().get(4));
-        textures.put("specular", this.getFrameBuffer().getTextureAttachments().get(5));
     }
 
     @Override
     protected FrameBuffer createFrameBuffer() {
         return new GLFrameBuffer.FrameBufferBuilder(QuantumClient.get().getWidth(), QuantumClient.get().getHeight())
-                .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888)
-                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
-                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
-                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
-                .addBasicColorTextureAttachment(Pixmap.Format.RGB888)
                 .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888)
                 .addDepthRenderBuffer(GL_DEPTH_COMPONENT24)
                 .build();

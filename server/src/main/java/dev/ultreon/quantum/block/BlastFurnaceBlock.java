@@ -44,7 +44,8 @@ public class BlastFurnaceBlock extends EntityBlock {
         super.use(world, player, item, pos);
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof BlastFurnaceBlockEntity blastFurnace && world.isClientSide()) {
+        if (blockEntity instanceof BlastFurnaceBlockEntity && world.isClientSide()) {
+            BlastFurnaceBlockEntity blastFurnace = (BlastFurnaceBlockEntity) blockEntity;
             blastFurnace.open(player);
             return UseResult.ALLOW;
         }

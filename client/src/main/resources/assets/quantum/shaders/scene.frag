@@ -11,44 +11,44 @@ precision highp float;
 #define HIGH
 #endif
 
-MED in vec3 v_normal;
-MED in vec3 v_modelNormal;
+varying MED vec3 v_normal;
+varying MED vec3 v_modelNormal;
 
-LOW in vec4 v_color;
+varying LOW vec4 v_color;
 
 #if LOD_LEVEL == 0
-in HIGH vec2 v_diffuseUV;
-in HIGH vec2 v_emissiveUV;
-in HIGH vec2 v_normalUV;
-in HIGH vec2 v_specularUV;
+varying HIGH vec2 v_diffuseUV;
+varying HIGH vec2 v_emissiveUV;
+varying HIGH vec2 v_normalUV;
+varying HIGH vec2 v_specularUV;
 #elif LOD_LEVEL >= 2
-in MED vec2 v_diffuseUV;
-in MED vec2 v_emissiveUV;
-in MED vec2 v_normalUV;
-in MED vec2 v_specularUV;
+varying MED vec2 v_diffuseUV;
+varying MED vec2 v_emissiveUV;
+varying MED vec2 v_normalUV;
+varying MED vec2 v_specularUV;
 #else
-in MED vec2 v_diffuseUV;
-in MED vec2 v_emissiveUV;
-in MED vec2 v_normalUV;
-in MED vec2 v_specularUV;
+varying MED vec2 v_diffuseUV;
+varying MED vec2 v_emissiveUV;
+varying MED vec2 v_normalUV;
+varying MED vec2 v_specularUV;
 #endif
 uniform sampler2D u_diffuseTexture;
 uniform sampler2D u_emissiveTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_specularTexture;
 uniform vec4 u_fogColor;
-MED in float v_fog;
+varying MED float v_fog;
 
 #if LOD_LEVEL == 0
-in HIGH vec3 v_position;
+varying HIGH vec3 v_position;
 #elif LOD_LEVEL == 1
-in HIGH vec3 v_position;
+varying HIGH vec3 v_position;
 #elif LOD_LEVEL == 2
-in HIGH vec3 v_position;
+varying HIGH vec3 v_position;
 #elif LOD_LEVEL == 3
-in MED vec3 v_position;
+varying MED vec3 v_position;
 #else
-in MED vec3 v_position;
+varying MED vec3 v_position;
 #endif
 
 uniform mat4 u_modelMatrix;
@@ -148,13 +148,6 @@ vec2 transformUV(vec2 uv) {
     return v_texUV;
 }
 
-layout(location = 0) out vec4 diffuseOut;
-layout(location = 1) out vec3 reflectiveOut;
-layout(location = 2) out vec3 depthOut;
-layout(location = 3) out vec3 positionOut;
-layout(location = 4) out vec3 normalOut;
-layout(location = 5) out vec4 specularOut;
-
 void main() {
     vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
     vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
@@ -164,11 +157,11 @@ void main() {
     float sunLight = v_color.a;
     vec4 blockLight = vec4(v_color.rgb, 1.0);
 
-    vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
     #if LOD_LEVEL < 1
     if (diffuse.a <= 0.01) discard;
     #endif
-    diffuseOut.a = 1.0;
+    gl_FragColor.a = 1.0;
 
     #if LOD_LEVEL < 2
     vec3 light = vec3(u_globalSunlight) * sunLight;
@@ -179,30 +172,14 @@ void main() {
 
     vec3 emissive = vec3(0.0);
     #if LOD_LEVEL < 1
-    emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
-    diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
+    emissive = texture2D(u_emissiveTexture, v_emissiveTexUV).rgb;
+    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
     #else
-    diffuseOut.rgb = (diffuse.rgb) * light;
+    gl_FragColor.rgb = (diffuse.rgb) * light;
     #endif
 
     #if LOD_LEVEL < 2
-    diffuseOut = vec4(diffuseOut.xyz * gamma(sh_light(v_normal, groove)).r, diffuseOut.w);
+    gl_FragColor = vec4(gl_FragColor.xyz * gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
     #endif
-    diffuseOut.rgb = mix(diffuseOut.rgb, vec3(u_fogColor), v_fog);
-    positionOut = v_position;
-    #if LOD_LEVEL == 0
-    normalOut = (diffuseOut.xyz * vec3(1.0, 0.0, 0.0));
-    #elif LOD_LEVEL == 1
-    normalOut = (diffuseOut.xyz * vec3(1.0, 1.0, 0.0));
-    #elif LOD_LEVEL == 2
-    normalOut = (diffuseOut.xyz * vec3(0.0, 1.0, 0.0));
-    #elif LOD_LEVEL == 3
-    normalOut = (diffuseOut.xyz * vec3(0.0, 1.0, 1.0));
-    #else
-    normalOut = (diffuseOut.xyz * vec3(0.0, 0.0, 1.0));
-    #endif
-    #if LOD_LEVEL < 2
-    specularOut = blockLight;
-    depthOut = vec3(1.0 - sunLight);
-    #endif
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);
 }

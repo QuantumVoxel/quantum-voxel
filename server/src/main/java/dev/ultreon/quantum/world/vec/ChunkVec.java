@@ -4,7 +4,6 @@ import dev.ultreon.quantum.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -20,8 +19,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     // Region chunk size
     public static final int RCS = REGION_SIZE * CS;
 
-    @Serial
-    private static final long serialVersionUID = 782820744815861493L;
     private final ChunkVecSpace space;
 
     /**
@@ -254,8 +251,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @throws IllegalArgumentException if the region is null and the current space is in region space
      */
     public BlockVec blockInWorldSpace(int x, int y, int z, @Nullable RegionVec region) {
-        return switch (this.space) {
-            case REGION -> {
+        switch (this.space) {
+            case REGION:
                 if (region == null)
                     throw new IllegalArgumentException("Region cannot be null when converting from region space");
 
@@ -271,16 +268,16 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
                 ry += region.y * REGION_SIZE * CS;
                 rz += region.z * REGION_SIZE * CS;
 
-                yield new BlockVec(rx + x, ry + y, rz + z, BlockVecSpace.WORLD);
-            }
-            case WORLD -> {
+                return new BlockVec(rx + x, ry + y, rz + z, BlockVecSpace.WORLD);
+            case WORLD:
                 int cx = this.x * CS;
                 int cy = this.y * CS;
                 int cz = this.z * CS;
 
-                yield new BlockVec(cx + x, cy + y, cz + z, BlockVecSpace.WORLD);
-            }
-        };
+                return new BlockVec(cx + x, cy + y, cz + z, BlockVecSpace.WORLD);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     /**

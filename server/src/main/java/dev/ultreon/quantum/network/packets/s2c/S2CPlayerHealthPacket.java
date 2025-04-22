@@ -5,7 +5,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public record S2CPlayerHealthPacket(float newHealth) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CPlayerHealthPacket implements Packet<InGameClientPacketHandler> {
+    private final float newHealth;
+
+    public S2CPlayerHealthPacket(float newHealth) {
+        this.newHealth = newHealth;
+    }
 
     public static S2CPlayerHealthPacket read(PacketIO buffer) {
         var newHealth = buffer.readFloat();
@@ -29,4 +36,22 @@ public record S2CPlayerHealthPacket(float newHealth) implements Packet<InGameCli
                "newHealth=" + newHealth +
                '}';
     }
+
+    public float newHealth() {
+        return newHealth;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CPlayerHealthPacket) obj;
+        return Float.floatToIntBits(this.newHealth) == Float.floatToIntBits(that.newHealth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(newHealth);
+    }
+
 }

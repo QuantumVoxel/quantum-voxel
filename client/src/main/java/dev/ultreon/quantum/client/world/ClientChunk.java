@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
@@ -274,7 +273,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         }
     }
 
-    @CanIgnoreReturnValue
     public void addModel(BlockVec pos, ModelInstance instance) {
         if (models.containsKey(pos)) {
             BlockObject modelInstance1 = this.models.get(pos);

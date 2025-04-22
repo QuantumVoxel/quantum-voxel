@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.entity.player;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.Attribute;
@@ -18,7 +17,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -469,7 +468,8 @@ public abstract class Player extends LivingEntity {
             return;
         }
 
-        if (this instanceof ServerPlayer serverPlayer) {
+        if (this instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer) this;
             MenuEvents.MENU_CLOSE.factory().onMenuClose(this.openMenu, serverPlayer);
         }
 
@@ -502,9 +502,7 @@ public abstract class Player extends LivingEntity {
      *
      * @param cursor the item stack to set.
      */
-    public void setCursor(ItemStack cursor) {
-        Preconditions.checkNotNull(cursor, "cursor");
-        this.cursor = cursor;
+    public void setCursor(ItemStack cursor) {        this.cursor = cursor;
     }
 
     /**

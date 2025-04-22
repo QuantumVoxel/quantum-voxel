@@ -15,7 +15,6 @@ public class DebugFlags {
     public static final DebugFlag CHUNK_PACKET_DUMP = new DebugFlag(false, "chunkPacketDump");
     public static final DebugFlag CHUNK_BLOCK_DATA_DUMP = new DebugFlag(false, "chunkBlockDataDump");
     public static final DebugFlag WARN_CHUNK_BUILD_OVERLOAD = new DebugFlag(true, "logging.chunkBuildOverload");
-    public static final DebugFlag INSPECTION_ENABLED = new DebugFlag(true, "inspection"); //! Only enable for debugging
     public static final DebugFlag DUMP_TEXTURE_ATLAS = new DebugFlag(true, "textures.atlas.dump");
     public static final DebugFlag WORLD_GEN = new DebugFlag(false, "worldGen");
     public static final DebugFlag LOG_POSITION_RESET_ON_CHUNK_LOAD = new DebugFlag(false, "logging.positionReset");

@@ -1,29 +1,20 @@
 package dev.ultreon.quantum.server;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
-import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.events.server.ServerStartedEvent;
 import dev.ultreon.quantum.api.events.server.ServerStartingEvent;
 import dev.ultreon.quantum.api.events.server.ServerStoppedEvent;
 import dev.ultreon.quantum.api.events.server.ServerStoppingEvent;
-import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.data.Json5Ops;
-import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.Debugger;
-import dev.ultreon.quantum.debug.inspect.InspectionNode;
 import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityTypes;
@@ -43,36 +34,29 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.registry.ServerRegistry;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.resources.ResourceCategory;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
 import dev.ultreon.quantum.server.player.CachedPlayer;
 import dev.ultreon.quantum.server.player.PermissionMap;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.gen.chunk.*;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -103,32 +87,19 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static final Logger LOGGER = LoggerFactory.getLogger("QuantumServer");
     @Deprecated(since = "0.1.0", forRemoval = true)
     public static final String NAMESPACE = "quantum";
-    private static final ThreadGroup GROUP = new ThreadGroup("QuantumServer");
-    private static final ThreadGroup WORLD_GEN_GROUP = new ThreadGroup("WorldGen");
-    public static final ThreadFactory WORLD_GEN_THREAD_FACTORY = r -> {
-        Thread thread1 = new Thread(WORLD_GEN_GROUP, r);
-        thread1.setDaemon(true);
-        thread1.setPriority(3);
-        return thread1;
-    };
     private static final boolean CHUNK_DEBUG = System.getProperty("quantum.chunk.debug", "false").equals("true");
 
     //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
     private static QuantumServer instance;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(GROUP, r);
-        thread.setName("QuantumServer");
-        return thread;
-    });
     private final Queue<Pair<ServerPlayer, Supplier<Packet<? extends ClientPacketHandler>>>> chunkNetworkQueue = new ArrayDeque<>();
     private final Map<UUID, ServerPlayer> players = new ConcurrentHashMap<>();
     private final MapType worldData;
     protected Networker networker;
     private final WorldStorage storage;
     private final ResourceManager resourceManager;
-    protected InspectionNode<QuantumServer> node;
-    private InspectionNode<Object> playersNode;
+    //    protected InspectionNode<QuantumServer> node;
+//    private InspectionNode<Object> playersNode;
     @ShowInNodeView
     protected int port;
     @ShowInNodeView
@@ -139,7 +110,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private int currentTps;
     private boolean sendingChunk;
     protected int maxPlayers = 10;
-    private final Cache<String, CachedPlayer> cachedPlayers = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).build();
+    private final Map<String, CachedPlayer> cachedPlayers = new HashMap<>();
     private final GameRules gameRules = new GameRules();
     private final PermissionMap permissions = new PermissionMap();
     private final CommandSender consoleSender = new ConsoleCommandSender(this);
@@ -157,9 +128,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * Creates a new {@link QuantumServer} instance.
      *
      * @param storage    the world storage for the world data.
-     * @param parentNode the parent inspection node. (E.g., the client inspection node)
      */
-    protected QuantumServer(WorldStorage storage, Profiler profiler, InspectionNode<?> parentNode) {
+    protected QuantumServer(WorldStorage storage, Profiler profiler) {
         super(profiler);
 
         WorldSaveInfo worldSaveInfo = storage.loadInfo();
@@ -170,7 +140,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.storage = storage;
 
         QuantumServer.instance = this;
-        this.thread = new Thread(this, "server");
+        if (!GamePlatform.get().isWeb()) this.thread = new Thread(this, "server");
+        else this.thread = null;
 
         this.networker = null;
 
@@ -189,42 +160,12 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.biomes = new Biomes(this);
         this.add("Noise Configs", noiseConfigs);
         this.add("Biomes", biomes);
-
-        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            this.node = parentNode.createNode("server", () -> this);
-            this.playersNode = this.node.createNode("players", this.players::values);
-            this.node.createNode("overworld", this::overworld);
-            this.node.create("refreshChunks", () -> this.chunkRefresh);
-            this.node.create("renderDistance", this::getRenderDistance);
-            this.node.create("entityRenderDistance", () -> this.entityRenderDistance);
-            this.node.create("maxPlayers", () -> this.maxPlayers);
-            this.node.create("tps", () -> this.currentTps);
-            this.node.create("onlineTicks", () -> this.onlineTicks);
-        }
-
         this.add("Dimension Manager", this.dimManager);
 
         this.resourceManager = new ResourceManager("data");
-        URL serverResource = QuantumServer.class.getResource("/.quantum-server-resources");
-        if (serverResource == null) {
-            throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
-        }
-        this.add("Resource Manager", this.resourceManager);
-        String serverPath = serverResource.toString();
-
-        if (serverPath.startsWith("jar:")) {
-            serverPath = serverPath.substring("jar:".length());
-        }
-
-        serverPath = serverPath.substring(0, serverPath.lastIndexOf('/'));
-
-        if (serverPath.endsWith("!")) {
-            serverPath = serverPath.substring(0, serverPath.length() - 1);
-        }
-
         try {
-            resourceManager.importPackage(new File(new URI(serverPath)).toPath());
-        } catch (IOException | URISyntaxException e) {
+            resourceManager.importPackage(Gdx.files.internal("."));
+        } catch (IOException e) {
             LOGGER.warn("Server resources location is unknown!");
         }
         this.recipeManager = new RecipeManager(this);
@@ -247,30 +188,48 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     private void loadRegistries() {
         var chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
-        chunkGenRegistry.register(ChunkGenerator.OVERWORLD, CHUNK_DEBUG ? new DebugGenerator(this.registries.biomes()) :  new OverworldGenerator(this.registries.biomes()));
+        chunkGenRegistry.register(ChunkGenerator.OVERWORLD, CHUNK_DEBUG ? new DebugGenerator(this.registries.biomes()) : new OverworldGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.TEST, new TestGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.FLOATING_ISLANDS, new SpaceGenerator(this.registries.biomes()));
 
         var dimRegistry = registries.get(RegistryKeys.DIMENSION);
-        for (ResourceCategory dimensions : resourceManager.getResourceCategory("dimensions")) {
-            for (NamespaceID entry : dimensions.entries()) {
-                if (dimRegistry.contains(entry)) {
-                    LOGGER.warn("Dimension {} is already registered", entry);
-                    continue;
-                }
+//        for (ResourceCategory dimensions : resourceManager.getResourceCategory("dimensions")) {
+//            for (NamespaceID entry : dimensions.entries()) {
+//                if (dimRegistry.contains(entry)) {
+//                    LOGGER.warn("Dimension {} is already registered", entry);
+//                    continue;
+//                }
+//
+//                dimRegistry.register(
+//                        entry.mapPath(path -> path.substring("dimensions/".length(), path.lastIndexOf('.'))),
+//                        DimensionInfo.fromJson(dimensions.get(entry).readJson())
+//                );
+//            }
+//        }
 
-                dimRegistry.register(
-                        entry.mapPath(path -> path.substring("dimensions/".length(), path.lastIndexOf('.'))),
-                        DimensionInfo.CODEC.parse(Json5Ops.INSTANCE, dimensions.get(entry).readJson5()).getOrThrow()
-                );
-            }
-        }
+        dimRegistry.register(DimensionInfo.OVERWORLD, new DimensionInfo(
+                NamespaceID.of("overworld"),
+                Optional.empty(),
+                ChunkGenerator.OVERWORLD
+        ));
+
+        dimRegistry.register(DimensionInfo.TEST, new DimensionInfo(
+                NamespaceID.of("test"),
+                Optional.empty(),
+                ChunkGenerator.TEST
+        ));
+
+        dimRegistry.register(DimensionInfo.SPACE, new DimensionInfo(
+                NamespaceID.of("space"),
+                Optional.empty(),
+                ChunkGenerator.FLOATING_ISLANDS
+        ));
 
         this.dimManager.load(registries);
     }
 
     private void reload(ReloadContext context) {
-        for (ServerRegistry<?> registry : registries.stream().toList())
+        for (ServerRegistry<?> registry : registries.stream().collect(Collectors.toList()))
             registry.reload(context);
 
         this.recipeManager.reload(context);
@@ -326,8 +285,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param <T>  the return type of the callable.
      * @return the result of the callable.
      */
-    @CanIgnoreReturnValue
     public static <T> T invokeAndWait(@NotNull Callable<T> func) {
+        if (GamePlatform.get().isWeb() || Thread.currentThread() == QuantumServer.instance.thread()) {
+            try {
+                return func.call();
+            } catch (Exception e) {
+                throw new RejectedExecutionException("Failed to execute task", e);
+            }
+        }
         return QuantumServer.instance.submit(func).join();
     }
 
@@ -337,7 +302,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param func the runnable to be executed.
      */
     public static void invokeAndWait(Runnable func) {
-        if (Thread.currentThread() == QuantumServer.instance.thread()) {
+        if (GamePlatform.get().isWeb() || Thread.currentThread() == QuantumServer.instance.thread()) {
             func.run();
             return;
         }
@@ -350,10 +315,13 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param func the runnable to be executed.
      * @return the future.
      */
-    @CanIgnoreReturnValue
-    public static @NotNull CompletableFuture<Void> invoke(Runnable func) {
+    public static @NotNull Promise<Void> invoke(Runnable func) {
+        if (GamePlatform.get().isWeb() || Thread.currentThread() == QuantumServer.instance.thread()) {
+            func.run();
+            return CompletionPromise.completedFuture(null);
+        }
         QuantumServer server = QuantumServer.instance;
-        if (server == null) return CompletableFuture.failedFuture(new ServerStatusException("Server is offline!"));
+        if (server == null) return Promise.failedFuture(new ServerStatusException("Server is offline!"));
         return server.submit(func);
     }
 
@@ -364,8 +332,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param <T>  the return type of the callable.
      * @return the future.
      */
-    @CanIgnoreReturnValue
-    public static <T> @NotNull CompletableFuture<T> invoke(Callable<T> func) {
+    public static <T> @NotNull Promise<T> invoke(Callable<T> func) {
         return QuantumServer.instance.submit(func);
     }
 
@@ -381,7 +348,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public void start() {
         if (this.running) throw new IllegalStateException("Server already running!");
         this.running = true;
-        this.thread.start();
+        if (!GamePlatform.get().isWeb()) this.thread.start();
     }
 
     /**
@@ -395,9 +362,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @return true if the current thread is the server thread.
      */
     public static boolean isOnServerThread() {
+        if (GamePlatform.get().isWeb()) return true;
         QuantumServer instance = QuantumServer.instance;
         if (instance == null) throw new IllegalStateException("Server closed!");
-        return instance.thread.threadId() == Thread.currentThread().threadId();
+        return instance.thread.getId() == Thread.currentThread().getId();
     }
 
     @ApiStatus.Internal
@@ -495,7 +463,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         // Cleanup any resources allocated.
         this.players.clear();
-        this.scheduler.shutdownNow();
 
         try {
             this.resourceManager.close();
@@ -555,16 +522,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.running = false;
 
         try {
-            this.scheduler.shutdown();
-            if (!this.scheduler.awaitTermination(60, TimeUnit.SECONDS) && !this.scheduler.isTerminated())
-                this.onTerminationFailed();
-        } catch (ApplicationCrash crash) {
-            this.crash(crash.getCrashLog());
-        } catch (Exception exc) {
-            this.crash(exc);
-        }
-
-        try {
             this.thread.join(60000);
         } catch (InterruptedException e) {
             this.fatalCrash(new RuntimeException("Safe shutdown got interrupted."));
@@ -601,29 +558,28 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * Subclasses overriding this method must invoke this implementation to ensure basic server
      * operations are performed.
      */
-    @OverridingMethodsMustInvokeSuper
     protected void runTick() {
-        this.profiler.update();
-
         this.onlineTicks++;
 
         // Poll all the tasks in the queue.
-        this.profiler.section("taskPolling", this::pollAll);
+        this.pollAll();
 
         // Tick connections.
-        this.profiler.section("connections", this.networker::tick);
+        if (this.networker != null)
+            this.networker.tick();
 
         // Tick the world.
-        for (ServerWorld world : this.dimManager.getWorlds().values()) {
-            this.profiler.section("world", () -> {
+        if (this.dimManager != null) {
+            for (ServerWorld world : this.dimManager.getWorlds().values()) {
+                if (world == null) continue;
                 WorldEvents.PRE_TICK.factory().onPreTick(world);
                 world.tick();
                 WorldEvents.POST_TICK.factory().onPostTick(world);
-            });
+            }
         }
 
         // Poll the chunk network queue.
-        this.profiler.section("chunkPackets", this::pollChunkPacket);
+        this.pollChunkPacket();
     }
 
     /**
@@ -690,18 +646,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     /**
-     * Schedules a runnable to be executed after the specified delay.
-     *
-     * @param runnable the runnable.
-     * @param time     the delay.
-     * @param unit     the time unit of the delay.
-     * @return the scheduled future.
-     */
-    public ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit unit) {
-        return this.scheduler.schedule(runnable, time, unit);
-    }
-
-    /**
      * Closes the server instance and performs cleanup of resources.
      */
     public void close() {
@@ -714,10 +658,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         }
 
         this.recipeManager.unload();
-        this.cachedPlayers.invalidateAll();
+        this.cachedPlayers.clear();
         this.players.forEach((UUID uuid, ServerPlayer player) -> {
             player.connection.disconnect("Server already closed!");
-            this.cachedPlayers.invalidate(player.getName());
+            this.cachedPlayers.remove(player.getName());
         });
         this.players.clear();
         this.resourceManager.close();
@@ -754,9 +698,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @throws InternalError if the mod container for the base game cannot be found.
      */
     public String getGameVersion() {
-        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE);
-        if (container.isEmpty()) throw new InternalError("Can't find mod container for the base game.");
-        return container.get().getMetadata().getVersion().getFriendlyString();
+//        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE);
+//        if (container.isEmpty()) throw new InternalError("Can't find mod container for the base game.");
+//        return container.get().getMetadata().getVersion().getFriendlyString();
+        return "0.2.0";
     }
 
     /**
@@ -791,11 +736,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @return the player, or null if the player is not in the cache.
      */
     public @Nullable CachedPlayer getCachedPlayer(String name) {
-        try {
-            return this.cachedPlayers.get(name, () -> new CachedPlayer(null, name));
-        } catch (ExecutionException e) {
-            return null;
-        }
+        return this.cachedPlayers.putIfAbsent(name, new CachedPlayer(null, name));
     }
 
     /**
@@ -820,14 +761,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.players.put(player.getUuid(), player);
         this.cachedPlayers.put(player.getName(), new CachedPlayer(player.getUuid(), player.getName()));
 
-        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            this.playersNode.createNode(player.getName(), () -> player);
-        }
-
         // Send player to all other players within the render distance.
         var players = this.getPlayers()
                 .stream()
-                .toList();
+                .collect(Collectors.toList());
 
         for (ServerPlayer other : players) {
             if (other == player) continue;
@@ -1003,7 +940,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public List<CachedPlayer> getCachedPlayers() {
-        return Lists.newArrayList();
+        return new ArrayList<>();
     }
 
     public Collection<? extends World> getWorlds() {

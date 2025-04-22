@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.tags;
 
-import com.google.common.collect.Lists;
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -10,10 +8,7 @@ import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class NamedTag<T> {
     private final NamespaceID name;
@@ -24,7 +19,7 @@ public class NamedTag<T> {
     public NamedTag(NamespaceID name, Registry<T> registry) {
         this.name = name;
         this.registry = registry;
-        this.values = Lists.newArrayList();
+        this.values = new ArrayList<>();
     }
 
     public void reload(ReloadContext context) {
@@ -40,18 +35,19 @@ public class NamedTag<T> {
             this.loaded = false;
             return;
         }
-        Json5Element rootElem = res.loadJson5();
+        JsonValue rootElem = res.loadJson();
 
-        if (!(rootElem instanceof Json5Object root)) {
+        if (!(rootElem.isObject())) {
             return;
         }
+        JsonValue root = rootElem;
 
-        for (Json5Element elem : root.getAsJson5Array("elements")) {
-            if (!elem.isJson5Primitive() || !elem.getAsJson5Primitive().isString()) {
+        for (JsonValue elem : root) {
+            if (!elem.isString()) {
                 continue;
             }
 
-            String element = elem.getAsString();
+            String element = elem.asString();
             if (!element.startsWith("#")) {
                 T e = registry.get(new NamespaceID(element));
                 if (e == null) {

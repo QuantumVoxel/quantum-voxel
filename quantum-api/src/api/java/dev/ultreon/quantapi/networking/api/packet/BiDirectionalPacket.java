@@ -5,7 +5,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 
 import java.util.function.Supplier;
 
-public abstract non-sealed class BiDirectionalPacket<T extends BiDirectionalPacket<T>> extends Packet<T> implements IClientEndpoint, IServerEndpoint {
+public abstract class BiDirectionalPacket<T extends BiDirectionalPacket<T>> extends Packet<T> implements IClientEndpoint, IServerEndpoint {
     public BiDirectionalPacket() {
         super();
     }
@@ -14,10 +14,14 @@ public abstract non-sealed class BiDirectionalPacket<T extends BiDirectionalPack
     public final boolean handle(Supplier<IPacketContext> context) {
         IPacketContext ctx = context.get();
         switch (ctx.getDestination()) {
-            case CLIENT -> ctx.queue(this::handleClient);
-            case SERVER -> ctx.queue(() -> this.handleServer(ctx.getPlayer()));
-            default -> {
-            }
+            case CLIENT:
+                ctx.queue(this::handleClient);
+                break;
+            case SERVER:
+                ctx.queue(() -> this.handleServer(ctx.getPlayer()));
+                break;
+            default:
+                break;
         }
         return true;
     }

@@ -37,7 +37,8 @@ public abstract class BlockContainerMenu extends ContainerMenu {
     public void build() {
         super.build();
 
-        if (blockEntity instanceof ContainerBlockEntity<?> containerBlock && !containerBlock.getWorld().isClientSide()) {
+        if (blockEntity instanceof ContainerBlockEntity<?> && !((ContainerBlockEntity<?>) blockEntity).getWorld().isClientSide()) {
+            ContainerBlockEntity<?> containerBlock = (ContainerBlockEntity<?>) blockEntity;
             for (int i = 0; i < containerBlock.getItemCapacity(); i++) {
                 this.slots[i] = containerBlock.getSlot(i);
             }

@@ -15,18 +15,15 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
-import dev.ultreon.langgen.LangGenConfig;
-import dev.ultreon.langgen.LangGenListener;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
-import dev.ultreon.quantum.LangGenMain;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -91,6 +88,9 @@ public final class Main implements ApplicationListener {
     public void create() {
         if (client != null) return;
 
+        if (GamePlatform.get().isWeb()) Gdx.graphics.setTitle("Quantum Voxel (Web)");
+        else Gdx.graphics.setTitle("Quantum Voxel");
+
         glProfiler = new GLProfiler(Gdx.graphics);
         if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
 
@@ -103,50 +103,17 @@ public final class Main implements ApplicationListener {
             batch = new SpriteBatch();
             shapeRenderer = new ShapeRenderer();
 
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/roboto-mono.ttf"));
-            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 15;
-
-            font = generator.generateFont(parameter);
-
             // Set log level to debug
             Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
             // Check for datagen system property
             if (Objects.equals(System.getProperty("quantum.datagen"), "true")) {
-                this.client = new DataGeneratorClient();
+//                this.client = new DataGeneratorClient();
             }
 
             AtomicBoolean preprocessing = new AtomicBoolean(true);
-            LangGenConfig.progressListener = new LangGenListener() {
-                @Override
-                public void onProgress(int progress, int total) {
-                    preprocessing.set(false);
-                    Main.this.progress = (float) progress / total;
-                    Main.this.message = "Generating bindings: " + progress + " / " + total;
-                }
-
-                @Override
-                public void onPreprocessProgress(int progress, int total) {
-                    preprocessing.set(true);
-                    Main.this.progress = (float) progress / total;
-                    Main.this.message = "Preprocessing bindings: " + progress + " / " + total;
-                }
-
-                @Override
-                public void onDone() {
-                    Main.this.generated = true;
-                }
-            };
-            Thread thread = new Thread(() -> {
-                try {
-                    LangGenMain.genBindings();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }, "LangGen");
-
-            thread.start();
+            generated = true;
+            preprocessing.set(false);
         } catch (ApplicationCrash t) {
             // Handle ApplicationCrash exception
             QuantumClient.crash(t);

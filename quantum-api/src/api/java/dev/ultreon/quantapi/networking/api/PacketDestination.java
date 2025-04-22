@@ -6,23 +6,35 @@ public enum PacketDestination {
     SERVER, CLIENT;
 
     public PacketDestination opposite() {
-        return switch (this) {
-            case SERVER -> PacketDestination.CLIENT;
-            case CLIENT -> PacketDestination.SERVER;
-        };
+        switch (this) {
+            case SERVER:
+                return PacketDestination.CLIENT;
+            case CLIENT:
+                return PacketDestination.SERVER;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public EnvType getSourceEnv() {
-        return switch (this) {
-            case SERVER -> EnvType.CLIENT;
-            case CLIENT -> EnvType.SERVER;
-        };
+        switch (this) {
+            case SERVER:
+                return EnvType.CLIENT;
+            case CLIENT:
+                return EnvType.SERVER;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public EnvType getDestinationEnv() {
-        return switch (this) {
-            case SERVER -> EnvType.SERVER;
-            case CLIENT -> EnvType.CLIENT;
-        };
+        switch (this) {
+            case SERVER:
+                return EnvType.SERVER;
+            case CLIENT:
+                return EnvType.CLIENT;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }

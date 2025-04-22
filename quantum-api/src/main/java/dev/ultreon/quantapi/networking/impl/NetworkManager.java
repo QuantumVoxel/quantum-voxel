@@ -1,8 +1,8 @@
 package dev.ultreon.quantapi.networking.impl;
 
 import dev.ultreon.quantum.util.NamespaceID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;

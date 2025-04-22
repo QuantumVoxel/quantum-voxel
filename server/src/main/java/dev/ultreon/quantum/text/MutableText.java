@@ -1,10 +1,8 @@
 package dev.ultreon.quantum.text;
 
 import com.badlogic.gdx.utils.Array;
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -140,9 +138,7 @@ public abstract class MutableText extends TextObject {
      * @param append The TextObject to append
      * @return A new instance of MutableText
      */
-    public @NewInstance MutableText append(TextObject append) {
-        Preconditions.checkNotNull(append, "Text object cannot be null");
-        this.extras.add(append);
+    public MutableText append(TextObject append) {        this.extras.add(append);
         return this;
     }
 

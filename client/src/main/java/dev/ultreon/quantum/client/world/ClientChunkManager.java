@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.utils.LongMap;
-import com.google.common.collect.ImmutableList;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.GameObject;
@@ -9,7 +8,9 @@ import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class ClientChunkManager extends GameObject implements ChunkManager<ClientChunk> {
@@ -87,11 +88,11 @@ public class ClientChunkManager extends GameObject implements ChunkManager<Clien
         return (((long) x) & 0xFFFFF) | ((((long) y) & 0xFFFFF) << 20) | ((((long) z) & 0xFFFFF) << 40);
     }
 
-    public ImmutableList<ClientChunk> getAllChunks() {
+    public List<ClientChunk> getAllChunks() {
         synchronized (this) {
-            var chunkList = new ImmutableList.Builder<ClientChunk>();
+            var chunkList = new ArrayList<ClientChunk>();
             for (var chunk : this.chunks.values()) chunkList.add(chunk);
-            return chunkList.build();
+            return chunkList;
         }
     }
 

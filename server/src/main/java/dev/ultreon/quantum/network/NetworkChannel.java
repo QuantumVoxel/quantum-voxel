@@ -2,7 +2,6 @@ package dev.ultreon.quantum.network;
 
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectIntMap;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.network.api.packet.ClientEndpoint;
 import dev.ultreon.quantum.network.api.packet.ModPacket;
 import dev.ultreon.quantum.network.api.packet.ModPacketContext;
@@ -43,7 +42,6 @@ public class NetworkChannel {
         return channel;
     }
 
-    @CheckReturnValue
     public static NetworkChannel getChannel(NamespaceID channelId) {
         return NetworkChannel.CHANNELS.get(channelId);
     }

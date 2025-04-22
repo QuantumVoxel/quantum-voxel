@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.Position;
@@ -10,7 +9,6 @@ import dev.ultreon.quantum.client.gui.widget.components.RangedValueComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Supplier;
 
@@ -27,10 +25,8 @@ public class Slider extends Widget {
         this(200, value, min, max);
     }
 
-    public Slider(@IntRange(from = 10) int width, int value, int min, int max) {
+    public Slider(int width, int value, int min, int max) {
         super(width, 21);
-
-        Preconditions.checkArgument(max > min, "Max should be higher than min");
 
         this.callback = this.register(NamespaceID.of("callback"), new CallbackComponent<>(it -> {
         }));

@@ -20,7 +20,7 @@ public class GizmoShaders extends ModelShaders {
     }
 
     public GizmoShaders(FileHandle vertexShader, FileHandle fragmentShader, FileHandle geometryShader) {
-        this(vertexShader.readString(), fragmentShader.readString(), geometryShader.readString());
+        this(vertexShader.readString(), fragmentShader.readString(), "");
     }
 
     @Override

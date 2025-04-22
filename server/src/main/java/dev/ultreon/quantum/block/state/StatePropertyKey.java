@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.DataType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.ArrayUtils;

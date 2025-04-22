@@ -1,13 +1,10 @@
 package dev.ultreon.quantum.text;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Objects;
 
 public final class ClickEvent implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 0L;
     private final Action action;
     private final String value;
 

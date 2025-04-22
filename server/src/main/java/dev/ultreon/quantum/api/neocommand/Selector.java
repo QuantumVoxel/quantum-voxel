@@ -2,23 +2,62 @@ package dev.ultreon.quantum.api.neocommand;
 
 import dev.ultreon.libs.functions.v0.misc.ThrowingFunction;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.ubo.DataIo;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.DataIo;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public record Selector<T>(
-        Type<T> type,
-        T value
-) {
+public final class Selector<T> {
+    private final Type<T> type;
+    private final T value;
+
+    public Selector(
+            Type<T> type,
+            T value
+    ) {
+        this.type = type;
+        this.value = value;
+    }
+
     @SuppressWarnings("unchecked")
     public <R> Selector<R> cast() {
         return new Selector<>((Type<R>) type, (R) value);
     }
+
+    public Type<T> type() {
+        return type;
+    }
+
+    public T value() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Selector) obj;
+        return Objects.equals(this.type, that.type) &&
+               Objects.equals(this.value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value);
+    }
+
+    @Override
+    public String toString() {
+        return "Selector[" +
+               "type=" + type + ", " +
+               "value=" + value + ']';
+    }
+
 
     public static class Type<T> {
         public static final Type<String> TAG = new Type<>('#', Type::readAlphaNumericWithUnderscore, Type::matchAlphaNumericWithUnderscore);
@@ -176,7 +215,8 @@ public record Selector<T>(
             try {
                 while ((read = reader.read()) != -1) {
                     if (fromChar((char) read) != null) return true;
-                    if (!Character.isLetterOrDigit((char) read) && (char) read != '_' && (char) read != '-') return false;
+                    if (!Character.isLetterOrDigit((char) read) && (char) read != '_' && (char) read != '-')
+                        return false;
                 }
             } catch (IOException e) {
                 return false;
@@ -193,7 +233,8 @@ public record Selector<T>(
             try {
                 while ((read = reader.read()) != -1) {
                     if (fromChar((char) read) != null) return true;
-                    if (!Character.isLetterOrDigit((char) read) && (char) read != '_' && (char) read != '-' && (char) read != ' ') return false;
+                    if (!Character.isLetterOrDigit((char) read) && (char) read != '_' && (char) read != '-' && (char) read != ' ')
+                        return false;
                 }
             } catch (IOException e) {
                 return false;
@@ -333,18 +374,28 @@ public record Selector<T>(
         }
 
         public static Type<?> fromChar(char c) {
-            return switch (c) {
-                case '#' -> TAG;
-                case '.' -> CLASS;
-                case '*' -> ID;
-                case '@' -> NAME;
-                case '?' -> DATA;
-                case ':' -> UUID;
-                case '=' -> DISPLAY_NAME;
-                case '+' -> CUSTOM_NAME;
-                case '$' -> VARIABLE;
-                default -> null;
-            };
+            switch (c) {
+                case '#':
+                    return TAG;
+                case '.':
+                    return CLASS;
+                case '*':
+                    return ID;
+                case '@':
+                    return NAME;
+                case '?':
+                    return DATA;
+                case ':':
+                    return UUID;
+                case '=':
+                    return DISPLAY_NAME;
+                case '+':
+                    return CUSTOM_NAME;
+                case '$':
+                    return VARIABLE;
+                default:
+                    return null;
+            }
         }
 
         public static Selector<?> parse(StringReader reader) throws IOException {

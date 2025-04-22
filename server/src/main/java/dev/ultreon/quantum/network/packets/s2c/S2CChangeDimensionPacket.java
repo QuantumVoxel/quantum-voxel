@@ -9,8 +9,15 @@ import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.DimensionInfo;
 
-public record S2CChangeDimensionPacket(
-        RegistryKey<DimensionInfo> dimension) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CChangeDimensionPacket implements Packet<InGameClientPacketHandler> {
+    private final RegistryKey<DimensionInfo> dimension;
+
+    public S2CChangeDimensionPacket(
+            RegistryKey<DimensionInfo> dimension) {
+        this.dimension = dimension;
+    }
 
     public static S2CChangeDimensionPacket read(PacketIO buffer) {
         NamespaceID dimId = buffer.readId();
@@ -28,4 +35,28 @@ public record S2CChangeDimensionPacket(
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onChangeDimension(ctx, this);
     }
+
+    public RegistryKey<DimensionInfo> dimension() {
+        return dimension;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CChangeDimensionPacket) obj;
+        return Objects.equals(this.dimension, that.dimension);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dimension);
+    }
+
+    @Override
+    public String toString() {
+        return "S2CChangeDimensionPacket[" +
+               "dimension=" + dimension + ']';
+    }
+
 }

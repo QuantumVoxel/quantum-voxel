@@ -3,9 +3,7 @@ package dev.ultreon.quantum.world.gen.chunk;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
 import dev.ultreon.quantum.registry.ServerRegistry;
-import dev.ultreon.quantum.tags.NamedTag;
 import dev.ultreon.quantum.util.MathHelper;
-import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
@@ -34,7 +32,6 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     private final List<BiomeData> biomeGenData = new ArrayList<>();
 
     private NoiseConfig noiseConfig;
-    private final NamedTag<Biome> biomeTag;
 
     private @UnknownNullability DomainWarping biomeDomain;
     private @UnknownNullability BiomeNoise humidNoise;
@@ -45,7 +42,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     public OverworldGenerator(ServerRegistry<Biome> biomeRegistry) {
         super(biomeRegistry);
 
-        this.biomeTag = biomeRegistry.getTag(new NamespaceID("overworld_biomes")).orElseThrow();
+        biomeRegistry.keys().forEach(this::addBiome);
     }
 
     @Override
@@ -60,7 +57,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         this.variationNoise = new BiomeNoise(world.getSeed() + 220);
         this.carver = new OverworldCarver(biomeDomain, noise, world.getSeed() + 300);
 
-        for (Biome biome : this.biomeTag.getValues()) {
+        for (Biome biome : this.biomes.toArray(Biome.class)) {
             this.biomeGenData.add(new BiomeData(
                     biome.getTemperatureStart(), biome.getTemperatureEnd(),
                     biome.getHumidityStart(), biome.getHumidityEnd(),
@@ -135,22 +132,22 @@ public class OverworldGenerator extends SimpleChunkGenerator {
 
         if (variation < -2.0 || variation > 2.0) {
             CommonConstants.LOGGER.warn("Invalid variation: {}", variation);
-            return this.biomeGenData.getFirst().biomeGen();
+            return this.biomeGenData.get(0).biomeGen();
         }
 
         if (temp < -2.0 || temp > 2.0) {
             CommonConstants.LOGGER.warn("Invalid temperature: {}", temp);
-            return this.biomeGenData.getFirst().biomeGen();
+            return this.biomeGenData.get(0).biomeGen();
         }
 
         if (humid < -2.0 || humid > 2.0) {
             CommonConstants.LOGGER.warn("Invalid humidity: {}", humid);
-            return this.biomeGenData.getFirst().biomeGen();
+            return this.biomeGenData.get(0).biomeGen();
         }
 
         if (height < -64.0 || height > 320.0) {
             CommonConstants.LOGGER.warn("Invalid height: {}", height);
-            return this.biomeGenData.getFirst().biomeGen();
+            return this.biomeGenData.get(0).biomeGen();
         }
 
         for (var data : this.biomeGenData) {
@@ -166,7 +163,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
 
         if (biomeGen == null) {
             CommonConstants.LOGGER.warn("No biome generator found for height: {}, humid: {}, temp: {}, variation: {}", height, humid, temp, variation);
-            return this.biomeGenData.getFirst().biomeGen();
+            return this.biomeGenData.get(0).biomeGen();
         }
 
         return biomeGen;

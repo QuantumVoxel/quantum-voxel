@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network.system;
 
-import com.google.errorprone.annotations.concurrent.LazyInit;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.*;
@@ -11,18 +11,18 @@ import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.SanityCheckException;
+import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
-    @LazyInit
     private MemoryConnection<TheirHandler, OurHandler> otherSide;
     private final Executor executor;
     private OurHandler handler;
@@ -31,71 +31,96 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private PacketData<TheirHandler> theirPacketData;
     private boolean readOnly;
 
-    private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
+    private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
     private boolean loggingIn = true;
 
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
         this.otherSide = otherSide;
         this.executor = executor;
 
-        Thread receiver = new Thread(() -> {
-            try {
-                while (true) {
-                    Packet<? extends OurHandler> packet = this.receiveQueue.poll();
-                    if (packet == null) continue;
-                    this.received(packet, null);
-
-                    Thread.sleep(5);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        Thread sender = new Thread(() -> {
-            while (true) {
-                PacketInstance<@NotNull Packet<? extends TheirHandler>> instance = this.sendQueue.poll();
-                if (instance == null) continue;
-
+        if (!GamePlatform.get().isWeb()) {
+            Thread receiver = new Thread(() -> {
                 try {
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    PacketIO io = new PacketIO(null, bos);
-                    Packet<? extends TheirHandler> packet = instance.packet();
-                    packet.toBytes(io);
-                    bos.close();
-
-                    theirPacketData.encode(packet, io);
-
-                    int id = theirPacketData.getId(packet);
-
-                    this.otherSide.receive(id, bos.toByteArray());
-
-                    if (instance.listener() != null) {
-                        instance.listener().onSuccess();
+                    while (true) {
+                        receive();
                     }
-                } catch (IOException e) {
-                    if (instance.listener() != null) {
-                        instance.listener().onFailure();
-                    }
-                    disconnect(e.getMessage());
-                    throw new RuntimeException(e);
-                } catch (Exception e) {
-                    if (instance.listener() != null) {
-                        instance.listener().onFailure();
-                    }
-                    disconnect(e.getClass().getName() + ":\n" + e.getMessage());
-                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-                tx.decrementAndGet();
+            });
+            Thread sender = new Thread(() -> {
+                while (true) {
+                    send();
+                }
+            });
+            receiver.setDaemon(true);
+            sender.setDaemon(true);
+
+            receiver.start();
+            sender.start();
+        }
+
+
+    }
+
+    private void send() {
+        PacketInstance<@NotNull Packet<? extends TheirHandler>> instance = this.sendQueue.poll();
+        if (instance == null) return;
+
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            PacketIO io = new PacketIO(null, bos);
+            Packet<? extends TheirHandler> packet = instance.packet();
+            packet.toBytes(io);
+            bos.close();
+
+            theirPacketData.encode(packet, io);
+
+            int id = theirPacketData.getId(packet);
+
+            this.otherSide.receive(id, bos.toByteArray());
+
+            if (instance.listener() != null) {
+                instance.listener().onSuccess();
             }
-        });
+        } catch (IOException e) {
+            if (instance.listener() != null) {
+                instance.listener().onFailure();
+            }
+            disconnect(e.getMessage());
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            if (instance.listener() != null) {
+                instance.listener().onFailure();
+            }
+            disconnect(e.getClass().getName() + ":\n" + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        tx.decrementAndGet();
+    }
 
-        receiver.setDaemon(true);
-        sender.setDaemon(true);
+    private void receive() throws InterruptedException {
+        Packet<? extends OurHandler> packet = this.receiveQueue.poll();
+        if (packet == null) return;
+        this.received(packet, null);
 
-        receiver.start();
-        sender.start();
+        if (!GamePlatform.get().isWeb()) Thread.sleep(5);
+    }
+
+    @Override
+    public void update() {
+        if (otherSide == null) return;
+        try {
+            send();
+            receive();
+        } catch (InterruptedException e) {
+            if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
+        }
+    }
+
+    public MemoryConnection<TheirHandler, OurHandler> getOtherSide() {
+        return otherSide;
     }
 
     @SuppressWarnings("unchecked")

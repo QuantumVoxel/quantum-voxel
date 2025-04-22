@@ -5,6 +5,8 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
 
 public class AndroidWindow extends GameWindow {
+    private String title;
+
     @Override
     public long getHandle() {
         return 0;
@@ -53,5 +55,15 @@ public class AndroidWindow extends GameWindow {
             AndroidPlatform androidPlatform = (AndroidPlatform) gamePlatform;
             androidPlatform.setRotationLock(true);
         }
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

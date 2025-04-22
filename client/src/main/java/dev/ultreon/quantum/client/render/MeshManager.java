@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.ConeShapeBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.CylinderShapeBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 
 import java.util.*;
@@ -161,7 +160,6 @@ public class MeshManager {
      *
      * @return true if the mesh was successfully unloaded and disposed of; false otherwise.
      */
-    @CanIgnoreReturnValue
     public boolean unloadMesh(Mesh mesh) {
         this.meshes.remove(mesh);
         if (mesh != null) {

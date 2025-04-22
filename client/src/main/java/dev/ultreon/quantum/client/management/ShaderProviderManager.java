@@ -2,19 +2,21 @@ package dev.ultreon.quantum.client.management;
 
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.google.common.base.Supplier;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ShaderProviderManager implements Manager<ShaderProvider> {
-    private final Map<NamespaceID, ShaderProvider> shaders = new LinkedHashMap<>();
+    private final Map<NamespaceID, ShaderProvider> shaders = new HashMap<>();
     private final LinkedHashMap<NamespaceID, Supplier<? extends ShaderProvider>> shaderProviderFactories = new LinkedHashMap<>();
 
     @Override
@@ -66,6 +68,10 @@ public class ShaderProviderManager implements Manager<ShaderProvider> {
 
         this.shaderProviderFactories.forEach((id, factory) -> {
             ShaderProvider provider = factory.get();
+            if (provider == null) {
+                CommonConstants.LOGGER.warn("Failed to load shader provider: {}", id);
+                return;
+            }
             this.shaders.put(id, provider);
             context.submit(provider::dispose);
         });

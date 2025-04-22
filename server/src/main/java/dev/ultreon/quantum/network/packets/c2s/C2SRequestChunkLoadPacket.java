@@ -7,7 +7,11 @@ import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
-public record C2SRequestChunkLoadPacket(ChunkVec pos) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SRequestChunkLoadPacket implements Packet<InGameServerPacketHandler> {
+    private final ChunkVec pos;
+
     public C2SRequestChunkLoadPacket(@NotNull ChunkVec pos) {
         this.pos = pos;
     }
@@ -27,4 +31,28 @@ public record C2SRequestChunkLoadPacket(ChunkVec pos) implements Packet<InGameSe
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onRequestChunkLoad(pos);
     }
+
+    public ChunkVec pos() {
+        return pos;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SRequestChunkLoadPacket) obj;
+        return Objects.equals(this.pos, that.pos);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos);
+    }
+
+    @Override
+    public String toString() {
+        return "C2SRequestChunkLoadPacket[" +
+               "pos=" + pos + ']';
+    }
+
 }

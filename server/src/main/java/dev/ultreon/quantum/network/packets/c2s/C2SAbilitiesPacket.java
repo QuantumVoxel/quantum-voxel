@@ -7,7 +7,14 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public record C2SAbilitiesPacket(boolean flying) implements AbilitiesPacket, Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SAbilitiesPacket implements AbilitiesPacket, Packet<InGameServerPacketHandler> {
+    private final boolean flying;
+
+    public C2SAbilitiesPacket(boolean flying) {
+        this.flying = flying;
+    }
 
     public C2SAbilitiesPacket(PlayerAbilities abilities) {
         this(abilities.flying);
@@ -46,4 +53,23 @@ public record C2SAbilitiesPacket(boolean flying) implements AbilitiesPacket, Pac
     public String toString() {
         return "C2SAbilitiesPacket{flying=" + this.flying + '}';
     }
+
+    @Override
+    public boolean flying() {
+        return flying;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SAbilitiesPacket) obj;
+        return this.flying == that.flying;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(flying);
+    }
+
 }

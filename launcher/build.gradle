@@ -41,7 +41,6 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'scala'
 apply plugin: 'groovy'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 
@@ -49,13 +48,13 @@ apply plugin: 'org.jetbrains.kotlin.jvm'
 // Setting up main properties //
 //****************************//
 
-group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
+group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
-group = project_group
+group = projectGroup
 def packageVersion = rootProject.version
 
 base {
-    archivesName = archives_base_name + "-launcher"
+    archivesName = archivesBaseName + "-launcher"
 }
 
 java {
@@ -108,89 +107,89 @@ evaluationDependsOn(":client")
 
 dependencies {
     addToJar api(project(":gameprovider"))
-    pack api(project(":client"))
-    pack api(project(":desktop"))
-    pack api(project(":mixinprovider"))
+    api(project(":client"))
+    api(project(":desktop"))
+    api(project(":mixinprovider"))
 
-    pack api("com.formdev:flatlaf:3.2.1")
+    api("com.formdev:flatlaf:3.2.1")
 
-    pack api("com.badlogicgames.gdx:gdx:$gdx_version")
-    pack api("com.badlogicgames.gdx:gdx-box2d:$gdx_version")
-    pack api("com.badlogicgames.ashley:ashley:$ashley_version")
-    pack api("com.badlogicgames.gdx:gdx-ai:$ai_version")
-    pack api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
-    pack api("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
-    pack api("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
+    api("com.badlogicgames.gdx:gdx:$gdxVersion")
+    api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+    api("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    api("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
+    api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
-    pack api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version")
-    pack api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
-    pack api("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
-    pack api("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
-    pack api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
-    pack api("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
-    pack api("org.tukaani:xz:$tukaani_xz_version")
-    pack api("org.bidib.org.oxbow:swingbits:$swingbits_version")
+    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
+    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+    api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
+    api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
+    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
+    api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
+    api("org.tukaani:xz:$tukaaniXzVersion")
+    api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
     // Apache Log4J
-    pack api("org.apache.logging.log4j:log4j:$log4j_version")
-    pack api("org.apache.logging.log4j:log4j-core:$log4j_version")
-    pack api("org.apache.logging.log4j:log4j-api:$log4j_version")
-    pack api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
+    api("org.apache.logging.log4j:log4j:$log4jVersion")
+    api("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    api("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 
     // JNA
-    pack api("net.java.dev.jna:jna:$jna_version")
-    pack api("net.java.dev.jna:jna-platform:$jna_version")
+    api("net.java.dev.jna:jna:$jnaVersion")
+    api("net.java.dev.jna:jna-platform:$jnaVersion")
 
     // SLF4J
-    pack api("org.slf4j:slf4j-api:$slf4j_version")
+    api("org.slf4j:slf4j-api:$slf4jVersion")
 
     // Google
-    pack api("com.google.code.gson:gson:2.10.1")
-    pack api("com.google.guava:guava:$guava_version")
+    api("com.google.code.gson:gson:2.10.1")
+    api("com.google.guava:guava:$guavaVersion")
 
     // Misc
-    pack api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
-    pack api('com.raylabz:opensimplex:1.0.3')
+    api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    api('com.raylabz:opensimplex:1.0.3')
 
-    pack api("space.earlygrey:shapedrawer:$shapedrawer_version")
+    api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
     // ImGui
-    pack api("io.github.spair:imgui-java-binding:$imgui_version")
-    pack api("io.github.spair:imgui-java-lwjgl3:$imgui_version")
-    pack api("io.github.spair:imgui-java-natives-linux:$imgui_version")
-    pack api("io.github.spair:imgui-java-natives-macos:$imgui_version")
-    pack api("io.github.spair:imgui-java-natives-windows:$imgui_version")
+    api("io.github.spair:imgui-java-binding:$imGuiVersion")
+    api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion")
+    api("io.github.spair:imgui-java-natives-linux:$imGuiVersion")
+    api("io.github.spair:imgui-java-natives-macos:$imGuiVersion")
+    api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")
 
-    pack api("it.unimi.dsi:fastutil-core:8.5.9")
-    pack api("com.google.code.findbugs:jsr305:$jsr_version")
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    api("it.unimi.dsi:fastutil-core:8.5.9")
+    api("com.google.code.findbugs:jsr305:$jsrVersion")
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
-    pack api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    pack api("org.apache.logging.log4j:log4j:$log4j_version")
-    pack api("org.apache.logging.log4j:log4j-core:$log4j_version")
-    pack api("org.apache.logging.log4j:log4j-api:$log4j_version")
+    api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
+    api("org.apache.logging.log4j:log4j:$log4jVersion")
+    api("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    api("org.apache.logging.log4j:log4j-api:$log4jVersion")
 
     // fabric-loader dependencies
-    pack api("org.ow2.asm:asm:${project.asm_version}")
-    pack api("org.ow2.asm:asm-analysis:${project.asm_version}")
-    pack api("org.ow2.asm:asm-commons:${project.asm_version}")
-    pack api("org.ow2.asm:asm-tree:${project.asm_version}")
-    pack api("org.ow2.asm:asm-util:${project.asm_version}")
+    api("org.ow2.asm:asm:${project.asmVersion}")
+    api("org.ow2.asm:asm-analysis:${project.asmVersion}")
+    api("org.ow2.asm:asm-commons:${project.asmVersion}")
+    api("org.ow2.asm:asm-tree:${project.asmVersion}")
+    api("org.ow2.asm:asm-util:${project.asmVersion}")
 
-    pack api("net.fabricmc:sponge-mixin:${project.mixin_version}") {
+    api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
 
     //noinspection GradleDynamicVersion
-    pack api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    pack api('net.fabricmc:tiny-remapper:0.8.7')
+    api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    api('net.fabricmc:tiny-remapper:0.8.7')
     //noinspection GradleDynamicVersion
-    pack api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    pack api('net.fabricmc:access-widener:2.1.0')
+    api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    api('net.fabricmc:access-widener:2.1.0')
 
-    pack api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version")
+    api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion")
     
     natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows")
     natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")
@@ -259,7 +258,7 @@ jar {
         //noinspection GroovyAssignabilityCheck
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.project_version,
+                project_version: project.projectVersion,
                 'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
                 'Multi-Release': 'true'
     }
@@ -335,7 +334,7 @@ tasks.register('packageBin', Zip) {
         copy {
             from "${outputs.files.singleFile.path}"
             into "$rootProject.projectDir/build/dist"
-            rename "package.zip", "${app_name}-${project_version}.zip"
+            rename "package.zip", "${appName}-${projectVersion}.zip"
         }
     }
 }
@@ -347,8 +346,8 @@ jpackage {
     input  = "$projectDir/build/jars"
     destination = "$projectDir/build/dist"
 
-    appName = app_name
-    appVersion = project_version
+    appName = appName
+    appVersion = projectVersion
     vendor = "Ultreon Studios"
     copyright = "Copyright (c) 2023 Ultreon Studios"
     runtimeImage = System.getProperty("java.home")
@@ -364,8 +363,8 @@ jpackage {
         javaOptions = javaOptions
         icon = "$rootProject.projectDir/icons/icon.icns"
         javaOptions += ["-XstartOnFirstThread"]
-        macPackageIdentifier = project_id
-        macPackageName = project_name
+        macPackageIdentifier = projectId
+        macPackageName = projectName
         appVersion = "1.0.0"
         type = ImageType.APP_IMAGE
     }

@@ -1,4 +1,3 @@
-#version 410
 
 #ifdef GL_ES
 #define LOWP lowp
@@ -11,36 +10,35 @@ precision mediump float;
 #define HIGH
 #endif
 
-in vec3 v_normal;
-in vec3 v_modelNormal;
+varying vec3 v_normal;
+varying vec3 v_modelNormal;
 
-in vec4 v_color;
+varying vec4 v_color;
 
-in MED vec2 v_diffuseUV;
-in MED vec2 v_emissiveUV;
-in MED vec2 v_normalUV;
-in MED vec2 v_specularUV;
+varying MED vec2 v_diffuseUV;
+varying MED vec2 v_emissiveUV;
+varying MED vec2 v_normalUV;
+varying MED vec2 v_specularUV;
 uniform vec4 u_color;
 uniform vec4 u_fogColor;
 
 uniform sampler2D u_framebuffer;
 
-in float v_fog;
-in vec3 v_position;
+varying float v_fog;
+varying vec3 v_position;
 
 uniform float u_globalSunlight;
 uniform vec2 u_atlasSize;
 uniform vec2 u_atlasOffset;
 uniform float lodThreshold;
 
-layout(location = 0) out vec4 diffuseOut;
 
 void main() {
-    vec4 framebuffer = texture(u_framebuffer, gl_SamplePosition);
+    vec4 framebuffer = texture2D(u_framebuffer, gl_SamplePosition);
     vec4 diffuse = u_color;
 
-    // Blend with diffuseOut if it's not opaque
+    // Blend with gl_FragColor if it's not opaque
     // GL_ONE, GL_ONE_MINUS_SRC_ALPHA
     vec4 alpha = framebuffer * (1.0 - diffuse.a) + (diffuse.a * (1.0 - framebuffer.a));
-    diffuseOut = vec4(diffuse.rgb * alpha.rgb, alpha.a);
+    gl_FragColor = vec4(diffuse.rgb * alpha.rgb, alpha.a);
 }

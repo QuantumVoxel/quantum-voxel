@@ -11,7 +11,7 @@ public interface IQuantAPI {
     static IQuantAPI get() {
         if (QuantAPIHolder.api != null) return QuantAPIHolder.api;
         ServiceLoader<IQuantAPI> serviceLoader = ServiceLoader.load(IQuantAPI.class);
-        List<ServiceLoader.Provider<IQuantAPI>> first = serviceLoader.stream().toList();
+        List<ServiceLoader.Provider<IQuantAPI>> first = serviceLoader.stream().collect(Collectors.toList());
 
         if (first.isEmpty())
             throw new IllegalStateException("No IQuantAPI implementation found!");
@@ -19,7 +19,7 @@ public interface IQuantAPI {
         if (first.size() > 1)
             throw new IllegalStateException("Multiple implementations of IQuantAPI found!");
 
-        QuantAPIHolder.api = first.getFirst().get();
+        QuantAPIHolder.api = first.get(0).get();
         return QuantAPIHolder.api;
     }
 

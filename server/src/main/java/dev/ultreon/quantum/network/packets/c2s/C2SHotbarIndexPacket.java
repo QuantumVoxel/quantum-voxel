@@ -5,7 +5,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public record C2SHotbarIndexPacket(int hotbarIdx) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SHotbarIndexPacket implements Packet<InGameServerPacketHandler> {
+    private final int hotbarIdx;
+
+    public C2SHotbarIndexPacket(int hotbarIdx) {
+        this.hotbarIdx = hotbarIdx;
+    }
 
     public static C2SHotbarIndexPacket read(PacketIO buffer) {
         var hotbarIdx = buffer.readByte();
@@ -29,4 +36,22 @@ public record C2SHotbarIndexPacket(int hotbarIdx) implements Packet<InGameServer
                "hotbarIdx=" + hotbarIdx +
                '}';
     }
+
+    public int hotbarIdx() {
+        return hotbarIdx;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SHotbarIndexPacket) obj;
+        return this.hotbarIdx == that.hotbarIdx;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(hotbarIdx);
+    }
+
 }

@@ -1,22 +1,21 @@
 package dev.ultreon.quantum.world.rng;
 
+import com.badlogic.gdx.math.RandomXS128;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Random;
 
 public class JavaRNG implements RNG {
     public static final @Nullable RNG GLOBAL = new JavaRNG();
-    private final Random random;
+    private final RandomXS128 random;
 
     public JavaRNG() {
-        this(new Random());
+        this(new RandomXS128());
     }
 
     public JavaRNG(long seed) {
-        this(new Random(seed));
+        this(new RandomXS128(seed));
     }
 
-    public JavaRNG(Random random) {
+    public JavaRNG(RandomXS128 random) {
         this.random = random;
     }
 
@@ -37,12 +36,12 @@ public class JavaRNG implements RNG {
 
     @Override
     public float randrange(float min, float max) {
-        return this.random.nextFloat(max - min) + min;
+        return this.random.nextFloat() * (max - min) + min;
     }
 
     @Override
     public double randrange(double min, double max) {
-        return this.random.nextDouble(max - min) + min;
+        return this.random.nextDouble() * (max - min) + min;
     }
 
     @Override

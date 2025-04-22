@@ -22,10 +22,11 @@ public class GizmoOutlineShader extends OutlineShader {
         public final static BaseShader.Setter color = new BaseShader.LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                switch (renderable.userData) {
-                    case Gizmo gizmo ->
-                            shader.set(inputID, gizmo.color);
-                    case null, default -> shader.set(inputID, 1f, 1f, 1f, 1f);
+                if (renderable.userData instanceof Gizmo) {
+                    Gizmo gizmo = (Gizmo) renderable.userData;
+                    shader.set(inputID, gizmo.color);
+                } else {
+                    shader.set(inputID, 1f, 1f, 1f, 1f);
                 }
             }
         };

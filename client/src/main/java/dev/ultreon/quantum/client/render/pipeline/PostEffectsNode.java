@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.render.pipeline;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.util.GameCamera;
-import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus.Experimental;
 
 /**
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.ApiStatus.Experimental;
  */
 @Experimental
 public class PostEffectsNode extends RenderPipeline.RenderNode {
-    @NewInstance
     @Override
     public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
         // Implement post-effects rendering logic here

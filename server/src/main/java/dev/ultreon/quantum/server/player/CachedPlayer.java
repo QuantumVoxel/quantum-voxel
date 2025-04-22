@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.server.player;
 
 import dev.ultreon.quantum.server.QuantumServer;
-import org.checkerframework.common.value.qual.PolyValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -28,7 +27,6 @@ public final class CachedPlayer implements CacheablePlayer {
     }
 
     @Override
-    @PolyValue
     public @Nullable UUID getUuid() {
         return this.uuid;
     }
@@ -46,7 +44,6 @@ public final class CachedPlayer implements CacheablePlayer {
     }
 
     @Override
-    @PolyValue
     public @Nullable String getName() {
         return this.name;
     }

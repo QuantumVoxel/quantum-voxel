@@ -20,12 +20,16 @@ public class SlabBlock extends Block {
     public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
         var type = blockState.<Type>get("type");
 
-        return switch (type) {
-            case TOP -> new BoundingBox(x, y, z, x + 1, y + 1, z + 1);
-            case BOTTOM -> new BoundingBox(x, y + 0.5, z, x + 1, y, z + 1);
-            case DOUBLE -> new BoundingBox(x, y, z, x + 1, y + 0.5, z + 1);
-            default -> throw new IllegalArgumentException();
-        };
+        switch (type) {
+            case TOP:
+                return new BoundingBox(x, y, z, x + 1, y + 1, z + 1);
+            case BOTTOM:
+                return new BoundingBox(x, y + 0.5, z, x + 1, y, z + 1);
+            case DOUBLE:
+                return new BoundingBox(x, y, z, x + 1, y + 0.5, z + 1);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     @Override

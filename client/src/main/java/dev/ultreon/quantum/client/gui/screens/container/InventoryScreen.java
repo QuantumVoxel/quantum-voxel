@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class InventoryScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
@@ -43,7 +44,8 @@ public class InventoryScreen extends ContainerScreen {
         super(menu, title, InventoryScreen.CONTAINER_SIZE);
         this.menu = menu;
 
-        if (menu.getEntity() instanceof Player player) {
+        if (menu.getEntity() instanceof Player) {
+            Player player = (Player) menu.getEntity();
             this.inventory = player.inventory;
             this.recipes = ClientRecipeManager.INSTANCE.getRecipes(RecipeType.CRAFTING, 30, player.inventory);
         } else this.recipes = new PagedList<>(30);
@@ -80,7 +82,8 @@ public class InventoryScreen extends ContainerScreen {
         if (inventory == null) return;
 
         for (Widget child : List.copyOf(this.children())) {
-            if (child instanceof RecipeSlot recipeSlot) {
+            if (child instanceof RecipeSlot) {
+                RecipeSlot recipeSlot = (RecipeSlot) child;
                 this.remove(recipeSlot);
             }
         }
@@ -160,7 +163,7 @@ public class InventoryScreen extends ContainerScreen {
             result.add(TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(RgbColor.RED)));
         }
 
-        return String.join("\n", result.stream().map(TextObject::getText).toList()) + description;
+        return String.join("\n", result.stream().map(TextObject::getText).collect(Collectors.toList())) + description;
     }
 
     private boolean showOnlyCraftable() {
@@ -170,7 +173,7 @@ public class InventoryScreen extends ContainerScreen {
     @Nullable
     private RecipeSlot getRecipeSlotAt(int mouseX, int mouseY) {
         Widget widgetAt = getWidgetAt(mouseX, mouseY);
-        return widgetAt instanceof RecipeSlot recipeSlot ? recipeSlot : null;
+        return widgetAt instanceof RecipeSlot ? (RecipeSlot) widgetAt : null;
     }
 
     @Override

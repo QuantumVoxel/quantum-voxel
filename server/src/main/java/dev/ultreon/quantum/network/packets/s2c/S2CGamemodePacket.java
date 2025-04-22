@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.GameMode;
 
-public record S2CGamemodePacket(GameMode gameMode) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CGamemodePacket implements Packet<InGameClientPacketHandler> {
+    private final GameMode gameMode;
+
+    public S2CGamemodePacket(GameMode gameMode) {
+        this.gameMode = gameMode;
+    }
 
     public static S2CGamemodePacket read(PacketIO buffer) {
         var gameMode = GameMode.byOrdinal(buffer.readByte());
@@ -30,4 +37,22 @@ public record S2CGamemodePacket(GameMode gameMode) implements Packet<InGameClien
                "gameMode=" + gameMode +
                '}';
     }
+
+    public GameMode gameMode() {
+        return gameMode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CGamemodePacket) obj;
+        return Objects.equals(this.gameMode, that.gameMode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameMode);
+    }
+
 }

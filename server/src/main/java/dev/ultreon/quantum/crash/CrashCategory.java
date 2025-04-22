@@ -27,7 +27,8 @@ public class CrashCategory {
     }
 
     public CrashCategory(String details, Throwable throwable) {
-        if (throwable instanceof ApplicationCrash crash) {
+        if (throwable instanceof ApplicationCrash) {
+            ApplicationCrash crash = (ApplicationCrash) throwable;
             CrashLog crashLog = crash.getCrashLog();
             this.details = this.detectThrowable(crashLog.details, crashLog.throwable);
             this.entries.addAll(crashLog.entries);
@@ -41,13 +42,14 @@ public class CrashCategory {
         var current = throwable;
         if (current != null) {
             do {
-                if (current instanceof ApplicationCrash crash) {
+                if (current instanceof ApplicationCrash) {
+                    ApplicationCrash crash = (ApplicationCrash) current;
                     CrashLog crashLog = crash.getCrashLog();
                     this.entries.addAll(crashLog.entries);
                     return this.detectThrowable(crashLog.details, crashLog.throwable);
                 }
 
-                if (!(current instanceof InvocationTargetException) && !(current instanceof CompletionException)) {
+                if (!(current instanceof InvocationTargetException)) {
                     break;
                 }
 
@@ -55,7 +57,8 @@ public class CrashCategory {
             } while (current.getCause() != null);
         }
 
-        if (current instanceof ApplicationCrash crash) {
+        if (current instanceof ApplicationCrash) {
+            ApplicationCrash crash = (ApplicationCrash) current;
             return this.detectThrowable(crash.getCrashLog().details, crash.getCrashLog().throwable);
         } else {
             this.throwable = current;

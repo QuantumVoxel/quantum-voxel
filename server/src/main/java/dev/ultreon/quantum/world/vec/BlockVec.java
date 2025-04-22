@@ -5,8 +5,7 @@ import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.Direction;
-import dev.ultreon.ubo.types.MapType;
-import org.checkerframework.common.reflection.qual.NewInstance;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
@@ -138,7 +137,6 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
      * @param z the offset in the z-axis.
      * @return The new block position.
      */
-    @NewInstance
     public BlockVec offset(int x, int y, int z) {
         return new BlockVec(this.x + x, this.y + y, this.z + z, this.space);
     }
@@ -196,8 +194,8 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public ChunkVec chunk(RegionVec region, ChunkVecSpace space) {
-        return switch (space) {
-            case REGION -> {
+        switch (space) {
+            case REGION:
                 int rx = region.getIntX() * REGION_SIZE;
                 int ry = region.getIntY() * REGION_SIZE;
                 int rz = region.getIntZ() * REGION_SIZE;
@@ -206,19 +204,20 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
                 if (region.getIntY() < 0) ry -= REGION_SIZE;
                 if (region.getIntZ() < 0) rz -= REGION_SIZE;
 
-                yield new ChunkVec(rx + this.x / CS, ry + this.y / CS, rz + this.z / CS, ChunkVecSpace.REGION);
-            }
-
-            case WORLD -> new ChunkVec(this.x, this.y, this.z, ChunkVecSpace.WORLD);
-        };
+                return new ChunkVec(rx + this.x / CS, ry + this.y / CS, rz + this.z / CS, ChunkVecSpace.REGION);
+            case WORLD:
+                return new ChunkVec(this.x, this.y, this.z, ChunkVecSpace.WORLD);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public BlockVec toSpace(BlockVecSpace toSpace) {
         if (toSpace.ordinal() == this.space.ordinal()) return this;
         if (toSpace.ordinal() < this.space.ordinal()) return this;
 
-        return switch (toSpace) {
-            case REGION -> {
+        switch (toSpace) {
+            case REGION:
                 int rx = this.x % (CS * REGION_SIZE);
                 int ry = this.y % (CS * REGION_SIZE);
                 int rz = this.z % (CS * REGION_SIZE);
@@ -227,9 +226,8 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
                 if (this.y < 0) ry += CS * REGION_SIZE;
                 if (this.x < 0) rz += CS * REGION_SIZE;
 
-                yield new BlockVec(rx, ry, rz, BlockVecSpace.REGION);
-            }
-            case CHUNK -> {
+                return new BlockVec(rx, ry, rz, BlockVecSpace.REGION);
+            case CHUNK:
                 int cx = this.x % CS;
                 int cy = this.y % CS;
                 int cz = this.z % CS;
@@ -238,9 +236,8 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
                 if (this.y < 0) cy += CS;
                 if (this.z < 0) cz += CS;
 
-                yield new BlockVec(cx, cy, cz, BlockVecSpace.CHUNK);
-            }
-            case SECTION -> {
+                return new BlockVec(cx, cy, cz, BlockVecSpace.CHUNK);
+            case SECTION:
                 int sx = this.x % CS;
                 int sy = this.y % CS;
                 int sz = this.z % CS;
@@ -249,10 +246,10 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
                 if (this.y < 0) sy += CS;
                 if (this.z < 0) sz += CS;
 
-                yield new BlockVec(sx, sy, sz, BlockVecSpace.SECTION);
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + toSpace);
-        };
+                return new BlockVec(sx, sy, sz, BlockVecSpace.SECTION);
+            default:
+                throw new IllegalStateException("Unexpected value: " + toSpace);
+        }
     }
 
     public BlockVec chunkLocal() {
@@ -292,12 +289,18 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec local(BlockVecSpace space) {
-        return switch (space) {
-            case WORLD -> this.cpy();
-            case REGION -> this.regionLocal();
-            case CHUNK -> this.chunkLocal();
-            case SECTION -> this.sectionLocal();
-        };
+        switch (space) {
+            case WORLD:
+                return this.cpy();
+            case REGION:
+                return this.regionLocal();
+            case CHUNK:
+                return this.chunkLocal();
+            case SECTION:
+                return this.sectionLocal();
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public BlockVec offsetRegion(RegionVec region) {
@@ -327,11 +330,14 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         if (this.y < 0 && this.y % CS != 0) cy--;
         if (this.z < 0 && this.z % CS != 0) cz--;
 
-        return switch (this.space) {
-            case WORLD -> new ChunkVec(cx, cy, cz, ChunkVecSpace.WORLD);
-            case REGION -> new ChunkVec(cx, cy, cz, ChunkVecSpace.REGION);
-            default -> throw new IllegalStateException("Can't get chunk in this space: " + this.space);
-        };
+        switch (this.space) {
+            case WORLD:
+                return new ChunkVec(cx, cy, cz, ChunkVecSpace.WORLD);
+            case REGION:
+                return new ChunkVec(cx, cy, cz, ChunkVecSpace.REGION);
+            default:
+                throw new IllegalStateException("Can't get chunk in this space: " + this.space);
+        }
     }
 
     @Override
@@ -572,13 +578,21 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec relative(Direction dir) {
-        return switch (dir) {
-            case NORTH -> new BlockVec(this.x, this.y, this.z - 1, this.space);
-            case SOUTH -> new BlockVec(this.x, this.y, this.z + 1, this.space);
-            case EAST -> new BlockVec(this.x + 1, this.y, this.z, this.space);
-            case WEST -> new BlockVec(this.x - 1, this.y, this.z, this.space);
-            case UP -> new BlockVec(this.x, this.y + 1, this.z, this.space);
-            case DOWN -> new BlockVec(this.x, this.y - 1, this.z, this.space);
-        };
+        switch (dir) {
+            case NORTH:
+                return new BlockVec(this.x, this.y, this.z - 1, this.space);
+            case SOUTH:
+                return new BlockVec(this.x, this.y, this.z + 1, this.space);
+            case EAST:
+                return new BlockVec(this.x + 1, this.y, this.z, this.space);
+            case WEST:
+                return new BlockVec(this.x - 1, this.y, this.z, this.space);
+            case UP:
+                return new BlockVec(this.x, this.y + 1, this.z, this.space);
+            case DOWN:
+                return new BlockVec(this.x, this.y - 1, this.z, this.space);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }

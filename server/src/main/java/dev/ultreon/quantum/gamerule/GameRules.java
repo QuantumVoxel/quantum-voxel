@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.gamerule;
 
-import dev.ultreon.quantum.api.commands.CommandExecuteException;
+import dev.ultreon.quantum.api.neocommand.CommandExecuteException;
 import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +70,7 @@ public class GameRules {
         }
 
         @Override
-        public void setStringValue(String value) throws CommandExecuteException {
+        public void setStringValue(String value) {
             try {
                 this.value = Double.parseDouble(value);
             } catch (NumberFormatException e) {

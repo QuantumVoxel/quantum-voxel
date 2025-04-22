@@ -6,9 +6,12 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.UUID;
 
-public record S2CRemovePlayerPacket(UUID uuid) implements Packet<InGameClientPacketHandler> {
+public final class S2CRemovePlayerPacket implements Packet<InGameClientPacketHandler> {
+    private final UUID uuid;
+
     public S2CRemovePlayerPacket(@NotNull UUID uuid) {
         this.uuid = uuid;
     }
@@ -35,4 +38,22 @@ public record S2CRemovePlayerPacket(UUID uuid) implements Packet<InGameClientPac
                "uuid=" + uuid +
                '}';
     }
+
+    public UUID uuid() {
+        return uuid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CRemovePlayerPacket) obj;
+        return Objects.equals(this.uuid, that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
+    }
+
 }

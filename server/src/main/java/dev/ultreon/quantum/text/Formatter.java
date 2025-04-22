@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharList;
 import it.unimi.dsi.fastutil.chars.CharPredicate;
 import org.apache.commons.lang3.CharUtils;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -37,7 +36,7 @@ public class Formatter {
     private final CharPredicate emotePredicate = it -> CharUtils.isAsciiAlphanumeric(it) || "_-".contains(Character.toString(it));
 
     // Redirect
-    private @MonotonicNonNull ParseResult redirectValue = null;
+    private ParseResult redirectValue = null;
     private boolean redirect = false;
 
     // Reader
@@ -58,7 +57,7 @@ public class Formatter {
     private boolean strikethrough = false;
 
     // Flags
-    private final @MonotonicNonNull ParseResult parsed = null;
+    private final ParseResult parsed = null;
 
     // Pings
     private final List<Player> pinged = new ArrayList<>();

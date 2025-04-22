@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.entity.player;
 
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -7,7 +8,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record Temperature(double temperature) {
+public final class Temperature {
+    private final double temperature;
+
+    public Temperature(double temperature) {
+        this.temperature = temperature;
+    }
+
     /**
      * Returns true if the temperature is cold.
      * Cold means below 10 °C.
@@ -182,9 +189,9 @@ public record Temperature(double temperature) {
 
     private static double getNightTempSub(ServerWorld world, int x, int z, double temperature) {
         var funcA = temperature + 1;
-        var funcB = Math.clamp(funcA, 0, 3);
+        var funcB = Mth.clamp(funcA, 0, 3);
         var funcC = 2.5 - funcB;
-        var clamp = Math.clamp(funcC, 0, 3);
+        var clamp = Mth.clamp(funcC, 0, 3);
         double baseTemperature = getBiomeTemp(world, x, z);
         return clamp / 1.5 * ((Math.pow(Math.max(baseTemperature - 1.0, 0.1), 1.25)) / 2.0);
     }
@@ -192,4 +199,9 @@ public record Temperature(double temperature) {
     private static double getBiomeTemp(ServerWorld world, int x, int z) {
         return world.getGenerator().getTemperature(x, z);
     }
+
+    public double temperature() {
+        return temperature;
+    }
+
 }

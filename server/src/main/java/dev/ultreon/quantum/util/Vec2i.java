@@ -4,12 +4,10 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class Vec2i implements Externalizable, Cloneable {
+public class Vec2i implements Cloneable {
     public int x, y;
 
     public Vec2i(int x, int y) {
@@ -284,17 +282,5 @@ public class Vec2i implements Externalizable, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(this.x);
-        out.writeInt(this.y);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        this.x = in.readInt();
-        this.y = in.readInt();
     }
 }

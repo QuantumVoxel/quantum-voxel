@@ -15,7 +15,6 @@ public class Selections {
     private @Nullable Entity entity = null;
     private @Nullable ServerWorld world = null;
     private @Nullable ServerChunk chunk = null;
-    protected PositionCommand.PositionSelection positions = new PositionCommand.PositionSelection();
     private static final Map<CommandSender, Selections> selections = new HashMap<>();
 
     public @Nullable Player getPlayer() {

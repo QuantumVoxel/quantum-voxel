@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.capability;
 
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental

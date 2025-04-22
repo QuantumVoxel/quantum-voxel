@@ -7,10 +7,26 @@ import dev.ultreon.quantum.recipe.RecipeRegistry;
 import dev.ultreon.quantum.recipe.RecipeType;
 
 public class LoadingEvent {
-    public static final Event<RegisterCommands> REGISTER_COMMANDS = Event.create();
-    public static final Event<RecipeState> LOAD_RECIPES = Event.create();
-    public static final Event<RecipeState> UNLOAD_RECIPES = Event.create();
-    public static final Event<ModifyRecipes> MODIFY_RECIPES = Event.create();
+    public static final Event<RegisterCommands> REGISTER_COMMANDS = Event.create(listeners -> () -> {
+        for (RegisterCommands listener : listeners) {
+            listener.onRegisterCommands();
+        }
+    });
+    public static final Event<RecipeState> LOAD_RECIPES = Event.create(listeners -> recipes -> {
+        for (RecipeState listener : listeners) {
+            listener.onRecipeState(recipes);
+        }
+    });
+    public static final Event<RecipeState> UNLOAD_RECIPES = Event.create(listeners -> recipes -> {
+        for (RecipeState listener : listeners) {
+            listener.onRecipeState(recipes);
+        }
+    });
+    public static final Event<ModifyRecipes> MODIFY_RECIPES = Event.create(listeners -> (recipes, type, recipeRecipeRegistry) -> {
+        for (ModifyRecipes listener : listeners) {
+            listener.onModifyRecipes(recipes, type, recipeRecipeRegistry);
+        }
+    });
 
     @FunctionalInterface
     public interface RegisterCommands {

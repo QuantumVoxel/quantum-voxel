@@ -4,10 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
-
-import com.badlogic.gdx.Gdx;
 
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
@@ -117,7 +114,7 @@ public class CrashScreen extends Screen {
      * @param deltaTime the time that has passed since the last frame
      */
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
         this.list.width(QuantumClient.get().getScaledWidth());
@@ -141,7 +138,7 @@ public class CrashScreen extends Screen {
 
         // Extract the error message from the throwable
         String message = throwable.getMessage();
-        String errorMessage = message == null ? "<No message>" : message.trim().stripIndent().replace("\n", " ").replace("\t", "").replace("java.lang.", "");
+        String errorMessage = message == null ? "<No message>" : message.trim().replace("\n", " ").replace("\t", "").replace("java.lang.", "");
 
         // Get the first usable stack id from the throwable stack trace
         String usableStackTrace = Arrays.stream(throwable.getStackTrace())

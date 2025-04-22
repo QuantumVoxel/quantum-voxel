@@ -7,8 +7,15 @@ import dev.ultreon.quantum.network.packets.Packet;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public record S2CTabCompletePacket(@Nullable List<String> options) implements Packet<InGameClientPacketHandler> {
+public final class S2CTabCompletePacket implements Packet<InGameClientPacketHandler> {
+    private final @Nullable List<String> options;
+
+    public S2CTabCompletePacket(@Nullable List<String> options) {
+        this.options = options;
+    }
+
     public static S2CTabCompletePacket read(PacketIO buffer) {
         var options = buffer.readList(buf -> buf.readString(64));
 
@@ -35,4 +42,22 @@ public record S2CTabCompletePacket(@Nullable List<String> options) implements Pa
                "options=" + options +
                '}';
     }
+
+    public @Nullable List<String> options() {
+        return options;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CTabCompletePacket) obj;
+        return Objects.equals(this.options, that.options);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(options);
+    }
+
 }

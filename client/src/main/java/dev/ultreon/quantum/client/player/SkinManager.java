@@ -4,11 +4,10 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.Promise;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientReloadEvent;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is used to manage the skin of the player.
@@ -17,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  * @since 0.1.0
  */
 public class SkinManager implements Disposable {
-    private CompletableFuture<Texture> future = loadAsync();
+    private Promise<Texture> future = loadAsync();
     private Texture localSkin;
 
     /**
@@ -26,8 +25,8 @@ public class SkinManager implements Disposable {
      * @return The future of the skin.
      */
     @NotNull
-    private CompletableFuture<Texture> loadAsync() {
-        return CompletableFuture.supplyAsync(() -> {
+    private Promise<Texture> loadAsync() {
+        return Promise.supplyAsync(() -> {
             FileHandle data = QuantumClient.data("skin.png");
             if (!data.exists()) return null;
             Pixmap pixmap = new Pixmap(data);
@@ -83,7 +82,7 @@ public class SkinManager implements Disposable {
      */
     @Override
     public void dispose() {
-        if (!future.isDone()) future.cancel(true);
+        if (!future.isDone()) future.cancel();
         if (localSkin != null) localSkin.dispose();
     }
 }

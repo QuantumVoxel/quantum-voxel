@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.gui.debug;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Mesh;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -111,7 +113,8 @@ public class GenericDebugPage implements DebugPage {
         LocalPlayer localPlayer = client.player;
         if (world != null && localPlayer != null) {
             ClientChunkAccess chunkAccess = world.getChunk(localPlayer.getChunkVec());
-            if (chunkAccess instanceof ClientChunk chunk) {
+            if (chunkAccess instanceof ClientChunk) {
+                ClientChunk chunk = (ClientChunk) chunkAccess;
                 context.right();
                 context.right("Chunk");
                 context.right("Pos", chunk.getVec());
@@ -126,7 +129,8 @@ public class GenericDebugPage implements DebugPage {
 
         // Cursor
         @NotNull Hit cursor = client.cursor;
-        if (cursor instanceof BlockHit blockHit && cursor.isCollide()) {
+        if (cursor instanceof BlockHit && cursor.isCollide()) {
+            BlockHit blockHit = (BlockHit) cursor;
             BlockState block = blockHit.getBlockMeta();
             if (block != null && !block.isAir()) {
                 context.right();
@@ -135,7 +139,8 @@ public class GenericDebugPage implements DebugPage {
                 context.right("Pos", cursor.getBlockVec());
                 context.right("Next", blockHit.getNext());
             }
-        } else if (cursor instanceof EntityHit entityHit) {
+        } else if (cursor instanceof EntityHit) {
+            EntityHit entityHit = (EntityHit) cursor;
             Entity entity = entityHit.getEntity();
             if (entity != null) {
                 context.right();
@@ -144,6 +149,39 @@ public class GenericDebugPage implements DebugPage {
                 context.right("Entity Key", entity.getType().getId());
                 context.right("Pos", cursor.getBlockVec());
             }
+        }
+
+        context.right();
+        context.right("GUI");
+        context.right("Width", Gdx.graphics.getWidth());
+        context.right("Height", Gdx.graphics.getHeight());
+        context.right("Scale", Gdx.graphics.getDensity());
+        context.right("Framerate", Gdx.graphics.getFramesPerSecond());
+        context.right("Delta", Gdx.graphics.getDeltaTime());
+        context.right("Screen Name", client.screen == null ? "N/A" : client.screen.getClient().getName());
+
+        context.right();
+        context.right("Memory");
+        context.right("Native", Gdx.app.getNativeHeap());
+        context.right("Java", Gdx.app.getJavaHeap());
+
+        if (!GamePlatform.get().isWeb()) {
+            context.right();
+            context.right("Java Version", System.getProperty("java.version"));
+            context.right("Java VM", System.getProperty("java.vm.name"));
+            context.right("Java VM Version", System.getProperty("java.vm.version"));
+            context.right("Java VM Vendor", System.getProperty("java.vm.vendor"));
+            context.right("Java VM Spec", System.getProperty("java.vm.specification.version"));
+
+            context.right();
+            context.right("OS");
+            context.right("Name", System.getProperty("os.name"));
+            context.right("Version", System.getProperty("os.version"));
+        } else {
+            context.right();
+            context.right("Web Browser");
+            context.right("User Agent", GamePlatform.get().getUserAgent());
+            context.right("Language", GamePlatform.get().getLanguage());
         }
     }
 }

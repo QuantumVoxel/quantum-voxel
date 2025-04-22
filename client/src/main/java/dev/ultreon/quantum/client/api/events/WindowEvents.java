@@ -5,12 +5,41 @@ import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 
 public class WindowEvents {
-    public static final Event<WindowCreated> WINDOW_CREATED = Event.create();
-    public static final Event<WindowResized> WINDOW_RESIZED = Event.create();
-    public static final Event<WindowMoved> WINDOW_MOVED = Event.create();
-    public static final Event<WindowFocusChanged> WINDOW_FOCUS_CHANGED = Event.create();
-    public static final Event<WindowCloseRequested> WINDOW_CLOSE_REQUESTED = Event.withResult();
-    public static final Event<WindowFilesDropped> WINDOW_FILES_DROPPED = Event.create();
+    public static final Event<WindowCreated> WINDOW_CREATED = Event.create(listeners -> window -> {
+        for (WindowCreated listener : listeners) {
+            listener.onWindowCreated(window);
+        }
+    });
+    public static final Event<WindowResized> WINDOW_RESIZED = Event.create(listeners -> (window, width, height) -> {
+        for (WindowResized listener : listeners) {
+            listener.onWindowResized(window, width, height);
+        }
+    });
+    public static final Event<WindowMoved> WINDOW_MOVED = Event.create(listeners -> (window, x, y) -> {
+        for (WindowMoved listener : listeners) {
+            listener.onWindowMoved(window, x, y);
+        }
+    });
+    public static final Event<WindowFocusChanged> WINDOW_FOCUS_CHANGED = Event.create(listeners -> (window, focused) -> {
+        for (WindowFocusChanged listener : listeners) {
+            listener.onWindowFocusChanged(window, focused);
+        }
+    });
+    public static final Event<WindowCloseRequested> WINDOW_CLOSE_REQUESTED = Event.withResult(listeners -> window -> {
+        EventResult result = EventResult.pass();
+        for (WindowCloseRequested listener : listeners) {
+            EventResult eventResult = listener.onWindowCloseRequested(window);
+            if (eventResult.isCanceled()) return eventResult;
+            if (eventResult.isInterrupted()) result = eventResult;
+        }
+
+        return result;
+    });
+    public static final Event<WindowFilesDropped> WINDOW_FILES_DROPPED = Event.create(listeners -> (window, files) -> {
+        for (WindowFilesDropped listener : listeners) {
+            listener.onWindowFilesDropped(window, files);
+        }
+    });
 
     @FunctionalInterface
     public interface WindowCreated {

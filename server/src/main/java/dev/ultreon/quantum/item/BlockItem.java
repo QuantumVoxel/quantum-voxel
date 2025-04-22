@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.item;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockAttemptPlaceEvent;
 import dev.ultreon.quantum.api.events.block.BlockPlaceEvent;
@@ -23,9 +22,7 @@ public class BlockItem extends Item {
     private final @NotNull Supplier<Block> block;
 
     public BlockItem(Properties properties, @NotNull Supplier<Block> block) {
-        super(properties);
-        Preconditions.checkNotNull(block, "block");
-        this.block = Suppliers.memoize(block);
+        super(properties);        this.block = Suppliers.memoize(block);
     }
 
     public Block getBlock() {

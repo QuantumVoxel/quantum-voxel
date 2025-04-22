@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -37,7 +36,6 @@ public class ItemSlot {
      * @param item the item to put in the slot.
      * @return the previous item in the slot.
      */
-    @CanIgnoreReturnValue
     public ItemStack setItem(ItemStack item, boolean emitEvent) {
         ItemStack old = this.item;
         this.item = item;

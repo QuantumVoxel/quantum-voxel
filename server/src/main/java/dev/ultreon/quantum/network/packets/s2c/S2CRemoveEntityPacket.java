@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public record S2CRemoveEntityPacket(int id) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CRemoveEntityPacket implements Packet<InGameClientPacketHandler> {
+    private final int id;
+
+    public S2CRemoveEntityPacket(int id) {
+        this.id = id;
+    }
 
     public S2CRemoveEntityPacket(Entity entity) {
         this(entity.getId());
@@ -32,4 +39,22 @@ public record S2CRemoveEntityPacket(int id) implements Packet<InGameClientPacket
     public String toString() {
         return "S2CRemoveEntityPacket(id=" + this.id + ")";
     }
+
+    public int id() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CRemoveEntityPacket) obj;
+        return this.id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 }

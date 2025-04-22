@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.resources;
 
-import com.google.gson.GsonBuilder;
-import de.marhali.json5.Json5Element;
-import dev.ultreon.quantum.CommonConstants;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -42,13 +42,13 @@ public interface Resource {
         byte[] bytes = this.loadOrGet();
         if (bytes == null) throw new RuntimeException("Resource failed to load.");
 
-        return new GsonBuilder().create().fromJson(new String(bytes), jsonObjectClass);
+        return new Json().fromJson(jsonObjectClass, new String(bytes));
     }
 
-    default Json5Element loadJson5() {
+    default JsonValue loadJson() {
         byte[] bytes = this.loadOrGet();
         if (bytes == null) throw new RuntimeException("Resource failed to load.");
 
-        return CommonConstants.JSON5.parse(new String(bytes));
+        return new JsonReader().parse(new String(bytes));
     }
 }

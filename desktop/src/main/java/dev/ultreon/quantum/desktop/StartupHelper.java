@@ -31,6 +31,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Adds some utilities to ensure that the JVM was started with the
@@ -217,7 +218,7 @@ public class StartupHelper {
             jvmArgs.add("-Xdock:name=Quantum Voxel");
             jvmArgs.add("-Xdock:icon=Resources/Quantum Voxel.icns");
         }
-        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(v -> !v.startsWith("-Xmx") && !v.startsWith("-Xms")).toList());
+        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(v -> !v.startsWith("-Xmx") && !v.startsWith("-Xms")).collect(Collectors.toList()));
 
         Gson gson = new Gson();
         Path configPath = launcherPath.resolve("launch_cfg.json");

@@ -7,7 +7,6 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.DebugFlags;
-import dev.ultreon.quantum.debug.inspect.InspectionNode;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.util.Vec3d;
@@ -25,7 +24,6 @@ public class GameCamera extends PerspectiveCamera {
     public float fov = 67;
     private float fovModifier = 1;
     private float fovModifierGoal = 1;
-    private InspectionNode<GameCamera> node;
     private Vector3 hitPosition;
     private Vec3d camPos;
     private BlockHit hitResult;
@@ -38,23 +36,6 @@ public class GameCamera extends PerspectiveCamera {
 
     public GameCamera(float fieldOfViewY, float viewportWidth, float viewportHeight) {
         super(fieldOfViewY, viewportWidth, viewportHeight);
-
-        if (!DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            return;
-        }
-        this.node = this.client.inspection.createNode("camera", () -> this);
-        this.node.create("position", () -> this.position);
-        this.node.create("direction", () -> this.direction);
-        this.node.create("up", () -> this.up);
-        this.node.create("near", () -> this.near);
-        this.node.create("far", () -> this.far);
-        this.node.create("viewportWidth", () -> this.viewportWidth);
-        this.node.create("viewportHeight", () -> this.viewportHeight);
-        this.node.create("fieldOfView", () -> this.fov);
-        this.node.create("hitPosition", () -> this.hitResult.getVec());
-        this.node.create("relHitPosition", () -> this.hitPosition);
-        this.node.create("eyePosition", () -> this.camPos);
-        this.node.create("playerPosition", () -> this.player.getPosition(client.partialTick));
     }
 
     public float getFovModifier() {
@@ -98,11 +79,6 @@ public class GameCamera extends PerspectiveCamera {
     }
 
     private void updateFirstPerson(Vec3d lookVec) {
-        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            this.node.remove("hitPosition");
-            this.node.remove("eyePosition");
-            this.node.remove("playerPosition");
-        }
         // Set the camera's position to zero, and set the camera's direction to the player's look vector.
         this.position.set(0, 0, 0);
         this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);

@@ -37,34 +37,38 @@ public class PlayerArgumentType implements ArgumentType<ServerPlayer> {
         } else if (type == Selector.Type.UUID) {
             return ctx.getServer().getPlayer((UUID) selector.value());
         } else if (includeSelf && type == Selector.Type.TAG) {
-            return switch ((String) selector.value()) {
-                case "me" -> {
-                    if (ctx.getSender() instanceof ServerPlayer player) yield player;
-                    else throw new CommandParseException("You are not a player", ctx.tell());
-                }
-                case "selection" -> {
+            switch ((String) selector.value()) {
+                case "me":
+                    if (ctx.getSender() instanceof ServerPlayer) {
+                        ServerPlayer player = (ServerPlayer) ctx.getSender();
+                        return player;
+                    } else throw new CommandParseException("You are not a player", ctx.tell());
+                case "selection":
                     Selections selections = Selections.get(ctx.getSender());
-                    yield (ServerPlayer) selections.getPlayer();
-                }
-                case "target" -> {
-                    if (ctx.getSender() instanceof ServerPlayer player) {
+                    return (ServerPlayer) selections.getPlayer();
+                case "target":
+                    if (ctx.getSender() instanceof ServerPlayer) {
+                        ServerPlayer player = (ServerPlayer) ctx.getSender();
                         Hit hit = player.rayCast();
                         if (hit instanceof EntityHit) {
                             Entity entity = ((EntityHit) hit).getEntity();
-                            if (entity instanceof ServerPlayer player1) yield player1;
-                            else throw new CommandParseException("The target is not a player", ctx.tell());
+                            if (entity instanceof ServerPlayer) {
+                                ServerPlayer player1 = (ServerPlayer) entity;
+                                return player1;
+                            } else throw new CommandParseException("The target is not a player", ctx.tell());
                         } else {
                             throw new CommandParseException("You are not looking at a player", ctx.tell());
                         }
                     } else {
                         throw new CommandParseException("You are not a player", ctx.tell());
                     }
-                }
-                default -> throw new CommandParseException("Unknown tag: " + selector.value(), ctx.tell());
-            };
+                default:
+                    throw new CommandParseException("Unknown tag: " + selector.value(), ctx.tell());
+            }
         } else if (type == Selector.Type.VARIABLE) {
             String var = (String) selector.value();
-            if (ctx.getSender() instanceof ServerPlayer player) {
+            if (ctx.getSender() instanceof ServerPlayer) {
+                ServerPlayer player = (ServerPlayer) ctx.getSender();
                 Object variable = player.getVariable(var);
                 if (variable == null) {
                     throw new CommandParseException("Variable not found: " + var, ctx.tell());
@@ -88,13 +92,15 @@ public class PlayerArgumentType implements ArgumentType<ServerPlayer> {
         } else if (ctx.getCurrent().charAt(0) == Selector.Type.TAG.character) {
             ctx.suggest("me", "selection", "target");
         } else if (ctx.getCurrent().charAt(0) == Selector.Type.VARIABLE.character) {
-            if (ctx.getSender() instanceof ServerPlayer player) {
+            if (ctx.getSender() instanceof ServerPlayer) {
+                ServerPlayer player = (ServerPlayer) ctx.getSender();
                 ctx.suggest(player.getVariableNames(ServerPlayer.class));
             }
         } else if (ctx.getCurrent().charAt(0) == Selector.Type.ID.character) {
-            List<Entity> entities = ctx.getServer().getEntities().collect(Collectors.toUnmodifiableList());
+            List<Entity> entities = ctx.getServer().getEntities().collect(Collectors.toList());
             for (Entity entity : entities) {
-                if (entity instanceof Player player) {
+                if (entity instanceof Player) {
+                    Player player = (Player) entity;
                     ctx.suggest(player.getId());
                 }
             }

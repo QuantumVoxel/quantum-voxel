@@ -155,3 +155,4 @@ Thumbs.db
 /logs/debug-6.log.gz
 /profile.jfr
 /.profileconfig.json
+/client/src/main/resources/assets.txt

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.StaticWidget;
@@ -52,17 +53,7 @@ public class ManualCrashOverlay implements StaticWidget {
         CrashLog log = new CrashLog("Manually Initiated Crash", new Throwable(":("));
         QuantumClient.get().fillGameInfo(log);
 
-        for (Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
-            StackTraceElement[] stackTrace = entry.getValue();
-            String name = entry.getKey().getName();
-            long id = entry.getKey().getId();
-
-            Throwable throwable = new Throwable();
-            throwable.setStackTrace(stackTrace);
-
-            CrashCategory threadCategory = new CrashCategory("Thread #" + id + ": " + name, throwable);
-            log.addCategory(threadCategory);
-        }
+        GamePlatform.get().debugCrash(log);
 
         QuantumClient.crash(log);
     }

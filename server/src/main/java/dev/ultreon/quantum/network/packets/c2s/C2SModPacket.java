@@ -9,8 +9,19 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.util.NamespaceID;
 
-public record C2SModPacket(NetworkChannel channel, NamespaceID channelId,
-                           ModPacket<?> packet) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SModPacket implements Packet<InGameServerPacketHandler> {
+    private final NetworkChannel channel;
+    private final NamespaceID channelId;
+    private final ModPacket<?> packet;
+
+    public C2SModPacket(NetworkChannel channel, NamespaceID channelId,
+                        ModPacket<?> packet) {
+        this.channel = channel;
+        this.channelId = channelId;
+        this.packet = packet;
+    }
 
 
     public <T extends ModPacket<T> & ServerEndpoint> C2SModPacket(NetworkChannel channel, ModPacket<T> modPacket) {
@@ -45,4 +56,32 @@ public record C2SModPacket(NetworkChannel channel, NamespaceID channelId,
                ", packet=" + packet +
                '}';
     }
+
+    public NetworkChannel channel() {
+        return channel;
+    }
+
+    public NamespaceID channelId() {
+        return channelId;
+    }
+
+    public ModPacket<?> packet() {
+        return packet;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SModPacket) obj;
+        return Objects.equals(this.channel, that.channel) &&
+               Objects.equals(this.channelId, that.channelId) &&
+               Objects.equals(this.packet, that.packet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(channel, channelId, packet);
+    }
+
 }

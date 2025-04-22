@@ -15,7 +15,8 @@ public abstract class RenderObject extends GameObject implements Renderable {
         for (var child : getChildren()) {
             if (child instanceof RenderObject) {
                 ((RenderObject) child).render(bufferSource);
-            } else if (child instanceof GameObject gameObject && renderPass != null) {
+            } else if (child instanceof GameObject && renderPass != null) {
+                GameObject gameObject = (GameObject) child;
                 bufferSource.getBuffer(renderPass).render(gameObject);
             }
         }

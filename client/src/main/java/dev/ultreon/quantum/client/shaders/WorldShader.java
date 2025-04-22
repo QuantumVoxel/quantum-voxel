@@ -5,11 +5,10 @@ import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import dev.ultreon.mixinprovider.GeomShaderProgram;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -96,10 +95,7 @@ public class WorldShader extends DefaultShader {
      * @param lod The level of detail used for rendering, influencing the #define LOD_LEVEL in the shader.
      */
     public WorldShader(Renderable renderable, GeomShaderConfig config, int lod) {
-        this(renderable, config, """
-                #version %s
-                #define LOD_LEVEL %s
-                """.formatted(version(), lod));
+        this(renderable, config, String.format("#define LOD_LEVEL %s\n", lod));
         this.lod = lod;
     }
 
@@ -116,24 +112,11 @@ public class WorldShader extends DefaultShader {
     public boolean canRender(Renderable renderable) {
         boolean b = super.canRender(renderable);
         if (!b) return false;
-        if (renderable.userData instanceof ClientChunk clientChunk) {
+        if (renderable.userData instanceof ClientChunk) {
+            ClientChunk clientChunk = (ClientChunk) renderable.userData;
             return clientChunk.lod == lod;
         }
         return lod == -1;
-    }
-
-    /**
-     * Determines the shader version string based on the platform's graphics API.
-     * If the platform uses ANGLE with OpenGL ES, the version is "320 es".
-     * Otherwise, the version defaults to "410".
-     *
-     * @return A string representing the shader version, either "320 es" or "410".
-     */
-    private static String version() {
-        if (GamePlatform.get().isAngleGLES()) {
-            return "320 es";
-        }
-        return "410";
     }
 
     /**
@@ -142,11 +125,9 @@ public class WorldShader extends DefaultShader {
      * @return A string containing the source code for the default geometry shader.
      */
     public static String getDefaultGeometryShader() {
-        return """
-                void main() {
-                
-                }
-                """;
+        return "void main() {\n" +
+               "\n" +
+               "}\n";
     }
 
     /**
@@ -162,7 +143,7 @@ public class WorldShader extends DefaultShader {
      */
     public WorldShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
                        final String fragmentShader, String geometryShader) {
-        this(renderable, config, new GeomShaderProgram(prefix + vertexShader, prefix + fragmentShader, prefix + geometryShader));
+        this(renderable, config, new ShaderProgram(prefix + vertexShader, prefix + fragmentShader));
     }
 
     /**
@@ -170,9 +151,9 @@ public class WorldShader extends DefaultShader {
      *
      * @param renderable The Renderable instance to be rendered by this shader.
      * @param config The configuration for the geometry shader, containing shader settings and parameters.
-     * @param shaderProgram The GeomShaderProgram instance containing the vertex, fragment, and geometry shader programs.
+     * @param shaderProgram The ShaderProgram instance containing the vertex, fragment, and geometry shader programs.
      */
-    public WorldShader(Renderable renderable, Config config, GeomShaderProgram shaderProgram) {
+    public WorldShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
         super(renderable, config, shaderProgram);
 
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);
@@ -233,7 +214,8 @@ public class WorldShader extends DefaultShader {
         public final static Setter lod = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                if (renderable.userData instanceof ClientChunk clientChunk) {
+                if (renderable.userData instanceof ClientChunk) {
+                    ClientChunk clientChunk = (ClientChunk) renderable.userData;
                     shader.set(inputID, clientChunk.lod);
                 }
             }

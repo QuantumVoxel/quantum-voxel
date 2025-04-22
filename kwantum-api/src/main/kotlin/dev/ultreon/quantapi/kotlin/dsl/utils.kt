@@ -1,9 +1,9 @@
 package dev.ultreon.quantapi.kotlin.dsl
 
+import dev.ultreon.quantum.Logger
+import dev.ultreon.quantum.LoggerFactory
 import dev.ultreon.quantum.Mod
 import dev.ultreon.quantum.client.QuantumClient
-import dev.ultreon.quantum.log.Logger
-import dev.ultreon.quantum.log.LoggerFactory
 import dev.ultreon.quantum.server.QuantumServer
 import dev.ultreon.quantum.util.ModLoadingContext
 import dev.ultreon.quantum.util.NamespaceID

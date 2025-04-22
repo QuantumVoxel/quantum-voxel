@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Disposable;
  * 
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
-public sealed interface DesktopMain extends Disposable permits DataGeneratorClient, QuantumClient {
+public interface DesktopMain extends Disposable {
     /**
      * Resizes the desktop main.
      * 

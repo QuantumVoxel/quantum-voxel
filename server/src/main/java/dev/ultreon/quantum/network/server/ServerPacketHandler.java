@@ -4,7 +4,7 @@ import dev.ultreon.quantum.network.PacketHandler;
 import dev.ultreon.quantum.network.S2CReplyPacket;
 import dev.ultreon.quantum.network.api.PacketDestination;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.system.TcpConnection;
+//import dev.ultreon.quantum.network.system.TcpConnection;
 
 public interface ServerPacketHandler extends PacketHandler {
     @Override
@@ -18,6 +18,6 @@ public interface ServerPacketHandler extends PacketHandler {
     }
 
     default void handleC2SReply(long sequenceId) {
-        TcpConnection.handleReply(sequenceId);
+//        TcpConnection.handleReply(sequenceId);
     }
 }

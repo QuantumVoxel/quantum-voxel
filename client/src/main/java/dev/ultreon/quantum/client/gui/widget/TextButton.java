@@ -9,7 +9,6 @@ import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Supplier;
 
@@ -26,7 +25,7 @@ public class TextButton extends Button<TextButton> {
     /**
      * @param width the width of the button
      */
-    protected TextButton(@IntRange(from = 21) int width) {
+    protected TextButton(int width) {
         this(width, 21);
     }
 
@@ -34,7 +33,7 @@ public class TextButton extends Button<TextButton> {
      * @param width  the width of the button
      * @param height the height of the button
      */
-    protected TextButton(@IntRange(from = 21) int width, @IntRange(from = 21) int height) {
+    protected TextButton(int width, int height) {
         super(width, height);
 
         this.text = this.register(id("text"), new TextComponent(null));

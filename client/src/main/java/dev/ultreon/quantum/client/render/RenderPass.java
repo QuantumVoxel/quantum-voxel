@@ -25,6 +25,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.ClientRegistries;
 import dev.ultreon.quantum.util.NamespaceID;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -234,93 +235,465 @@ public class RenderPass {
             return new RenderPass(this);
         }
 
-        public record CullFace(int mode) implements AttributeDelegate {
-            @Override
-            public void apply(Material material) {
-                material.set(IntAttribute.createCullFace(mode));
+        public static final class CullFace implements AttributeDelegate {
+            private final int mode;
+
+            public CullFace(int mode) {
+                this.mode = mode;
             }
-        }
+
+            @Override
+                    public void apply(Material material) {
+                        material.set(IntAttribute.createCullFace(mode));
+                    }
+
+            public int mode() {
+                return mode;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (CullFace) obj;
+                return this.mode == that.mode;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mode);
+            }
+
+            @Override
+            public String toString() {
+                return "CullFace[" +
+                       "mode=" + mode + ']';
+            }
+
+                }
 
         public interface AttributeDelegate {
             void apply(Material material);
         }
 
-        public record AlphaTest(float threshold) implements AttributeDelegate {
-            @Override
-            public void apply(Material material) {
-                material.set(FloatAttribute.createAlphaTest(threshold));
-            }
-        }
+        public static final class AlphaTest implements AttributeDelegate {
+            private final float threshold;
 
-        public record DepthTest(int func, float rangeNear, float rangeFar, boolean depthMask) implements AttributeDelegate {
-            @Override
-            public void apply(Material material) {
-                material.set(new DepthTestAttribute(func, rangeNear, rangeFar, depthMask));
+            public AlphaTest(float threshold) {
+                this.threshold = threshold;
             }
-        }
 
-        public record Blending(int src, int dst) implements AttributeDelegate {
             @Override
-            public void apply(Material material) {
-                material.set(new BlendingAttribute(src, dst));
+                    public void apply(Material material) {
+                        material.set(FloatAttribute.createAlphaTest(threshold));
+                    }
+
+            public float threshold() {
+                return threshold;
             }
-        }
 
-        public record Atlas(NamespaceID textureId, TextureAtlas.TextureAtlasType type) implements AttributeDelegate {
             @Override
-            public void apply(Material material) {
-                QuantumClient client = QuantumClient.get();
-                TextureAtlas atlas = client.getAtlas(textureId);
-                if (atlas == null) throw new IllegalStateException("Texture atlas " + textureId + " not found");
-                atlas.apply(material, type);
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (AlphaTest) obj;
+                return Float.floatToIntBits(this.threshold) == Float.floatToIntBits(that.threshold);
             }
-        }
 
-        public record Texture(NamespaceID textureId) implements AttributeDelegate {
             @Override
-            public void apply(Material material) {
-                QuantumClient client = QuantumClient.get();
-                TextureManager textureManager = client.getTextureManager();
-                var texture = textureManager.getTexture(textureId);
-                material.set(TextureAttribute.createDiffuse(texture));
+            public int hashCode() {
+                return Objects.hash(threshold);
             }
-        }
 
-        public record TextureRegion(NamespaceID atlasId, NamespaceID textureId, TextureAtlas.TextureAtlasType type) implements AttributeDelegate {
             @Override
-            public void apply(Material material) {
-                QuantumClient client = QuantumClient.get();
-                TextureAtlas atlas = client.getAtlas(atlasId);
-                if (atlas == null) throw new IllegalStateException("Texture atlas " + atlasId + " not found");
-                var texture = atlas.get(textureId, type);
-                if (texture == null) {
-                    material.set(TextureAttribute.createDiffuse(TextureManager.DEFAULT_TEX_REG));
-                    return;
+            public String toString() {
+                return "AlphaTest[" +
+                       "threshold=" + threshold + ']';
+            }
+
                 }
-                material.set(TextureAttribute.createDiffuse(texture));
-            }
-        }
 
-        public record FogColor(Color color) implements AttributeDelegate {
-            @Override
-            public void apply(Material material) {
-                material.set(ColorAttribute.createFog(color));
-            }
-        }
+        public static final class DepthTest implements AttributeDelegate {
+            private final int func;
+            private final float rangeNear;
+            private final float rangeFar;
+            private final boolean depthMask;
 
-        public record Fog(float density, float start, float end) implements AttributeDelegate {
-            @Override
-            public void apply(Material material) {
-                material.set(FogAttribute.createFog(start, end, density));
+            public DepthTest(int func, float rangeNear, float rangeFar, boolean depthMask) {
+                this.func = func;
+                this.rangeNear = rangeNear;
+                this.rangeFar = rangeFar;
+                this.depthMask = depthMask;
             }
-        }
 
-        public record AmbientColor(Color color) implements AttributeDelegate {
             @Override
-            public void apply(Material material) {
-                material.set(ColorAttribute.createAmbient(color));
+                    public void apply(Material material) {
+                        material.set(new DepthTestAttribute(func, rangeNear, rangeFar, depthMask));
+                    }
+
+            public int func() {
+                return func;
             }
-        }
+
+            public float rangeNear() {
+                return rangeNear;
+            }
+
+            public float rangeFar() {
+                return rangeFar;
+            }
+
+            public boolean depthMask() {
+                return depthMask;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (DepthTest) obj;
+                return this.func == that.func &&
+                       Float.floatToIntBits(this.rangeNear) == Float.floatToIntBits(that.rangeNear) &&
+                       Float.floatToIntBits(this.rangeFar) == Float.floatToIntBits(that.rangeFar) &&
+                       this.depthMask == that.depthMask;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(func, rangeNear, rangeFar, depthMask);
+            }
+
+            @Override
+            public String toString() {
+                return "DepthTest[" +
+                       "func=" + func + ", " +
+                       "rangeNear=" + rangeNear + ", " +
+                       "rangeFar=" + rangeFar + ", " +
+                       "depthMask=" + depthMask + ']';
+            }
+
+                }
+
+        public static final class Blending implements AttributeDelegate {
+            private final int src;
+            private final int dst;
+
+            public Blending(int src, int dst) {
+                this.src = src;
+                this.dst = dst;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        material.set(new BlendingAttribute(src, dst));
+                    }
+
+            public int src() {
+                return src;
+            }
+
+            public int dst() {
+                return dst;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (Blending) obj;
+                return this.src == that.src &&
+                       this.dst == that.dst;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(src, dst);
+            }
+
+            @Override
+            public String toString() {
+                return "Blending[" +
+                       "src=" + src + ", " +
+                       "dst=" + dst + ']';
+            }
+
+                }
+
+        public static final class Atlas implements AttributeDelegate {
+            private final NamespaceID textureId;
+            private final TextureAtlas.TextureAtlasType type;
+
+            public Atlas(NamespaceID textureId, TextureAtlas.TextureAtlasType type) {
+                this.textureId = textureId;
+                this.type = type;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        QuantumClient client = QuantumClient.get();
+                        TextureAtlas atlas = client.getAtlas(textureId);
+                        if (atlas == null) throw new IllegalStateException("Texture atlas " + textureId + " not found");
+                        atlas.apply(material, type);
+                    }
+
+            public NamespaceID textureId() {
+                return textureId;
+            }
+
+            public TextureAtlas.TextureAtlasType type() {
+                return type;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (Atlas) obj;
+                return Objects.equals(this.textureId, that.textureId) &&
+                       Objects.equals(this.type, that.type);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(textureId, type);
+            }
+
+            @Override
+            public String toString() {
+                return "Atlas[" +
+                       "textureId=" + textureId + ", " +
+                       "type=" + type + ']';
+            }
+
+                }
+
+        public static final class Texture implements AttributeDelegate {
+            private final NamespaceID textureId;
+
+            public Texture(NamespaceID textureId) {
+                this.textureId = textureId;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        QuantumClient client = QuantumClient.get();
+                        TextureManager textureManager = client.getTextureManager();
+                        var texture = textureManager.getTexture(textureId);
+                        material.set(TextureAttribute.createDiffuse(texture));
+                    }
+
+            public NamespaceID textureId() {
+                return textureId;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (Texture) obj;
+                return Objects.equals(this.textureId, that.textureId);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(textureId);
+            }
+
+            @Override
+            public String toString() {
+                return "Texture[" +
+                       "textureId=" + textureId + ']';
+            }
+
+                }
+
+        public static final class TextureRegion implements AttributeDelegate {
+            private final NamespaceID atlasId;
+            private final NamespaceID textureId;
+            private final TextureAtlas.TextureAtlasType type;
+
+            public TextureRegion(NamespaceID atlasId, NamespaceID textureId, TextureAtlas.TextureAtlasType type) {
+                this.atlasId = atlasId;
+                this.textureId = textureId;
+                this.type = type;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        QuantumClient client = QuantumClient.get();
+                        TextureAtlas atlas = client.getAtlas(atlasId);
+                        if (atlas == null) throw new IllegalStateException("Texture atlas " + atlasId + " not found");
+                        var texture = atlas.get(textureId, type);
+                        if (texture == null) {
+                            material.set(TextureAttribute.createDiffuse(TextureManager.DEFAULT_TEX_REG));
+                            return;
+                        }
+                        material.set(TextureAttribute.createDiffuse(texture));
+                    }
+
+            public NamespaceID atlasId() {
+                return atlasId;
+            }
+
+            public NamespaceID textureId() {
+                return textureId;
+            }
+
+            public TextureAtlas.TextureAtlasType type() {
+                return type;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (TextureRegion) obj;
+                return Objects.equals(this.atlasId, that.atlasId) &&
+                       Objects.equals(this.textureId, that.textureId) &&
+                       Objects.equals(this.type, that.type);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(atlasId, textureId, type);
+            }
+
+            @Override
+            public String toString() {
+                return "TextureRegion[" +
+                       "atlasId=" + atlasId + ", " +
+                       "textureId=" + textureId + ", " +
+                       "type=" + type + ']';
+            }
+
+                }
+
+        public static final class FogColor implements AttributeDelegate {
+            private final Color color;
+
+            public FogColor(Color color) {
+                this.color = color;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        material.set(ColorAttribute.createFog(color));
+                    }
+
+            public Color color() {
+                return color;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (FogColor) obj;
+                return Objects.equals(this.color, that.color);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(color);
+            }
+
+            @Override
+            public String toString() {
+                return "FogColor[" +
+                       "color=" + color + ']';
+            }
+
+                }
+
+        public static final class Fog implements AttributeDelegate {
+            private final float density;
+            private final float start;
+            private final float end;
+
+            public Fog(float density, float start, float end) {
+                this.density = density;
+                this.start = start;
+                this.end = end;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        material.set(FogAttribute.createFog(start, end, density));
+                    }
+
+            public float density() {
+                return density;
+            }
+
+            public float start() {
+                return start;
+            }
+
+            public float end() {
+                return end;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (Fog) obj;
+                return Float.floatToIntBits(this.density) == Float.floatToIntBits(that.density) &&
+                       Float.floatToIntBits(this.start) == Float.floatToIntBits(that.start) &&
+                       Float.floatToIntBits(this.end) == Float.floatToIntBits(that.end);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(density, start, end);
+            }
+
+            @Override
+            public String toString() {
+                return "Fog[" +
+                       "density=" + density + ", " +
+                       "start=" + start + ", " +
+                       "end=" + end + ']';
+            }
+
+                }
+
+        public static final class AmbientColor implements AttributeDelegate {
+            private final Color color;
+
+            public AmbientColor(Color color) {
+                this.color = color;
+            }
+
+            @Override
+                    public void apply(Material material) {
+                        material.set(ColorAttribute.createAmbient(color));
+                    }
+
+            public Color color() {
+                return color;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                var that = (AmbientColor) obj;
+                return Objects.equals(this.color, that.color);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(color);
+            }
+
+            @Override
+            public String toString() {
+                return "AmbientColor[" +
+                       "color=" + color + ']';
+            }
+
+                }
     }
 
     public static final RenderPass SKYBOX = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))

@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class Commands {
-    static final SequencedMap<String, CommandRegistrant> ALIASES = new LinkedHashMap<>();
-    private static final SequencedMap<String, CommandRegistrant> COMMANDS = new LinkedHashMap<>();
+    static final Map<String, CommandRegistrant> ALIASES = new LinkedHashMap<>();
+    private static final Map<String, CommandRegistrant> COMMANDS = new LinkedHashMap<>();
     private static boolean refresh;
 
     public static CommandRegistrant register(String name) {
@@ -81,8 +81,8 @@ public class Commands {
         return COMMANDS.get(cmd);
     }
 
-    public static SequencedCollection<CommandRegistrant> getCommands() {
-        return COMMANDS.sequencedValues();
+    public static Collection<CommandRegistrant> getCommands() {
+        return COMMANDS.values();
     }
 
     public static int size() {

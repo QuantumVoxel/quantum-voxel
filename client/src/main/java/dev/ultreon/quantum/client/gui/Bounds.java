@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.client.gui;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.util.Copyable;
 
 import java.util.Objects;
@@ -24,21 +22,18 @@ public final class Bounds implements Copyable<Bounds> {
         this.size.set(width, height);
     }
 
-    @CanIgnoreReturnValue
     public Bounds setPos(int x, int y) {
         this.pos.x = x;
         this.pos.y = y;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setSize(int width, int height) {
         this.size.width = width;
         this.size.height = height;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds set(int x, int y, int width, int height) {
         this.pos.x = x;
         this.pos.y = y;
@@ -47,21 +42,18 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setPos(Position pos) {
         this.pos.x = pos.x;
         this.pos.y = pos.y;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setSize(Size size) {
         this.size.width = size.width;
         this.size.height = size.height;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds set(Position pos, Size size) {
         this.pos.x = pos.x;
         this.pos.y = pos.y;
@@ -70,7 +62,6 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds set(Position pos, int width, int height) {
         this.pos.x = pos.x;
         this.pos.y = pos.y;
@@ -79,7 +70,6 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds set(int x, int y, Size size) {
         this.pos.x = x;
         this.pos.y = y;
@@ -88,7 +78,6 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds set(Bounds bounds) {
         this.pos.x = bounds.pos.x;
         this.pos.y = bounds.pos.y;
@@ -97,25 +86,21 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setX(int x) {
         this.pos.x = x;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setY(int y) {
         this.pos.y = y;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setWidth(int width) {
         this.size.width = width;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds setHeight(int height) {
         this.size.height = height;
         return this;
@@ -138,13 +123,11 @@ public final class Bounds implements Copyable<Bounds> {
     }
 
     @Override
-    @CheckReturnValue
     public Bounds cpy() {
         return new Bounds(this.pos.cpy(), this.size.cpy());
     }
 
     @Override
-    @CheckReturnValue
     public String toString() {
         return "Bounds{" +
                "pos=" + this.pos +
@@ -152,7 +135,6 @@ public final class Bounds implements Copyable<Bounds> {
                '}';
     }
 
-    @CanIgnoreReturnValue
     public boolean contains(int x, int y) {
         return x >= this.pos.x && x <= this.pos.x + this.size.width &&
                y >= this.pos.y && y <= this.pos.y + this.size.height;
@@ -170,7 +152,6 @@ public final class Bounds implements Copyable<Bounds> {
         return new Bounds(this.pos.x + amount, this.pos.y + amount, this.size.width - amount * 2, this.size.height - amount * 2);
     }
 
-    @CanIgnoreReturnValue
     public Bounds grow(int left, int right, int top, int bottom) {
         this.pos.x -= left;
         this.pos.y -= top;
@@ -179,7 +160,6 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds grow(int horizontal, int vertical) {
         this.pos.x -= horizontal;
         this.pos.y -= vertical;
@@ -188,7 +168,6 @@ public final class Bounds implements Copyable<Bounds> {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Bounds grow(int amount) {
         this.pos.x -= amount;
         this.pos.y -= amount;

@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.world.loot;
 
-import com.google.common.collect.ImmutableList;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.apache.commons.lang3.IntegerRange;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,14 +19,14 @@ public class RandomLoot implements LootGenerator {
 
     @Override
     public Iterable<ItemStack> generate(RNG random) {
-        var items = new ImmutableList.Builder<ItemStack>();
+        var items = new ArrayList<ItemStack>();
 
         for (var entry : this.entries) {
             int count = entry.randomCount(random);
             items.add(new ItemStack(entry.item(), count, entry.data()));
         }
 
-        return items.build();
+        return items;
     }
 
     public List<LootEntry> getEntries() {

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.entity;
 
-import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
@@ -26,7 +25,7 @@ import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -604,8 +603,10 @@ public abstract class Entity extends GameObject implements CommandSender {
         this.oy = y;
         this.oz = z;
 
-        if (this.world instanceof ServerWorld serverWorld) {
-            if (this instanceof ServerPlayer serverPlayer) {
+        if (this.world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) this.world;
+            if (this instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer) this;
                 serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition()), serverPlayer);
             } else {
                 serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
@@ -669,8 +670,10 @@ public abstract class Entity extends GameObject implements CommandSender {
         this.xRot = position.x;
         this.yRot = Mth.clamp(position.y, -90, 90);
 
-        if (this.world instanceof ServerWorld serverWorld) {
-            if (this instanceof ServerPlayer serverPlayer) {
+        if (this.world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) this.world;
+            if (this instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer) this;
                 serverWorld.sendAllTrackingExcept((int) this.x, (int) this.y, (int) this.z, new S2CPlayerPositionPacket(serverPlayer.getUuid(), getPosition(), serverPlayer.xHeadRot, xRot, yRot), serverPlayer);
             } else {
                 serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CEntityPipeline(this.getId(), getPipeline()));
@@ -864,7 +867,7 @@ public abstract class Entity extends GameObject implements CommandSender {
 
     @Override
     public @Nullable QuantumServer getServer() {
-        return world instanceof ServerWorld serverWorld ? serverWorld.getServer() : null;
+        return world instanceof ServerWorld ? ((ServerWorld) world).getServer() : null;
     }
 
     public AttributeMap getAttributes() {
@@ -891,7 +894,8 @@ public abstract class Entity extends GameObject implements CommandSender {
      * Sends the pipeline data for this entity to the client.
      */
     public void sendPipeline() {
-        if (this.world instanceof ServerWorld serverWorld) {
+        if (this.world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) this.world;
             // Send the entity to all tracking players
             MapType pipeline1 = this.getPipeline();
             if (pipeline1.entries().isEmpty()) return;
@@ -937,7 +941,6 @@ public abstract class Entity extends GameObject implements CommandSender {
         world.spawn(this);
     }
 
-    @DoNotCall
     public void onTeleportedDimension(WorldAccess world) {
         this.world = world;
     }

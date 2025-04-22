@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.text;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,13 +12,18 @@ public abstract class TextObject {
 
     public static TextObject deserialize(MapType data) {
         String type = data.getString("type");
-        return switch (type) {
-            case "literal" -> LiteralText.deserialize(data);
-            case "translation" -> TranslationText.deserialize(data);
-            case "empty" -> TextObject.empty();
-            case "font_icon" -> FontIconObject.deserialize(data);
-            default -> throw new IllegalStateException("Unexpected value: " + type);
-        };
+        switch (type) {
+            case "literal":
+                return LiteralText.deserialize(data);
+            case "translation":
+                return TranslationText.deserialize(data);
+            case "empty":
+                return TextObject.empty();
+            case "font_icon":
+                return FontIconObject.deserialize(data);
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
     }
 
     public static TextObject nullToEmpty(TextObject title) {
@@ -34,31 +39,7 @@ public abstract class TextObject {
     public abstract MapType serialize();
 
     public static TextObject empty() {
-        return new TextObject() {
-            private static final StylePart BAKED = new StylePart("", 0, 0, (byte) 1);
-
-            @Override
-            public @NotNull String createString() {
-                return "";
-            }
-
-            @Override
-            public MapType serialize() {
-                MapType data = new MapType();
-                data.putString("type", "empty");
-                return data;
-            }
-
-            @Override
-            public MutableText copy() {
-                return new LiteralText(this.createString());
-            }
-
-            @Override
-            protected void bake(Array<TextPart> bake) {
-                bake.add(BAKED);
-            }
-        };
+        return new MyTextObject();
     }
 
     public static LiteralText literal(@Nullable String text) {
@@ -91,5 +72,31 @@ public abstract class TextObject {
     @Override
     public String toString() {
         return getText();
+    }
+
+    private static class MyTextObject extends TextObject {
+        private static final StylePart BAKED = new StylePart("", 0, 0, (byte) 1);
+
+        @Override
+        public @NotNull String createString() {
+            return "";
+        }
+
+        @Override
+        public MapType serialize() {
+            MapType data = new MapType();
+            data.putString("type", "empty");
+            return data;
+        }
+
+        @Override
+        public MutableText copy() {
+            return new LiteralText(this.createString());
+        }
+
+        @Override
+        protected void bake(Array<TextPart> bake) {
+            bake.add(BAKED);
+        }
     }
 }

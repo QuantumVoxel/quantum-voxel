@@ -11,30 +11,29 @@ public enum BlockVecSpace {
 
     public void validate(int x, int y, int z) {
         switch (this) {
-            case WORLD -> {
-                // No validation
-            }
-            case REGION -> {
+            case WORLD:// No validation
+                break;
+            case REGION:
                 if (x < 0 || x >= REGION_SIZE * CS
-                        || z < 0 || z >= REGION_SIZE * CS) {
+                    || z < 0 || z >= REGION_SIZE * CS) {
                     throw new IllegalArgumentException("Invalid region space position: " + x + ", " + y + ", " + z);
                 }
-            }
-            case CHUNK -> {
+                break;
+            case CHUNK:
                 if (x < 0 || x >= CS
-                        || z < 0 || z >= CS) {
+                    || z < 0 || z >= CS) {
                     throw new IllegalArgumentException("Invalid chunk space position: " + x + ", " + y + ", " + z);
                 }
-            }
-            case SECTION -> {
+                break;
+            case SECTION:
                 if (x < 0 || x >= CS
-                        || y < 0 || y >= CS
-                        || z < 0 || z >= CS) {
+                    || y < 0 || y >= CS
+                    || z < 0 || z >= CS) {
                     throw new IllegalArgumentException("Invalid section space position: " + x + ", " + y + ", " + z);
                 }
-            }
-
-            default -> throw new IllegalArgumentException("Invalid block space: " + this);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid block space: " + this);
         }
     }
 }

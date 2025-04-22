@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.network.packets.s2c;
 
 import com.badlogic.gdx.utils.ObjectMap;
+import dev.ultreon.quantum.network.EncoderException;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
@@ -9,10 +10,19 @@ import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
-import io.netty.handler.codec.EncoderException;
 
-public record S2CRecipeSyncPacket<T extends Recipe>(RecipeType<T> type,
-                                                    ObjectMap<NamespaceID, ? extends T> recipes) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CRecipeSyncPacket<T extends Recipe> implements Packet<InGameClientPacketHandler> {
+    private final RecipeType<T> type;
+    private final ObjectMap<NamespaceID, ? extends T> recipes;
+
+    public S2CRecipeSyncPacket(RecipeType<T> type,
+                               ObjectMap<NamespaceID, ? extends T> recipes) {
+        this.type = type;
+        this.recipes = recipes;
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Recipe> S2CRecipeSyncPacket<T> read(PacketIO packetIO) {
         RecipeType<? extends Recipe> type = Registries.RECIPE_TYPE.get(packetIO.readId());
@@ -32,4 +42,34 @@ public record S2CRecipeSyncPacket<T extends Recipe>(RecipeType<T> type,
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
         handler.onRecipeSync(this);
     }
+
+    public RecipeType<T> type() {
+        return type;
+    }
+
+    public ObjectMap<NamespaceID, ? extends T> recipes() {
+        return recipes;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CRecipeSyncPacket) obj;
+        return Objects.equals(this.type, that.type) &&
+               Objects.equals(this.recipes, that.recipes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, recipes);
+    }
+
+    @Override
+    public String toString() {
+        return "S2CRecipeSyncPacket[" +
+               "type=" + type + ", " +
+               "recipes=" + recipes + ']';
+    }
+
 }

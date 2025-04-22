@@ -8,14 +8,15 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class ShaderProgramManager implements Manager<ShaderProgram> {
-    private final Map<NamespaceID, ShaderProgram> programs = new LinkedHashMap<>();
-    private final Map<NamespaceID, Supplier<ShaderProgram>> factories = new LinkedHashMap<>();
+    private final Map<NamespaceID, ShaderProgram> programs = new HashMap<>();
+    private final Map<NamespaceID, Supplier<ShaderProgram>> factories = new HashMap<>();
 
     @Override
     public ShaderProgram register(@NotNull NamespaceID id, @NotNull ShaderProgram program) {

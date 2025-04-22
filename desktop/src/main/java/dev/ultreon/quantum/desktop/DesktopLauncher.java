@@ -7,8 +7,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.Os;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
-import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
+import com.github.dgzt.gdx.lwjgl3.Lwjgl3WindowListener;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
 import dev.ultreon.quantum.CommonConstants;
@@ -21,12 +21,8 @@ import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.js.JsLang;
-import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
-import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
-import dev.ultreon.quantum.python.PyLang;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +36,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -68,7 +64,8 @@ public class DesktopLauncher {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 try {
-                    if (e instanceof ApplicationCrash crash) {
+                    if (e instanceof ApplicationCrash) {
+                        ApplicationCrash crash = (ApplicationCrash) e;
                         QuantumClient.crash(crash.getCrashLog());
                     }
 
@@ -76,9 +73,9 @@ public class DesktopLauncher {
                 } catch (Throwable t1) {
                     try {
                         logger.error("Failed to handle exception", t1);
-                        Runtime.getRuntime().halt(StatusCode.forException());
+                        GamePlatform.get().halt(StatusCode.forException());
                     } catch (Throwable t2) {
-                        Runtime.getRuntime().halt(StatusCode.forAbort());
+                        GamePlatform.get().halt(StatusCode.forAbort());
                     }
                 }
 
@@ -160,8 +157,8 @@ public class DesktopLauncher {
             }
         };
 
-        Log.setLogger(KyroSlf4jLogger.INSTANCE);
-        com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
+//        Log.setLogger(KyroSlf4jLogger.INSTANCE);
+//        com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
 
         CrashHandler.addHandler(crashLog -> {
             try {
@@ -175,15 +172,12 @@ public class DesktopLauncher {
         });
 
         try {
-            Files.createDirectories(Paths.get("logs"));
+            Files.createDirectories(Path.of("logs"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         QuantumClient.logDebug();
-
-        new PyLang().init();
-        new JsLang().init();
 
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
@@ -223,20 +217,14 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.useVsync(false);
         config.setForegroundFPS(0);
-        config.setBackBufferConfig(4, 4, 4, 4, 8, 0, 0);
+        config.setBackBufferConfig(4, 4, 4, 4, 8, 8, 0);
         config.setHdpiMode(HdpiMode.Pixels);
-        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
         config.setInitialVisible(false);
         config.setTitle("Quantum Voxel");
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
         config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
-
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
 
         return config;
     }
@@ -253,7 +241,7 @@ public class DesktopLauncher {
         return windowVibrancyEnabled;
     }
 
-    private static class WindowAdapter extends Lwjgl3WindowAdapter implements com.github.dgzt.gdx.lwjgl3.Lwjgl3WindowListener {
+    private static class WindowAdapter extends Lwjgl3WindowAdapter implements Lwjgl3WindowListener {
         public static MessageDigest SHA_256;
 
         static {
@@ -269,7 +257,7 @@ public class DesktopLauncher {
             gameWindow = new DesktopVulkanWindow(window);
 
             setupMacIcon();
-            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
+//            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
             setupVibrancy(window.getWindowHandle());
         }
 

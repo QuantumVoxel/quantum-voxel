@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.block.state;
 
-import dev.ultreon.ubo.types.BooleanType;
-import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.BooleanType;
+import dev.ultreon.quantum.ubo.types.DataType;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;

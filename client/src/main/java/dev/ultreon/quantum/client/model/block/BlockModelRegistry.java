@@ -2,11 +2,10 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
@@ -74,14 +73,12 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
     public void registerDefault(Block block) {
         NamespaceID key = Registries.BLOCK.getId(block);
-        Preconditions.checkNotNull(key, "Block is not registered");
         this.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
     }
 
     public void registerDefault(Supplier<Block> block) {
         this.register(block, meta -> true, Suppliers.memoize(() -> {
             NamespaceID key = Registries.BLOCK.getId(block.get());
-            Preconditions.checkNotNull(key, "Block is not registered");
             return CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path));
         }));
     }
@@ -122,7 +119,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public BakedModelRegistry bake(TextureAtlas atlas) {
-        ImmutableMap.Builder<Block, List<Pair<Predicate<BlockState>, BakedCubeModel>>> bakedModels = new ImmutableMap.Builder<>();
+        Map<Block, List<Pair<Predicate<BlockState>, BakedCubeModel>>> bakedModels = new HashMap<>();
         this.registry.forEach((block, models) -> {
             List<Pair<Predicate<BlockState>, BakedCubeModel>> modelList = new ArrayList<>();
             for (var modelPair : models) {
@@ -135,7 +132,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
             bakedModels.put(block, modelList);
         });
 
-        return new BakedModelRegistry(atlas, bakedModels.build());
+        return new BakedModelRegistry(atlas, bakedModels);
     }
 
     public void bakeJsonModels(QuantumClient client) {
@@ -143,6 +140,10 @@ public class BlockModelRegistry implements ContextAwareReloadable {
             List<Pair<Predicate<BlockState>, Supplier<BlockModel>>> models = new ArrayList<>();
             for (var pair : entry.getValue()) {
                 BlockModel model = pair.getSecond().get();
+                if (model == null) {
+                    QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), pair.getFirst());
+                    continue;
+                }
                 QuantumClient.invokeAndWait(() -> model.load(client));
                 models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
             }
@@ -152,33 +153,39 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
     public void load(Json5ModelLoader loader) {
         for (Block value : Registries.BLOCK.values()) {
+            if (value == Blocks.AIR) continue;
+
             this.loadingBlock = value;
-            if (!registry.containsKey(value)) {
-                try {
+            try {
+                if (!registry.containsKey(value)) {
                     Json5Model load = loader.load(value);
                     if (load != null) {
                         customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> true, () -> load));
 
-                        load.getOverrides().cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.get(cell.getRowKey()).equals(cell.getColumnKey()), cell::getValue)));
+                        load.getOverrides().cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.get(cell.getRow()).equals(cell.getColumn()), cell::getValue)));
                     } else if (value.doesRender()) {
                         this.registerDefault(value);
                     }
-                } catch (IOException e) {
-                    QuantumClient.LOGGER.error("Failed to load block model for {}", value.getId(), e);
                 }
+            } catch (Exception e) {
+                QuantumClient.LOGGER.error("Failed to load block model for {}: {}", value.getId(), e.toString());
             }
-
             this.loadingBlock = null;
         }
 
         for (var entry : customRegistry.entrySet()) {
+            if (entry.getKey() == Blocks.AIR) continue;
             this.loadingBlock = entry.getKey();
-            List<Pair<Predicate<BlockState>, Supplier<BlockModel>>> models = new ArrayList<>();
-            for (var pair : entry.getValue()) {
-                BlockModel model = pair.getSecond().get();
-                models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
+            try {
+                List<Pair<Predicate<BlockState>, Supplier<BlockModel>>> models = new ArrayList<>();
+                for (var pair : entry.getValue()) {
+                    BlockModel model = pair.getSecond().get();
+                    models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
+                }
+                finishedRegistry.put(entry.getKey(), models);
+            } catch (Exception e) {
+                QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), e.toString());
             }
-            finishedRegistry.put(entry.getKey(), models);
             this.loadingBlock = null;
         }
     }
@@ -197,6 +204,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                     throw new RuntimeException("Failed to bake block models");
                 }
             } catch (Exception e) {
+                QuantumClient.LOGGER.error("Failed to reload block models", e);
                 CrashLog crashLog = new CrashLog("Failed to load block models", e);
                 CrashCategory model = new CrashCategory("Model");
                 model.add("Block", this.loadingBlock.getId());

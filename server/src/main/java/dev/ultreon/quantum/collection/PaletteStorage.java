@@ -2,13 +2,12 @@ package dev.ultreon.quantum.collection;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.quantum.world.rng.RNG;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.commons.lang3.ArrayUtils;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -41,7 +39,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     private final D defaultValue;
     private short[] palette;
     private Array<D> data = new Array<>();
-    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     @Deprecated
     public PaletteStorage(D defaultValue, int size) {
@@ -172,8 +169,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     public short add(int idx, D value) {
-        Preconditions.checkNotNull(value, "value");
-
         short dataIdx = (short) (this.data.size);
         this.data.add(value);
         this.palette[idx] = dataIdx;
@@ -210,9 +205,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Override
     public <R> Storage<R> map(@NotNull R defaultValue, IntFunction<R[]> generator, @NotNull Function<@NotNull D, @Nullable R> mapper) {
-        Preconditions.checkNotNull(defaultValue, "defaultValue");
-        Preconditions.checkNotNull(mapper, "mapper");
-
         var ref = new Object() {
             final transient Function<D, R> mapperRef = mapper;
         };
@@ -241,7 +233,6 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     public short[] getPalette() {
         short[] palette = this.palette.clone();
-        this.rwLock.readLock().unlock();
         return palette;
     }
 
@@ -250,16 +241,10 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     public void set(short[] palette, D[] data) {
-        Preconditions.checkNotNull(palette, "palette");
-        Preconditions.checkNotNull(data, "data");
-
         set(palette, new Array<>(data));
     }
 
     public void set(short[] palette, Array<D> data) {
-        Preconditions.checkNotNull(palette, "palette");
-        Preconditions.checkNotNull(data, "data");
-
         if (this.palette.length != palette.length)
             throw new IllegalArgumentException("Palette length must be equal.");
 

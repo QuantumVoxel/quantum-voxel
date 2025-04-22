@@ -1,17 +1,15 @@
 package dev.ultreon.quantum.item;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import de.marhali.json5.Json5Object;
-import de.marhali.json5.Json5Primitive;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A class that holds items with a certain amount and with data.
@@ -79,12 +77,12 @@ public class ItemStack {
         return new ItemStack(item, count, tag);
     }
 
-    public static ItemStack deserialize(Json5Object asJson5Object) {
-        Item item = Registries.ITEM.get(NamespaceID.parse(asJson5Object.getAsJson5Object("item").getAsString()));
+    public static ItemStack deserialize(JsonValue asJsonObject) {
+        Item item = Registries.ITEM.get(NamespaceID.parse(asJsonObject.get("item").asString()));
         if (item == null) return new ItemStack();
-        Json5Primitive countJson = asJson5Object.getAsJson5Primitive("count");
+        JsonValue countJson = asJsonObject.get("count");
         if (countJson == null) return new ItemStack(item);
-        int count = countJson.getAsInt();
+        int count = countJson.asInt();
         if (count <= 0) return new ItemStack();
 
         return new ItemStack(item, count);
@@ -149,9 +147,7 @@ public class ItemStack {
      * @param amount the amount to shrink by.
      * @return the amount that was remains.
      */
-    @CanIgnoreReturnValue
     public int shrink(int amount) {
-        Preconditions.checkArgument(amount >= 0, "Grow amount should not be negative!");
         if (this.count == 0) {
             return amount;
         }
@@ -173,9 +169,7 @@ public class ItemStack {
      * @param amount the amount to grow by.
      * @return the amount of item that has overflown.
      */
-    @CanIgnoreReturnValue
     public int grow(int amount) {
-        Preconditions.checkArgument(amount >= 0, "Grow amount should not be negative!");
         if (this.count == this.getItem().getMaxStackSize())
             return amount;
 
@@ -269,11 +263,7 @@ public class ItemStack {
      * @param amount the amount to transfer.
      * @return the amount remaining.
      */
-    @CanIgnoreReturnValue
     public int transferTo(ItemStack target, int amount) {
-        Preconditions.checkArgument(amount >= 0, "The transfer amount should be non-negative.");
-        Preconditions.checkArgument(amount <= this.count, "Can't transfer more than the current stack count.");
-
         if (target.isEmpty()) {
             target.item = this.item;
             target.data = this.data.copy();
@@ -281,9 +271,6 @@ public class ItemStack {
             this.shrink(amount);
             return 0;
         }
-
-        Preconditions.checkArgument(this.item == target.item, "The item of source stack should match the i destination stack.");
-        Preconditions.checkArgument(this.data.equals(target.data), "The tag of source stack should match the tag of the destination stack.");
 
         int remainder = target.grow(amount);
         if (remainder == 0) {
@@ -302,7 +289,6 @@ public class ItemStack {
      * @param target the item stack to receive the item.
      * @return the amount remaining.
      */
-    @CanIgnoreReturnValue
     public boolean transferTo(ItemStack target) {
         if (target.getItem() != this.item) return false;
         if (target.grow(1) == 1) return false;
@@ -333,7 +319,7 @@ public class ItemStack {
     }
 
     public String getFullDescription() {
-        String join = String.join("\n", getDescription().stream().map(TextObject::getText).toList());
+        String join = String.join("\n", getDescription().stream().map(TextObject::getText).collect(Collectors.toList()));
         return join + "\n\n" + getExtendedDescription();
     }
 

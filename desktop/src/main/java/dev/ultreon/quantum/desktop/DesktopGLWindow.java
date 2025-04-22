@@ -2,7 +2,6 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
-import dev.ultreon.mixinprovider.PlatformOS;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.lwjgl.glfw.GLFWNativeWin32;
@@ -43,7 +42,7 @@ public class DesktopGLWindow extends DesktopWindow {
 
     @Override
     public boolean isMaximized() {
-        return !PlatformOS.isMac && GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
+        return !System.getProperty("os.name").equals("Mac OS X") && GLFW.glfwGetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
     }
 
     @Override
@@ -77,7 +76,7 @@ public class DesktopGLWindow extends DesktopWindow {
 
     @Override
     public void restore() {
-        if (!PlatformOS.isMac) {
+        if (!System.getProperty("os.name").equals("Mac OS X")) {
             GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
             GLFW.glfwSetWindowAttrib(getHandle(), GLFW.GLFW_ICONIFIED, GLFW.GLFW_FALSE);
         }
@@ -102,9 +101,9 @@ public class DesktopGLWindow extends DesktopWindow {
 
     @Override
     public long getPeer() {
-        if (PlatformOS.isWindows) {
+        if (System.getProperty("os.name").startsWith("Windows")) {
             return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
-        } else if (PlatformOS.isMac) {
+        } else if (System.getProperty("os.name").startsWith("Mac")) {
             return GLFWNativeCocoa.glfwGetCocoaWindow(this.getHandle());
         } else {
             return -1L;

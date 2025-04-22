@@ -36,7 +36,6 @@ buildscript {
 //     Plugins     //
 //*****************//
 apply plugin: 'java'
-apply plugin: 'scala'
 apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'org.jetbrains.kotlin.jvm'
@@ -53,6 +52,7 @@ apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
 
 evaluationDependsOn(":gameprovider")
 evaluationDependsOn(":server")
+evaluationDependsOn(":mixinprovider")
 evaluationDependsOn(":client")
 
 java {
@@ -79,14 +79,14 @@ dependencies {
 
     implementation api("com.formdev:flatlaf:3.2.1")
 
-    implementation api("com.badlogicgames.gdx:gdx:$gdx_version")
-    implementation api("com.badlogicgames.gdx:gdx-box2d:$gdx_version")
-    implementation api("com.badlogicgames.ashley:ashley:$ashley_version")
-    implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
-    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
-    implementation api("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
+    implementation api("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+    implementation api("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    implementation api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
-    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version") {
+    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion") {
         exclude group: "org.lwjgl", module: "lwjgl"
         exclude group: "org.lwjgl", module: "lwjgl-glfw"
         exclude group: "org.lwjgl", module: "lwjgl-egl"
@@ -123,11 +123,11 @@ dependencies {
     implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
     implementation api("org.lwjgl:lwjgl-opengles:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
     implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
-    implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
-    implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
-    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
-    implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
+    implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+    implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
+    implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
+    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
+    implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion") {
         exclude group: "org.lwjgl", module: "lwjgl"
         exclude group: "org.lwjgl", module: "lwjgl-glfw"
@@ -157,58 +157,50 @@ dependencies {
     }
 
     // Apache Log4J
-    runtimeOnly("org.apache.logging.log4j:log4j:$log4j_version")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4j_version")
-    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4j_version")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
-    implementation api("org.tukaani:xz:$tukaani_xz_version")
-    implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
-
-    // JNA
-    implementation api("net.java.dev.jna:jna:$jna_version")
-    implementation api("net.java.dev.jna:jna-platform:$jna_version")
+    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    implementation api("org.tukaani:xz:$tukaaniXzVersion")
+    implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
     implementation api("ca.weblite:java-objc-bridge:1.2")
 
     // SLF4J
-    api "org.slf4j:slf4j-api:$slf4j_version"
-
-    // Google
-    implementation api("com.google.code.gson:gson:2.10.1")
-    implementation api("com.google.guava:guava:$guava_version")
+    api "org.slf4j:slf4j-api:$slf4jVersion"
 
     // Misc
     implementation api("it.unimi.dsi:fastutil:8.5.13", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
     implementation api("com.raylabz:opensimplex:1.0.3")
 
-    implementation api("space.earlygrey:shapedrawer:$shapedrawer_version")
+    implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
     // ImGui
-    implementation api("io.github.spair:imgui-java-binding:$imgui_version")
-    implementation api("io.github.spair:imgui-java-lwjgl3:$imgui_version")
-    implementation api("io.github.spair:imgui-java-natives-linux:$imgui_version")
-    implementation api("io.github.spair:imgui-java-natives-macos:$imgui_version")
-    implementation api("io.github.spair:imgui-java-natives-windows:$imgui_version")
+    implementation api("io.github.spair:imgui-java-binding:$imGuiVersion")
+    implementation api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion")
+    implementation api("io.github.spair:imgui-java-natives-linux:$imGuiVersion")
+    implementation api("io.github.spair:imgui-java-natives-macos:$imGuiVersion")
+    implementation api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")
 
     implementation api("it.unimi.dsi:fastutil-core:8.5.13")
-    implementation api("com.google.code.findbugs:jsr305:$jsr_version")
+    implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    implementation api("org.apache.logging.log4j:log4j:$log4j_version")
-    implementation api("org.apache.logging.log4j:log4j-core:$log4j_version")
-    implementation api("org.apache.logging.log4j:log4j-api:$log4j_version")
+    implementation api("org.apache.logging.log4j:log4j:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
 
     // fabric-loader dependencies
-    implementation api("org.ow2.asm:asm:${project.asm_version}")
-    implementation api("org.ow2.asm:asm-analysis:${project.asm_version}")
-    implementation api("org.ow2.asm:asm-commons:${project.asm_version}")
-    implementation api("org.ow2.asm:asm-tree:${project.asm_version}")
-    implementation api("org.ow2.asm:asm-util:${project.asm_version}")
+    implementation api("org.ow2.asm:asm:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-analysis:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
 
-    implementation api("net.fabricmc:sponge-mixin:${project.mixin_version}") {
+    implementation api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
@@ -220,7 +212,7 @@ dependencies {
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     implementation api('net.fabricmc:access-widener:2.1.0')
 
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version")
+    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion")
 
     //noinspection GradleDynamicVersion
     implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
@@ -229,7 +221,7 @@ dependencies {
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     implementation api('net.fabricmc:access-widener:2.1.0')
 
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version")
+    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion")
 }
 
 compileJava {
@@ -254,14 +246,14 @@ jar {
         //noinspection GroovyAssignabilityCheck
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.project_version,
+                project_version: project.projectVersion,
                 'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
                 'Multi-Release': 'true'
     }
 }
 
 tasks.register('prepareRun', {
-    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
+    Files.createDirectories(Path.of(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
 tasks.withType(ProcessResources).configureEach {
@@ -273,6 +265,6 @@ tasks.withType(Jar).configureEach {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }

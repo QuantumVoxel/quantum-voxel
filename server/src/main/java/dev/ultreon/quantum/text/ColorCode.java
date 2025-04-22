@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.text;
 
 import com.badlogic.gdx.utils.IntMap;
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.util.Color;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceMap;
@@ -118,8 +117,6 @@ public enum ColorCode implements Color {
     }
 
     public static ColorCode getByChar(String code) {
-        Preconditions.checkNotNull(code, "Code cannot be null");
-        Preconditions.checkArgument(!code.isEmpty(), "Code must have at least one char");
         return ColorCode.BY_CHAR.get(code.charAt(0));
     }
 

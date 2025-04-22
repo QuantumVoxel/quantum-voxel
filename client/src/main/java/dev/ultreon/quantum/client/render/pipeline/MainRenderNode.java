@@ -1,21 +1,14 @@
 package dev.ultreon.quantum.client.render.pipeline;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
-import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.NamespaceID;
-import org.checkerframework.common.reflection.qual.NewInstance;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 
@@ -42,22 +35,12 @@ public class MainRenderNode extends RenderNode {
      * @param camera    The GameCamera representing the camera.
      * @param deltaTime The time passed since the last frame.
      */
-    @NewInstance
     @Override
     public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
         // Extract textures
         if (vignetteTex == null) {
             vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
         }
-
-        Texture depthTex = textures.get("depth");
-        Texture skyboxTex = textures.get("skybox");
-        Texture diffuseTex = textures.get("diffuse");
-        Texture positionTex = textures.get("position");
-        Texture normalTex = textures.get("normal");
-        Texture reflectiveTex = textures.get("reflective");
-        Texture specularTex = textures.get("specular");
-        Texture foregroundTex = textures.get("foreground");
 
         // Handle blur effect
         if (blurScale > 0f) {
@@ -79,22 +62,6 @@ public class MainRenderNode extends RenderNode {
 
         gl.glActiveTexture(GL_TEXTURE0);
 
-        // Show render pipeline
-        if (GamePlatform.get().showRenderPipeline()) {
-            client.renderer.begin();
-            client.renderer.getBatch().enableBlending();
-            client.spriteBatch.draw(diffuseTex, (float) 0, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
-            client.spriteBatch.flush();
-            client.spriteBatch.draw(positionTex, (float) (QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
-            client.spriteBatch.flush();
-            client.spriteBatch.draw(normalTex, (float) (2 * QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
-            client.spriteBatch.flush();
-            client.spriteBatch.draw(foregroundTex, (float) (3 * QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
-            client.spriteBatch.flush();
-            client.spriteBatch.draw(skyboxTex, (float) (4 * QuantumClient.get().getWidth()) / 5, 0, (float) QuantumClient.get().getWidth() / 5, (float) QuantumClient.get().getHeight() / 5);
-            client.renderer.end();
-        }
-
         // Enable blending and set blend function
         client.renderer.getBatch().enableBlending();
     }
@@ -112,77 +79,6 @@ public class MainRenderNode extends RenderNode {
         client.renderer.begin();
         client.renderer.getBatch().enableBlending();
         client.renderer.getBatch().setBlendFunctionSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    /**
-     * Renders the scene with the given textures and parameters.
-     *
-     * @param skyboxTex The skybox texture.
-     * @param diffuseTex The diffuse texture.
-     * @param normalTex The normal texture.
-     * @param reflectiveTex The reflective texture.
-     * @param depthTex The depth texture.
-     * @param positionTex The position texture.
-     * @param specularTex The specular texture.
-     * @param foregroundTex The foreground texture.
-     */
-    private void render(Texture skyboxTex, Texture diffuseTex, Texture normalTex, Texture reflectiveTex, Texture depthTex, Texture positionTex, Texture specularTex, Texture foregroundTex) {
-        client.spriteBatch.enableBlending();
-
-        drawDiffuse(skyboxTex);
-        if (client.viewMode == 0) {
-            drawDiffuse(diffuseTex);
-            drawDiffuse(foregroundTex);
-
-            BlockState buriedBlock = client.player.getBuriedBlock();
-            if (!buriedBlock.isAir()) {
-                TextureRegion texture = client.getBlockModel(buriedBlock).getBuriedTexture();
-                if (!client.player.isSpectator() && texture != null && texture != TextureManager.DEFAULT_TEX_REG && texture.getTexture() != null && texture.getTexture() != TextureManager.DEFAULT_TEX_REG.getTexture()) {
-                    client.spriteBatch.draw(texture, 0, QuantumClient.get().getHeight(), QuantumClient.get().getWidth(), -QuantumClient.get().getHeight());
-                    client.renderer.fill(0, 0, client.getWidth(), client.getHeight(), new Color(0, 0, 0, 0.5f));
-                }
-            }
-
-            drawDiffuse(vignetteTex, ClientConfig.vignetteOpacity);
-        } else if (client.viewMode == 1) {
-            drawDiffuse(normalTex);
-        } else if (client.viewMode == 2) {
-            drawDiffuse(reflectiveTex);
-        } else if (client.viewMode == 3) {
-            drawDiffuse(depthTex);
-        } else if (client.viewMode == 4) {
-            drawDiffuse(positionTex);
-        } else if (client.viewMode == 5) {
-            drawDiffuse(specularTex);
-        } else if (client.viewMode == 6) {
-            drawDiffuse(foregroundTex);
-        } else {
-            drawDiffuse(skyboxTex);
-            drawDiffuse(foregroundTex);
-        }
-    }
-
-    /**
-     * Draws the diffuse texture.
-     *
-     * @param diffuseTexture The diffuse texture.
-     */
-    private void drawDiffuse(@NotNull Texture diffuseTexture) {
-        client.spriteBatch.setShader(null);
-        client.spriteBatch.draw(diffuseTexture, 0, 0, client.getWidth(), client.getHeight());
-    }
-
-    /**
-     * Draws the diffuse texture with the given opacity.
-     *
-     * @param diffuseTexture The diffuse texture.
-     * @param opacity The opacity.
-     */
-    private void drawDiffuse(@NotNull Texture diffuseTexture, float opacity) {
-        client.spriteBatch.setShader(null);
-        client.spriteBatch.setColor(1, 1, 1, opacity);
-        client.spriteBatch.draw(diffuseTexture, 0, 0, client.getWidth(), client.getHeight());
-        client.spriteBatch.setColor(1, 1, 1, 1);
     }
 
     /**

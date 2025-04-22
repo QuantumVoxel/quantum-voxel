@@ -1,8 +1,5 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.concurrent.LazyInit;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
@@ -40,7 +37,6 @@ public abstract class ContainerMenu implements Menu {
     private final @NotNull WorldAccess world;
     private final @NotNull Entity entity;
     private final @Nullable BlockVec pos;
-    @LazyInit
     @ApiStatus.Internal
     public ItemSlot[] slots;
 
@@ -59,10 +55,6 @@ public abstract class ContainerMenu implements Menu {
      */
     protected ContainerMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
         this.container = container;
-        Preconditions.checkNotNull(type, "Menu type cannot be null!");
-        Preconditions.checkNotNull(world, "World cannot be null!");
-        Preconditions.checkNotNull(entity, "Entity cannot be null!");
-        Preconditions.checkArgument(size >= 0, "Size cannot be negative!");
 
         this.type = type;
         this.world = world;
@@ -100,7 +92,6 @@ public abstract class ContainerMenu implements Menu {
     }
 
     public ItemSlot get(int index) {
-        Preconditions.checkElementIndex(index, this.slots.length, "Slot index out of chance");
         return this.slots[index];
     }
 
@@ -111,7 +102,8 @@ public abstract class ContainerMenu implements Menu {
      */
     protected void onChanged(ItemSlot slot) {
         for (Player player : this.watching) {
-            if (!(player instanceof ServerPlayer serverPlayer)) continue;
+            if (!(player instanceof ServerPlayer)) continue;
+            ServerPlayer serverPlayer = (ServerPlayer) player;
             Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slot);
             if (packet != null && !serverPlayer.connection.isLoggingIn()) {
                 serverPlayer.connection.send(packet);
@@ -132,7 +124,6 @@ public abstract class ContainerMenu implements Menu {
         return new S2CMenuItemChangedPacket(getType().getId(), map);
     }
 
-    @CanIgnoreReturnValue
     public void setItem(int index, ItemStack stack) {
         this.slots[index].setItem(stack, false);
     }
@@ -275,9 +266,9 @@ public abstract class ContainerMenu implements Menu {
         return this.watching.isEmpty();
     }
 
-    @CanIgnoreReturnValue
     protected int inventoryMenu(int idx, int offX, int offY) {
-        if (getEntity() instanceof Player player) {
+        if (getEntity() instanceof Player) {
+            Player player = (Player) getEntity();
             for (int x = 0; x < 9; x++) {
                 this.addSlot(new RedirectItemSlot(idx++, player.inventory.hotbar[x], offX + x * 19 + 6, offY + 83));
             }
@@ -306,7 +297,8 @@ public abstract class ContainerMenu implements Menu {
     @ApiStatus.Internal
     public void onAllChanged() {
         for (Player player : this.watching) {
-            if (!(player instanceof ServerPlayer serverPlayer)) continue;
+            if (!(player instanceof ServerPlayer)) continue;
+            ServerPlayer serverPlayer = (ServerPlayer) player;
 
             Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slots);
             if (packet == null) continue;
@@ -325,7 +317,8 @@ public abstract class ContainerMenu implements Menu {
 
     protected void onChanged(List<ItemSlot> changed) {
         for (Player player : this.watching) {
-            if (!(player instanceof ServerPlayer serverPlayer)) continue;
+            if (!(player instanceof ServerPlayer)) continue;
+            ServerPlayer serverPlayer = (ServerPlayer) player;
             Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, changed.toArray(ItemSlot[]::new));
             if (packet != null && !serverPlayer.connection.isLoggingIn()) {
                 serverPlayer.connection.send(packet);

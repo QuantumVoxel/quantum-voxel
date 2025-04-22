@@ -37,9 +37,9 @@ public class Language {
     }
 
     private static String translateFallback(String path, Object[] args) {
-        Language english = LanguageManager.INSTANCE.get(Locale.of("en", "us"));
+        Language english = LanguageManager.INSTANCE.get(new Locale("en", "us"));
         if (english == null) {
-            throw new IllegalStateException("English language not loaded");
+            return path;
         }
         String s = english.get(path, args);
         return s == null ? path : s;

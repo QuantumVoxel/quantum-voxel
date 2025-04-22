@@ -7,7 +7,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import lombok.Getter;
 
 import java.util.Objects;

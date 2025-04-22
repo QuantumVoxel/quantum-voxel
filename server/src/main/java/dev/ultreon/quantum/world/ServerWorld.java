@@ -1,14 +1,13 @@
 package dev.ultreon.quantum.world;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Queues;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.CompletionPromise;
+import dev.ultreon.quantum.Promise;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
 import dev.ultreon.quantum.block.Blocks;
@@ -33,6 +32,7 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.util.RejectedExecutionException;
 import dev.ultreon.quantum.world.gen.FeatureData;
 import dev.ultreon.quantum.world.gen.StructureData;
 import dev.ultreon.quantum.world.gen.StructureInstance;
@@ -43,21 +43,20 @@ import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.vec.*;
-import dev.ultreon.ubo.DataIo;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.DataIo;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import kotlin.system.TimingKt;
-import org.checkerframework.common.reflection.qual.NewInstance;
+import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.*;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -72,20 +71,17 @@ public class ServerWorld extends World implements Audience {
     private final ChunkGenerator generator;
     private final QuantumServer server;
     private final RegionStorage regionStorage = new RegionStorage();
-    private @Nullable CompletableFuture<Boolean> saveFuture;
-    private @Nullable ScheduledFuture<?> saveSchedule;
-    private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "ServerWorld-Save"));
-    private final ExecutorService executor = Executors.newFixedThreadPool(4, QuantumServer.WORLD_GEN_THREAD_FACTORY);
+    private @Nullable Promise<Boolean> saveFuture;
+    private final AsyncExecutor saveExecutor = new AsyncExecutor(1, "ServerWorld-Save");
+    private final AsyncExecutor executor = new AsyncExecutor(4, "World-Executor");
     private static long chunkUnloads;
 
     private final Queue<ChunkVec> chunksToLoad = this.createSyncQueue();
     private final Queue<ChunkVec> chunksToUnload = this.createSyncQueue();
     private final Queue<Runnable> tasks = this.createSyncQueue();
 
-    private final Lock chunkLock = new ReentrantLock();
-
     private int playTime;
-    private final Set<RecordedChange> recordedChanges = new CopyOnWriteArraySet<>();
+    private final Set<RecordedChange> recordedChanges = Collections.synchronizedSet(new LinkedHashSet<>());
     private int chunksToLoadCount;
     private boolean saving;
     private int spawnY;
@@ -179,7 +175,7 @@ public class ServerWorld extends World implements Audience {
     }
 
     private <T> Queue<T> createSyncQueue() {
-        return Queues.synchronizedQueue(Queues.newConcurrentLinkedQueue());
+        return SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
     }
 
     @Override
@@ -193,7 +189,7 @@ public class ServerWorld extends World implements Audience {
 
         this.unloadChunk(pos, true);
 
-        WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getVec(), chunk);
+//        WorldEvents.CHUNK_UNLOADED.factory().onChunkUnloaded(this, chunk.getVec(), chunk);
         return true;
     }
 
@@ -367,7 +363,7 @@ public class ServerWorld extends World implements Audience {
      */
     @NonBlocking
     @SuppressWarnings("UnusedReturnValue")
-    public @NotNull CompletableFuture<@Nullable ServerChunk> loadChunk(ChunkVec pos) {
+    public @NotNull Promise<@Nullable ServerChunk> loadChunk(ChunkVec pos) {
         // Ensure this method is called from the correct thread
         this.checkThread();
 
@@ -383,7 +379,7 @@ public class ServerWorld extends World implements Audience {
      * @return The loaded chunk or null if loading failed.
      */
     @NonBlocking
-    public @NotNull CompletableFuture<@Nullable ServerChunk> loadChunk(int x, int y, int z) {
+    public @NotNull Promise<@Nullable ServerChunk> loadChunk(int x, int y, int z) {
         // Ensure this method is called from the correct thread
         this.checkThread();
 
@@ -401,7 +397,7 @@ public class ServerWorld extends World implements Audience {
      * @throws IllegalChunkStateException If the chunk is already active.
      */
     @NonBlocking
-    public @NotNull CompletableFuture<@Nullable ServerChunk> loadChunk(int x, int y, int z, boolean overwrite) {
+    public Promise<ServerChunk> loadChunk(int x, int y, int z, boolean overwrite) {
         // Ensure this method is called from the correct thread
         this.checkThread();
 
@@ -422,7 +418,7 @@ public class ServerWorld extends World implements Audience {
                     regionAt.activate(localVec);
                 }
 
-                return CompletableFuture.completedFuture(oldChunk);
+                return CompletionPromise.completedFuture(oldChunk);
             }
 
             // Get or open the region at the global position
@@ -442,7 +438,7 @@ public class ServerWorld extends World implements Audience {
                     throw new IllegalChunkStateException("Chunk is loaded at a different location: " + serverChunk.getVec() + " expected " + globalVec);
 
                 // Trigger chunk loaded event and track chunk loads
-                WorldEvents.CHUNK_LOADED.factory().onChunkLoaded(this, globalVec, serverChunk);
+//                WorldEvents.CHUNK_LOADED.factory().onChunkLoaded(this, globalVec, serverChunk);
                 ValueTracker.setChunkLoads(ValueTracker.getChunkLoads() + 1);
 
                 return serverChunk;
@@ -519,7 +515,7 @@ public class ServerWorld extends World implements Audience {
             }
 
             // Trigger CHUNK_LOADED event and update chunk load count
-            WorldEvents.CHUNK_LOADED.factory().onChunkLoaded(this, globalVec, chunk);
+//            WorldEvents.CHUNK_LOADED.factory().onChunkLoaded(this, globalVec, chunk);
             ValueTracker.setChunkLoads(ValueTracker.getChunkLoads() + 1);
 
             return chunk;
@@ -568,7 +564,6 @@ public class ServerWorld extends World implements Audience {
     }
 
     private void pollChunkQueues() {
-        this.chunkLock.lock();
         try {
             this.server.profiler.section("chunkUnloads", () -> {
                 var unload = this.chunksToUnload.poll();
@@ -594,7 +589,6 @@ public class ServerWorld extends World implements Audience {
         } catch (Throwable t) {
             World.LOGGER.error("Failed to poll chunk task", t);
         }
-        this.chunkLock.unlock();
     }
 
     /**
@@ -638,25 +632,21 @@ public class ServerWorld extends World implements Audience {
     }
 
     private void deferLoadChunk(ChunkVec chunkVec) {
-        this.chunkLock.lock();
         try {
             if (this.chunksToLoad.contains(chunkVec)) return;
             this.chunksToLoad.add(chunkVec);
         } catch (Throwable t) {
             World.LOGGER.error("Failed to defer chunk " + chunkVec + ":", t);
         }
-        this.chunkLock.unlock();
     }
 
     private void deferUnloadChunk(ChunkVec chunkVec) {
-        this.chunkLock.lock();
         try {
             if (this.chunksToUnload.contains(chunkVec)) return;
             this.chunksToUnload.add(chunkVec);
         } catch (Throwable t) {
             World.LOGGER.error("Failed to defer chunk " + chunkVec + ":", t);
         }
-        this.chunkLock.unlock();
     }
 
     /**
@@ -834,9 +824,9 @@ public class ServerWorld extends World implements Audience {
     @ApiStatus.Internal
     public void dispose() {
         this.disposed = true;
-        var saveSchedule = this.saveSchedule;
-        if (saveSchedule != null) saveSchedule.cancel(true);
-        this.saveExecutor.shutdownNow();
+//        var saveSchedule = this.saveSchedule;
+//        if (saveSchedule != null) saveSchedule.cancel(true);
+        this.saveExecutor.dispose();
 
         super.dispose();
 
@@ -946,9 +936,9 @@ public class ServerWorld extends World implements Audience {
         this.storage.createDir("players/");
         this.storage.createDir("regions/");
 
-        Path dimPath = this.getDimensionPath();
+        FileHandle dimPath = this.getDimensionPath();
 
-        World.LOGGER.info("Loading world: " + dimPath.getFileName());
+        World.LOGGER.info("Loading world: " + dimPath.name());
 
         //<editor-fold defaultstate="collapsed" desc="<<Loading: entities.ubo>>">
         if (this.storage.exists("entities.ubo")) {
@@ -968,22 +958,23 @@ public class ServerWorld extends World implements Audience {
         //</editor-fold>
 
         //<editor-fold defaultstate="collapsed" desc="<<Starting: Auto Save Schedule>>">
-        this.saveSchedule = this.server.schedule(new Task<>(new NamespaceID("auto_save")) {
-            @Override
-            public void run() {
-                try {
-                    ServerWorld.this.save(true);
-                } catch (Exception e) {
-                    World.LOGGER.error("Failed to save world:", e);
-                }
-                ServerWorld.this.saveSchedule = ServerWorld.this.server.schedule(this, QuantumServerConfig.autoSaveInterval, TimeUnit.SECONDS);
-            }
-        }, QuantumServerConfig.initialAutoSaveDelay, TimeUnit.SECONDS);
+        // TODO
+//        this.saveSchedule = this.server.schedule(new Task<>(new NamespaceID("auto_save")) {
+//            @Override
+//            public void run() {
+//                try {
+//                    ServerWorld.this.save(true);
+//                } catch (Exception e) {
+//                    World.LOGGER.error("Failed to save world:", e);
+//                }
+//                ServerWorld.this.saveSchedule = ServerWorld.this.server.schedule(this, QuantumServerConfig.autoSaveInterval, TimeUnit.SECONDS);
+//            }
+//        }, QuantumServerConfig.initialAutoSaveDelay, TimeUnit.SECONDS);
         //</editor-fold>
 
-        WorldEvents.LOAD_WORLD.factory().onLoadWorld(this, this.storage);
+//        WorldEvents.LOAD_WORLD.factory().onLoadWorld(this, this.storage);
 
-        World.LOGGER.info("Loaded world: " + dimPath.getFileName());
+        World.LOGGER.info("Loaded world: " + dimPath.name());
     }
 
     /**
@@ -998,10 +989,10 @@ public class ServerWorld extends World implements Audience {
         if (this.saving) return;
         this.saving = true;
 
-        Path dimPath = getDimensionPath();
+        FileHandle dimPath = getDimensionPath();
 
         // Log saving world message if not silent
-        if (!silent) World.LOGGER.info("Saving world: " + dimPath.getFileName());
+        if (!silent) World.LOGGER.info("Saving world: " + dimPath.name());
 
         // Save entities data
         var entitiesData = new ListType<MapType>();
@@ -1035,15 +1026,15 @@ public class ServerWorld extends World implements Audience {
         }
 
         // Trigger save world event
-        WorldEvents.SAVE_WORLD.factory().onSaveWorld(this, this.storage);
+//        WorldEvents.SAVE_WORLD.factory().onSaveWorld(this, this.storage);
 
         // Log saved world message if not silent
-        if (!silent) World.LOGGER.info("Saved world: " + dimPath.getFileName());
+        if (!silent) World.LOGGER.info("Saved world: " + dimPath.name());
         this.saving = false;
     }
 
-    private Path getDimensionPath() {
-        return this.storage.getDirectory().resolve("regions/" + key.id().getDomain() + "/" + key.id().getPath() + ".region");
+    private FileHandle getDimensionPath() {
+        return this.storage.getDirectory().child("regions/" + key.id().getDomain() + "/" + key.id().getPath() + ".region");
     }
 
     /**
@@ -1082,23 +1073,23 @@ public class ServerWorld extends World implements Audience {
      */
     @ApiStatus.Internal
     @NonBlocking
-    public CompletableFuture<Boolean> saveAsync(boolean silent) {
+    public Promise<Boolean> saveAsync(boolean silent) {
         // Check if there is a save schedule running
-        var saveSchedule = this.saveSchedule;
+//        var saveSchedule = this.saveSchedule;
 
         // If there is a save schedule running and it's not done, return the existing saveFuture if available
-        if (saveSchedule != null && !saveSchedule.isDone()) {
-            return this.saveFuture != null ? this.saveFuture : CompletableFuture.completedFuture(true);
-        }
+//        if (saveSchedule != null && !saveSchedule.isDone()) {
+//            return this.saveFuture != null ? this.saveFuture : CompletionPromise.completedFuture(true);
+//        }
 
         // If there is a save schedule running, cancel it
-        if (saveSchedule != null) {
-            saveSchedule.cancel(false);
-        }
+//        if (saveSchedule != null) {
+//            saveSchedule.cancel(false);
+//        }
 
         try {
             // Run the save operation asynchronously
-            return this.saveFuture = CompletableFuture.supplyAsync(() -> {
+            return this.saveFuture = Promise.supplyAsync(() -> {
                 try {
                     //noinspection BlockingMethodInNonBlockingContext
                     this.save(silent);
@@ -1109,11 +1100,11 @@ public class ServerWorld extends World implements Audience {
                     World.LOGGER.error("Failed to save world", e);
                     return false;
                 }
-            }, this.saveExecutor);
+            });
         } catch (Exception e) {
             // Log error if save operation fails
             World.LOGGER.error("Failed to save world", e);
-            return CompletableFuture.completedFuture(false);
+            return CompletionPromise.completedFuture(false);
         }
     }
 
@@ -1164,7 +1155,7 @@ public class ServerWorld extends World implements Audience {
      */
     private @NotNull Region openRegion(int rx, int ry, int rz) throws IOException {
         var fileHandle = this.storage.regionFile(rx, ry, rz);
-        try (var stream = new GZIPInputStream(new FileInputStream(fileHandle))) {
+        try (var stream = new GZIPInputStream(fileHandle.read())) {
             var dataStream = new DataInputStream(stream);
             return this.regionStorage.load(this, dataStream);
         }
@@ -1184,7 +1175,8 @@ public class ServerWorld extends World implements Audience {
 
         T spawn = super.spawn(entity);
 
-        if (entity instanceof ServerPlayer player) {
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer player = (ServerPlayer) entity;
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddEntityPacket(spawn));
@@ -1199,7 +1191,8 @@ public class ServerWorld extends World implements Audience {
 
         T spawn = super.spawn(entity, spawnData);
 
-        if (entity instanceof ServerPlayer player) {
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer player = (ServerPlayer) entity;
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddEntityPacket(spawn));
@@ -1334,13 +1327,13 @@ public class ServerWorld extends World implements Audience {
         return this.getChunk(chunkVec) != null;
     }
 
-    public @NotNull CompletableFuture<@Nullable ServerChunk> getOrLoadChunk(ChunkVec pos) {
+    public @NotNull Promise<@Nullable ServerChunk> getOrLoadChunk(ChunkVec pos) {
         @Nullable ServerChunk chunk = this.getChunk(pos);
         if (chunk == null) {
             return this.loadChunk(pos);
         }
 
-        return CompletableFuture.completedFuture(chunk);
+        return CompletionPromise.completedFuture(chunk);
     }
 
     public void stopTrackingChunk(ChunkVec vec, ServerPlayer serverPlayer) {
@@ -1423,7 +1416,7 @@ public class ServerWorld extends World implements Audience {
      */
     @NotThreadSafe
     public static class Region implements Disposable {
-        private final Set<ChunkVec> activeChunks = new CopyOnWriteArraySet<>();
+        private final Set<ChunkVec> activeChunks = Collections.synchronizedSet(new HashSet<>());
         private final RegionVec pos;
         public int dataVersion;
         public String lastPlayedIn = QuantumServer.get().getGameVersion();
@@ -1436,7 +1429,7 @@ public class ServerWorld extends World implements Audience {
         private final Object buildLock = new Object();
         private boolean dirty;
         private int chunkCount;
-        private Set<Vec3d> caveCache = new HashSet<>();
+        private final Set<Vec3d> caveCache = new HashSet<>();
 
         /**
          * Constructs a new region with the given world and position.
@@ -1525,7 +1518,6 @@ public class ServerWorld extends World implements Audience {
          * @param localVec the local position of the chunk to activate.
          * @return the acivated chunk, or null if the chunk wasn't loaded.
          */
-        @CanIgnoreReturnValue
         public @Nullable Chunk activate(@NotNull ChunkVec localVec) {
             synchronized (this) {
                 this.validateLocalVec(localVec);
@@ -1544,8 +1536,7 @@ public class ServerWorld extends World implements Audience {
         }
 
         private void validateLocalVec(ChunkVec chunkVec) {
-            Preconditions.checkElementIndex(chunkVec.getIntX(), World.REGION_SIZE, "Chunk x-position out of chance");
-            Preconditions.checkElementIndex(chunkVec.getIntZ(), World.REGION_SIZE, "Chunk z-position out of chance");
+
         }
 
         /**
@@ -1613,8 +1604,7 @@ public class ServerWorld extends World implements Audience {
          *
          * @param globalVec the global position of the chunk to generate.
          */
-        @NewInstance
-        public CompletableFuture<@NotNull ServerChunk> generateChunk(ChunkVec globalVec) {
+            public Promise<@NotNull ServerChunk> generateChunk(ChunkVec globalVec) {
             return this.buildChunkAsync(globalVec);
         }
 
@@ -1624,8 +1614,7 @@ public class ServerWorld extends World implements Audience {
          * @param globalVec the global position of the chunk to generate.
          * @return the generated chunk.
          */
-        @NewInstance
-        public @NotNull ServerChunk generateChunkNow(ChunkVec globalVec) {
+            public @NotNull ServerChunk generateChunkNow(ChunkVec globalVec) {
             this.validateThread();
 
             // Add the chunk to the list of generating chunks.
@@ -1642,7 +1631,11 @@ public class ServerWorld extends World implements Audience {
                 ServerChunk builtChunk = null;
             };
             try {
-                ref.builtChunk = this.buildChunk(globalVec);
+                ServerChunk chunk = this.buildChunk(globalVec);
+                if (chunk == null) {
+                    throw new IllegalChunkStateException("Failed to build chunk");
+                }
+                ref.builtChunk = chunk;
             } catch (CancellationException e) {
                 this.generatingChunks.remove(globalVec);
                 throw new CancellationException("Chunk was cancelled during build");
@@ -1690,7 +1683,7 @@ public class ServerWorld extends World implements Audience {
          *
          * @param globalVec the global position of the chunk to generate.
          */
-        private CompletableFuture<@NotNull ServerChunk> buildChunkAsync(ChunkVec globalVec) {
+        private Promise<@NotNull ServerChunk> buildChunkAsync(ChunkVec globalVec) {
             if (QuantumServerConfig.debugWarnChunkBuildOverload) {
                 World.LOGGER.warn("Chunk building is being overloaded!");
             }
@@ -1699,12 +1692,12 @@ public class ServerWorld extends World implements Audience {
             // Will return immediately if the chunk is already being built.
             synchronized (this.buildLock) {
                 if (this.generatingChunks.contains(globalVec))
-                    return CompletableFuture.failedFuture(new CancellationException("Chunk is already being built"));
+                    return CompletionPromise.failedFuture(new CancellationException("Chunk is already being built"));
                 this.generatingChunks.add(globalVec);
             }
 
             // Build the chunk asynchronously.
-            return CompletableFuture.supplyAsync(() -> {
+            return Promise.supplyAsync(() -> {
                 try {
                     var ref = new Object() {
                         ServerChunk builtChunk = null;
@@ -1726,35 +1719,35 @@ public class ServerWorld extends World implements Audience {
                     throw e;
                 }
             }, this.world.executor).thenApplyAsync(builtChunk -> QuantumServer.invoke(() -> {
-                var players = this.world.getServer().getPlayersInChunk(globalVec);
-                players.forEach(player -> {
-                    try {
-                        BlockVec globalTpVec = player.getBlockVec();
-                        BlockVec localTpVec = globalTpVec.chunkLocal();
-                        int x = localTpVec.getIntX();
-                        int z = localTpVec.getIntZ();
-                        Integer ascend = builtChunk.ascend(x, (int) player.getY(), z);
-                        if (ascend == null) return;
-                        player.teleportTo(globalTpVec.getIntX(), ascend, globalTpVec.getIntZ());
-                    } catch (Exception e) {
-                        World.LOGGER.error("Failed to teleport player outside unloaded chunk:", e);
-                    }
-                });
+                try {
+                    var players = this.world.getServer().getPlayersInChunk(globalVec);
+                    players.forEach(player -> {
+                        try {
+                            BlockVec globalTpVec = player.getBlockVec();
+                            BlockVec localTpVec = globalTpVec.chunkLocal();
+                            int x = localTpVec.getIntX();
+                            int z = localTpVec.getIntZ();
+                            Integer ascend = builtChunk.ascend(x, (int) player.getY(), z);
+                            if (ascend == null) return;
+                            player.teleportTo(globalTpVec.getIntX(), ascend, globalTpVec.getIntZ());
+                        } catch (Exception e) {
+                            World.LOGGER.error("Failed to teleport player outside unloaded chunk:", e);
+                        }
+                    });
 
-                if (!globalVec.equals(builtChunk.getVec())) {
-                    World.LOGGER.error(String.format("Failed to build chunk at {} as it was generated at {} instead of " + globalVec, globalVec, builtChunk.getVec()));
-                    throw new IllegalChunkStateException("Chunk generated at " + globalVec + " instead of " + builtChunk.getVec());
-                }
-                return builtChunk;
-            }).exceptionallyAsync(e -> {
-                if (!(e instanceof CancellationException))
+                    if (!globalVec.equals(builtChunk.getVec())) {
+                        World.LOGGER.error(String.format("Failed to build chunk at {} as it was generated at {} instead of " + globalVec, globalVec, builtChunk.getVec()));
+                        throw new IllegalChunkStateException("Chunk generated at " + globalVec + " instead of " + builtChunk.getVec());
+                    }
+                    return builtChunk;
+                } catch (Exception e) {
                     QuantumServer.LOGGER.error("Failed to build chunk at {}:", globalVec, e);
 
-                return null;
+                    return null;
+                }
             }).join(), this.world.executor);
         }
 
-        @CheckReturnValue
         private @NotNull ServerChunk buildChunk(ChunkVec globalVec) {
             if (globalVec.getSpace() != ChunkVecSpace.WORLD)
                 throw new IllegalArgumentException("Chunk vector must be in world space");
@@ -1768,7 +1761,7 @@ public class ServerWorld extends World implements Audience {
             recordedChanges1 = List.copyOf(world.recordedChanges);
             this.world.generator.generate(world, chunk, recordedChanges1);
 
-            WorldEvents.CHUNK_BUILT.factory().onChunkGenerated(this.world, this, chunk);
+//            WorldEvents.CHUNK_BUILT.factory().onChunkGenerated(this.world, this, chunk);
 
             // Put the chunk into the list of loaded chunks.
             ServerChunk builtChunk = chunk.build();
@@ -1798,7 +1791,7 @@ public class ServerWorld extends World implements Audience {
          * @param globalVec the global position.
          * @return the loaded/generated chunk.
          */
-        public CompletableFuture<@NotNull ServerChunk> openChunk(ChunkVec globalVec) {
+        public Promise<@NotNull ServerChunk> openChunk(ChunkVec globalVec) {
             this.validateThread();
 
             @Nullable ServerChunk loadedChunk = this.getChunk(globalVec);
@@ -1811,7 +1804,7 @@ public class ServerWorld extends World implements Audience {
                 throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", globalVec, loadedAt));
             }
 
-            return CompletableFuture.completedFuture(loadedChunk);
+            return CompletionPromise.completedFuture(loadedChunk);
         }
 
         @ApiStatus.Internal
@@ -1936,7 +1929,7 @@ public class ServerWorld extends World implements Audience {
          * @throws IOException if an I/O error occurs.
          */
         @ApiStatus.Internal
-        public void save(Region region, File file, boolean dispose) throws IOException {
+        public void save(Region region, FileHandle file, boolean dispose) throws IOException {
             synchronized (this) {
                 var pos = region.pos();
 
@@ -1948,7 +1941,7 @@ public class ServerWorld extends World implements Audience {
                 mapType.putInt("size", World.REGION_SIZE);
 
                 // Write chunks to the region file.
-                var chunks = region.getChunks().stream().filter(serverChunk -> !serverChunk.isOriginal()).toList();
+                var chunks = region.getChunks().stream().filter(serverChunk -> !serverChunk.isOriginal()).collect(Collectors.toList());
                 var idx = 0;
                 CommonConstants.LOGGER.info("Saving {} chunks in region {}", chunks.size(), pos);
                 for (var chunk : chunks) {
@@ -1961,7 +1954,7 @@ public class ServerWorld extends World implements Audience {
                 }
 
                 // Write region metadata.
-                DataIo.writeCompressed(mapType, file);
+                DataIo.writeCompressed(mapType, file.write(false));
 
                 // Dispose the region if requested.
                 if (dispose) {
@@ -2017,10 +2010,6 @@ public class ServerWorld extends World implements Audience {
                 var chunkY = Integer.parseInt(parts[1]);
 
                 var chunkZ = Integer.parseInt(parts[2]);
-
-                // Validate chunk coordinates.
-                Preconditions.checkElementIndex(chunkX, World.REGION_SIZE, "Invalid chunk X position");
-                Preconditions.checkElementIndex(chunkZ, World.REGION_SIZE, "Invalid chunk Z position");
 
                 // Create local and global chunk coordinates.
                 var localChunkVec = new ChunkVec(chunkX, chunkY, chunkZ, ChunkVecSpace.REGION);
@@ -2080,39 +2069,67 @@ public class ServerWorld extends World implements Audience {
         }
     }
 
-    public record RecordedChange(int x, int y, int z, BlockState block) {
+    public static final class RecordedChange {
+        private final int x;
+        private final int y;
+        private final int z;
+        private final BlockState block;
 
-        public MapType save() {
-            MapType mapType = new MapType();
-            mapType.putInt("x", this.x);
-            mapType.putInt("y", this.y);
-            mapType.putInt("z", this.z);
-            mapType.put("block", this.block.save());
-            return mapType;
+        public RecordedChange(int x, int y, int z, BlockState block) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.block = block;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            RecordedChange that = (RecordedChange) o;
-            return x == that.x && y == that.y && z == that.z;
+            public MapType save() {
+                MapType mapType = new MapType();
+                mapType.putInt("x", this.x);
+                mapType.putInt("y", this.y);
+                mapType.putInt("z", this.z);
+                mapType.put("block", this.block.save());
+                return mapType;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                RecordedChange that = (RecordedChange) o;
+                return x == that.x && y == that.y && z == that.z;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(x, y, z);
+            }
+
+            @Override
+            public String toString() {
+                return "RecordedChange{" +
+                       "x=" + x +
+                       ", y=" + y +
+                       ", z=" + z +
+                       ", block=" + block +
+                       '}';
+            }
+
+        public int x() {
+            return x;
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y, z);
+        public int y() {
+            return y;
         }
 
-        @Override
-        public String toString() {
-            return "RecordedChange{" +
-                   "x=" + x +
-                   ", y=" + y +
-                   ", z=" + z +
-                   ", block=" + block +
-                   '}';
+        public int z() {
+            return z;
         }
 
-    }
+        public BlockState block() {
+            return block;
+        }
+
+
+        }
 }

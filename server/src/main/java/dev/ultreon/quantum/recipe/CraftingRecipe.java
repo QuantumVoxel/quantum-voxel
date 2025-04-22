@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.recipe;
 
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.*;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public final class CraftingRecipe implements Recipe {
     private final List<ItemStack> ingredients;
     private final ItemStack result;
-    private boolean isAdvanced;
+    private final boolean isAdvanced;
 
     public CraftingRecipe(List<ItemStack> ingredients, ItemStack result) {
         this(ingredients, result, false);
@@ -75,18 +75,19 @@ public final class CraftingRecipe implements Recipe {
         return RecipeType.CRAFTING;
     }
 
-    public static CraftingRecipe deserialize(NamespaceID namespaceID, Json5Object object) {
+    public static CraftingRecipe deserialize(NamespaceID namespaceID, JsonValue object) {
         List<ItemStack> ingredients = new ArrayList<>();
 
-        for (Json5Element json5Element : object.getAsJson5Array("ingredients")) {
-            Json5Object asJson5Object = json5Element.getAsJson5Object();
-            ItemStack itemStack = ItemStack.deserialize(asJson5Object);
+        for (JsonValue JsonValue : object.get("ingredients")) {
+            JsonValue asJsonObject = JsonValue;
+            if (!asJsonObject.isObject()) throw new GdxRuntimeException("Expected an object");
+            ItemStack itemStack = ItemStack.deserialize(asJsonObject);
 
             ingredients.add(itemStack);
         }
 
-        ItemStack result = ItemStack.deserialize(object.getAsJson5Object("result"));
-        boolean advanced = object.has("advanced") && object.getAsJson5Primitive("advanced").getAsBoolean();
+        ItemStack result = ItemStack.deserialize(object.get("result"));
+        boolean advanced = object.has("advanced") && object.get("advanced").asBoolean();
 
         return new CraftingRecipe(ingredients, result, advanced);
     }
@@ -129,7 +130,8 @@ public final class CraftingRecipe implements Recipe {
                 return false;
             }
         }
-        if (!(inventory instanceof ContainerMenu menu)) return false;
+        if (!(inventory instanceof ContainerMenu)) return false;
+        ContainerMenu menu = (ContainerMenu) inventory;
         var ingredients = this.ingredients.stream().map(ItemStack::copy).collect(Collectors.toList());
 
         for (ItemSlot slot : menu.slots) {

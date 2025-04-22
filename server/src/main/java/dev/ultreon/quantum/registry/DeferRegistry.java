@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.registry;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.util.NamespaceID;
 import groovy.lang.Closure;
@@ -17,9 +16,7 @@ public class DeferRegistry<T> {
     private final Registry<T> registry;
     private final ArrayList<HashMap.Entry<NamespaceID, Supplier<T>>> objects = new ArrayList<>();
 
-    protected DeferRegistry(@NotNull String modId, @NotNull Registry<T> registry) {
-        Preconditions.checkNotNull(modId, "modId");
-        this.modId = modId;
+    protected DeferRegistry(@NotNull String modId, @NotNull Registry<T> registry) {        this.modId = modId;
         this.registry = registry;
     }
 

@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.files.FileHandle;
-import dev.ultreon.ubo.DataIo;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.DataIo;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 
 import java.io.IOException;
 import java.io.OutputStream;

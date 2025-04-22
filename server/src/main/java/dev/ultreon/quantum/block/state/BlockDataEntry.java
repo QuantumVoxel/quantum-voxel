@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.block.state;
 
-import dev.ultreon.ubo.types.BooleanType;
-import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.ubo.types.IntType;
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonValue;
+import dev.ultreon.quantum.ubo.types.BooleanType;
+import dev.ultreon.quantum.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.IntType;
 import dev.ultreon.quantum.network.PacketIO;
 
 import java.util.Locale;
@@ -54,7 +54,7 @@ public abstract class BlockDataEntry<T> {
 
     public abstract void write(PacketIO packetBuffer);
 
-    public abstract BlockDataEntry<?> parse(Json5Object overrideObj);
+    public abstract BlockDataEntry<?> parse(JsonValue overrideObj);
 
     @Override
     public boolean equals(Object o) {
@@ -107,8 +107,8 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public BlockDataEntry<?> parse(Json5Object overrideObj) {
-            return this.with(overrideObj.get("value").getAsBoolean());
+        public BlockDataEntry<?> parse(JsonValue overrideObj) {
+            return this.with(overrideObj.get("value").asBoolean());
         }
 
         @Override
@@ -168,8 +168,8 @@ public abstract class BlockDataEntry<T> {
         }
 
         @Override
-        public BlockDataEntry<?> parse(Json5Object overrideObj) {
-            return this.with(overrideObj.get("value").getAsInt());
+        public BlockDataEntry<?> parse(JsonValue overrideObj) {
+            return this.with(overrideObj.get("value").asInt());
         }
 
         @Override
@@ -212,8 +212,8 @@ public abstract class BlockDataEntry<T> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockDataEntry<?> parse(Json5Object overrideObj) {
-            return this.with((T) Enum.valueOf(this.value.getClass(), overrideObj.get("value").getAsString().toUpperCase()));
+        public BlockDataEntry<?> parse(JsonValue overrideObj) {
+            return this.with((T) Enum.valueOf(this.value.getClass(), overrideObj.get("value").asString().toUpperCase()));
         }
 
         @Override

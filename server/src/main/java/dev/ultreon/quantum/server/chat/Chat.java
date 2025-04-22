@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.server.chat;
 
 import dev.ultreon.quantum.api.commands.CommandSender;
-import dev.ultreon.quantum.api.commands.MessageCode;
+import dev.ultreon.quantum.api.neocommand.MessageCode;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.MutableText;

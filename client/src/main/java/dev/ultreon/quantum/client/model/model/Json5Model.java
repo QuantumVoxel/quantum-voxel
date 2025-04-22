@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.model.model;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.google.common.collect.Table;
+import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;

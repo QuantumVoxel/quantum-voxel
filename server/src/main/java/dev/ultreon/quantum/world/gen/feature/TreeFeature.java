@@ -48,7 +48,7 @@ public class TreeFeature extends TerrainFeature {
 
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y);
+                System.out.println("[Start " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + y);
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
@@ -65,14 +65,14 @@ public class TreeFeature extends TerrainFeature {
                         setter.set(x + xOffset, ty, z + zOffset, this.leaves.getDefaultState());
 
                         if (WorldGenDebugContext.isActive()) {
-                            System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Setting leaf at " + (x + xOffset) + ", " + ty + ", " + (z + zOffset));
+                            System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Setting leaf at " + (x + xOffset) + ", " + ty + ", " + (z + zOffset));
                         }
                     }
                 }
             }
 
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Success");
+                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Success");
             }
             return true;
         }

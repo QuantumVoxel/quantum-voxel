@@ -8,13 +8,13 @@ import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ConfigGui extends Screen {
     private final CraftyConfig config;
@@ -32,7 +32,7 @@ public class ConfigGui extends Screen {
 
         this.entryWidgets = entries.stream()
                 .map(ConfigEntry::createWidget)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<ConfigEntry<?>> createEntries() {
@@ -65,7 +65,7 @@ public class ConfigGui extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
         if (this.list != null && renderer.pushScissors(this.list.getBounds())) {

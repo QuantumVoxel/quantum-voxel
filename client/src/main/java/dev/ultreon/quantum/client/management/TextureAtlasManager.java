@@ -19,6 +19,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
     public static final @NotNull NamespaceID BLOCK_ATLAS_ID = NamespaceID.of("block");
     public static final @NotNull NamespaceID ITEM_ATLAS_ID = NamespaceID.of("item");
     public static final @NotNull NamespaceID ENVIRONMENT_ID = NamespaceID.of("environment");
-    private final Map<NamespaceID, TextureAtlas> atlasMap = new LinkedHashMap<>();
+    private final Map<NamespaceID, TextureAtlas> atlasMap = new HashMap<>();
     private final QuantumClient client;
 
     public TextureAtlasManager(QuantumClient client) {

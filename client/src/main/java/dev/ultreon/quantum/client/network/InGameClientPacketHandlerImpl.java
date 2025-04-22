@@ -57,7 +57,7 @@ import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import kotlin.system.TimingKt;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import dev.ultreon.quantum.Promise;
 
 import static dev.ultreon.quantum.world.World.CS;
 
@@ -134,7 +134,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
-        CompletableFuture.runAsync(() -> {
+        Promise.runAsync(() -> {
             try {
                 LocalPlayer player = this.client.player;
                 if (player == null/* || new Vec2d(pos.setX(), pos.z()).dst(new Vec2d(player.getChunkVec().setX(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
@@ -330,7 +330,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 }
             }
 
-            if (this.client.screen instanceof ContainerScreen screen) {
+            if (this.client.screen instanceof ContainerScreen) {
+                ContainerScreen screen = (ContainerScreen) this.client.screen;
                 screen.emitUpdate();
             }
         }
@@ -350,7 +351,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
             }
         }
 
-        if (this.client.screen instanceof InventoryScreen screen) {
+        if (this.client.screen instanceof InventoryScreen) {
+            InventoryScreen screen = (InventoryScreen) this.client.screen;
             screen.emitUpdate();
         }
     }
@@ -408,7 +410,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onTabCompleteResult(String[] options) {
         Screen screen = this.client.screen;
-        if (screen instanceof ChatScreen chatScreen) {
+        if (screen instanceof ChatScreen) {
+            ChatScreen chatScreen = (ChatScreen) screen;
             QuantumClient.invoke(() -> chatScreen.onTabComplete(options));
         }
     }
@@ -447,7 +450,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onBlockEntitySet(BlockVec pos, BlockEntityType<?> blockEntity) {
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess worldAccess = client.world;
-            if (worldAccess instanceof ClientWorld world) {
+            if (worldAccess instanceof ClientWorld) {
+                ClientWorld world = (ClientWorld) worldAccess;
                 world.setBlockEntity(pos, blockEntity.create(world, pos));
             }
         });

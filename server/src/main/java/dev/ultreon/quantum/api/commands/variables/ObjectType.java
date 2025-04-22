@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.api.commands.variables;
 
-import dev.ultreon.libs.commons.v0.Either;
-import dev.ultreon.quantum.api.commands.*;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.Item;
@@ -11,7 +9,6 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.ServerWorld;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ObjectType<T> implements ObjectSource<T> {
@@ -29,7 +26,6 @@ public class ObjectType<T> implements ObjectSource<T> {
     public static final ObjectType<Entity> ENTITY = new ObjectType<>("entity");
     public static final ObjectType<Item> ITEM = new ObjectType<>("item");
     public static final ObjectType<ItemStack> ITEM_STACK = new ObjectType<>("item");
-    public static final ObjectType<Command> COMMAND = new ObjectType<>("command");
     public static final ObjectType<Void> NONE = new ObjectType<>("none");
 
     static {
@@ -64,10 +60,6 @@ public class ObjectType<T> implements ObjectSource<T> {
         field.setSource(this);
     }
 
-    public ObjectField<T, ?> getField(String name) {
-        return this.fields.get(name);
-    }
-
     public Class<T> getType() {
         return type;
     }
@@ -75,42 +67,6 @@ public class ObjectType<T> implements ObjectSource<T> {
     @Override
     public ObjectType<T> getObjectType() {
         return this;
-    }
-
-    @Override
-    public Object get(CommandSender sender, CommandReader ctx) throws CommandParseException {
-        String name = ctx.readUntil('.');
-        ObjectField<T, ?> field = getField(name);
-        if (field == null) throw new CommandParseException("Unknown field " + ctx.readString(), ctx.getOffset());
-        Object o = field.get(sender, ctx);
-
-        ctx.readChar();
-        if (ctx.getCurChar() == '.') {
-            ObjectType<?> objectType = ObjectType.get(o.getClass());
-            if (objectType == null) {
-                throw new CommandParseException("Illegal type " + o.getClass().getName(), ctx.getOffset());
-            }
-
-            return objectType.get(sender, ctx);
-        }
-
-        return o;
-    }
-
-    @Override
-    public Either<Object, List<String>> tabComplete(ServerPlayer serverPlayer, CommandReader ctx, StringBuilder currentCode) throws CommandParseException.EndOfArgument {
-        String s = ctx.readUntil('.');
-        if (ctx.getLastChar() == '.') {
-            ObjectField<T, ?> tObjectField = fields.get(s);
-            if (tObjectField == null) {
-                return Either.right(TabCompleting.prefixed(currentCode.toString(), ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(currentCode.length()), fields.keySet().toArray(new String[0]))));
-            }
-
-            return tObjectField.tabComplete(serverPlayer, ctx, currentCode);
-        }
-
-        return Either.right(TabCompleting.prefixed(currentCode.toString(), ctx.getArgument(), TabCompleting.strings(ctx.getArgument().substring(currentCode.length()), fields.keySet().toArray(new String[0]))));
-
     }
 
     public boolean isInstance(Object obj) {

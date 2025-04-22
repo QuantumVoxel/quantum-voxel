@@ -9,7 +9,6 @@ import dev.ultreon.quantum.client.gui.widget.layout.StandardLayout;
 import dev.ultreon.quantum.client.api.events.gui.WidgetEvents;
 import dev.ultreon.quantum.client.input.controller.GuiNavigator;
 
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +42,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     protected Widget focused;
     protected Widget hoveredWidget;
 
-    public UIContainer(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public UIContainer(int width, int height) {
         super(width, height);
     }
 
@@ -71,7 +70,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     @Override
-    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void render(@NotNull Renderer renderer, float deltaTime) {
         super.render(renderer, deltaTime);
 
         for (var widget : this.widgets) {
@@ -87,7 +86,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
         if (renderer.pushScissors(this.getBounds())) {
@@ -122,7 +121,8 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
             var widget = this.widgets.get(i);
             if (!widget.isVisible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?> uiContainer) {
+                if (widget instanceof UIContainer<?>) {
+                    UIContainer<?> uiContainer = (UIContainer<?>) widget;
                     uiContainer.mouseMoved(x, y);
                     return;
                 }
@@ -184,7 +184,8 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
             if (!widget.isVisible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?> container) {
+                if (widget instanceof UIContainer<?>) {
+                    UIContainer<?> container = (UIContainer<?>) widget;
                     output.addAll(container.getWidgetsAt(x, y));
                 }
                 output.add(widget);

@@ -13,7 +13,6 @@ import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import it.unimi.dsi.fastutil.chars.CharPredicate;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
@@ -38,7 +37,7 @@ public class TextEntry extends Widget {
      * @param width  the width of the text entry.
      * @param height the height of the text entry.
      */
-    public TextEntry(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public TextEntry(int width, int height) {
         super(width, height);
 
         this.hint = this.register(id("hint"), new TextComponent());

@@ -33,22 +33,22 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
             }
             return List.of(entity);
         } else if (type == Selector.Type.NAME) {
-            List<Entity> collect = ctx.getServer().getEntities().filter(entity -> entity.getName().equals(selector.value()) && predicate.test(entity)).collect(Collectors.toUnmodifiableList());
+            List<Entity> collect = ctx.getServer().getEntities().filter(entity -> entity.getName().equals(selector.value()) && predicate.test(entity)).collect(Collectors.toList());
             if (collect.isEmpty()) {
                 throw new CommandParseException("No entity with name '" + selector.value() + "'", ctx.tell());
             }
             return collect;
         } else if (type == Selector.Type.TAG) {
             switch ((String) selector.value()) {
-                case "me" -> {
-                    if (ctx.getSender() instanceof Entity entity) {
+                case "me":
+                    if (ctx.getSender() instanceof Entity) {
+                        Entity entity = (Entity) ctx.getSender();
                         if (!predicate.test(entity)) {
                             throw new CommandParseException("You don't seem to pass the conditions", ctx.tell());
                         }
                         return List.of(entity);
                     } else throw new CommandParseException("You are not an entity", ctx.tell());
-                }
-                case "selection" -> {
+                case "selection":
                     Selections selections = Selections.get(ctx.getSender());
                     Entity entity = selections.getEntity();
                     if (entity == null) {
@@ -58,10 +58,10 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                         throw new CommandParseException("Selected entity doesn't pass the conditions", ctx.tell());
                     }
                     return List.of(entity);
-                }
-                case "target" -> {
-                    if (ctx.getSender() instanceof Player entity) {
-                        Hit hit = entity.rayCast();
+                case "target":
+                    if (ctx.getSender() instanceof Player) {
+                        Player player = (Player) ctx.getSender();
+                        Hit hit = player.rayCast();
                         if (hit instanceof EntityHit) {
                             Entity entity1 = ((EntityHit) hit).getEntity();
                             if (!predicate.test(entity1)) {
@@ -72,16 +72,16 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                             throw new CommandParseException("You are not looking at an entity", ctx.tell());
                         }
                     } else throw new CommandParseException("You are not an player", ctx.tell());
-                }
-                default -> throw new CommandParseException("Invalid entity tag: " + selector.value(), ctx.tell());
+                default:
+                    throw new CommandParseException("Invalid entity tag: " + selector.value(), ctx.tell());
             }
         } else if (type == Selector.Type.UUID) {
-            List<Entity> collect = ctx.getServer().getEntities().filter(entity -> entity.getUuid().equals(selector.value())).collect(Collectors.toUnmodifiableList());
+            List<Entity> collect = ctx.getServer().getEntities().filter(entity -> entity.getUuid().equals(selector.value())).collect(Collectors.toList());
             if (collect.isEmpty())
                 throw new CommandParseException("No entity with uuid " + selector.value(), ctx.tell());
             if (collect.size() > 1)
                 throw new CommandParseException("Multiple entities with uuid " + selector.value(), ctx.tell());
-            if (!predicate.test(collect.getFirst()))
+            if (!predicate.test(collect.get(0)))
                 throw new CommandParseException("Entity with uuid " + selector.value() + " doesn't pass the conditions", ctx.tell());
             return collect;
         } else if (type == Selector.Type.VARIABLE) {
@@ -89,13 +89,15 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
             if (!(sender instanceof Player)) throw new CommandParseException("You are not a player", ctx.tell());
             PlayerVariables variables = PlayerVariables.get((ServerPlayer) sender);
             Object variable = variables.getVariable((String) selector.value());
-            if (variable instanceof Entity entity) {
+            if (variable instanceof Entity) {
+                Entity entity = (Entity) variable;
                 if (!predicate.test(entity)) {
                     throw new CommandParseException("Variable '" + selector.value() + "' doesn't pass the conditions", ctx.tell());
                 }
                 return List.of(entity);
             }
-            else if (variable instanceof List<?> list) {
+            else if (variable instanceof List<?>) {
+                List<?> list = (List<?>) variable;
                 List<Entity> collect = (List<Entity>) list.stream().filter(entity -> entity instanceof Entity).collect(Collectors.toList());
                 if (collect.isEmpty())
                     throw new CommandParseException("No entity in list variable '" + selector.value() + "'", ctx.tell());

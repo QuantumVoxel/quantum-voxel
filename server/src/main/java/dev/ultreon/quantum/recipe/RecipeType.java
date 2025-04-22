@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.recipe;
 
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.PacketCodec;
 import dev.ultreon.quantum.registry.Registries;
@@ -13,13 +13,13 @@ import java.util.Objects;
  * Represents a type of recipe.
  */
 public final class RecipeType<T extends Recipe> {
-    public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<>(CraftingRecipe::deserialize, CraftingRecipe.class, PacketCodec.of(packetIO -> {
+    public static final RecipeType<CraftingRecipe> CRAFTING = RecipeType.register("crafting", new RecipeType<CraftingRecipe>(CraftingRecipe::deserialize, CraftingRecipe.class, PacketCodec.of(packetIO -> {
         return new CraftingRecipe(packetIO.readList(PacketIO::readItemStack), packetIO.readItemStack());
     }, ((packetIO, data) -> {
         packetIO.writeList(data.ingredients(), PacketIO::writeItemStack);
         packetIO.writeItemStack(data.result());
     }))));
-    public static final RecipeType<BlastingRecipe> BLASTING = RecipeType.register("blasting", new RecipeType<>(BlastingRecipe::deserialize, BlastingRecipe.class, PacketCodec.of(
+    public static final RecipeType<BlastingRecipe> BLASTING = RecipeType.register("blasting", new RecipeType<BlastingRecipe>(BlastingRecipe::deserialize, BlastingRecipe.class, PacketCodec.of(
             packetIO -> {
                 return new BlastingRecipe(packetIO.readItemStack(), packetIO.readInt(), packetIO.readInt(), packetIO.readItemStack());
             },
@@ -82,7 +82,7 @@ public final class RecipeType<T extends Recipe> {
      * @param root The JSON object containing the recipe data
      * @return The deserialized recipe
      */
-    public T deserialize(NamespaceID id, Json5Object root) {
+    public T deserialize(NamespaceID id, JsonValue root) {
         return this.deserializer.deserialize(id, root);
     }
 
@@ -139,6 +139,6 @@ public final class RecipeType<T extends Recipe> {
          * @param root The JSON object containing the recipe data
          * @return The deserialized recipe
          */
-        T deserialize(NamespaceID id, Json5Object root);
+        T deserialize(NamespaceID id, JsonValue root);
     }
 }

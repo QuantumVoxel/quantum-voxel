@@ -1,14 +1,8 @@
 package dev.ultreon.quantum.server.player;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.DoNotCall;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.api.commands.Command;
-import dev.ultreon.quantum.api.commands.CommandContext;
-import dev.ultreon.quantum.api.commands.TabCompleting;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
-import dev.ultreon.quantum.api.neocommand.CommandReader;
 import dev.ultreon.quantum.api.neocommand.Commands;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -32,7 +26,6 @@ import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.recipe.RecipeType;
-import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
@@ -44,8 +37,7 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
-import org.apache.commons.lang3.ArrayUtils;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -179,9 +171,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     @ApiStatus.Internal
     public void spawn(Vec3d position, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
-        Preconditions.checkNotNull(position, "position");
-        Preconditions.checkNotNull(connection, "connection");
-
         // Set the entity's connection and health, and position it at the specified position
         this.connection = connection;
         this.setHealth(this.getMaxHealth());
@@ -392,15 +381,19 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void onChunkStatus(@NotNull ChunkVec vec, Chunk.Status status) {
         switch (status) {
-            case FAILED -> this.handleFailedChunk(vec);
-            case UNLOADED -> {
+            case FAILED:
+                this.handleFailedChunk(vec);
+                break;
+            case UNLOADED:
                 ServerChunk chunk = this.world.getChunkNoLoad(vec);
                 if (chunk != null) {
                     chunk.getTracker().stopTracking(this);
                 }
                 this.chunkTracker.stopTracking(vec);
-            }
-            case SUCCESS -> this.handleClientLoadChunk(vec);
+                break;
+            case SUCCESS:
+                this.handleClientLoadChunk(vec);
+                break;
         }
 
         // Handle chunk load failure if the status is failed
@@ -692,11 +685,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     @Override
-    @DoNotCall
     public void onTeleportedDimension(@NotNull WorldAccess world) {
         super.onTeleportedDimension(world);
 
-        if (!(world instanceof ServerWorld serverWorld)) throw new IllegalArgumentException("Expected a " + ServerWorld.class.getName() +", got a " + world.getClass().getName());
+        if (!(world instanceof ServerWorld)) throw new IllegalArgumentException("Expected a " + ServerWorld.class.getName() + ", got a " + world.getClass().getName());
+        ServerWorld serverWorld = (ServerWorld) world;
         this.world = serverWorld;
         this.sendPacket(new S2CChangeDimensionPacket(world.getDimension()));
     }
@@ -707,7 +700,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void resendCommands() {
-        this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().collect(Collectors.toList())));
+//        this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().collect(Collectors.toUnmodifiableList())));
     }
 
     public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {
@@ -758,7 +751,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         Entity entity = this.world.getEntity(id);
         if (entity == null) return;
         this.world.sendAllTrackingExcept((int) entity.getX(), (int) entity.getY(), (int) entity.getZ(), new S2CPlayerAttackPacket(this.getId(), id), this);
-        if (entity instanceof LivingEntity livingEntity) {
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
             livingEntity.hurt(this.getAttackDamage(), DamageSource.ATTACK);
         }
     }
@@ -823,6 +817,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public Collection<String> getVariableNames(Class<?> clazz) {
-        return PlayerVariables.get(this).getVariablesByType(clazz).sorted().toList();
+        return PlayerVariables.get(this).getVariablesByType(clazz).sorted().collect(Collectors.toList());
     }
 }

@@ -19,15 +19,12 @@ package dev.ultreon.quantum.util;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.world.Direction;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 /** Encapsulates a ray having a starting position and a unit length direction.
  * 
  * @author badlogicgames@gmail.com */
 public class Ray implements Serializable {
-	@Serial
-	private static final long serialVersionUID = -620692054835390878L;
 	public final Vec3d origin = new Vec3d();
 	public final Vec3d direction = new Vec3d();
 

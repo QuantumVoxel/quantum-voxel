@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.debug;
 
 import com.badlogic.gdx.graphics.Color;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.ClientRegistries;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -14,23 +13,28 @@ public class DebugOverlay {
     final QuantumClient client;
     private int leftY;
     private int rightY;
-    private int page;
+    private int page = 1;
+    private int scale;
 
     public DebugOverlay(QuantumClient client) {
         this.client = client;
     }
 
-    public void render(Renderer renderer) {
+    public void render(Renderer renderer, int scale) {
         this.leftY = DebugOverlay.OFFSET;
         this.rightY = DebugOverlay.OFFSET;
 
-        if (!this.client.isShowDebugHud() || this.client.world == null) return;
+        this.scale = scale;
+
+        left(renderer, "Page", this.page);
+        left();
 
         this.renderPage(renderer);
     }
 
     private void renderPage(Renderer renderer) {
         DebugPage page = this.getPage();
+        if (page == null) return;
         page.render(new RenderDebugPageContext(this, renderer));
     }
 
@@ -67,7 +71,6 @@ public class DebugOverlay {
         return ClientRegistries.DEBUG_PAGE.byId(this.page);
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay left(Renderer renderer, String name, Object value) {
         String textObject = escape(name) + ": [light grey]" + escape(String.valueOf(value));
         int width = renderer.textWidth(textObject);
@@ -77,7 +80,6 @@ public class DebugOverlay {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay left(Renderer renderer, String text) {
         String textObject = "[*][_][gold]" + escape(text);
         int width = renderer.textWidth(textObject);
@@ -87,29 +89,27 @@ public class DebugOverlay {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay left() {
         this.leftY += 11;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay right(Renderer renderer, String name, Object value) {
         String textObject = escape(name) + ": [light grey]" + escape(String.valueOf(value));
         int width = renderer.textWidth(textObject);
-        int screenWidth = this.client.getScaledWidth();
+        int screenWidth = this.client.getWidth() / scale;
         renderer.fill(screenWidth - DebugOverlay.OFFSET - 3 - width, this.rightY - 1, width + 5, 11, COLOR);
         renderer.textRight(textObject, screenWidth - DebugOverlay.OFFSET, this.rightY);
         this.rightY += 11;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay right(Renderer renderer, String text) {
         String textObject = "[*][_][gold]" + escape(text);
         int width = renderer.textWidth(textObject);
+        int screenWidth = this.client.getWidth() / 2;
         renderer.fill(DebugOverlay.OFFSET - 2, this.rightY - 1, width + 5, 11, COLOR);
-        renderer.textRight(textObject, DebugOverlay.OFFSET, this.rightY);
+        renderer.textRight(textObject, screenWidth - DebugOverlay.OFFSET, this.rightY);
         this.rightY += 11;
         return this;
     }
@@ -118,13 +118,11 @@ public class DebugOverlay {
         return text.replace("[", "[[").replace("{", "{{");
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay right() {
         this.rightY += 11;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay entryLine(Renderer renderer, int idx, String name, long nanos) {
         String lText = "[*][[" + idx + "] [white]" + name;
         String rText = nanos < 10000.0
@@ -139,7 +137,6 @@ public class DebugOverlay {
         return this;
     }
 
-    @CanIgnoreReturnValue
     DebugOverlay entryLine(Renderer renderer, int idx, String name) {
         String text = "[gold][[" + idx + "] [white]" + name;
         int width = renderer.textWidth(text);
@@ -149,7 +146,6 @@ public class DebugOverlay {
         return this;
     }
 
-    @CanIgnoreReturnValue
     DebugOverlay entryLine(Renderer renderer, TextObject text) {
         int width = renderer.textWidth(text);
         renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(width + 2, 304), 11, COLOR);
@@ -159,7 +155,6 @@ public class DebugOverlay {
     }
 
     @Deprecated
-    @CanIgnoreReturnValue
     DebugOverlay entryLine(Renderer renderer, String text) {
         int width = renderer.textWidth(text);
         renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, Math.max(width + 2, 304), 11, COLOR);
@@ -168,7 +163,6 @@ public class DebugOverlay {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay entryLine(Renderer renderer, String name, String value) {
         String lText = "[white]" + name + "[ ]";
         String rText = "[light grey]" + value + "[ ]";
@@ -181,7 +175,6 @@ public class DebugOverlay {
         return this;
     }
 
-    @CanIgnoreReturnValue
     public DebugOverlay entryLine(Renderer renderer) {
         renderer.fill(DebugOverlay.OFFSET - 2, this.leftY - 1, 304, 11, COLOR);
         this.leftY += 11;
@@ -189,7 +182,8 @@ public class DebugOverlay {
     }
 
     public void updateProfiler() {
-        if (this.getPage() instanceof ProfilerDebugPage profilerPage) {
+        if (this.getPage() instanceof ProfilerDebugPage) {
+            ProfilerDebugPage profilerPage = (ProfilerDebugPage) this.getPage();
             var profiler = this.client.profiler;
             profilerPage.profile = profiler.collect();
         }

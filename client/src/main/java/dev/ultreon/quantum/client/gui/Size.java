@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui;
 
 import dev.ultreon.quantum.util.Copyable;
-import org.checkerframework.common.returnsreceiver.qual.This;
 
 import java.util.Objects;
 
@@ -23,19 +22,19 @@ public class Size implements Copyable<Size> {
         this(0, 0);
     }
 
-    public @This Size set(int width, int height) {
+    public Size set(int width, int height) {
         this.width = width;
         this.height = height;
         return this;
     }
 
-    public @This Size set(int size) {
+    public Size set(int size) {
         this.width = size;
         this.height = size;
         return this;
     }
 
-    public @This Size set(Size size) {
+    public Size set(Size size) {
         this.width = size.width;
         this.height = size.height;
         return this;

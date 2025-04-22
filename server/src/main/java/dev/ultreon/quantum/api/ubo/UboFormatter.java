@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.api.ubo;
 
-import dev.ultreon.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.text.TextObject;
 
 public class UboFormatter {

@@ -37,7 +37,7 @@ public class CactiFeature extends TerrainFeature {
 
         if (this.random.nextFloat() < this.threshold) {
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[Start " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y);
+                System.out.println("[Start " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + y);
             }
 
             var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
@@ -47,7 +47,7 @@ public class CactiFeature extends TerrainFeature {
             }
 
             if (WorldGenDebugContext.isActive()) {
-                System.out.println("[End " + Thread.currentThread().threadId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Success");
+                System.out.println("[End " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + y + " - Success");
             }
             return true;
         }

@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.debug;
 
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 public class Debugger {
     private static final Logger LOGGER = LoggerFactory.getLogger(Debugger.class);

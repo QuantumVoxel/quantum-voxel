@@ -12,7 +12,6 @@ import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2f;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -147,7 +146,7 @@ public abstract class Screen extends UIContainer<Screen> {
      * @see #renderChildren(Renderer, float)
      */
     @Override
-    public final void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public final void render(@NotNull Renderer renderer, float deltaTime) {
         if (this.titleWidget != null) {
             renderer.pushMatrix();
             renderer.translate(0, this.titleWidget.getHeight(), 0);

@@ -1,12 +1,9 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +40,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     private Notification dragNotification;
     private boolean startedDragging;
 
-    public HorizontalList(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public HorizontalList(int width, int height) {
         super(width, height);
 
     }
@@ -297,8 +294,6 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     public void removeEntryIf(Predicate<T> predicate) {
-        Preconditions.checkNotNull(predicate, "predicate");
-
         int found = -1;
         int idx = 0;
         for (T entry : this.entries) {
@@ -318,19 +313,16 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         return this.entries;
     }
 
-    @CanIgnoreReturnValue
     public HorizontalList<T> itemRenderer(ItemRenderer<T> itemRenderer) {
         this.itemRenderer = itemRenderer;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public HorizontalList<T> selectable(boolean selectable) {
         this.selectable = selectable;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public T entry(T entry) {
         this.entries.add(entry);
         return entry;

@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import dev.ultreon.mixinprovider.GeomShaderProgram;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.world.ClientWorld;
@@ -36,24 +36,22 @@ public class OutlineShader extends DefaultShader {
     public OutlineShader(final Renderable renderable, final GeomShaderConfig config, final String prefix) {
         this(renderable, config, prefix,
                 config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
-                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
-                config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader()
+        );
     }
 
     public static String getDefaultGeometryShader() {
-        return """
-                void main() {
-                
-                }
-                """;
+        return "void main() {\n" +
+               "\n" +
+               "}\n";
     }
 
     public OutlineShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
-                         final String fragmentShader, String geometryShader) {
-        this(renderable, config, new GeomShaderProgram(prefix + vertexShader, prefix + fragmentShader, prefix + geometryShader));
+                         final String fragmentShader) {
+        this(renderable, config, new ShaderProgram(prefix + vertexShader, prefix + fragmentShader));
     }
 
-    public OutlineShader(Renderable renderable, Config config, GeomShaderProgram shaderProgram) {
+    public OutlineShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
         super(renderable, config, shaderProgram);
 
         this.u_globalSunlight = this.register(Inputs.globalSunlight, Setters.globalSunlight);

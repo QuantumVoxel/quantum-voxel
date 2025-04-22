@@ -88,12 +88,12 @@ public class OverworldCarver implements Carver {
 
         synchronized (this) {
             if (durations.size() > 100) {
-                Long l = durations.removeFirst();
+                Long l = durations.remove(0);
                 totalDurations -= l;
             }
 
             totalDurations += duration;
-            durations.addLast(duration);
+            durations.add(duration);
         }
 
         return groundPos;

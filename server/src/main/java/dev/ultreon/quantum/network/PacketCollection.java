@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.network;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.network.packets.Packet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -50,9 +49,6 @@ public class PacketCollection<H extends PacketHandler> {
      * @throws PacketException if the packet is not registered.
      */
     public void encode(Packet<?> packet, PacketIO buffer) {
-        Preconditions.checkNotNull(packet, "packet");
-        Preconditions.checkNotNull(buffer, "buffer");
-
         @Nullable BiConsumer<Packet<?>, PacketIO> encoder = this.encoders.get(packet.getClass());
         if (encoder == null)
             throw new PacketException("Unknown packet: " + packet.getClass());
@@ -68,8 +64,6 @@ public class PacketCollection<H extends PacketHandler> {
      * @throws PacketException if the packet ID is unknown.
      */
     public Packet<H> decode(int id, PacketIO buffer) {
-        Preconditions.checkNotNull(buffer, "buffer");
-
         Function<PacketIO, ? extends Packet<H>> decoder = this.decoders.get(id);
         if (decoder == null)
             throw new PacketException("Unknown packet ID: " + id);
@@ -84,9 +78,6 @@ public class PacketCollection<H extends PacketHandler> {
      * @throws PacketException if the packet is not registered.
      */
     public void handle(Packet<H> packet, Pair<PacketContext, H> params) {
-        Preconditions.checkNotNull(packet, "packet");
-        Preconditions.checkNotNull(params, "params");
-
         BiConsumer<Packet<H>, Pair<PacketContext, H>> handler = this.handlers.get(packet.getClass());
         if (handler == null)
             throw new PacketException("Unknown packet: " + packet.getClass());
@@ -101,8 +92,6 @@ public class PacketCollection<H extends PacketHandler> {
      * @throws PacketException if the packet is not registered.
      */
     public int getId(Packet<?> packet) {
-        Preconditions.checkNotNull(packet, "packet");
-
         Integer id = this.packet2id.get(packet.getClass());
         if (id == null)
             throw new PacketException("Unknown packet: " + packet.getClass());

@@ -24,17 +24,26 @@ public enum DepthFunc {
     }
 
     public static DepthFunc byGlId(int depthFunc) {
-        return switch (depthFunc) {
-            case GL20.GL_LESS -> LESS;
-            case GL20.GL_LEQUAL -> LEQUAL;
-            case GL20.GL_GREATER -> GREATER;
-            case GL20.GL_GEQUAL -> GEQUAL;
-            case GL20.GL_EQUAL -> EQUAL;
-            case GL20.GL_NOTEQUAL -> NOTEQUAL;
-            case GL20.GL_ALWAYS -> ALWAYS;
-            case GL20.GL_NEVER -> NEVER;
-            default -> throw new IllegalArgumentException("Invalid depth func: " + depthFunc);
-        };
+        switch (depthFunc) {
+            case GL20.GL_LESS:
+                return LESS;
+            case GL20.GL_LEQUAL:
+                return LEQUAL;
+            case GL20.GL_GREATER:
+                return GREATER;
+            case GL20.GL_GEQUAL:
+                return GEQUAL;
+            case GL20.GL_EQUAL:
+                return EQUAL;
+            case GL20.GL_NOTEQUAL:
+                return NOTEQUAL;
+            case GL20.GL_ALWAYS:
+                return ALWAYS;
+            case GL20.GL_NEVER:
+                return NEVER;
+            default:
+                throw new IllegalArgumentException("Invalid depth func: " + depthFunc);
+        }
     }
 
     public int getGlFunc() {

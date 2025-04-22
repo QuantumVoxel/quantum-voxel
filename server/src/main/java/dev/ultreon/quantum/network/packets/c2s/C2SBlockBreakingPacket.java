@@ -6,8 +6,17 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-public record C2SBlockBreakingPacket(BlockVec pos,
-                                     dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakingPacket.BlockStatus status) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SBlockBreakingPacket implements Packet<InGameServerPacketHandler> {
+    private final BlockVec pos;
+    private final BlockStatus status;
+
+    public C2SBlockBreakingPacket(BlockVec pos,
+                                  BlockStatus status) {
+        this.pos = pos;
+        this.status = status;
+    }
 
     public static C2SBlockBreakingPacket read(PacketIO buffer) {
         var status = BlockStatus.values()[buffer.readByte()];
@@ -38,4 +47,27 @@ public record C2SBlockBreakingPacket(BlockVec pos,
     public String toString() {
         return "C2SBlockBreakingPacket{pos=" + this.pos + ", status=" + this.status + '}';
     }
+
+    public BlockVec pos() {
+        return pos;
+    }
+
+    public BlockStatus status() {
+        return status;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SBlockBreakingPacket) obj;
+        return Objects.equals(this.pos, that.pos) &&
+               Objects.equals(this.status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, status);
+    }
+
 }

@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
-import java.nio.file.Files;
 import java.util.*;
 
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -22,7 +21,6 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerSetPosPacket;
@@ -34,7 +32,7 @@ import dev.ultreon.quantum.world.ServerChunk;
 import static dev.ultreon.quantum.world.World.CS;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 
 /**
  * The IntegratedServer class represents a server integrated into the client system for local play.
@@ -57,10 +55,10 @@ public class IntegratedServer extends QuantumServer {
      * @throws RuntimeException If the world directory does not exist and cannot be created.
      */
     public IntegratedServer(WorldStorage storage) {
-        super(storage, QuantumClient.PROFILER, QuantumClient.get().inspection);
+        super(storage, QuantumClient.PROFILER);
 
         // Check if the world directory exists.
-        if (Files.notExists(storage.getDirectory())) {
+        if (!storage.getDirectory().exists()) {
             try {
                 // If the world directory does not exist, try to create it.
                 storage.createWorld();
@@ -122,11 +120,6 @@ public class IntegratedServer extends QuantumServer {
         // Set the host player if the player UUID matches the local player UUID
         if (this.host == null && (player.getUuid().equals(localPlayer.getUuid()) || player.getName().equals(localPlayer.getName()))) {
             this.host = player;
-        }
-
-        // Create a debug node for host player if inspection is enabled
-        if (DebugFlags.INSPECTION_ENABLED.isEnabled()) {
-            this.node.createNode("host", () -> this.host);
         }
     }
 
@@ -377,7 +370,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
-            if (terrainRenderer instanceof ClientWorld clientWorld) {
+            if (terrainRenderer instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) terrainRenderer;
                 ClientChunk chunk = clientWorld.getChunk(builtChunk.vec);
                 if (chunk == null) return;
                 Gizmo gizmo = new BoxGizmo(chunk, "built_chunk_indicator", "built-chunk");
@@ -403,7 +397,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
-            if (terrainRenderer instanceof ClientWorld clientWorld) {
+            if (terrainRenderer instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) terrainRenderer;
                 ClientChunk chunk = clientWorld.getChunk(globalVec);
                 if (chunk == null) return;
                 Gizmo gizmo = new BoxGizmo(chunk, "request_chunk_indicator", "request-chunk");
@@ -429,7 +424,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
-            if (terrainRenderer instanceof ClientWorld clientWorld) {
+            if (terrainRenderer instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) terrainRenderer;
                 ClientChunk chunk = clientWorld.getChunk(serverChunk.vec);
                 if (chunk == null) return;
                 Gizmo gizmo = new BoxGizmo(chunk, "sent_chunk_indicator", "sent-chunk");
@@ -455,7 +451,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess world = this.client.world;
-            if (world instanceof ClientWorld clientWorld) {
+            if (world instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) world;
                 Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld), "unloaded_chunk_indicator", "unloaded-chunk");
                 gizmo.color.set(1.0F, 0.5F, 1F, 1F);
                 gizmo.position.set(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
@@ -473,7 +470,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
-            if (terrainRenderer instanceof ClientWorld clientWorld) {
+            if (terrainRenderer instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) terrainRenderer;
                 ClientChunk chunk = clientWorld.getChunk(unloadedChunk.vec);
                 if (chunk == null) return;
                 Gizmo gizmo = new BoxGizmo(chunk, "unloaded_chunk_indicator", "unloaded-chunk");
@@ -499,7 +497,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
-            if (terrainRenderer instanceof ClientWorld clientWorld) {
+            if (terrainRenderer instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) terrainRenderer;
                 Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld.getChunk(loadedChunk.vec)), "loaded_chunk_indicator", "loaded-chunk");
                 gizmo.color.set(0F, 1.0F, 1F, 1F);
                 gizmo.position.set(loadedChunk.getOffset().vec().d());
@@ -523,7 +522,8 @@ public class IntegratedServer extends QuantumServer {
 
         QuantumClient.invoke(() -> {
             @Nullable ClientWorldAccess terrainRenderer = this.client.world;
-            if (terrainRenderer instanceof ClientWorld clientWorld) {
+            if (terrainRenderer instanceof ClientWorld) {
+                ClientWorld clientWorld = (ClientWorld) terrainRenderer;
                 Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld), "failed_chunk_indicator", "failed-chunk");
                 gizmo.color.set(1F, 0F, 1F, 1F);
                 gizmo.position.set(d.add(8, 8, 8));

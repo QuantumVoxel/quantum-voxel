@@ -11,7 +11,6 @@ import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import org.apache.commons.lang3.ArrayUtils;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -27,7 +26,7 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
     private Function<T, TextObject> formatter;
     private int cur;
 
-    public CycleButton(@IntRange(from = 21) int width, @Nullable MutableText name) {
+    public CycleButton(int width, @Nullable MutableText name) {
         super(width, 21);
 
         this.text = this.register(id("text"), new TextComponent(TextObject.empty()));
@@ -37,7 +36,7 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
         this.text.set(name);
     }
 
-    public CycleButton(@IntRange(from = 21) int width, @IntRange(from = 21) int height, @Nullable MutableText name) {
+    public CycleButton(int width, int height, @Nullable MutableText name) {
         super(width, height);
 
         this.text = this.register(id("text"), new TextComponent(null));

@@ -18,8 +18,8 @@ import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.capability.ItemStorageCapability;
 import dev.ultreon.quantum.world.container.ItemContainer;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.codehaus.groovy.util.ArrayIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -148,7 +148,8 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
         for (Player player : watchers) {
             {
-                if (player instanceof ServerPlayer serverPlayer) {
+                if (player instanceof ServerPlayer) {
+                    ServerPlayer serverPlayer = (ServerPlayer) player;
                     serverPlayer.connection.send(packet);
                 }
             }
@@ -158,7 +159,8 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     @Override
     public void sendMessage(String message) {
         for (Player player : watchers) {
-            if (player instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer) player;
                 serverPlayer.sendMessage(message);
             }
         }
@@ -167,7 +169,8 @@ public abstract class ContainerBlockEntity<T extends ContainerMenu> extends Bloc
     @Override
     public void sendMessage(TextObject message) {
         for (Player player : watchers) {
-            if (player instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer) player;
                 serverPlayer.sendMessage(message);
             }
         }

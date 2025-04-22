@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.entity.player;
 
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.item.food.FoodData;
 
@@ -23,7 +24,7 @@ public class FoodStatus {
     }
 
     public void setFoodLevel(int foodLevel) {
-        this.foodLevel = Math.clamp(foodLevel, 0, 20);
+        this.foodLevel = Mth.clamp(foodLevel, 0, 20);
     }
 
     public void setSaturationLevel(int saturationLevel) {
@@ -31,7 +32,7 @@ public class FoodStatus {
     }
 
     public void setThirstLevel(float thirstLevel) {
-        this.thirstLevel = Math.clamp(thirstLevel, 0, 20);
+        this.thirstLevel = Mth.clamp(thirstLevel, 0, 20);
     }
 
     public int getFoodLevel() {

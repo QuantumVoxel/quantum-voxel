@@ -116,12 +116,15 @@ public final class GlobalEventHandler {
                 ((EventListener<T>) listener).call(event);
 
                 // If the event was canceled, return true.
-                if (event instanceof Cancelable cancelable && cancelable.isCanceled()) return true;
+                if (event instanceof Cancelable && ((Cancelable) event).isCanceled()) {
+                    Cancelable cancelable = (Cancelable) event;
+                    return true;
+                }
             }
         }
 
         // Return whether the event was canceled.
-        return event instanceof Cancelable cancelable && cancelable.isCanceled();
+        return event instanceof Cancelable && ((Cancelable) event).isCanceled();
     }
 
     /**

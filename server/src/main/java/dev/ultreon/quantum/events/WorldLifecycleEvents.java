@@ -8,7 +8,11 @@ import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import java.util.List;
 
 public class WorldLifecycleEvents {
-    public static final Event<WorldLifecycleEvents.BiomeLayersBuilt> BIOME_LAYERS_BUILT = Event.create();
+    public static final Event<WorldLifecycleEvents.BiomeLayersBuilt> BIOME_LAYERS_BUILT = Event.create(listeners -> (biome, layers, features) -> {
+        for (BiomeLayersBuilt listener : listeners) {
+            listener.onBiomeLayersBuilt(biome, layers, features);
+        }
+    });
 
     @FunctionalInterface
     public interface BiomeLayersBuilt {

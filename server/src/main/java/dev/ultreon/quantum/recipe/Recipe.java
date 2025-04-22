@@ -16,7 +16,8 @@ public interface Recipe {
     }
 
     default ItemStack craft(Menu input) {
-        if (input instanceof Inventory inventory) {
+        if (input instanceof Inventory) {
+            Inventory inventory = (Inventory) input;
             return craft(inventory);
         }
 
@@ -24,7 +25,8 @@ public interface Recipe {
     }
 
     default boolean canCraft(Menu input) {
-        if (input instanceof Inventory inventory) {
+        if (input instanceof Inventory) {
+            Inventory inventory = (Inventory) input;
             return canCraft(inventory);
         }
 

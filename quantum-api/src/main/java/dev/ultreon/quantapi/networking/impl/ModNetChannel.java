@@ -1,6 +1,5 @@
 package dev.ultreon.quantapi.networking.impl;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantapi.networking.api.INetChannel;
 import dev.ultreon.quantapi.networking.api.IPacketContext;
 import dev.ultreon.quantapi.networking.api.packet.IClientEndpoint;
@@ -50,7 +49,6 @@ public class ModNetChannel implements INetChannel {
         return channel;
     }
 
-    @CheckReturnValue
     public static ModNetChannel getChannel(NamespaceID channelId) {
         return ModNetChannel.CHANNELS.get(channelId);
     }

@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.input.controller;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +49,7 @@ public class GuiNavigator {
         // Logic to ensure that the direct line between the two widgets
         // does not cross any diagonal boundaries. This could involve
         // checking if the line intersects with any of the diagonal lines.
-        @IntRange(from = 0, to = 360) float angle = current.getCenter().angleDeg(candidate.getCenter());
+        float angle = current.getCenter().angleDeg(candidate.getCenter());
         if (direction == UIDirection.LEFT) {
             return angle <= 45 || angle >= 135;
         } else if (direction == UIDirection.RIGHT) {

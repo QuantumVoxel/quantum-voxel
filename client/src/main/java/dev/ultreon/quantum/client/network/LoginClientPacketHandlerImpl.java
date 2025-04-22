@@ -45,8 +45,6 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
         this.client.connection.moveTo(PacketStages.IN_GAME, new InGameClientPacketHandlerImpl(this.connection));
 
-        this.client.inspection.createNode("world", () -> this.client.world);
-
         var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, this.client.world, uuid);
         ClientPlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
 
@@ -62,13 +60,15 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
         if (this.client.integratedServer != null) this.client.setActivity(GameActivity.SINGLEPLAYER);
         else this.client.setActivity(GameActivity.MULTIPLAYER);
 
-        if (this.client.screen instanceof WorldLoadScreen worldLoadScreen) {
+        if (this.client.screen instanceof WorldLoadScreen) {
+            WorldLoadScreen worldLoadScreen = (WorldLoadScreen) this.client.screen;
             QuantumClient.invoke(worldLoadScreen::onLogin);
         } else {
             QuantumClient.invoke(() -> {
                 this.client.renderWorld = true;
                 ClientWorld clientWorldAccess = this.client.world;
-                if (clientWorldAccess instanceof ClientWorld clientWorld) {
+                if (clientWorldAccess instanceof ClientWorld) {
+                    ClientWorld clientWorld = clientWorldAccess;
                     this.client.worldRenderer = new WorldRenderer(clientWorld);
                 }
                 this.client.showScreen(null);

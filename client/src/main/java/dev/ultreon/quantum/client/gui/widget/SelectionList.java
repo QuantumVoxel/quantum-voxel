@@ -1,12 +1,9 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +37,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private boolean drawButtons = true;
     private boolean cutButtons = true;
 
-    public SelectionList(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public SelectionList(int x, int y, int width, int height) {
         super(width, height);
 
         this.pos.x = x;
@@ -235,7 +232,6 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this.drawBackground;
     }
 
-    @CanIgnoreReturnValue
     public Entry<T> removeEntry(Entry<T> entry) {
         this.entries.remove(entry);
         return entry;
@@ -246,8 +242,6 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     }
 
     public void removeEntryIf(Predicate<T> predicate) {
-        Preconditions.checkNotNull(predicate, "predicate");
-
         int found = -1;
         int idx = 0;
         for (Entry<T> entry : this.entries) {
@@ -267,19 +261,16 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this.entries;
     }
 
-    @CanIgnoreReturnValue
     public SelectionList<T> itemRenderer(ItemRenderer<T> itemRenderer) {
         this.itemRenderer = itemRenderer;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public SelectionList<T> selectable(boolean selectable) {
         this.selectable = selectable;
         return this;
     }
 
-    @CanIgnoreReturnValue
     public Entry<T> entry(T value) {
         Entry<T> entry = new Entry<>(value, this);
         this.entries.add(entry);

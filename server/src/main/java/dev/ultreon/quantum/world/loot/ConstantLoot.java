@@ -4,6 +4,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.rng.RNG;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ConstantLoot implements LootGenerator {
     public static final LootGenerator EMPTY = new ConstantLoot();
@@ -19,6 +20,6 @@ public class ConstantLoot implements LootGenerator {
 
     @Override
     public Iterable<ItemStack> generate(RNG random) {
-        return this.loot.stream().map(ItemStack::copy).toList();
+        return this.loot.stream().map(ItemStack::copy).collect(Collectors.toList());
     }
 }

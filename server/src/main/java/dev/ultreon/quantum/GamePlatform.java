@@ -1,20 +1,20 @@
 package dev.ultreon.quantum;
 
-import dev.ultreon.quantum.log.Logger;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
-import dev.ultreon.xeox.loader.XeoxLoader;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public abstract class GamePlatform {
     protected static GamePlatform instance;
@@ -87,15 +87,15 @@ public abstract class GamePlatform {
      * @return the mod metadata
      */
     public Optional<Mod> getMod(String id) {
-        return XeoxLoader.get().getMod(id);
+        return Optional.empty();
     }
 
     public boolean isModLoaded(String id) {
-        return XeoxLoader.get().isModLoaded(id);
+        return false;
     }
 
     public Collection<? extends Mod> getMods() {
-        return XeoxLoader.get().getMods();
+        return Collections.emptyList();
     }
 
     public boolean isDevEnvironment() {
@@ -110,12 +110,12 @@ public abstract class GamePlatform {
         return Env.CLIENT;
     }
 
-    public Path getConfigDir() {
-        return Paths.get("config");
+    public FileHandle getConfigDir() {
+        return Gdx.files.local("config");
     }
 
-    public Path getGameDir() {
-        return Paths.get(".");
+    public FileHandle getGameDir() {
+        return Gdx.files.local(".");
     }
 
     public boolean isMobile() {
@@ -138,13 +138,6 @@ public abstract class GamePlatform {
 
     public boolean hasCompass() {
         return false;
-    }
-
-    public Context enterXeoxContext() {
-        Context context = ContextFactory.getGlobal().enterContext();
-        context.setOptimizationLevel(-1);
-        context.setLanguageVersion(Context.VERSION_ES6);
-        return context;
     }
 
     public void locateResources() {
@@ -184,7 +177,9 @@ public abstract class GamePlatform {
     }
 
     public Logger getLogger(String name) {
-        return new StdoutLogger();
+        return (level, message, t) -> {
+            // Implemented in subclasses
+        };
     }
 
     public boolean detectDebug() {
@@ -248,5 +243,206 @@ public abstract class GamePlatform {
 
     public boolean getWindowVibrancy() {
         return false;
+    }
+
+    public boolean isWeb() {
+        return false;
+    }
+
+    public void yield() {
+        Thread.yield();
+    }
+
+    public <T> CompletionPromise<T> createCompletionPromise() {
+        return new BareBonesCompletionPromise<>();
+    }
+
+    public @NotNull <T> Promise<T> supplyAsync(Supplier<T> o) {
+        CompletionPromise<T> promise = createCompletionPromise();
+        Thread thread = new Thread(() -> {
+            try {
+                promise.complete(o.get());
+            } catch (Exception e) {
+                promise.fail(e);
+            }
+        });
+        thread.start();
+        return promise;
+    }
+
+    public Promise<Void> runAsync(Runnable o) {
+        return supplyAsync(() -> {
+            o.run();
+            return null;
+        });
+    }
+
+    public abstract int cpuCores();
+
+    public void halt(int code) {
+        // Implemented in subclasses
+    }
+
+    public void addShutdownHook(Runnable o) {
+        // Implemented in subclasses
+    }
+
+    public void nukeThreads() {
+
+    }
+
+    public void debugCrash(CrashLog log) {
+    }
+
+    public long maxMemory() {
+        return 0;
+    }
+
+    public long totalMemory() {
+        return 0;
+    }
+
+    public long freeMemory() {
+        return 0;
+    }
+
+    public abstract long[] getUuidElements(UUID value);
+
+    public abstract UUID constructUuid(long msb, long lsb);
+
+    public void setLogger(LoggerFactory loggerFactory) {
+
+    }
+
+    public boolean isIOS() {
+        return false;
+    }
+
+    public boolean isAndroid() {
+        return false;
+    }
+
+    public boolean isHeadless() {
+        return false;
+    }
+
+    public boolean isServer() {
+        return false;
+    }
+
+    public boolean isClient() {
+        return false;
+    }
+
+    public boolean isSwitch() {
+        return false;
+    }
+
+    public boolean isXbox() {
+        return false;
+    }
+
+    public boolean isSwitchGDX() {
+        return false;
+    }
+
+    public boolean hasImGui() {
+        return false;
+    }
+
+    public String getUserAgent() {
+        return "Unknown";
+    }
+
+    public String getLanguage() {
+        return "en_US";
+    }
+
+    private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {
+        private boolean done = false;
+        private boolean cancelled = false;
+        private Throwable throwable;
+        private T value;
+        private final List<BiConsumer<? super T, ? super Throwable>> listeners = new ArrayList<>();
+
+        @Override
+        public Promise<T> whenComplete(BiConsumer<? super T, ? super Throwable> runnable) {
+            return apply((t, throwable1) -> {
+                runnable.accept(t, throwable1);
+                return t;
+            });
+        }
+
+        @Override
+        public <V> Promise<V> apply(BiFunction<? super T, ? super Throwable, ? extends V> function) {
+            BareBonesCompletionPromise<V> promise = new BareBonesCompletionPromise<>();
+            this.listeners.add((value, throwable) -> {
+                try {
+                    promise.complete(function.apply(value, throwable));
+                } catch (Exception e) {
+                    promise.fail(e);
+                }
+            });
+
+            return promise;
+        }
+
+        @Override
+        public T join() throws AsyncException {
+            while (!isDone()) {
+                GamePlatform.this.yield();
+                if (cancelled) {
+                    throw new AsyncException("Cancelled");
+                }
+            }
+            if (isFailed()) {
+                throw new AsyncException(throwable);
+            }
+            return value;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        @Override
+        public void cancel() {
+            cancelled = true;
+        }
+
+        @Override
+        public T getNow(T defaultValue) {
+            return done ? value : defaultValue;
+        }
+
+        @Override
+        public boolean isFailed() {
+            return done && throwable != null;
+        }
+
+        @Override
+        public void complete(T value) {
+            this.value = value;
+            done = true;
+            listeners.forEach(listener -> listener.accept(value, null));
+        }
+
+        @Override
+        public void fail(Throwable throwable) {
+            this.throwable = throwable;
+            done = true;
+            listeners.forEach(listener -> listener.accept(null, throwable));
+        }
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean isCanceled() {
+            return cancelled;
+        }
     }
 }

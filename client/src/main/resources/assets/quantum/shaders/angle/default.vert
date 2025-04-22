@@ -1,4 +1,3 @@
-#version 320 es
 
 #if defined(diffuseTextureFlag) || defined(specularTextureFlag) || defined(emissiveTextureFlag)
 #define textureFlag
@@ -12,91 +11,91 @@
 #define cameraPositionFlag
 #endif
 
-in vec3 a_position;
+attribute vec3 a_position;
 uniform mat4 u_projViewTrans;
 
 #if defined(colorFlag)
-out vec4 v_color;
-in vec4 a_color;
+varying vec4 v_color;
+attribute vec4 a_color;
 #endif // colorFlag
 
 #ifdef normalFlag
-in vec3 a_normal;
+attribute vec3 a_normal;
 uniform mat3 u_normalMatrix;
-out vec3 v_normal;
+varying vec3 v_normal;
 #endif // normalFlag
 
 #ifdef textureFlag
-in vec2 a_texCoord0;
+attribute vec2 a_texCoord0;
 #endif // textureFlag
 
 #ifdef diffuseTextureFlag
 uniform vec4 u_diffuseUVTransform;
-out vec2 v_diffuseUV;
+varying vec2 v_diffuseUV;
 #endif
 
 #ifdef emissiveTextureFlag
 uniform vec4 u_emissiveUVTransform;
-out vec2 v_emissiveUV;
+varying vec2 v_emissiveUV;
 #endif
 
 #ifdef specularTextureFlag
 uniform vec4 u_specularUVTransform;
-out vec2 v_specularUV;
+varying vec2 v_specularUV;
 #endif
 
 #ifdef boneWeight0Flag
 #define boneWeightsFlag
-in vec2 a_boneWeight0;
+attribute vec2 a_boneWeight0;
 #endif //boneWeight0Flag
 
 #ifdef boneWeight1Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight1;
+attribute vec2 a_boneWeight1;
 #endif //boneWeight1Flag
 
 #ifdef boneWeight2Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight2;
+attribute vec2 a_boneWeight2;
 #endif //boneWeight2Flag
 
 #ifdef boneWeight3Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight3;
+attribute vec2 a_boneWeight3;
 #endif //boneWeight3Flag
 
 #ifdef boneWeight4Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight4;
+attribute vec2 a_boneWeight4;
 #endif //boneWeight4Flag
 
 #ifdef boneWeight5Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight5;
+attribute vec2 a_boneWeight5;
 #endif //boneWeight5Flag
 
 #ifdef boneWeight6Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight6;
+attribute vec2 a_boneWeight6;
 #endif //boneWeight6Flag
 
 #ifdef boneWeight7Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight7;
+attribute vec2 a_boneWeight7;
 #endif //boneWeight7Flag
 
 #if defined(numBones) && defined(boneWeightsFlag)
@@ -121,16 +120,16 @@ const float u_shininess = 20.0;
 
 #ifdef blendedFlag
 uniform float u_opacity;
-out float v_opacity;
+varying float v_opacity;
 
 #ifdef alphaTestFlag
 uniform float u_alphaTest;
-out float v_alphaTest;
+varying float v_alphaTest;
 #endif //alphaTestFlag
 #endif // blendedFlag
 
 #ifdef lightingFlag
-out vec3 v_lightDiffuse;
+varying vec3 v_lightDiffuse;
 
 #ifdef ambientLightFlag
 uniform vec3 u_ambientLight;
@@ -145,7 +144,7 @@ uniform vec3 u_sphericalHarmonics[9];
 #endif //sphericalHarmonicsFlag
 
 #ifdef specularFlag
-out vec3 v_lightSpecular;
+varying vec3 v_lightSpecular;
 #endif // specularFlag
 
 #ifdef cameraPositionFlag
@@ -153,7 +152,7 @@ uniform vec4 u_cameraPosition;
 #endif // cameraPositionFlag
 
 #ifdef fogFlag
-out float v_fog;
+varying float v_fog;
 #endif // fogFlag
 
 
@@ -181,12 +180,12 @@ uniform PointLight u_pointLights[numPointLights];
 
 #ifdef shadowMapFlag
 uniform mat4 u_shadowMapProjViewTrans;
-out vec3 v_shadowMapUv;
+varying vec3 v_shadowMapUv;
 #define separateAmbientFlag
 #endif //shadowMapFlag
 
 #if defined(ambientFlag) && defined(separateAmbientFlag)
-out vec3 v_ambientLight;
+varying vec3 v_ambientLight;
 #endif //separateAmbientFlag
 
 #endif // lightingFlag

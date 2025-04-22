@@ -10,7 +10,6 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.sound.event.SoundEvents;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
@@ -25,11 +24,11 @@ public abstract class Button<T extends Button<T>> extends Widget {
     private final Color tmp = new Color();
     protected float yOffset = 0f;
 
-    protected Button(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    protected Button(int width, int height) {
         this(width, height, Type.DARK);
     }
 
-    protected Button(@IntRange(from = 0) int width, @IntRange(from = 0) int height, Type type) {
+    protected Button(int width, int height, Type type) {
         super(width, height);
         this.type = type;
 

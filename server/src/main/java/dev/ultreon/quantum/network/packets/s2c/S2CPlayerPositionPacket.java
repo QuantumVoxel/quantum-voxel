@@ -6,11 +6,25 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.Vec3d;
 
+import java.util.Objects;
 import java.util.UUID;
 
-public record S2CPlayerPositionPacket(UUID uuid, Vec3d pos,
-                                      float xHeadRot, float xRot,
-                                      float yRot) implements Packet<InGameClientPacketHandler> {
+public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketHandler> {
+    private final UUID uuid;
+    private final Vec3d pos;
+    private final float xHeadRot;
+    private final float xRot;
+    private final float yRot;
+
+    public S2CPlayerPositionPacket(UUID uuid, Vec3d pos,
+                                   float xHeadRot, float xRot,
+                                   float yRot) {
+        this.uuid = uuid;
+        this.pos = pos;
+        this.xHeadRot = xHeadRot;
+        this.xRot = xRot;
+        this.yRot = yRot;
+    }
 
     public S2CPlayerPositionPacket(UUID uuid, Vec3d pos) {
         this(uuid, pos, 0, 0, 0);
@@ -44,4 +58,42 @@ public record S2CPlayerPositionPacket(UUID uuid, Vec3d pos,
     public String toString() {
         return "S2CPlayerPositionPacket{uuid=" + this.uuid + ", pos=" + this.pos + '}';
     }
+
+    public UUID uuid() {
+        return uuid;
+    }
+
+    public Vec3d pos() {
+        return pos;
+    }
+
+    public float xHeadRot() {
+        return xHeadRot;
+    }
+
+    public float xRot() {
+        return xRot;
+    }
+
+    public float yRot() {
+        return yRot;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CPlayerPositionPacket) obj;
+        return Objects.equals(this.uuid, that.uuid) &&
+               Objects.equals(this.pos, that.pos) &&
+               Float.floatToIntBits(this.xHeadRot) == Float.floatToIntBits(that.xHeadRot) &&
+               Float.floatToIntBits(this.xRot) == Float.floatToIntBits(that.xRot) &&
+               Float.floatToIntBits(this.yRot) == Float.floatToIntBits(that.yRot);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid, pos, xHeadRot, xRot, yRot);
+    }
+
 }

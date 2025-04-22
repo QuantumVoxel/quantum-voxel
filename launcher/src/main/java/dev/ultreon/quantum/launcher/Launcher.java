@@ -35,8 +35,8 @@ public final class Launcher {
 
             if (OS.isWindows()) {
                 try {
-                    System.setOut(new PrintStream(Files.newOutputStream(Paths.get("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
-                    System.setErr(new PrintStream(Files.newOutputStream(Paths.get("launcher_err.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
+                    System.setOut(new PrintStream(Files.newOutputStream(Path.of("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
+                    System.setErr(new PrintStream(Files.newOutputStream(Path.of("launcher_err.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -50,9 +50,9 @@ public final class Launcher {
 
             // Copy mixinprovider.jar to ./mods/
             try {
-                if (!Files.exists(Paths.get("mods/")))
-                    Files.createDirectory(Paths.get("mods/"));
-                Files.copy(Objects.requireNonNull(Launcher.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Paths.get("mods/mixinprovider.jar"), StandardCopyOption.REPLACE_EXISTING);
+                if (!Files.exists(Path.of("mods/")))
+                    Files.createDirectory(Path.of("mods/"));
+                Files.copy(Objects.requireNonNull(Launcher.class.getResourceAsStream("/mixinprovider.jar"), "mixinprovider.jar"), Path.of("mods/mixinprovider.jar"), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
                 Runtime.getRuntime().exit(1);

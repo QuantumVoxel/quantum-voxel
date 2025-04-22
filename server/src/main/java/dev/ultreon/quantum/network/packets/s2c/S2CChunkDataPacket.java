@@ -26,9 +26,25 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-public record S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, IntList blockEntityPositions, IntList blockEntities) implements Packet<InGameClientPacketHandler> {
+public final class S2CChunkDataPacket implements Packet<InGameClientPacketHandler> {
     public static final int MAX_SIZE = 1048576;
+    private final ChunkVec pos;
+    private final ChunkBuildInfo info;
+    private final Storage<BlockState> storage;
+    private final @NotNull Storage<RegistryKey<Biome>> biomeStorage;
+    private final IntList blockEntityPositions;
+    private final IntList blockEntities;
+
+    public S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, IntList blockEntityPositions, IntList blockEntities) {
+        this.pos = pos;
+        this.info = info;
+        this.storage = storage;
+        this.biomeStorage = biomeStorage;
+        this.blockEntityPositions = blockEntityPositions;
+        this.blockEntities = blockEntities;
+    }
 
     public S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Collection<BlockEntity> blockEntities) {
         this(pos, info, storage, biomeStorage, new IntArrayList(), new IntArrayList());
@@ -93,4 +109,58 @@ public record S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<Bloc
 
         handler.onChunkData(this.pos, this.info, this.storage, this.biomeStorage, blockEntities);
     }
+
+    public ChunkVec pos() {
+        return pos;
+    }
+
+    public ChunkBuildInfo info() {
+        return info;
+    }
+
+    public Storage<BlockState> storage() {
+        return storage;
+    }
+
+    public @NotNull Storage<RegistryKey<Biome>> biomeStorage() {
+        return biomeStorage;
+    }
+
+    public IntList blockEntityPositions() {
+        return blockEntityPositions;
+    }
+
+    public IntList blockEntities() {
+        return blockEntities;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CChunkDataPacket) obj;
+        return Objects.equals(this.pos, that.pos) &&
+               Objects.equals(this.info, that.info) &&
+               Objects.equals(this.storage, that.storage) &&
+               Objects.equals(this.biomeStorage, that.biomeStorage) &&
+               Objects.equals(this.blockEntityPositions, that.blockEntityPositions) &&
+               Objects.equals(this.blockEntities, that.blockEntities);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, info, storage, biomeStorage, blockEntityPositions, blockEntities);
+    }
+
+    @Override
+    public String toString() {
+        return "S2CChunkDataPacket[" +
+               "pos=" + pos + ", " +
+               "info=" + info + ", " +
+               "storage=" + storage + ", " +
+               "biomeStorage=" + biomeStorage + ", " +
+               "blockEntityPositions=" + blockEntityPositions + ", " +
+               "blockEntities=" + blockEntities + ']';
+    }
+
 }

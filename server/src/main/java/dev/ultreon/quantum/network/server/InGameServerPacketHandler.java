@@ -149,25 +149,30 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             float efficiency = 1.0F;
             ItemStack stack = this.player.getSelectedItem();
             Item item = stack.getItem();
-            if (item instanceof ToolItem toolItem && block.getEffectiveTool() == toolItem.getToolType()) {
+            if (item instanceof ToolItem && block.getEffectiveTool() == ((ToolItem) item).getToolType()) {
+                ToolItem toolItem = (ToolItem) item;
                 efficiency = toolItem.getEfficiency();
             }
 
             final float amount = 1.0F / (Math.max(block.getHardness() * QuantumServer.TPS / efficiency, 0) + 1);
             switch (status) {
-                case START-> world.startBreaking(pos, this.player);
-                case CONTINUE -> {
+                case START:
+                    world.startBreaking(pos, this.player);
+                    break;
+                case CONTINUE:
                     BreakResult breakResult = world.continueBreaking(pos, amount, this.player);
                     if (breakResult == BreakResult.BROKEN)
                         onBlockBroken(pos);
-                }
-                case BROKEN -> {
-                    BreakResult breakResult = world.continueBreaking(pos, amount, this.player);
-                    if (breakResult == BreakResult.BROKEN || (breakResult == BreakResult.CONTINUE && amount > 0.5f)) {
+                    break;
+                case BROKEN:
+                    BreakResult breakResult1 = world.continueBreaking(pos, amount, this.player);
+                    if (breakResult1 == BreakResult.BROKEN || (breakResult1 == BreakResult.CONTINUE && amount > 0.5f)) {
                         onBlockBroken(pos);
                     }
-                }
-                case STOP -> world.stopBreaking(pos, this.player);
+                    break;
+                case STOP:
+                    world.stopBreaking(pos, this.player);
+                    break;
             }
         });
     }
@@ -260,7 +265,8 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     public void onCraftAdvancedRecipe(int typeId, NamespaceID recipeId) {
         RecipeType<?> recipeType = Registries.RECIPE_TYPE.byId(typeId);
         Recipe recipe = RecipeManager.get().get(recipeId, recipeType);
-        if (!(recipe instanceof CraftingRecipe craftingRecipe)) throw new IllegalStateException("Not a crafting recipe: " + recipeId);
+        if (!(recipe instanceof CraftingRecipe)) throw new IllegalStateException("Not a crafting recipe: " + recipeId);
+        CraftingRecipe craftingRecipe = (CraftingRecipe) recipe;
         if (!(player.getOpenMenu() instanceof AdvancedCraftingMenu))
             throw new IllegalStateException("Player is not in a crafting menu.");
         if (!craftingRecipe.canCraft(this.player.getOpenMenu())) return;

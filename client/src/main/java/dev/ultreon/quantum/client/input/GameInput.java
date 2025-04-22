@@ -7,7 +7,6 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -92,8 +91,8 @@ public abstract class GameInput implements Disposable {
             return client.keyAndMouseInput;
         } else if (Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen)) {
             return client.touchInput;
-        } else if (!Controllers.getControllers().isEmpty()) {
-            return client.controllerInput;
+//        } else if (!Controllers.getControllers().isEmpty()) {
+//            return client.controllerInput;
         } else {
             Gdx.app.log("GameInput", "No input devices found, using fallback input");
             return client.keyAndMouseInput;
@@ -165,12 +164,10 @@ public abstract class GameInput implements Disposable {
 
     public abstract void update(float deltaTime);
 
-    @CanIgnoreReturnValue
     public UseResult useItem(Player player, @Nullable ClientWorld world, Hit hit) {
         return useItem(player, world, hit, 1F);
     }
 
-    @CanIgnoreReturnValue
     public UseResult useItem(Player player, @Nullable ClientWorld world, Hit hit, float amount) {
         if (this.itemUseCooldown > System.currentTimeMillis())
             return UseResult.DENY;
@@ -194,7 +191,8 @@ public abstract class GameInput implements Disposable {
         if (result == null)
             return UseResult.SKIP;
 
-        if (hit instanceof BlockHit blockHitResult) {
+        if (hit instanceof BlockHit) {
+            BlockHit blockHitResult = (BlockHit) hit;
             Block block = blockHitResult.getBlock();
             if (block != null && !block.isAir()) {
                 UseResult blockResult = block.use(context.world(), context.player(), stack.getItem(), new BlockVec(result.getBlockVec()));
@@ -207,7 +205,6 @@ public abstract class GameInput implements Disposable {
         return stack.getItem().use(context);
     }
 
-    @CanIgnoreReturnValue
     public static boolean cancelVibration() {
         Controller current = Controllers.getCurrent();
         if (current == null) return false;
@@ -215,7 +212,6 @@ public abstract class GameInput implements Disposable {
         return true;
     }
 
-    @CanIgnoreReturnValue
     public static boolean startVibration(int duration, float strength) {
         if (!ClientConfig.vibration) return false;
 

@@ -9,17 +9,47 @@ import dev.ultreon.quantum.events.api.Event;
 import org.jetbrains.annotations.ApiStatus;
 
 public class RenderEvents {
-    public static final Event<RenderScreen> PRE_RENDER_SCREEN = Event.withValue();
-    public static final Event<RenderScreen> POST_RENDER_SCREEN = Event.withValue();
+    public static final Event<RenderScreen> PRE_RENDER_SCREEN = Event.create(listeners -> (screen, renderer, x, y, deltaTime) -> {
+        for (RenderScreen listener : listeners) {
+            listener.onRenderScreen(screen, renderer, x, y, deltaTime);
+        }
+    });
+    public static final Event<RenderScreen> POST_RENDER_SCREEN = Event.create(listeners -> (screen, renderer, x, y, deltaTime) -> {
+        for (RenderScreen listener : listeners) {
+            listener.onRenderScreen(screen, renderer, x, y, deltaTime);
+        }
+    });
 
-    public static final Event<RenderWorld> PRE_RENDER_WORLD = Event.withValue();
-    public static final Event<RenderWorld> POST_RENDER_WORLD = Event.withValue();
+    public static final Event<RenderWorld> PRE_RENDER_WORLD = Event.create(listeners -> (world, worldRenderer) -> {
+        for (RenderWorld listener : listeners) {
+            listener.onRenderWorld(world, worldRenderer);
+        }
+    });
 
-    public static final Event<RenderGame> PRE_RENDER_GAME = Event.withValue();
-    public static final Event<RenderGame> POST_RENDER_GAME = Event.withValue();
+    public static final Event<RenderWorld> POST_RENDER_WORLD = Event.create(listeners -> (world, worldRenderer) -> {
+        for (RenderWorld listener : listeners) {
+            listener.onRenderWorld(world, worldRenderer);
+        }
+    });
+
+    public static final Event<RenderGame> PRE_RENDER_GAME = Event.create(listeners -> (gameRenderer, renderer, deltaTime) -> {
+        for (RenderGame listener : listeners) {
+            listener.onRenderGame(gameRenderer, renderer, deltaTime);
+        }
+    });
+
+    public static final Event<RenderGame> POST_RENDER_GAME = Event.create(listeners -> (gameRenderer, renderer, deltaTime) -> {
+        for (RenderGame listener : listeners) {
+            listener.onRenderGame(gameRenderer, renderer, deltaTime);
+        }
+    });
 
     @ApiStatus.Obsolete
-    public static final Event<RenderOverlay> RENDER_OVERLAY = Event.withValue();
+    public static final Event<RenderOverlay> RENDER_OVERLAY = Event.create(listeners -> (renderer, deltaTime) -> {
+        for (RenderOverlay listener : listeners) {
+            listener.onRenderOverlay(renderer, deltaTime);
+        }
+    });
 
     @FunctionalInterface
     public interface RenderScreen {

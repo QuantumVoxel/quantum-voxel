@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 
-public record C2SCommandPacket(String input) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SCommandPacket implements Packet<InGameServerPacketHandler> {
+    private final String input;
+
+    public C2SCommandPacket(String input) {
+        this.input = input;
+    }
 
     public static C2SCommandPacket read(PacketIO buffer) {
         var input = buffer.readString(32768);
@@ -33,4 +40,22 @@ public record C2SCommandPacket(String input) implements Packet<InGameServerPacke
                "input='" + input + '\'' +
                '}';
     }
+
+    public String input() {
+        return input;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SCommandPacket) obj;
+        return Objects.equals(this.input, that.input);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(input);
+    }
+
 }

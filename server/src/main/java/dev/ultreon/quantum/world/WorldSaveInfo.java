@@ -1,10 +1,9 @@
 package dev.ultreon.quantum.world;
 
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.libs.datetime.v0.DateTime;
 import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,7 +59,7 @@ public final class WorldSaveInfo {
         if (storage.exists("picture.png")) {
             Texture texture;
 
-            texture = new Texture(new FileHandle(storage.getDirectory().resolve("picture.png").toFile()));
+            texture = new Texture(storage.getDirectory().child("picture.png"));
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
             return Optional.of(texture);

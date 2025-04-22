@@ -2,12 +2,10 @@ package dev.ultreon.quantum.android;
 
 import android.app.*;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.*;
 import android.hardware.input.InputManager;
-import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,24 +16,11 @@ import android.view.InputDevice;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.badlogic.gdx.files.FileHandle;
-import dev.ultreon.quantum.CommonConstants;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import dev.ultreon.quantum.DeviceType;
-import dev.ultreon.quantum.client.GameLibGDXWrapper;
-import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.screens.ModImportFailedScreen;
-import dev.ultreon.quantum.client.gui.screens.RestartConfirmScreen;
-import dev.ultreon.xeox.loader.XeoxLoader;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.UUID;
+import dev.ultreon.quantum.client.Main;
 
 public class AndroidLauncher extends AndroidApplication implements SensorEventListener, InputManager.InputDeviceListener {
     private AndroidPlatform androidPlatform;
@@ -52,10 +37,22 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
         super.onCreate(savedInstanceState);
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-        config.useGL30 = true;
         config.maxSimultaneousSounds = 256;
         config.useGyroscope = true;
         config.useCompass = true;
+        config.r = 8;
+        config.g = 8;
+        config.b = 8;
+        config.a = 8;
+        config.depth = 16;
+        config.stencil = 8;
+        config.useImmersiveMode = true;
+        config.renderUnderCutout = true;
+        config.maxNetThreads = 4;
+
+        // Make sure the shaders use GLES 2
+        ShaderProgram.prependVertexCode = "#version 100\n";
+        ShaderProgram.prependFragmentCode = "#version 100\n";
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         androidPlatform = new AndroidPlatform(this);
@@ -69,47 +66,7 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
 
         this.uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
 
-        initialize(GameLibGDXWrapper.createInstance(new String[]{"--android"}), config);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == AndroidPlatform.IMPORT_MOD_CODE && resultCode == Activity.RESULT_OK) {
-            try {
-                Uri contentDescriber = data.getData();
-                File source = new File(contentDescriber.getPath());
-                CommonConstants.LOGGER.debug("src is {}", source);
-
-                FileHandle external = Gdx.files.external("temp");
-                File tempFile = external.child(source.getName() + "_" + UUID.randomUUID() + ".tmp").file();
-                tempFile.deleteOnExit();
-                copy(source, tempFile);
-                XeoxLoader.get().importMod(tempFile);
-                tempFile.delete();
-                QuantumClient.get().showScreen(new RestartConfirmScreen());
-            } catch (Exception e) {
-                Log.e("Quantum", "Failed to import mod file", e);
-                QuantumClient.get().showScreen(new ModImportFailedScreen());
-            }
-        }
-    }
-
-    private void copy(File source, File destination) throws IOException {
-        try (FileChannel in = new FileInputStream(source).getChannel();
-             FileChannel out = new FileOutputStream(destination).getChannel()) {
-
-            try {
-                in.transferTo(0, in.size(), out);
-            } catch (Exception e) {
-                Log.d("Exception", e.toString());
-            } finally {
-                if (in != null)
-                    in.close();
-                if (out != null)
-                    out.close();
-            }
-        }
+        initialize(Main.createInstance(new String[]{"--android"}), config);
     }
 
     public SensorManager getSensorManager() {
@@ -227,10 +184,7 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
         }
 
         view.queueEvent(() -> {
-            AndroidMouseDevice mouseDevice = androidPlatform.getMouseDevice();
-            if (mouseDevice != null) {
-                // TODO: mouseDevice.setCursorPosition(x, y);
-            }
+            // TODO: mouseDevice.setCursorPosition(x, y);
         });
     }
 

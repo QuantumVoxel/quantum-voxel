@@ -1,4 +1,3 @@
-#version 410
 
 #ifdef GL_ES
 #define LOWP lowp
@@ -11,22 +10,22 @@ precision mediump float;
 #define HIGH
 #endif
 
-in vec3 v_normal;
-in vec3 v_modelNormal;
+varying vec3 v_normal;
+varying vec3 v_modelNormal;
 
-in vec4 v_color;
+varying vec4 v_color;
 
-in MED vec2 v_diffuseUV;
-in MED vec2 v_emissiveUV;
-in MED vec2 v_normalUV;
-in MED vec2 v_specularUV;
+varying MED vec2 v_diffuseUV;
+varying MED vec2 v_emissiveUV;
+varying MED vec2 v_normalUV;
+varying MED vec2 v_specularUV;
 uniform sampler2D u_diffuseTexture;
 uniform sampler2D u_emissiveTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_specularTexture;
 uniform vec4 u_fogColor;
-in float v_fog;
-in vec3 v_position;
+varying float v_fog;
+varying vec3 v_position;
 
 uniform float u_globalSunlight;
 uniform vec2 u_atlasSize;
@@ -102,13 +101,6 @@ vec3 gamma(vec3 color){
     return pow(color, vec3(1.0/2.0));
 }
 
-layout(location = 0) out vec4 diffuseOut;
-layout(location = 1) out vec3 reflectiveOut;
-layout(location = 2) out vec3 depthOut;
-layout(location = 3) out vec3 positionOut;
-layout(location = 4) out vec3 normalOut;
-layout(location = 5) out vec4 specularOut;
-
 void main() {
     vec2 v_diffuseTexUV = v_diffuseUV;
     vec2 v_emissiveTexUV = v_emissiveUV;
@@ -117,16 +109,16 @@ void main() {
 
     float depth = gl_FragCoord.z / gl_FragCoord.w;
 
-    vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
 
     if (diffuse.a <= 0.01) discard;
-    diffuseOut.a = 1.0;
+    gl_FragColor.a = 1.0;
 
     vec3 light = vec3(u_globalSunlight);
 
     vec3 emissive;
     emissive = vec3(0.0);
-    diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
+    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
 
     vec3 depthIn3Channels;
     depthIn3Channels.r = mod(depth, 1.0);
@@ -139,10 +131,6 @@ void main() {
 
     depthIn3Channels.b = depth;
 
-    diffuseOut = vec4(diffuseOut.xyz*gamma(sh_light(v_normal, groove)).r, diffuseOut.w);
-    diffuseOut.rgb = mix(diffuseOut.rgb, vec3(u_fogColor), v_fog);
-    positionOut = v_position;
-    normalOut = normal;
-    specularOut = vec4(0.0, 0.0, 0.0, 0.0);
-    depthOut = depthIn3Channels;
+    gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);
 }

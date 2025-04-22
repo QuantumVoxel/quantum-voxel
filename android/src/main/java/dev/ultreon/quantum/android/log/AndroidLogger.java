@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.android.log;
 
 import android.util.Log;
-import dev.ultreon.quantum.log.Logger;
+import dev.ultreon.quantum.Logger;
 
 import java.text.MessageFormat;
 
@@ -13,142 +13,46 @@ public class AndroidLogger implements Logger {
     }
 
     @Override
-    public void debug(String s) {
-        Log.d(this.name, s);
-    }
-
-    @Override
-    public void debug(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.d(this.name, s, throwable);
+    public void log(Level level, String message, Throwable t) {
+        if (level == null) return;
+        
+        if (t == null) {
+            switch (level) {
+                case TRACE:
+                    Log.v(name, message);
+                    break;
+                case DEBUG:
+                    Log.d(name, message);
+                    break;
+                case INFO:
+                    Log.i(name, message);
+                    break;
+                case WARN:
+                    Log.w(name, message);
+                    break;
+                case ERROR:
+                    Log.e(name, message);
+                    break;
+            }
             return;
         }
-        Log.d(this.name, MessageFormat.format(s, o));
-    }
-
-    @Override
-    public void debug(String s, Throwable t) {
-        Log.d(this.name, s, t);
-    }
-
-    @Override
-    public void debug(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.d(this.name, MessageFormat.format(s, p), throwable);
-            return;
+        
+        switch (level) {
+            case TRACE:
+                Log.v(name, message, t);
+                break;
+            case DEBUG:
+                Log.d(name, message, t);
+                break;
+            case INFO:
+                Log.i(name, message, t);
+                break;
+            case WARN:
+                Log.w(name, message, t);
+                break;
+            case ERROR:
+                Log.e(name, message, t);
+                break;
         }
-        Log.d(this.name, MessageFormat.format(s, p, o));
-    }
-
-    @Override
-    public void debug(String s, Object p, Throwable t) {
-        Log.d(this.name, MessageFormat.format(s, p), t);
-    }
-
-    @Override
-    public void info(String s) {
-        Log.i(this.name, s);
-    }
-
-    @Override
-    public void info(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.i(this.name, s, throwable);
-            return;
-        }
-        Log.i(this.name, MessageFormat.format(s, o));
-    }
-
-    @Override
-    public void info(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.i(this.name, MessageFormat.format(s, p), throwable);
-            return;
-        }
-        Log.i(this.name, MessageFormat.format(s, p, o));
-    }
-
-    @Override
-    public void info(String s, Object p, Throwable t) {
-        Log.i(this.name, MessageFormat.format(s, p), t);
-    }
-
-    @Override
-    public void info(String s, Throwable t) {
-        Log.i(this.name, s, t);
-    }
-
-    @Override
-    public void warn(String s) {
-        Log.w(this.name, s);
-    }
-
-    @Override
-    public void warn(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.w(this.name, s, throwable);
-            return;
-        }
-        Log.w(this.name, MessageFormat.format(s, o));
-    }
-
-    @Override
-    public void warn(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.w(this.name, MessageFormat.format(s, p), throwable);
-            return;
-        }
-        Log.w(this.name, MessageFormat.format(s, p, o));
-    }
-
-    @Override
-    public void warn(String s, Object p, Throwable t) {
-        Log.w(this.name, MessageFormat.format(s, p), t);
-    }
-
-    @Override
-    public void warn(String s, Throwable t) {
-        Log.w(this.name, s, t);
-    }
-
-    @Override
-    public void error(String s) {
-        Log.e(this.name, s);
-    }
-
-    @Override
-    public void error(String s, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.e(this.name, s, throwable);
-            return;
-        }
-        Log.e(this.name, MessageFormat.format(s, o));
-    }
-
-    @Override
-    public void error(String s, Throwable t) {
-        Log.e(this.name, s, t);
-    }
-
-    @Override
-    public void error(String s, Object p, Object o) {
-        if (o instanceof Throwable) {
-            Throwable throwable = (Throwable) o;
-            Log.e(this.name, MessageFormat.format(s, p), throwable);
-            return;
-        }
-        Log.e(this.name, MessageFormat.format(s, p, o));
-    }
-
-    @Override
-    public void error(String s, Object p, Throwable t) {
-        Log.e(this.name, MessageFormat.format(s, p), t);
     }
 }

@@ -2,7 +2,6 @@ package dev.ultreon.quantum.desktop;
 
 
 import com.github.dgzt.gdx.lwjgl3.Lwjgl3Window;
-import dev.ultreon.mixinprovider.PlatformOS;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.lwjgl.glfw.GLFWNativeWin32;
 
@@ -103,9 +102,9 @@ public class DesktopVulkanWindow extends DesktopWindow {
 
     @Override
     public long getPeer() {
-        if (PlatformOS.isWindows) {
+        if (System.getProperty("os.name").startsWith("Windows")) {
             return GLFWNativeWin32.glfwGetWin32Window(this.getHandle());
-        } else if (PlatformOS.isMac) {
+        } else if (System.getProperty("os.name").startsWith("Mac")) {
             return GLFWNativeCocoa.glfwGetCocoaWindow(this.getHandle());
         } else {
             return -1L;

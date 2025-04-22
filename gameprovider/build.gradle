@@ -28,7 +28,7 @@ plugins {
     id "java-library"
 }
 
-group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
+group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
 //projectConfig {
 //    type ProjectType.Gameprovider
@@ -53,7 +53,7 @@ configurations {
 
 dependencies {
     implementation api("org.jetbrains:annotations:24.0.1")
-    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version", {
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion", {
         exclude group: "org.lwjgl", module: "lwjgl"
         exclude group: "org.lwjgl", module: "lwjgl-bom"
         exclude group: "org.lwjgl", module: "lwjgl-glfw"
@@ -66,17 +66,17 @@ dependencies {
     }
 
     implementation "it.unimi.dsi:fastutil-core:8.5.9"
-    implementation "com.google.code.findbugs:jsr305:$jsr_version"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    implementation "com.google.code.findbugs:jsr305:$jsrVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    implementation api("org.apache.logging.log4j:log4j:$log4j_version")
-    implementation api("org.apache.logging.log4j:log4j-core:$log4j_version")
-    implementation api("org.apache.logging.log4j:log4j-api:$log4j_version")
+    implementation api("org.apache.logging.log4j:log4j:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
     implementation api("com.formdev:flatlaf:3.2.1")
 
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version") {
+    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion") {
         exclude group: "org.ow2.asm"
         exclude group: "org.ow2.sat4j"
     }

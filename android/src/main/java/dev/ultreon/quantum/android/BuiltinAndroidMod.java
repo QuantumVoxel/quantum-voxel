@@ -1,18 +1,12 @@
 package dev.ultreon.quantum.android;
 
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.ModOrigin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /** @noinspection ClassCanBeRecord*/
@@ -32,12 +26,12 @@ public class BuiltinAndroidMod implements Mod {
     }
 
     @Override
-    public @NotNull String getId() {
+    public @NotNull String getName() {
         return id;
     }
 
     @Override
-    public @NotNull String getName() {
+    public @NotNull String getDisplayName() {
         return name;
     }
 
@@ -62,8 +56,7 @@ public class BuiltinAndroidMod implements Mod {
     }
 
     @Override
-    @Nullable
-    public Iterable<Path> getRootPaths() {
+    public @Nullable Iterable<FileHandle> getRootPaths() {
         return null;
     }
 

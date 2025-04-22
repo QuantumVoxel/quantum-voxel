@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
@@ -11,8 +9,8 @@ import dev.ultreon.quantum.network.packets.s2c.S2CInventoryItemChangedPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,9 +28,10 @@ public class Inventory extends ContainerMenu {
     public Inventory(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos) {
         super(type, world, entity, pos, MAX_SLOTS, null);
 
-        if (!(entity instanceof Player player)) {
+        if (!(entity instanceof Player)) {
             throw new IllegalArgumentException("Entity must be a player!");
         }
+        Player player = (Player) entity;
 
         this.holder = player;
     }
@@ -63,7 +62,6 @@ public class Inventory extends ContainerMenu {
     }
 
     public ItemSlot getHotbarSlot(int index) {
-        Preconditions.checkElementIndex(index, this.hotbar.length, "Invalid hotbar index");
         return this.hotbar[index];
     }
 
@@ -77,7 +75,6 @@ public class Inventory extends ContainerMenu {
      * @param stacks the list of item stacks.
      * @return true if all items could fit.
      */
-    @CanIgnoreReturnValue
     public boolean addItems(Iterable<ItemStack> stacks) {
         boolean fit = true;
         for (ItemStack stack : stacks) {
@@ -94,7 +91,6 @@ public class Inventory extends ContainerMenu {
      * @param stack the item stack to add.
      * @return true if the item stack could fully fit in the inventory.
      */
-    @CanIgnoreReturnValue
     public boolean addItem(ItemStack stack) {
         return addItem(stack, true);
     }
@@ -105,7 +101,6 @@ public class Inventory extends ContainerMenu {
      * @param stack the item stack to add.
      * @return true if the item stack could fully fit in the inventory.
      */
-    @CanIgnoreReturnValue
     public boolean addItem(ItemStack stack, boolean emitUpdate) {
         if (this.getWorld().isClientSide()) return false; // Ignore client side inventory.
 

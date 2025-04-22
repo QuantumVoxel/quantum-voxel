@@ -16,7 +16,6 @@
 
 package dev.ultreon.quantum.util;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -28,9 +27,6 @@ import java.util.List;
  */
 @SuppressWarnings({"ManualMinMaxCalculation", "UnusedReturnValue", "GrazieInspection", "SpellCheckingInspection", "BooleanMethodIsAlwaysInverted"})
 public class BoundingBox implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -1286036817192127343L;
-
     /**
      * Minimum vector. All XYZ components should be inferior to corresponding {@link #max} components. Call {@link #update()} if
      * you manually change this vector.

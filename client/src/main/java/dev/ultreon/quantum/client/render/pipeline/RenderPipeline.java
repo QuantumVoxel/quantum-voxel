@@ -20,7 +20,6 @@ import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.RenderBuffer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.reflection.qual.NewInstance;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -275,7 +274,7 @@ public class RenderPipeline implements Disposable {
          * @param camera    the camera.
          * @param deltaTime the delta time.
          */
-        public abstract @NewInstance void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime);
+        public abstract void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime);
 
         /**
          * Resizes the node. This is used to resize the node when the window is resized.

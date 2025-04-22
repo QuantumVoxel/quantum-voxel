@@ -5,7 +5,7 @@ import dev.ultreon.quantum.util.Env;
 
 import java.util.function.Supplier;
 
-public abstract non-sealed class PacketToClient<T extends PacketToClient<T>> extends Packet<T> implements IClientEndpoint {
+public abstract class PacketToClient<T extends PacketToClient<T>> extends Packet<T> implements IClientEndpoint {
     public PacketToClient() {
         super();
     }

@@ -22,8 +22,6 @@ public class ExceptionMap {
             return "JX-0001";
         } else if (t instanceof SyntaxException) {
             return "SRV-0001";
-        } else if (t instanceof IllegalCommandException) {
-            return "SRV-0004";
         } else if (t instanceof UnsupportedOperationException) {
             return "J-0001";
         } else if (t instanceof IllegalStateException) {
@@ -110,12 +108,6 @@ public class ExceptionMap {
 
         if (thrown instanceof NoSuchMechanismException) {
             s.sendMessage("[JX-0001] No such mechanism: " + thrown.getMessage());
-        } else if (thrown instanceof CommandExecuteException) {
-            s.sendMessage("[B-0002] Illegal or invalid command: " + thrown.getMessage());
-        } else if (thrown instanceof SpecSyntaxException) {
-            s.sendMessage("[SRV-0001] Syntax error: " + thrown.getMessage());
-        } else if (thrown instanceof OverloadConflictException overloadConflictException) {
-            s.sendMessage("[SRV-0004] Overload conflicts for commands: " + StringUtils.join(overloadConflictException.getAliases(), ", ") + ": " + thrown.getMessage());
         } else if (thrown instanceof UnsupportedOperationException) {
             s.sendMessage("[J-0001] Unsupported operation: " + thrown.getMessage());
         } else if (thrown instanceof IllegalStateException) {

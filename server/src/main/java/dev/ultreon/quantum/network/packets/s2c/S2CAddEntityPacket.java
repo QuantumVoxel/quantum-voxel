@@ -8,9 +8,23 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 
-public record S2CAddEntityPacket(int id, EntityType<?> type, Vec3d position, MapType pipeline) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandler> {
+    private final int id;
+    private final EntityType<?> type;
+    private final Vec3d position;
+    private final MapType pipeline;
+
+    public S2CAddEntityPacket(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
+        this.id = id;
+        this.type = type;
+        this.position = position;
+        this.pipeline = pipeline;
+    }
+
     public S2CAddEntityPacket(Entity spawned) {
         this(spawned.getId(), spawned.getType(), spawned.getPosition(), spawned.getPipeline());
     }
@@ -44,10 +58,43 @@ public record S2CAddEntityPacket(int id, EntityType<?> type, Vec3d position, Map
     @Override
     public String toString() {
         return "S2CAddEntityPacket{" +
-                "id=" + id +
-                ", type=" + type +
-                ", position=" + position +
-                ", pipeline=" + pipeline +
-                '}';
+               "id=" + id +
+               ", type=" + type +
+               ", position=" + position +
+               ", pipeline=" + pipeline +
+               '}';
     }
+
+    public int id() {
+        return id;
+    }
+
+    public EntityType<?> type() {
+        return type;
+    }
+
+    public Vec3d position() {
+        return position;
+    }
+
+    public MapType pipeline() {
+        return pipeline;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CAddEntityPacket) obj;
+        return this.id == that.id &&
+               Objects.equals(this.type, that.type) &&
+               Objects.equals(this.position, that.position) &&
+               Objects.equals(this.pipeline, that.pipeline);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, type, position, pipeline);
+    }
+
 }

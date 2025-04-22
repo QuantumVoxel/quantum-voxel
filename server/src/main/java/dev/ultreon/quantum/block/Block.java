@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.block;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.block.state.BlockStateDefinition;
@@ -21,8 +20,7 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.ubo.types.MapType;
-import org.checkerframework.common.returnsreceiver.qual.This;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -134,7 +132,6 @@ public class Block {
         return new BoundingBox(new Vec3d(x, y, z), new Vec3d(x + 1, y + 1, z + 1));
     }
 
-    @CanIgnoreReturnValue
     public BoundingBox boundingBox(int x, int y, int z, BlockState blockState, BoundingBox box) {
         return box.set(box.min.set(x, y, z), box.max.set(x + 1, y + 1, z + 1));
     }
@@ -416,67 +413,67 @@ public class Block {
         private @Nullable ToolLevel toolLevel = null;
         private boolean doesRandomTick;
 
-        public @This Properties soundType(SoundType soundType) {
+        public Properties soundType(SoundType soundType) {
             this.soundType = soundType;
             return this;
         }
 
-        public @This Properties transparent() {
+        public Properties transparent() {
             this.transparent = true;
             return this;
         }
 
-        public @This Properties noCollision() {
+        public Properties noCollision() {
             this.solid = false;
             return this;
         }
 
-        public @This Properties hardness(float hardness) {
+        public Properties hardness(float hardness) {
             this.hardness = hardness;
             return this;
         }
 
-        public @This Properties effectiveTool(@Nullable ToolType toolType) {
+        public Properties effectiveTool(@Nullable ToolType toolType) {
             this.effectiveTool = toolType;
             return this;
         }
 
-        public @This Properties requiresTool() {
+        public Properties requiresTool() {
             this.requiresTool = true;
             return this;
         }
 
-        public @This Properties fluid() {
+        public Properties fluid() {
             this.fluid = true;
             return this;
         }
 
-        public @This Properties dropsItems(@NotNull ItemStack @NotNull ... drops) {
+        public Properties dropsItems(@NotNull ItemStack @NotNull ... drops) {
             this.loot = new ConstantLoot(drops);
             return this;
         }
 
-        public @This Properties dropsItems(@NotNull Item @NotNull ... drops) {
+        public Properties dropsItems(@NotNull Item @NotNull ... drops) {
             this.loot = new ConstantLoot(Arrays.stream(drops).map(Item::defaultStack).collect(Collectors.toList()));
             return this;
         }
 
-        public @This Properties dropsItems(@Nullable LootGenerator drops) {
+        public Properties dropsItems(@Nullable LootGenerator drops) {
             this.loot = drops;
             return this;
         }
 
-        public @This Properties noRendering() {
+        public Properties noRendering() {
             this.disableRendering = true;
             return this;
         }
 
-        public @This Properties usesCustomRender() {
+        public Properties usesCustomRender() {
             this.hasCustomRender = true;
             return this;
         }
 
-        public @This Properties lightReduction(int reduction) {
+        public Properties lightReduction(int reduction) {
             if (reduction < 1)
                 throw new IllegalArgumentException("Light reduction needs to be 1 or higher.");
             this.lightReduction = reduction;
@@ -487,27 +484,27 @@ public class Block {
          * @deprecated Blocks are now instantly broken by default
          */
         @Deprecated(since = "0.1.0")
-        public @This Properties instaBreak() {
+        public Properties instaBreak() {
             this.hardness = 0;
             return this;
         }
 
-        public @This Properties unbreakable() {
+        public Properties unbreakable() {
             this.hardness = Float.POSITIVE_INFINITY;
             return this;
         }
 
-        public @This Properties replaceable() {
+        public Properties replaceable() {
             this.replaceable = true;
             return this;
         }
 
-        public @This Properties noOcclude() {
+        public Properties noOcclude() {
             this.occlude = false;
             return this;
         }
 
-        public @This Properties noGreedyMerge() {
+        public Properties noGreedyMerge() {
             this.greedyMerge = false;
             return this;
         }

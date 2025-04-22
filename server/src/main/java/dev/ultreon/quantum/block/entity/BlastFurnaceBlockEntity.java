@@ -11,7 +11,7 @@ import dev.ultreon.quantum.world.container.FuelRegistry;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.container.BlastFurnaceContainer;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 

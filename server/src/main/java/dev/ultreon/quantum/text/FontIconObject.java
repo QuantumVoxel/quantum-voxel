@@ -1,11 +1,10 @@
 package dev.ultreon.quantum.text;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 public class FontIconObject extends MutableText {
@@ -13,8 +12,6 @@ public class FontIconObject extends MutableText {
     private final FontIconMap fontIconMap;
 
     public FontIconObject(String id, FontIconMap fontIconMap) {
-        Preconditions.checkNotNull(id, "Icon ID may not be null.");
-        Preconditions.checkNotNull(fontIconMap, "Font Icon Map may not be null.");
         this.id = id;
         this.fontIconMap = fontIconMap;
     }

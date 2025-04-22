@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.crash;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.DataSizes;
@@ -37,7 +36,8 @@ public final class CrashLog extends CrashCategory {
     public CrashLog(String details, Throwable t) {
         super(details, t);
 
-        if (t instanceof ApplicationCrash crash) {
+        if (t instanceof ApplicationCrash) {
+            ApplicationCrash crash = (ApplicationCrash) t;
             this.addCrash(crash);
         }
     }
@@ -133,7 +133,6 @@ public final class CrashLog extends CrashCategory {
         return "crash-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss"));
     }
 
-    @CanIgnoreReturnValue
     public Result<@Nullable Void> defaultSave() {
         File file = new File("game-crashes");
         if (!file.exists()) {
@@ -148,7 +147,6 @@ public final class CrashLog extends CrashCategory {
         return Result.ok(null);
     }
 
-    @CanIgnoreReturnValue
     public Result<@Nullable Void> writeToFile(File file) {
         try (FileOutputStream stream = new FileOutputStream(file)) {
             this.writeToStream(stream);

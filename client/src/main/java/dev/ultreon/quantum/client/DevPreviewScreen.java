@@ -4,7 +4,6 @@ import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.text.TextObject;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -49,7 +48,7 @@ public class DevPreviewScreen extends Screen {
      * @param deltaTime The time passed since the last frame.
      */
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         renderBackground(renderer);
 
         super.renderWidget(renderer, deltaTime);

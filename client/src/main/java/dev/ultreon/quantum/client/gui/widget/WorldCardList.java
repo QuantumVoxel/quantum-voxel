@@ -169,7 +169,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
                     if (client.getTextureManager().isTextureLoaded(id)) {
                         picture = client.getTextureManager().getTexture(id);
                     } else {
-                        picture = new Texture(new FileHandle(world.getDirectory().resolve("picture.png").toFile()));
+                        picture = new Texture(world.getDirectory().child("picture.png"));
                         picture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                         client.getTextureManager().registerTexture(id, picture);
                     }

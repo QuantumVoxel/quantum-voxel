@@ -9,15 +9,25 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-public record S2COpenMenuPacket(NamespaceID menuType,
-                                List<ItemStack> items) implements Packet<InGameClientPacketHandler> {
+public final class S2COpenMenuPacket implements Packet<InGameClientPacketHandler> {
+    private final NamespaceID menuType;
+    private final List<ItemStack> items;
+
+    public S2COpenMenuPacket(NamespaceID menuType,
+                             List<ItemStack> items) {
+        this.menuType = menuType;
+        this.items = items;
+    }
+
     public static S2COpenMenuPacket of(NamespaceID menuType, List<ItemSlot> slots) {
         var stacks = slots.stream().map(itemSlot -> {
             if (itemSlot == null) return ItemStack.empty();
             if (itemSlot.isEmpty()) return ItemStack.empty();
             return itemSlot.getItem();
-        }).toList();
+        }).collect(Collectors.toList());
 
         return new S2COpenMenuPacket(menuType, stacks);
     }
@@ -44,4 +54,27 @@ public record S2COpenMenuPacket(NamespaceID menuType,
     public String toString() {
         return "S2COpenMenuPacket{menuType=" + this.menuType + ", items=" + this.items + '}';
     }
+
+    public NamespaceID menuType() {
+        return menuType;
+    }
+
+    public List<ItemStack> items() {
+        return items;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2COpenMenuPacket) obj;
+        return Objects.equals(this.menuType, that.menuType) &&
+               Objects.equals(this.items, that.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(menuType, items);
+    }
+
 }

@@ -1,16 +1,9 @@
 package dev.ultreon.quantum.client;
 
-import com.google.gson.annotations.SerializedName;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Objects;
-
 /**
  * This class represents the metadata of the application.
  * It holds the version of the application.
- * 
+ *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class Metadata {
@@ -24,7 +17,6 @@ public class Metadata {
      * The version of the application.
      * This field is annotated with @SerializedName to specify the name of the field when serializing/deserializing to/from JSON.
      */
-    @SerializedName("version")
     public String version;
 
     /**
@@ -49,11 +41,7 @@ public class Metadata {
      * @throws AssertionError if an IOException occurs while reading the file
      */
     private static Metadata load() {
-        try (Reader reader = new InputStreamReader(Objects.requireNonNull(Metadata.class.getResourceAsStream("/metadata.json")))) {
-            Metadata.instance = QuantumClient.GSON.fromJson(reader, Metadata.class);
-            return Metadata.instance;
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        Metadata.instance = new Metadata();
+        return Metadata.instance;
     }
 }

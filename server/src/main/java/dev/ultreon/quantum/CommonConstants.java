@@ -2,13 +2,13 @@ package dev.ultreon.quantum;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.google.gson.Gson;
-import de.marhali.json5.Json5;
-import de.marhali.json5.Json5Options;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonWriter;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.rng.JavaRNG;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 import java.time.format.DateTimeFormatter;
 
@@ -19,22 +19,8 @@ public class CommonConstants {
     public static final String EX_INVALID_DATA = "Invalid data";
     public static final String EX_ARRAY_TOO_LARGE = "Array too large, max = %d, actual = %d";
     public static final String NAMESPACE = "quantum";
-    public static final Gson GSON = new Gson();
-    public static final Json5 JSON5 = Json5.builder(builder -> {
-        // Setup JSON5 options
-        builder.prettyPrinting();
-        builder.indentFactor(4);
-        builder.allowInvalidSurrogate();
-
-        return builder.build();
-    });
-    public static final Json5Options JSON5_OPTIONS = Json5Options.builder()
-            .prettyPrinting()
-            .indentFactor(4)
-            .allowInvalidSurrogate()
-            .quoteless()
-            .build();
-    public static final int MAX_BLOCK_REGISTRY = 128;
+    public static final Json JSON5 = new Json(JsonWriter.OutputType.minimal);
+    public static final JsonWriter.OutputType JSON5_OPTIONS = JsonWriter.OutputType.minimal;
     public static final NamespaceID DEFAULT_FONT = new NamespaceID("quantium");
     
     // Client Vec3D
@@ -135,6 +121,8 @@ public class CommonConstants {
     public static final JavaRNG RANDOM = new JavaRNG();
     public static final int DEFAULT_LOD_LEVEL = 0;
     public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final JsonReader JSON_READ = new JsonReader();
+    public static final int MAX_BLOCK_REGISTRY = 256;
 
     private CommonConstants() {
 

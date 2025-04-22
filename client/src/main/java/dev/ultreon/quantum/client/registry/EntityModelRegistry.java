@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static dev.ultreon.quantum.CommonConstants.LOGGER;
+
 /**
  * Represents the registry of entity models.
  *
@@ -176,7 +178,7 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
 
         for (Map.Entry<EntityType<?>, NamespaceID> e : this.g3dRegistry.entrySet()) {
             NamespaceID id = e.getValue();
-            Model model = QuantumClient.invokeAndWait(() -> this.modelLoader.loadModel(new ResourceFileHandle(id.mapPath(path -> "models/entity/" + path + ".g3dj")),fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
+            Model model = QuantumClient.invokeAndWait(() -> this.modelLoader.loadModel(QuantumClient.resource(id.mapPath(path -> "models/entity/" + path + ".g3dj")),fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
                 if (path.startsWith("models/entity/")) {
                     path = path.substring("models/entity/".length());
                 }
@@ -189,21 +191,26 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
             NamespaceID id = e.getValue();
             NamespaceID mappedId = id.mapPath(path -> "models/entity/" + path + ".g3dj");
 
-            Model model = QuantumClient.invokeAndWait(() -> MODEL_LOADER.loadModel(new ResourceFileHandle(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
-                if (path.startsWith("models/entity/")) {
-                    path = path.substring("models/entity/".length());
-                } else if (path.startsWith(mappedId.toString())) {
-                    path = path.substring(mappedId.toString().length());
-                } else {
-                    String string = mappedId.toString();
-                    int len = string.length() - path.length() - ".g3dj".length();
-                    if (path.startsWith(string.substring(0, len))) {
-                        path = path.substring(len);
-                    }
-                }
-
-                return "textures/entity/" + path;
-            }))));
+//            Model model = QuantumClient.invokeAndWait(() -> MODEL_LOADER.loadModel(QuantumClient.resource(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
+//                if (path.startsWith("models/entity/")) {
+//                    path = path.substring("models/entity/".length());
+//                } else if (path.startsWith(mappedId.toString())) {
+//                    path = path.substring(mappedId.toString().length());
+//                } else {
+//                    String string = mappedId.toString();
+//                    System.out.println(string);
+//                    System.out.println(path);
+//                    int len = string.length() - path.length() - ".g3dj".length();
+//                    System.out.println(len);
+//                    if (path.startsWith(string.substring(0, len))) {
+//                        path = path.substring(len);
+//                    }
+//                }
+//
+//                return "textures/entity/" + path;
+//            }))));
+            LOGGER.warn("TOOD: Implement model loader for: {}", mappedId);
+            Model model = null;
             this.finishedRegistry.put(e.getKey(), model);
         }
 

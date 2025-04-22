@@ -1,4 +1,3 @@
-#version 320 es
 
 #ifdef GL_ES
 #define LOWP lowp
@@ -11,22 +10,22 @@ precision mediump float;
 #define HIGH
 #endif
 
-in HIGH vec3 v_normal;
-in HIGH vec3 v_modelNormal;
+varying HIGH vec3 v_normal;
+varying HIGH vec3 v_modelNormal;
 
-in LOWP vec4 v_color;
+varying LOWP vec4 v_color;
 
-in HIGH vec2 v_diffuseUV;
-in HIGH vec2 v_emissiveUV;
-in HIGH vec2 v_normalUV;
-in HIGH vec2 v_specularUV;
+varying HIGH vec2 v_diffuseUV;
+varying HIGH vec2 v_emissiveUV;
+varying HIGH vec2 v_normalUV;
+varying HIGH vec2 v_specularUV;
 uniform sampler2D u_diffuseTexture;
 uniform sampler2D u_emissiveTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_specularTexture;
 uniform MED vec4 u_fogColor;
-in LOWP float v_fog;
-in HIGH vec3 v_position;
+varying LOWP float v_fog;
+varying HIGH vec3 v_position;
 
 uniform LOWP float u_globalSunlight;
 uniform HIGH vec2 u_atlasSize;
@@ -97,13 +96,6 @@ vec2 transformUV(vec2 uv) {
     return v_texUV;
 }
 
-layout(location = 0) out vec4 diffuseOut;
-layout(location = 1) out vec3 reflectiveOut;
-layout(location = 2) out vec3 depthOut;
-layout(location = 3) out vec3 positionOut;
-layout(location = 4) out vec3 normalOut;
-layout(location = 5) out vec4 specularOut;
-
 void main() {
     vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
     vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
@@ -115,14 +107,14 @@ void main() {
     float sunLight = v_color.a;
     vec4 blockLight = vec4(v_color.rgb, 1.0);
 
-    vec4 diffuse = texture(u_diffuseTexture, v_diffuseTexUV);
-    //    if (depth > lodThreshold) diffuseOut.a = 1.0;
+    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
+    //    if (depth > lodThreshold) gl_FragColor.a = 1.0;
     //    else {
     //        #ifdef blendedFlag
-    //            diffuseOut.a = diffuse.a;
+    //            gl_FragColor.a = diffuse.a;
     //        #else
     if (diffuse.a <= 0.01) discard;
-    diffuseOut.a = 1.0;
+    gl_FragColor.a = 1.0;
     //        #endif
     //    }
 
@@ -131,9 +123,9 @@ void main() {
     //    light += (blockLight.rgb - (light * blockLight.rgb));
 
     vec3 emissive;
-    if (depth > lodThreshold) emissive = texture(u_emissiveTexture, v_emissiveTexUV).rgb;
+    if (depth > lodThreshold) emissive = texture2D(u_emissiveTexture, v_emissiveTexUV).rgb;
     else emissive = vec3(0.0);
-    diffuseOut.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
+    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
 
     vec3 depthIn3Channels;
     depthIn3Channels.r = mod(depth, 1.0);
@@ -146,10 +138,6 @@ void main() {
 
     depthIn3Channels.b = depth;
 
-    diffuseOut = vec4(diffuseOut.xyz*gamma(sh_light(v_normal, groove)), diffuseOut.w);
-    diffuseOut.rgb = mix(diffuseOut.rgb, vec3(u_fogColor), v_fog);
-    positionOut = v_position;
-    normalOut = normal;
-    specularOut = vec4(0.0, 0.0, 0.0, 0.0);
-    depthOut = depthIn3Channels;
+    gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)), gl_FragColor.w);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);
 }

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.util;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.entity.player.PlayerAbilities;
 
 public enum GameMode {
@@ -22,7 +21,6 @@ public enum GameMode {
         this.blockBreak = blockBreak;
     }
 
-    @CanIgnoreReturnValue
     public PlayerAbilities setAbilities(PlayerAbilities abilities) {
         abilities.allowFlight = this.allowFlight;
         abilities.instaMine = this.instaMine;

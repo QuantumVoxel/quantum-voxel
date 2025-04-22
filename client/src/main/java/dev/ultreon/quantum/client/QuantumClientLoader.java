@@ -2,9 +2,7 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import de.marhali.json5.Json5Array;
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CommonRegistries;
@@ -18,14 +16,15 @@ import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.debug.*;
 import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
+import dev.ultreon.quantum.client.gui.screens.TitleScreen;
 import dev.ultreon.quantum.client.gui.screens.container.AdvancedCraftingScreen;
 import dev.ultreon.quantum.client.gui.screens.container.BlastFurnaceScreen;
 import dev.ultreon.quantum.client.gui.screens.container.CrateScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.client.input.TouchInput;
-import dev.ultreon.quantum.client.input.controller.ControllerInput;
-import dev.ultreon.quantum.client.input.controller.gui.VirtualKeyboard;
+//import dev.ultreon.quantum.client.input.controller.ControllerInput;
+//import dev.ultreon.quantum.client.input.controller.gui.VirtualKeyboard;
 import dev.ultreon.quantum.client.item.ItemRenderer;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.particle.ClientParticleRegistry;
@@ -41,9 +40,7 @@ import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.js.JsLoader;
 import dev.ultreon.quantum.menu.MenuTypes;
-import dev.ultreon.quantum.python.PyLoader;
 import dev.ultreon.quantum.registry.GlobalRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
@@ -65,13 +62,12 @@ class QuantumClientLoader implements Runnable {
      * Registers the debug pages.
      */
     private static void registerDebugPages() {
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("simple"), new SimpleDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("generic"), new GenericDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("value_tracker"), new ValueTrackerPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("rendering"), new RenderingDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("profiler"), new ProfilerDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("chunk_info"), new ChunkInfoDebugPage());
-        ClientRegistries.DEBUG_PAGE.register(QuantumClient.id("inspector"), new InspectorDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("simple"), new SimpleDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("generic"), new GenericDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("value_tracker"), new ValueTrackerPage());
+        ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("rendering"), new RenderingDebugPage());
+        if (!GamePlatform.get().isWeb()) ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("profiler"), new ProfilerDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("chunk_info"), new ChunkInfoDebugPage());
     }
 
     /**
@@ -79,8 +75,14 @@ class QuantumClientLoader implements Runnable {
      */
     @Override
     public void run() {
-        QuantumClient client = QuantumClient.get();
-        load(client);
+        try {
+            QuantumClient client = QuantumClient.get();
+            load(client);
+        } catch (Throwable e) {
+            QuantumClient.LOGGER.error("Failed to load QuantumClient", e);
+            QuantumClient.LOGGER.error("QuantumClient will be shut down");
+            QuantumClient.crash(e);
+        }
     }
 
     /**
@@ -102,7 +104,7 @@ class QuantumClientLoader implements Runnable {
 
 //        Thread.setDefaultUncaughtExceptionHandler(QuantumClient::uncaughtException);
 
-        client.loadingOverlay.setProgress(0.075F);
+        progress(client, 0.075F);
 
         Gdx.app.setApplicationLogger(new GdxSlf4jLogger());
 
@@ -120,22 +122,20 @@ class QuantumClientLoader implements Runnable {
 
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
 
-        client.loadingOverlay.setProgress(0.15F);
+        progress(client, 0.15F);
 
         QuantumClient.LOGGER.info("Importing resources");
         client.getResourceManager().importModResources();
 
-        client.loadingOverlay.setProgress(0.35F);
+        float progress = 0.35F;
+        progress(client, progress);
 
         QuantumClient.LOGGER.info("Generating bitmap fonts");
-        var resource = client.getResourceManager().getResource(QuantumClient.id("texts/unicode.txt"));
-        if (resource == null) {
-            throw new ApplicationCrash(new CrashLog("Where are my symbols", new ResourceNotFoundException(QuantumClient.id("texts/unicode.txt"))));
-        }
+        var resource = QuantumClient.resource(NamespaceID.of("texts/unicode.txt"));
 
         client.crashOverlay = new ManualCrashOverlay(client);
 
-        client.loadingOverlay.setProgress(0.7F);
+        progress(client, 0.7F);
 
         //----------------------
         // Setting up rendering
@@ -143,10 +143,10 @@ class QuantumClientLoader implements Runnable {
         QuantumClient.LOGGER.info("Initializing rendering stuffs");
         QuantumClient.invokeAndWait(() -> {
             client.keyAndMouseInput = new KeyAndMouseInput(client, client.camera);
-            client.controllerInput = new ControllerInput(client, client.camera);
+//            client.controllerInput = new ControllerInput(client, client.camera);
             client.touchInput = new TouchInput(client, client.camera);
 
-            client.virtualKeyboard = new VirtualKeyboard();
+//            client.virtualKeyboard = new VirtualKeyboard();
         });
         Gdx.input.setInputProcessor(client.keyAndMouseInput);
 
@@ -156,7 +156,7 @@ class QuantumClientLoader implements Runnable {
         QuantumClient.LOGGER.info("Setting up Debug Renderer");
         client.debugGui = new DebugOverlay(client);
 
-        client.loadingOverlay.setProgress(0.83F);
+        progress(client, 0.83F);
 
         //--------------------------
         // Registering game content
@@ -170,7 +170,7 @@ class QuantumClientLoader implements Runnable {
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
             RenderPass.nopInit();
             Registries.nopInit();
-            RegistryEvents.REGISTRY_CREATION.factory().onRegistryCreation();
+//            RegistryEvents.REGISTRY_CREATION.factory().onRegistryCreation();
         });
 
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
@@ -197,23 +197,7 @@ class QuantumClientLoader implements Runnable {
             final String id = mod.getName();
             LoadingContext.withinContext(new LoadingContext(id), () -> {
                 for (Registry<?> registry : GlobalRegistry.getRegistries()) {
-                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
-                }
-            });
-        }
-
-        for (var pyMod : PyLoader.getInstance().getMods()) {
-            LoadingContext.withinContext(new LoadingContext(pyMod.id), () -> {
-                for (Registry<?> registry : GlobalRegistry.getRegistries()) {
-                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(pyMod.id, registry);
-                }
-            });
-        }
-
-        for (var jsMod : JsLoader.getInstance().getMods()) {
-            LoadingContext.withinContext(new LoadingContext(jsMod.name), () -> {
-                for (Registry<?> registry : GlobalRegistry.getRegistries()) {
-                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(jsMod.name, registry);
+//                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
                 }
             });
         }
@@ -229,7 +213,7 @@ class QuantumClientLoader implements Runnable {
         QuantumClient.LOGGER.info("Reloading resources");
         client.reloadResources();
 
-        client.loadingOverlay.setProgress(0.95F);
+        progress(client, 0.95F);
 
         //*
         //* Post-initialize game content
@@ -238,7 +222,7 @@ class QuantumClientLoader implements Runnable {
         QuantumClient.LOGGER.info("Stitching textures");
         stitchTextures();
 
-        client.loadingOverlay.setProgress(0.98F);
+        progress(client, 0.98F);
 
         client.itemRenderer = QuantumClient.invokeAndWait(() -> new ItemRenderer(client));
         client.itemRenderer.registerModels(client.j5ModelLoader);
@@ -250,9 +234,9 @@ class QuantumClientLoader implements Runnable {
             client.camera.update();
         }
 
-        client.windowTex = client.getTextureManager().getTexture(QuantumClient.id("textures/gui/window.png"));
+        client.windowTex = client.getTextureManager().getTexture(NamespaceID.of("textures/gui/window.png"));
 
-        client.loadingOverlay.setProgress(0.99F);
+        progress(client, 0.99F);
 
         ClientLifecycleEvents.CLIENT_STARTED.factory().onGameLoaded(client);
 
@@ -270,19 +254,29 @@ class QuantumClientLoader implements Runnable {
 
         client.booted = true;
 
-        client.loadingOverlay.setProgress(1.0F);
+        progress(client, 1.0F);
 
         client.bootTime = Duration.ofMilliseconds(System.currentTimeMillis() - QuantumClient.BOOT_TIMESTAMP);
         QuantumClient.LOGGER.info("Game booted in {}.", client.bootTime.toSimpleString());
 
-        QuantumClient.invokeAndWait(new Task<>(QuantumClient.id("main/show_title_screen"), () -> {
+        QuantumClient.invokeAndWait(new Task<>(NamespaceID.of("main/show_title_screen"), () -> {
             if (client.devWorld) {
                 client.startDevWorld();
+            } else {
+                client.showScreen(new DevPreviewScreen(client.getUser() != null ? new TitleScreen() : new UsernameScreen()));
             }
         }));
         client.loadingOverlay = null;
 
         OverlayManager.resize(ceil(client.getWidth() / client.getGuiScale()), ceil(client.getHeight() / client.getGuiScale()));
+    }
+
+    private static void progress(QuantumClient client, float progress) {
+        if (client.loadingOverlay == null) {
+            CommonConstants.LOGGER.warn("Loading overlay is null");
+            return;
+        }
+        client.loadingOverlay.setProgress(progress);
     }
 
     /**
@@ -302,13 +296,12 @@ class QuantumClientLoader implements Runnable {
      */
     private void loadLanguages(QuantumClient client) {
         var internal = QuantumClient.resource(new NamespaceID("languages.json5"));
-        Json5Element parse = CommonConstants.JSON5.parse(internal.reader());
-        Json5Object asJson5Object = parse.getAsJson5Object();
+        JsonValue asJsonObject = CommonConstants.JSON_READ.parse(internal.reader());
 
-        Json5Array languagesJ5 = asJson5Object.get("Languages").getAsJson5Array();
+        String[] languagesJ5 = asJsonObject.get("Languages").asStringArray();
 
-        if (languagesJ5.isEmpty()) {
-            registerLanguage(QuantumClient.id("en_us"), client);
+        if (languagesJ5.length == 0) {
+            registerLanguage(NamespaceID.of("en_us"), client);
             return;
         }
 
@@ -316,14 +309,11 @@ class QuantumClientLoader implements Runnable {
 
         for (var language : languagesJ5) {
             if (language == null) continue;
-            if (!language.isJson5Primitive()) continue;
-            if (language.getAsJson5Primitive().isString()) {
-                languages.add(language.getAsString());
-            }
+            languages.add(language);
         }
 
         for (var language : languages) {
-            registerLanguage(QuantumClient.id(language), client);
+            registerLanguage(NamespaceID.of(language), client);
         }
 
         LanguageRegistry.doRegistration(id -> registerLanguage(id, client));
@@ -337,7 +327,7 @@ class QuantumClientLoader implements Runnable {
      */
     private void registerLanguage(NamespaceID id, QuantumClient quantumClient) {
         var s = id.getPath().split("_", 2);
-        var locale = s.length == 1 ? Locale.of(s[0]) : Locale.of(s[0], s[1]);
+        var locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
         LanguageManager.INSTANCE.register(locale, id);
         LanguageManager.INSTANCE.load(locale, id, quantumClient.getResourceManager());
     }

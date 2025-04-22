@@ -3,8 +3,8 @@ package dev.ultreon.quantum.client.input.key;
 import com.badlogic.gdx.Input.Keys;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
-import dev.ultreon.quantum.client.input.controller.ControllerInput;
-import dev.ultreon.quantum.client.input.controller.ControllerMapping;
+//import dev.ultreon.quantum.client.input.controller.ControllerInput;
+//import dev.ultreon.quantum.client.input.controller.ControllerMapping;
 
 import java.util.function.Predicate;
 
@@ -19,7 +19,7 @@ public class KeyBind {
     private boolean down;
     private int clicks;
 
-    private ControllerMapping<?> mapping = null;
+//    private ControllerMapping<?> mapping = null;
 
     public KeyBind(String name, int keyCode, Type type) {
         this(name, keyCode, 0);
@@ -34,23 +34,23 @@ public class KeyBind {
     }
 
     public boolean isPressed() {
-        if (GameInput.getCurrent() instanceof ControllerInput) {
-            return mapping != null && mapping.getAction().isPressed();
-        }
+//        if (GameInput.getCurrent() instanceof ControllerInput) {
+//            return mapping != null && mapping.getAction().isPressed();
+//        }
         return type.pressed.test(this);
     }
 
     public boolean isReleased() {
-        if (GameInput.getCurrent() instanceof ControllerInput) {
-            return mapping != null && !mapping.getAction().isPressed();
-        }
+//        if (GameInput.getCurrent() instanceof ControllerInput) {
+//            return mapping != null && !mapping.getAction().isPressed();
+//        }
         return !type.pressed.test(this);
     }
 
     public boolean isJustPressed() {
-        if (GameInput.getCurrent() instanceof ControllerInput) {
-            return mapping != null && mapping.getAction().isJustPressed();
-        }
+//        if (GameInput.getCurrent() instanceof ControllerInput) {
+//            return mapping != null && mapping.getAction().isJustPressed();
+//        }
 
         if ((modifiers & SHIFT_MOD) != 0 && !KeyAndMouseInput.isKeyPressed(Keys.SHIFT_LEFT) && !KeyAndMouseInput.isKeyPressed(Keys.SHIFT_RIGHT))
             return false;

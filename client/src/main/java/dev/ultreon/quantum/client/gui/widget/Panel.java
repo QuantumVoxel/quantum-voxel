@@ -3,12 +3,11 @@ package dev.ultreon.quantum.client.gui.widget;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Supplier;
 
 public class Panel extends Widget {
-    public Panel(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public Panel(int x, int y, int width, int height) {
         super(width, height);
     }
 

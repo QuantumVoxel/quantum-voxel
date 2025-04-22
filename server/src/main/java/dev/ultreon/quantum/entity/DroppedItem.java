@@ -1,9 +1,8 @@
 package dev.ultreon.quantum.entity;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.ubo.types.IntType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.IntType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
@@ -53,7 +52,8 @@ public class DroppedItem extends Entity {
 
         if (this.pickupDelay <= 0) {
             for (Entity entity : this.world.entitiesWithinDst(this, 4)) {
-                if (entity instanceof Player player) {
+                if (entity instanceof Player) {
+                    Player player = (Player) entity;
                     double deltaX = (player.getX() - this.getX()) / 10;
                     double deltaY = (player.getY() - this.getY()) / 10;
                     double deltaZ = (player.getZ() - this.getZ()) / 10;
@@ -63,7 +63,8 @@ public class DroppedItem extends Entity {
 
             for (Entity entity : this.world.collideEntities(this, getBoundingBox().ext(0.5, 0.5, 0.5))) {
                 if (this.isMarkedForRemoval()) continue;
-                if (entity instanceof ServerPlayer player) {
+                if (entity instanceof ServerPlayer) {
+                    ServerPlayer player = (ServerPlayer) entity;
                     this.markRemoved();
                     player.inventory.addItem(this.stack);
                 }
@@ -94,9 +95,7 @@ public class DroppedItem extends Entity {
         return this.stack;
     }
 
-    public void setStack(ItemStack stack) {
-        Preconditions.checkNotNull(stack, "Stack cannot be null");
-        this.stack = stack;
+    public void setStack(ItemStack stack) {        this.stack = stack;
         this.pipeline.put("Item", stack.save());
     }
 

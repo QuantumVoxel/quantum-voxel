@@ -58,16 +58,22 @@ public class BlastFurnaceScreen extends ContainerScreen {
     }
 
     private float burnPercent() {
-        if (menu instanceof BlockContainerMenu containerMenu
-                && containerMenu.getBlockEntity() instanceof BlastFurnaceBlockEntity blockEntity)
+        if (menu instanceof BlockContainerMenu
+            && ((BlockContainerMenu) menu).getBlockEntity() instanceof BlastFurnaceBlockEntity) {
+            BlockContainerMenu containerMenu = menu;
+            BlastFurnaceBlockEntity blockEntity = (BlastFurnaceBlockEntity) containerMenu.getBlockEntity();
             return (float) blockEntity.getBurnTime() / blockEntity.getMaxBurnTime();
+        }
         return 0;
     }
 
     private float progress() {
-        if (menu instanceof BlockContainerMenu containerMenu
-                && containerMenu.getBlockEntity() instanceof BlastFurnaceBlockEntity blockEntity)
+        if (menu instanceof BlockContainerMenu
+            && ((BlockContainerMenu) menu).getBlockEntity() instanceof BlastFurnaceBlockEntity) {
+            BlockContainerMenu containerMenu = menu;
+            BlastFurnaceBlockEntity blockEntity = (BlastFurnaceBlockEntity) containerMenu.getBlockEntity();
             return (float) blockEntity.getCookTime() / blockEntity.getMaxCookTime();
+        }
         return 0;
     }
 }

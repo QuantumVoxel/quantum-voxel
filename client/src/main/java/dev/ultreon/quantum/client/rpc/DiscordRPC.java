@@ -12,9 +12,7 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import dev.ultreon.quantum.Promise;
 
 /**
  * A class that handles Discord Rich Presence integration. The Discord IPC client is used to send
@@ -89,9 +87,11 @@ public class DiscordRPC implements RpcHandler {
                 client.sendRichPresence(builder.build());
 
                 // Schedule a task to update the Rich Presence every 200 milliseconds
-                ScheduledFuture<?> scheduledFuture = QuantumClient.get().scheduleRepeat(() -> update(client), 0, 200, TimeUnit.MILLISECONDS);
+                // TODO : This is not working
+//                ScheduledFuture<?> scheduledFuture = QuantumClient.get().scheduleRepeat(() -> update(client), 0, 200, TimeUnit.MILLISECONDS);
+
                 // Set up a shutdown hook to cancel the scheduled task and close the IPC client
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> scheduledFuture.cancel(false)));
+//                Runtime.getRuntime().addShutdownHook(new Thread(() -> scheduledFuture.cancel(false)));
             }
             /**
              * Updates the Discord Rich Presence with the current game activity.
@@ -213,7 +213,7 @@ public class DiscordRPC implements RpcHandler {
             }
         });
 
-        CompletableFuture.runAsync(() -> {
+        Promise.runAsync(() -> {
             CommonConstants.LOGGER.info("Attempting to connect to Discord...");
             try {
                 client.connect();

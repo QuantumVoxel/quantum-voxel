@@ -79,7 +79,7 @@ public class AOUtils {
             if (!block.hasAO()) {
                 int ao;
                 switch (dir.getAxis()) {
-                    case Y -> {
+                    case Y:
                         BlockModel northWest = getModelAt(chunk, (int) point.x - 1, (int) point.y, (int) point.z - 1);
                         BlockModel west = getModelAt(chunk, (int) point.x - 1, (int) point.y, (int) point.z);
                         BlockModel north = getModelAt(chunk, (int) point.x, (int) point.y, (int) point.z - 1);
@@ -103,49 +103,51 @@ public class AOUtils {
                                     southWest.hasAO() || west.hasAO() || south.hasAO()
                             ));
                         }
-                    }
-                    case X -> {
+                        break;
+                    case X:
                         BlockModel northUp = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z + 1);
                         BlockModel up = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z);
-                        BlockModel north = getModelAt(chunk, (int) point.x, (int) point.y, (int) point.z + 1);
+                        BlockModel north1 = getModelAt(chunk, (int) point.x, (int) point.y, (int) point.z + 1);
                         BlockModel southUp = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z - 1);
-                        BlockModel south = getModelAt(chunk, (int) point.x, (int) point.y, (int) point.z - 1);
+                        BlockModel south1 = getModelAt(chunk, (int) point.x, (int) point.y, (int) point.z - 1);
                         BlockModel southDown = getModelAt(chunk, (int) point.x, (int) point.y - 1, (int) point.z - 1);
                         BlockModel down = getModelAt(chunk, (int) point.x, (int) point.y - 1, (int) point.z);
                         BlockModel northDown = getModelAt(chunk, (int) point.x, (int) point.y - 1, (int) point.z + 1);
                         if (dir.isNegative()) {
                             ao = createAO(
-                                    southDown.hasAO() || down.hasAO() || south.hasAO(),
-                                    southUp.hasAO() || up.hasAO() || south.hasAO(),
-                                    northDown.hasAO() || down.hasAO() || north.hasAO(),
-                                    northUp.hasAO() || up.hasAO() || north.hasAO()
+                                    southDown.hasAO() || down.hasAO() || south1.hasAO(),
+                                    southUp.hasAO() || up.hasAO() || south1.hasAO(),
+                                    northDown.hasAO() || down.hasAO() || north1.hasAO(),
+                                    northUp.hasAO() || up.hasAO() || north1.hasAO()
                             );
                         } else {
                             ao = createAO(
-                                    northDown.hasAO() || down.hasAO() || north.hasAO(),
-                                    northUp.hasAO() || up.hasAO() || north.hasAO(),
-                                    southDown.hasAO() || down.hasAO() || south.hasAO(),
-                                    southUp.hasAO() || up.hasAO() || south.hasAO()
+                                    northDown.hasAO() || down.hasAO() || north1.hasAO(),
+                                    northUp.hasAO() || up.hasAO() || north1.hasAO(),
+                                    southDown.hasAO() || down.hasAO() || south1.hasAO(),
+                                    southUp.hasAO() || up.hasAO() || south1.hasAO()
                             );
                         }
-                    }
-                    case Z -> {
+                        break;
+                    case Z:
                         BlockModel westUp = getModelAt(chunk, (int) point.x - 1, (int) point.y + 1, (int) point.z);
-                        BlockModel up = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z);
-                        BlockModel west = getModelAt(chunk, (int) point.x - 1, (int) point.y, (int) point.z);
+                        BlockModel up1 = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z);
+                        BlockModel west1 = getModelAt(chunk, (int) point.x - 1, (int) point.y, (int) point.z);
                         BlockModel eastUp = getModelAt(chunk, (int) point.x + 1, (int) point.y + 1, (int) point.z);
-                        BlockModel east = getModelAt(chunk, (int) point.x + 1, (int) point.y, (int) point.z);
+                        BlockModel east1 = getModelAt(chunk, (int) point.x + 1, (int) point.y, (int) point.z);
                         BlockModel eastDown = getModelAt(chunk, (int) point.x + 1, (int) point.y - 1, (int) point.z);
-                        BlockModel down = getModelAt(chunk, (int) point.x, (int) point.y - 1, (int) point.z);
+                        BlockModel down1 = getModelAt(chunk, (int) point.x, (int) point.y - 1, (int) point.z);
                         BlockModel westDown = getModelAt(chunk, (int) point.x - 1, (int) point.y - 1, (int) point.z);
                         ao = createAO(
-                                westDown.hasAO() || down.hasAO() || west.hasAO(),
-                                westUp.hasAO() || up.hasAO() || west.hasAO(),
-                                eastDown.hasAO() || down.hasAO() || east.hasAO(),
-                                eastUp.hasAO() || up.hasAO() || east.hasAO()
+                                westDown.hasAO() || down1.hasAO() || west1.hasAO(),
+                                westUp.hasAO() || up1.hasAO() || west1.hasAO(),
+                                eastDown.hasAO() || down1.hasAO() || east1.hasAO(),
+                                eastUp.hasAO() || up1.hasAO() || east1.hasAO()
                         );
-                    }
-                    default -> ao = createAO(false, false, false, false);
+                        break;
+                    default:
+                        ao = createAO(false, false, false, false);
+                        break;
                 }
                 array[dir.ordinal()] = ao;
             }

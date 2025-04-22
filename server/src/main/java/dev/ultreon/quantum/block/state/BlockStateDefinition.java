@@ -1,12 +1,13 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BlockStateDefinition {
     private final int totalBits;
@@ -150,7 +151,7 @@ public class BlockStateDefinition {
         }
 
         public List<StatePropertyKey<?>> keys() {
-            return keys.stream().sorted(Comparator.comparing(StatePropertyKey::getName)).toList();
+            return keys.stream().sorted(Comparator.comparing(StatePropertyKey::getName)).collect(Collectors.toList());
         }
     }
 }

@@ -2,8 +2,6 @@ package dev.ultreon.quantum.registry;
 
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.common.base.Preconditions;
-import com.mojang.serialization.Codec;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -24,19 +22,15 @@ public abstract class Registry<T> extends AbstractRegistryMap<RegistryKey<T>, T>
     private final boolean overrideAllowed;
     private final boolean syncDisabled;
     protected final RegistryKey<Registry<T>> key;
-    private final Codec<RegistryKey<T>> keyCodec;
 
     private final Map<NamespaceID, NamedTag<T>> tags = new HashMap<>();
     private int curId;
 
-    protected Registry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {
-        Preconditions.checkNotNull(key, "key");
-        this.key = key;
+    protected Registry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {        this.key = key;
         this.id = builder.id;
         this.type = builder.type;
         this.overrideAllowed = builder.allowOverride;
         this.syncDisabled = builder.doNotSync;
-        keyCodec = NamespaceID.CODEC.xmap(this::subspace, RegistryKey::id);
 
         RegistryEvents.REGISTRY_DUMP.subscribe(this::dumpRegistry);
     }
@@ -47,7 +41,6 @@ public abstract class Registry<T> extends AbstractRegistryMap<RegistryKey<T>, T>
         this.overrideAllowed = builder.allowOverride;
         this.syncDisabled = builder.doNotSync;
         this.key = RegistryKey.registry(this);
-        keyCodec = NamespaceID.CODEC.xmap(this::subspace, RegistryKey::id);
 
         RegistryEvents.REGISTRY_DUMP.subscribe(this::dumpRegistry);
     }
@@ -209,10 +202,6 @@ public abstract class Registry<T> extends AbstractRegistryMap<RegistryKey<T>, T>
         T value = this.registry.get(key);
         if (value == null) throw new NoSuchElementException("No such element: " + key);
         return value;
-    }
-
-    public Codec<RegistryKey<T>> keyCodec() {
-        return this.keyCodec;
     }
 
     public void reload(ReloadContext context) {

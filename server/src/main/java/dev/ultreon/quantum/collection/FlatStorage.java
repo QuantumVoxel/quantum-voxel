@@ -1,11 +1,10 @@
 package dev.ultreon.quantum.collection;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.quantum.world.rng.RNG;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;
 import it.unimi.dsi.fastutil.shorts.Short2ReferenceFunction;
 
@@ -118,8 +117,6 @@ public class FlatStorage<D> implements Storage<D> {
 
     @Override
     public boolean set(int idx, D value) {
-        Preconditions.checkNotNull(value, "value");
-
         if (idx < 0 || idx >= this.data.length) {
             throw new ArrayIndexOutOfBoundsException(idx);
         }

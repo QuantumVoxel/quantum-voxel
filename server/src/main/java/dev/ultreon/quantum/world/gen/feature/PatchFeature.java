@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world.gen.feature;
 
-import com.google.errorprone.annotations.concurrent.LazyInit;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.world.Fork;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -14,7 +13,6 @@ public class PatchFeature extends TerrainFeature {
     private final NoiseConfig settingsBase;
     private final Block patchBlock;
     private final float threshold;
-    @LazyInit
     @Nullable
     private NoiseInstance baseNoise;
     private final int depth;

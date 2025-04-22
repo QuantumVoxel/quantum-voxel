@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public record S2CDisconnectPacket<T extends ClientPacketHandler>(String message) implements Packet<T> {
+import java.util.Objects;
+
+public final class S2CDisconnectPacket<T extends ClientPacketHandler> implements Packet<T> {
+    private final String message;
+
+    public S2CDisconnectPacket(String message) {
+        this.message = message;
+    }
 
     public static <T extends ClientPacketHandler> S2CDisconnectPacket<T> read(PacketIO buffer) {
         var message = buffer.readString(300);
@@ -29,4 +36,22 @@ public record S2CDisconnectPacket<T extends ClientPacketHandler>(String message)
     public String toString() {
         return "S2CDisconnectPacket{message=" + this.message + '}';
     }
+
+    public String message() {
+        return message;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CDisconnectPacket) obj;
+        return Objects.equals(this.message, that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message);
+    }
+
 }

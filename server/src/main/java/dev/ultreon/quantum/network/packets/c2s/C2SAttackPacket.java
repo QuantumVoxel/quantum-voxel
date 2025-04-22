@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public record C2SAttackPacket(int id) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SAttackPacket implements Packet<InGameServerPacketHandler> {
+    private final int id;
+
+    public C2SAttackPacket(int id) {
+        this.id = id;
+    }
 
     public C2SAttackPacket(Entity entity) {
         this(entity.getId());
@@ -27,4 +34,28 @@ public record C2SAttackPacket(int id) implements Packet<InGameServerPacketHandle
     public void handle(PacketContext ctx, InGameServerPacketHandler handler) {
         handler.onAttack(id);
     }
+
+    public int id() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SAttackPacket) obj;
+        return this.id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "C2SAttackPacket[" +
+               "id=" + id + ']';
+    }
+
 }

@@ -6,7 +6,14 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
-public record S2CChunkCancelPacket(ChunkVec pos) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CChunkCancelPacket implements Packet<InGameClientPacketHandler> {
+    private final ChunkVec pos;
+
+    public S2CChunkCancelPacket(ChunkVec pos) {
+        this.pos = pos;
+    }
 
     public static S2CChunkCancelPacket read(PacketIO buffer) {
         return new S2CChunkCancelPacket(buffer.readChunkVec());
@@ -26,4 +33,22 @@ public record S2CChunkCancelPacket(ChunkVec pos) implements Packet<InGameClientP
     public String toString() {
         return "S2CChunkCancelPacket{pos=" + this.pos + '}';
     }
+
+    public ChunkVec pos() {
+        return pos;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CChunkCancelPacket) obj;
+        return Objects.equals(this.pos, that.pos);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos);
+    }
+
 }

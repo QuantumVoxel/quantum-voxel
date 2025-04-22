@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.lang.Integer.max;
+import static java.lang.Math.max;
 
 /**
  * @author <a href="https://github.com/XyperCode">Qubilux</a>

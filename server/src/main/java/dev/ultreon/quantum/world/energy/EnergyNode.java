@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world.energy;
 
-import com.google.common.collect.Iterators;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
@@ -8,12 +7,14 @@ import dev.ultreon.quantum.world.capability.Capabilities;
 import dev.ultreon.quantum.world.capability.Capability;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.capability.EnergyCapability;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 public class EnergyNode implements Capability<EnergyConnection>, Iterable<EnergyNode> {
@@ -40,12 +41,24 @@ public class EnergyNode implements Capability<EnergyConnection>, Iterable<Energy
 
     public void set(Direction connect, EnergyNode other) {
         switch (connect) {
-            case NORTH -> this.north = other;
-            case SOUTH -> this.south = other;
-            case EAST -> this.east = other;
-            case WEST -> this.west = other;
-            case UP -> this.up = other;
-            case DOWN -> this.down = other;
+            case NORTH:
+                this.north = other;
+                break;
+            case SOUTH:
+                this.south = other;
+                break;
+            case EAST:
+                this.east = other;
+                break;
+            case WEST:
+                this.west = other;
+                break;
+            case UP:
+                this.up = other;
+                break;
+            case DOWN:
+                this.down = other;
+                break;
         }
     }
 
@@ -88,7 +101,7 @@ public class EnergyNode implements Capability<EnergyConnection>, Iterable<Energy
     }
 
     public @NotNull Iterator<EnergyNode> iterator() {
-        return Iterators.filter(Iterators.cycle(north, south, east, west, up, down), Objects::nonNull);
+        return Arrays.asList(north, south, east, west, up, down).stream().filter(Objects::nonNull).iterator();
     }
 
     public void onRevalidate(EnergyNetwork energyNetwork) {

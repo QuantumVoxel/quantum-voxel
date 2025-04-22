@@ -1,12 +1,5 @@
 package dev.ultreon.quantum.api.commands.variables;
 
-import dev.ultreon.libs.commons.v0.Either;
-import dev.ultreon.quantum.api.commands.CommandParseException;
-import dev.ultreon.quantum.api.commands.CommandReader;
-import dev.ultreon.quantum.api.commands.CommandSender;
-import dev.ultreon.quantum.server.player.ServerPlayer;
-
-import java.util.List;
 import java.util.function.Function;
 
 public class ObjectField<T, R> implements ObjectSource<R> {
@@ -36,22 +29,6 @@ public class ObjectField<T, R> implements ObjectSource<R> {
     @Override
     public ObjectType<R> getObjectType() {
         return this.objectType;
-    }
-
-    @Override
-    public Object get(CommandSender sender, CommandReader ctx) throws CommandParseException {
-        Object o = source.get(sender, ctx);
-        ObjectType<T> sourceType = this.source.getObjectType();
-        if (sourceType.isInstance(o)) {
-            return getter.apply(sourceType.cast(o));
-        }
-
-        throw new CommandParseException("Expected " + this.objectType.getName() + " but got " + o.getClass().getName());
-    }
-
-    @Override
-    public Either<Object, List<String>> tabComplete(ServerPlayer serverPlayer, CommandReader ctx, StringBuilder code) throws CommandParseException.EndOfArgument {
-        return source.tabComplete(serverPlayer, ctx, code);
     }
 
     public Function<T, R> getter() {

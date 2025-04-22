@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.energy;
 
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 public class Energy implements Comparable<Energy> {

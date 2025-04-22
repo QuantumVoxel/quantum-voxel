@@ -13,7 +13,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 
 public class ClientSoundRegistry {
-    private Map<NamespaceID, Sound> soundMap = Collections.emptyMap();
+    private Map<NamespaceID, Sound> soundMap = new HashMap<>();
 
     public ClientSoundRegistry() {
 

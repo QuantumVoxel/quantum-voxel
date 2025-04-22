@@ -263,11 +263,6 @@ public class GameRenderer implements Disposable {
                 RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
             }
         }
-
-        try (var ignored = QuantumClient.PROFILER.start("debug")) {
-            if (this.client.hideHud || this.client.isLoading()) return;
-            this.client.debugGui.render(renderer);
-        }
     }
 
     /**

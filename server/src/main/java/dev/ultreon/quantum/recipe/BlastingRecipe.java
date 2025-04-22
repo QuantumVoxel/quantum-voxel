@@ -1,20 +1,16 @@
 package dev.ultreon.quantum.recipe;
 
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.container.BlastFurnaceContainer;
-import dev.ultreon.quantum.world.container.Container;
-import lombok.Getter;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@Getter
 public final class BlastingRecipe implements Recipe {
     private final ItemStack input;
     private final int minTemperature;
@@ -89,12 +85,11 @@ public final class BlastingRecipe implements Recipe {
         return RecipeType.BLASTING;
     }
 
-    public static BlastingRecipe deserialize(NamespaceID namespaceID, Json5Object object) {
-
-        Json5Object asJson5Object = object.getAsJson5Object("input");
-        ItemStack input = ItemStack.deserialize(asJson5Object);
-        int minTemperature = object.getAsJson5Primitive("min_temperature").getAsInt();
-        ItemStack result = ItemStack.deserialize(object.getAsJson5Object("result"));
+    public static BlastingRecipe deserialize(NamespaceID namespaceID, JsonValue object) {
+        JsonValue asJsonValue = object.get("input");
+        ItemStack input = ItemStack.deserialize(asJsonValue);
+        int minTemperature = object.get("min_temperature").asInt();
+        ItemStack result = ItemStack.deserialize(object.get("result"));
 
         return new BlastingRecipe(input, minTemperature, 200, result);
     }
@@ -130,4 +125,19 @@ public final class BlastingRecipe implements Recipe {
                "result=" + result + ']';
     }
 
+    public ItemStack getInput() {
+        return input;
+    }
+
+    public int getMinTemperature() {
+        return minTemperature;
+    }
+
+    public int getCookTime() {
+        return cookTime;
+    }
+
+    public ItemStack getResult() {
+        return result;
+    }
 }

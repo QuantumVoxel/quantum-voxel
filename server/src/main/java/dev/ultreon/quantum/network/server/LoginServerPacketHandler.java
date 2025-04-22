@@ -79,7 +79,37 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onPlayerLogin(String name) {
-        UUID uuid = UUID.nameUUIDFromBytes(("Quantum:" + name).getBytes());
+        UUID uuid = UUID.randomUUID();
+
+        //noinspection ConstantValue§
+        if (connection == null) {
+            IConnection.LOGGER.info("{} left the server because they disconnected.", name);
+            return;
+        }
+
+        if (server == null) {
+            connection.disconnect("The server is shutting down.");
+            IConnection.LOGGER.info("{} left the server because the server is shutting down.", name);
+            return;
+        }
+
+        if (server.getPlayerCount() >= server.getMaxPlayers()) {
+            connection.disconnect("The server is full.");
+            IConnection.LOGGER.info("{} left the server because the server is full.", name);
+            return;
+        }
+
+        if (server.getPlayer(name) != null) {
+            connection.disconnect("Player " + name + " is already in the server.");
+            IConnection.LOGGER.info("{} left the server because they are already in the server.", name);
+            return;
+        }
+
+        if (server.getPlayer(uuid) != null) {
+            connection.disconnect("Player " + name + " is already in the server.");
+            IConnection.LOGGER.info("{} left the server because they are already in the server.", name);
+            return;
+        }
 
         // Find a free UUID if the requested UUID is already in use
         while (server.getPlayer(uuid) != null) {

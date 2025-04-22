@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.text;
 
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.chars.CharList;
 
 import java.util.*;
@@ -8,7 +7,7 @@ import java.util.stream.Collectors;
 
 @Deprecated
 public class FormattedText {
-    private final Map<Integer, TextFormatElement> indexedElements = Maps.newHashMap();
+    private final Map<Integer, TextFormatElement> indexedElements = new HashMap<>();
     private List<TextFormatElement> elements = new ArrayList<>();
     private int length;
 

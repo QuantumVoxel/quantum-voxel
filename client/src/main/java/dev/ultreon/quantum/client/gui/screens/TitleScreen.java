@@ -4,7 +4,6 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
-import dev.ultreon.quantum.client.gui.widget.ModSidebar;
 import dev.ultreon.quantum.client.gui.widget.Rectangle;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.gui.widget.TitleButton;
@@ -14,7 +13,6 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.util.Vec2f;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +24,6 @@ public class TitleScreen extends Screen {
     private TitleButton quitButton;
     private final Resizer resizer;
     private @Nullable TextButton worldGenTestButton;
-    private ModSidebar modSidebar;
 
     public TitleScreen() {
         super((TextObject) null, null);
@@ -120,7 +117,7 @@ public class TitleScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
         renderer.blit(NamespaceID.of("textures/gui/quantum_voxel.png"), this.size.width / 2f - 878 / 6f, Math.max(2 * this.size.height / 3f - 301 / 6f - 200, 10), 878 / 3f, 301 / 3f, 0, 0, 100, 150, 100, 150);

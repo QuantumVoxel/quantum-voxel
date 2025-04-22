@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world.gen.layer;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.world.BlockSetter;
 import dev.ultreon.quantum.world.World;
@@ -12,8 +11,6 @@ public class GroundTerrainLayer extends TerrainLayer {
     private final int height;
 
     public GroundTerrainLayer(Block block, int offset, int height) {
-        Preconditions.checkArgument(height > 0, "Height must be greater than zero");
-
         this.block = block;
         this.offset = offset;
         this.height = height;

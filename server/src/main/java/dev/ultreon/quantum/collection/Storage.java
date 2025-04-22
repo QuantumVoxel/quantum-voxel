@@ -2,7 +2,7 @@ package dev.ultreon.quantum.collection;
 
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.world.rng.RNG;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;

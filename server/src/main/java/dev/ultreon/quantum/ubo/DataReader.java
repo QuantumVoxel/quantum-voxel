@@ -1,17 +1,9 @@
 package dev.ultreon.quantum.ubo;
 
-import dev.ultreon.ubo.types.DataType;
+import java.io.DataInput;
+import java.io.IOException;
 
-/**
- * Interface for data readers.
- *
- * @param <T>
- */
-public interface DataReader<T extends DataType<?>> {
-    /**
-     * Loads this object from a UBO object.
-     *
-     * @param data the UBO object
-     */
-    void load(T data);
+@FunctionalInterface
+public interface DataReader<T extends dev.ultreon.quantum.ubo.types.DataType<?>> {
+    T read(DataInput input) throws IOException;
 }

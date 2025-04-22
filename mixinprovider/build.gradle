@@ -23,17 +23,17 @@ repositories {
 }
 
 dependencies {
-    implementation("com.badlogicgames.gdx:gdx:$gdx_version")
-    implementation("com.badlogicgames.gdx:gdx-box2d:$gdx_version")
-    implementation("com.badlogicgames.ashley:ashley:$ashley_version")
-    implementation("com.badlogicgames.gdx:gdx-ai:$ai_version")
-    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdx_controllers_version")
-    implementation("com.badlogicgames.gdx:gdx-freetype:$gdx_version")
-    implementation("com.badlogicgames.box2dlights:box2dlights:$box_2d_lights_version")
+    implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+    implementation("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    implementation("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    implementation("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
+    implementation("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
     implementation("com.github.tommyettinger:textratypist:1.1.0")
 
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdx_version") {
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion") {
         exclude group: "org.lwjgl", module: "lwjgl"
         exclude group: "org.lwjgl", module: "lwjgl-glfw"
         exclude group: "org.lwjgl", module: "lwjgl-egl"
@@ -70,15 +70,15 @@ dependencies {
     implementation("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-windows")
     implementation("org.lwjgl:lwjgl-opengles:3.3.5!!:natives-windows")
     implementation("org.lwjgl:lwjgl-stb:3.3.5!!:natives-windows")
-    implementation("com.badlogicgames.gdx:gdx-platform:$gdx_version:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-box2d-platform:$gdx_version:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-bullet-platform:$gdx_version:natives-desktop")
-    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdx_controllers_version")
-    implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdx_version:natives-desktop")
+    implementation("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+    implementation("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
+    implementation("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
+    implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
+    implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
     implementation("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion")
 
     implementation("com.github.crykn.guacamole:gdx:v0.3.5")
-    implementation("net.fabricmc:sponge-mixin:${project.mixin_version}") {
+    implementation("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }

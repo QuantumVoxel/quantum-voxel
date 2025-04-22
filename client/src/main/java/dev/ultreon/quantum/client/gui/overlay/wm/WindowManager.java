@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui.overlay.wm;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.CycleButton;
@@ -35,56 +35,7 @@ public class WindowManager {
 //            renderer.textLeft("[white]Playing Sounds: [green]" + QuantumClient.get().soundSystem.getPlayingCount(), getX() + 10, getY() + 130);
         }
     };
-    private static final DebugWindow MAIN = new DebugWindow("Main") {
-        private static final CycleButton<Boolean> BUTTON = new CycleButton<Boolean>(80, TextObject.literal("Info")).values(true, false).value(false).formatter(bool -> {
-            if (bool)
-                return TextObject.nullToEmpty("Info: Enabled");
-            else
-                return TextObject.nullToEmpty("Info: Disabled");
-        }).setCallback(bool -> {
-            if (bool.getValue() == Boolean.TRUE) {
-                addWindow(INFO_WINDOW);
-            } else {
-                removeWindow(INFO_WINDOW);
-            }
-        });
-
-        {
-            this.setSize(200, 200);
-        }
-
-        @Override
-        public void renderContents(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-            super.renderContents(renderer, mouseX, mouseY, deltaTime);
-
-            BUTTON.setPos(getX() + 10, getY() + 30);
-            BUTTON.render(renderer, deltaTime);
-        }
-
-        @Override
-        public void mousePress(int mouseX, int mouseY, int button) {
-            super.mousePress(mouseX, mouseY, button);
-
-            if (BUTTON.isWithin(mouseX, mouseY))
-                BUTTON.mousePress(mouseX, mouseY, button);
-        }
-
-        @Override
-        public void mouseRelease(int mouseX, int mouseY, int button) {
-            super.mouseRelease(mouseX, mouseY, button);
-
-            if (BUTTON.isWithin(mouseX, mouseY))
-                BUTTON.mouseRelease(mouseX, mouseY, button);
-        }
-
-        @Override
-        public void mouseClicked(int mouseX, int mouseY, int button) {
-            super.mouseClicked(mouseX, mouseY, button);
-
-            if (BUTTON.isWithin(mouseX, mouseY))
-                BUTTON.mouseClick(mouseX, mouseY, button, 1);
-        }
-    };
+    private static final DebugWindow MAIN = new MyDebugWindow();
 
     private static DebugWindow pressedWindow;
     private static boolean focused;
@@ -130,7 +81,7 @@ public class WindowManager {
 
     public static void moveToFront(DebugWindow window) {
         windows.remove(window);
-        windows.addFirst(window);
+        windows.add(0, window);
     }
 
     public static boolean mouseMoved(int mouseX, int mouseY) {
@@ -197,18 +148,18 @@ public class WindowManager {
     }
 
     public static boolean keyPress(int keyCode) {
-        if (SharedLibraryLoader.isMac) {
+        if (GamePlatform.get().isMacOSX()) {
             if (keyCode == Input.Keys.N && Gdx.input.isKeyPressed(Input.Keys.SYM) && !windows.contains(MAIN)) {
-                windows.addFirst(MAIN);
+                windows.add(0, MAIN);
                 return true;
             }
         } else if (keyCode == Input.Keys.N && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && !windows.contains(MAIN)) {
-            windows.addFirst(MAIN);
+            windows.add(0, MAIN);
             return true;
         }
 
         if (!focused || windows.isEmpty()) return false;
-        DebugWindow first = windows.getFirst();
+        DebugWindow first = windows.get(0);
         if (first != null) {
             first.keyPress(keyCode);
             return true;
@@ -218,7 +169,7 @@ public class WindowManager {
 
     public static boolean keyRelease(int keyCode) {
         if (!focused || windows.isEmpty()) return false;
-        DebugWindow first = windows.getFirst();
+        DebugWindow first = windows.get(0);
         if (first != null) {
             first.keyRelease(keyCode);
             return true;
@@ -228,7 +179,7 @@ public class WindowManager {
 
     public static boolean keyTyped(char character) {
         if (!focused || windows.isEmpty()) return false;
-        DebugWindow first = windows.getFirst();
+        DebugWindow first = windows.get(0);
         if (first != null) {
             first.keyTyped(character);
             return true;
@@ -259,5 +210,60 @@ public class WindowManager {
             return true;
         }
         return false;
+    }
+
+    private static class MyDebugWindow extends DebugWindow {
+        private static final CycleButton<Boolean> BUTTON = new CycleButton<Boolean>(80, TextObject.literal("Info")).values(true, false).value(false).formatter(bool -> {
+            if (bool)
+                return TextObject.nullToEmpty("Info: Enabled");
+            else
+                return TextObject.nullToEmpty("Info: Disabled");
+        }).setCallback(bool -> {
+            if (bool.getValue() == Boolean.TRUE) {
+                addWindow(INFO_WINDOW);
+            } else {
+                removeWindow(INFO_WINDOW);
+            }
+        });
+
+        {
+            this.setSize(200, 200);
+        }
+
+        public MyDebugWindow() {
+            super("Main");
+        }
+
+        @Override
+        public void renderContents(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
+            super.renderContents(renderer, mouseX, mouseY, deltaTime);
+
+            BUTTON.setPos(getX() + 10, getY() + 30);
+            BUTTON.render(renderer, deltaTime);
+        }
+
+        @Override
+        public void mousePress(int mouseX, int mouseY, int button) {
+            super.mousePress(mouseX, mouseY, button);
+
+            if (BUTTON.isWithin(mouseX, mouseY))
+                BUTTON.mousePress(mouseX, mouseY, button);
+        }
+
+        @Override
+        public void mouseRelease(int mouseX, int mouseY, int button) {
+            super.mouseRelease(mouseX, mouseY, button);
+
+            if (BUTTON.isWithin(mouseX, mouseY))
+                BUTTON.mouseRelease(mouseX, mouseY, button);
+        }
+
+        @Override
+        public void mouseClicked(int mouseX, int mouseY, int button) {
+            super.mouseClicked(mouseX, mouseY, button);
+
+            if (BUTTON.isWithin(mouseX, mouseY))
+                BUTTON.mouseClick(mouseX, mouseY, button, 1);
+        }
     }
 }

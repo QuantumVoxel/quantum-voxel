@@ -1,11 +1,10 @@
 package dev.ultreon.quantum.entity;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,8 +74,6 @@ public abstract class EntityType<T extends Entity> {
         }
 
         public EntityType<T> build() {
-            Preconditions.checkNotNull(this.factory, "Entity factory is not set");
-
             return new EntityType<>(this) {
                 @Override
                 public T create(World world) {

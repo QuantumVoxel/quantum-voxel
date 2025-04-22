@@ -2,8 +2,6 @@ package dev.ultreon.quantum.util;
 
 import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Objects;
 
 /**
@@ -17,7 +15,7 @@ import java.util.Objects;
  * @see Vec3d
  */
 @SuppressWarnings("unused")
-public class Vec3i implements Externalizable, Cloneable {
+public class Vec3i implements Cloneable {
     public int x, y, z;
 
     /**
@@ -392,20 +390,6 @@ public class Vec3i implements Externalizable, Cloneable {
     @Override
     public String toString() {
         return String.format("%d, %d, %d", this.x, this.y, this.z);
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(this.x);
-        out.writeInt(this.y);
-        out.writeInt(this.z);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        this.x = in.readInt();
-        this.y = in.readInt();
-        this.z = in.readInt();
     }
 
     public long seed() {

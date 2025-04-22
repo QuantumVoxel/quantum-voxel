@@ -3,7 +3,6 @@ package dev.ultreon.quantum.client.render;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.util.GameObject;
 import org.jetbrains.annotations.Nullable;
@@ -23,9 +22,7 @@ public class RenderBufferSource extends GameObject implements Disposable {
     }
 
     public void begin(GameCamera camera) {
-        if (this.started) throw new IllegalStateException("RenderBuffer already started");
-        Preconditions.checkNotNull(camera, "Camera cannot be null");
-        this.camera = camera;
+        if (this.started) throw new IllegalStateException("RenderBuffer already started");        this.camera = camera;
         this.started = true;
     }
 

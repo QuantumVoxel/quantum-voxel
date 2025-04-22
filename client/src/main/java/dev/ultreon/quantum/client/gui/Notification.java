@@ -3,8 +3,6 @@ package dev.ultreon.quantum.client.gui;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.client.gui.icon.Icon;
 import dev.ultreon.quantum.text.MutableText;
-import org.checkerframework.common.reflection.qual.NewInstance;
-import org.checkerframework.common.returnsreceiver.qual.This;
 
 public class Notification {
     private static final int MAX_FADE_IN = 500;
@@ -123,32 +121,32 @@ public class Notification {
             this.summary = summary;
         }
 
-        public @This Builder subText(String subText) {
+        public Builder subText(String subText) {
             this.subText = MutableText.literal(subText);
             return this;
         }
 
-        public @This Builder subText(MutableText subText) {
+        public Builder subText(MutableText subText) {
             this.subText = subText;
             return this;
         }
 
-        public @This Builder duration(Duration duration) {
+        public Builder duration(Duration duration) {
             this.duration = duration;
             return this;
         }
 
-        public @This Builder sticky() {
+        public Builder sticky() {
             this.sticky = true;
             return this;
         }
 
-        public @This Builder icon(Icon icon) {
+        public Builder icon(Icon icon) {
             this.icon = icon;
             return this;
         }
 
-        public @NewInstance Notification build() {
+        public Notification build() {
             return new Notification(this);
         }
     }

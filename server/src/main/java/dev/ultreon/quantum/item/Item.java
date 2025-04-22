@@ -7,7 +7,6 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.UseResult;
-import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -89,7 +88,8 @@ public class Item {
             }
         }
 
-        if (this instanceof ToolItem toolItem) {
+        if (this instanceof ToolItem) {
+            ToolItem toolItem = (ToolItem) this;
             float efficiency = toolItem.getEfficiency();
             if (efficiency != 0) {
                 float v = efficiency;
@@ -117,7 +117,7 @@ public class Item {
          *
          * @param sizeIn the stack size.
          */
-        public @This Properties stackSize(int sizeIn) {
+        public Properties stackSize(int sizeIn) {
             maxStackSize = sizeIn;
             return this;
         }

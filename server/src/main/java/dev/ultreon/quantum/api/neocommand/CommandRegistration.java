@@ -23,8 +23,9 @@ public class CommandRegistration {
         Commands.register("kill")
                 .overload(ctx -> {
                     CommandSender sender = ctx.sender();
-                    if (!(sender instanceof LivingEntity livingEntity))
+                    if (!(sender instanceof LivingEntity))
                         return BasicCommandResult.error("You must be a living entity to use this command");
+                    LivingEntity livingEntity = (LivingEntity) sender;
 
                     livingEntity.kill();
                     return BasicCommandResult.success("You successfully killed yourself (wait why?)");
@@ -43,8 +44,9 @@ public class CommandRegistration {
         Commands.register("tp")
                 .overload(ctx -> {
                     CommandSender sender = ctx.sender();
-                    if (!(sender instanceof LivingEntity livingEntity))
+                    if (!(sender instanceof LivingEntity))
                         return BasicCommandResult.error("You must be a living entity to use this command");
+                    LivingEntity livingEntity = (LivingEntity) sender;
 
                     List<LivingEntity> entity = ctx.get("entity");
                     if (entity.isEmpty())
@@ -53,14 +55,15 @@ public class CommandRegistration {
                     if (entity.size() > 1)
                         return BasicCommandResult.error("You can only teleport to one entity at a time");
 
-                    LivingEntity target = entity.getFirst();
+                    LivingEntity target = entity.get(0);
                     livingEntity.teleportTo(target.getX(), target.getY(), target.getZ());
                     return BasicCommandResult.success("You successfully teleported to " + target.getName());
                 }, entitiesOf("entity", entity -> entity instanceof LivingEntity))
                 .overload(context -> {
                     CommandSender sender = context.sender();
-                    if (!(sender instanceof LivingEntity livingEntity))
+                    if (!(sender instanceof LivingEntity))
                         return BasicCommandResult.error("You must be a living entity to use this command");
+                    LivingEntity livingEntity = (LivingEntity) sender;
 
                     int x = context.get("x");
                     int y = context.get("y");

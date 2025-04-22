@@ -34,7 +34,6 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'scala'
 apply plugin: 'groovy'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java-library'
@@ -42,47 +41,34 @@ apply plugin: 'java-library'
 @Language("jvm-class-name")
 def mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotServer'
 
-group project_group // https://maven.apache.org/guides/mini/guide-naming-conventions.html
+group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
 java {
     withSourcesJar()
     withJavadocJar()
 }
 
-evaluationDependsOn(":gameprovider")
-evaluationDependsOn(":mixinprovider")
-evaluationDependsOn(":lang-gen")
-
 dependencies {
     implementation api("com.formdev:flatlaf:3.2.1")
     implementation api("org.jetbrains:annotations:24.0.0")
-
-    implementation api(project(":gameprovider"))
-    implementation api(project(":mixinprovider"))
-    implementation api(project(":lang-gen"))
 
     annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
 
     implementation api("org.projectlombok:lombok:1.18.34")
     annotationProcessor "org.projectlombok:lombok:1.18.34"
 
-    runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdx_version"
+    runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
 
     // Language adapters
     api 'org.apache.groovy:groovy:4.0.14'
-    api "org.scala-lang:scala-library:$scala_version"
     api 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
 
     // CoreLibs
-    implementation api("dev.ultreon.corelibs:collections-v0:$corelibs_version")
-    implementation api("dev.ultreon.corelibs:commons-v0:$corelibs_version")
-    implementation api("dev.ultreon.corelibs:datetime-v0:$corelibs_version")
-    implementation api("dev.ultreon.corelibs:functions-v0:$corelibs_version")
-    implementation api("dev.ultreon:ubo:$ultreon_data_version")
-
-    // Quantum Fabric Loader
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabric_version")
-    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    implementation api("dev.ultreon.corelibs:collections-v0:$coreLibsVersion")
+    implementation api("dev.ultreon.corelibs:commons-v0:$coreLibsVersion")
+    implementation api("dev.ultreon.corelibs:datetime-v0:$coreLibsVersion")
+    implementation api("dev.ultreon.corelibs:functions-v0:$coreLibsVersion")
+    implementation api("dev.ultreon:ubo:$uboVersion")
 
     // KryoNet
     implementation api("com.esotericsoftware.kryo:kryo5:5.5.0")
@@ -90,70 +76,60 @@ dependencies {
 
     // Apache Commons
     implementation api("org.apache.commons:commons-lang3:3.13.0")
-    implementation api("org.apache.commons:commons-collections4:$commons_collections4_version")
-    runtimeOnly api("org.apache.logging.log4j:log4j-api:$log4j_version")
-    runtimeOnly api("org.apache.logging.log4j:log4j-core:$log4j_version")
-    runtimeOnly api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version")
-
-    // Apache Arrow
-    implementation api("org.apache.arrow:arrow-vector:16.1.0")
+    implementation api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
 
     // Tukaani XZ
-    implementation api("org.tukaani:xz:$tukaani_xz_version")
+    implementation api("org.tukaani:xz:$tukaaniXzVersion")
 
     // SwingBits
-    implementation api("org.bidib.org.oxbow:swingbits:$swingbits_version")
-
-    // Netty
-    implementation api("io.netty:netty-all:$netty_version")
+    implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
     // LibGDX
-    implementation api("com.badlogicgames.gdx:gdx-ai:$ai_version")
-    implementation api("com.badlogicgames.gdx:gdx-backend-headless:$gdx_version")
+    implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    implementation api("com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion")
 
     // JNA
-    implementation api("net.java.dev.jna:jna:$jna_version")
-    implementation api("net.java.dev.jna:jna-platform:$jna_version")
+    implementation api("net.java.dev.jna:jna:$jnaVersion")
+    implementation api("net.java.dev.jna:jna-platform:$jnaVersion")
 
-    implementation api("org.tukaani:xz:$tukaani_xz_version")
+    implementation api("org.tukaani:xz:$tukaaniXzVersion")
     implementation api("com.jcraft:jzlib:1.1.3")
 
     // JSON5
     implementation api("dev.ultreon:json5-api:d0a559bc9b")
 
-    // Google
-    implementation api("com.google.code.gson:gson:2.10.1")
-    implementation api("com.google.guava:guava:$guava_version")
-
     // Misc
     implementation api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
     implementation api("com.raylabz:opensimplex:1.0.3")
-    implementation api("de.articdive:jnoise-pipeline:4.1.0")
+
+    api "dev.ultreon.JNoiseJDK11:jnoise-core:a6507bcc7e", {
+        exclude group: "org.jspecify", module: "jspecify"
+    }
+    api "dev.ultreon.JNoiseJDK11:jnoise-pipeline:a6507bcc7e", {
+        exclude group: "org.jspecify", module: "jspecify"
+    }
+    api "dev.ultreon.JNoiseJDK11:jnoise-generators:a6507bcc7e", {
+        exclude group: "org.jspecify", module: "jspecify"
+    }
+    api "dev.ultreon.JNoiseJDK11:jnoise-modifiers:a6507bcc7e", {
+        exclude group: "org.jspecify", module: "jspecify"
+    }
+    api "dev.ultreon.JNoiseJDK11:jnoise-modules:a6507bcc7e", {
+        exclude group: "org.jspecify", module: "jspecify"
+    }
 
     implementation api('dev.ultreon:libnoiseforjava:f77e0827da')
     implementation api('com.flowpowered:flow-noise:1.0.0')
 
-    implementation api("space.earlygrey:shapedrawer:$shapedrawer_version")
+    implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
-    implementation api("com.google.code.findbugs:jsr305:$jsr_version")
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 
-    implementation(api("org.graalvm.polyglot:polyglot:24.1.2"))
-    implementation(api("org.graalvm.polyglot:python:24.1.2"))
-    implementation(api("org.graalvm.polyglot:js:24.1.2"))
-    implementation(api("org.graalvm.llvm:llvm-api:24.1.2"))
-
-    implementation(api("com.mojang:datafixerupper:8.0.16"))
-
-    implementation(api("com.mojang:datafixerupper:8.0.16"))
-
     implementation(api("org.apache.commons:commons-compress:1.26.1"))
-
-    api 'org.mozilla:rhino:1.7.15!!'
-    api 'org.mozilla:rhino-engine:1.7.15!!'
 }
 
 processResources {
@@ -221,7 +197,7 @@ tasks.create("serverJar", Jar) {
 }
 
 tasks.register('prepareRun', {
-    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
+    Files.createDirectories(Path.of(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
 tasks.withType(ProcessResources).configureEach {

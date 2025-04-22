@@ -10,7 +10,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Notifications implements GuiRenderable {
     private static final int HEIGHT = 41;
@@ -18,7 +17,6 @@ public class Notifications implements GuiRenderable {
     private static final int OFFSET = 5;
     private static final int GAP = 5;
 
-    private final Lock lock = new ReentrantLock(true);
     private final QuantumClient client;
     private final Deque<Notification> notifications = new ArrayDeque<>();
     private final Set<UUID> usedNotifications = new HashSet<>();
@@ -34,7 +32,6 @@ public class Notifications implements GuiRenderable {
 
         int y = (int) (Notifications.OFFSET + this.motionY);
 
-        this.lock.lock();
         this.notifications.removeIf(notification1 -> {
             if (notification1.isFinished()) {
                 this.motionY += Notifications.HEIGHT + Notifications.GAP;
@@ -75,8 +72,6 @@ public class Notifications implements GuiRenderable {
         }
 
         this.motionY = Math.max(this.motionY - ((deltaTime * Notifications.HEIGHT) * 4 + (deltaTime * this.motionY) * 4), 0);
-
-        this.lock.unlock();
     }
 
     public void add(Notification notification) {
@@ -86,7 +81,7 @@ public class Notifications implements GuiRenderable {
             return;
         }
 
-        this.notifications.addLast(notification);
+        this.notifications.add(notification);
     }
 
     public void add(String title, String description) {

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.world;
 
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
@@ -18,7 +17,7 @@ import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ public abstract class Biome {
     }
 
     public BiomeGenerator create(ServerWorld world, long seed) {
-        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getGenerator().getLayerDomain(), this.layers, this.surfaceFeatures);
+//        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getGenerator().getLayerDomain(), this.layers, this.surfaceFeatures);
 
         this.layers.forEach(layer -> layer.create(world));
         this.surfaceFeatures.forEach(feature -> feature.create(world));
@@ -127,15 +126,15 @@ public abstract class Biome {
 
     public boolean isTopBlock(BlockState currentBlock) {
         if (currentBlock.getBlock() == Blocks.AIR) return true;
-        return layers.stream().anyMatch(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer && layer.surfaceBlock == currentBlock.getBlock());
+        return layers.stream().anyMatch(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer && ((SurfaceTerrainLayer) terrainLayer).surfaceBlock == currentBlock.getBlock());
     }
 
     public BlockState getTopMaterial() {
-        return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer layer ? layer.surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer ? ((SurfaceTerrainLayer) terrainLayer).surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
     }
 
     public BlockState getFillerMaterial() {
-        return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer layer ? layer.block : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer ? ((GroundTerrainLayer) terrainLayer).block : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
     }
 
     public float getHumidityStart() {
@@ -263,8 +262,6 @@ public abstract class Biome {
         }
 
         public Biome build() {
-            Preconditions.checkNotNull(this.biomeNoise, "Biome noise not set.");
-
             if (Float.isNaN(this.temperatureStart)) throw new IllegalArgumentException("Temperature start not set.");
             if (Float.isNaN(this.temperatureEnd)) throw new IllegalArgumentException("Temperature end not set.");
 

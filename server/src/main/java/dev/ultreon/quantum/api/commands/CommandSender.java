@@ -1,12 +1,7 @@
 package dev.ultreon.quantum.api.commands;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.api.commands.output.BasicCommandResult;
-import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.api.commands.perms.Permission;
-import dev.ultreon.quantum.api.neocommand.CommandError;
 import dev.ultreon.quantum.api.neocommand.Commands;
-import dev.ultreon.quantum.registry.CommandRegistry;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
@@ -62,25 +57,6 @@ public interface CommandSender {
     boolean isAdmin();
 
     /**
-     * Executes a slash command with the given input.
-     * The method expects to have the first slash pre-removed from the input.
-     * <p>
-     * So, if the actual command is "/example", the method should be called with "example" as the input.<br>
-     * And if the actual command is "//example", the method should be called with "/example" as the input.
-     * <p>
-     * This method doesn't need to be implemented. As it executes the command already by default.
-     *
-     * @param input The input string containing the command and arguments.
-     * @return
-     */
-    @Nullable
-    @Deprecated
-    @CanIgnoreReturnValue
-    default CommandResult execute(String input) {
-        return CompatCommandResult.wrap(runCommand(input, true));
-    }
-
-    /**
      * Executes a command with the given input string. This method is a shorthand
      * for {@link #runCommand(String, boolean)} with `sendToChat` set to true by default.
      *
@@ -91,25 +67,6 @@ public interface CommandSender {
      */
     default dev.ultreon.quantum.api.neocommand.CommandResult runCommand(String input) {
         return runCommand(input, true);
-    }
-
-    /**
-     * Executes a slash command with the given input.
-     * The method expects to have the first slash pre-removed from the input.
-     * <p>
-     * So, if the actual command is "/example", the method should be called with "example" as the input.<br>
-     * And if the actual command is "//example", the method should be called with "/example" as the input.
-     * <p>
-     * This method doesn't need to be implemented. As it executes the command already by default.
-     *
-     * @param input The input string containing the command and arguments.
-     * @return
-     */
-    @Nullable
-    @Deprecated
-    @CanIgnoreReturnValue
-    default CommandResult execute(String input, boolean sendToChat) {
-        return CompatCommandResult.wrap(runCommand(input, sendToChat));
     }
 
     /**
@@ -125,7 +82,6 @@ public interface CommandSender {
      * @return The result of executing the command as a {@link dev.ultreon.quantum.api.neocommand.CommandResult}.
      *         Returns null if the input is empty, or if executing the command fails.
      */
-    @CanIgnoreReturnValue
     default @NotNull dev.ultreon.quantum.api.neocommand.CommandResult runCommand(String input, boolean sendToChat) {
         // Trim the input to remove any leading or trailing whitespace
         var commandline = input.trim();

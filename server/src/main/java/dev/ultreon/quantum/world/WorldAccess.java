@@ -14,14 +14,14 @@ import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import dev.ultreon.quantum.Promise;
 
 /**
  * The {@code WorldAccess} interface provides a set of methods for interacting with the world,
@@ -173,9 +173,9 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @param height the height of the cuboid region.
      * @param depth the depth of the cuboid region.
      * @param block the BlockState to set for each block in the region.
-     * @return a CompletableFuture that completes when the operation has finished.
+     * @return a CompletionPromise that completes when the operation has finished.
      */
-    CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block);
+    Promise<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block);
 
     /**
      * Retrieves a collection of all chunks that are currently loaded in memory.

@@ -6,7 +6,16 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public record S2CPingPacket(long serverTime, long time) implements Packet<ClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CPingPacket implements Packet<ClientPacketHandler> {
+    private final long serverTime;
+    private final long time;
+
+    public S2CPingPacket(long serverTime, long time) {
+        this.serverTime = serverTime;
+        this.time = time;
+    }
 
     public S2CPingPacket(long time) {
         this(System.currentTimeMillis(), time);
@@ -27,7 +36,8 @@ public record S2CPingPacket(long serverTime, long time) implements Packet<Client
 
     @Override
     public void handle(PacketContext ctx, ClientPacketHandler handler) {
-        if (handler instanceof InGameClientPacketHandler inGameHandler) {
+        if (handler instanceof InGameClientPacketHandler) {
+            InGameClientPacketHandler inGameHandler = (InGameClientPacketHandler) handler;
             inGameHandler.onPing(this.serverTime, this.time);
         }
     }
@@ -36,4 +46,27 @@ public record S2CPingPacket(long serverTime, long time) implements Packet<Client
     public String toString() {
         return "S2CPingPacket{serverTime=" + this.serverTime + ", time=" + this.time + '}';
     }
+
+    public long serverTime() {
+        return serverTime;
+    }
+
+    public long time() {
+        return time;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CPingPacket) obj;
+        return this.serverTime == that.serverTime &&
+               this.time == that.time;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(serverTime, time);
+    }
+
 }

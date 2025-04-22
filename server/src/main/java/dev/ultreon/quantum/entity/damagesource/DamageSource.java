@@ -6,7 +6,6 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.Nullable;
 
 public class DamageSource {
@@ -35,7 +34,8 @@ public class DamageSource {
         if (type == null) return Formatter.format("[light red]NULL</>");
         if (entity == null) return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), Formatter.format("[light red]NULL</>"));
         TextObject displayName = entity.getDisplayName();
-        if (entity instanceof LivingEntity livingEntity) {
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
             Entity lastAttacker = livingEntity.getLastAttacker();
             if (lastAttacker == null)
                 return TextObject.translation(type.getDomain() + ".damageSource." + type.getPath().replaceAll("/", "."), displayName);
@@ -48,7 +48,7 @@ public class DamageSource {
         return this.byPassInvincibility;
     }
 
-    public @This DamageSource byPassInvincibility(boolean byPassInvincibility) {
+    public DamageSource byPassInvincibility(boolean byPassInvincibility) {
         this.byPassInvincibility = byPassInvincibility;
         return this;
     }

@@ -2,8 +2,6 @@ package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.*;
-import com.google.common.util.concurrent.AtomicDouble;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -32,7 +30,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,9 +48,9 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
     public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
     public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(2048, 2048));
-    public static final AtomicDouble FOG_DENSITY = new AtomicDouble(0.001);
-    public static final AtomicDouble FOG_START = new AtomicDouble(0.0);
-    public static final AtomicDouble FOG_END = new AtomicDouble(1.0);
+    public static double FOG_DENSITY = 0.001;
+    public static double FOG_START = 0.0;
+    public static double FOG_END = 1.0;
 
     public static final Color DAY_TOP_COLOR = new Color(0x7fb0feff);
     public static final Color DAY_BOTTOM_COLOR = new Color(0xc1d3f1ff);
@@ -149,8 +147,9 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
      */
     @Override
     public boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos) {
-        if (!(chunk instanceof ClientChunk clientChunk))
+        if (!(chunk instanceof ClientChunk))
             throw new IllegalArgumentException("Chunk must be a ClientChunk");
+        ClientChunk clientChunk = (ClientChunk) chunk;
 
         // Check if the chunk should stay loaded
         if (shouldStayLoaded(pos)) {
@@ -235,12 +234,14 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
             return;
         }
 
-        if (!(chunk instanceof ClientChunk clientChunk))
+        if (!(chunk instanceof ClientChunk))
             throw new IllegalArgumentException("Chunk must be a ClientChunk but was " + chunk.getClass().getSimpleName());
+        ClientChunk clientChunk = (ClientChunk) chunk;
 
         clientChunk.markNotEmpty();
 
-        if (this.client.worldRenderer instanceof WorldRenderer worldRenderer) {
+        if (this.client.worldRenderer instanceof WorldRenderer) {
+            WorldRenderer worldRenderer = this.client.worldRenderer;
             worldRenderer.rebuild(clientChunk);
         }
 
@@ -698,7 +699,8 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
     @Override
     public boolean isLoaded(@NotNull Chunk chunk) {
-        if (chunk instanceof ClientChunk clientChunk) {
+        if (chunk instanceof ClientChunk) {
+            ClientChunk clientChunk = (ClientChunk) chunk;
             return this.chunkManager.contains(clientChunk);
         }
 
@@ -998,7 +1000,6 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         return this.time % DAY_CYCLE;
     }
 
-    @CanIgnoreReturnValue
     static Color mixColors(Color color1, Color color2, Color output, double percent) {
         percent = Mth.clamp(percent, 0.0, 1.0);
         double inversePercent = 1.0 - percent;
@@ -1043,7 +1044,6 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     }
 
     @Override
-    @CanIgnoreReturnValue
     public Entity removeEntity(int id) {
         Entity remove = this.entitiesById.remove(id);
         Gizmo boundsGizmo = this.entityManager.removeEntity(remove).boundsGizmo;
@@ -1068,7 +1068,8 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         Entity entity = this.entitiesById.get(entityId);
 
         // If the target entity exists and the player is a remote player, trigger the attack
-        if (entity != null && player instanceof RemotePlayer remotePlayer) {
+        if (entity != null && player instanceof RemotePlayer) {
+            RemotePlayer remotePlayer = (RemotePlayer) player;
             remotePlayer.onAttack(entity);
         }
 

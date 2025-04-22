@@ -1,30 +1,25 @@
 package dev.ultreon.quantum.api;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 public class FileIO {
     private FileIO() {
     }
 
-    public static String readString(Path path, Charset charset) throws IOException {
-        return new String(readBytes(path), charset);
+    public static String readString(FileHandle path, Charset charset) throws IOException {
+        return new String(path.readBytes(), charset);
     }
 
-    public static byte[] readBytes(Path path) throws IOException {
+    public static byte[] readBytes(FileHandle path) throws IOException {
         try {
-            FileHandle absolute = Gdx.files.absolute(path.toString());
-
-            if (!absolute.exists()) {
-                throw new FileNotFoundException(absolute.path());
+            if (!path.exists()) {
+                throw new FileNotFoundException(path.path());
             }
-            return absolute.readBytes();
+            return path.readBytes();
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
@@ -32,21 +27,19 @@ public class FileIO {
         }
     }
 
-    public static String readString(Path resolve) throws IOException {
+    public static String readString(FileHandle resolve) throws IOException {
         return readString(resolve, Charset.defaultCharset());
     }
 
-    public static void writeString(Path path, CharSequence str, Charset charset) {
-        FileHandle local = Gdx.files.local(path.toString());
-        local.writeString(str.toString(), false, charset.toString());
+    public static void writeString(FileHandle path, CharSequence str, Charset charset) {
+        path.writeString(str.toString(), false, charset.toString());
     }
 
-    public static void writeString(Path path, CharSequence str) {
+    public static void writeString(FileHandle path, CharSequence str) {
         writeString(path, str, Charset.defaultCharset());
     }
 
-    public static void writeBytes(Path path, byte[] bytes) {
-        FileHandle local = Gdx.files.local(path.toString());
-        local.writeBytes(bytes, false);
+    public static void writeBytes(FileHandle path, byte[] bytes) {
+        path.writeBytes(bytes, false);
     }
 }

@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.config.ClientConfig;
-import dev.ultreon.quantum.client.input.controller.ControllerContext;
-import dev.ultreon.quantum.client.input.controller.ControllerInput;
-import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
+//import dev.ultreon.quantum.client.input.controller.ControllerContext;
+//import dev.ultreon.quantum.client.input.controller.ControllerInput;
+//import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.entity.player.Player;
@@ -79,20 +79,21 @@ public class PlayerInput {
     }
 
     private void controllerMove() {
-        if (!ControllerInput.isControllerConnected() || moveX != 0 || moveY != 0)
-            return;
-        if (!(GameInput.getCurrent() instanceof ControllerInput))
-            return;
-
-        if (ControllerContext.get() instanceof InGameControllerContext context) {
-            Vector2 joystick = context.move.getAction().get2DValue();
-
-            if (joystick == null)
-                return;
-
-            moveX = -joystick.x;
-            moveY = joystick.y;
-        }
+//        if (!ControllerInput.isControllerConnected() || moveX != 0 || moveY != 0)
+//            return;
+//        if (!(GameInput.getCurrent() instanceof ControllerInput))
+//            return;
+//
+//        if (ControllerContext.get() instanceof InGameControllerContext) {
+//            InGameControllerContext context = (InGameControllerContext) ControllerContext.get();
+//            Vector2 joystick = context.move.getAction().get2DValue();
+//
+//            if (joystick == null)
+//                return;
+//
+//            moveX = -joystick.x;
+//            moveY = joystick.y;
+//        }
     }
 
     private void move() {

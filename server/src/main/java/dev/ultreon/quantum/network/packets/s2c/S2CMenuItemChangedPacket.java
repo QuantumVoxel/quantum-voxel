@@ -9,9 +9,17 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.Map;
+import java.util.Objects;
 
-public record S2CMenuItemChangedPacket(NamespaceID menuId,
-                                       Map<Integer, ItemStack> stackMap) implements Packet<InGameClientPacketHandler> {
+public final class S2CMenuItemChangedPacket implements Packet<InGameClientPacketHandler> {
+    private final NamespaceID menuId;
+    private final Map<Integer, ItemStack> stackMap;
+
+    public S2CMenuItemChangedPacket(NamespaceID menuId,
+                                    Map<Integer, ItemStack> stackMap) {
+        this.menuId = menuId;
+        this.stackMap = stackMap;
+    }
 
     public S2CMenuItemChangedPacket(NamespaceID menuId, ItemSlot slot) {
         this(menuId, Map.of(slot.getIndex(), slot.getItem()));
@@ -46,4 +54,27 @@ public record S2CMenuItemChangedPacket(NamespaceID menuId,
                ", stackMap=" + stackMap +
                '}';
     }
+
+    public NamespaceID menuId() {
+        return menuId;
+    }
+
+    public Map<Integer, ItemStack> stackMap() {
+        return stackMap;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CMenuItemChangedPacket) obj;
+        return Objects.equals(this.menuId, that.menuId) &&
+               Objects.equals(this.stackMap, that.stackMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(menuId, stackMap);
+    }
+
 }

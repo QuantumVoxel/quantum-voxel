@@ -3,8 +3,6 @@ package dev.ultreon.quantum.util;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.MutableClassToInstanceMap;
 import dev.ultreon.quantum.component.Component;
 import dev.ultreon.quantum.component.GameComponent;
 import org.jetbrains.annotations.NotNull;
@@ -13,12 +11,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class GameNode implements Disposable {
     private static final Array<GameNode> MANAGED = new Array<>();
     private static int allActiveCount;
 
-    final @NotNull ClassToInstanceMap<Component<?>> components = MutableClassToInstanceMap.create();
+    final @NotNull Map<Class<?>, Component<?>> components = new ConcurrentHashMap<>();
     final @NotNull Array<GameNode> children = new Array<>();
 
     public boolean enabled = true;
@@ -57,8 +57,10 @@ public abstract class GameNode implements Disposable {
     public void update(float delta) {
         synchronized (components) {
             for (Component<?> component : components.values()) {
-                if (component instanceof Updatable updatable)
+                if (component instanceof Updatable) {
+                    Updatable updatable = (Updatable) component;
                     updatable.update(delta);
+                }
             }
         }
 
@@ -66,7 +68,8 @@ public abstract class GameNode implements Disposable {
             for (GameNode child : children) {
                 if (!child.enabled && !child.updateAnyways) continue;
 
-                if (child instanceof GameObject gameObject) {
+                if (child instanceof GameObject) {
+                    GameObject gameObject = (GameObject) child;
                     gameObject.combined.set(gameObject.transform)
                             .translate(gameObject.translation)
                             .rotate(Vector3.X, gameObject.rotation.x)
@@ -83,8 +86,10 @@ public abstract class GameNode implements Disposable {
     public void tick() {
         synchronized (components) {
             for (Component<?> component : components.values()) {
-                if (component instanceof Tickable tickable)
+                if (component instanceof Tickable) {
+                    Tickable tickable = (Tickable) component;
                     tickable.tick();
+                }
             }
         }
 
@@ -102,8 +107,10 @@ public abstract class GameNode implements Disposable {
 
         synchronized (components) {
             for (Component<?> component : components.values()) {
-                if (component instanceof Disposable disposable)
+                if (component instanceof Disposable) {
+                    Disposable disposable = (Disposable) component;
                     disposable.dispose();
+                }
             }
         }
 
@@ -276,7 +283,7 @@ public abstract class GameNode implements Disposable {
 
     public <T extends Component<?>> @Nullable T get(@NotNull Class<T> modelInstanceClass) {
         synchronized (components) {
-            return this.components.getInstance(modelInstanceClass);
+            return (T) this.components.get(modelInstanceClass);
         }
     }
 
@@ -288,11 +295,13 @@ public abstract class GameNode implements Disposable {
                 return null;
             }
             if (!components.containsKey(type)) {
-                components.putInstance(type, value);
+                components.put(type, value);
             } else {
                 Object old = components.replace(type, value);
-                if (old instanceof Component<?> component)
+                if (old instanceof Component<?>) {
+                    Component<?> component = (Component<?>) old;
                     component.onRemoved(this);
+                }
             }
 
             value.onAdded(this);

@@ -5,13 +5,10 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.world.Location;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 public final class HoverEvent<T> implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 0L;
     private final Action action;
     private final T value;
 

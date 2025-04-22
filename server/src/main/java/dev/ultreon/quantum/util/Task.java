@@ -1,15 +1,16 @@
 package dev.ultreon.quantum.util;
 
+import dev.ultreon.quantum.CompletionPromise;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
+import dev.ultreon.quantum.Promise;
 import java.util.function.Supplier;
 
 public class Task <T> implements Runnable {
     private final NamespaceID id;
     private Supplier<@Nullable T> block = () -> null;
     @Nullable
-    CompletableFuture<T> future;
+    CompletionPromise<T> future;
 
     public Task(NamespaceID id) {
         this.id = id;

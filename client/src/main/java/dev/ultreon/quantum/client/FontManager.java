@@ -4,7 +4,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.Disposable;
 import com.github.tommyettinger.textra.Font;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -56,7 +55,6 @@ public class FontManager implements Disposable, ContextAwareReloadable {
      * @param font The font.
      * @return The font.
      */
-    @CanIgnoreReturnValue
     public GameFont registerFont(NamespaceID id, GameFont font) {
         this.fonts.put(id, font);
         return font;

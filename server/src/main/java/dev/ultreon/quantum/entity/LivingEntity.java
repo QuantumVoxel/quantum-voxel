@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.entity;
 
-import com.google.common.collect.Lists;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.entity.LivingEntityDeathEvent;
@@ -20,10 +19,11 @@ import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class LivingEntity extends Entity {
@@ -43,7 +43,7 @@ public abstract class LivingEntity extends Entity {
     protected float lastDamage;
     protected @Nullable DamageSource lastDamageSource;
     private int age;
-    private final List<AppliedEffect> appliedEffects = Lists.newArrayList();
+    private final List<AppliedEffect> appliedEffects = new ArrayList<>();
     private boolean tagged;
     private Navigator navigator;
     private final AirSupply airSupply = this.set(AirSupply.class, new AirSupply(10));
@@ -144,7 +144,8 @@ public abstract class LivingEntity extends Entity {
     }
 
     protected void tickTemperature() {
-        if (!(world instanceof ServerWorld serverWorld)) return;
+        if (!(world instanceof ServerWorld)) return;
+        ServerWorld serverWorld = (ServerWorld) world;
         temperatureGoal = Temperature.getTemperature(serverWorld, (int) x, (int) y, (int) z);
 
         final double delta = 0.1;
@@ -182,7 +183,8 @@ public abstract class LivingEntity extends Entity {
     }
 
     private void setInitialTemperature() {
-        if (world instanceof ServerWorld serverWorld) {
+        if (world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) world;
             temperatureGoal = temperature = Temperature.getTemperature(serverWorld, (int) x, (int) y, (int) z);
         }
     }
@@ -313,7 +315,8 @@ public abstract class LivingEntity extends Entity {
     }
 
     protected void removeDead() {
-        if (this.world instanceof ServerWorld serverWorld) {
+        if (this.world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) this.world;
             serverWorld.sendAllTracking((int) this.x, (int) this.y, (int) this.z, new S2CRemoveEntityPacket(this.getId()));
         }
 

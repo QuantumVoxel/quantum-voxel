@@ -7,7 +7,16 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.SoundEvent;
 
-public record S2CPlaySoundPacket(NamespaceID sound, float volume) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CPlaySoundPacket implements Packet<InGameClientPacketHandler> {
+    private final NamespaceID sound;
+    private final float volume;
+
+    public S2CPlaySoundPacket(NamespaceID sound, float volume) {
+        this.sound = sound;
+        this.volume = volume;
+    }
 
     public S2CPlaySoundPacket(SoundEvent sound, float volume) {
         this(sound.getId(), volume);
@@ -35,4 +44,27 @@ public record S2CPlaySoundPacket(NamespaceID sound, float volume) implements Pac
     public String toString() {
         return "S2CPlaySoundPacket{sound=" + this.sound + ", volume=" + this.volume + "}";
     }
+
+    public NamespaceID sound() {
+        return sound;
+    }
+
+    public float volume() {
+        return volume;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CPlaySoundPacket) obj;
+        return Objects.equals(this.sound, that.sound) &&
+               Float.floatToIntBits(this.volume) == Float.floatToIntBits(that.volume);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sound, volume);
+    }
+
 }

@@ -2,12 +2,10 @@ package dev.ultreon.quantum.util;
 
 import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class Vec2f implements Externalizable, Cloneable {
+public class Vec2f implements Cloneable {
     public float x, y;
 
     public Vec2f(float x, float y) {
@@ -300,17 +298,5 @@ public class Vec2f implements Externalizable, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeFloat(this.x);
-        out.writeFloat(this.y);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        this.x = in.readFloat();
-        this.y = in.readFloat();
     }
 }

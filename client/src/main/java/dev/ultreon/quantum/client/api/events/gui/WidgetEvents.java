@@ -5,8 +5,16 @@ import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.events.api.Event;
 
 public class WidgetEvents {
-    public static final Event<WidgetAdded> WIDGET_ADDED = Event.withValue();
-    public static final Event<WidgetRemoved> WIDGET_REMOVED = Event.withValue();
+    public static final Event<WidgetAdded> WIDGET_ADDED = Event.withValue(listeners -> (screen, widget) -> {
+        for (WidgetAdded listener : listeners) {
+            listener.onWidgetAdded(screen, widget);
+        }
+    });
+    public static final Event<WidgetRemoved> WIDGET_REMOVED = Event.withValue(listeners -> (screen, widget) -> {
+        for (WidgetRemoved listener : listeners) {
+            listener.onWidgetRemoved(screen, widget);
+        }
+    });
 
     @FunctionalInterface
     public interface WidgetAdded {

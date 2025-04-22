@@ -72,55 +72,95 @@ public enum Direction implements StringSerializable {
     }
 
     public Axis getAxis() {
-        return switch (this) {
-            case UP, DOWN -> Axis.Y;
-            case WEST, EAST -> Axis.X;
-            case NORTH, SOUTH -> Axis.Z;
-        };
+        switch (this) {
+            case UP:
+            case DOWN:
+                return Axis.Y;
+            case WEST:
+            case EAST:
+                return Axis.X;
+            case NORTH:
+            case SOUTH:
+                return Axis.Z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public Direction getOpposite() {
-        return switch (this) {
-            case UP -> DOWN;
-            case DOWN -> UP;
-            case WEST -> EAST;
-            case EAST -> WEST;
-            case NORTH -> SOUTH;
-            case SOUTH -> NORTH;
-        };
+        switch (this) {
+            case UP:
+                return DOWN;
+            case DOWN:
+                return UP;
+            case WEST:
+                return EAST;
+            case EAST:
+                return WEST;
+            case NORTH:
+                return SOUTH;
+            case SOUTH:
+                return NORTH;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public Direction getClockwise() {
-        return switch (this) {
-            case UP -> UP;
-            case DOWN -> DOWN;
-            case WEST -> SOUTH;
-            case EAST -> NORTH;
-            case NORTH -> EAST;
-            case SOUTH -> WEST;
-        };
+        switch (this) {
+            case UP:
+                return UP;
+            case DOWN:
+                return DOWN;
+            case WEST:
+                return SOUTH;
+            case EAST:
+                return NORTH;
+            case NORTH:
+                return EAST;
+            case SOUTH:
+                return WEST;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public Direction getCounterClockwise() {
-        return switch (this) {
-            case UP -> UP;
-            case DOWN -> DOWN;
-            case WEST -> NORTH;
-            case EAST -> SOUTH;
-            case NORTH -> WEST;
-            case SOUTH -> EAST;
-        };
+        switch (this) {
+            case UP:
+                return UP;
+            case DOWN:
+                return DOWN;
+            case WEST:
+                return NORTH;
+            case EAST:
+                return SOUTH;
+            case NORTH:
+                return WEST;
+            case SOUTH:
+                return EAST;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public Quaternion getHorizontalRotation() {
-        return switch (this) {
-            case UP -> UP.rotation;
-            case DOWN -> DOWN.rotation;
-            case WEST -> WEST.rotation;
-            case EAST -> EAST.rotation;
-            case NORTH -> NORTH.rotation;
-            case SOUTH -> SOUTH.rotation;
-        };
+        switch (this) {
+            case UP:
+                return UP.rotation;
+            case DOWN:
+                return DOWN.rotation;
+            case WEST:
+                return WEST.rotation;
+            case EAST:
+                return EAST.rotation;
+            case NORTH:
+                return NORTH.rotation;
+            case SOUTH:
+                return SOUTH.rotation;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public int getIndex() {
@@ -130,24 +170,37 @@ public enum Direction implements StringSerializable {
     public Direction rotateY(int hIndex) {
         if (this.hIndex == -1) return this;
 
-        return switch (hIndex) {
-            case 0 -> this;
-            case 1 -> this.getClockwise();
-            case 2 -> this.getClockwise().getClockwise();
-            case 3 -> this.getCounterClockwise();
-            default -> throw new IllegalArgumentException();
-        };
+        switch (hIndex) {
+            case 0:
+                return this;
+            case 1:
+                return this.getClockwise();
+            case 2:
+                return this.getClockwise().getClockwise();
+            case 3:
+                return this.getCounterClockwise();
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public Vec3i getOffset() {
-        return switch (this) {
-            case UP -> new Vec3i(0, 1, 0);
-            case DOWN -> new Vec3i(0, -1, 0);
-            case WEST -> new Vec3i(-1, 0, 0);
-            case EAST -> new Vec3i(1, 0, 0);
-            case NORTH -> new Vec3i(0, 0, -1);
-            case SOUTH -> new Vec3i(0, 0, 1);
-        };
+        switch (this) {
+            case UP:
+                return new Vec3i(0, 1, 0);
+            case DOWN:
+                return new Vec3i(0, -1, 0);
+            case WEST:
+                return new Vec3i(-1, 0, 0);
+            case EAST:
+                return new Vec3i(1, 0, 0);
+            case NORTH:
+                return new Vec3i(0, 0, -1);
+            case SOUTH:
+                return new Vec3i(0, 0, 1);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -156,27 +209,51 @@ public enum Direction implements StringSerializable {
     }
 
     public int getOffsetX() {
-        return switch (this) {
-            case UP, SOUTH, NORTH, DOWN -> 0;
-            case WEST -> -1;
-            case EAST -> 1;
-        };
+        switch (this) {
+            case UP:
+            case SOUTH:
+            case NORTH:
+            case DOWN:
+                return 0;
+            case WEST:
+                return -1;
+            case EAST:
+                return 1;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public int getOffsetZ() {
-        return switch (this) {
-            case UP, WEST, EAST, DOWN -> 0;
-            case SOUTH -> -1;
-            case NORTH -> 1;
-        };
+        switch (this) {
+            case UP:
+            case WEST:
+            case EAST:
+            case DOWN:
+                return 0;
+            case SOUTH:
+                return -1;
+            case NORTH:
+                return 1;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public int getOffsetY() {
-        return switch (this) {
-            case WEST, EAST, NORTH, SOUTH -> 0;
-            case UP -> 1;
-            case DOWN -> -1;
-        };
+        switch (this) {
+            case WEST:
+            case EAST:
+            case NORTH:
+            case SOUTH:
+                return 0;
+            case UP:
+                return 1;
+            case DOWN:
+                return -1;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public boolean isNegative() {

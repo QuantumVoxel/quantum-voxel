@@ -5,7 +5,14 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public record C2SPingPacket(long time) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SPingPacket implements Packet<InGameServerPacketHandler> {
+    private final long time;
+
+    public C2SPingPacket(long time) {
+        this.time = time;
+    }
 
     public C2SPingPacket() {
         this(System.currentTimeMillis());
@@ -33,4 +40,22 @@ public record C2SPingPacket(long time) implements Packet<InGameServerPacketHandl
                "time=" + time +
                '}';
     }
+
+    public long time() {
+        return time;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SPingPacket) obj;
+        return this.time == that.time;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(time);
+    }
+
 }

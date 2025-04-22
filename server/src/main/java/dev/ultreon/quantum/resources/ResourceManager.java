@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.resources;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Os;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
 import dev.ultreon.libs.commons.v0.util.IOUtils;
@@ -20,8 +20,6 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +28,8 @@ import java.util.zip.ZipInputStream;
 
 public class ResourceManager extends GameObject implements Closeable {
     protected final List<ResourcePackage> resourcePackages = new ArrayList<>();
-    public static Logger logger = (level, msg, t) -> {};
+    public static Logger logger = (level, msg, t) -> {
+    };
     private final String root;
 
     public ResourceManager(String root) {
@@ -65,7 +64,7 @@ public class ResourceManager extends GameObject implements Closeable {
     public void importPackage(URI uri) throws IOException {
         URL url = uri.toURL();
         if (url.getProtocol().equals("file")) {
-            this.importPackage(new File(uri));
+            this.importPackage(new FileHandle(new File(uri)));
         } else if (url.getProtocol().equals("jar")) {
             try {
                 this.importFilePackage(new ZipInputStream(new URI(uri.toURL().getPath().split("!/", 2)[0]).toURL().openStream()), uri.toASCIIString());
@@ -77,105 +76,155 @@ public class ResourceManager extends GameObject implements Closeable {
         }
     }
 
-    public void importPackage(Path path) throws IOException {
-        this.importPackage(path.toUri());
-    }
-
-    public void importPackage(File file) throws IOException {
+    public void importPackage(FileHandle file) throws IOException {
         if (!file.exists()) {
-            throw new IOException("Resource package doesn't exists: " + file.getAbsolutePath());
+            throw new IOException("Resource package doesn't exists: " + file.path());
         }
 
-        if (file.isFile()) {
-            if (file.getName().endsWith(".jar") || file.getName().endsWith(".zip")) {
-                this.importFilePackage(new ZipInputStream(Files.newInputStream(file.toPath())), file.getAbsolutePath());
+        if (!file.isDirectory()) {
+            if (file.name().endsWith(".jar") || file.name().endsWith(".zip")) {
+                this.importFilePackage(new ZipInputStream(file.read()), file.path());
             } else {
-                logger.warn("Resource package isn't a .jar or .zip file: " + file.getPath());
+                logger.warn("Resource package isn't a .jar or .zip file: " + file.path());
             }
         } else if (file.isDirectory()) {
             this.importDirectoryPackage(file);
         }
     }
 
+    public void loadFromAssetsTxt(FileHandle internal) {
+        String[] fileList = internal.readString().split("\n");
+        if (fileList.length == 0) {
+            logger.warn("No files in assets.txt: " + internal.path());
+            return;
+        }
+
+        // Prepare mappings
+        Map<NamespaceID, StaticResource> map = new HashMap<>();
+        Map<String, ResourceCategory> categories = new HashMap<>();
+
+        for (String file : fileList) {
+            if (file.startsWith(root + "/")) {
+                String domain = file.substring(root.length() + 1);
+                String domainId = domain.substring(0, domain.indexOf('/'));
+                String[] path = domain.substring(domain.indexOf('/') + 1).split("/");
+                String[] categoryParts = Arrays.copyOf(path, path.length - 1);
+                String filename = path[path.length - 1];
+
+                String categoryPath = categoryParts.length > 0 ? String.join("/", categoryParts) + "/" : "";
+                String filePath = categoryPath + filename;
+
+                StaticResource resource = new StaticResource(
+                        new NamespaceID(domainId, filePath),
+                        () -> Gdx.files.internal(file).read()
+                );
+
+                // Add to categories map
+                if (categoryParts.length > 0) {
+                    String category = categoryParts[0];
+                    categories.computeIfAbsent(category, ResourceCategory::new)
+                            .set(new NamespaceID(domainId, filePath), resource);
+                }
+
+                // Add to resources map
+                map.put(new NamespaceID(domainId, filePath), resource);
+            }
+        }
+
+        addImported(new ResourcePackage(map, categories));
+    }
+    
     @SuppressWarnings({"unused"})
-    private void importDirectoryPackage(File file) {
+    private void importDirectoryPackage(FileHandle file) {
         // Check if it's a directory.
         assert file.isDirectory();
 
-        try {
-            // Prepare (entry -> resource) mappings
-            Map<NamespaceID, StaticResource> map = new HashMap<>();
+        // Prepare (entry -> resource) mappings
+        Map<NamespaceID, StaticResource> map = new HashMap<>();
 
-            // Resource categories
-            Map<String, ResourceCategory> categories = new HashMap<>();
+        // Resource categories
+        Map<String, ResourceCategory> categories = new HashMap<>();
 
-            // Get assets directory.
-            File assets = new File(file, this.root + "/");
+        // Get assets directory.
+        FileHandle assets = file.child(this.root);
 
-            // Check if the assets directory exists.
-            if (assets.exists()) {
-                // List files in assets dir.
-                File[] files = assets.listFiles();
+        // Check if the assets directory exists.
+        if (assets.exists()) {
+            // List files in assets dir.
+            FileHandle[] files = assets.list();
 
-                // Loop listed files.
-                for (File resPackage : files != null ? files : new File[0]) {
-                    // Get assets-package namespace from the name create the listed file (that's a dir).
-                    String namespace = resPackage.getName();
+            // Loop listed files.
+            for (FileHandle resPackage : files != null ? files : new FileHandle[0]) {
+                // Get assets-package namespace from the name create the listed file (that's a dir).
+                String namespace = resPackage.name();
 
-                    // Walk assets package.
-                    try (Stream<Path> walk = Files.walk(resPackage.toPath())) {
-                        for (Path assetPath : walk.collect(Collectors.toList())) {
-                            // Convert to a file object.
-                            File asset = assetPath.toFile();
+                // Walk assets package.
+                try (Stream<FileHandle> walk = walk(resPackage)) {
+                    for (FileHandle assetPath : walk.collect(Collectors.toList())) {
+                        // Convert to a file object.
 
-                            // Check if it's a file, if not,
-                            // we will walk to the next file / folder in the Files.walk(...)
-                            // list.
-                            if (!asset.isFile()) {
-                                continue;
-                            }
-
-                            // Continue to the next file / folder
-                            // if the asset path is the same path as the resource package.
-                            if (assetPath.toFile().equals(resPackage)) {
-                                continue;
-                            }
-
-                            // Calculate resource path.
-                            Path relative = resPackage.toPath().relativize(assetPath);
-                            String s = relative.toString().replaceAll("\\\\", "/");
-
-                            // Create resource entry/
-                            NamespaceID entry;
-                            try {
-                                entry = new NamespaceID(namespace, s);
-                            } catch (SyntaxException e) {
-                                logger.error("Invalid resource identifier:", e);
-                                continue;
-                            }
-
-                            // Create resource with file input stream.
-                            ThrowingSupplier<InputStream, IOException> sup = () -> Files.newInputStream(asset.toPath());
-                            StaticResource resource = new StaticResource(entry, sup);
-
-                            String path = entry.getPath();
-                            String[] split = path.split("/");
-                            String category = split[0];
-                            if (split.length > 1) {
-                                categories.computeIfAbsent(category, ResourceCategory::new).set(entry, resource);
-                            }
-
-                            // Add resource mapping for (entry -> resource).
-                            map.put(entry, resource);
+                        // Check if it's a file, if not,
+                        // we will walk to the next file / folder in the Files.walk(...)
+                        // list.
+                        if (assetPath.isDirectory()) {
+                            continue;
                         }
+
+                        // Continue to the next file / folder
+                        // if the asset path is the same path as the resource package.
+                        if (assetPath.equals(resPackage)) {
+                            continue;
+                        }
+
+                        // Calculate resource path.
+                        FileHandle relative = Gdx.files.getFileHandle(resPackage.path().substring(assets.path().length() + 1), resPackage.type());
+                        String s = relative.toString().replaceAll("\\\\", "/");
+
+                        // Create resource entry/
+                        NamespaceID entry;
+                        try {
+                            entry = new NamespaceID(namespace, s);
+                        } catch (SyntaxException e) {
+                            logger.error("Invalid resource identifier:", e);
+                            continue;
+                        }
+
+                        // Create resource with file input stream.
+                        ThrowingSupplier<InputStream, IOException> sup = assetPath::read;
+                        StaticResource resource = new StaticResource(entry, sup);
+
+                        String path = entry.getPath();
+                        String[] split = path.split("/");
+                        String category = split[0];
+                        if (split.length > 1) {
+                            categories.computeIfAbsent(category, ResourceCategory::new).set(entry, resource);
+                        }
+
+                        // Add resource mapping for (entry -> resource).
+                        map.put(entry, resource);
                     }
                 }
-
-                addImported(new ResourcePackage(map, categories));
             }
-        } catch (IOException e) {
-            CommonConstants.LOGGER.error("Failed to load resource package: {}", file.getAbsolutePath(), e);
+
+            addImported(new ResourcePackage(map, categories));
         }
+    }
+
+    private Stream<FileHandle> walk(FileHandle resPackage) {
+        if (!resPackage.exists()) {
+            return Stream.empty();
+        }
+
+        List<FileHandle> files = new ArrayList<>();
+        files.add(resPackage);
+
+        if (resPackage.isDirectory()) {
+            for (FileHandle child : resPackage.list()) {
+                files.addAll(walk(child).collect(Collectors.toList()));
+            }
+        }
+
+        return files.stream();
     }
 
     private void importFilePackage(ZipInputStream stream, String filePath) throws IOException {
@@ -336,28 +385,27 @@ public class ResourceManager extends GameObject implements Closeable {
     }
 
     private void importResourcePackages() throws IOException {
-        Path dir;
-        if (SharedLibraryLoader.os == Os.Android) {
-            dir = Gdx.files.external("resource-packages").file().toPath();
+        FileHandle dir;
+        if (GamePlatform.get().isMobile() || GamePlatform.get().isWeb()) {
+            dir = Gdx.files.local("resource-packages");
         } else {
-            dir = GamePlatform.get().getGameDir().resolve("resource-packages");
+            dir = GamePlatform.get().getGameDir().child("resource-packages");
         }
-        if (!Files.exists(dir)) {
-            Files.createDirectories(dir);
+        if (!dir.exists()) {
+            dir.mkdirs();
             return;
         }
-        try (Stream<Path> list = Files.list(dir)) {
-            this.importFrom(list);
+        FileHandle[] list = dir.list();
+        for (FileHandle fileHandle : list) {
+            this.importFrom(fileHandle);
         }
     }
 
-    private void importFrom(Stream<Path> list) {
-        for (Path path : list.collect(Collectors.toList())) {
-            try {
-                this.importPackage(path);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    private void importFrom(FileHandle list) {
+        try {
+            this.importPackage(list);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

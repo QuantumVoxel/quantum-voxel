@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.management;
 
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.utils.Disposable;
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -13,12 +13,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CubemapManager implements Manager<Cubemap>, Disposable {
-    private final Map<NamespaceID, Cubemap> cubemaps = new LinkedHashMap<>();
+    private final Map<NamespaceID, Cubemap> cubemaps = new HashMap<>();
     private final ResourceManager resourceManager;
 
     public CubemapManager(ResourceManager resourceManager) {
@@ -33,24 +34,24 @@ public class CubemapManager implements Manager<Cubemap>, Disposable {
 
     public void loadCubemap(NamespaceID id) {
         try (InputStream inputStream = resourceManager.openResourceStream(id)) {
-            Json5Object root = CommonConstants.JSON5.parse(inputStream).getAsJson5Object();
+            JsonValue root = CommonConstants.JSON_READ.parse(inputStream);
 
-            String identifier = root.getAsJson5Primitive("target_pos_x").getAsString();
+            String identifier = root.get("target_pos_x").asString();
             NamespaceID targetPosX = new NamespaceID(identifier);
 
-            identifier = root.getAsJson5Primitive("target_neg_x").getAsString();
+            identifier = root.get("target_neg_x").asString();
             NamespaceID targetNegX = new NamespaceID(identifier);
 
-            identifier = root.getAsJson5Primitive("target_pos_y").getAsString();
+            identifier = root.get("target_pos_y").asString();
             NamespaceID targetPosY = new NamespaceID(identifier);
 
-            identifier = root.getAsJson5Primitive("target_neg_y").getAsString();
+            identifier = root.get("target_neg_y").asString();
             NamespaceID targetNegY = new NamespaceID(identifier);
 
-            identifier = root.getAsJson5Primitive("target_pos_z").getAsString();
+            identifier = root.get("target_pos_z").asString();
             NamespaceID targetPosZ = new NamespaceID(identifier);
 
-            identifier = root.getAsJson5Primitive("target_neg_z").getAsString();
+            identifier = root.get("target_neg_z").asString();
             NamespaceID targetNegZ = new NamespaceID(identifier);
 
             Cubemap cubemap = new Cubemap(

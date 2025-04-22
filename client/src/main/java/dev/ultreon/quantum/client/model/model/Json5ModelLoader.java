@@ -17,13 +17,10 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import de.marhali.json5.Json5Array;
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
-import de.marhali.json5.Json5Primitive;
+import com.badlogic.gdx.utils.JsonValue;
+import de.damios.guacamole.Preconditions;
+import dev.ultreon.libs.collections.v0.tables.HashTable;
+import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockDataEntry;
 import dev.ultreon.quantum.block.state.BlockState;
@@ -44,7 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.*;
 
-import static dev.ultreon.quantum.CommonConstants.JSON5;
+import static dev.ultreon.quantum.CommonConstants.JSON_READ;
 
 /**
  * The Json5ModelLoader class is responsible for loading and processing JSON5 formatted models
@@ -93,7 +90,7 @@ public class Json5ModelLoader {
         if (resource == null)
             return null;
         QuantumClient.LOGGER.debug("Loading block model: {}", namespaceID);
-        return this.load(Registries.BLOCK.getKey(block), JSON5.parse(resource.openReader()));
+        return this.load(Registries.BLOCK.getKey(block), JSON_READ.parse(resource.openReader()));
     }
 
     /**
@@ -112,7 +109,7 @@ public class Json5ModelLoader {
         if (resource == null)
             return null;
         QuantumClient.LOGGER.debug("Loading item model: {}", namespaceID);
-        return this.load(Registries.ITEM.getKey(item), JSON5.parse(resource.openReader()));
+        return this.load(Registries.ITEM.getKey(item), JSON_READ.parse(resource.openReader()));
     }
 
     /**
@@ -128,35 +125,29 @@ public class Json5ModelLoader {
      * @throws IllegalArgumentException if the provided registry key does not belong to blocks or items
      */
     @SuppressWarnings("SpellCheckingInspection")
-    public Json5Model load(RegistryKey<?> key, Json5Element modelData) {
+    public Json5Model load(RegistryKey<?> key, JsonValue modelData) {
         if (!Objects.equals(key.parent(), RegistryKeys.BLOCK) && !Objects.equals(key.parent(), RegistryKeys.ITEM)) {
             throw new IllegalArgumentException("Invalid model key, must be block or item: " + key);
         }
 
-        Json5Object root = modelData.getAsJson5Object();
-        Json5Object textures = root.getAsJson5Object("textures");
+        JsonValue root = modelData;
+        JsonValue textures = root.get("textures");
         Map<String, NamespaceID> textureElements = loadTextures(textures);
 
-//        GridPoint2 textureSize = loadVec2i(root.getAsJson5Array("texture_size"), new GridPoint2(16, 16));
+//        GridPoint2 textureSize = loadVec2i(root.get("texture_size"), new GridPoint2(16, 16));
         GridPoint2 textureSize = new GridPoint2(16, 16);
 
-        Json5Array elements = root.getAsJson5Array("elements");
+        JsonValue elements = root.get("elements");
         List<ModelElement> modelElements = loadElements(elements, textureSize.x, textureSize.y);
 
-        Json5Element ambientocclusion = root.get("ambientocclusion");
-        boolean ambientOcclusion = ambientocclusion == null || ambientocclusion.getAsBoolean();
+        JsonValue ambientocclusion = root.get("ambientocclusion");
+        boolean ambientOcclusion = ambientocclusion == null || ambientocclusion.asBoolean();
 
         Table<String, BlockDataEntry<?>, Json5Model> overrides = null;
-        if (key.parent().equals(RegistryKeys.BLOCK)) {
-            Json5Object overridesJson5 = root.getAsJson5Object("overrides");
-            if (overridesJson5 == null) overridesJson5 = new Json5Object();
-            //noinspection unchecked
-            overrides = loadOverrides((RegistryKey<Block>) key, overridesJson5);
-        }
 
-        Json5Object displayJson = root.getAsJson5Object("display");
+        JsonValue displayJson = root.get("display");
         if (displayJson == null)
-            displayJson = new Json5Object();
+            displayJson = new JsonValue(JsonValue.ValueType.object);
 
         // TODO: Allow display properties.
         Display display = Display.read(displayJson);
@@ -164,15 +155,14 @@ public class Json5ModelLoader {
         return new Json5Model(key, textureElements, modelElements, ambientOcclusion, display, overrides);
     }
 
-    private Table<String, BlockDataEntry<?>, Json5Model> loadOverrides(RegistryKey<Block> key, Json5Object overridesJson5) {
-        Table<String, BlockDataEntry<?>, Json5Model> overrides = HashBasedTable.create();
+    private Table<String, BlockDataEntry<?>, Json5Model> loadOverrides(RegistryKey<Block> key, JsonValue overridesJson5) {
+        Table<String, BlockDataEntry<?>, Json5Model> overrides = new HashTable<>();
         Block block = Registries.BLOCK.get(key);
         BlockState meta = block.getDefaultState();
 
-        for (Map.Entry<String, Json5Element> entry : overridesJson5.entrySet()) {
-            String keyName = entry.getKey();
-            Json5Element overrideElem = entry.getValue();
-            Json5Object overrideObj = overrideElem.getAsJson5Object();
+        for (JsonValue overrideElem : overridesJson5) {
+            String keyName = overrideElem.name;
+            JsonValue overrideObj = overrideElem;
 
             Json5Model model = load(key, overrideObj);
             BlockDataEntry<?> entry1 = meta.get(keyName);
@@ -186,21 +176,21 @@ public class Json5ModelLoader {
         return overrides;
     }
 
-    private List<ModelElement> loadElements(Json5Array elements, int textureWidth, int textureHeight) {
+    private List<ModelElement> loadElements(JsonValue elements, int textureWidth, int textureHeight) {
         List<ModelElement> modelElements = new ArrayList<>();
 
-        for (Json5Element elem : elements) {
-            Json5Object element = elem.getAsJson5Object();
-            Json5Object faces = element.getAsJson5Object("faces");
+        for (JsonValue elem : elements) {
+            JsonValue element = elem;
+            JsonValue faces = element.get("faces");
             Map<Direction, FaceElement> blockFaceFaceElementMap = loadFaces(faces, textureWidth, textureHeight);
 
-            Json5Element shade1 = element.get("shade");
-            boolean shade = shade1 != null && shade1.getAsBoolean();
-            Json5Element rotation1 = element.get("rotation");
-            ElementRotation rotation = ElementRotation.deserialize(rotation1 == null ? null : rotation1.getAsJson5Object());
+            JsonValue shade1 = element.get("shade");
+            boolean shade = shade1 != null && shade1.asBoolean();
+            JsonValue rotation1 = element.get("rotation");
+            ElementRotation rotation = ElementRotation.deserialize(rotation1 == null ? null : rotation1);
 
-            Vector3 from = loadVec3(element.getAsJson5Array("from"));
-            Vector3 to = loadVec3(element.getAsJson5Array("to"));
+            Vector3 from = loadVec3(element.get("from"));
+            Vector3 to = loadVec3(element.get("to"));
 
             ModelElement modelElement = new ModelElement(blockFaceFaceElementMap, shade, rotation, from, to);
             modelElements.add(modelElement);
@@ -209,37 +199,37 @@ public class Json5ModelLoader {
         return modelElements;
     }
 
-    private Vector3 loadVec3(Json5Array from) {
-        return new Vector3(from.get(0).getAsFloat(), from.get(1).getAsFloat(), from.get(2).getAsFloat());
+    private Vector3 loadVec3(JsonValue from) {
+        float[] floatArray = from.asFloatArray();
+        return new Vector3(floatArray[0], floatArray[1], floatArray[2]);
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    private Map<Direction, FaceElement> loadFaces(Json5Object faces, int textureWidth, int textureHeight) {
+    private Map<Direction, FaceElement> loadFaces(JsonValue faces, int textureWidth, int textureHeight) {
         Map<Direction, FaceElement> faceElems = new HashMap<>();
-        for (Map.Entry<String, Json5Element> face : faces.entrySet()) {
-            Direction direction = Direction.valueOf(face.getKey().toUpperCase(Locale.ROOT));
-            Json5Object faceData = face.getValue().getAsJson5Object();
-            Json5Array uvs = faceData.getAsJson5Array("uv");
-            String texture = faceData.get("texture").getAsString();
-            Json5Element rotation1 = faceData.get("rotation");
-            int rotation = rotation1 == null ? 0 : rotation1.getAsInt();
-            Json5Element tintIndex1 = faceData.get("tintindex");
-            int tintIndex = tintIndex1 == null ? -1 : tintIndex1.getAsInt();
-            Json5Element cullface = faceData.get("cullface");
-            String cullFace = cullface == null ? null : cullface.getAsString();
+        for (JsonValue faceData : faces) {
+            Direction direction = Direction.valueOf(faceData.name.toUpperCase(Locale.ROOT));
+            JsonValue uvs = faceData.get("uv");
+            String texture = faceData.get("texture").asString();
+            JsonValue rotation1 = faceData.get("rotation");
+            int rotation = rotation1 == null ? 0 : rotation1.asInt();
+            JsonValue tintIndex1 = faceData.get("tintindex");
+            int tintIndex = tintIndex1 == null ? -1 : tintIndex1.asInt();
+            JsonValue cullface = faceData.get("cullface");
+            String cullFace = cullface == null ? null : cullface.asString();
 
-            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).getAsInt(), uvs.get(1).getAsInt(), uvs.get(2).getAsInt(), uvs.get(3).getAsInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace));
+            faceElems.put(direction, new FaceElement(texture, new UVs(uvs.get(0).asInt(), uvs.get(1).asInt(), uvs.get(2).asInt(), uvs.get(3).asInt(), textureWidth, textureHeight), rotation, tintIndex, cullFace));
         }
 
         return faceElems;
     }
 
-    private Map<String, NamespaceID> loadTextures(Json5Object textures) {
+    private Map<String, NamespaceID> loadTextures(JsonValue textures) {
         Map<String, NamespaceID> textureElements = new HashMap<>();
 
-        for (var entry : textures.entrySet()) {
-            String name = entry.getKey();
-            String stringId = entry.getValue().getAsString();
+        for (var entry : textures) {
+            String name = entry.name;
+            String stringId = entry.asString();
             NamespaceID id = NamespaceID.parse(stringId).mapPath(path -> "textures/" + path + ".png");
             textureElements.put(name, id);
         }
@@ -250,7 +240,7 @@ public class Json5ModelLoader {
     public BlockModel load(RegistryKey<?> key, NamespaceID id) {
         Resource resource = this.resourceManager.getResource(id.mapPath(path -> "models/" + path + ".json5"));
         if (resource != null) {
-            return this.load(key, resource.loadJson5());
+            return this.load(key, resource.loadJson());
         }
 
         return null;
@@ -561,45 +551,90 @@ public class Json5ModelLoader {
     }
 
     /**
-     * Represents a rotational transformation applied to an element, defined by its origin, axis,
-     * angle of rotation, and an optional rescaling flag.
-     * <p>
-     * This class is used to manage rotation information for elements in a 3D space, where the
-     * rotation is specified with respect to a defined origin vector and a chosen axis (X, Y, or Z).
-     * The amount of rotation is determined by an angle measured in degrees, and optionally, the
-     * transformation can apply rescaling to maintain proportionality.
-     * <p>
-     * Instances of this class are immutable and provide methods to retrieve the properties of the rotation.
-     *
-     * @param originVec the origin vector representing the point around which the element is rotated
-     * @param axis the axis of rotation (X, Y, or Z)
-     * @param angle the angle of rotation in degrees
-     * @param rescale whether to apply rescaling after the rotation
+         * Represents a rotational transformation applied to an element, defined by its origin, axis,
+         * angle of rotation, and an optional rescaling flag.
+         * <p>
+         * This class is used to manage rotation information for elements in a 3D space, where the
+         * rotation is specified with respect to a defined origin vector and a chosen axis (X, Y, or Z).
+         * The amount of rotation is determined by an angle measured in degrees, and optionally, the
+         * transformation can apply rescaling to maintain proportionality.
+         * <p>
+         * Instances of this class are immutable and provide methods to retrieve the properties of the rotation.
+         *
      */
-    public record ElementRotation(Vector3 originVec, Axis axis, float angle, boolean rescale) {
+        public static final class ElementRotation {
+        private final Vector3 originVec;
+        private final Axis axis;
+        private final float angle;
+        private final boolean rescale;
 
-        public static ElementRotation deserialize(@Nullable Json5Object rotation) {
-            if (rotation == null) {
-                return new ElementRotation(new Vector3(0, 0, 0), Axis.Y, 0, false);
+        /**
+         * @param originVec the origin vector representing the point around which the element is rotated
+         * @param axis the axis of rotation (X, Y, or Z)
+         * @param angle the angle of rotation in degrees
+         * @param rescale whether to apply rescaling after the rotation
+         */
+        public ElementRotation(Vector3 originVec, Axis axis, float angle, boolean rescale) {
+            this.originVec = originVec;
+            this.axis = axis;
+            this.angle = angle;
+            this.rescale = rescale;
+        }
+
+            public static ElementRotation deserialize(@Nullable JsonValue rotation) {
+                if (rotation == null) {
+                    return new ElementRotation(new Vector3(0, 0, 0), Axis.Y, 0, false);
+                }
+
+                float[] origin = rotation.get("origin").asFloatArray();
+                String axis = rotation.get("axis").asString();
+                float angle = rotation.get("angle").asFloat();
+                JsonValue rescale1 = rotation.get("rescale");
+                boolean rescale = rescale1 == null || rescale1.asBoolean();
+
+                Vector3 originVec = new Vector3(origin[0], origin[1], origin[2]);
+                return new ElementRotation(originVec, Axis.valueOf(axis.toUpperCase(Locale.ROOT)), angle, rescale);
             }
 
-            Json5Array origin = rotation.getAsJson5Array("origin");
-            String axis = rotation.get("axis").getAsString();
-            float angle = rotation.get("angle").getAsFloat();
-            Json5Element rescale1 = rotation.get("rescale");
-            boolean rescale = rescale1 != null && rescale1.getAsBoolean();
+            @Override
+            public @NotNull String toString() {
+                return "ElementRotation[" +
+                       "originVec=" + originVec + ", " +
+                       "axis=" + axis + ", " +
+                       "angle=" + angle + ", " +
+                       "rescale=" + rescale + ']';
+            }
 
-            Vector3 originVec = new Vector3(origin.get(0).getAsFloat(), origin.get(1).getAsFloat(), origin.get(2).getAsFloat());
-            return new ElementRotation(originVec, Axis.valueOf(axis.toUpperCase(Locale.ROOT)), angle, rescale);
+        public Vector3 originVec() {
+            return originVec;
+        }
+
+        public Axis axis() {
+            return axis;
+        }
+
+        public float angle() {
+            return angle;
+        }
+
+        public boolean rescale() {
+            return rescale;
         }
 
         @Override
-        public @NotNull String toString() {
-            return "ElementRotation[" +
-                   "originVec=" + originVec + ", " +
-                   "axis=" + axis + ", " +
-                   "angle=" + angle + ", " +
-                   "rescale=" + rescale + ']';
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (ElementRotation) obj;
+            return Objects.equals(this.originVec, that.originVec) &&
+                   Objects.equals(this.axis, that.axis) &&
+                   Float.floatToIntBits(this.angle) == Float.floatToIntBits(that.angle) &&
+                   this.rescale == that.rescale;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(originVec, axis, angle, rescale);
         }
 
 
@@ -612,9 +647,9 @@ public class Json5ModelLoader {
             this.renderPass = renderPass;
         }
 
-        public static Display read(Json5Object display) {
-            Json5Primitive renderPassJson = display.getAsJson5Primitive("renderPass");
-            String renderPass = renderPassJson != null ? renderPassJson.getAsString() : "opaque";
+        public static Display read(JsonValue display) {
+            JsonValue renderPassJson = display.get("renderPass");
+            String renderPass = renderPassJson != null ? renderPassJson.asString() : "opaque";
             return new Display(renderPass);
         }
 

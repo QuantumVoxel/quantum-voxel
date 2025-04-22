@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.input.key;
 
 import com.badlogic.gdx.Input;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.OS;
 
 public class KeyBinds {
@@ -22,7 +23,7 @@ public class KeyBinds {
     public static final KeyBind hideHudKey = KeyBindRegistry.register(new KeyBind("hideHud", Input.Keys.F1, KeyBind.Type.KEY));
     public static final KeyBind screenshotKey = KeyBindRegistry.register(new KeyBind("screenshot", Input.Keys.F2, KeyBind.Type.KEY));
     public static final KeyBind fullScreenKey = KeyBindRegistry.register(new KeyBind("fullScreen", Input.Keys.F11, KeyBind.Type.KEY));
-    public static final KeyBind debugKey = KeyBindRegistry.register(new KeyBind("debug", Input.Keys.F3, KeyBind.Type.KEY));
+    public static final KeyBind debugKey = KeyBindRegistry.register(new KeyBind("debug", GamePlatform.get().isWeb() ? Input.Keys.SEMICOLON : Input.Keys.F3, KeyBind.Type.KEY));
     public static final KeyBind walkForwardsKey = KeyBindRegistry.register(new KeyBind("walkForward", Input.Keys.W, KeyBind.Type.KEY));
     public static final KeyBind walkBackwardsKey = KeyBindRegistry.register(new KeyBind("walkBackwards", Input.Keys.S, KeyBind.Type.KEY));
     public static final KeyBind walkLeftKey = KeyBindRegistry.register(new KeyBind("walkLeft", Input.Keys.A, KeyBind.Type.KEY));

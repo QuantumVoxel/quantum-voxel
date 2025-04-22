@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.entity.player;
 
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 
 public class PlayerAbilities {
     public boolean flying = false;

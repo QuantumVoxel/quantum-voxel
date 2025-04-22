@@ -1,16 +1,16 @@
 package dev.ultreon.quantum.resources;
 
+import dev.ultreon.quantum.Promise;
 import dev.ultreon.quantum.util.PollingExecutorService;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 
 public class ReloadContext {
     private final PollingExecutorService executor;
-    private final List<CompletableFuture<?>> futures = new ArrayList<>();
+    private final List<Promise<?>> futures = new ArrayList<>();
     private final ResourceManager resourceManager;
 
     public ReloadContext(PollingExecutorService executor, ResourceManager resourceManager) {
@@ -23,18 +23,18 @@ public class ReloadContext {
     }
 
     public void submit(Runnable submission) {
-        CompletableFuture<Void> submitted = this.executor.submit(submission);
+        Promise<Void> submitted = this.executor.submit(submission);
         futures.add(submitted);
     }
 
-    public @NotNull <T> CompletableFuture<T> submit(Callable<T> submission) {
-        CompletableFuture<T> submitted = this.executor.submit(submission);
+    public @NotNull <T> Promise<T> submit(Callable<T> submission) {
+        Promise<T> submitted = this.executor.submit(submission);
         futures.add(submitted);
         return submitted;
     }
 
     public boolean isDone() {
-        return futures.stream().allMatch(CompletableFuture::isDone);
+        return futures.stream().allMatch(Promise::isDone);
     }
 
     public void finish() {

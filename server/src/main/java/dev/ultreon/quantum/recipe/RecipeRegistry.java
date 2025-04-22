@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<NamespaceID, T> {
@@ -76,6 +77,6 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
     }
 
     public List<T> findRecipe(Menu menu) {
-        return Arrays.stream(this.registry.values().toArray().items).filter(t -> t.canCraft(menu)).toList();
+        return Arrays.stream(this.registry.values().toArray().items).filter(t -> t.canCraft(menu)).collect(Collectors.toList());
     }
 }

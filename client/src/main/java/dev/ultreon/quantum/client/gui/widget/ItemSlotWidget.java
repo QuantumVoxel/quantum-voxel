@@ -3,13 +3,12 @@ package dev.ultreon.quantum.client.gui.widget;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.menu.ItemSlot;
-import org.checkerframework.common.value.qual.IntRange;
 
 public class ItemSlotWidget extends Widget {
     public final ItemSlot slot;
     private static final Color COLOR = new Color(1, 1, 1, .5f);
 
-    public ItemSlotWidget(ItemSlot slot, @IntRange(from = 0) int x, @IntRange(from = 0) int y) {
+    public ItemSlotWidget(ItemSlot slot, int x, int y) {
         super(16, 16);
         this.slot = slot;
         this.setPos(x, y);

@@ -152,14 +152,29 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         int faces = 0;
 
         for (Direction blockFace : Direction.values()) {
-            TextureRegion entry = switch (blockFace) {
-                case UP -> top;
-                case DOWN -> bottom;
-                case WEST -> west;
-                case EAST -> east;
-                case NORTH -> north;
-                case SOUTH -> south;
-            };
+            TextureRegion entry;
+            switch (blockFace) {
+                case UP:
+                    entry = top;
+                    break;
+                case DOWN:
+                    entry = bottom;
+                    break;
+                case WEST:
+                    entry = west;
+                    break;
+                case EAST:
+                    entry = east;
+                    break;
+                case NORTH:
+                    entry = north;
+                    break;
+                case SOUTH:
+                    entry = south;
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
 
             if (entry == null) continue;
 
@@ -365,13 +380,21 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     }
 
     public TextureRegion tex(Direction direction) {
-        return switch (direction) {
-            case UP -> top;
-            case DOWN -> bottom;
-            case WEST -> left;
-            case EAST -> right;
-            case NORTH -> front;
-            case SOUTH -> back;
-        };
+        switch (direction) {
+            case UP:
+                return top;
+            case DOWN:
+                return bottom;
+            case WEST:
+                return left;
+            case EAST:
+                return right;
+            case NORTH:
+                return front;
+            case SOUTH:
+                return back;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }

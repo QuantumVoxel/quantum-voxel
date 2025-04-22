@@ -7,7 +7,6 @@ import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseInstance;
 import it.unimi.dsi.fastutil.doubles.Double2BooleanFunction;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.List;
 import static dev.ultreon.quantum.world.World.CS;
 
 public class TreeGenerator {
-    @MonotonicNonNull
     private NoiseInstance noise;
 
     @NotNull

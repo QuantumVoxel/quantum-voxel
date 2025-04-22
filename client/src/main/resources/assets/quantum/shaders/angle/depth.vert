@@ -1,65 +1,65 @@
-in vec3 a_position;
+attribute vec3 a_position;
 uniform mat4 u_projViewWorldTrans;
 
 #if defined(diffuseTextureFlag) && defined(blendedFlag)
 #define blendedTextureFlag
-in vec2 a_texCoord0;
-out vec2 v_texCoords0;
+attribute vec2 a_texCoord0;
+varying vec2 v_texCoords0;
 #endif
 
 
 #ifdef boneWeight0Flag
 #define boneWeightsFlag
-in vec2 a_boneWeight0;
+attribute vec2 a_boneWeight0;
 #endif//boneWeight0Flag
 
 #ifdef boneWeight1Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight1;
+attribute vec2 a_boneWeight1;
 #endif//boneWeight1Flag
 
 #ifdef boneWeight2Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight2;
+attribute vec2 a_boneWeight2;
 #endif//boneWeight2Flag
 
 #ifdef boneWeight3Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight3;
+attribute vec2 a_boneWeight3;
 #endif//boneWeight3Flag
 
 #ifdef boneWeight4Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight4;
+attribute vec2 a_boneWeight4;
 #endif//boneWeight4Flag
 
 #ifdef boneWeight5Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight5;
+attribute vec2 a_boneWeight5;
 #endif//boneWeight5Flag
 
 #ifdef boneWeight6Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight6;
+attribute vec2 a_boneWeight6;
 #endif//boneWeight6Flag
 
 #ifdef boneWeight7Flag
 #ifndef boneWeightsFlag
 #define boneWeightsFlag
 #endif
-in vec2 a_boneWeight7;
+attribute vec2 a_boneWeight7;
 #endif//boneWeight7Flag
 
 #if defined(numBones) && defined(boneWeightsFlag)

@@ -1,9 +1,8 @@
 package dev.ultreon.quantum.util;
 
-import com.google.common.collect.Queues;
+import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.debug.profiler.Profiler;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
+import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,10 +16,10 @@ import java.util.stream.Collectors;
  * Tasks are kept in a synchronized queue and processed by a dedicated thread.
  */
 @SuppressWarnings("NewApi")
-public class PollingExecutorService extends GameObject implements ExecutorService {
+public class PollingExecutorService extends GameObject implements Executor {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
-    private final Queue<Runnable> tasks = Queues.synchronizedQueue(new ArrayDeque<>(2000));
-    private final List<CompletableFuture<?>> futures = new CopyOnWriteArrayList<>();
+    private final Queue<Runnable> tasks = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>(2000));
+    private final List<CompletionPromise<?>> futures = new CopyOnWriteArrayList<>();
     protected Thread thread;
     private boolean isShutdown = false;
     @Nullable
@@ -51,12 +50,11 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
         this.profiler = profiler;
     }
 
-    @Override
     public void shutdown() {
         if (this.isSameThread()) {
             this.isShutdown = true;
-            for (CompletableFuture<?> future : this.futures) {
-                future.completeExceptionally(new RejectedExecutionException("Executor has been shut down"));
+            for (CompletionPromise<?> future : this.futures) {
+                future.fail(new RejectedExecutionException("Executor has been shut down"));
             }
 
             this.tasks.clear();
@@ -64,8 +62,8 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
         } else {
             this.submit(() -> {
                 this.isShutdown = true;
-                for (CompletableFuture<?> future : this.futures) {
-                    future.completeExceptionally(new RejectedExecutionException("Executor has been shut down"));
+                for (CompletionPromise<?> future : this.futures) {
+                    future.fail(new RejectedExecutionException("Executor has been shut down"));
                 }
 
                 this.tasks.clear();
@@ -74,30 +72,26 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
         }
     }
 
-    @Override
     public @NotNull List<Runnable> shutdownNow() {
         this.isShutdown = true;
         List<Runnable> remainingTasks = List.copyOf(this.tasks);
         this.tasks.clear();
 
-        for (CompletableFuture<?> future : this.futures) {
-            future.cancel(true);
+        for (CompletionPromise<?> future : this.futures) {
+            future.cancel();
         }
         this.futures.clear();
         return remainingTasks;
     }
 
-    @Override
     public boolean isShutdown() {
         return this.isShutdown;
     }
 
-    @Override
     public boolean isTerminated() {
         return this.isShutdown && this.tasks.isEmpty();
     }
 
-    @Override
     @SuppressWarnings("BusyWait")
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
         var endTime = System.currentTimeMillis() + unit.toMillis(timeout);
@@ -105,9 +99,8 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
         return this.isTerminated();
     }
 
-    @Override
-    public <T> @NotNull CompletableFuture<T> submit(@NotNull Callable<T> task) {
-        var future = new CompletableFuture<T>();
+    public <T> @NotNull CompletionPromise<T> submit(@NotNull Callable<T> task) {
+        var future = CompletionPromise.<T>create();
         if (this.isSameThread()) {
             try {
                 future.complete(task.call());
@@ -116,7 +109,7 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
                     NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
-                future.completeExceptionally(throwable);
+                future.fail(throwable);
             }
             return future;
         }
@@ -125,15 +118,14 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
                 var result = task.call();
                 future.complete(result);
             } catch (Throwable throwable) {
-                future.completeExceptionally(throwable);
+                future.fail(throwable);
             }
         }));
         return future;
     }
 
-    @Override
-    public <T> @NotNull CompletableFuture<T> submit(@NotNull Runnable task, T result) {
-        CompletableFuture<T> future = new CompletableFuture<>();
+    public <T> @NotNull CompletionPromise<T> submit(@NotNull Runnable task, T result) {
+        CompletionPromise<T> future = CompletionPromise.create();
         if (this.isSameThread()) {
             try {
                 task.run();
@@ -143,7 +135,7 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
                     NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
-                future.completeExceptionally(throwable);
+                future.fail(throwable);
             }
             return future;
         }
@@ -152,15 +144,14 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
                 task.run();
                 future.complete(result);
             } catch (Throwable throwable) {
-                future.completeExceptionally(throwable);
+                future.fail(throwable);
             }
         }));
         return future;
     }
 
-    @Override
-    public @NotNull CompletableFuture<Void> submit(@NotNull Runnable task) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
+    public @NotNull CompletionPromise<Void> submit(@NotNull Runnable task) {
+        CompletionPromise<Void> future = CompletionPromise.create();
         if (this.isSameThread()) {
             try {
                 task.run();
@@ -170,7 +161,7 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
                     NamespaceID id = ((Task<?>) task).id();
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
-                future.completeExceptionally(throwable);
+                future.fail(throwable);
             }
             return future;
         }
@@ -184,7 +175,7 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 PollingExecutorService.LOGGER.error("Failed to run task:", throwable);
-                future.completeExceptionally(throwable);
+                future.fail(throwable);
             }
             futures.remove(future);
         });
@@ -193,74 +184,14 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
         return future;
     }
 
-    @Override
-    public <T> @NotNull List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
-        List<CompletableFuture<T>> futures = tasks.stream()
+    public <T> @NotNull List<Promise<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
+        List<CompletionPromise<T>> futures = tasks.stream()
                 .map(this::submit)
-                .toList();
-        return futures.stream()
-                .map(CompletableFuture::join)
-                .map(CompletableFuture::completedFuture)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public <T> @NotNull List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) {
-        long endTime = System.currentTimeMillis() + unit.toMillis(timeout);
-        List<CompletableFuture<T>> futures = tasks.stream()
-                .map(this::submit)
-                .toList();
-        List<Future<T>> resultList = new ArrayList<>();
-
-        for (CompletableFuture<T> future : futures) {
-            long timeLeft = endTime - System.currentTimeMillis();
-            if (timeLeft <= 0)
-                break;
-
-            resultList.add(future.orTimeout(timeLeft, TimeUnit.MILLISECONDS).toCompletableFuture());
-        }
-
-        return resultList;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> @NotNull T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        var futures = tasks.stream()
-                .map(this::submit)
-                .toList();
-
-        try {
-            return CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(o -> (T)o)
-                    .get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw e;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        var endTime = System.currentTimeMillis() + unit.toMillis(timeout);
-        var futures = tasks.stream()
-                .map(this::submit)
-                .toList();
-
-        try {
-            var result = CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(o -> ((CompletableFuture<T>)o).join());
-
-            var timeLeft = endTime - System.currentTimeMillis();
-            if (timeLeft <= 0)
-                throw new TimeoutException();
-
-            return result.orTimeout(timeLeft, TimeUnit.MILLISECONDS).get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw e;
-        }
+        return futures.stream()
+                .map(CompletionPromise::join)
+                .map(CompletionPromise::completedFuture)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -277,7 +208,8 @@ public class PollingExecutorService extends GameObject implements ExecutorServic
     }
 
     private boolean isSameThread() {
-        return Thread.currentThread().threadId() == this.thread.threadId();
+        if (GamePlatform.get().isWeb()) return true;
+        return Thread.currentThread().getId() == this.thread.getId();
     }
 
     /**

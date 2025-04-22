@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.entity.component;
 
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.component.GameComponent;
 
 public class AirSupply extends GameComponent {
@@ -36,12 +37,12 @@ public class AirSupply extends GameComponent {
     }
 
     public AirSupply useAir(float amount) {
-        this.air = Math.clamp(this.air - amount, 0, this.maxAir);
+        this.air = Mth.clamp(this.air - amount, 0, this.maxAir);
         return this;
     }
 
     public AirSupply fillAir(float amount) {
-        this.air = Math.clamp(this.air + amount, 0, this.maxAir);
+        this.air = Mth.clamp(this.air + amount, 0, this.maxAir);
         return this;
     }
 

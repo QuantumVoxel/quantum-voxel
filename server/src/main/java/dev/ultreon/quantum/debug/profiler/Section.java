@@ -12,7 +12,7 @@ public final class Section {
     private final Profiler profiler;
     @Nullable
     private Section current;
-    private final SequencedMap<String, Integer> stats = new LinkedHashMap<>();
+    private final Map<String, Integer> stats = new LinkedHashMap<>();
 
     public Section(String name, Profiler profiler) {
         this.profiler = profiler;
@@ -108,7 +108,7 @@ public final class Section {
         private final Map<String, FinishedSection> data = new HashMap<>();
         private final long nanos;
         private final String name;
-        private final SequencedMap<String, Integer> stats;
+        private final Map<String, Integer> stats;
 
         public FinishedSection(Section section) {
             for (var entry : section.getData().entrySet()) {
@@ -135,7 +135,7 @@ public final class Section {
             return this.name;
         }
 
-        public SequencedMap<String, Integer> getStats() {
+        public Map<String, Integer> getStats() {
             return this.stats;
         }
     }

@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.api.ubo;
 
-import dev.ultreon.ubo.DataTypes;
-import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.ubo.types.MapType;
-import dev.ultreon.ubo.util.DataTypeVisitor;
+import dev.ultreon.quantum.ubo.DataTypes;
+import dev.ultreon.quantum.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.util.DataTypeVisitor;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;

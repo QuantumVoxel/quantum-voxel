@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.libs.datetime.v0.DateTime;
+import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.GenericIcon;
@@ -13,18 +15,14 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 public class WorldCreationScreen extends Screen {
     private static final WordGenerator WORD_GEN = new WordGenerator(new WordGenerator.Config().minSize(4).maxSize(6).named());
-    @MonotonicNonNull
     private TextEntry worldNameEntry;
-    @MonotonicNonNull
     private IconButton reloadButton;
-    @MonotonicNonNull
     private TextButton createButton;
     private String worldName = "";
     private long seed;
@@ -58,7 +56,15 @@ public class WorldCreationScreen extends Screen {
 
         createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_creation.create"), 95)
                 .position(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 + 5))
-                .setCallback(this::createWorld));
+                .setCallback(caller -> {
+                    if (GamePlatform.get().isWeb()) {
+                        client.showScreen(new UntestedAreaScreen("World creation on web is experimental", () -> {
+                            createWorld(caller);
+                        }));
+                        return;
+                    }
+                    createWorld(caller);
+                }));
 
         builder.add(TextButton.of(UITranslations.CANCEL, 95)
                 .position(() -> new Position(getWidth() / 2 + 5, getHeight() / 2 + 5))
@@ -75,11 +81,11 @@ public class WorldCreationScreen extends Screen {
     }
 
     private void createWorld(TextButton caller) {
-        String folderName = WorldStorage.createFolderName();
-        WorldStorage storage = new WorldStorage(QuantumClient.data("worlds").child(folderName).file());
-
-
         try {
+            String folderName = WorldStorage.createFolderName();
+            WorldStorage storage = new WorldStorage(QuantumClient.data("worlds").child(folderName));
+
+
             if (storage.exists(".")) {
                 client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal("World already exists")).icon(MessageIcon.ERROR).build());
                 return;
@@ -97,15 +103,16 @@ public class WorldCreationScreen extends Screen {
                         DateTime.current()
                 ));
             } catch (IOException e) {
-                e.printStackTrace();
+                CommonConstants.LOGGER.error("Failed to save world info", e);
                 String localizedMessage = e.getLocalizedMessage();
-                client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal(localizedMessage.substring(0, Math.min(localizedMessage.length() - 1, 50)))).icon(MessageIcon.ERROR).build());
+                client.notifications.add(Notification.builder(TextObject.literal("Failed to save world info"), TextObject.literal(localizedMessage.substring(0, Math.min(localizedMessage.length() - 1, 50)))).icon(MessageIcon.ERROR).build());
                 return;
             }
 
             storage.createWorld();
             client.startWorld(storage);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            CommonConstants.LOGGER.error("Failed to create world", e);
             client.notifications.add(Notification.builder(TextObject.literal("Failed to create world"), TextObject.literal(e.getLocalizedMessage())).icon(MessageIcon.ERROR).build());
         }
     }

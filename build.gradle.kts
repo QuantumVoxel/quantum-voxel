@@ -1,8 +1,3 @@
-import dev.ultreon.gameutils.GameUtilsExt
-import org.jetbrains.gradle.ext.Application
-import org.jetbrains.gradle.ext.ShortenCommandLine
-import org.jetbrains.gradle.ext.runConfigurations
-import org.jetbrains.gradle.ext.settings
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 import org.mini2Dx.butler.ButlerExtension
@@ -38,6 +33,7 @@ buildscript {
 
   dependencies {
     classpath("gradle.plugin.org.danilopianini:javadoc.io-linker:0.1.4-700fdb6")
+    classpath("com.android.tools.build:gradle:8.1.2")
     classpath(group = "org.mini2Dx", name = "butler", version = "2.1.0")
   }
 }
@@ -46,45 +42,20 @@ buildscript {
 //     Plugins     //
 //*****************//
 plugins {
-  id("idea")
   id("maven-publish")
-  id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.22"
-  id("application")
   id("org.jreleaser") version "1.14.0" apply false
   id("io.freefair.javadoc-links") version "8.3"
 }
 
-apply(plugin = "gameutils")
 apply(plugin = "org.mini2Dx.butler")
 
-val gameVersion = property("project_version")?.toString() ?: throw IllegalStateException("project_version is not set")
+val gameVersion = property("projectVersion")?.toString() ?: throw IllegalStateException("project_version is not set")
 //val gameVersion = "0.1.0+edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 version = gameVersion
 println("Current version: $gameVersion")
 if (ghBuildNumber != null) println("Build number: $ghBuildNumber")
-
-//********************************//
-// Setting up the main properties //
-//********************************//
-extensions.configure<GameUtilsExt> {
-  projectName = "Quantum Voxel"
-
-  projectVersion =
-    if (ghBuildNumber != null) "$gameVersion+build.$ghBuildNumber"
-    else gameVersion
-  projectGroup = "dev.ultreon.quantum"
-  projectId = "quantum"
-  production = true
-
-  coreProject = project(":client")
-  desktopProject = project(":desktop")
-  packageProject = project(":launcher")
-
-  mainClass = "dev.ultreon.quantum.premain.PreMain"
-  javaVersion = 21
-}
 
 //**********************//
 //     Repositories     //
@@ -112,6 +83,38 @@ repositories {
   }
 }
 
+// From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
+// The article can be helpful when using assets.txt in your project.
+
+val generateAssetList = rootProject.tasks.register("generateAssetList") {
+  inputs.dir("${project.rootDir}/client/src/main/resources/")
+  outputs.file("${project.rootDir}/client/src/main/resources/assets.txt")
+  actions.add {
+    // projectFolder/assets
+    val assetsFolder = File("${project.rootDir}/client/src/main/resources/")
+    // projectFolder/assets/assets.txt
+    val assetsFile = File(assetsFolder, "assets.txt")
+    // delete that file in case we've already created it
+    assetsFile.delete()
+
+    // iterate through all files inside that folder
+    // convert it to a relative path
+    // and append it to the file assets.txt
+    fileTree(assetsFolder).map { it.relativeTo(assetsFolder) }.sorted().forEach {
+      assetsFile.appendText("$it\n")
+    }
+  }
+}
+
+allprojects {
+  if (this@allprojects.name == "android") {
+    generateAssetList.get().mustRunAfter(":android:mergeDebugAssets", ":android:mergeReleaseAssets")
+    return@allprojects
+  }
+  afterEvaluate {
+    tasks.processResources.get().dependsOn(generateAssetList.get())
+  }
+}
 /*****************
  * Configurations
  */
@@ -139,19 +142,21 @@ beforeEvaluate {
 
 allprojects {
   apply(plugin = "maven-publish")
-  apply(plugin = "java")
+  if (this@allprojects.name != "android") {
+    apply(plugin = "java")
 
-  java.sourceCompatibility = JavaVersion.VERSION_21
-  java.targetCompatibility = JavaVersion.VERSION_21
+    java.sourceCompatibility = JavaVersion.VERSION_11
+    java.targetCompatibility = JavaVersion.VERSION_11
+  }
 
   ext.also {
-    it["app_name"] = "Quantum Voxel"
-    it["gdx_version"] = property("gdx_version")
-    it["robo_vm_version"] = "2.3.16"
-    it["box_2d_lights_version"] = "1.5"
-    it["ashley_version"] = "1.7.4"
-    it["ai_version"] = "1.8.2"
-    it["gdx_controllers_version"] = "2.2.3"
+    it["appName"] = "Quantum Voxel"
+    it["gdxVersion"] = property("gdxVersion")
+    it["roboVmVersion"] = "2.3.16"
+    it["box2DLightsVersion"] = "1.5"
+    it["ashleyVersion"] = "1.7.4"
+    it["aiVersion"] = "1.8.2"
+    it["gdxControllersVersion"] = "2.2.3"
   }
 
   repositories {
@@ -168,6 +173,7 @@ allprojects {
     maven("https://jitpack.io") {
       content {
         includeGroup("dev.ultreon")
+        includeGroup("dev.ultreon.JNoiseJDK11")
         includeGroup("dev.ultreon.quantum-fabric-loader")
         includeGroup("com.github.mgsx-dev.gdx-gltf")
         includeGroup("com.github.JnCrMx")
@@ -190,7 +196,7 @@ allprojects {
     }
   }
 
-  dependencies {
+  if (this@allprojects.name != "android") dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
 
     implementation(annotationProcessor("org.projectlombok:lombok:1.18.34")!!)
@@ -204,9 +210,9 @@ subprojects {
     options.encoding = "UTF-8"
   }
 
-  java {
+  if (this@subprojects.name != "android") java {
     toolchain {
-      languageVersion.set(JavaLanguageVersion.of(21))
+      languageVersion.set(JavaLanguageVersion.of(11))
     }
   }
 
@@ -285,13 +291,14 @@ artifacts {
 
 val publishProjects =
   listOf(
-    project(":client"),
     project(":desktop"),
+    project(":client"),
+
+   project(":teavm"),
     project(":launcher"),
     project(":server"),
     project(":gameprovider"),
     project(":mixinprovider"),
-    project(":lang-gen"),
     project(":quantum-api"),
     project(":kwantum-api")
   )
@@ -519,7 +526,7 @@ java -cp ./server.jar:$classPath net.fabricmc.loader.impl.launch.knot.KnotClient
     }
 
     Files.writeString(
-      Paths.get("$projectDir/build/docker/image-version.txt"),
+      Path.of("$projectDir/build/docker/image-version.txt"),
       gameVersion,
       StandardOpenOption.WRITE,
       StandardOpenOption.TRUNCATE_EXISTING,
@@ -637,105 +644,9 @@ tasks.register<DefaultTask>("docker-push") {
   }
 }
 
-apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
-idea {
-  project {
-    settings {
-      fun setupIdea(
-        dependency: Project,
-        name: String,
-        env: String,
-        knotEnv: String,
-        workingDir: String = dependency.file("run").absolutePath
-      ) {
-        dependency.afterEvaluate {
-          mkdir(workingDir)
-          Files.createDirectories(Paths.get(dependency.projectDir.path, "build", "gameutils"))
-
-          val ps = File.pathSeparator!!
-          val clientFiles = dependency.configurations["runtimeClasspath"]!!.files
-
-          val fs = File.separator!!
-
-          val clientClassPath = clientFiles.asSequence()
-            .filter { it != null }
-            .map { it.path }
-            .joinToString(ps)
-
-          val serverFiles = dependency.configurations["runtimeClasspath"]!!.files
-
-          val serverClassPath = serverFiles.asSequence()
-            .filter { it != null }
-            .map { it.path }
-            .joinToString(ps)
-
-          val conf = """
-commonProperties
-  fabric.development=true
-  log4j2.formatMsgNoLookups=true
-  fabric.log.disableAnsi=false
-  fabric.skipMcProvider=true
-  fabric.zipfs.use_temp_file=false
-  fabric.gameJarPath.client=$clientClassPath
-  fabric.gameJarPath.server=$serverClassPath
-  log4j.configurationFile=${rootProject.projectDir}${fs}log4j.xml
-    """.trimIndent()
-          val launchFile = file("${dependency.projectDir}/build/gameutils/launch.cfg")
-          Files.writeString(
-            launchFile.toPath(),
-            conf,
-            StandardOpenOption.CREATE,
-            StandardOpenOption.TRUNCATE_EXISTING,
-            StandardOpenOption.WRITE
-          )
-
-          val cpFile = file("${dependency.projectDir}/build/gameutils/classpath.txt")
-          Files.writeString(
-            cpFile.toPath(),
-            clientClassPath,
-            StandardOpenOption.CREATE,
-            StandardOpenOption.TRUNCATE_EXISTING,
-            StandardOpenOption.WRITE
-          )
-
-          var defaultJvmArgs = "-Xmx4g -Dfabric.dli.config=\"${launchFile.path}\""
-
-          if (System.getProperty("os.name").lowercase().startsWith("mac")) {
-            defaultJvmArgs += " -XstartOnFirstThread"
-          }
-
-          withIDEADir {
-            println("Callback 1 executed with: $absolutePath")
-          }
-
-          runConfigurations {
-            create(
-              "Quantum $name",
-              Application::class.java
-            ) {
-              jvmArgs =
-                "$defaultJvmArgs -Dfabric.dli.env=$env -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.Knot$knotEnv"
-              mainClass = "net.fabricmc.devlaunchinjector.Main"
-              moduleName = rootProject.name + ".${dependency.name}.main"
-              workingDirectory = workingDir
-              programParameters = "--gameDir=."
-              shortenCommandLine = ShortenCommandLine.ARGS_FILE
-            }
-          }
-        }
-
-      }
-
-      setupIdea(rootProject.project(":desktop"), "Client", "CLIENT", "Client", "$projectDir/run/client/main/")
-      setupIdea(rootProject.project(":desktop"), "Client Alt", "CLIENT", "Client", "$projectDir/run/client/alt/")
-      setupIdea(rootProject.project(":server"), "Server", "SERVER", "Server", "$projectDir/run/server/")
-    }
-  }
-}
-
 tasks.register<Exec>("runClient") {
   workingDir = file("$projectDir/run/client/")
-  Files.createDirectories(Paths.get(workingDir.path))
+  Files.createDirectories(Path.of(workingDir.path))
 
   dependsOn(":desktop:build")
 
@@ -778,7 +689,7 @@ tasks.register<Exec>("runClient") {
 
 tasks.register<Exec>("runClientAlt") {
   workingDir = file("$projectDir/run/data/")
-  Files.createDirectories(Paths.get("$projectDir/run/data/"))
+  Files.createDirectories(Path.of("$projectDir/run/data/"))
 
   dependsOn(":desktop:build")
 
@@ -820,7 +731,7 @@ tasks.register<Exec>("runClientAlt") {
 
 tasks.register<Exec>("runDataGenClient") {
   workingDir = file("$projectDir/run/data/")
-  Files.createDirectories(Paths.get("$projectDir/run/data/"))
+  Files.createDirectories(Path.of("$projectDir/run/data/"))
 
   dependsOn(":desktop:build")
 
@@ -864,7 +775,7 @@ tasks.register<Exec>("runDataGenClient") {
 
 tasks.register<Exec>("runDataGenServer") {
   workingDir = file("$projectDir/run/data/")
-  Files.createDirectories(Paths.get("$projectDir/run/data/"))
+  Files.createDirectories(Path.of("$projectDir/run/data/"))
 
   dependsOn(":server:build")
 
@@ -906,7 +817,7 @@ tasks.register<Exec>("runDataGenServer") {
 
 tasks.register<Exec>("runServer") {
   workingDir = file("$projectDir/run/server/")
-  Files.createDirectories(Paths.get("$projectDir/run/server/"))
+  Files.createDirectories(Path.of("$projectDir/run/server/"))
 
   dependsOn(":server:build")
 

@@ -7,7 +7,17 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
-public record S2CBlockEntitySetPacket(BlockVec pos, int blockEntityId) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CBlockEntitySetPacket implements Packet<InGameClientPacketHandler> {
+    private final BlockVec pos;
+    private final int blockEntityId;
+
+    public S2CBlockEntitySetPacket(BlockVec pos, int blockEntityId) {
+        this.pos = pos;
+        this.blockEntityId = blockEntityId;
+    }
+
     public static S2CBlockEntitySetPacket read(PacketIO buffer) {
         var pos = buffer.readBlockVec();
         var blockEntityId = buffer.readVarInt();
@@ -33,4 +43,27 @@ public record S2CBlockEntitySetPacket(BlockVec pos, int blockEntityId) implement
                ", blockEntityId=" + blockEntityId +
                '}';
     }
+
+    public BlockVec pos() {
+        return pos;
+    }
+
+    public int blockEntityId() {
+        return blockEntityId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CBlockEntitySetPacket) obj;
+        return Objects.equals(this.pos, that.pos) &&
+               this.blockEntityId == that.blockEntityId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, blockEntityId);
+    }
+
 }

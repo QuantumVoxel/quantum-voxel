@@ -3,28 +3,20 @@ package dev.ultreon.quantum.android;
 import android.content.Intent;
 import android.hardware.SensorEvent;
 import android.os.Looper;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Version;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.IntSet;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.screens.RestartConfirmScreen;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
-import dev.ultreon.quantum.log.Logger;
 import dev.ultreon.quantum.util.Result;
-import dev.ultreon.xeox.loader.XeoxModFile;
-import de.mxapplications.openfiledialog.OpenFileDialog;
-import org.mozilla.javascript.Context;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -39,7 +31,7 @@ public class AndroidPlatform extends GamePlatform {
     private final IntSet keyboards = new IntSet();
     private final IntMap<MouseDevice> motions = new IntMap<MouseDevice>();
     private AndroidMouseDevice mouseDevice;
-    private final IntMap<Device> gameDevices = new IntMap<Device>();
+    private final Map<Integer, Device> gameDevices = new HashMap<>();
 
     AndroidPlatform(AndroidLauncher launcher) {
         super();
@@ -78,13 +70,13 @@ public class AndroidPlatform extends GamePlatform {
     }
 
     @Override
-    public Path getConfigDir() {
-        return Gdx.files.external("config").file().toPath();
+    public FileHandle getConfigDir() {
+        return Gdx.files.local("config");
     }
 
     @Override
-    public Path getGameDir() {
-        return Gdx.files.external(".").file().toPath();
+    public FileHandle getGameDir() {
+        return Gdx.files.local(".");
     }
 
     @Override
@@ -108,42 +100,11 @@ public class AndroidPlatform extends GamePlatform {
         return Result.ok(false);
     }
 
-    public void performImport() {
-        // You can use the API that requires the permission.
-
-        // Open android file dialog
-        OpenFileDialog openFileDialog = new OpenFileDialog(this.launcher);
-        openFileDialog.setFolderSelectable(false);
-        openFileDialog.setTitle("Import Mod");
-        openFileDialog.setOnCloseListener(new OpenFileDialog.OnCloseListener() {
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onOk(String pathName) {
-                try {
-                    XeoxModFile.importFile(new File(pathName));
-                    QuantumClient.get().showScreen(new RestartConfirmScreen());
-                } catch (IOException e) {
-                    Log.e("Quantum", "Failed to import mod file", e);
-                }
-            }
-        });
-        openFileDialog.show();
-    }
-
     @Override
     public void prepare() {
         super.prepare();
 
         Looper.prepare();
-    }
-
-    @Override
-    public Context enterXeoxContext() {
-        return super.enterXeoxContext();
     }
 
     @Override
@@ -250,5 +211,38 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public DeviceType getDeviceType() {
         return launcher.getDeviceType();
+    }
+
+    @Override
+    public boolean isAngleGLES() {
+        return true;
+    }
+
+    @Override
+    public boolean isGLES() {
+        return true;
+    }
+
+    @Override
+    public boolean hasBackPanelRemoved() {
+        return false;
+    }
+
+    @Override
+    public int cpuCores() {
+        return Runtime.getRuntime().availableProcessors();
+    }
+
+    @Override
+    public long[] getUuidElements(UUID value) {
+        return new long[]{
+                value.getMostSignificantBits(),
+                value.getLeastSignificantBits()
+        };
+    }
+
+    @Override
+    public UUID constructUuid(long msb, long lsb) {
+        return new UUID(msb, lsb);
     }
 }

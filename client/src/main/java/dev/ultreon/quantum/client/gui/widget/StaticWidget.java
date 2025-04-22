@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import dev.ultreon.quantum.client.gui.Renderer;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -17,5 +16,5 @@ public interface StaticWidget {
      * @param renderer  The renderer
      * @param deltaTime The delta time of the rendering
      */
-    void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime);
+    void render(@NotNull Renderer renderer, float deltaTime);
 }

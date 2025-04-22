@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.events.api;
 
-import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.Nullable;
 
 public final class ValueEventResult<T> {
@@ -31,9 +30,7 @@ public final class ValueEventResult<T> {
         return new ValueEventResult<>(false, false, null);
     }
 
-    public static <T> ValueEventResult<T> interruptCancel(T value) {
-        Preconditions.checkNotNull(value, "Expected non-null value. Use stop() or pass() to use an empty value.");
-        return new ValueEventResult<>(true, true, value);
+    public static <T> ValueEventResult<T> interruptCancel(T value) {        return new ValueEventResult<>(true, true, value);
     }
 
     public static <T> ValueEventResult<T> interrupt(T value) {

@@ -1,7 +1,8 @@
 package dev.ultreon.quantum.client.gui.screens.world;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.WorldCreationScreen;
 import dev.ultreon.quantum.client.gui.widget.*;
@@ -12,20 +13,13 @@ import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WorldSelectionScreen extends Screen {
-    public static final Path WORLDS_DIR = QuantumClient.data("worlds").file().toPath();
+    public static final FileHandle WORLDS_DIR = Gdx.files.local("worlds");
     private SelectionList<WorldStorage> worldList;
     private WorldStorage selected;
     private TextButton createButton;
@@ -134,27 +128,22 @@ public class WorldSelectionScreen extends Screen {
 
     public List<WorldStorage> locateWorlds() {
         var worlds = new ArrayList<WorldStorage>();
-        try (Stream<Path> worldPaths = Files.list(WorldSelectionScreen.WORLDS_DIR)) {
-            worlds = worldPaths.map(WorldStorage::new).sorted(Comparator.comparing(o -> o.getDirectory().getFileName().toString())).collect(Collectors.toCollection(ArrayList::new));
+        FileHandle[] worldPaths = WorldSelectionScreen.WORLDS_DIR.list();
+        if (worldPaths != null) {
+            worlds = Arrays.stream(worldPaths).map(WorldStorage::new).sorted(Comparator.comparing(o -> o.getDirectory().name())).collect(Collectors.toCollection(ArrayList::new));
             worlds.sort((o1, o2) -> {
-                try {
-                    if (!o1.exists("info.ubo") && !o2.exists("info.ubo")) {
-                        long millis1 = Files.readAttributes(o1.getDirectory(), BasicFileAttributes.class).lastAccessTime().toMillis();
-                        long millis2 = Files.readAttributes(o2.getDirectory(), BasicFileAttributes.class).lastAccessTime().toMillis();
-                        return Long.compare(millis2, millis1);
-                    }
-                    if (!o1.exists("info.ubo")) return 1;
-                    if (!o2.exists("info.ubo")) return -1;
-
-                    long millis1 = o1.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
-                    long millis2 = o2.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+                if (!o1.exists("info.ubo") && !o2.exists("info.ubo")) {
+                    long millis1 = o1.getDirectory().lastModified();
+                    long millis2 = o2.getDirectory().lastModified();
                     return Long.compare(millis2, millis1);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
+                if (!o1.exists("info.ubo")) return 1;
+                if (!o2.exists("info.ubo")) return -1;
+
+                long millis1 = o1.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+                long millis2 = o2.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+                return Long.compare(millis2, millis1);
             });
-        } catch (IOException ignored) {
-            // ignored
         }
 
         return worlds;

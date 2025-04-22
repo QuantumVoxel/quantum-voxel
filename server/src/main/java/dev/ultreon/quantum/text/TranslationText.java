@@ -1,13 +1,14 @@
 package dev.ultreon.quantum.text;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.ubo.types.ListType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
@@ -47,8 +48,8 @@ public class TranslationText extends MutableText {
     }
 
     private void initFormat() {
-        if (this.initialized) this.extras.removeFirst();
-        this.extras.addFirst(Formatter.format(getTranslated(), false));
+        if (this.initialized) this.extras.remove(0);
+        this.extras.add(0, Formatter.format(getTranslated(), false));
         this.initialized = true;
     }
 
@@ -71,9 +72,11 @@ public class TranslationText extends MutableText {
 
         ListType<MapType> argsData = new ListType<>();
         for (Object arg : this.args) {
-            if (arg instanceof TextObject textObject) {
+            if (arg instanceof TextObject) {
+                TextObject textObject = (TextObject) arg;
                 argsData.add(textObject.serialize());
-            } else if (arg instanceof String s) {
+            } else if (arg instanceof String) {
+                String s = (String) arg;
                 argsData.add(TextObject.literal(s).serialize());
             } else argsData.add(TextObject.literal(String.valueOf(arg)).serialize());
         }
@@ -104,7 +107,7 @@ public class TranslationText extends MutableText {
 
     @Override
     public MutableText copy() {
-        var copy = this.extras.stream().map(TextObject::copy).toList();
+        var copy = this.extras.stream().map(TextObject::copy).collect(Collectors.toList());
         var translationText = new TranslationText(this.path, this.args);
         translationText.extras.addAll(copy);
         return translationText;

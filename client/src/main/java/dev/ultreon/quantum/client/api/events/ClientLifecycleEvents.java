@@ -5,26 +5,30 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.events.api.Event;
 
 public class ClientLifecycleEvents {
-    public static final Event<ClientStarted> CLIENT_STARTED = Event.create();
+    public static final Event<ClientStarted> CLIENT_STARTED = Event.create(listeners -> client -> {
+        for (ClientStarted listener : listeners) {
+            listener.onGameLoaded(client);
+        }
+    });
     @Deprecated(forRemoval = true, since = "0.1.0")
     public static final Event<ClientStarted> GAME_LOADED = CLIENT_STARTED;
-    public static final Event<ClientStopped> CLIENT_STOPPED = Event.create();
+    public static final Event<ClientStopped> CLIENT_STOPPED = Event.create(listeners -> () -> {
+        for (ClientStopped listener : listeners) {
+            listener.onGameDisposed();
+        }
+    });
     @Deprecated
     public static final Event<ClientStopped> GAME_DISPOSED = CLIENT_STOPPED;
-    public static final Event<WindowClosed> WINDOW_CLOSED = Event.create();
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    public static final Event<Registration> REGISTER_ENTITY_MODELS = Event.create();
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    public static final Event<Registration> REGISTER_ENTITY_RENDERERS = Event.create();
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    public static final Event<Registration> REGISTER_BLOCK_RENDERERS = Event.create();
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    public static final Event<Registration> REGISTER_BLOCK_RENDER_TYPES = Event.create();
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    public static final Event<Registration> REGISTER_BLOCK_ENTITY_MODELS = Event.create();
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    public static final Event<Registration> REGISTER_BLOCK_MODELS = Event.create();
-    public static final Event<GuiAtlasInit> GUI_ATLAS_INIT = Event.create();
+    public static final Event<WindowClosed> WINDOW_CLOSED = Event.create(listeners -> () -> {
+        for (WindowClosed listener : listeners) {
+            listener.onWindowClose();
+        }
+    });
+    public static final Event<GuiAtlasInit> GUI_ATLAS_INIT = Event.create(listeners -> packer -> {
+        for (GuiAtlasInit listener : listeners) {
+            listener.onGuiAtlasInit(packer);
+        }
+    });
 
     @FunctionalInterface
     public interface ClientStarted {

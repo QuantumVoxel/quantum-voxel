@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.world.gen;
 
+import java.util.Objects;
+
 public class WorleyUtil {
     private final int m_seed;
 
@@ -38,8 +40,53 @@ public class WorleyUtil {
         return hash;
     }
 
-    private record Double3(double x, double y, double z) {
-    }
+    private static final class Double3 {
+        private final double x;
+        private final double y;
+        private final double z;
+
+        private Double3(double x, double y, double z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public double x() {
+            return x;
+        }
+
+        public double y() {
+            return y;
+        }
+
+        public double z() {
+            return z;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (Double3) obj;
+            return Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
+                   Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
+                   Double.doubleToLongBits(this.z) == Double.doubleToLongBits(that.z);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y, z);
+        }
+
+        @Override
+        public String toString() {
+            return "Double3[" +
+                   "x=" + x + ", " +
+                   "y=" + y + ", " +
+                   "z=" + z + ']';
+        }
+
+        }
 
     private static final Double3[] CELL_3D = {
             new Double3(0.1453787434f, -0.4149781685f, -0.0956981749f),

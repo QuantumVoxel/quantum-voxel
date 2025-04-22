@@ -2,15 +2,12 @@ package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +35,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
     protected Screen root;
     protected final Bounds bounds = new Bounds();
     protected final Position pos = bounds.pos;
-    protected final Size size = bounds.size;
+    public final Size size = bounds.size;
     public boolean clipped = true;
     public boolean topMost = false;
 
@@ -48,9 +45,9 @@ public abstract class Widget extends GameObject implements StaticWidget {
     protected GameFont font = this.client.font;
     private final List<RevalidateListener> revalidateListeners = new ArrayList<>();
     private final Map<NamespaceID, UIComponent> components = new HashMap<>();
-    protected final GridPoint2 mousePos = new GridPoint2(Integer.MIN_VALUE, Integer.MIN_VALUE);
+    public final GridPoint2 mousePos = new GridPoint2(Integer.MIN_VALUE, Integer.MIN_VALUE);
 
-    protected Widget(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    protected Widget(int width, int height) {
         this.preferredSize.set(width, height);
         this.size.set(this.preferredSize);
     }
@@ -59,7 +56,6 @@ public abstract class Widget extends GameObject implements StaticWidget {
         return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
     }
 
-    @CheckReturnValue
     protected final <C extends UIComponent> C register(NamespaceID id, C component) {
         this.components.put(id, component);
         return component;
@@ -67,7 +63,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     @Override
     @ApiStatus.Internal
-    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void render(@NotNull Renderer renderer, float deltaTime) {
         if (!this.isVisible) return;
 
         this.renderBackground(renderer, deltaTime);
@@ -240,47 +236,38 @@ public abstract class Widget extends GameObject implements StaticWidget {
         return this.bounds.contains(x, y) || this.ignoreBounds;
     }
 
-    @CanIgnoreReturnValue
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
         return false;
     }
 
-    @CanIgnoreReturnValue
     public boolean mousePress(int mouseX, int mouseY, int button) {
         return false;
     }
 
-    @CanIgnoreReturnValue
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
         return false;
     }
 
-    @CanIgnoreReturnValue
     public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
         return false;
     }
 
-    @CanIgnoreReturnValue
     public void mouseMove(int mouseX, int mouseY) {
         this.mousePos.set(mouseX, mouseY);
     }
 
-    @CanIgnoreReturnValue
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
         return false;
     }
 
-    @CanIgnoreReturnValue
     public boolean keyPress(int keyCode) {
         return this.isFocused;
     }
 
-    @CanIgnoreReturnValue
     public boolean keyRelease(int keyCode) {
         return this.isFocused;
     }
 
-    @CanIgnoreReturnValue
     public boolean charType(char character) {
         return this.isFocused;
     }
@@ -325,7 +312,6 @@ public abstract class Widget extends GameObject implements StaticWidget {
         this.revalidateListeners.add(o);
     }
 
-    @CanIgnoreReturnValue
     public void setBounds(Bounds bounds) {
         this.pos.x = bounds.pos().x;
         this.pos.y = bounds.pos().y;

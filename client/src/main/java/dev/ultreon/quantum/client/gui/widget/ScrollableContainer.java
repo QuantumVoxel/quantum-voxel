@@ -1,14 +1,11 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.graphics.Color;
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Size;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +26,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     protected int contentWidth;
     public final Color backgroundColor = new Color(0x00000040);
 
-    public ScrollableContainer(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public ScrollableContainer(int width, int height) {
         super(width, height);
     }
 
@@ -203,8 +200,6 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     }
 
     public void removeWidgetIf(Predicate<Widget> predicate) {
-        Preconditions.checkNotNull(predicate, "predicate");
-
         int found = -1;
         int idx = 0;
         for (Widget widget : this.widgets) {
@@ -219,7 +214,6 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         this.widgets.remove(found);
     }
 
-    @CanIgnoreReturnValue
     public ScrollableContainer selectable(boolean selectable) {
         this.selectable = selectable;
         return this;

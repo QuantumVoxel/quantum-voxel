@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.gamerule;
 
-import dev.ultreon.quantum.api.commands.CommandExecuteException;
+import dev.ultreon.quantum.api.neocommand.CommandExecuteException;
 
 public interface Rule<T> {
     String getKey();

@@ -1,12 +1,10 @@
 package dev.ultreon.quantum.client.player;
 
-import dev.ultreon.quantum.api.commands.output.CommandResult;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.network.packets.c2s.C2SCommandPacket;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -133,19 +131,6 @@ public abstract class ClientPlayer extends Player {
     @Override
     public boolean hasExplicitPermission(@NotNull Permission permission) {
         return false;
-    }
-
-    /**
-     * Executes the provided command input from the client side,
-     * sending it to the server for processing.
-     *
-     * @param input The command input to be executed.
-     * @return A CommandResult representing the result of the execution, or null if no result.
-     */
-    @Override
-    public @NotNull CommandResult execute(@NotNull String input) {
-        this.client.connection.send(new C2SCommandPacket(input));
-        return null;
     }
 
     /**

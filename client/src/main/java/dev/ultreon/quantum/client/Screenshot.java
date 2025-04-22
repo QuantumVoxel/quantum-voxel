@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 
 /**
  * Represents a screenshot grabbed from the game.
@@ -70,24 +69,21 @@ public class Screenshot {
      * @param filename The name of the file to be saved.
      * @return The file handle of the saved file.
      */
-    public FileHandle save(String filename) {
-        // Get data from QuantumClient based on the filename
-        FileHandle data = QuantumClient.data(filename);
-
+    public FileHandle save(FileHandle filename) {
         // Write the data to a PNG file
-        PixmapIO.writePNG(data, pixmap);
+        PixmapIO.writePNG(filename, pixmap);
 
         // Copy the screenshot file to clipboard
         if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
             IClipboard clipboard = QuantumClient.get().clipboard;
-            try(InputStream read = data.read()) {
+            try(InputStream read = filename.read()) {
 //                clipboard.copy(ImageIO.read(read));
             } catch (IOException e) {
                 QuantumClient.LOGGER.error("Failed to copy screenshot to clipboard", e);
             }
         }
 
-        return data;
+        return filename;
     }
 
 
@@ -98,7 +94,7 @@ public class Screenshot {
      * @return The FileHandle object representing the saved file
      */
     public FileHandle saveAndDispose(String filename) {
-        FileHandle data = save(filename);
+        FileHandle data = save(Gdx.files.local("screenshots/" + filename));
         dispose();
 
         return data;
@@ -139,9 +135,5 @@ public class Screenshot {
 
         // Return the captured screenshot as a Screenshot object
         return new Screenshot(pixmap);
-    }
-
-    public void save(Path resolve) {
-        this.save(resolve.toString());
     }
 }

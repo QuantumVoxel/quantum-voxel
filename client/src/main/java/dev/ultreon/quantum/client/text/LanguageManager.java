@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.client.text;
 
-import de.marhali.json5.Json5;
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.GameFont;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.registry.ClientRegistry;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ResourceManager;
@@ -49,13 +49,22 @@ public class LanguageManager {
 
     public Language load(Locale locale, NamespaceID id, ResourceManager resourceManager) {
         try {
-            Json5 gson = CommonConstants.JSON5;
+            JsonReader gson = CommonConstants.JSON_READ;
             String newPath = "lang/" + id.getPath() + ".json";
             List<byte[]> assets = resourceManager.getAllDataById(id.withPath(newPath));
+            if (assets.isEmpty()) {
+                try {
+                    assets = new ArrayList<>();
+                    assets.add(QuantumClient.resource(id.withPath(newPath)).readBytes());
+                } catch (Exception e) {
+                    CommonConstants.LOGGER.warn("Language not found: " + id);
+                    return null;
+                }
+            }
             Map<String, String> languageMap = new HashMap<>();
             for (byte[] asset : assets) {
                 String s = new String(asset, StandardCharsets.UTF_8);
-                Json5Object object = gson.parse(new StringReader(s)).getAsJson5Object();
+                JsonValue object = gson.parse(new StringReader(s));
                 this.loadFile(languageMap, object);
             }
 
@@ -71,7 +80,7 @@ public class LanguageManager {
 
     public Language load(Locale locale, NamespaceID id, Reader reader) {
         Map<String, String> languageMap = new HashMap<>();
-        this.loadFile(languageMap, CommonConstants.JSON5.parse(reader).getAsJson5Object());
+        this.loadFile(languageMap, CommonConstants.JSON_READ.parse(reader));
         Language language = new Language(locale, languageMap, id);
         this.languages.put(locale, language);
         REGISTRY.register(id, language);
@@ -104,12 +113,11 @@ public class LanguageManager {
         return this.locale2id.get(locale);
     }
 
-    private void loadFile(Map<String, String> languageMap, Json5Object object) {
-        for (Map.Entry<String, Json5Element> entry : object.entrySet()) {
-            Json5Element value = entry.getValue();
-            String key = entry.getKey();
-            if (value.isJson5Primitive() && value.getAsJson5Primitive().isString()) {
-                languageMap.put(key, value.getAsString());
+    private void loadFile(Map<String, String> languageMap, JsonValue object) {
+        for (JsonValue entry : object) {
+            String key = entry.name;
+            if (entry.isString()) {
+                languageMap.put(key, entry.asString());
             }
         }
     }

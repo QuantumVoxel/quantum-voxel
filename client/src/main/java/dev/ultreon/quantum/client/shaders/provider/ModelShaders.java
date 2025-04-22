@@ -21,7 +21,7 @@ public class ModelShaders extends DefaultShaderProvider implements GameShaders {
     }
 
     public ModelShaders(final FileHandle vertexShader, final FileHandle fragmentShader, FileHandle geometryShader) {
-        this(vertexShader.readString(), fragmentShader.readString(), geometryShader.readString());
+        this(vertexShader.readString(), fragmentShader.readString(), "");
     }
 
     public ModelShaders() {

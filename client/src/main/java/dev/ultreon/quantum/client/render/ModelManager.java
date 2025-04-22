@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -189,7 +188,6 @@ public class ModelManager {
      * @param id the {@code NamespaceID} representing the specific model to unload.
      * @return {@code true} if the model was successfully unloaded and disposed, {@code false} otherwise.
      */
-    @CanIgnoreReturnValue
     public boolean unloadModel(NamespaceID id) {
         Model removed = this.models.remove(id);
         if (removed != null) {

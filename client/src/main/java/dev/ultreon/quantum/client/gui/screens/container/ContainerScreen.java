@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui.screens.container;
 
 import com.badlogic.gdx.Input;
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.GuiBuilder;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public abstract class ContainerScreen extends Screen {
-    @Getter
     private final int maxSlots;
     private final ContainerMenu menu;
     private final LocalPlayer player;
@@ -36,9 +34,7 @@ public abstract class ContainerScreen extends Screen {
         this.menu = menu;
         this.maxSlots = maxSlots;
 
-        this.player = this.client.player;
-        Preconditions.checkNotNull(this.player, "Local player is null");
-    }
+        this.player = this.client.player;    }
 
     @Override
     public final void build(@NotNull GuiBuilder builder) {
@@ -158,5 +154,9 @@ public abstract class ContainerScreen extends Screen {
 
     public boolean isOnSlot() {
         return focused instanceof ItemSlotWidget;
+    }
+
+    public int getMaxSlots() {
+        return maxSlots;
     }
 }

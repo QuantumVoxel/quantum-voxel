@@ -11,8 +11,6 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -37,8 +35,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class ItemRenderer implements Disposable {
@@ -53,7 +49,7 @@ public class ItemRenderer implements Disposable {
     protected final Vector3 tmp = new Vector3();
     private final Map<Item, ItemModel> models = new HashMap<>();
     private final Map<Item, ModelInstance> modelsInstances = new HashMap<>();
-    private Cache<BlockState, ModelInstance> blockModelCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).build();
+    private Map<BlockState, ModelInstance> blockModelCache = new HashMap<>();
 
     public ItemRenderer(QuantumClient client) {
         this.client = client;
@@ -76,7 +72,8 @@ public class ItemRenderer implements Disposable {
             return;
         }
 
-        if (item instanceof BlockItem blockItem) {
+        if (item instanceof BlockItem) {
+            BlockItem blockItem = (BlockItem) item;
             ModelInstance modelInstance = modelsInstances.get(item);
             if (modelInstance != null) {
                 this.renderModel(modelInstance, models.get(item), renderer, x + 8, this.client.getScaledHeight() - y - 16 - offset);
@@ -148,13 +145,8 @@ public class ItemRenderer implements Disposable {
 //                this.batch.render(renderable);
 //                this.batch.end();
 //            } else {
-                try {
-                    ModelInstance modelInstance = this.blockModelCache.get(block, () -> new ModelInstance(blockModel.getModel()));
-                    this.batch.render(modelInstance, this.environment);
-                } catch (ExecutionException e) {
-                    QuantumClient.LOGGER.warn("Error occurred while caching block model:", e);
-                }
-//            }
+            ModelInstance modelInstance = this.blockModelCache.putIfAbsent(block, new ModelInstance(blockModel.getModel()));
+            this.batch.render(modelInstance, this.environment);
         });
     }
 
@@ -223,7 +215,8 @@ public class ItemRenderer implements Disposable {
     public void registerModels(Json5ModelLoader loader) {
         Registries.ITEM.values().forEach((e) -> {
             try {
-                if (e instanceof BlockItem blockItem) {
+                if (e instanceof BlockItem) {
+                    BlockItem blockItem = (BlockItem) e;
                     this.registerBlockModel(blockItem, () -> this.client.getBlockModel(blockItem.createBlockMeta()));
                     return;
                 }
@@ -242,7 +235,8 @@ public class ItemRenderer implements Disposable {
     }
 
     private void fallbackModel(Item e) {
-        if (e instanceof BlockItem blockItem) {
+        if (e instanceof BlockItem) {
+            BlockItem blockItem = (BlockItem) e;
             //            this.registerBlockModel(blockItem, () -> this.client.getBakedBlockModel(blockItem.createBlockMeta()));
         }
     }
@@ -255,8 +249,7 @@ public class ItemRenderer implements Disposable {
     public void dispose() {
         this.modelsInstances.clear();
         this.models.clear();
-        this.blockModelCache.invalidateAll();
-        this.blockModelCache.cleanUp();
+        this.blockModelCache.clear();
 
         this.batch.dispose();
 

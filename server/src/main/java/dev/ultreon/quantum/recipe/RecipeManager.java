@@ -2,9 +2,8 @@ package dev.ultreon.quantum.recipe;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IdentityMap;
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
 import dev.ultreon.quantum.events.LoadingEvent;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
@@ -17,7 +16,6 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
-import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -60,27 +58,25 @@ public class RecipeManager extends GameObject {
 
     private static Recipe loadRecipe(StaticResource resource) {
         NamespaceID id = resource.id();
-        Json5Element json5Element = resource.readJson5();
+        JsonValue root = resource.readJson();
 
-        if (json5Element == null) {
+        if (root == null) {
             QuantumServer.LOGGER.warn("Failed to load recipe as it's unreadable: {}", id);
             return null;
         }
 
-        if (!json5Element.isJson5Object()) {
+        if (root.type() != JsonValue.ValueType.object) {
             QuantumServer.LOGGER.warn("Failed to load recipe as it is not an object: {}", id);
             return null;
         }
 
-        Json5Object root = json5Element.getAsJson5Object();
-
-        Json5Element typeElement = root.get("type");
-        if (!typeElement.isJson5Primitive() && !typeElement.getAsJson5Primitive().isString()) {
-            QuantumServer.LOGGER.warn("Failed to load recipe as it is not a string: {}", id);
+        JsonValue typeElement = root.get("type");
+        if (typeElement == null || typeElement.type() != JsonValue.ValueType.stringValue) {
+            QuantumServer.LOGGER.warn("Failed to load recipe as type is not a string: {}", id);
             return null;
         }
 
-        String type = typeElement.getAsJson5Primitive().getAsString();
+        String type = typeElement.asString();
         NamespaceID recipeTypeId = new NamespaceID(type);
 
         RecipeType<?> recipeType = Registries.RECIPE_TYPE.get(recipeTypeId);

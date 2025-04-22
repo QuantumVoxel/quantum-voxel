@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.menu;
 
-import com.google.common.collect.Iterators;
 import dev.ultreon.quantum.block.entity.BlastFurnaceBlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.entity.Entity;
@@ -38,7 +37,8 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
     private static BlastFurnaceBlockEntity getBlockEntity(@NotNull World world, @Nullable BlockVec pos) {
         if (pos == null) return null;
         BlockEntity blockEntity1 = world.getBlockEntity(pos);
-        if (!(blockEntity1 instanceof BlastFurnaceBlockEntity crate)) return null;
+        if (!(blockEntity1 instanceof BlastFurnaceBlockEntity)) return null;
+        BlastFurnaceBlockEntity crate = (BlastFurnaceBlockEntity) blockEntity1;
         return crate;
     }
 
@@ -99,7 +99,7 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
 
     @Override
     public @NotNull Iterator<ItemStack> iterator() {
-        return Iterators.forArray(this.get(0).getItem(), this.get(1).getItem(), this.get(2).getItem());
+        return List.of(this.get(0).getItem(), this.get(1).getItem(), this.get(2).getItem()).iterator();
     }
 
     @Override

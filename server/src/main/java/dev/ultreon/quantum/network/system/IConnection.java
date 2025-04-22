@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.network.system;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.network.PacketHandler;
 import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -9,8 +8,8 @@ import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -21,12 +20,10 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
     AtomicInteger rx = new AtomicInteger();
     AtomicInteger tx = new AtomicInteger();
 
-    @CanIgnoreReturnValue
     default void send(Packet<? extends TheirHandler> packet) {
         send(packet, null);
     }
 
-    @CanIgnoreReturnValue
     void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener);
 
     boolean isCompressed();
@@ -68,6 +65,8 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
     }
 
     long getPing();
+
+    void update();
 
     void onPing(long ping);
 

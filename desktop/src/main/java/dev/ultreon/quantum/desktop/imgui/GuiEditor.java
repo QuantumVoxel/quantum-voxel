@@ -87,7 +87,8 @@ public class GuiEditor {
                 ImGui.treePop();
             }
 
-            if (widget instanceof UIContainer<?> container && ImGui.collapsingHeader("Children")) {
+            if (widget instanceof UIContainer<?> && ImGui.collapsingHeader("Children")) {
+                UIContainer<?> container = (UIContainer<?>) widget;
                 ImGui.treePush();
                 List<? extends Widget> children = container.children();
                 for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {

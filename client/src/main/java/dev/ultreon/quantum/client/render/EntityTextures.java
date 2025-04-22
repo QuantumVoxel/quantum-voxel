@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.LongMap;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.NamespaceID;
-import org.checkerframework.common.returnsreceiver.qual.This;
 
 /**
  * The EntityTextures class manages a mapping between entity attributes and their associated textures.
@@ -27,7 +26,7 @@ public class EntityTextures {
      * @param texture the NamespaceID of the texture to set.
      * @return the current instance of EntityTextures.
      */
-    public @This EntityTextures set(long attribute, NamespaceID texture) {
+    public EntityTextures set(long attribute, NamespaceID texture) {
         this.textureMap.put(attribute, QuantumClient.get().getTextureManager().getTexture(texture));
         return this;
     }

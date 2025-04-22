@@ -5,11 +5,8 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.server.QuantumServer;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class RandomTicker implements Disposable {
-    private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
     private final ServerWorld world;
     private final int interval;
 
@@ -19,7 +16,7 @@ public class RandomTicker implements Disposable {
     }
 
     public void start() {
-        this.service.scheduleAtFixedRate(() -> QuantumServer.invoke(this::randomTick), 0, this.interval, java.util.concurrent.TimeUnit.MILLISECONDS);
+//        this.service.scheduleAtFixedRate(() -> QuantumServer.invoke(this::randomTick), 0, this.interval, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     private void randomTick() {
@@ -36,6 +33,6 @@ public class RandomTicker implements Disposable {
 
     @Override
     public void dispose() {
-        this.service.shutdown();
+//        this.service.shutdown();
     }
 }

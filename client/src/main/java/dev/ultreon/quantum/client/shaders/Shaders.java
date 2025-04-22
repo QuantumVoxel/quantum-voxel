@@ -4,10 +4,11 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.google.common.base.Supplier;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.provider.*;
 import dev.ultreon.quantum.util.NamespaceID;
+
+import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.client.QuantumClient.get;
 

@@ -2,12 +2,10 @@ package dev.ultreon.quantum.util;
 
 import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class Vec4i implements Externalizable, Cloneable {
+public class Vec4i implements Cloneable {
     public int x, y, z, w;
 
     public Vec4i(int x, int y, int z, int w) {
@@ -352,21 +350,5 @@ public class Vec4i implements Externalizable, Cloneable {
     @Override
     public String toString() {
         return String.format("%d, %d, %d, %d", this.x, this.y, this.z, this.w);
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(this.x);
-        out.writeInt(this.y);
-        out.writeInt(this.z);
-        out.writeInt(this.w);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        this.x = in.readInt();
-        this.y = in.readInt();
-        this.z = in.readInt();
-        this.w = in.readInt();
     }
 }

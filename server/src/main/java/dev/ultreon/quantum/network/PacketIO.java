@@ -1,24 +1,22 @@
 package dev.ultreon.quantum.network;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.network.partial.PartialPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
-import dev.ultreon.ubo.DataTypeRegistry;
-import dev.ultreon.ubo.types.DataType;
-import io.netty.buffer.ByteBuf;
-import org.jetbrains.annotations.ApiStatus;
+import dev.ultreon.quantum.ubo.DataTypeRegistry;
+import dev.ultreon.quantum.ubo.types.DataType;
 
 import java.io.*;
 import java.net.Socket;
@@ -63,20 +61,6 @@ public class PacketIO {
     }
 
     /**
-     * Initializes a new PacketIO instance with the specified input and output streams,
-     * and checks the integrity of the provided partial packets.
-     *
-     * @param in   the input stream from which packets will be read. If null, defaults to a NullInputStream.
-     * @param out  the output stream to which packets will be written. If null, defaults to a NullOutputStream.
-     * @param parts the list of partial packets to be validated for integrity.
-     * @throws PacketIntegrityException if the packet integrity check fails.
-     */
-    @ApiStatus.Experimental
-    public PacketIO(InputStream in, OutputStream out, List<PartialPacket> parts) throws PacketIntegrityException {
-        this(in, out);
-    }
-
-    /**
      * Initializes a new PacketIO instance using the specified socket.
      * The socket's input and output streams are used for reading and writing packets.
      *
@@ -85,25 +69,6 @@ public class PacketIO {
      */
     public PacketIO(Socket socket) throws IOException {
         this(socket.getInputStream(), socket.getOutputStream());
-    }
-
-    /**
-     * Validates a list of partial packets to ensure their data offsets are in the correct sequence.
-     *
-     * @param parts a list of PartialPacket objects to be validated.
-     * @return a list of ByteBuf objects reassembled from the validated partial packets.
-     * @throws PacketIntegrityException if any partial packet has an incorrect data offset.
-     */
-    @ApiStatus.Internal
-    public final List<ByteBuf> validate(List<PartialPacket> parts) throws PacketIntegrityException {
-        List<ByteBuf> bufs = new ArrayList<>();
-        int dataOffsetCheck = 0;
-        for (PartialPacket partialPacket : parts.stream().sorted(Comparator.comparing(PartialPacket::dataOffset)).toList()) {
-            if (dataOffsetCheck != partialPacket.dataOffset()) throw new PacketIntegrityException("Packet data offset mismatch. Expected " + dataOffsetCheck + " but got " + partialPacket.dataOffset());
-            bufs.add(partialPacket.data());
-            dataOffsetCheck += partialPacket.data().readableBytes();
-        }
-        return bufs;
     }
 
     public String readString(int max) {
@@ -122,7 +87,6 @@ public class PacketIO {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeString(String string, int max) {
         if (max < 0) throw new IllegalArgumentException(CommonConstants.EX_INVALID_DATA);
         byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
@@ -347,15 +311,14 @@ public class PacketIO {
         long mostSigBits = this.readLong();
         long leastSigBits = this.readLong();
 
-        return new UUID(mostSigBits, leastSigBits);
+        return GamePlatform.get().constructUuid(mostSigBits, leastSigBits);
     }
 
     public void writeUuid(UUID value) {
-        long mostSigBits = value.getMostSignificantBits();
-        long leastSigBits = value.getLeastSignificantBits();
+        long[] elements = GamePlatform.get().getUuidElements(value);
         try {
-            this.output.writeLong(mostSigBits);
-            this.output.writeLong(leastSigBits);
+            this.output.writeLong(elements[0]);
+            this.output.writeLong(elements[1]);
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -545,7 +508,6 @@ public class PacketIO {
         return new BlockVec(x, y, z, this.readEnum(BlockVecSpace.WORLD));
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeBlockVec(BlockVec pos) {
         this.writeInt(pos.getIntX());
         this.writeInt(pos.getIntY());
@@ -563,7 +525,6 @@ public class PacketIO {
         return new ChunkVec(x, y, z, space);
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeChunkVec(ChunkVec pos) {
         try {
             this.output.writeInt(pos.getIntX());
@@ -581,7 +542,6 @@ public class PacketIO {
         return readInt();
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeVarInt(int value) {
         return writeInt(value);
     }
@@ -875,7 +835,7 @@ public class PacketIO {
     public short[] readShortArray(int max) {
         int len = this.readVarInt();
         if (len > max) {
-            throw new PacketException(CommonConstants.EX_ARRAY_TOO_LARGE.formatted(max, len));
+            throw new PacketException(String.format(CommonConstants.EX_ARRAY_TOO_LARGE, max, len));
         }
 
         short[] array = new short[len];
@@ -887,7 +847,6 @@ public class PacketIO {
         return array;
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeShortArray(short[] array) {
         this.writeVarInt(array.length);
         for (short s : array) {
@@ -911,7 +870,7 @@ public class PacketIO {
     public int[] readMediumArray(int max) {
         int len = this.readVarInt();
         if (len > max) {
-            throw new PacketException(CommonConstants.EX_ARRAY_TOO_LARGE.formatted(max, len));
+            throw new PacketException(String.format(CommonConstants.EX_ARRAY_TOO_LARGE, max, len));
         }
 
         int[] array = new int[len];
@@ -923,7 +882,6 @@ public class PacketIO {
         return array;
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeMediumArray(int[] array) {
         this.writeVarInt(array.length);
         for (int i : array) {
@@ -947,7 +905,7 @@ public class PacketIO {
     public int[] readIntArray(int max) {
         int len = this.readVarInt();
         if (len > max) {
-            throw new PacketException(CommonConstants.EX_ARRAY_TOO_LARGE.formatted(max, len));
+            throw new PacketException(String.format(CommonConstants.EX_ARRAY_TOO_LARGE, max, len));
         }
 
         int[] array = new int[len];
@@ -959,7 +917,6 @@ public class PacketIO {
         return array;
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeIntArray(int[] array) {
         this.writeVarInt(array.length);
         for (int i : array) {
@@ -983,7 +940,7 @@ public class PacketIO {
     public long[] readLongArray(int max) {
         int len = this.readVarInt();
         if (len > max) {
-            throw new PacketException(CommonConstants.EX_ARRAY_TOO_LARGE.formatted(max, len));
+            throw new PacketException(String.format(CommonConstants.EX_ARRAY_TOO_LARGE, max, len));
         }
 
         long[] array = new long[len];
@@ -995,7 +952,6 @@ public class PacketIO {
         return array;
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeLongArray(long[] array) {
         this.writeVarInt(array.length);
         for (long l : array) {
@@ -1018,7 +974,7 @@ public class PacketIO {
     public float[] readFloatArray(int max) {
         int len = this.readVarInt();
         if (len > max) {
-            throw new PacketException(CommonConstants.EX_ARRAY_TOO_LARGE.formatted(max, len));
+            throw new PacketException(String.format(CommonConstants.EX_ARRAY_TOO_LARGE, max, len));
         }
 
         float[] array = new float[len];
@@ -1030,7 +986,6 @@ public class PacketIO {
         return array;
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeFloatArray(float[] array) {
         this.writeVarInt(array.length);
         for (float f : array) {
@@ -1053,7 +1008,7 @@ public class PacketIO {
     public double[] readDoubleArray(int max) {
         int len = this.readVarInt();
         if (len > max) {
-            throw new PacketException(CommonConstants.EX_ARRAY_TOO_LARGE.formatted(max, len));
+            throw new PacketException(String.format(CommonConstants.EX_ARRAY_TOO_LARGE, max, len));
         }
 
         double[] array = new double[len];
@@ -1065,7 +1020,6 @@ public class PacketIO {
         return array;
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeDoubleArray(double[] array) {
         this.writeVarInt(array.length);
         for (double d : array) {
@@ -1101,7 +1055,6 @@ public class PacketIO {
         return list;
     }
 
-    @CanIgnoreReturnValue
     public <T> PacketIO writeList(List<T> list, BiConsumer<PacketIO, T> encoder) {
         this.writeInt(list.size());
         for (T item : list) {
@@ -1137,7 +1090,6 @@ public class PacketIO {
         return map;
     }
 
-    @CanIgnoreReturnValue
     public <K, V> PacketIO writeMap(Map<K, V> map, BiConsumer<PacketIO, K> keyEncoder, BiConsumer<PacketIO, V> valueEncoder) {
         this.writeMedium(map.size());
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -1162,7 +1114,6 @@ public class PacketIO {
         return ItemStack.load(this.readUbo());
     }
 
-    @CanIgnoreReturnValue
     public PacketIO writeItemStack(ItemStack stack) {
         this.writeUbo(stack.save());
         return this;
@@ -1199,10 +1150,6 @@ public class PacketIO {
 
     public void writeBlockState(BlockState blockMeta) {
         blockMeta.write(this);
-    }
-
-    public PartialPacket[] split(int packetId, long sequenceId) {
-        return null;
     }
 
     private void readBytes0(byte[] bytes) {

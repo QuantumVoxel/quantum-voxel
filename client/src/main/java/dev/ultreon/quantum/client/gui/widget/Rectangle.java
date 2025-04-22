@@ -5,7 +5,6 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.function.Supplier;
 
@@ -14,7 +13,7 @@ import static dev.ultreon.quantum.client.QuantumClient.id;
 public class Rectangle extends Widget {
     private final ColorComponent backgroundColor;
 
-    public Rectangle(int x, int y, @IntRange(from = 0) int width, @IntRange(from = 0) int height) {
+    public Rectangle(int x, int y, int width, int height) {
         super(width, height);
 
         this.backgroundColor = this.register(id("background_color"), new ColorComponent(RgbColor.BLACK.withAlpha(0x80)));

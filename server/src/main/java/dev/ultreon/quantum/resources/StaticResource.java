@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.resources;
 
-import de.marhali.json5.Json5Element;
+import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.libs.commons.v0.util.IOUtils;
 import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import dev.ultreon.quantum.CommonConstants;
@@ -57,11 +57,11 @@ public class StaticResource implements Resource, Closeable {
         return this.id;
     }
 
-    public @Nullable Json5Element readJson5() {
+    public @Nullable JsonValue readJson() {
         byte[] bytes = this.loadOrGet();
         if (bytes == null) return null;
 
-        return CommonConstants.JSON5.parse(new String(bytes, StandardCharsets.UTF_8));
+        return CommonConstants.JSON_READ.parse(new String(bytes, StandardCharsets.UTF_8));
     }
 
     public void close() {

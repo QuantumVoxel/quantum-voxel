@@ -5,7 +5,10 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 
-public record S2CKeepAlivePacket() implements Packet<InGameClientPacketHandler> {
+public final class S2CKeepAlivePacket implements Packet<InGameClientPacketHandler> {
+    public S2CKeepAlivePacket() {
+    }
+
     public static S2CKeepAlivePacket read(PacketIO ignoredBuffer) {
         return new S2CKeepAlivePacket();
     }
@@ -24,4 +27,15 @@ public record S2CKeepAlivePacket() implements Packet<InGameClientPacketHandler> 
     public String toString() {
         return "S2CKeepAlivePacket";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || obj != null && obj.getClass() == this.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+
 }

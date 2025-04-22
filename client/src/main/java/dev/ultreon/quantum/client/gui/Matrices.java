@@ -5,14 +5,14 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FlushablePool;
-import com.google.common.collect.Queues;
 import dev.ultreon.quantum.client.util.Utils;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
 
 public class Matrices {
-    private final FlushablePool<Matrix4> pool = new FlushablePool<Matrix4>() {
+    private final FlushablePool<Matrix4> pool = new FlushablePool<>() {
         @Override
         protected Matrix4 newObject() {
             return new Matrix4();
@@ -26,15 +26,15 @@ public class Matrices {
     private Vector3 tmp;
 
     public Matrices() {
-        this.stack = Utils.make(Queues.newArrayDeque(), matrixDeque -> matrixDeque.add(this.pool.obtain().idt()));
+        this.stack = Utils.make(new ArrayDeque<>(), matrixDeque -> matrixDeque.add(this.pool.obtain().idt()));
     }
 
     public Matrices(Matrix4 origin) {
-        this.stack = Utils.make(Queues.newArrayDeque(), matrixDeque -> matrixDeque.add(origin));
+        this.stack = Utils.make(new ArrayDeque<>(), matrixDeque -> matrixDeque.add(origin));
     }
 
     public void push() {
-        this.stack.addLast(this.stack.getLast().cpy());
+        this.stack.add(this.stack.getLast().cpy());
         this.onEdit.accept(this.stack.getLast());
     }
 

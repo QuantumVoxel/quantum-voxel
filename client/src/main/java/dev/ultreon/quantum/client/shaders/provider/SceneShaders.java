@@ -28,7 +28,7 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
     }
 
     public SceneShaders(final FileHandle vertexShader, final FileHandle fragmentShader, FileHandle geometryShader) {
-        this(vertexShader.readString(), fragmentShader.readString(), geometryShader.readString());
+        this(vertexShader.readString(), fragmentShader.readString(), "");
     }
 
     public SceneShaders() {
@@ -37,7 +37,8 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
 
     @Override
     public Shader createShader(Renderable renderable) {
-        if (renderable != null && renderable.userData instanceof ClientChunk chunk) {
+        if (renderable != null && renderable.userData instanceof ClientChunk) {
+            ClientChunk chunk = (ClientChunk) renderable.userData;
             WorldShader worldShader = new WorldShader(renderable, this.config, chunk.lod);
             Shaders.checkShaderCompilation(worldShader.program, "WorldShader");
             return worldShader;
@@ -60,17 +61,29 @@ public class SceneShaders extends DefaultShaderProvider implements GameShaders {
     }
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
-        return switch (userData) {
-            case Gizmo gizmo ->
-                gizmo.outline ? Shaders.GIZMO_OUTLINE.get().createShader(renderable) : Shaders.GIZMO.get().createShader(renderable);
-            case QVModel qvModel -> qvModel.getShaderProvider().createShader(renderable);
-            case SkyboxShaders provider -> provider.createShader(renderable);
-            case GameShaders provider -> provider.createShader(renderable);
-            case ItemModel ignored -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case BlockModel ignored -> Shaders.MODEL_VIEW.get().createShader(renderable);
-            case Shader shader -> shader;
-            case ModelObject modelObject -> modelObject.shaderProvider().createShader(renderable);
-            case null, default -> new DefaultShader(renderable, new DefaultShader.Config());
-        };
+        if (userData instanceof Gizmo) {
+            Gizmo gizmo = (Gizmo) userData;
+            return gizmo.outline ? Shaders.GIZMO_OUTLINE.get().createShader(renderable) : Shaders.GIZMO.get().createShader(renderable);
+        } else if (userData instanceof QVModel) {
+            QVModel qvModel = (QVModel) userData;
+            return qvModel.getShaderProvider().createShader(renderable);
+        } else if (userData instanceof SkyboxShaders) {
+            SkyboxShaders provider = (SkyboxShaders) userData;
+            return provider.createShader(renderable);
+        } else if (userData instanceof GameShaders) {
+            GameShaders provider = (GameShaders) userData;
+            return provider.createShader(renderable);
+        } else if (userData instanceof ItemModel) {
+            return Shaders.MODEL_VIEW.get().createShader(renderable);
+        } else if (userData instanceof BlockModel) {
+            return Shaders.MODEL_VIEW.get().createShader(renderable);
+        } else if (userData instanceof Shader) {
+            Shader shader = (Shader) userData;
+            return shader;
+        } else if (userData instanceof ModelObject) {
+            ModelObject modelObject = (ModelObject) userData;
+            return modelObject.shaderProvider().createShader(renderable);
+        }
+        return new DefaultShader(renderable, new DefaultShader.Config());
     }
 }

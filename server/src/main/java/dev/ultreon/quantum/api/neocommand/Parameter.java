@@ -2,9 +2,48 @@ package dev.ultreon.quantum.api.neocommand;
 
 import dev.ultreon.quantum.api.neocommand.params.ArgumentType;
 
-public record Parameter<T>(
-        String name,
-        ArgumentType<T> type
-) {
+import java.util.Objects;
+
+public final class Parameter<T> {
+    private final String name;
+    private final ArgumentType<T> type;
+
+    public Parameter(
+            String name,
+            ArgumentType<T> type
+    ) {
+        this.name = name;
+        this.type = type;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public ArgumentType<T> type() {
+        return type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Parameter) obj;
+        return Objects.equals(this.name, that.name) &&
+               Objects.equals(this.type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type);
+    }
+
+    @Override
+    public String toString() {
+        return "Parameter[" +
+               "name=" + name + ", " +
+               "type=" + type + ']';
+    }
+
 
 }

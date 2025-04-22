@@ -4,7 +4,6 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.text.TextObject;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +41,7 @@ public class ChunkLoadScreen extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
         renderer.textCenter(title == null ? TextObject.literal("Chunks loading!") : title, 2, size.width / 2, size.height / 2);

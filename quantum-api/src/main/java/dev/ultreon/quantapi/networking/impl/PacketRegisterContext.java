@@ -53,10 +53,13 @@ public class PacketRegisterContext implements IPacketRegisterContext {
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException("Couldn't decode packet " + construct.getClass().getName() + " because it couldn't be accessed.", e);
                     } catch (InvocationTargetException e) {
-                        if (e.getCause() instanceof DecoderException ex) {
+                        if (e.getCause() instanceof DecoderException) {
+                            DecoderException ex = (DecoderException) e.getCause();
                             throw ex;
-                        } else if (e.getCause() instanceof InstantiationException ex) {
-                            if (ex.getCause() instanceof DecoderException ex2) {
+                        } else if (e.getCause() instanceof InstantiationException) {
+                            InstantiationException ex = (InstantiationException) e.getCause();
+                            if (ex.getCause() instanceof DecoderException) {
+                                DecoderException ex2 = (DecoderException) ex.getCause();
                                 throw ex2;
                             }
                         }

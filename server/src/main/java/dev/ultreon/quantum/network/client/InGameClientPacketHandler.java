@@ -24,7 +24,7 @@ import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

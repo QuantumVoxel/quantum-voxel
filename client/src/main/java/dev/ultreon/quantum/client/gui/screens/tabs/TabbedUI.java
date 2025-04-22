@@ -7,7 +7,6 @@ import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +54,7 @@ public abstract class TabbedUI extends Screen {
 
         this.contentBoundsRev = tabbedUIBuilder.contentBounds;
         this.tabs = tabbedUIBuilder.tabs;
-        this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.getFirst();
+        this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.get(0);
 
         this.client.setWindowTitle(getTitle());
 
@@ -79,7 +78,7 @@ public abstract class TabbedUI extends Screen {
     }
 
     @Override
-    public void renderWidget(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         Dialog dialog = getDialog();
         if (dialog != null) {
             isHovered = false;

@@ -14,7 +14,6 @@ import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.world.Direction;
-import org.checkerframework.common.returnsreceiver.qual.This;
 
 import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 
@@ -51,7 +50,7 @@ public class BoxBuilder {
         this.depth = depth / 16f;
     }
 
-    public @This BoxBuilder uv(int u, int v) {
+    public BoxBuilder uv(int u, int v) {
         this.u = u;
         this.v = v;
         return this;

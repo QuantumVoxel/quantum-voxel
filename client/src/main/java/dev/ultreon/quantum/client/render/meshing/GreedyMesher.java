@@ -377,12 +377,24 @@ public class GreedyMesher implements Mesher {
 
         // Adjust coordinates based on the side direction
         switch (side) {
-            case UP -> y++;
-            case DOWN -> y--;
-            case WEST -> x--;
-            case EAST -> x++;
-            case NORTH -> z++;
-            case SOUTH -> z--;
+            case UP:
+                y++;
+                break;
+            case DOWN:
+                y--;
+                break;
+            case WEST:
+                x--;
+                break;
+            case EAST:
+                x++;
+                break;
+            case NORTH:
+                z++;
+                break;
+            case SOUTH:
+                z--;
+                break;
         }
 
         ClientWorldAccess world = this.chunk.getWorld();
@@ -539,42 +551,36 @@ public class GreedyMesher implements Mesher {
         // coordinate offsets for getting the blocks to average
         int posX = 0, negX = 0, posY = 0, negY = 0, posZ = 0, negZ = 0;
         switch (side) {
-            case UP -> {
-                // Use the light values from the blocks above the face
+            case UP:// Use the light values from the blocks above the face
                 negY = posY = 1;
                 // Get blocks around the point
                 negZ = negX = -1;
-            }
-            case DOWN -> {
-                // Use the light values from the blocks below the face
+                break;
+            case DOWN:// Use the light values from the blocks below the face
                 negY = posY = -1;
                 // Get blocks around the point
                 negZ = negX = -1;
-            }
-            case WEST -> {
-                // Use the light values from the blocks to the west of the face
+                break;
+            case WEST:// Use the light values from the blocks to the west of the face
                 negX = posX = -1;
                 // Get blocks around the point
                 negY = negZ = -1;
-            }
-            case EAST -> {
-                // Use the light values from the blocks to the east of the face
+                break;
+            case EAST:// Use the light values from the blocks to the east of the face
                 negX = posX = 1;
                 // Get blocks around the point
                 negY = negZ = -1;
-            }
-            case NORTH -> {
-                // Use the light values from the blocks to the north of the face
+                break;
+            case NORTH:// Use the light values from the blocks to the north of the face
                 negZ = posZ = 1;
                 // Get blocks around the point
                 negY = negX = -1;
-            }
-            case SOUTH -> {
-                // Use the light values from the blocks to the south of the face
+                break;
+            case SOUTH:// Use the light values from the blocks to the south of the face
                 negZ = posZ = -1;
                 // Get blocks around the point
                 negY = negX = -1;
-            }
+                break;
         }
         // sx,sy,sz are the setX, setY, and z positions of the side block
         int count = 0;
@@ -638,36 +644,36 @@ public class GreedyMesher implements Mesher {
         // coordinate offsets for getting the blocks to average
         int posX = 0, negX = 0, posY = 0, negY = 0, posZ = 0, negZ = 0;
         switch (side) {
-            case UP -> {
+            case UP:
                 negY = posY = 1;
                 // Get blocks around the point
                 negZ = negX = -1;
-            }
-            case DOWN -> {
+                break;
+            case DOWN:
                 negY = posY = -1;
                 // Get blocks around the point
                 negZ = negX = -1;
-            }
-            case WEST -> {
+                break;
+            case WEST:
                 negX = posX = -1;
                 // Get blocks around the point
                 negY = negZ = -1;
-            }
-            case EAST -> {
+                break;
+            case EAST:
                 negX = posX = 1;
                 // Get blocks around the point
                 negY = negZ = -1;
-            }
-            case NORTH -> {
+                break;
+            case NORTH:
                 negZ = posZ = 1;
                 // Get blocks around the point
                 negY = negX = -1;
-            }
-            case SOUTH -> {
+                break;
+            case SOUTH:
                 negZ = posZ = -1;
                 // Get blocks around the point
                 negY = negX = -1;
-            }
+                break;
         }
 
         // sx,sy,sz are the setX, setY, and z positions of the side block
@@ -751,8 +757,10 @@ public class GreedyMesher implements Mesher {
         List<Face> faces;
         try (var ignoredSection = QuantumClient.PROFILER.start("chunk-get-faces")) {
             faces = this.getFaces(condition, this::shouldOcclude, this::shouldMerge);
-            if (chunk instanceof ClientChunk clientChunk)
+            if (chunk instanceof ClientChunk) {
+                ClientChunk clientChunk = (ClientChunk) chunk;
                 clientChunk.faceCount = faces.size();
+            }
         }
 
         try (var section = QuantumClient.PROFILER.start("mesh-faces")) {
@@ -763,21 +771,53 @@ public class GreedyMesher implements Mesher {
     }
 
     /**
-     * Represents light level data for a specific block, encapsulating both block brightness
-     * and sunlight brightness.
-     *
-     * @param blockBrightness The brightness level emitted by the block itself.
-     * @param sunBrightness   The brightness level contributed by sunlight on the block.
+         * Represents light level data for a specific block, encapsulating both block brightness
+         * and sunlight brightness.
+         *
      */
-    public record LightLevelData(float blockBrightness, float sunBrightness) {
+        public static final class LightLevelData {
+        private final float blockBrightness;
+        private final float sunBrightness;
+
+        /**
+         * @param blockBrightness The brightness level emitted by the block itself.
+         * @param sunBrightness   The brightness level contributed by sunlight on the block.
+         */
+        public LightLevelData(float blockBrightness, float sunBrightness) {
+            this.blockBrightness = blockBrightness;
+            this.sunBrightness = sunBrightness;
+        }
+
+            @Override
+            public String toString() {
+                return "LightLevelData[" +
+                       "sunBrightness=" + sunBrightness + ", " +
+                       "blockBrightness=" + blockBrightness + ']';
+            }
+
+        public float blockBrightness() {
+            return blockBrightness;
+        }
+
+        public float sunBrightness() {
+            return sunBrightness;
+        }
 
         @Override
-        public String toString() {
-            return "LightLevelData[" +
-                    "sunBrightness=" + sunBrightness + ", " +
-                    "blockBrightness=" + blockBrightness + ']';
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (LightLevelData) obj;
+            return Float.floatToIntBits(this.blockBrightness) == Float.floatToIntBits(that.blockBrightness) &&
+                   Float.floatToIntBits(this.sunBrightness) == Float.floatToIntBits(that.sunBrightness);
         }
-    }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(blockBrightness, sunBrightness);
+        }
+
+        }
 
     /**
      * The Face class represents a single face of a block in the game world. This includes the coordinates, lighting
@@ -845,18 +885,24 @@ public class GreedyMesher implements Mesher {
                 LightLevelData lld = new LightLevelData(this.lightLevel, this.sunlightLevel);
                 if (this.bakedBlockModel == null) return;
                 switch (this.side) {
-                    case UP ->
-                            this.renderer.renderTop(this.bakedBlockModel.top(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, ao, builder);
-                    case DOWN ->
-                            this.renderer.renderBottom(this.bakedBlockModel.bottom(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, ao, builder);
-                    case NORTH ->
-                            this.renderer.renderNorth(this.bakedBlockModel.north(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, ao, builder);
-                    case SOUTH ->
-                            this.renderer.renderSouth(this.bakedBlockModel.south(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, ao, builder);
-                    case EAST ->
-                            this.renderer.renderEast(this.bakedBlockModel.east(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, ao, builder);
-                    case WEST ->
-                            this.renderer.renderWest(this.bakedBlockModel.west(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, ao, builder);
+                    case UP:
+                        this.renderer.renderTop(this.bakedBlockModel.top(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, ao, builder);
+                        break;
+                    case DOWN:
+                        this.renderer.renderBottom(this.bakedBlockModel.bottom(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, ao, builder);
+                        break;
+                    case NORTH:
+                        this.renderer.renderNorth(this.bakedBlockModel.north(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, ao, builder);
+                        break;
+                    case SOUTH:
+                        this.renderer.renderSouth(this.bakedBlockModel.south(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, ao, builder);
+                        break;
+                    case EAST:
+                        this.renderer.renderEast(this.bakedBlockModel.east(), this.x1, this.y1, this.x2, this.y2, this.z + 1, lld, this.lightData, ao, builder);
+                        break;
+                    case WEST:
+                        this.renderer.renderWest(this.bakedBlockModel.west(), this.x1, this.y1, this.x2, this.y2, this.z, lld, this.lightData, ao, builder);
+                        break;
                 }
             }
         }
@@ -865,27 +911,51 @@ public class GreedyMesher implements Mesher {
 
     // Find "real" setX based on relative position in the greedy method
     private int realX(Direction side, int x, int z) {
-        return switch (side) {
-            case UP, DOWN, NORTH, SOUTH -> x;
-            case EAST, WEST -> z;
-        };
+        switch (side) {
+            case UP:
+            case DOWN:
+            case NORTH:
+            case SOUTH:
+                return x;
+            case EAST:
+            case WEST:
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     // Find "real" setY based on relative position in the greedy method
     private int realY(Direction side, int y, int z) {
-        return switch (side) {
-            case EAST, WEST, NORTH, SOUTH -> y;
-            case UP, DOWN -> z;
-        };
+        switch (side) {
+            case EAST:
+            case WEST:
+            case NORTH:
+            case SOUTH:
+                return y;
+            case UP:
+            case DOWN:
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     // Find "real" z based on relative position in the greedy method
     private int realZ(Direction side, int x, int y, int z) {
-        return switch (side) {
-            case UP, DOWN -> y;
-            case WEST, EAST -> x;
-            case NORTH, SOUTH -> z;
-        };
+        switch (side) {
+            case UP:
+            case DOWN:
+                return y;
+            case WEST:
+            case EAST:
+                return x;
+            case NORTH:
+            case SOUTH:
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     /**

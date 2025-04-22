@@ -16,6 +16,7 @@ import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.FaceProperties;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
 
 import java.util.Locale;
@@ -81,21 +82,21 @@ public class RenderingRegistration {
     private static void registerBlockModels() {
         // Register block models for grass block, log, and crafting bench
         BlockModelRegistry registry = BlockModelRegistry.get();
-        registry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/grass"), QuantumClient.id("blocks/grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.SNOWY_GRASS_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/snowy_grass"), QuantumClient.id("blocks/snowy_grass_top"), QuantumClient.id("blocks/dirt"), QuantumClient.id("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.SNOW_BLOCK, meta -> true, CubeModel.of(QuantumClient.id("blocks/snowy_grass_top"), QuantumClient.id("blocks/snowy_grass_top"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.LOG, meta -> true, CubeModel.of(QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log"), QuantumClient.id("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(QuantumClient.id("blocks/crafting_bench"), QuantumClient.id("blocks/crafting_bench_top"), QuantumClient.id("blocks/crafting_bench_bottom"), QuantumClient.id("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(NamespaceID.of("blocks/grass"), NamespaceID.of("blocks/grass_top"), NamespaceID.of("blocks/dirt"), NamespaceID.of("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.SNOWY_GRASS_BLOCK, meta -> true, CubeModel.of(NamespaceID.of("blocks/snowy_grass"), NamespaceID.of("blocks/snowy_grass_top"), NamespaceID.of("blocks/dirt"), NamespaceID.of("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.SNOW_BLOCK, meta -> true, CubeModel.of(NamespaceID.of("blocks/snowy_grass_top"), NamespaceID.of("blocks/snowy_grass_top"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.LOG, meta -> true, CubeModel.of(NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(NamespaceID.of("blocks/crafting_bench"), NamespaceID.of("blocks/crafting_bench_top"), NamespaceID.of("blocks/crafting_bench_bottom"), NamespaceID.of("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
 
         // Register block models for blast furnace with different rotations based on metadata
         for (Direction direction : Direction.HORIZONTAL) {
-            registry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>get("lit") && meta.<Direction>get("facing") == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
-            registry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>get("lit") && meta.<Direction>get("facing") == direction, CubeModel.of(QuantumClient.id("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), QuantumClient.id("blocks/blast_furnace_top"), QuantumClient.id("blocks/blast_furnace_bottom"), QuantumClient.id("blocks/blast_furnace_side"), QuantumClient.id("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            registry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>get("lit") && meta.<Direction>get("facing") == direction, CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            registry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>get("lit") && meta.<Direction>get("facing") == direction, CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
         }
 
-        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.TOP, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_top")));
-        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.BOTTOM, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_bottom")));
-        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.DOUBLE, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), QuantumClient.id("blocks/planks_slab_double")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.TOP, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_top")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.BOTTOM, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_bottom")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.DOUBLE, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_double")));
 
         // Trigger the block models factory registration event
         ClientRegistrationEvents.BLOCK_MODELS.factory().onRegister();
@@ -128,10 +129,10 @@ public class RenderingRegistration {
     public static void registerEntityRenderers() {
         // Register the entity models
         EntityModelRegistry entityModelManager = QuantumClient.get().entityModelManager;
-        entityModelManager.registerBBModel(EntityTypes.PLAYER, QuantumClient.id("player"));
-        entityModelManager.registerBBModel(EntityTypes.SOMETHING, QuantumClient.id("something"));
-        entityModelManager.registerBBModel(EntityTypes.PIG, QuantumClient.id("pig"));
-        entityModelManager.registerBBModel(EntityTypes.BANVIL, QuantumClient.id("banvil"));
+        entityModelManager.registerBBModel(EntityTypes.PLAYER, NamespaceID.of("player"));
+        entityModelManager.registerBBModel(EntityTypes.SOMETHING, NamespaceID.of("something"));
+        entityModelManager.registerBBModel(EntityTypes.PIG, NamespaceID.of("pig"));
+        entityModelManager.registerBBModel(EntityTypes.BANVIL, NamespaceID.of("banvil"));
 
         // Register the player entity renderer
         EntityRendererRegistry.register(EntityTypes.PLAYER, PlayerRenderer::new);

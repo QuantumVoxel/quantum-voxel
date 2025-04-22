@@ -5,11 +5,10 @@ import dev.ultreon.quantapi.networking.impl.Network;
 import dev.ultreon.quantapi.networking.impl.NetworkManager;
 import dev.ultreon.quantapi.networking.impl.test.TestNetworkEntry;
 import dev.ultreon.quantapi.networking.impl.test.TestPacket;
-import dev.ultreon.quantum.ModInit;
 import dev.ultreon.quantum.events.PlayerEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 import java.util.ServiceLoader;
 

@@ -64,8 +64,8 @@ public abstract class ShaderProgramMixin implements ShaderProgramAccess {
             }
             fragmentShaderSource = fragmentShaderSource.replace("texture2D(", "texture(");
             fragmentShaderSource = fragmentShaderSource.replace("textureCube(", "texture(");
-            vertexShaderSource = "#version 150\n" + vertexShaderSource;
-            fragmentShaderSource = "#version 150\n" + fragmentShaderSource;
+            vertexShaderSource = "" + vertexShaderSource;
+            fragmentShaderSource = "" + fragmentShaderSource;
         }
 
         source = vertexShaderSource;

@@ -38,7 +38,8 @@ public class ChunkInfoDebugPage implements DebugPage {
         context.left("Heightmap", chunk.getHeight(blockVec.x, blockVec.z));
         context.left("Render Offset", chunk.getRenderOffset());
 
-        if (chunk instanceof ClientChunk clientChunk) {
+        if (chunk instanceof ClientChunk) {
+            ClientChunk clientChunk = (ClientChunk) chunk;
             ClientChunkInfo info = clientChunk.info;
 
             context.left();

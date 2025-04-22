@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Utils {
-    public static final UUID ZEROED_UUID = new UUID(0, 0);
+    public static final UUID ZEROED_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public static <T> T make(Supplier<T> supplier) {
         return supplier.get();

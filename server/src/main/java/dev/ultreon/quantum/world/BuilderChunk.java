@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
@@ -79,11 +80,13 @@ public final class BuilderChunk extends Chunk {
     }
 
     public boolean isOnInvalidThread() {
-        return this.thread.threadId() != Thread.currentThread().threadId();
+        if (GamePlatform.get().isWeb()) return false;
+        return this.thread.getId() != Thread.currentThread().getId();
     }
 
     public boolean isOnBuilderThread() {
-        return this.thread.threadId() == Thread.currentThread().threadId();
+        if (GamePlatform.get().isWeb()) return true;
+        return this.thread.getId() == Thread.currentThread().getId();
     }
 
     @SuppressWarnings("unchecked")

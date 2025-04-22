@@ -1,12 +1,11 @@
 package dev.ultreon.quantum.server.dedicated;
 
+import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.debug.inspect.InspectionRoot;
 import dev.ultreon.quantum.debug.profiler.Profiler;
-import dev.ultreon.quantum.network.system.TcpNetworker;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.ServerLanguage;
@@ -22,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ import java.util.Map;
 public class DedicatedServer extends QuantumServer {
     public static final ServerPlatform PLATFORM = Main.SERVER_PLATFORM;
     
-    private static final WorldStorage STORAGE = new WorldStorage(Paths.get("world"));
+    private static final WorldStorage STORAGE = new WorldStorage(Gdx.files.local("world"));
     private static final Profiler PROFILER = new Profiler();
     private static DedicatedServer instance;
     private final ServerLanguage language = createServerLanguage();
@@ -49,15 +49,14 @@ public class DedicatedServer extends QuantumServer {
      *
      * @param host       the hostname for the server.
      * @param port       the port for the server.
-     * @param inspection the inspection root.
      * @throws UnknownHostException if the hostname cannot be resolved.
      */
-    public DedicatedServer(String host, int port, InspectionRoot<Main> inspection) throws IOException {
-        super(DedicatedServer.STORAGE, DedicatedServer.PROFILER, inspection);
+    public DedicatedServer(String host, int port) throws IOException {
+        super(DedicatedServer.STORAGE, DedicatedServer.PROFILER);
 
         DedicatedServer.instance = this;
 
-        this.networker = new TcpNetworker(this, InetAddress.getByName(host), port);
+//        this.networker = new TcpNetworker(this, InetAddress.getByName(host), port);
 
         GamePlatform.get().locateResources();
         GamePlatform.get().locateModResources();
@@ -75,7 +74,7 @@ public class DedicatedServer extends QuantumServer {
     @NotNull
     private ServerLanguage createServerLanguage() {
         // Specify the locale
-        Locale locale = Locale.of("en", "us");
+        Locale locale = new Locale("en", "us");
 
         // Load the language resource from the file system
         InputStream resourceAsStream = getClass().getResourceAsStream("/data/quantum/lang/main.json");
@@ -92,7 +91,8 @@ public class DedicatedServer extends QuantumServer {
             );
 
             //noinspection unchecked
-            languageMap = (Map<String, String>) CommonConstants.GSON.fromJson(json, Map.class);
+//            languageMap = (Map<String, String>) CommonConstants.GSON.fromJson(json, Map.class);
+            languageMap = Collections.emptyMap();
         } catch (IOException e) {
             throw new RuntimeException("Could not load language file!", e);
         }
@@ -104,12 +104,11 @@ public class DedicatedServer extends QuantumServer {
     /**
      * Constructor for the DedicatedServer class.
      *
-     * @param inspection the InspectionRoot object for the main inspection
      * @throws UnknownHostException if the hostname is unknown
      */
-    DedicatedServer(InspectionRoot<Main> inspection) throws IOException {
+    DedicatedServer() throws IOException {
         // Call the other constructor with hostname, port, and inspection
-        this(ServerConfig.hostname, ServerConfig.port, inspection);
+        this(ServerConfig.hostname, ServerConfig.port);
 
         LOGGER.info("Server started on {}:{}", ServerConfig.hostname, ServerConfig.port);
 

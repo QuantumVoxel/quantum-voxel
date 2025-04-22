@@ -1,17 +1,15 @@
-#version 410
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-in vec3 v_position;
+varying vec3 v_position;
 
 uniform vec4 u_topColor; // = vec3(0.5, 0.64, 0.985);
 uniform vec4 u_midColor; // = vec3(0.75, 0.825, 0.945);
 uniform vec4 u_bottomColor; // = vec3(0.75, 0.825, 0.945);
 
-out vec4 fragColor;
-in vec3 fragCoord;
+varying vec3 fragCoord;
 
 void main() {
     // Normalize the position to getConfig values between 0 and 1
@@ -25,5 +23,5 @@ void main() {
     gradient = mix(gradient, u_topColor.rgb, normalizedPosition.y * normalizedPosition.y);
 
     // Output the color
-    fragColor = vec4(gradient, 1.0);
+    gl_FragColor = vec4(gradient, 1.0);
 }

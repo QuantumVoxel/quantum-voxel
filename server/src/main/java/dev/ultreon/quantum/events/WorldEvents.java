@@ -9,23 +9,71 @@ import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.MapType;
 
 import java.util.List;
 
 public class WorldEvents {
-    public static final Event<PreTick> PRE_TICK = Event.create();
-    public static final Event<PostTick> POST_TICK = Event.create();
-    public static final Event<ChunkBuilt> CHUNK_BUILT = Event.create();
-    public static final Event<ChunkLoaded> CHUNK_LOADED = Event.create();
-    public static final Event<ChunkUnloaded> CHUNK_UNLOADED = Event.create();
-    public static final Event<CreateBiome> CREATE_BIOME = Event.create();
-    public static final Event<SaveWorld> SAVE_WORLD = Event.create();
-    public static final Event<LoadWorld> LOAD_WORLD = Event.create();
-    @Deprecated public static final Event<SaveRegion> SAVE_REGION = Event.create();
-    @Deprecated public static final Event<LoadRegion> LOAD_REGION = Event.create();
-    public static final Event<SaveChunk> SAVE_CHUNK = Event.create();
-    public static final Event<LoadChunk> LOAD_CHUNK = Event.create();
+    public static final Event<PreTick> PRE_TICK = Event.create(listeners -> world -> {
+        for (PreTick listener : listeners) {
+            listener.onPreTick(world);
+        }
+    });
+    public static final Event<PostTick> POST_TICK = Event.create(listeners -> world -> {
+        for (PostTick listener : listeners) {
+            listener.onPostTick(world);
+        }
+    });
+    public static final Event<ChunkBuilt> CHUNK_BUILT = Event.create(listeners -> (world, pos, chunk) -> {
+        for (ChunkBuilt listener : listeners) {
+            listener.onChunkGenerated(world, pos, chunk);
+        }
+    });
+    public static final Event<ChunkLoaded> CHUNK_LOADED = Event.create(listeners -> (world, pos, chunk) -> {
+        for (ChunkLoaded listener : listeners) {
+            listener.onChunkLoaded(world, pos, chunk);
+        }
+    });
+    public static final Event<ChunkUnloaded> CHUNK_UNLOADED = Event.create(listeners -> (world, pos, chunk) -> {
+        for (ChunkUnloaded listener : listeners) {
+            listener.onChunkUnloaded(world, pos, chunk);
+        }
+    });
+    public static final Event<CreateBiome> CREATE_BIOME = Event.create(listeners -> (world, domainWarping, layers, features) -> {
+        for (CreateBiome listener : listeners) {
+            listener.onCreateBiome(world, domainWarping, layers, features);
+        }
+    });
+    public static final Event<SaveWorld> SAVE_WORLD = Event.create(listeners -> (world, save) -> {
+        for (SaveWorld listener : listeners) {
+            listener.onSaveWorld(world, save);
+        }
+    });
+    public static final Event<LoadWorld> LOAD_WORLD = Event.create(listeners -> (world, save) -> {
+        for (LoadWorld listener : listeners) {
+            listener.onLoadWorld(world, save);
+        }
+    });
+    @Deprecated public static final Event<SaveRegion> SAVE_REGION = Event.create(listeners -> (world, region) -> {
+        for (SaveRegion listener : listeners) {
+            listener.onSaveRegion(world, region);
+        }
+    });
+    @Deprecated public static final Event<LoadRegion> LOAD_REGION = Event.create(listeners -> (world, region) -> {
+        for (LoadRegion listener : listeners) {
+            listener.onLoadRegion(world, region);
+        }
+    });
+    public static final Event<SaveChunk> SAVE_CHUNK = Event.create(listeners -> (region, extraData) -> {
+        for (SaveChunk listener : listeners) {
+            listener.onSaveChunk(region, extraData);
+        }
+    });
+    public static final Event<LoadChunk> LOAD_CHUNK = Event.create(listeners -> (region, extraData) -> {
+        for (LoadChunk listener : listeners) {
+            listener.onLoadChunk(region, extraData);
+        }
+    });
 
     @FunctionalInterface
     public interface PreTick {

@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.atlas;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
@@ -49,13 +50,27 @@ public class TextureAtlas implements Disposable {
 
     public TextureRegion get(NamespaceID id, TextureAtlasType type) {
         if (id == null) return null;
-        return (switch (type) {
-            case DIFFUSE -> this.atlas;
-            case EMISSIVE -> this.emissiveAtlas;
-            case NORMAL -> this.normalAtlas;
-            case SPECULAR -> this.specularAtlas;
-            case REFLECTIVE -> this.reflectiveAtlas;
-        }).findRegion(id.toString());
+        com.badlogic.gdx.graphics.g2d.TextureAtlas textureAtlas;
+        switch (type) {
+            case DIFFUSE:
+                textureAtlas = this.atlas;
+                break;
+            case EMISSIVE:
+                textureAtlas = this.emissiveAtlas;
+                break;
+            case NORMAL:
+                textureAtlas = this.normalAtlas;
+                break;
+            case SPECULAR:
+                textureAtlas = this.specularAtlas;
+                break;
+            case REFLECTIVE:
+                textureAtlas = this.reflectiveAtlas;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+        return textureAtlas.findRegion(id.toString());
     }
 
     public TextureRegion getEmissive(NamespaceID id) {
@@ -115,13 +130,27 @@ public class TextureAtlas implements Disposable {
     }
 
     public void apply(Material material, TextureAtlasType type) {
-        material.set(switch (type) {
-            case DIFFUSE -> diffuse;
-            case EMISSIVE -> emissive;
-            case NORMAL -> normal;
-            case SPECULAR -> specular;
-            case REFLECTIVE -> reflective;
-        });
+        Attribute attribute;
+        switch (type) {
+            case DIFFUSE:
+                attribute = diffuse;
+                break;
+            case EMISSIVE:
+                attribute = emissive;
+                break;
+            case NORMAL:
+                attribute = normal;
+                break;
+            case SPECULAR:
+                attribute = specular;
+                break;
+            case REFLECTIVE:
+                attribute = reflective;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+        material.set(attribute);
     }
 
     public NamespaceID getId() {

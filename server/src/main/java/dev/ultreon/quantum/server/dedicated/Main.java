@@ -3,34 +3,25 @@ package dev.ultreon.quantum.server.dedicated;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
-import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.debug.inspect.InspectionRoot;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
-import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
-import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.dedicated.gui.DedicatedServerGui;
-import dev.ultreon.quantum.server.dedicated.http.ServerHttpSite;
+//import dev.ultreon.quantum.server.dedicated.http.ServerHttpSite;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
-import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +38,7 @@ public class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger("ServerMain");
     private static DedicatedServer server;
     private static ServerLoader serverLoader;
-    static ServerHttpSite site;
+//    static ServerHttpSite site;
 
     /**
      * Main entry point for the server.
@@ -61,8 +52,8 @@ public class Main {
     @ApiStatus.Internal
     public static void main(String[] args) throws IOException, InterruptedException {
         try {
-            Log.setLogger(KyroSlf4jLogger.INSTANCE);
-            com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
+//            Log.setLogger(KyroSlf4jLogger.INSTANCE);
+//            com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
 
             LOGGER.info("Booting started!");
             HeadlessApplication app = new HeadlessApplication(new ApplicationAdapter() {
@@ -118,19 +109,19 @@ public class Main {
 
             // Invoke FabricMC entrypoint for dedicated server.
             LOGGER.info("Invoking FabricMC entrypoints");
-            FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
-            FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+//            FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
+//            FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
 
-            Thread httpThread = new Thread(() -> {
-                LOGGER.info("Starting HTTP server");
-                try {
-                    Main.site = new ServerHttpSite();
-                } catch (IOException e) {
-                    CommonConstants.LOGGER.error("Failed to start HTTP server", e);
-                }
-            });
-            httpThread.setDaemon(true);
-            httpThread.start();
+//            Thread httpThread = new Thread(() -> {
+//                LOGGER.info("Starting HTTP server");
+//                try {
+//                    Main.site = new ServerHttpSite();
+//                } catch (IOException e) {
+//                    CommonConstants.LOGGER.error("Failed to start HTTP server", e);
+//                }
+//            });
+//            httpThread.setDaemon(true);
+//            httpThread.start();
 
             ModApi.init();
 
@@ -143,8 +134,8 @@ public class Main {
 
             // Start the server.
             LOGGER.info("Starting server");
-            @SuppressWarnings("InstantiationOfUtilityClass") var inspection = new InspectionRoot<>(new Main());
-            server = new DedicatedServer(inspection);
+//            @SuppressWarnings("InstantiationOfUtilityClass") var inspection = new InspectionRoot<>(new Main());
+            server = new DedicatedServer();
             server.init();
             server.start();
 
@@ -234,7 +225,7 @@ public class Main {
     private static void run() throws InterruptedException {
         ServerConfig serverConfig = new ServerConfig();
         new QuantumServerConfig();
-        if (!Files.exists(serverConfig.getConfigPath(), LinkOption.NOFOLLOW_LINKS)) {
+        if (!serverConfig.getConfigPath().exists()) {
             serverConfig.save();
 
             Main.LOGGER.info("First-initialization finished, set up your config in server_config.json5 and restart the server.");

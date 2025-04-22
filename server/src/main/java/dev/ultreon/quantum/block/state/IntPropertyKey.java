@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.quantum.network.PacketIO;
-import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.ubo.types.IntType;
+import dev.ultreon.quantum.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.IntType;
 import org.jetbrains.annotations.NotNull;
 
 public class IntPropertyKey extends StatePropertyKey<Integer> {
@@ -30,7 +30,8 @@ public class IntPropertyKey extends StatePropertyKey<Integer> {
 
     @Override
     public void write(@NotNull PacketIO packetBuffer, Object value) {
-        if (value instanceof Integer integer) {
+        if (value instanceof Integer) {
+            Integer integer = (Integer) value;
             if (integer < minValue || integer > maxValue)
                 throw new IllegalArgumentException("Value " + integer + " is out of range for property " + name);
             packetBuffer.writeInt(integer);

@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfig;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -27,7 +29,7 @@ public class MemoryUsageOverlay extends Overlay {
         renderer.fill(x + 1, y, width + 4, height + 6, RgbColor.rgb(0x202020));
         renderer.fill(x, y + 1, width + 6, height + 4, RgbColor.rgb(0x202020));
         renderer.box(x + 1, y + 1, width + 4, height + 4, RgbColor.rgb(0x303030));
-        Runtime runtime = Runtime.getRuntime();
+        GamePlatform runtime = GamePlatform.get();
 
         long maxMemory = runtime.maxMemory(); // Maximum amount of memory the JVM will attempt to use
         long allocatedMemory = runtime.totalMemory(); // Total amount of memory in use by the JVM

@@ -1,13 +1,20 @@
 package dev.ultreon.quantum.network.packets.c2s;
 
+import dev.ultreon.quantum.network.DecoderException;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import io.netty.handler.codec.DecoderException;
 
-public record C2SChatPacket(String message) implements Packet<InGameServerPacketHandler> {
+import java.util.Objects;
+
+public final class C2SChatPacket implements Packet<InGameServerPacketHandler> {
+    private final String message;
+
+    public C2SChatPacket(String message) {
+        this.message = message;
+    }
 
     public static C2SChatPacket read(PacketIO buffer) {
         var message = buffer.readString(1024);
@@ -31,4 +38,22 @@ public record C2SChatPacket(String message) implements Packet<InGameServerPacket
     public String toString() {
         return "C2SChatPacket{message=" + this.message + '}';
     }
+
+    public String message() {
+        return message;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SChatPacket) obj;
+        return Objects.equals(this.message, that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message);
+    }
+
 }

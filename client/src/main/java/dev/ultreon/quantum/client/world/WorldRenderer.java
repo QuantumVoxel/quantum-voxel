@@ -20,11 +20,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DisposableContainer;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -56,14 +56,11 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -89,15 +86,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final NamespaceID MOON_ID = NamespaceID.of("generated/moon");
     public static final NamespaceID SUN_ID = NamespaceID.of("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
-    final ExecutorService executor = Executors.newFixedThreadPool(Math.max(Runtime.getRuntime().availableProcessors() / 3, 4));
+    final AsyncExecutor executor = new AsyncExecutor(Math.max(GamePlatform.get().cpuCores() / 3, 4));
 
-    @MonotonicNonNull
     private Material material;
-    @MonotonicNonNull
     private Material transparentMaterial;
-    @MonotonicNonNull
     private Texture breakingTex;
-    @MonotonicNonNull
     private Environment environment;
     private int visibleChunks;
     private int loadedChunks;
@@ -407,7 +400,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         // Render the cursor.
         @Nullable Hit gameCursor = null;
         if (this.client.cursor != null) gameCursor = this.client.cursor;
-        if (gameCursor instanceof BlockHit blockHit && blockHit.isCollide() && !this.client.hideHud && !player.isSpectator()) {
+        if (gameCursor instanceof BlockHit && ((BlockHit) gameCursor).isCollide() && !this.client.hideHud && !player.isSpectator()) {
+            BlockHit blockHit = (BlockHit) gameCursor;
             renderCursor(blockHit, player);
         }
 
@@ -868,12 +862,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      */
     @Override
     public void dispose() {
-        executor.shutdown();
-        try {
-            boolean ignored = executor.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new TerminationFailedException();
-        }
+        executor.dispose();
 
         this.disposed = true;
 
@@ -917,8 +906,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      */
     @Override
     public <T extends Disposable> T deferDispose(T disposable) {
-        Preconditions.checkNotNull(disposable, "Disposable cannot be null");
-
         if (this.disposables.contains(disposable)) return disposable;
         if (this.disposed) {
             QuantumClient.LOGGER.warn("World renderer already disposed, immediately disposing {}", disposable.getClass().getName());
@@ -1072,7 +1059,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Nullable
-    @CanIgnoreReturnValue
     public Boolean rebuild(ClientChunk chunk) {
         if (!QuantumClient.isOnRenderThread()) {
             QuantumClient.invoke(() -> this.rebuild(chunk));

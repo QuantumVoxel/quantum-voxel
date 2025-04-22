@@ -3,6 +3,8 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
@@ -10,8 +12,6 @@ import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.DimensionInfo;
@@ -182,10 +182,10 @@ public class WorldLoadScreen extends Screen {
 
                 renderer.fill(x, y, width, height, PROGRESS_BG);
                 renderer.fill(x, y, (int) (width * ratio), height, PROGRESS_FG);
-            } else {
+            } else if (subTitleLabel != null) {
                 this.subTitleLabel.text().setRaw("");
             }
-        } else {
+        } else if (subTitleLabel != null) {
             this.subTitleLabel.text().setRaw("");
         }
     }
@@ -206,7 +206,8 @@ public class WorldLoadScreen extends Screen {
 
         this.client.renderWorld = true;
         ClientWorldAccess world1 = this.client.world;
-        if (world1 instanceof ClientWorld clientWorld) {
+        if (world1 instanceof ClientWorld) {
+            ClientWorld clientWorld = (ClientWorld) world1;
             this.client.worldRenderer = new WorldRenderer(clientWorld);
         } else {
             throw new IllegalStateException("Unexpected world type: " + null);

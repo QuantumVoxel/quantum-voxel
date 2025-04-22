@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.network.stage;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.network.PacketCollection;
 import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.PacketIO;
@@ -39,7 +38,6 @@ public abstract class PacketStage {
      * @return the id of the packet
      */
     @SuppressWarnings("unchecked")
-    @CanIgnoreReturnValue
     protected <T extends Packet<? extends ServerPacketHandler>> int addServerBound(Function<PacketIO, T> decoder, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
         return this.serverBoundList.add(type, Packet::toBytes, t -> (Packet<ServerPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
@@ -54,7 +52,6 @@ public abstract class PacketStage {
      * @return the id of the packet
      */
     @SuppressWarnings("unchecked")
-    @CanIgnoreReturnValue
     protected <T extends Packet<?>> int addClientBound(Function<PacketIO, T> decoder, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
         return this.clientBoundList.add(type, Packet::toBytes, t -> (Packet<ClientPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));

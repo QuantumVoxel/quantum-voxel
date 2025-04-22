@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.util.GameCamera;
-import org.checkerframework.common.reflection.qual.NewInstance;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_BUFFER_BIT;
@@ -31,7 +30,6 @@ public class ForegroundNode extends WorldRenderNode {
      * @param camera    The camera.
      * @param deltaTime The delta time.
      */
-    @NewInstance
     @Override
     public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
         Gdx.gl.glClearColor(0F, 0F, 0F, 0F);

@@ -8,22 +8,20 @@ import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import org.checkerframework.common.reflection.qual.NewInstance;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class TextureManager implements Disposable {
     private final Map<NamespaceID, Texture> textures = new HashMap<>();
@@ -45,11 +43,9 @@ public class TextureManager implements Disposable {
     }
 
     private boolean frozen = false;
-    private final BiMap<NamespaceID, TextureAtlas> atlasMap = HashBiMap.create();
+    private final BidiMap<NamespaceID, TextureAtlas> atlasMap = new DualHashBidiMap<>();
 
     public TextureManager(ResourceManager resourceManager) {
-        Preconditions.checkNotNull(resourceManager, "resourceManager");
-
         this.resourceManager = resourceManager;
 
         this.setupGuiAtlas();
@@ -93,8 +89,6 @@ public class TextureManager implements Disposable {
     }
 
     public Texture getTexture(NamespaceID id, Texture fallback) {
-        Preconditions.checkNotNull(id, "id");
-
         if (!QuantumClient.isOnRenderThread()) {
             return QuantumClient.invokeAndWait(() -> this.getTexture(id, fallback));
         }
@@ -117,18 +111,12 @@ public class TextureManager implements Disposable {
     public boolean isTextureLoaded(NamespaceID id) {
         if (this.frozen) return false;
 
-        Preconditions.checkNotNull(id, "id");
-
         return this.textures.containsKey(id);
     }
 
     @NotNull
-    @NewInstance
-    @CanIgnoreReturnValue
     public Texture registerTexture(NamespaceID id) {
         if (this.frozen) return TextureManager.getDefaultTex();
-
-        Preconditions.checkNotNull(id, "id");
         Texture oldTexture = this.textures.get(id);
         if (oldTexture != null) return oldTexture;
 
@@ -152,12 +140,8 @@ public class TextureManager implements Disposable {
         return texture;
     }
 
-    @NewInstance
-    @CanIgnoreReturnValue
     public Texture registerTextureFB(NamespaceID id, Texture fallback) {
         if (this.frozen) return fallback;
-
-        Preconditions.checkNotNull(id, "id");
         Texture oldTexture = this.textures.get(id);
         if (oldTexture != null) {
             QuantumClient.LOGGER.warn("Texture already registered {}, possibly leaking textures", id, new Exception("Stacktrace"));
@@ -184,12 +168,8 @@ public class TextureManager implements Disposable {
         return texture;
     }
 
-    @CanIgnoreReturnValue
     public Texture registerTexture(@NotNull NamespaceID id, @NotNull Texture texture) {
         if (this.frozen) return TextureManager.getDefaultTex();
-
-        Preconditions.checkNotNull(id, "id");
-        Preconditions.checkNotNull(texture, "texture");
 
         if (this.textures.containsKey(id)) throw new IllegalArgumentException("A texture is already registered with id: " + id);
         if (texture.getTextureData() == null) return TextureManager.getDefaultTex();
@@ -213,7 +193,7 @@ public class TextureManager implements Disposable {
     public void reload(ReloadContext context) {
         this.frozen = true;
         context.submit(() -> {
-            Iterable<Texture> textures = this.textures.values().stream().filter(Objects::nonNull).toList();
+            Iterable<Texture> textures = this.textures.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
             this.textures.clear();
             defaultTex = new Texture(MISSING_NO);
             for (Texture texture : textures) {
@@ -229,7 +209,7 @@ public class TextureManager implements Disposable {
     }
 
     public NamespaceID getAtlasId(TextureAtlas atlas) {
-        return this.atlasMap.inverse().get(atlas);
+        return this.atlasMap.inverseBidiMap().get(atlas);
     }
 
     public TextureAtlas getAtlas(NamespaceID id) {

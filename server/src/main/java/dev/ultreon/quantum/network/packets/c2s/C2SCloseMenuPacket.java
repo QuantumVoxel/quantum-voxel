@@ -5,7 +5,10 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 
-public record C2SCloseMenuPacket() implements Packet<InGameServerPacketHandler> {
+public final class C2SCloseMenuPacket implements Packet<InGameServerPacketHandler> {
+    public C2SCloseMenuPacket() {
+    }
+
     public static C2SCloseMenuPacket read(PacketIO buffer) {
         return new C2SCloseMenuPacket();
     }
@@ -24,4 +27,15 @@ public record C2SCloseMenuPacket() implements Packet<InGameServerPacketHandler> 
     public String toString() {
         return "C2SCloseMenuPacket";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || obj != null && obj.getClass() == this.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+
 }

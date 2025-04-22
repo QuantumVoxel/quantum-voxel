@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.gui;
 
 import dev.ultreon.quantum.client.gui.widget.IconButton;
-import org.checkerframework.common.value.qual.IntRange;
 import org.jetbrains.annotations.NotNull;
 
 public class ControlButton extends IconButton {
@@ -13,7 +12,7 @@ public class ControlButton extends IconButton {
     }
 
     @Override
-    public void render(@NotNull Renderer renderer, @IntRange(from = 0) float deltaTime) {
+    public void render(@NotNull Renderer renderer, float deltaTime) {
         if (!this.isVisible) return;
 
         this.renderBackground(renderer, deltaTime);

@@ -3,9 +3,9 @@ package dev.ultreon.quantum;
 import dev.ultreon.quantum.log.Logger;
 
 public class Slf4jLogger implements Logger {
-    private final org.slf4j.Logger slf4jLogger;
+    private final dev.ultreon.quantum.Logger slf4jLogger;
 
-    public Slf4jLogger(org.slf4j.Logger slf4jLogger) {
+    public Slf4jLogger(dev.ultreon.quantum.Logger slf4jLogger) {
         this.slf4jLogger = slf4jLogger;
     }
 

@@ -12,7 +12,6 @@ import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 public class WorldDeleteConfirmScreen extends Screen {
     @NotNull
@@ -28,7 +27,7 @@ public class WorldDeleteConfirmScreen extends Screen {
         builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(RgbColor.RED).position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
                 .scale(2));
 
-        builder.add(Label.of(TextObject.translation("quantum.screen.world_delete_confirm.message1", this.storage.getDirectory().getFileName().toString()))
+        builder.add(Label.of(TextObject.translation("quantum.screen.world_delete_confirm.message1", this.storage.getDirectory().name()))
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.getWidth() / 2, this.getHeight() / 2)));
 
@@ -47,7 +46,7 @@ public class WorldDeleteConfirmScreen extends Screen {
 
     private void deleteWorld(TextButton caller) {
         try {
-            Path name = this.storage.getDirectory().getFileName();
+            String name = this.storage.getDirectory().name();
             this.storage.delete();
             this.client.notifications.add(Notification.builder("World Deleted", String.format("'%s'", name)).subText("World Manager").icon(MessageIcon.DANGER).build());
         } catch (IOException e) {

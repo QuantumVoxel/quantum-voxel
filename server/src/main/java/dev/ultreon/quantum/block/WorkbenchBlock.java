@@ -6,7 +6,6 @@ import dev.ultreon.quantum.menu.AdvancedCraftingMenu;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * to open the advanced crafting menu.
  */
 public class WorkbenchBlock extends Block {
-    public WorkbenchBlock(Block.@This Properties properties) {
+    public WorkbenchBlock(Block.Properties properties) {
         super(properties);
     }
 

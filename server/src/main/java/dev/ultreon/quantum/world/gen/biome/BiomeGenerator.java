@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.world.gen.biome;
 
 import com.badlogic.gdx.utils.Disposable;
-import com.google.common.base.Preconditions;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -42,9 +41,7 @@ public class BiomeGenerator implements Disposable {
      * @param layers the list of terrain layers to apply in the world generation
      * @param surfaceFeatures the list of world generation surface features to include
      */
-    public BiomeGenerator(World world, Biome biome, List<TerrainLayer> layers, List<TerrainFeature> surfaceFeatures, List<TerrainFeature> undergroundFeatures) {
-        Preconditions.checkNotNull(biome, "biome");
-        this.world = world;
+    public BiomeGenerator(World world, Biome biome, List<TerrainLayer> layers, List<TerrainFeature> surfaceFeatures, List<TerrainFeature> undergroundFeatures) {        this.world = world;
         this.biome = biome;
         this.layers = layers;
         this.surfaceFeatures = surfaceFeatures;

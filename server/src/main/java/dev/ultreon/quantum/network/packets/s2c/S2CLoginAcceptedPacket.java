@@ -7,10 +7,25 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.Vec3d;
 
+import java.util.Objects;
 import java.util.UUID;
 
-public record S2CLoginAcceptedPacket(UUID uuid, Vec3d spawnPos, GameMode gameMode, float health,
-                                     int hunger) implements Packet<LoginClientPacketHandler> {
+public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHandler> {
+    private final UUID uuid;
+    private final Vec3d spawnPos;
+    private final GameMode gameMode;
+    private final float health;
+    private final int hunger;
+
+    public S2CLoginAcceptedPacket(UUID uuid, Vec3d spawnPos, GameMode gameMode, float health,
+                                  int hunger) {
+        this.uuid = uuid;
+        this.spawnPos = spawnPos;
+        this.gameMode = gameMode;
+        this.health = health;
+        this.hunger = hunger;
+    }
+
     public static S2CLoginAcceptedPacket read(PacketIO buffer) {
         var uuid = buffer.readUuid();
         var spawnPos = buffer.readVec3d();
@@ -41,4 +56,42 @@ public record S2CLoginAcceptedPacket(UUID uuid, Vec3d spawnPos, GameMode gameMod
                "uuid=" + uuid +
                '}';
     }
+
+    public UUID uuid() {
+        return uuid;
+    }
+
+    public Vec3d spawnPos() {
+        return spawnPos;
+    }
+
+    public GameMode gameMode() {
+        return gameMode;
+    }
+
+    public float health() {
+        return health;
+    }
+
+    public int hunger() {
+        return hunger;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CLoginAcceptedPacket) obj;
+        return Objects.equals(this.uuid, that.uuid) &&
+               Objects.equals(this.spawnPos, that.spawnPos) &&
+               Objects.equals(this.gameMode, that.gameMode) &&
+               Float.floatToIntBits(this.health) == Float.floatToIntBits(that.health) &&
+               this.hunger == that.hunger;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid, spawnPos, gameMode, health, hunger);
+    }
+
 }

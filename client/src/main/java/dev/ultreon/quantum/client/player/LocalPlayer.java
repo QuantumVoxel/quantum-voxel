@@ -1,12 +1,6 @@
 package dev.ultreon.quantum.client.player;
 
-import java.util.ArrayDeque;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.google.errorprone.annotations.DoNotCall;
 
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
@@ -84,13 +77,13 @@ public class LocalPlayer extends ClientPlayer {
     private double lastWalkSound;
     private final Vec3d tmp = new Vec3d();
     private final Vec2i tmp2I = new Vec2i();
-    private final Set<ChunkVec> chunksToLoad = new CopyOnWriteArraySet<>();
+    private final Set<ChunkVec> chunksToLoad = Collections.synchronizedSet(new HashSet<>());
     private long lastRefresh;
 
     /**
      * The set of pending chunks to be loaded.
      */
-    public final Set<ChunkVec> pendingChunks = new CopyOnWriteArraySet<>();
+    public final Set<ChunkVec> pendingChunks = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * The queue of chunks to be sent to the server.
@@ -541,7 +534,8 @@ public class LocalPlayer extends ClientPlayer {
             CommonConstants.LOGGER.warn("Opened menu {} instead of {}", menuType, openMenu);
         } else if (openedBefore == null) {
             CommonConstants.LOGGER.warn("Opened server menu {} before opening any on client side", menuType);
-            if (this.clientWorld instanceof ClientWorld ourClientWorld) {
+            if (this.clientWorld instanceof ClientWorld) {
+                ClientWorld ourClientWorld = (ClientWorld) this.clientWorld;
                 openedBefore = menuType.create(ourClientWorld, this, this.getBlockVec());
             }
         }
@@ -643,7 +637,6 @@ public class LocalPlayer extends ClientPlayer {
      *
      * @param world The new world to teleport the player to.
      */
-    @DoNotCall
     public void onTeleportedDimension(ClientWorldAccess world) {
         super.onTeleportedDimension(world);
 
@@ -659,7 +652,6 @@ public class LocalPlayer extends ClientPlayer {
      * @param world The new world to teleport the player to.
      */
     @Override
-    @DoNotCall
     @Deprecated
     public void onTeleportedDimension(@NotNull WorldAccess world) {
         super.onTeleportedDimension(world);

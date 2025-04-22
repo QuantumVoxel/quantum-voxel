@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.client.render.EntityTextures;
 import dev.ultreon.quantum.entity.Entity;
 
@@ -21,7 +20,6 @@ public abstract class EntityModel<T extends Entity> {
 
     protected abstract void build(ModelBuilder builder, EntityTextures textures);
 
-    @CanIgnoreReturnValue
     protected BoxBuilder box(int x, int y, int z, int width, int height, int depth) {
         MeshBuilder builder = new MeshBuilder();
         builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL_TRIANGLES);

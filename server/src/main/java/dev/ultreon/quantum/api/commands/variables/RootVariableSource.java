@@ -1,13 +1,6 @@
 package dev.ultreon.quantum.api.commands.variables;
 
-import dev.ultreon.libs.commons.v0.Either;
-import dev.ultreon.quantum.api.commands.CommandParseException;
-import dev.ultreon.quantum.api.commands.CommandReader;
-import dev.ultreon.quantum.api.commands.CommandSender;
-import dev.ultreon.quantum.server.player.ServerPlayer;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -32,17 +25,6 @@ public class RootVariableSource<T> implements ObjectSource<T> {
     @Override
     public ObjectType<T> getObjectType() {
         return this.type;
-    }
-
-    @Override
-    public Object get(CommandSender sender, CommandReader ctx) {
-        return this.getter.get();
-    }
-
-    @Override
-    public Either<Object, List<String>> tabComplete(ServerPlayer serverPlayer, CommandReader ctx, StringBuilder code) throws CommandParseException.EndOfArgument {
-        ObjectType<T> type = this.type;
-        return type.tabComplete(serverPlayer, ctx, code);
     }
 
     public Supplier<T> getter() {

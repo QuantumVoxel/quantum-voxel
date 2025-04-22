@@ -23,7 +23,7 @@ import static dev.ultreon.quantum.world.World.CS;
  */
 public abstract class SimpleChunkGenerator implements ChunkGenerator {
     private final Registry<Biome> biomesRegistry;
-    private final Array<Biome> biomes = new Array<>();
+    final Array<Biome> biomes = new Array<>();
     private DomainWarping layerDomain;
 
     /**

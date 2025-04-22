@@ -6,12 +6,21 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.InGameServerPacketHandler;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
+import java.util.Objects;
+
 /**
  * Represents a C2S (Client to Server) packet indicating that a block break event has occurred.
  *
- * @param pos The position of the block that was broken.
  */
-public record C2SBlockBreakPacket(BlockVec pos) implements Packet<InGameServerPacketHandler> {
+public final class C2SBlockBreakPacket implements Packet<InGameServerPacketHandler> {
+    private final BlockVec pos;
+
+    /**
+     * @param pos The position of the block that was broken.
+     */
+    public C2SBlockBreakPacket(BlockVec pos) {
+        this.pos = pos;
+    }
 
     public static C2SBlockBreakPacket read(PacketIO buffer) {
         var pos = buffer.readBlockVec();
@@ -35,4 +44,22 @@ public record C2SBlockBreakPacket(BlockVec pos) implements Packet<InGameServerPa
                "pos=" + pos +
                '}';
     }
+
+    public BlockVec pos() {
+        return pos;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (C2SBlockBreakPacket) obj;
+        return Objects.equals(this.pos, that.pos);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos);
+    }
+
 }

@@ -41,7 +41,7 @@ public class ConsoleCommandSender implements CommandSender {
 
     @Override
     public @NotNull UUID getUuid() {
-        return UUID.nameUUIDFromBytes("Hello Console".getBytes());
+        return UUID.fromString("00000000-0000-0000-0000-000000000000");
     }
 
     @Override

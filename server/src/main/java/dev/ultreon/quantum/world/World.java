@@ -4,8 +4,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
@@ -33,18 +31,18 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
-import dev.ultreon.ubo.types.LongType;
-import dev.ultreon.ubo.types.MapType;
+import dev.ultreon.quantum.ubo.types.LongType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import dev.ultreon.quantum.Promise;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -126,7 +124,6 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    @CanIgnoreReturnValue
     public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
 
     @Override
@@ -353,17 +350,25 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
 
     @Override
     public Heightmap heightMapAt(int x, int z, HeightmapType type) {
-        return switch (type) {
-            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
-            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
-        };
+        switch (type) {
+            case MOTION_BLOCKING:
+                return this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
+            case WORLD_SURFACE:
+                return this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public Heightmap heightMapAt(@NotNull ChunkVec vec, HeightmapType type) {
-        return switch (type) {
-            case MOTION_BLOCKING -> this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
-            case WORLD_SURFACE -> this.worldSurfaceHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
-        };
+        switch (type) {
+            case MOTION_BLOCKING:
+                return this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
+            case WORLD_SURFACE:
+                return this.worldSurfaceHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -393,13 +398,13 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @param height the height of the 3D area
      * @param depth  the depth of the 3D area
      * @param block  the block to be set in the specified area
-     * @return a {@link CompletableFuture} representing the asynchronous operation
+     * @return a {@link Promise} representing the asynchronous operation
      * @see #set(int, int, int, BlockState)
      * @see #setColumn(int, int, BlockState)
      */
     @Override
-    public CompletableFuture<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block) {
-        return CompletableFuture.runAsync(() -> {
+    public Promise<Void> set(int x, int y, int z, int width, int height, int depth, BlockState block) {
+        return Promise.runAsync(() -> {
             int curX = x, curY = y, curZ = z;
             int startX = Math.max(curX, 0);
             int startY = Math.max(curY, 0);
@@ -472,8 +477,6 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     @ApiStatus.Obsolete
     public <T extends Entity> T spawn(T entity) {
-        Preconditions.checkNotNull(entity, "Cannot spawn null entity");
-
         // Set the entity ID
         this.setEntityId(entity);
 
@@ -495,11 +498,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public <T extends Entity> T spawn(T entity, MapType spawnData) {
         // Check if entity is not null
-        Preconditions.checkNotNull(entity, "Cannot spawn null entity");
-
         // Check if spawn data is not null
-        Preconditions.checkNotNull(spawnData, "Cannot spawn entity with null spawn data");
-
         // Set the entity ID
         this.setEntityId(entity);
 
@@ -512,9 +511,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         return entity;
     }
 
-    private <T extends Entity> void setEntityId(T entity) {
-        Preconditions.checkNotNull(entity, "Cannot set entity id for null entity");
-        int oldId = entity.getId();
+    private <T extends Entity> void setEntityId(T entity) {        int oldId = entity.getId();
         if (oldId > 0 && this.entitiesById.containsKey(oldId)) {
             throw new IllegalStateException("Entity already spawned: " + entity);
         }

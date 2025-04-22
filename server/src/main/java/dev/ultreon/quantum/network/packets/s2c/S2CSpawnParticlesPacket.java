@@ -8,8 +8,21 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.particles.ParticleType;
 
-public record S2CSpawnParticlesPacket(int particleTypeId, Vec3d position, Vec3d motion,
-                                      int count) implements Packet<InGameClientPacketHandler> {
+import java.util.Objects;
+
+public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketHandler> {
+    private final int particleTypeId;
+    private final Vec3d position;
+    private final Vec3d motion;
+    private final int count;
+
+    public S2CSpawnParticlesPacket(int particleTypeId, Vec3d position, Vec3d motion,
+                                   int count) {
+        this.particleTypeId = particleTypeId;
+        this.position = position;
+        this.motion = motion;
+        this.count = count;
+    }
 
     public S2CSpawnParticlesPacket(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
         this(particleType.getRawId(), position, motion, count);
@@ -50,4 +63,37 @@ public record S2CSpawnParticlesPacket(int particleTypeId, Vec3d position, Vec3d 
                ", count=" + this.count +
                '}';
     }
+
+    public int particleTypeId() {
+        return particleTypeId;
+    }
+
+    public Vec3d position() {
+        return position;
+    }
+
+    public Vec3d motion() {
+        return motion;
+    }
+
+    public int count() {
+        return count;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (S2CSpawnParticlesPacket) obj;
+        return this.particleTypeId == that.particleTypeId &&
+               Objects.equals(this.position, that.position) &&
+               Objects.equals(this.motion, that.motion) &&
+               this.count == that.count;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(particleTypeId, position, motion, count);
+    }
+
 }

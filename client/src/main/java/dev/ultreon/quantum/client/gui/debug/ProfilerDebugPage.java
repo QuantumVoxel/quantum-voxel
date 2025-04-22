@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.SequencedMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.client.gui.debug.DebugOverlay.escape;
@@ -117,7 +117,7 @@ public class ProfilerDebugPage implements DebugPage {
 
     private void navThreadView(int idx) {
         Thread thread;
-        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).toList();
+        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).collect(Collectors.toList());
         if (idx >= 0 && idx < threads.size()) {
             thread = threads.get(idx);
             this.currentThread = thread;
@@ -143,8 +143,8 @@ public class ProfilerDebugPage implements DebugPage {
             }
 
             data = section.getData().values().stream().sorted(comparator).collect(Collectors.toList());
-            SequencedMap<String, Integer> stats = section.getStats();
-            for (Map.Entry<String, Integer> entry : stats.sequencedEntrySet()) {
+            Map<String, Integer> stats = section.getStats();
+            for (Map.Entry<String, Integer> entry : stats.entrySet()) {
                 context.entryLine(entry.getKey(), String.valueOf(entry.getValue()));
             }
 
@@ -161,7 +161,7 @@ public class ProfilerDebugPage implements DebugPage {
         context.entryLine("[green][*][_]Thread View")
                 .entryLine();
 
-        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).toList();
+        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).collect(Collectors.toList());
         if (threads.isEmpty()) return true;
 
         for (int i = 0, threadsSize = threads.size(); i < threadsSize; i++) {

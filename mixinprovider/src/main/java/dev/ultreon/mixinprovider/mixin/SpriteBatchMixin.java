@@ -24,8 +24,8 @@ public abstract class SpriteBatchMixin implements ShaderProgramAccess {
             }
             fragmentShader = fragmentShader.replace("texture2D(", "texture(");
             fragmentShader = fragmentShader.replace("textureCube(", "texture(");
-            String vertexShader1 = "#version 150\n" + vertexShader;
-            String fragmentShader1 = "#version 150\n" + fragmentShader;
+            String vertexShader1 = "" + vertexShader;
+            String fragmentShader1 = "" + fragmentShader;
 
             System.err.println("\n// __VERT__");
             System.err.println(vertexShader1);
@@ -44,8 +44,8 @@ public abstract class SpriteBatchMixin implements ShaderProgramAccess {
             }
             fragmentShader = fragmentShader.replace("texture2D(", "texture(");
             fragmentShader = fragmentShader.replace("textureCube(", "texture(");
-            String vertexShader1 = "#version 300 es\n" + vertexShader;
-            String fragmentShader1 = "#version 300 es\n" + fragmentShader;
+            String vertexShader1 = "" + vertexShader;
+            String fragmentShader1 = "" + fragmentShader;
 
             System.err.println("\n// __VERT__");
             System.err.println(vertexShader1);

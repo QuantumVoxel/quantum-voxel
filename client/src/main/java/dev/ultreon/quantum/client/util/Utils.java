@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.util;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.OS;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -42,13 +43,7 @@ public class Utils {
         System.out.println("Opening " + url);
 
         try {
-            if (OS.isWindows()) {
-                Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
-            } else if (OS.isMac()) {
-                Runtime.getRuntime().exec("open " + url);
-            } else if (OS.isLinux()) {
-                Runtime.getRuntime().exec("xdg-open " + url);
-            }
+            Gdx.net.openURI(url);
             return true;
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Failed to open URL", e);

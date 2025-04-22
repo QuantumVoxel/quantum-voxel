@@ -1,15 +1,20 @@
 package dev.ultreon.quantum.registry;
 
-import com.mojang.serialization.Codec;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public record RegistryKey<T>(@Nullable RegistryKey<Registry<T>> parent, @NotNull NamespaceID id) {
+public final class RegistryKey<T> {
     public static final RegistryKey<Registry<Registry<?>>> ROOT = new RegistryKey<>(null, new NamespaceID("root"));
-    public static final Codec<RegistryKey<Registry<?>>> REGISTRY_KEY_CODEC = NamespaceID.CODEC.xmap(RegistryKey::registry, RegistryKey::id);
+    private final @Nullable RegistryKey<Registry<T>> parent;
+    private final @NotNull NamespaceID id;
+
+    public RegistryKey(@Nullable RegistryKey<Registry<T>> parent, @NotNull NamespaceID id) {
+        this.parent = parent;
+        this.id = id;
+    }
 
     public static <T> RegistryKey<T> of(RegistryKey<Registry<T>> parent, NamespaceID element) {
         if (element == null) throw new IllegalArgumentException("Element ID cannot be null");
@@ -44,4 +49,13 @@ public record RegistryKey<T>(@Nullable RegistryKey<Registry<T>> parent, @NotNull
     public int hashCode() {
         return (parent == null ? 0 : parent.hashCode()) * 31 + id.hashCode();
     }
+
+    public @Nullable RegistryKey<Registry<T>> parent() {
+        return parent;
+    }
+
+    public @NotNull NamespaceID id() {
+        return id;
+    }
+
 }

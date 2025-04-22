@@ -85,7 +85,8 @@ public class PerCornerLightData {
             return false;
         if(o == this)
             return true;
-        if(o instanceof PerCornerLightData p) {
+        if(o instanceof PerCornerLightData) {
+            PerCornerLightData p = (PerCornerLightData) o;
             return p.l10 == this.l10 && p.l11 == this.l11 && p.l00 == this.l00 && p.l01 == this.l01 &&
                    p.s10 == this.s10 && p.s11 == this.s11 && p.s00 == this.s00 && p.s01 == this.s01;
         }

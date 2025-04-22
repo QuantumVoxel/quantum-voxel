@@ -1,9 +1,8 @@
 package dev.ultreon.quantum.util;
 
+import com.badlogic.gdx.math.RandomXS128;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
-
-import java.util.Random;
 
 public class RandomValueSource implements ValueSource {
     private final RNG random;
@@ -16,7 +15,7 @@ public class RandomValueSource implements ValueSource {
         this.max = max;
     }
 
-    public static RandomValueSource of(Random random, double min, double max) {
+    public static RandomValueSource of(RandomXS128 random, double min, double max) {
         return new RandomValueSource(new JavaRNG(random), min, max);
     }
 

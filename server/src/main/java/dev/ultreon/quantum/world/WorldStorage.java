@@ -1,25 +1,16 @@
 package dev.ultreon.quantum.world;
 
-import com.google.common.base.Preconditions;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import dev.ultreon.quantum.util.Hashing;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import dev.ultreon.quantum.ubo.DataIo;
+import dev.ultreon.quantum.ubo.types.DataType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.vec.RegionVec;
-import dev.ultreon.ubo.DataIo;
-import dev.ultreon.ubo.types.DataType;
-import dev.ultreon.ubo.types.MapType;
-import kotlin.io.FilesKt;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * The WorldStorage class represents a storage system for world data.
@@ -31,8 +22,8 @@ public final class WorldStorage {
      *
      * @return the world directory.
      */
-    private final Path directory;
-    private final Path infoFile;
+    private final FileHandle directory;
+    private final FileHandle infoFile;
     private boolean infoLoaded;
     private WorldSaveInfo info;
     private String md5Name;
@@ -43,27 +34,9 @@ public final class WorldStorage {
      *
      * @param path the world directory.
      */
-    public WorldStorage(Path path) {
+    public WorldStorage(FileHandle path) {
         this.directory = path;
-        this.infoFile = this.getDirectory().resolve("info.ubo");
-    }
-
-    /**
-     * Creates a new world storage instance from the given directory.
-     *
-     * @param path the world directory.
-     */
-    public WorldStorage(String path) {
-        this(Paths.get(path));
-    }
-
-    /**
-     * Creates a new world storage instance from the given directory.
-     *
-     * @param file the world directory.
-     */
-    public WorldStorage(File file) {
-        this(file.toPath());
+        this.infoFile = this.getDirectory().child("info.ubo");
     }
 
     /**
@@ -77,9 +50,7 @@ public final class WorldStorage {
      */
     @SafeVarargs
     public final <T extends DataType<?>> T read(String path, T... typeGetter) throws IOException {
-        Preconditions.checkNotNull(path, "Path is null");
-        Preconditions.checkNotNull(typeGetter, "TypeGetter is null");
-        return DataIo.readCompressed(this.validatePath(path).toFile(), typeGetter);
+        return DataIo.read(Gdx.files.local(path).read(), typeGetter);
     }
 
     /**
@@ -90,8 +61,7 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     public void write(DataType<?> data, String path) throws IOException {
-        Preconditions.checkNotNull(data, "Data is null");
-        DataIo.writeCompressed(data, this.validatePath(path).toFile());
+        DataIo.write(data, Gdx.files.local(path).write(false));
     }
 
     /**
@@ -101,45 +71,21 @@ public final class WorldStorage {
      * @return {@code true} if the path exists, {@code false} otherwise.
      */
     public boolean exists(String path) {
-        try {
-            Path worldPath = this.validatePath(path);
-            return Files.exists(worldPath);
-        } catch (IOException e) {
-            return false;
-        }
+        return this.directory.child(path).exists();
     }
 
     /**
      * Creates a new subdirectory in the world directory.
      *
      * @param path the relative path to the subdirectory.
-     * @throws IOException if an I/O error occurs.
      */
-    public void createDir(String path) throws IOException {
-        // Validate path
-        var worldPath = this.validatePath(path);
-
+    public void createDir(String path) {
         // Create the directory if it doesn't exist
-        if (Files.notExists(worldPath, LinkOption.NOFOLLOW_LINKS)) {
-            Files.createDirectories(worldPath);
-        }
-    }
-
-    private Path validatePath(String path) throws IOException {
-        // Check if the path is in the world directory based on the absolute path.
-        if (Paths.get(path).isAbsolute())
-            throw new IllegalArgumentException("Path is absolute: " + path);
-
-        Path worldPath = this.getDirectory().resolve(path).toAbsolutePath().normalize();
-
-        // Check if there are any links in the world directory by iterating through the world path.
-        for (Path value : worldPath) {
-            if (Files.isSymbolicLink(value)) {
-                throw new IllegalArgumentException("Path contains symbolic links: " + path);
-            }
+        if (Gdx.files.local(path).exists()) {
+            return;
         }
 
-        return worldPath;
+        Gdx.files.local(path).mkdirs();
     }
 
     /**
@@ -148,9 +94,8 @@ public final class WorldStorage {
      * @param x the x coordinate of the region.
      * @param z the z coordinate of the region.
      * @return {@code true} if the region file exists, {@code false} otherwise.
-     * @throws IOException if an I/O error occurs.
      */
-    public boolean regionExists(int x, int y, int z) throws IOException {
+    public boolean regionExists(int x, int y, int z) {
         return this.exists("regions/" + x + "." + y + "." + z + ".ubo");
     }
 
@@ -161,8 +106,8 @@ public final class WorldStorage {
      * @param z the z coordinate of the region.
      * @return the region file.
      */
-    public File regionFile(int x, int y, int z) {
-        return this.getDirectory().resolve("regions/" + x + "." + y + "." + z + ".ubo").toFile();
+    public FileHandle regionFile(int x, int y, int z) {
+        return this.getDirectory().child("regions/" + x + "." + y + "." + z + ".ubo");
     }
 
     /**
@@ -171,11 +116,10 @@ public final class WorldStorage {
      * @return {@code true} if the world directory existed before, {@code false} otherwise.
      * @throws IOException if an I/O error occurs.
      */
-    @CanIgnoreReturnValue
     public boolean delete() throws IOException {
-        if (Files.notExists(this.getDirectory())) return false;
-        FilesKt.deleteRecursively(this.getDirectory().toFile());
-        FileUtils.deleteDirectory(this.getDirectory().toFile());
+        if (!this.getDirectory().exists()) return false;
+        this.getDirectory().emptyDirectory(false);
+        this.getDirectory().deleteDirectory();
         return true;
     }
 
@@ -185,7 +129,7 @@ public final class WorldStorage {
      * @param pos the position of the region.
      * @return the region file.
      */
-    public File regionFile(RegionVec pos) {
+    public FileHandle regionFile(RegionVec pos) {
         return this.regionFile(pos.getIntX(), pos.getIntY(), pos.getIntZ());
     }
 
@@ -204,8 +148,8 @@ public final class WorldStorage {
             this.infoLoaded = true;
             MapType infoData;
             try {
-                infoData = DataIo.readCompressed(this.infoFile.toFile());
-            } catch (IOException e) {
+                infoData = DataIo.read(this.infoFile.read());
+            } catch (Exception e) {
                 infoData = new MapType();
             }
 
@@ -216,7 +160,7 @@ public final class WorldStorage {
     }
 
     public boolean hasInfo() {
-        return Files.exists(this.getDirectory().resolve("info.ubo"));
+        return this.getDirectory().child("info.ubo").exists();
     }
 
     /**
@@ -227,10 +171,14 @@ public final class WorldStorage {
      */
     public String getMD5Name() {
         if (md5Name == null) {
-            String string = getDirectory().getFileName().toString();
-            Hashing.hashMD5(string.getBytes(StandardCharsets.UTF_8));
+            String string = getDirectory().name();
 
-            md5Name = bytes2hex(hashSHA256(string.getBytes(StandardCharsets.UTF_8)));
+            if (string == null) {
+                md5Name = Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8)).replace("/", "_").replace("+", "-").replace("=", ".");
+                return md5Name;
+            }
+
+            md5Name = hashSHA256(string.getBytes(StandardCharsets.UTF_8));
         }
 
         return md5Name;
@@ -242,19 +190,7 @@ public final class WorldStorage {
      * @return A string representing the generated folder name in hexadecimal format.
      */
     public static String createFolderName() {
-        long l = System.currentTimeMillis();
-        byte[] bytes = Hashing.hashMD5(new byte[]{
-                (byte) ((l >> 56) & 0xff),
-                (byte) ((l >> 48) & 0xff),
-                (byte) ((l >> 40) & 0xff),
-                (byte) ((l >> 32) & 0xff),
-                (byte) ((l >> 24) & 0xff),
-                (byte) ((l >> 16) & 0xff),
-                (byte) ((l >> 8) & 0xff),
-                (byte) (l & 0xff)
-        });
-
-        return bytes2hex(bytes);
+        return hashSHA256(String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -280,13 +216,8 @@ public final class WorldStorage {
      * @param input the byte array to be hashed
      * @return a byte array containing the MD5 hash of the input
      */
-    public static byte @NotNull [] hashSHA256(byte @NotNull [] input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            return md.digest(input);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    public static String hashSHA256(byte @NotNull [] input) {
+        return Base64.getEncoder().encodeToString(input).replace("/", "_").replace("+", "-").replace("=", ".");
     }
 
     /**
@@ -302,7 +233,7 @@ public final class WorldStorage {
             this.info = loadInfo();
             name = this.info.name();
         } else {
-            name = getDirectory().getFileName().toString();
+            name = getDirectory().name().toString();
         }
         return name;
     }
@@ -318,7 +249,7 @@ public final class WorldStorage {
         worldSaveInfo.save(this);
     }
 
-	public Path getDirectory() {
-		return directory;
-	}
+    public FileHandle getDirectory() {
+        return directory;
+    }
 }

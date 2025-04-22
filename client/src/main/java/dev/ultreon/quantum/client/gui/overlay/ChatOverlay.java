@@ -16,12 +16,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ChatOverlay extends Overlay {
-    private static final Lock messageLock = new ReentrantLock(true);
-
     public ChatOverlay() {
         super();
     }
@@ -30,7 +26,6 @@ public class ChatOverlay extends Overlay {
         int y = QuantumClient.get().getScaledHeight() - 40;
         List<TextObject> messages = ChatScreen.getMessages();
         LongList messageTimestamps = ChatScreen.getMessageTimestamps();
-        messageLock.lock();
         try {
             for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                 TextObject text = messages.get(i);
@@ -55,11 +50,9 @@ public class ChatOverlay extends Overlay {
                 y -= font.getLineHeight() + 2;
             }
         } catch (Exception e) {
-            messageLock.unlock();
             QuantumClient.crash(new CrashLog("Error rendering chat overlay", e));
             throw new Error("Unreachable");
         }
-        messageLock.unlock();
     }
 
     @Override

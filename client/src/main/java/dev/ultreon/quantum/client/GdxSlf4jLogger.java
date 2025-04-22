@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.ApplicationLogger;
-import dev.ultreon.quantum.log.Logger;
-import dev.ultreon.quantum.log.LoggerFactory;
+import dev.ultreon.quantum.Logger;
+import dev.ultreon.quantum.LoggerFactory;
 
 /**
  * Custom logger implementation for LibGDX.

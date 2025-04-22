@@ -35,17 +35,19 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
     }
 
     public void add(String name, GameNode node) {
-        if (!(node instanceof GameObject gameObject)) {
+        if (!(node instanceof GameObject)) {
             throw new IllegalArgumentException("Game objects can only have game objects as children");
         }
+        GameObject gameObject = (GameObject) node;
         add(name, gameObject);
     }
 
     @Override
     public void remove(GameNode node) {
-        if (!(node instanceof GameObject gameObject)) {
+        if (!(node instanceof GameObject)) {
             throw new IllegalArgumentException("Game objects can only have game objects as children");
         }
+        GameObject gameObject = (GameObject) node;
         remove(gameObject);
     }
 
@@ -58,7 +60,8 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
 
     @Override
     public <T extends Component<?>> @Nullable T set(@NotNull Class<T> type, @Nullable T value) {
-        if (value instanceof RendererComponent rendererComponent) {
+        if (value instanceof RendererComponent) {
+            RendererComponent rendererComponent = (RendererComponent) value;
             this.renderer = rendererComponent;
         }
 
@@ -69,8 +72,10 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
     public void update(float delta) {
         synchronized (components) {
             for (Component<?> component : components.values()) {
-                if (component instanceof Updatable updatable)
+                if (component instanceof Updatable) {
+                    Updatable updatable = (Updatable) component;
                     updatable.update(delta);
+                }
             }
         }
 
@@ -78,7 +83,8 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
             for (GameNode child : children) {
                 if (!child.enabled && !child.updateAnyways) continue;
 
-                if (child instanceof GameObject gameObject) {
+                if (child instanceof GameObject) {
+                    GameObject gameObject = (GameObject) child;
                     gameObject.combined.set(combined)
                             .mul(gameObject.transform)
                             .translate(gameObject.translation)
@@ -100,7 +106,7 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
     @Override
     public void getRenderables(@NotNull Array<Renderable> renderables, @NotNull Pool<Renderable> pool) {
         synchronized (children) {
-            combined.set(parent instanceof GameObject gameObject ? gameObject.combined : IDENTITY_MATRIX)
+            combined.set(parent instanceof GameObject ? ((GameObject) parent).combined : IDENTITY_MATRIX)
                     .mul(transform)
                     .translate(translation)
                     .rotate(Vector3.X, rotation.x)
@@ -113,7 +119,8 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
             }
 
             for (GameNode child : children) {
-                if (!child.enabled || !(child instanceof GameObject gameObject)) continue;
+                if (!child.enabled || !(child instanceof GameObject)) continue;
+                GameObject gameObject = (GameObject) child;
                 gameObject.getRenderables(renderables, pool);
             }
 

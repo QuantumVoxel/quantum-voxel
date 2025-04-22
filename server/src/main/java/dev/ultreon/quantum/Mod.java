@@ -1,12 +1,12 @@
 package dev.ultreon.quantum;
 
+import com.badlogic.gdx.files.FileHandle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.logging.FileHandler;
 
 /**
  * This interface represents a mod.
@@ -80,7 +80,7 @@ public interface Mod {
      * @return The root paths of the mod, or null if not supported.
      */
     @Nullable
-    Iterable<Path> getRootPaths();
+    Iterable<FileHandle> getRootPaths();
 
     @Nullable
     default String getSources() {
