@@ -1215,10 +1215,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * This is invoked by libGDX.</p>
      */
     public void render() {
-//        ValueTracker.setShaderSwitches(ValueTrackingDebug.glUseProgram);
-//        ValueTracker.setTextureBindings(ValueTrackingDebug.glActiveTexture);
-//        ValueTrackingDebug.glUseProgram = 0;
-//        ValueTrackingDebug.glActiveTexture = 0;
+        if (world != null && screen == null && !Gdx.input.isCursorCatched()) {
+            showScreen(new PauseScreen());
+        }
 
         IConnection<ClientPacketHandler, ServerPacketHandler> connection1 = connection;
         if (connection1 instanceof MemoryConnection) {

@@ -28,11 +28,11 @@ public final class S2CAbilitiesPacket implements AbilitiesPacket, Packet<InGameC
     }
 
     public static S2CAbilitiesPacket read(PacketIO buffer) {
-        var bitSet = buffer.readBitSet();
-        var flying = bitSet.get(0);
-        var allowFlight = bitSet.get(1);
-        var instaMine = bitSet.get(2);
-        var invincible = bitSet.get(3);
+        int bitSet = buffer.readByte();
+        boolean flying = (bitSet & 1) == 1;
+        boolean allowFlight = (bitSet & 2) == 2;
+        boolean instaMine = (bitSet & 4) == 4;
+        boolean invincible = (bitSet & 8) == 8;
 
         return new S2CAbilitiesPacket(flying, allowFlight, instaMine, invincible);
     }
@@ -59,14 +59,12 @@ public final class S2CAbilitiesPacket implements AbilitiesPacket, Packet<InGameC
 
     @Override
     public void toBytes(PacketIO buffer) {
-        var bitSet = new BitSet();
-
-        bitSet.set(0, this.flying);
-        bitSet.set(1, this.allowFlight);
-        bitSet.set(2, this.instaMine);
-        bitSet.set(3, this.invincible);
-
-        buffer.writeBitSet(bitSet);
+        buffer.writeByte(
+                (this.flying ? 1 : 0) |
+                (this.allowFlight ? 2 : 0) |
+                (this.instaMine ? 4 : 0) |
+                (this.invincible ? 8 : 0)
+        );
     }
 
     @Override
@@ -96,7 +94,7 @@ public final class S2CAbilitiesPacket implements AbilitiesPacket, Packet<InGameC
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CAbilitiesPacket) obj;
+        S2CAbilitiesPacket that = (S2CAbilitiesPacket) obj;
         return this.flying == that.flying &&
                this.allowFlight == that.allowFlight &&
                this.instaMine == that.instaMine &&

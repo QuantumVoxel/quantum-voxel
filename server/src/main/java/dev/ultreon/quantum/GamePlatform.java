@@ -32,6 +32,10 @@ public abstract class GamePlatform {
         return GamePlatform.instance;
     }
 
+    public void catchNative(Runnable runnable) {
+        runnable.run();
+    }
+
     public void preInitImGui() {
         // Implemented in subclasses
     }

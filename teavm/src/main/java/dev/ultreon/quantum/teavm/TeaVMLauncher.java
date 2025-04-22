@@ -32,15 +32,15 @@ public class TeaVMLauncher {
         config.useGL30 = true;
         config.shouldEncodePreference = true;
 
-        SafeLoadWrapper appListener = new SafeLoadWrapper(args);
+        SafeLoadWrapper safeWrapper = new SafeLoadWrapper(args);
         try {
             JSError.catchNative(() -> {
-                new TeaVMPlatform();
-                new TeaApplication(appListener, config);
+                new TeaVMPlatform(safeWrapper);
+                new TeaApplication(safeWrapper, config);
                 return null;
             }, e -> {
                 Throwable javaException = JSExceptions.getJavaException(e);
-                appListener.crash(javaException);
+                safeWrapper.crash(javaException);
                 return null;
             });
         } catch (ApplicationCrash e) {
@@ -48,7 +48,7 @@ public class TeaVMLauncher {
             String string = crashLog.toString();
             Console.error(string);
         } catch (Throwable e) {
-            appListener.crash(e);
+            safeWrapper.crash(e);
             Console.error("Error: " + e.getMessage() + " (" + e.getClass().getName() + ")");
         }
     }

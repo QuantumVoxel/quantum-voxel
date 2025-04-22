@@ -90,7 +90,7 @@ public class GameRenderer implements Disposable {
         var worldRenderer = this.client.worldRenderer;
 
         LocalPlayer player = this.client.player;
-        if (!(GamePlatform.get().hasBackPanelRemoved())) {
+        if (!GamePlatform.get().hasBackPanelRemoved()) {
             renderer.clearColor(0, 0, 0, 1);
         }
 
@@ -102,9 +102,15 @@ public class GameRenderer implements Disposable {
                     int height = QuantumClient.get().getHeight();
                     int centerX = width / 2;
                     int centerY = height / 2;
-                    float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfig.cameraSensitivity);
-                    float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfig.cameraSensitivity);
-                    player.rotateHead(dx, dy);
+                    if (GamePlatform.get().isWeb()) {
+                        float dx = (int) (-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity);
+                        float dy = (int) (-Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
+                        player.rotateHead(dx, dy);
+                    } else {
+                        float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfig.cameraSensitivity);
+                        float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfig.cameraSensitivity);
+                        player.rotateHead(dx, dy);
+                    }
 
                     // Reset position
                     Gdx.input.setCursorPosition(centerX, centerY);

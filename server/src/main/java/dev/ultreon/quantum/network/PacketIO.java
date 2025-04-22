@@ -1157,10 +1157,10 @@ public class PacketIO {
 
         try {
             int read = this.input.read(bytes);
-            if (read < bytes.length) throw new EOFException();
-            if (read != bytes.length) throw new IOException("Expected " + bytes.length + " bytes but got " + read);
+            if (read < bytes.length) throw new PacketException("End of stream reached");
+            if (read != bytes.length) throw new PacketException("Expected " + bytes.length + " bytes but got " + read);
         } catch (IOException e) {
-            throw new PacketException(e);
+            throw new PacketException(e.getMessage(), e);
         }
     }
 

@@ -67,7 +67,7 @@ public class TouchInput extends GameInput implements InputProcessor {
 
     @Override
     public boolean keyDown(int keyCode) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             KEYS.add(keyCode);
 
             Screen currentScreen = this.client.screen;
@@ -87,7 +87,7 @@ public class TouchInput extends GameInput implements InputProcessor {
 
     @Override
     public boolean keyUp(int keyCode) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             KEYS.remove(keyCode);
 
             Screen currentScreen = this.client.screen;
@@ -134,7 +134,7 @@ public class TouchInput extends GameInput implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             Screen currentScreen = this.client.screen;
             if (currentScreen != null)
                 currentScreen.charType(character);
@@ -148,7 +148,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         screenY -= this.client.getDrawOffset().y;
         int finalScreenX = screenX;
         int finalScreenY = screenY;
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
 
             if (Gdx.input.isCursorCatched())
                 return;
@@ -169,7 +169,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         screenY -= this.client.getDrawOffset().y;
         int finalScreenX = screenX;
         int finalScreenY = screenY;
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
 
             if (!Gdx.input.isCursorCatched()) {
                 Screen currentScreen = this.client.screen;
@@ -186,7 +186,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         final int finalScreenX = screenX - this.client.getDrawOffset().x;
         final int finalScreenY = screenY - this.client.getDrawOffset().y;
 
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             Screen currentScreen = this.client.screen;
             @Nullable ClientWorld world = this.client.world;
             Player player = this.client.player;
@@ -241,7 +241,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         final int finalScreenX = screenX - this.client.getDrawOffset().x;
         final int finalScreenY = screenY - this.client.getDrawOffset().y;
 
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             this.client.touchMoved[pointer].set(this.client.touchPosStart[pointer]);
 
             this.client.stopBreaking();
@@ -286,14 +286,14 @@ public class TouchInput extends GameInput implements InputProcessor {
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
         });
         return false;
     }
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             Screen currentScreen = this.client.screen;
 
             if (GamePlatform.get().isShowingImGui()) return;

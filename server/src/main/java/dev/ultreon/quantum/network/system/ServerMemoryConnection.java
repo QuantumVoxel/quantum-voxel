@@ -38,6 +38,7 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
 
     @Override
     public Result<Void> on3rdPartyDisconnect(String message) {
+        connected = false;
         if (player != null)
             player.onDisconnect(message);
         return null;

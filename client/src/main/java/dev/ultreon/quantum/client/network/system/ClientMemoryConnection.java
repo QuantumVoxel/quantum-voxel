@@ -29,6 +29,7 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
 
     @Override
     public Result<Void> on3rdPartyDisconnect(String message) {
+        this.connected = false;
         this.client.onDisconnect(message);
         return null;
     }

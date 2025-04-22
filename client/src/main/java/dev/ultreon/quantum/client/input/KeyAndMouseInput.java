@@ -19,7 +19,6 @@ import dev.ultreon.quantum.client.input.key.KeyBind;
 import dev.ultreon.quantum.client.input.key.KeyBindRegistry;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.util.BlockHit;
@@ -37,6 +36,7 @@ import java.util.stream.IntStream;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
+@SuppressWarnings("t")
 public final class KeyAndMouseInput extends GameInput implements InputProcessor {
     private static final BitSet KEYS = new BitSet(Input.Keys.MAX_KEYCODE);
 
@@ -149,7 +149,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean keyDown(int keyCode) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             GameInput.switchTo(this);
 
             if (WindowManager.keyPress(keyCode)) return;
@@ -210,7 +210,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
     @Override
     public boolean keyUp(int keyCode) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             if (!KEYS.get(keyCode)) return;
 
             KEYS.clear(keyCode);
@@ -387,7 +387,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean keyTyped(char character) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             if (WindowManager.keyTyped(character)) return;
 
             // Check if there is a current screen and if so, trigger the CHAR_TYPE event
@@ -411,7 +411,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             // Adjust screen coordinates based on the draw offset
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
@@ -440,7 +440,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             // Adjust the screen coordinates based on the draw offset
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
@@ -461,7 +461,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             // Adjust for draw offset
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
@@ -469,19 +469,11 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             if (WindowManager.mousePress(adjustedX, adjustedY, button)) return;
 
             Screen currentScreen = this.client.screen;
-            @Nullable ClientWorldAccess world = this.client.world;
-            Player player = this.client.player;
-            Hit hit = this.client.hit;
 
             // Check if the cursor is not caught and there is a current screen
             if (!Gdx.input.isCursorCatched() && currentScreen != null) {
                 client.mousePress(adjustedX, adjustedY, button);
-                return;
             }
-
-            // Check if the world is null or there is already a screen active
-            if (world == null || this.client.screen != null)
-                return;
         });
         return false;
     }
@@ -548,7 +540,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             // Adjust screen coordinates based on the draw offset
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
@@ -564,7 +556,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
         });
         return false;
     }
@@ -579,7 +571,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        Gdx.app.postRunnable(() -> {
+        GamePlatform.get().catchNative(() -> {
             Screen currentScreen = this.client.screen;
 
             // Check if ImGui overlay is shown

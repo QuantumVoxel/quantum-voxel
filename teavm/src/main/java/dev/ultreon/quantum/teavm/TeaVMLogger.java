@@ -39,19 +39,15 @@ public class TeaVMLogger implements Logger {
             case TRACE:
             case DEBUG:
                 Console.debug(message);
-                t.printStackTrace();
                 break;
             case INFO:
                 Console.info(message, t);
-                t.printStackTrace();
                 break;
             case WARN:
                 Console.warn(message, t);
-                t.printStackTrace();
                 break;
             case ERROR:
                 Console.error(message, t);
-                t.printStackTrace();
                 break;
         }
     }

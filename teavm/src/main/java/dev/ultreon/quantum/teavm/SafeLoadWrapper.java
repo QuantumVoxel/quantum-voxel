@@ -2,6 +2,7 @@ package dev.ultreon.quantum.teavm;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -29,6 +30,21 @@ public class SafeLoadWrapper implements ApplicationListener {
     public void create() {
         batch = new SpriteBatch();
         font = new BitmapFont();
+
+        batch.setTransformMatrix(batch.getTransformMatrix().scl(Gdx.graphics.getBackBufferScale(), Gdx.graphics.getBackBufferScale(), 1));
+
+        Gdx.input.setCatchKey(Input.Keys.ESCAPE, true);
+        Gdx.input.setCatchKey(Input.Keys.BACKSPACE, true);
+        Gdx.input.setCatchKey(Input.Keys.F12, true);
+        Gdx.input.setCatchKey(Input.Keys.F11, true);
+        Gdx.input.setCatchKey(Input.Keys.F10, true);
+        Gdx.input.setCatchKey(Input.Keys.F9, true);
+        Gdx.input.setCatchKey(Input.Keys.F7, true);
+        Gdx.input.setCatchKey(Input.Keys.F3, true);
+        Gdx.input.setCatchKey(Input.Keys.F1, true);
+        Gdx.input.setCatchKey(Input.Keys.SYM, true);
+        Gdx.input.setCatchKey(Input.Keys.SPACE, true);
+
         try {
             quantum = Main.createInstance(args);
             quantum.create();
@@ -55,23 +71,35 @@ public class SafeLoadWrapper implements ApplicationListener {
     public static native String getJSStackNative(Object o);
 
     void crash(Throwable e) {
+        if (crash != null) return;
+
         JSError.catchNative(() -> {
             crash = getJSStack(e);
+            Console.error(crash);
+            CrashOverlay.createOverlay(crash);
             return null;
         }, t -> {
             crash = getJSStackNative(e);
+            Console.error(crash);
+            CrashOverlay.createOverlay(crash);
             return null;
         });
         exceptionMessage = e.getClass().getName() + ": " + e.getMessage();
         quantum = null;
     }
 
-    private void crash(JSObject e) {
+    void crash(JSObject e) {
+        if (crash != null) return;
+
         JSError.catchNative(() -> {
             crash = getJSStackNative(e);
+            Console.error(crash);
+            CrashOverlay.createOverlay(crash);
             return null;
         }, t -> {
-            crash = getJSStackNative(e);
+            crash = getJSStackNative(t);
+            Console.error(crash);
+            CrashOverlay.createOverlay(crash);
             return null;
         });
         quantum = null;
@@ -81,7 +109,6 @@ public class SafeLoadWrapper implements ApplicationListener {
     public void render() {
         if (ended) return;
 
-        ScreenUtils.clear(0, 0, 0, 1);
         JSError.catchNative(this::unsafeRender, this::handleCrash);
     }
 
@@ -102,24 +129,6 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     private @Nullable Object unsafeRender() {
         if (crash != null) {
-            batch.begin();
-            if (Gdx.graphics == null) {
-                System.out.println(exceptionMessage);
-                Console.error(crash);
-                batch.end();
-                ended = true;
-                return null;
-            }
-            int y = Gdx.graphics.getHeight();
-            if (font == null) {
-                font = new BitmapFont();
-            }
-            y -= (int) (font.getLineHeight() + 2);
-            for (String element : crash.split("(\\n|\\r|\\r\\n)")) {
-                y -= (int) (font.getLineHeight() + 2);
-                font.draw(batch, element, 0, y);
-            }
-            batch.end();
             return null;
         }
         if (quantum != null) {

@@ -8,14 +8,17 @@ import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.Nullable;
+import org.teavm.jso.JSExceptions;
 import org.teavm.jso.browser.Navigator;
 import org.teavm.jso.browser.Window;
+import org.teavm.jso.core.JSError;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.CommonConstants.NAMESPACE;
@@ -23,6 +26,11 @@ import static dev.ultreon.quantum.CommonConstants.NAMESPACE;
 public class TeaVMPlatform extends GamePlatform {
 
     private final Supplier<TeaVMMod> value = Suppliers.memoize(TeaVMMod::new);
+    private SafeLoadWrapper safeWrapper;
+
+    public TeaVMPlatform(SafeLoadWrapper safeWrapper) {
+        this.safeWrapper = safeWrapper;
+    }
 
     @Override
     public @Nullable MouseDevice getMouseDevice() {
@@ -86,6 +94,17 @@ public class TeaVMPlatform extends GamePlatform {
     @Override
     public void renderImGui() {
         QuantumClient.get().updateViewport();
+    }
+
+    @Override
+    public void catchNative(Runnable runnable) {
+        JSError.catchNative(() -> {
+            runnable.run();
+            return null;
+        }, e -> {
+            safeWrapper.crash(e);
+            return null;
+        });
     }
 
     @Override

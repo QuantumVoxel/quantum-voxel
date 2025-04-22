@@ -29,7 +29,7 @@ public class TeaVMBuilder {
         tool.setMainClass(TeaVMLauncher.class.getName());
         // For many (or most) applications, using the highest optimization won't add much to build time.
         // If your builds take too long, and runtime performance doesn't matter, you can change FULL to SIMPLE .
-        tool.setOptimizationLevel(TeaVMOptimizationLevel.FULL);
+        tool.setOptimizationLevel(TeaVMOptimizationLevel.SIMPLE);
         tool.setTargetType(TeaVMTargetType.JAVASCRIPT);
         tool.setObfuscated(false);
         TeaBuilder.build(tool);

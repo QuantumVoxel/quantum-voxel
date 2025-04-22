@@ -34,9 +34,13 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
     private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
     private boolean loggingIn = true;
+    protected boolean connected = false;
 
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
         this.otherSide = otherSide;
+        if (otherSide != null) {
+            connected = true;
+        }
         this.executor = executor;
 
         if (!GamePlatform.get().isWeb()) {
@@ -65,6 +69,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     }
 
     private void send() {
+        if (!isConnected()) {
+            return;
+        }
+
         PacketInstance<@NotNull Packet<? extends TheirHandler>> instance = this.sendQueue.poll();
         if (instance == null) return;
 
@@ -88,19 +96,25 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             if (instance.listener() != null) {
                 instance.listener().onFailure();
             }
+            CommonConstants.LOGGER.error("Failed to send packet", e);
             disconnect(e.getMessage());
-            throw new RuntimeException(e);
+            if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
         } catch (Exception e) {
             if (instance.listener() != null) {
                 instance.listener().onFailure();
             }
+            CommonConstants.LOGGER.error("Failed to send packet", e);
             disconnect(e.getClass().getName() + ":\n" + e.getMessage());
-            throw new RuntimeException(e);
+            if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
         }
         tx.decrementAndGet();
     }
 
     private void receive() throws InterruptedException {
+        if (!isConnected()) {
+            return;
+        }
+
         Packet<? extends OurHandler> packet = this.receiveQueue.poll();
         if (packet == null) return;
         this.received(packet, null);
@@ -200,6 +214,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @Override
     public void disconnect(String message) {
+        this.connected = false;
         this.otherSide.on3rdPartyDisconnect(message);
     }
 
@@ -241,7 +256,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @Override
     public boolean isConnected() {
-        return otherSide != null && otherSide.isConnected();
+        return otherSide != null && connected;
     }
 
     @Override
@@ -255,6 +270,8 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     public void setOtherSide(MemoryConnection<TheirHandler, OurHandler> otherSide) {
         this.otherSide = otherSide;
+        if (otherSide != null)
+            connected = true;
     }
 
     @Override
