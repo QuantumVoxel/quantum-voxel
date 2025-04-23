@@ -254,6 +254,11 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         handlePlayerInteraction(player, currentScreen);
     }
 
+    @Override
+    public String getName() {
+        return "Keyboard & Mouse";
+    }
+
     private static void cycleGamemode(Player player) {
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
             switch (player.getGamemode()) {

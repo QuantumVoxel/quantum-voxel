@@ -5,11 +5,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
+import com.github.xpenatan.gdx.backends.teavm.TeaApplicationConfiguration;
 import dev.ultreon.quantum.client.Main;
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.JSBody;
-import org.teavm.jso.JSExceptions;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSError;
 
@@ -28,6 +28,9 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void create() {
+        TeaApplicationConfiguration config = ((TeaApplication) Gdx.app).getConfig();
+        Console.log("Config: ", config);
+
         batch = new SpriteBatch();
         font = new BitmapFont();
 

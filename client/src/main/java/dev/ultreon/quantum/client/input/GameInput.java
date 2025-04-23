@@ -225,4 +225,6 @@ public abstract class GameInput implements Disposable {
     public void dispose() {
 
     }
+
+    public abstract String getName();
 }

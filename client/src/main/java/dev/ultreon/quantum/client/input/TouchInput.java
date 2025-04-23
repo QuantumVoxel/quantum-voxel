@@ -124,6 +124,11 @@ public class TouchInput extends GameInput implements InputProcessor {
         }
     }
 
+    @Override
+    public String getName() {
+        return "Touchscreen";
+    }
+
     private void updateMouse(MouseDevice mouseDevice) {
         this.cursorPos.set(mouseDevice.getX(), mouseDevice.getY());
     }

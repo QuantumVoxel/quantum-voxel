@@ -80,8 +80,8 @@ public class Renderer implements Disposable {
     private int scissorOffsetY;
     private boolean blurred;
 
-    private FrameBuffer blurTargetA = new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
-    private FrameBuffer blurTargetB = new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
+    private FrameBuffer blurTargetA = GamePlatform.get().isWeb() ? null : new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
+    private FrameBuffer blurTargetB = GamePlatform.get().isWeb() ? null : new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
 
     public static final int FBO_SIZE = 1024;
 
@@ -2972,12 +2972,7 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(float overlayOpacity, float radius, boolean grid, int guiScale, Runnable block) {
-        if (!ClientConfig.blurEnabled) {
-            block.run();
-            return;
-        }
-
-        if (this.blurred) {
+        if (GamePlatform.get().isWeb() || !ClientConfig.blurEnabled || this.blurred) {
             block.run();
             return;
         }

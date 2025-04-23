@@ -6,6 +6,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
@@ -183,5 +184,8 @@ public class GenericDebugPage implements DebugPage {
             context.right("User Agent", GamePlatform.get().getUserAgent());
             context.right("Language", GamePlatform.get().getLanguage());
         }
+
+        GameInput current = GameInput.getCurrent();
+        context.left("Current Input", current == null ? "N/A" : current.getName());
     }
 }

@@ -1,12 +1,11 @@
 package dev.ultreon.quantum.teavm;
 
-import com.github.xpenatan.gdx.backends.teavm.TeaApplicationConfiguration;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
-import dev.ultreon.quantum.client.Main;
+import com.github.xpenatan.gdx.backends.teavm.TeaApplicationConfiguration;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import org.jetbrains.annotations.NotNull;
 import org.teavm.jso.JSExceptions;
+import org.teavm.jso.browser.Window;
 import org.teavm.jso.core.JSError;
 
 /**
@@ -14,22 +13,21 @@ import org.teavm.jso.core.JSError;
  */
 public class TeaVMLauncher {
     public static void main(String[] args) {
+        if (Window.current().getLocation().getFullURL().matches("https?://[0-9]+.discordsays.com(/.*)?")
+            && !Window.current().getLocation().getFullURL().matches("https?://[0-9]+.discordsays.com/.proxy(/.*)?")) {
+            Console.warn("Discord says detected, redirecting to proxy");
+            Window.current().getLocation().setPathName("/.proxy/");
+            return;
+        }
+
         TeaApplicationConfiguration config = new TeaApplicationConfiguration("canvas");
 
-        //// If width and height are each greater than 0, then the app will use a fixed size.
-        //config.width = 640;
-        //config.height = 480;
-        //// If width and height are both 0, then the app will use all available space.
         config.width = 0;
         config.height = 0;
-        //// If width and height are both -1, then the app will fill the canvas size.
-//        config.width = -1;
-//        config.height = -1;
         config.usePhysicalPixels = true;
         config.alpha = true;
         config.stencil = true;
         config.premultipliedAlpha = true;
-        config.useGL30 = true;
         config.shouldEncodePreference = true;
 
         SafeLoadWrapper safeWrapper = new SafeLoadWrapper(args);

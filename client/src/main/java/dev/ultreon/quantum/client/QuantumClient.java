@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.client;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
@@ -17,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
@@ -74,7 +71,6 @@ import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.render.*;
-import dev.ultreon.quantum.client.render.pipeline.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.rpc.RpcHandler;
@@ -91,7 +87,6 @@ import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.entity.Entity;
@@ -135,7 +130,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -215,9 +209,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Cursor normalCursor;
     private final Cursor clickCursor;
     private Cursor cursor0;
-
-    // Render pipeline
-    private final RenderPipeline pipeline;
 
     /**
      * The clipboard for the game.
@@ -321,7 +312,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Screen screen;
     public Hud hud;
 
-    private FrameBuffer fbo;
+//    private FrameBuffer fbo;
 
     public SpriteBatch spriteBatch;
     public ModelBatch modelBatch;
@@ -575,7 +566,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.camera.far = 2;
 
         // Load the configuration
-        ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), () -> {
+        ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(() -> new IllegalStateException("Failed to get mod instance")), () -> {
             this.newConfig = new ClientConfig();
             this.newConfig.event.subscribe(this::onReloadConfig);
             this.newConfig.load();
@@ -604,11 +595,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.modelLoader = modelLoader;
 
         // Initialize the render pipeline
-        this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
-                .node(new CollectNode())
-                .node(new WorldNode())
-                .node(new ForegroundNode())
-                .node(new BackgroundNode()));
+//        this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
+//                .node(new CollectNode())
+//                .node(new WorldNode())
+//                .node(new ForegroundNode())
+//                .node(new BackgroundNode()));
 
         // Create a white pixel for the shape drawer
         Pixmap pixmap = deferDispose(new Pixmap(1, 1, Pixmap.Format.RGBA8888));
@@ -632,7 +623,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 resource(id("shaders/scene.geom")))));
 
         // Initialize GameRenderer
-        this.gameRenderer = new GameRenderer(this, this.modelBatch, this.pipeline);
+        this.gameRenderer = new GameRenderer(this, this.modelBatch);
 
         // Set up modifications
         this.setupMods();
@@ -1386,8 +1377,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.captureScreenshot = true;
         this.triggerScreenshot = false;
 
-        this.fbo = new FrameBuffer(Pixmap.Format.RGB888, this.width, this.height, true);
-        this.fbo.begin();
+//        this.fbo = new FrameBuffer(Pixmap.Format.RGB888, this.width, this.height, true);
+//        this.fbo.begin();
 
         ScreenUtils.clear(0, 0, 0, 1, true);
     }
@@ -1413,9 +1404,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.captureScreenshot = false;
 
         this.saveScreenshot();
-        this.fbo.end();
+//        this.fbo.end();
         Gdx.gl.glViewport(0, 0, getWidth(), getHeight());
-        this.fbo.dispose();
+//        this.fbo.dispose();
 
         this.resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
@@ -1489,6 +1480,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             renderer.fill(drawOffset.x, drawOffset.y, (int) (this.gameBounds.getWidth() * getGuiScale()) - drawOffset.x * 2, (int) (this.gameBounds.getHeight() * getGuiScale()) - drawOffset.y * 2, Color.BLACK);
         }
         renderer.end();
+
+        if (this.keyAndMouseInput != null) {
+            try (var ignored = QuantumClient.PROFILER.start("input")) {
+                this.keyAndMouseInput.update();
+                if (this.touchInput != null) this.touchInput.update();
+            }
+        }
 
 //        if (this.controllerInput != null && this.keyAndMouseInput != null) {
 //            try (var ignored = QuantumClient.PROFILER.start("input")) {
@@ -1679,7 +1677,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return The game version as a {@code String}.
      */
     public static String getGameVersion() {
-        return GamePlatform.get().getMod("quantum").orElseThrow().getVersion();
+        return GamePlatform.get().getMod("quantum").orElseThrow(() -> new IllegalStateException("Quantum mod not found")).getVersion();
     }
 
     /**
@@ -2193,11 +2191,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 // Dispose renderers
                 QuantumClient.cleanUp(this.renderer);
                 QuantumClient.cleanUp(this.gameRenderer);
-                QuantumClient.cleanUp(this.pipeline);
                 QuantumClient.cleanUp(this.modelBatch);
                 QuantumClient.cleanUp(this.itemRenderer);
                 QuantumClient.cleanUp(this.worldRenderer);
-                QuantumClient.cleanUp(this.fbo);
+//                QuantumClient.cleanUp(this.fbo);
 
                 mainCat.pop(this);
 
@@ -2934,15 +2931,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return this.worldRenderer.getEnvironment();
         }
         return this.defaultEnv;
-    }
-
-    /**
-     * Gets the pipeline.
-     *
-     * @return the pipeline.
-     */ 
-    public RenderPipeline getPipeline() {
-        return pipeline;
     }
 
     /**

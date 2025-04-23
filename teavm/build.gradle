@@ -37,6 +37,27 @@ tasks.register('buildJavaScript', JavaExec) {
   setDescription("Transpile bytecode to JavaScript via TeaVM")
   mainClass.set(project.mainClassName)
   setClasspath(sourceSets.main.runtimeClasspath)
+
+  doFirst {
+    def sourceJarPaths = configurations.compileClasspath
+            .resolvedConfiguration
+            .resolvedArtifacts
+            .collect { artifact ->
+              try {
+                def id = artifact.moduleVersion.id
+                def dep = "${id.group}:${id.name}:${id.version}:sources"
+                def conf = configurations.detachedConfiguration(dependencies.create(dep))
+                conf.transitive = false
+                def file = conf.resolve().find { it.exists() }
+                return file?.absolutePath
+              } catch (Exception ignored) {
+                return null
+              }
+            }
+            .findAll { it != null }
+
+    environment 'SOURCE_JARS', sourceJarPaths.join(File.pathSeparator)
+  }
 }
 build.dependsOn buildJavaScript
 
@@ -44,3 +65,4 @@ tasks.register("run") {
   description = "Run the JavaScript application hosted via a local Jetty server at http://localhost:8080/"
   dependsOn(buildJavaScript, tasks.named("jettyRun"))
 }
+

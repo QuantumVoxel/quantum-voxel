@@ -7,8 +7,12 @@ import com.github.xpenatan.gdx.backends.teavm.gen.SkipClass;
 import java.io.File;
 import java.io.IOException;
 
+import org.teavm.tooling.TeaVMSourceFilePolicy;
 import org.teavm.tooling.TeaVMTargetType;
 import org.teavm.tooling.TeaVMTool;
+import org.teavm.tooling.TeaVMToolLog;
+import org.teavm.tooling.sources.DirectorySourceFileProvider;
+import org.teavm.tooling.sources.JarSourceFileProvider;
 import org.teavm.vm.TeaVMOptimizationLevel;
 
 /** Builds the TeaVM/HTML application. */
@@ -31,7 +35,29 @@ public class TeaVMBuilder {
         // If your builds take too long, and runtime performance doesn't matter, you can change FULL to SIMPLE .
         tool.setOptimizationLevel(TeaVMOptimizationLevel.SIMPLE);
         tool.setTargetType(TeaVMTargetType.JAVASCRIPT);
-        tool.setObfuscated(false);
+        tool.setObfuscated(true);
+        tool.setShortFileNames(false);
+        tool.setSourceMapsFileGenerated(true);
+        tool.setDebugInformationGenerated(true);
+        tool.setSourceFilePolicy(TeaVMSourceFilePolicy.COPY);
+        tool.addSourceFileProvider(new DirectorySourceFileProvider(new File("../client/src/main/java")));
+        tool.addSourceFileProvider(new DirectorySourceFileProvider(new File("../server/src/main/java")));
+        tool.addSourceFileProvider(new DirectorySourceFileProvider(new File("../teavm/src/main/java")));
+
+        String sourceJars = System.getenv("SOURCE_JARS");
+        if (sourceJars != null) {
+            String[] split = sourceJars.split(File.pathSeparator);
+            System.out.println("Adding " + split.length + " source jars");
+            tool.getLog().info("Adding " + split.length + " source jars");
+            for (String sourceJar : split) {
+                System.out.println("Adding source jar: " + sourceJar);
+                tool.getLog().info("Adding source jar: " + sourceJar);
+                tool.addSourceFileProvider(new JarSourceFileProvider(new File(sourceJar)));
+            }
+        } else {
+            System.out.println("No source jars found");
+            tool.getLog().info("No source jars found");
+        }
         TeaBuilder.build(tool);
     }
 }

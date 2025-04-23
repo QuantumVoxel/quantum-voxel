@@ -167,7 +167,7 @@ public abstract class Screen extends UIContainer<Screen> {
         }
 
         if (this.dialog != null) {
-            renderer.blurred(() -> super.render(renderer, deltaTime));
+            if (!GamePlatform.get().isWeb()) renderer.blurred(() -> super.render(renderer, deltaTime));
             renderer.fill(0, 0, this.size.width, this.size.height, DIALOG_BACKGROUND);
             this.dialog.render(renderer, deltaTime);
             return;

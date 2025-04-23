@@ -3,16 +3,18 @@ package dev.ultreon.quantum.client;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
@@ -24,13 +26,22 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.render.RenderBufferSource;
+import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static com.badlogic.gdx.Gdx.gl;
+import static com.badlogic.gdx.graphics.GL20.*;
+import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 import static dev.ultreon.quantum.world.World.CS;
 
 /**
@@ -44,39 +55,28 @@ import static dev.ultreon.quantum.world.World.CS;
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
     private final ModelBatch modelBatch;
-    private final RenderPipeline pipeline;
     private final Vector2 tmp = new Vector2();
-    private FrameBuffer depthFbo;
-    private FrameBuffer fbo;
     private final RenderContext context;
     private float cameraBop = 0.0f;
     private float blurScale = 0.0f;
+    private @NotNull Texture vignetteTex;
+    private boolean disposed;
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
      *
-     * @param client the client instance to be used by the renderer
+     * @param client     the client instance to be used by the renderer
      * @param modelBatch the batch used for rendering 3D models
-     * @param pipeline the rendering pipeline managing different render passes
      */
-    public GameRenderer(QuantumClient client, ModelBatch modelBatch, RenderPipeline pipeline) {
+    public GameRenderer(QuantumClient client, ModelBatch modelBatch) {
         this.client = client;
         this.modelBatch = modelBatch;
-        this.pipeline = pipeline;
 
         this.context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
-
-        this.depthFbo = new FrameBuffer(Pixmap.Format.RGB888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
-        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
     }
 
     public void resize(int width, int height) {
         if (width <= 0 || height <= 0) return;
-        this.depthFbo.dispose();
-        this.fbo.dispose();
-        this.depthFbo = new FrameBuffer(Pixmap.Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
-        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), true);
-        this.pipeline.resize(width, height);
     }
 
     /**
@@ -132,7 +132,7 @@ public class GameRenderer implements Disposable {
                 this.client.camera.up.rotate(Vector3.Y, rotation.x);
                 this.client.camera.up.rotate(Vector3.Z, cameraBop);
                 this.client.camera.up.rotate(Vector3.Y, -rotation.x);
-            };
+            }
         }
 
         client.backgroundCat.update(deltaTime);
@@ -215,7 +215,66 @@ public class GameRenderer implements Disposable {
      * @param deltaTime The time elapsed since the last frame.
      */
     void renderWorld(float blurScale, float deltaTime) {
-        this.pipeline.render(this.modelBatch, blurScale, deltaTime);
+        RenderBufferSource bufferSource = this.client.renderBuffers();
+        bufferSource.begin(this.client.camera);
+
+        // Background
+        @Nullable ClientWorldAccess world = this.client.world;
+        @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
+        LocalPlayer localPlayer = this.client.player;
+
+        // World
+        if (localPlayer == null || worldRenderer == null || world == null) {
+            LOGGER.warn("worldRenderer or localPlayer is null");
+            return;
+        }
+        if (this.client.renderWorld) {
+            worldRenderer.renderBackground(bufferSource, Gdx.graphics.getDeltaTime());
+        }
+
+        bufferSource.getBuffer(RenderPass.SKYBOX).flush();
+        bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
+
+        var position = localPlayer.getPosition(client.partialTick);
+        Array<Entity> toSort = new Array<>(world.getAllEntities());
+        worldRenderer.render(client.renderBuffers(), deltaTime);
+        toSort.sort((e1, e2) -> {
+            var d1 = e1.getPosition().dst(position);
+            var d2 = e2.getPosition().dst(position);
+            return Double.compare(d1, d2);
+        });
+        for (Entity entity : toSort.toArray(Entity.class)) {
+            if (entity instanceof LocalPlayer) continue;
+            worldRenderer.collectEntity(entity, client.renderBuffers());
+        }
+
+        ParticleSystem particleSystem = worldRenderer.getParticleSystem();
+        particleSystem.begin();
+        particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
+        particleSystem.end();
+//            modelBatch.render(particleSystem);
+        // TODO add particle system
+
+        // Foreground
+        worldRenderer.renderForeground(client.renderBuffers(), deltaTime);
+
+        // Extract textures
+        if (vignetteTex == null) {
+            vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
+        }
+
+        // Handle blur effect
+        if (blurScale > 0f && !GamePlatform.get().isWeb()) {
+            client.renderer.blurred(
+                    blurScale,
+                    ClientConfig.blurRadius * blurScale,
+                    true,
+                    1,
+                    () -> bufferSource.end()
+            );
+        } else {
+            bufferSource.end();
+        }
     }
 
     /**
@@ -287,7 +346,9 @@ public class GameRenderer implements Disposable {
      */
     @Override
     public void dispose() {
-        this.depthFbo.dispose();
-        this.fbo.dispose();
+        if (disposed) return;
+        disposed = true;
+
+        vignetteTex.dispose();
     }
 }
