@@ -27,6 +27,7 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.TextObject;
@@ -88,7 +89,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void kick(String message) {
         if (this.connection == null) return;
-        this.connection.disconnect(message);
+        this.connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), message);
     }
 
     /**
@@ -405,8 +406,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         try {
             this.connection.send(packet);
         } catch (Exception e) {
-            this.connection.disconnect("Internal server error");
-            this.connection.on3rdPartyDisconnect("Internal server error");
+            this.connection.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Internal server error");
+            this.connection.on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Internal server error");
             throw new RuntimeException(e);
         }
     }
@@ -494,7 +495,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         // If the player is trying to fly and flight is not allowed, disconnect them
         if (flying && !allowFlight) {
-            this.connection.disconnect("Kicked for flying.");
+            this.connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), "Kicked for flying.");
             return;
         }
 
@@ -689,8 +690,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         super.onTeleportedDimension(world);
 
         if (!(world instanceof ServerWorld)) throw new IllegalArgumentException("Expected a " + ServerWorld.class.getName() + ", got a " + world.getClass().getName());
-        ServerWorld serverWorld = (ServerWorld) world;
-        this.world = serverWorld;
+        this.world = (ServerWorld) world;
         this.sendPacket(new S2CChangeDimensionPacket(world.getDimension()));
     }
 

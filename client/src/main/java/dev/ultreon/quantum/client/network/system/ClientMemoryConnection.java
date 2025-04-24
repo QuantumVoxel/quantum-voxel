@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.network.system;
 
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketData;
@@ -18,7 +19,7 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
     private final QuantumClient client;
 
     public ClientMemoryConnection(QuantumClient client, Thread thread) {
-        super(null, client);
+        super(null, client, Env.CLIENT);
         this.client = client;
     }
 
@@ -28,7 +29,9 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
     }
 
     @Override
-    public Result<Void> on3rdPartyDisconnect(String message) {
+    public Result<Void> on3rdPartyDisconnect(int statusCode, String message) {
+        CommonConstants.LOGGER.info("Received disconnect with message: " + message);
+
         this.connected = false;
         this.client.onDisconnect(message);
         return null;

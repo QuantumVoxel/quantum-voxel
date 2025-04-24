@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.network.system;
 
+import com.badlogic.gdx.utils.Queue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -8,21 +9,22 @@ import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
+import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.util.SanityCheckException;
-import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Queue;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
+    @NotNull
+    private final Env env;
     private MemoryConnection<TheirHandler, OurHandler> otherSide;
     private final Executor executor;
     private OurHandler handler;
@@ -31,41 +33,64 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private PacketData<TheirHandler> theirPacketData;
     private boolean readOnly;
 
-    private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
-    private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
+    private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = new Queue<>();
+    private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = new Queue<>();
     private boolean loggingIn = true;
     protected boolean connected = false;
 
-    public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor) {
+    public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor, @NotNull Env env) {
+        this.env = env;
+        CommonConstants.LOGGER.info("Starting " + env.name() + " memory connection...");
+
         this.otherSide = otherSide;
         if (otherSide != null) {
+            otherSide.otherSide = this;
             connected = true;
+            CommonConstants.LOGGER.info("Memory connections connected!");
         }
         this.executor = executor;
 
         if (!GamePlatform.get().isWeb()) {
-            Thread receiver = new Thread(() -> {
-                try {
-                    while (true) {
-                        receive();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-            Thread sender = new Thread(() -> {
-                while (true) {
-                    send();
-                }
-            });
+            Thread receiver = new Thread(this::receiverThread, env == Env.CLIENT ? "ClientNetReceiver" : "ServerNetReceiver");
+            Thread sender = new Thread(this::senderThread, env == Env.CLIENT ? "ClientNetSender" : "ServerNetSender");
             receiver.setDaemon(true);
             sender.setDaemon(true);
 
             receiver.start();
             sender.start();
+        } else {
+            CommonConstants.LOGGER.info("Memory connection on web started!");
         }
+    }
 
+    private void receiverThread() {
+        CommonConstants.LOGGER.info("Receiver for memory connection started!");
+        try {
+            while (connected || loggingIn) {
+                receive();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            CommonConstants.LOGGER.info("Receiver for memory connection interrupted!");
+            return;
+        } catch (Throwable e) {
+            Thread.currentThread().interrupt();
+            CommonConstants.LOGGER.info("Error in memory connection receiver:", e);
+            return;
+        }
+        CommonConstants.LOGGER.info("Receiver for memory connection shutdown!");
+    }
 
+    private void senderThread() {
+        CommonConstants.LOGGER.info("Sender for memory connection started!");
+        try {
+            while (connected || loggingIn) {
+                send();
+            }
+        } catch (Throwable e) {
+            CommonConstants.LOGGER.info("Error in memory connection sender:", e);
+        }
+        CommonConstants.LOGGER.info("Sender for memory connection shutdown!");
     }
 
     private void send() {
@@ -73,8 +98,14 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             return;
         }
 
-        PacketInstance<@NotNull Packet<? extends TheirHandler>> instance = this.sendQueue.poll();
-        if (instance == null) return;
+        PacketInstance<@NotNull Packet<? extends TheirHandler>> instance;
+        synchronized (sendQueue) {
+            if (sendQueue.isEmpty()) return;
+            instance = this.sendQueue.removeFirst();
+        }
+
+        if (GamePlatform.get().isDevEnvironment())
+            CommonConstants.LOGGER.debug("Sending Packet: " + instance.packet().getClass().getName());
 
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -97,14 +128,14 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
                 instance.listener().onFailure();
             }
             CommonConstants.LOGGER.error("Failed to send packet", e);
-            disconnect(e.getMessage());
+            disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getMessage());
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (instance.listener() != null) {
                 instance.listener().onFailure();
             }
             CommonConstants.LOGGER.error("Failed to send packet", e);
-            disconnect(e.getClass().getName() + ":\n" + e.getMessage());
+            disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
         }
         tx.decrementAndGet();
@@ -115,11 +146,15 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             return;
         }
 
-        Packet<? extends OurHandler> packet = this.receiveQueue.poll();
-        if (packet == null) return;
-        this.received(packet, null);
+        Packet<? extends OurHandler> packet;
+        synchronized (receiveQueue) {
+            if (receiveQueue.isEmpty()) return;
+            packet = this.receiveQueue.removeFirst();
+        }
 
-        if (!GamePlatform.get().isWeb()) Thread.sleep(5);
+        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Received Packet: " + packet.getClass().getName());
+
+        this.received(packet, null);
     }
 
     @Override
@@ -137,13 +172,13 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         return otherSide;
     }
 
-    @SuppressWarnings("unchecked")
     private void receive(int id, byte[] ourPacket) {
         rx.incrementAndGet();
         ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
         PacketIO io = new PacketIO(bis, null);
-        Packet<?> packet = ourPacketData.decode(id, io);
-        this.received((Packet<? extends OurHandler>) packet, null);
+        Packet<? extends OurHandler> packet = ourPacketData.decode(id, io);
+        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Received memory packet: " + packet.getClass().getName());
+        this.receiveQueue.addLast(packet);
     }
 
     public static int getRx() {
@@ -174,11 +209,14 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
         tx.incrementAndGet();
-        this.sendQueue.add(new PacketInstance<>(packet, resultListener));
+        synchronized (sendQueue) {
+            if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Queued packet for sending to " + otherSide.env + ": " + packet.getClass().getName());
+            this.sendQueue.addLast(new PacketInstance<>(packet, resultListener));
+        }
 
-        if (sendQueue.size() >= 5000) {
+        if (sendQueue.size >= 5000) {
             CrashLog crashLog = new CrashLog("Too many packets in send queue", new Throwable(":("));
-            crashLog.add("Send queue size", sendQueue.size());
+            crashLog.add("Send queue size", sendQueue.size);
             throw new ApplicationCrash(crashLog);
         }
     }
@@ -201,8 +239,8 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             if (resultListener != null) {
                 resultListener.onFailure();
             }
-            this.disconnect(e.getClass().getName() + ":\n" + e.getMessage());
-            this.on3rdPartyDisconnect(e.getClass().getName() + ":\n" + e.getMessage());
+            this.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
+            this.on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
             CommonConstants.LOGGER.error("Failed to handle packet", e);
             rx.decrementAndGet();
             return;
@@ -213,12 +251,14 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     }
 
     @Override
-    public void disconnect(String message) {
+    public void disconnect(int code, String message) {
+        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.info("Disconnected with message: " + message);
+
         this.connected = false;
-        this.otherSide.on3rdPartyDisconnect(message);
+        this.otherSide.on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), message);
     }
 
-    public abstract Result<Void> on3rdPartyDisconnect(String message);
+    public abstract Result<Void> on3rdPartyDisconnect(int statusCode, String message);
 
     protected abstract PacketContext createPacketContext();
 
@@ -270,8 +310,9 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     public void setOtherSide(MemoryConnection<TheirHandler, OurHandler> otherSide) {
         this.otherSide = otherSide;
-        if (otherSide != null)
+        if (otherSide != null) {
             connected = true;
+        }
     }
 
     @Override

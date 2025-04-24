@@ -131,7 +131,7 @@ public class ImGuiOverlay {
     private static ImInt gameDockId;
 
     public static void setupImGui() {
-        if (GamePlatform.get().isAngleGLES()) return;
+        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
 
         QuantumClient.LOGGER.info("Setting up ImGui");
 
@@ -164,7 +164,7 @@ public class ImGuiOverlay {
     }
 
     public static void preInitImGui() {
-        if (GamePlatform.get().isAngleGLES()) return;
+        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
 
         synchronized (ImGuiOverlay.class) {
             ImGuiOverlay.imGuiGlfw = new ImGuiImplGlfw();
@@ -179,7 +179,7 @@ public class ImGuiOverlay {
 
     public static void renderImGui(QuantumClient client) {
         if (!ImGuiOverlay.SHOW_IM_GUI.get()) return;
-        if (GamePlatform.get().isAngleGLES()) return;
+        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
 
         if (Gdx.input.isCursorCatched()) {
             ImGui.getIO().setMousePos(Float.MAX_VALUE, Float.MAX_VALUE);
@@ -1471,7 +1471,7 @@ public class ImGuiOverlay {
     }
 
     public static boolean isShown() {
-        return ImGuiOverlay.SHOW_IM_GUI.get();
+        return ImGuiOverlay.SHOW_IM_GUI.get() && !GamePlatform.get().isMacOSX() && GamePlatform.get().isDesktop();
     }
 
     public static void setShowingImGui(boolean value) {
@@ -1483,7 +1483,7 @@ public class ImGuiOverlay {
     }
 
     public static void dispose() {
-        if (GamePlatform.get().isAngleGLES()) return;
+        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
 
         synchronized (ImGuiOverlay.class) {
             if (ImGuiOverlay.isImplCreated) {

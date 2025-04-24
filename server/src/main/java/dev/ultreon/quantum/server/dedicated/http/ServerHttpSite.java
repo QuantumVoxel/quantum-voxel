@@ -6,8 +6,8 @@
 //import com.sun.net.httpserver.HttpServer;
 //import dev.ultreon.quantum.CommonConstants;
 //import dev.ultreon.quantum.server.QuantumServer;
-//import dev.ultreon.quantum.server.dedicated.ServerConfig;
-//import dev.ultreon.quantum.server.dedicated.ServerPlatform;
+//import dev.ultreon.quantum.dedicated.ServerConfig;
+//import dev.ultreon.quantum.dedicated.ServerPlatform;
 //
 //import java.io.*;
 //import java.net.InetSocketAddress;

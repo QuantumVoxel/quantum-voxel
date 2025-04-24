@@ -76,7 +76,7 @@ dependencies {
     implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
     implementation api("com.formdev:flatlaf:3.2.1")
 
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion") {
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion") {
         exclude group: "org.ow2.asm"
         exclude group: "org.ow2.sat4j"
     }

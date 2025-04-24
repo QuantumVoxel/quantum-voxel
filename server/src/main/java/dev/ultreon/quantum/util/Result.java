@@ -150,13 +150,13 @@ public class Result<T> {
     public <R> Result<R> map(Function<T, R> mapper, Function<Throwable, Throwable> mapperFailure) {
         if (this.ok != null) return ok(mapper.apply(this.ok.value));
         if (this.failure != null) return failure(mapperFailure.apply(this.failure.throwable));
-        throw new VerifyError("Unreachable code.");
+        throw new Error("Unreachable code.");
     }
 
     public <R> R flatMap(Function<T, R> mapper, Function<Throwable, R> mapperFailure) {
         if (this.ok != null) return mapper.apply(this.ok.value);
         if (this.failure != null) return mapperFailure.apply(this.failure.throwable);
-        throw new VerifyError("Unreachable code.");
+        throw new Error("Unreachable code.");
     }
 
     private static class Ok<L> {

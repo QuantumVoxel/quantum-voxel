@@ -89,7 +89,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static final String NAMESPACE = "quantum";
     private static final boolean CHUNK_DEBUG = System.getProperty("quantum.chunk.debug", "false").equals("true");
 
-    //    private static final WatchManager WATCH_MANAGER = new WatchManager(new ConfigurationScheduler("QuantumVoxel"));
+    @SuppressWarnings("GDXJavaStaticResource")
     private static QuantumServer instance;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
     private final Queue<Pair<ServerPlayer, Supplier<Packet<? extends ClientPacketHandler>>>> chunkNetworkQueue = new ArrayDeque<>();
@@ -104,7 +104,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     protected int port;
     @ShowInNodeView
     protected int entityRenderDistance = 6 * World.CS;
-    private int chunkRefresh;
     private long onlineTicks;
     protected volatile boolean running = false;
     private int currentTps;
@@ -660,7 +659,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.recipeManager.unload();
         this.cachedPlayers.clear();
         this.players.forEach((UUID uuid, ServerPlayer player) -> {
-            player.connection.disconnect("Server already closed!");
+            player.connection.disconnect(CloseCodes.GOING_AWAY.getCode(), "Server closed!");
             this.cachedPlayers.remove(player.getName());
         });
         this.players.clear();

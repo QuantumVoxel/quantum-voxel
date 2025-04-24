@@ -3,18 +3,20 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.ServerInfo;
-import dev.ultreon.quantum.client.gui.Dialog;
 import dev.ultreon.quantum.client.gui.DialogBuilder;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.UITranslations;
+import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MultiplayerScreen extends Screen {
     public static final Color WHITE_TRANSPARENT = new Color(1, 1, 1, 0.2f);
-    private TextEntry entry;
+    public static final MutableText SECURE_CONNECTION_YES = TextObject.translation("quantum.ui.connection.secure.prefix").append(TextObject.translation("quantum.ui.yes"));
+    public static final MutableText SECURE_CONNECTION_NO = TextObject.translation("quantum.ui.connection.secure.prefix").append(TextObject.translation("quantum.ui.no"));
     private TextButton addButton;
     private TextButton joinButton;
     private TextButton backButton;
@@ -96,8 +98,8 @@ public class MultiplayerScreen extends Screen {
     }
 
     private void addServer(TextButton textButton) {
-        Dialog dialog = new AddServerDialog(this);
-        showDialog(dialog);
+        AddServerScreen screen = new AddServerScreen(this);
+        client.showScreen(screen);
     }
 
     private void addServer(ServerInfo serverInfo) {
@@ -159,22 +161,21 @@ public class MultiplayerScreen extends Screen {
 
         try {
             this.client.serverInfo = selected.info;
-            this.client.connectToServer(split[0], Integer.parseInt(split[1]));
+            this.client.connectToServer((selected.info.secure() ? "wss://" : "ws://") + selected.info.address());
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Can't connect to server", e);
         }
     }
 
-    private class AddServerDialog extends Dialog {
+    private class AddServerScreen extends Screen {
         private final TextEntry nameEntry;
         private final TextEntry entry;
         private final TextButton addButton;
+        private final CycleButton<Boolean> secureBtn;
 
-        public AddServerDialog(MultiplayerScreen parent) {
-            super(parent);
+        public AddServerScreen(MultiplayerScreen parent) {
+            super(TextObject.translation("quantum.screen.multiplayer.add_server"), parent);
 
-            setSize(200, 110);
-            setPos(parent.getWidth() / 2 - size.width / 2, parent.getHeight() / 2 - size.height / 2);
             title = TextObject.translation("quantum.screen.multiplayer.add_server");
 
             nameEntry = add(TextEntry.of());
@@ -183,18 +184,22 @@ public class MultiplayerScreen extends Screen {
             nameEntry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_name"));
 
             entry = add(TextEntry.of());
-            entry.setPos(pos.x + 5, pos.y + 55);
             entry.setSize(190, 20);
             entry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_ip"));
             entry.callback().set(this::validateServerIp);
 
+            secureBtn = add(new CycleButton<Boolean>().values(Boolean.TRUE, Boolean.FALSE).formatter(bool -> bool
+                    ? SECURE_CONNECTION_YES
+                    : SECURE_CONNECTION_NO));
+            secureBtn.setSize(190, 20);
+
             addButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.add"), 98));
-            addButton.setPos(pos.x + 5, pos.y + 80);
             addButton.setSize(190, 20);
             addButton.setType(Button.Type.DARK_EMBED);
             addButton.setCallback((button) -> {
                 MultiplayerScreen multiplayerScreen = MultiplayerScreen.this;
-                multiplayerScreen.addServer(new ServerInfo(nameEntry.getValue(), entry.getValue()));
+                multiplayerScreen.addServer(new ServerInfo(nameEntry.getValue(), entry.getValue(), secureBtn.getValue()));
+                back();
             });
 
             validateServerIp(entry);
@@ -204,20 +209,22 @@ public class MultiplayerScreen extends Screen {
         public void revalidate() {
             super.revalidate();
 
-            nameEntry.setPos(pos.x + 5, pos.y + 35);
-            entry.setPos(pos.x + 5, pos.y + 60);
-            addButton.setPos(pos.x + 5, pos.y + 85);
+            nameEntry.setPos(size.width / 2 - nameEntry.size.width / 2, size.height / 2 - 60);
+            entry.setPos(size.width / 2 - entry.size.width / 2, size.height / 2 - 30);
+            secureBtn.setPos(size.width / 2 - secureBtn.size.width / 2, size.height / 2);
+            addButton.setPos(size.width / 2 - addButton.size.width / 2, size.height / 2 + 30);
         }
 
         private void validateServerIp(TextEntry caller) {
             var text = caller.getValue();
-            boolean matches = text.matches("[^:]+:\\d{1,5}");
+            boolean matches = text.matches("[^:]+:\\d{1,5}(/[^@:]+)?");
             if (!matches) {
                 this.addButton.isEnabled = false;
                 return;
             }
-            var split = text.split(":", 2);
-            var port = Integer.parseInt(split[1]);
+            var hostSplitOff = text.split(":", 2);
+            String[] portSplitOff = hostSplitOff[1].split("/", 2);
+            var port = Integer.parseInt(portSplitOff[0]);
 
             if (port < 1000 || port > 65535) {
                 this.addButton.isEnabled = false;

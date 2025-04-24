@@ -22,7 +22,7 @@ import org.intellij.lang.annotations.Language;
 
 enum GameLibrary implements LibraryType {
     QUANTUM_VXL_CLIENT("dev/ultreon/quantum/desktop/DesktopLauncher.class"),
-    QUANTUM_VXL_SERVER("dev/ultreon/quantum/server/dedicated/Main.class"),
+    QUANTUM_VXL_SERVER("dev/ultreon/quantum/dedicated/Main.class"),
 	LIBGDX("com/badlogic/gdx/Gdx.class"),
 	LOG4J_API("org/apache/logging/log4j/LogManager.class"),
 	LOG4J_CORE("META-INF/services/org.apache.logging.log4j.spi.Provider", "META-INF/log4j-provider.properties"),

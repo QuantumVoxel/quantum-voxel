@@ -7,8 +7,11 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.dedicated.FabricMod;
+import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -23,11 +26,15 @@ import org.lwjgl.system.Platform;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URL;
+import java.net.http.WebSocketHandshakeException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -98,6 +105,11 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean showRenderPipeline() {
         return ImGuiOverlay.SHOW_RENDER_PIPELINE.get();
+    }
+
+    @Override
+    public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
+        return new JavaWebSocket(location, onError, initializeListener, connectedListener);
     }
 
     @Override
@@ -339,6 +351,11 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
+    public boolean isWebGL() {
+        return false;
+    }
+
+    @Override
     public boolean hasBackPanelRemoved() {
         return false;
     }
@@ -433,6 +450,37 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean hasImGui() {
         return true;
+    }
+
+    @Override
+    public boolean isLowPowerDevice() {
+        return Runtime.getRuntime().availableProcessors() < 6 || Runtime.getRuntime().maxMemory() < 2 * 1024L * 1024L * 1024L;
+    }
+
+    @Override
+    public void handleDisconnect(Throwable e) {
+        QuantumClient client = QuantumClient.get();
+
+        if (e instanceof CompletionException) {
+            if (e.getCause() instanceof ConnectException) {
+                if (e.getCause().getCause() instanceof ClosedChannelException) {
+                    client.showScreen(new DisconnectedScreen("Server closed the connection", true));
+                    return;
+                }
+                client.showScreen(new DisconnectedScreen("Failed to connect to server!", true));
+                return;
+            }
+            if (e.getCause() instanceof WebSocketHandshakeException) {
+                if (e.getCause().getCause() != null) {
+                    client.showScreen(new DisconnectedScreen("Connection handshake failed:\n" + e.getCause().getCause().getLocalizedMessage(), true));
+                    return;
+                }
+                client.showScreen(new DisconnectedScreen("Connection handshake failed", true));
+                return;
+            }
+        }
+
+        super.handleDisconnect(e);
     }
 
     @Override

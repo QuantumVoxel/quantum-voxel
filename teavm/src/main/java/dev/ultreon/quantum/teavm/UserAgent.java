@@ -12,4 +12,16 @@ public final class UserAgent {
     public static boolean isDevAgent() {
         return getUserAgent().contains("QuantumVoxelDebug/1");
     }
+
+    public static boolean isAndroid() {
+        return getUserAgent().contains("Android");
+    }
+
+    public static boolean isIOS() {
+        return getUserAgent().contains("iPhone") || getUserAgent().contains("iPad");
+    }
+
+    public static boolean isMobile() {
+        return isAndroid() || isIOS();
+    }
 }

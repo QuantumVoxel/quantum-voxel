@@ -76,6 +76,7 @@ dependencies {
     implementation api(project(":gameprovider"))
     implementation api(project(":client"))
     implementation api(project(":server"))
+    implementation api(project(":dedicated"))
 
     implementation api("com.formdev:flatlaf:3.2.1")
 
@@ -96,33 +97,33 @@ dependencies {
         exclude group: "org.lwjgl", module: "lwjgl-opengles"
         exclude group: "org.lwjgl", module: "lwjgl-stb"
     }
-    implementation api("org.lwjgl:lwjgl:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-egl:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-opengles:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-linux") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-macos") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-opengles:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.5!!:natives-windows") { version { strictly "3.3.5" } }
+    implementation api("org.lwjgl:lwjgl:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-egl:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
     implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
@@ -212,7 +213,7 @@ dependencies {
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     implementation api('net.fabricmc:access-widener:2.1.0')
 
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion")
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
 
     //noinspection GradleDynamicVersion
     implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
@@ -221,7 +222,7 @@ dependencies {
     implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     implementation api('net.fabricmc:access-widener:2.1.0')
 
-    implementation api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion")
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
 }
 
 compileJava {

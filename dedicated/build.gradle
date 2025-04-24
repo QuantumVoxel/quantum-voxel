@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+group = 'dev.ultreon.quantum'
+version = '0.2.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.11.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation api(project(":server"))
+    implementation api(project(":gameprovider"))
+    implementation api("net.fabricmc:fabric-loader:0.16.14")
+
+    runtimeOnly 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-desktop'
+
+    runtimeOnly 'org.apache.logging.log4j:log4j:2.24.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.24.1'
+    runtimeOnly 'net.fabricmc:tiny-mappings-parser:0.3.0+build.17'
+    runtimeOnly 'net.fabricmc:tiny-remapper:0.10.4'
+    runtimeOnly 'net.fabricmc:dev-launch-injector:0.2.1+build.8'
+    runtimeOnly 'net.fabricmc:access-widener:2.1.0'
+    runtimeOnly("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+
+    implementation api('org.glassfish.tyrus:tyrus-server:2.1.5')
+    implementation api('org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5')
+    implementation api('org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}

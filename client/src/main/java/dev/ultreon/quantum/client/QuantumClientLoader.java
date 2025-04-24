@@ -148,7 +148,7 @@ class QuantumClientLoader implements Runnable {
 
 //            client.virtualKeyboard = new VirtualKeyboard();
         });
-        Gdx.input.setInputProcessor(client.keyAndMouseInput);
+        Gdx.input.setInputProcessor(GamePlatform.get().isMobile() ? client.touchInput : client.keyAndMouseInput);
 
         QuantumClient.LOGGER.info("Setting up HUD");
         client.hud = QuantumClient.invokeAndWait(() -> new Hud(client));

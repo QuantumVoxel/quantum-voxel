@@ -24,6 +24,7 @@ public class TitleScreen extends Screen {
     private TitleButton quitButton;
     private final Resizer resizer;
     private @Nullable TextButton worldGenTestButton;
+    private @Nullable TextButton uiTestButton;
 
     public TitleScreen() {
         super((TextObject) null, null);
@@ -46,7 +47,11 @@ public class TitleScreen extends Screen {
         if (GamePlatform.get().isDevEnvironment()) {
             this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
                     .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 125))
-                    .setCallback(this::openTest));
+                    .setCallback(this::openWorldGenTest));
+
+            this.uiTestButton = builder.add(TextButton.of(TextObject.literal("UI TEST"), 100)
+                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 150))
+                    .setCallback(this::openUITest));
         }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
@@ -77,8 +82,12 @@ public class TitleScreen extends Screen {
         }
     }
 
-    private void openTest(TextButton textButton) {
+    private void openWorldGenTest(TextButton textButton) {
         this.client.showScreen(new WorldGenTestScreen());
+    }
+
+    private void openUITest(TextButton textButton) {
+        this.client.showScreen(new UITestScreen());
     }
 
     private void quitGame(TitleButton caller) {
@@ -129,6 +138,10 @@ public class TitleScreen extends Screen {
 
     public @Nullable TextButton getWorldGenTestButton() {
         return worldGenTestButton;
+    }
+
+    public @Nullable TextButton getUITestButton() {
+        return uiTestButton;
     }
 
     public TitleButton getMultiplayerButton() {

@@ -27,6 +27,7 @@ import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHit;
@@ -220,7 +221,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     public void onHotbarIndex(int hotbarIdx) {
         if (hotbarIdx < 0 || hotbarIdx > this.player.inventory.hotbar.length) {
-            this.connection.disconnect("Invalid packet:\nHotbar index " + hotbarIdx + " is out of bounds.");
+            this.connection.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Invalid packet:\nHotbar index " + hotbarIdx + " is out of bounds.");
         }
         this.player.selected = hotbarIdx;
     }

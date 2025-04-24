@@ -10,5 +10,5 @@ public enum DeviceType {
     WATCH,
     VR_HEADSET,
     APPLIANCE,
-    OTHER
+    WEB, OTHER
 }

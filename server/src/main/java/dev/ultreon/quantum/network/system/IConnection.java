@@ -5,6 +5,7 @@ import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
+import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Result;
@@ -28,9 +29,9 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
 
     boolean isCompressed();
 
-    void disconnect(String message);
+    void disconnect(int code, String message);
 
-    Result<Void> on3rdPartyDisconnect(String message);
+    Result<Void> on3rdPartyDisconnect(int statusCode, String message);
 
     void queue(Runnable handler);
 
@@ -61,7 +62,7 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
     void setPlayer(ServerPlayer player);
 
     default void disconnect(TextObject message) {
-        disconnect(message.getText());
+        disconnect(CloseCodes.NORMAL_CLOSURE.getCode(), message.getText());
     }
 
     long getPing();

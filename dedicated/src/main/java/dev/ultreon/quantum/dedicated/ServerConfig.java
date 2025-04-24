@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.server.dedicated;
+package dev.ultreon.quantum.dedicated;
 
 import dev.ultreon.quantum.config.crafty.*;
 import dev.ultreon.quantum.world.World;
@@ -12,6 +12,9 @@ public class ServerConfig extends CraftyConfig {
     @ConfigEntry(path = "hosting.port", comment = "The port to use for the server.")
     @RequiresRestart
     public static int port = 38800;
+
+    @ConfigEntry(path = "hosting.path", comment = "The path to host the server at")
+    public static String path = "quantum-server";
 
     @ConfigEntry(path = "antiCheat.allowFlying", comment = "Whether to allow unauthorized players to fly.")
     public static boolean allowFlying = false;

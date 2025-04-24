@@ -11,6 +11,7 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CLoginAcceptedPacket;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -88,25 +89,25 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         }
 
         if (server == null) {
-            connection.disconnect("The server is shutting down.");
+            connection.disconnect(CloseCodes.GOING_AWAY.getCode(), "The server is shutting down.");
             IConnection.LOGGER.info("{} left the server because the server is shutting down.", name);
             return;
         }
 
         if (server.getPlayerCount() >= server.getMaxPlayers()) {
-            connection.disconnect("The server is full.");
+            connection.disconnect(CloseCodes.TRY_AGAIN_LATER.getCode(), "The server is full.");
             IConnection.LOGGER.info("{} left the server because the server is full.", name);
             return;
         }
 
         if (server.getPlayer(name) != null) {
-            connection.disconnect("Player " + name + " is already in the server.");
+            connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), "Player " + name + " is already in the server.");
             IConnection.LOGGER.info("{} left the server because they are already in the server.", name);
             return;
         }
 
         if (server.getPlayer(uuid) != null) {
-            connection.disconnect("Player " + name + " is already in the server.");
+            connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), "Player " + name + " is already in the server.");
             IConnection.LOGGER.info("{} left the server because they are already in the server.", name);
             return;
         }
@@ -117,13 +118,13 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
         }
 
         if (server.getPlayer(uuid) != null) {
-            connection.disconnect("Player " + name + " is already in the server.");
+            connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), "Player " + name + " is already in the server.");
             IConnection.LOGGER.info("{} left the server because they are already in the server.", name);
             return;
         }
 
         if (server.getPlayerCount() >= server.getMaxPlayers()) {
-            connection.disconnect("The server is full.");
+            connection.disconnect(CloseCodes.TRY_AGAIN_LATER.getCode(), "The server is full.");
             IConnection.LOGGER.info("{} left the server because the server is full.", name);
             return;
         }

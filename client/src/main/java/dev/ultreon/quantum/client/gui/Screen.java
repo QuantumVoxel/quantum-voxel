@@ -301,7 +301,6 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clearColor(0, 0, 0, 1);
             renderer.clear();
             int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-            renderer.scale(1 / client.getGuiScale(), 1 / client.getGuiScale());
             renderer.blurred(true, () -> {
                 Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
 
@@ -314,8 +313,6 @@ public abstract class Screen extends UIContainer<Screen> {
                 renderer.blit(NamespaceID.of("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
             });
             renderer.flush();
-            renderer.scale(client.getGuiScale(), client.getGuiScale());
-
             renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, BACKGOUND_OVERLAY);
         }
     }

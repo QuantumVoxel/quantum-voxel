@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.server.dedicated;
+package dev.ultreon.quantum.dedicated;
 
 import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.CommonConstants;
@@ -12,15 +12,13 @@ import dev.ultreon.quantum.text.ServerLanguage;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.WorldStorage;
+import org.glassfish.tyrus.server.Server;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -43,20 +41,27 @@ public class DedicatedServer extends QuantumServer {
     private static final Profiler PROFILER = new Profiler();
     private static DedicatedServer instance;
     private final ServerLanguage language = createServerLanguage();
+    private final Server server;
 
     /**
      * Creates a new dedicated server instance.
      *
      * @param host       the hostname for the server.
      * @param port       the port for the server.
-     * @throws UnknownHostException if the hostname cannot be resolved.
      */
-    public DedicatedServer(String host, int port) throws IOException {
+    public DedicatedServer(String host, int port, String path) {
         super(DedicatedServer.STORAGE, DedicatedServer.PROFILER);
 
         DedicatedServer.instance = this;
 
-//        this.networker = new TcpNetworker(this, InetAddress.getByName(host), port);
+        server = new Server(host, port, null, null, JavaWebSocketServer.class);
+
+        try {
+            server.start();
+            CommonConstants.LOGGER.info("WebSocket server running at ws://" + host + ":" + port + "/" + path);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         GamePlatform.get().locateResources();
         GamePlatform.get().locateModResources();
@@ -104,13 +109,12 @@ public class DedicatedServer extends QuantumServer {
     /**
      * Constructor for the DedicatedServer class.
      *
-     * @throws UnknownHostException if the hostname is unknown
      */
-    DedicatedServer() throws IOException {
+    DedicatedServer() {
         // Call the other constructor with hostname, port, and inspection
-        this(ServerConfig.hostname, ServerConfig.port);
+        this(ServerConfig.hostname, ServerConfig.port, ServerConfig.path);
 
-        LOGGER.info("Server started on {}:{}", ServerConfig.hostname, ServerConfig.port);
+        QuantumServer.LOGGER.info("Server started on {}:{}/{}", ServerConfig.hostname, ServerConfig.port, ServerConfig.path);
 
         try {
             // Create the world storage
@@ -150,6 +154,7 @@ public class DedicatedServer extends QuantumServer {
         super.shutdown();
 
         this.profiler.dispose();
+        this.server.stop();
     }
 
     @Override

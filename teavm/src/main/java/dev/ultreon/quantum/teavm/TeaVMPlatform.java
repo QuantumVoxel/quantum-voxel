@@ -4,13 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.Nullable;
-import org.teavm.jso.JSExceptions;
 import org.teavm.jso.browser.Navigator;
-import org.teavm.jso.browser.Window;
 import org.teavm.jso.core.JSError;
 
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class TeaVMPlatform extends GamePlatform {
 
     @Override
     public DeviceType getDeviceType() {
-        return TeaApplication.isMobileDevice() ? DeviceType.MOBILE : DeviceType.DESKTOP;
+        return UserAgent.isMobile() ? DeviceType.MOBILE : DeviceType.DESKTOP;
     }
 
     @Override
@@ -65,6 +64,11 @@ public class TeaVMPlatform extends GamePlatform {
     @Override
     public boolean isGLES() {
         return false;
+    }
+
+    @Override
+    public boolean isWebGL() {
+        return true;
     }
 
     @Override
@@ -89,6 +93,11 @@ public class TeaVMPlatform extends GamePlatform {
     @Override
     public boolean isShowingImGui() {
         return false;
+    }
+
+    @Override
+    public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
+        return new TeaVMWebSocket(location, onError, initializeListener, connectedListener);
     }
 
     @Override
@@ -222,6 +231,16 @@ public class TeaVMPlatform extends GamePlatform {
     @Override
     public String getLanguage() {
         return Navigator.getLanguage();
+    }
+
+    @Override
+    public boolean isLowPowerDevice() {
+        return true;
+    }
+
+    @Override
+    public void handleDisconnect(Throwable e) {
+        QuantumClient.get().showScreen(new DisconnectedScreen(e.getClass().getName() + ": " + e.getMessage(), true));
     }
 
     @Override

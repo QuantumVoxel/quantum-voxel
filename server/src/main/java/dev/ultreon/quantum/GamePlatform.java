@@ -72,6 +72,8 @@ public abstract class GamePlatform {
         return false;
     }
 
+    public abstract WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener);
+
     public void setShowingImGui(boolean value) {
         // Implemented in subclasses
     }
@@ -215,6 +217,8 @@ public abstract class GamePlatform {
     public abstract boolean isAngleGLES();
 
     public abstract boolean isGLES();
+
+    public abstract boolean isWebGL();
 
     /**
      * Check if the window has no background (transparent framebuffer).
@@ -360,6 +364,14 @@ public abstract class GamePlatform {
 
     public String getLanguage() {
         return "en_US";
+    }
+
+    public boolean isLowPowerDevice() {
+        return false;
+    }
+
+    public void handleDisconnect(Throwable e) {
+
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

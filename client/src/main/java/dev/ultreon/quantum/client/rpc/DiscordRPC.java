@@ -78,7 +78,7 @@ public class DiscordRPC implements RpcHandler {
                             .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
-                            .setJoinSecret(quantumClient.serverInfo.address());
+                            .setJoinSecret((quantumClient.serverInfo.secure() ? "wss://" : "ws://") + quantumClient.serverInfo.address());
                 }
 
                 builder.setJoinSecret("hello_world");
@@ -122,7 +122,7 @@ public class DiscordRPC implements RpcHandler {
                             .setDetails("In: " + (world != null ? world.getDimension().id() : null))
                             .setStartTimestamp(OffsetDateTime.now())
                             .setLargeImage("icon", "Version: " + QuantumClient.getGameVersion())
-                            .setJoinSecret(QuantumClient.get().serverInfo.address());
+                            .setJoinSecret((QuantumClient.get().serverInfo.secure() ? "wss://" : "ws://") + QuantumClient.get().serverInfo.address());
                 }
 
                 // Send the updated Rich Presence to the Discord client.
@@ -161,16 +161,13 @@ public class DiscordRPC implements RpcHandler {
                 IPCListener.super.onActivityJoin(client, secret);
 
                 // Check if the secret is valid
-                if (!secret.matches("[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+):\\d+")) {
+                if (!secret.matches("wss?://[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+):\\d+/[^:]+")) {
                     QuantumClient.get().notifications.add("Discord RPC", "Invalid join request!", "discordrpc");
                     return;
                 }
 
-                // Split the secret into server address and port
-                String[] split = secret.split(":");
-
                 // Connect to the server
-                QuantumClient.get().connectToServer(split[0], Integer.parseInt(split[1]));
+                QuantumClient.get().connectToServer(secret);
             }
 
             /**

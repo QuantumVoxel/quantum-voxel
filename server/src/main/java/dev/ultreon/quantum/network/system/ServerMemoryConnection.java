@@ -18,7 +18,7 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
     private ServerPlayer player;
 
     public ServerMemoryConnection(@Nullable MemoryConnection<ClientPacketHandler, ServerPacketHandler> otherSide, QuantumServer server) {
-        super(otherSide, server);
+        super(otherSide, server, Env.SERVER);
     }
 
     public void setPlayer(ServerPlayer player) {
@@ -37,7 +37,9 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
     }
 
     @Override
-    public Result<Void> on3rdPartyDisconnect(String message) {
+    public Result<Void> on3rdPartyDisconnect(int statusCode, String message) {
+        CommonConstants.LOGGER.info("Received disconnect with message: " + message);
+
         connected = false;
         if (player != null)
             player.onDisconnect(message);

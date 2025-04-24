@@ -26,7 +26,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -40,7 +39,7 @@ public class QuantumVxlGameProvider implements GameProvider {
     private static final String[] ALLOWED_EARLY_CLASS_PREFIXES = {"org.apache.logging.log4j.", "dev.ultreon.gameprovider.quantum.", "dev.ultreon.premain."};
 
     private final GameTransformer transformer = new GameTransformer();
-    private EnvType Env;
+    private EnvType env;
     private Arguments arguments;
     private final List<Path> gameJars = new ArrayList<>();
     private final List<Path> logJars = new ArrayList<>();
@@ -302,13 +301,13 @@ public class QuantumVxlGameProvider implements GameProvider {
     @Override
     public boolean locateGame(FabricLauncher launcher, String[] args) {
         // Set the environment type and parse the arguments
-        this.Env = launcher.getEnvironmentType();
+        this.env = launcher.getEnvironmentType();
         this.arguments = new Arguments();
         this.arguments.parse(args);
 
         try {
             // Create a new LibClassifier object with the specified class and environment type
-            var classifier = new LibClassifier<>(GameLibrary.class, this.Env, this);
+            var classifier = new LibClassifier<>(GameLibrary.class, this.env, this);
 
             // Get the client and server libraries
             var clientLib = GameLibrary.QUANTUM_VXL_CLIENT;
@@ -332,7 +331,7 @@ public class QuantumVxlGameProvider implements GameProvider {
             }
 
             // Get the client and server jars from the classifier
-            clientJar = classifier.getOrigin(GameLibrary.QUANTUM_VXL_CLIENT);
+            clientJar = env == EnvType.CLIENT ? classifier.getOrigin(GameLibrary.QUANTUM_VXL_CLIENT) : null;
             var serverJar = classifier.getOrigin(GameLibrary.QUANTUM_VXL_SERVER);
             this.libGdxJar = classifier.getOrigin(GameLibrary.LIBGDX);
 
@@ -570,7 +569,7 @@ public class QuantumVxlGameProvider implements GameProvider {
      */
     @Override
     public boolean canOpenErrorGui() {
-        if (this.arguments == null || this.Env == Env.CLIENT)
+        if (this.arguments == null || this.env == env.CLIENT)
             return !OS.isMobile();
 
         return false;

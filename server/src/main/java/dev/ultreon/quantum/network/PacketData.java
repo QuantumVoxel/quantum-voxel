@@ -10,7 +10,7 @@ public class PacketData<T extends PacketHandler> {
         this.collection = collection;
     }
 
-    public Packet<?> decode(int id, PacketIO buffer) {
+    public Packet<T> decode(int id, PacketIO buffer) {
         return this.collection.decode(id, buffer);
     }
 
@@ -22,7 +22,7 @@ public class PacketData<T extends PacketHandler> {
         this.collection.handle(packet, new Pair<>(context, listener));
     }
 
-    public int getId(Packet<?> msg) {
+    public int getId(Packet<? extends T> msg) {
         return this.collection.getId(msg);
     }
 }

@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.dedicated;
 
 import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.Mod;

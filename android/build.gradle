@@ -22,6 +22,10 @@ dependencies {
         exclude group: "org.graalvm.polyglot"
         exclude group: "org.graalvm"
     }
+    implementation project(":dedicated"), {
+        exclude group: "org.graalvm.polyglot"
+        exclude group: "org.graalvm"
+    }
     api 'com.android.support:appcompat-v7:33.0.0'
     api "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
     api 'androidx.appcompat:appcompat:1.6.1'

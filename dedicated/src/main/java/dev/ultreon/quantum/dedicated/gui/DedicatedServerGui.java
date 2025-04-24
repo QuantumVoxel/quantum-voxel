@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.server.dedicated.gui;
+package dev.ultreon.quantum.dedicated.gui;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -6,9 +6,11 @@ import dev.ultreon.quantum.server.QuantumServer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Timer;
 
 public class DedicatedServerGui extends JFrame {
     private JTextField commandField;
+    protected final Timer timer = new Timer();
 
     public DedicatedServerGui() throws HeadlessException {
         super("Quantum Voxel Dedicated Server");
@@ -21,7 +23,7 @@ public class DedicatedServerGui extends JFrame {
         }
 
         JPanel contentPane = new JPanel(new GridBagLayout());
-        contentPane.add(new ServerLogGui(), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        contentPane.add(new ServerLogGui(this), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         contentPane.add(this.createCommandArea(), new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         this.setContentPane(contentPane);

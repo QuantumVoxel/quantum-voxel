@@ -5,7 +5,6 @@ import org.mini2Dx.butler.task.PushTask
 import java.lang.System.getenv
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -240,9 +239,9 @@ println("Current version: $gameVersion")
 println("Project: $group:$name")
 
 afterEvaluate {
-    tasks.getByName("javadoc", Javadoc::class) {
-      (options as StandardJavadocDocletOptions).stylesheetFile = file("betterjdocs.css")
-    }
+  tasks.getByName("javadoc", Javadoc::class) {
+    (options as StandardJavadocDocletOptions).stylesheetFile = file("betterjdocs.css")
+  }
 //        source(subprojects.map { subproject ->
 //            if (subproject.name == "android") return@map null
 //            subproject?.extensions?.getByType(JavaPluginExtension::class.java)?.sourceSets?.getByName("main")?.allJava?.sourceDirectories
@@ -294,7 +293,7 @@ val publishProjects =
     project(":desktop"),
     project(":client"),
 
-   project(":teavm"),
+    project(":teavm"),
     project(":launcher"),
     project(":server"),
     project(":gameprovider"),
@@ -644,47 +643,33 @@ tasks.register<DefaultTask>("docker-push") {
   }
 }
 
-tasks.register<Exec>("runClient") {
+tasks.register<JavaExec>("runClient") {
   workingDir = file("$projectDir/run/client/")
   Files.createDirectories(Path.of(workingDir.path))
 
   dependsOn(":desktop:build")
 
-  val classpath = project(":desktop").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
-
-  val a = if (System.getProperty("os.name").lowercase().startsWith("mac")) "-XstartOnFirstThread " else ""
-
-  val argFile = File.createTempFile("argfile", ".args").apply {
-    deleteOnExit()
-    writeText(
-      a +
-              """
-            -Xmx4g
-            -Xms4g
-            -Dfabric.dli.env=CLIENT
-            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient
-            -Dfabric.development=true
-            -Dlog4j2.formatMsgNoLookups=true
-            -Dfabric.log.disableAnsi=false
-            -Dfabric.skipMcProvider=true
-            -Dfabric.zipfs.use_temp_file=false
-            "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
-            -cp
-            "$classpath"
-            net.fabricmc.devlaunchinjector.Main
-            --gameDir=.
-            """.trimIndent()
-    )
+  classpath = project(":desktop").sourceSets["main"].runtimeClasspath
+  jvmArgs = listOf(
+    "-Xmx4g",
+    "-Xms4g",
+    "-Dfabric.dli.env=CLIENT",
+    "-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient",
+    "-Dfabric.development=true",
+    "-Dlog4j2.formatMsgNoLookups=true",
+    "-Dfabric.log.disableAnsi=false",
+    "-Dfabric.skipMcProvider=true",
+    "-Dfabric.zipfs.use_temp_file=false",
+    "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
+  ) + if (System.getProperty("os.name").lowercase().startsWith("mac")) {
+    listOf("-XstartOnFirstThread")
+  } else {
+    emptyList()
   }
 
-  commandLine(
-    Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
-      if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
-      else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
-      else "java"
-    ),
-    "@${argFile.path}"
-  )
+  mainClass.set("net.fabricmc.devlaunchinjector.Main")
+  args = listOf("--gameDir=.")
+  workingDir = file("run/client/main")
 }
 
 tasks.register<Exec>("runClientAlt") {
@@ -815,45 +800,33 @@ tasks.register<Exec>("runDataGenServer") {
   )
 }
 
-tasks.register<Exec>("runServer") {
+tasks.register<JavaExec>("runServer") {
   workingDir = file("$projectDir/run/server/")
-  Files.createDirectories(Path.of("$projectDir/run/server/"))
+  Files.createDirectories(Path.of(workingDir.path))
 
-  dependsOn(":server:build")
+  dependsOn(":dedicated:build")
 
-  val classpath = project(":server").sourceSets["main"].runtimeClasspath.files.joinToString(File.pathSeparator)
-
-  val argFile = File.createTempFile("argfile", ".args").apply {
-    deleteOnExit()
-    writeText(
-      """
-            -Xmx4g
-            -Xms4g
-            -Dfabric.dli.env=SERVER
-            -Dfabric.dli.config=
-            -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer
-            -Dfabric.development=true
-            -Dlog4j2.formatMsgNoLookups=true
-            -Dfabric.log.disableAnsi=false
-            -Dfabric.skipMcProvider=true
-            -Dfabric.zipfs.use_temp_file=false
-            -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-            -cp
-            $classpath
-            net.fabricmc.devlaunchinjector.Main
-            --gameDir=.
-            """.trimIndent()
-    )
+  classpath = project(":dedicated").sourceSets["main"].runtimeClasspath
+  jvmArgs = listOf(
+    "-Xmx4g",
+    "-Xms4g",
+    "-Dfabric.dli.env=SERVER",
+    "-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer",
+    "-Dfabric.development=true",
+    "-Dlog4j2.formatMsgNoLookups=true",
+    "-Dfabric.log.disableAnsi=false",
+    "-Dfabric.skipMcProvider=true",
+    "-Dfabric.zipfs.use_temp_file=false",
+    "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
+  ) + if (System.getProperty("os.name").lowercase().startsWith("mac")) {
+    listOf("-XstartOnFirstThread")
+  } else {
+    emptyList()
   }
 
-  commandLine(
-    Path.of(System.getProperty("java.home")).toAbsolutePath().resolve("bin").resolve(
-      if (System.getProperty("os.name").lowercase().startsWith("mac")) "java"
-      else if (System.getProperty("os.name").lowercase().startsWith("win")) "java.exe"
-      else "java"
-    ).toString(),
-    "@${argFile.absolutePath}"
-  )
+  mainClass.set("net.fabricmc.devlaunchinjector.Main")
+  args = listOf("--gameDir=.")
+  workingDir = file("run/client/main")
 }
 
 extensions.configure<ButlerExtension>("butler") {

@@ -5,14 +5,13 @@ import android.hardware.SensorEvent;
 import android.os.Looper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Version;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.IntSet;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.Result;
@@ -51,6 +50,11 @@ public class AndroidPlatform extends GamePlatform {
     }
 
     @Override
+    public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
+        return new JavaWebSocket(location, onError, initializeListener, connectedListener);
+    }
+
+    @Override
     public Optional<Mod> getMod(String id) {
         if (super.getMod(id).isPresent()) {
             return super.getMod(id);
@@ -67,16 +71,6 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public <T> void invokeEntrypoint(String name, Class<T> initClass, Consumer<T> init) {
         // TODO: Implement
-    }
-
-    @Override
-    public FileHandle getConfigDir() {
-        return Gdx.files.local("config");
-    }
-
-    @Override
-    public FileHandle getGameDir() {
-        return Gdx.files.local(".");
     }
 
     @Override
@@ -224,6 +218,11 @@ public class AndroidPlatform extends GamePlatform {
     }
 
     @Override
+    public boolean isWebGL() {
+        return false;
+    }
+
+    @Override
     public boolean hasBackPanelRemoved() {
         return false;
     }
@@ -244,5 +243,10 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public UUID constructUuid(long msb, long lsb) {
         return new UUID(msb, lsb);
+    }
+
+    @Override
+    public boolean isLowPowerDevice() {
+        return true;
     }
 }

@@ -7,6 +7,8 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import java.util.function.Supplier;
 
 public class Panel extends Widget {
+    private float depth = 3f;
+
     public Panel(int x, int y, int width, int height) {
         super(width, height);
     }
@@ -23,6 +25,19 @@ public class Panel extends Widget {
         return new Panel();
     }
 
+    public float getDepth() {
+        return depth;
+    }
+
+    public void setDepth(float depth) {
+        this.depth = depth;
+    }
+
+    public Panel depth(float depth) {
+        this.depth = depth;
+        return this;
+    }
+
     @Override
     public Panel position(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
@@ -37,7 +52,7 @@ public class Panel extends Widget {
 
     @Override
     public void renderWidget(Renderer renderer, float deltaTime) {
-        renderer.drawPlatform(pos.x, pos.y, size.width, size.height);
+        renderer.drawPlatform(pos.x, pos.y, size.width, size.height, depth);
     }
 
     @Override

@@ -31,6 +31,8 @@
   "quantum.item.snow_ball.name": "Snowball",
   "quantum.item.stick.name": "Stick",
   "quantum.item.air.name": "Air",
+  "quantum.ui.connection.secure.prefix": "Secure Connection: ",
+  "quantum.ui.connection.secure": "Secure Connection",
   "quantum.ui.exitWorld": "Exit World",
   "quantum.ui.gamePaused": "Game Paused",
   "quantum.ui.backToGame": "Go back to the game",

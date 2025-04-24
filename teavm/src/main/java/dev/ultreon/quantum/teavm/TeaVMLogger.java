@@ -19,6 +19,8 @@ public class TeaVMLogger implements Logger {
         if (t == null) {
             switch (level) {
                 case TRACE:
+                    Console.trace(message);
+                    break;
                 case DEBUG:
                     Console.debug(message);
                     break;
@@ -37,6 +39,8 @@ public class TeaVMLogger implements Logger {
 
         switch (level) {
             case TRACE:
+                Console.trace(message, t);
+                break;
             case DEBUG:
                 Console.debug(message);
                 break;

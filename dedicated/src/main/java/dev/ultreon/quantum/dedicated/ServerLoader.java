@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.server.dedicated;
+package dev.ultreon.quantum.dedicated;
 
 import dev.ultreon.quantum.CommonLoader;
 import dev.ultreon.quantum.CommonRegistries;

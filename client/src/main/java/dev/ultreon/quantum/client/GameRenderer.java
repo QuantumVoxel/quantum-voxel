@@ -96,17 +96,23 @@ public class GameRenderer implements Disposable {
 
         if (player != null) {
             try (var ignored1 = QuantumClient.PROFILER.start("camera")) {
-                if (this.client.screen == null && Gdx.input.isCursorCatched()) {
+                if (this.client.screen == null && Gdx.input.isCursorCatched() || GamePlatform.get().isMobile()) {
                     // Calculate delta position for player rotation.
                     int width = QuantumClient.get().getWidth();
                     int height = QuantumClient.get().getHeight();
                     int centerX = width / 2;
                     int centerY = height / 2;
-                    if (GamePlatform.get().isWeb()) {
+                    if (GamePlatform.get().isMobile()) {
+                        if (Gdx.input.isTouched()) {
+                            float dx = (int) (-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity);
+                            float dy = (int) (-Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
+                            player.rotateHead(dx, dy);
+                        }
+                    } else if (GamePlatform.get().isWeb()) {
                         float dx = (int) (-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity);
                         float dy = (int) (-Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
                         player.rotateHead(dx, dy);
-                    } else {
+                    } else if (GamePlatform.get().isDesktop()) {
                         float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfig.cameraSensitivity);
                         float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfig.cameraSensitivity);
                         player.rotateHead(dx, dy);
@@ -263,18 +269,7 @@ public class GameRenderer implements Disposable {
             vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
         }
 
-        // Handle blur effect
-        if (blurScale > 0f && !GamePlatform.get().isWeb()) {
-            client.renderer.blurred(
-                    blurScale,
-                    ClientConfig.blurRadius * blurScale,
-                    true,
-                    1,
-                    () -> bufferSource.end()
-            );
-        } else {
-            bufferSource.end();
-        }
+        bufferSource.end();
     }
 
     /**
@@ -349,6 +344,6 @@ public class GameRenderer implements Disposable {
         if (disposed) return;
         disposed = true;
 
-        vignetteTex.dispose();
+        if (vignetteTex != null) vignetteTex.dispose();
     }
 }

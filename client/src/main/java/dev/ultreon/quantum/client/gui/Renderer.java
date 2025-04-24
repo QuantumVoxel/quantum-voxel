@@ -107,7 +107,7 @@ public class Renderer implements Disposable {
      * Constructs a new Renderer object responsible for managing and drawing shapes,
      * applying matrix transformations, handling textures, and managing visual effects.
      *
-     * @param shapes shape drawer used for rendering various shapes
+     * @param shapes   shape drawer used for rendering various shapes
      * @param matrices matrix manager responsible for handling matrix operations and transformations
      */
     public Renderer(ShapeDrawer shapes, Matrices matrices) {
@@ -178,7 +178,8 @@ public class Renderer implements Disposable {
      * without making any changes.
      *
      * @param c the Color object to set; if null, no changes will be made
-     * @return the current instance of Renderer after setting the color*/
+     * @return the current instance of Renderer after setting the color
+     */
     public Renderer setColor(Color c) {
         if (c == null) return this;
         if (this.font != null)
@@ -191,7 +192,8 @@ public class Renderer implements Disposable {
     /**
      * Sets the color for the renderer, affecting both the font and shapes.
      *
-     * @param c the color to be set. If null, the method will return without modifying*/
+     * @param c the color to be set. If null, the method will return without modifying
+     */
     public Renderer setColor(com.badlogic.gdx.graphics.Color c) {
         if (c == null) return this;
         if (this.font != null)
@@ -217,7 +219,8 @@ public class Renderer implements Disposable {
      * Sets the color of the renderer using the specified red, green, and blue values.
      *
      * @param r the red component of the color, typically between 0 and 1
-     * @param g the green component of the color*/
+     * @param g the green component of the color
+     */
     public Renderer setColor(float r, float g, float b) {
         this.setColor(this.tmpC.set(r, g, b, 1f));
         return this;
@@ -229,7 +232,8 @@ public class Renderer implements Disposable {
      * @param r The red component of the color, in the range 0-255.
      * @param g The green component of the color, in the range 0-255.
      * @param b The blue component of the color, in the range 0-255.
-     * @param a The alpha (transparency) component of the*/
+     * @param a The alpha (transparency) component of the
+     */
     public Renderer setColor(int r, int g, int b, int a) {
         this.setColor(this.tmpC.set(r / 255f, g / 255f, b / 255f, a / 255f));
         return this;
@@ -242,7 +246,8 @@ public class Renderer implements Disposable {
      * @param g the green component of the color
      * @param b the blue component of the color
      * @param a the alpha component of the color
-     * @return the current instance of the*/
+     * @return the current instance of the
+     */
     public Renderer setColor(float r, float g, float b, float a) {
         this.setColor(this.tmpC.set(r, g, b, a));
         return this;
@@ -253,7 +258,8 @@ public class Renderer implements Disposable {
      *
      * @param argb An integer representing the color with alpha, red, green, and blue components.
      *             The format should be 0xAARRGGBB where AA is alpha, RR is red, GG is green, and BB is blue.
-     * @return The Renderer instance with*/
+     * @return The Renderer instance with
+     */
     public Renderer setColor(int argb) {
         this.setColor(this.tmpC.set((argb >> 16 & 0xFF) / 255f, (argb >> 8 & 0xFF) / 255f, (argb & 0xFF) / 255f, (argb >> 24 & 0xFF) / 255f));
         return this;
@@ -2249,7 +2255,7 @@ public class Renderer implements Disposable {
     ////////////////////////////
     //     Transformation     //
 
-    ////////////////////////////
+    /// /////////////////////////
     public Renderer translate(float x, float y) {
         this.matrices.translate(x, y);
         this.batch.setTransformMatrix(this.matrices.last());
@@ -2307,7 +2313,7 @@ public class Renderer implements Disposable {
     ///////////////////////////
     //     Miscellaneous     //
 
-    ///////////////////////////
+    /// ////////////////////////
     @Deprecated
     @ApiStatus.Experimental
     public Renderer drawRegion(int x, int y, int width, int height, Consumer<Renderer> consumer) {
@@ -2368,7 +2374,7 @@ public class Renderer implements Disposable {
 
     public boolean pushScissors(float x, float y, float width, float height) {
         this.flush();
-        Rectangle rect = new Rectangle();
+        Rectangle rect = new Rectangle(x, y, width, height);
         rect.x *= this.client.getGuiScale();
         rect.y *= this.client.getGuiScale();
         rect.width *= this.client.getGuiScale();
@@ -2600,14 +2606,25 @@ public class Renderer implements Disposable {
     /**
      * Renders a popout frame at the specified position and dimensions with a specified depth offset.
      *
-     * @param x the x-coordinate at the top-left corner of the frame
-     * @param y the y-coordinate at the top-left corner of the frame
-     * @param width the width of the frame
+     * @param x      the x-coordinate at the top-left corner of the frame
+     * @param y      the y-coordinate at the top-left corner of the frame
+     * @param width  the width of the frame
      * @param height the height of the frame
-     * @param depth the depth of the frame
+     * @param depth  the depth of the frame
      */
     public void drawPlatform(float x, float y, float width, float height, float depth) {
-        if (depth <= -1f) {
+        boolean scissored = depth <= 0f && pushScissors(x, y, width, height);
+        /*if (depth <= -height) {
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, height + 4, 21 * 6, 21, 21, 7, 1, 2, 4, 2, 256, 256);
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 6, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else if (depth > -height && depth <= -height + 3) {
+            float vHeight = height + depth;
+            draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 6, 21, 21, 7 - vHeight, 1, 2, 4 - vHeight, 2, 256, 256);
+            blit(id("textures/gui/widgets.png"), x, y, 3, vHeight, 126, 21, 3, vHeight, 256, 256); // left
+            blit(id("textures/gui/widgets.png"), x + 3, y, width - 6, vHeight, 129, 21, 15, vHeight, 256, 256); // center
+            blit(id("textures/gui/widgets.png"), x + width - 3, y, 3, vHeight, 144, 21, 3, vHeight, 256, 256); // right
+            draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 126, 41, 21, 1, 0, 3, 0, 3, 256, 256);
+        } else */if (/*depth > -height + 3 && */depth <= -1f) {
             draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 6, 21, 21, 7, 1, 2, 4, 2, 256, 256);
             draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 6, 28, 21, 12, 3, 3, 0, 3, 256, 256);
             draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 6, 41, 21, 1, 0, 3, 0, 3, 256, 256);
@@ -2628,6 +2645,7 @@ public class Renderer implements Disposable {
             draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 0, 18, 21, 3, 1, 256, 256);
             fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
         }
+        if (scissored) popScissors();
     }
 
     public void drawDisabledPlatform(int x, int y, int w, int h) {
@@ -2637,13 +2655,14 @@ public class Renderer implements Disposable {
     /**
      * Renders a popout frame at the specified position and dimensions with a specified depth offset.
      *
-     * @param x the x-coordinate at the top-left corner of the frame
-     * @param y the y-coordinate at the top-left corner of the frame
-     * @param width the width of the frame
+     * @param x      the x-coordinate at the top-left corner of the frame
+     * @param y      the y-coordinate at the top-left corner of the frame
+     * @param width  the width of the frame
      * @param height the height of the frame
-     * @param depth the depth of the frame
+     * @param depth  the depth of the frame
      */
     public void drawDisabledPlatform(float x, float y, float width, float height, float depth) {
+        boolean scissored = depth <= 0f && pushScissors(x, y, width, height);
         if (depth <= -1f) {
             draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 8, 21, 21, 7, 1, 2, 4, 2, 256, 256);
             draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 8, 28, 21, 12, 3, 3, 0, 3, 256, 256);
@@ -2665,14 +2684,15 @@ public class Renderer implements Disposable {
             draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 42, 18, 21, 3, 1, 256, 256);
             fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
         }
+        if (scissored) popScissors();
     }
 
     /**
      * Renders a popout frame at the specified position and dimensions with a specified depth offset.
      *
-     * @param x the x-coordinate at the top-left corner of the frame
-     * @param y the y-coordinate at the top-left corner of the frame
-     * @param width the width of the frame
+     * @param x      the x-coordinate at the top-left corner of the frame
+     * @param y      the y-coordinate at the top-left corner of the frame
+     * @param width  the width of the frame
      * @param height the height of the frame
      */
     public void drawHighlightPlatform(float x, float y, float width, float height) {
@@ -2682,13 +2702,14 @@ public class Renderer implements Disposable {
     /**
      * Renders a popout frame at the specified position and dimensions with a specified depth offset.
      *
-     * @param x the x-coordinate at the top-left corner of the frame
-     * @param y the y-coordinate at the top-left corner of the frame
-     * @param width the width of the frame
+     * @param x      the x-coordinate at the top-left corner of the frame
+     * @param y      the y-coordinate at the top-left corner of the frame
+     * @param width  the width of the frame
      * @param height the height of the frame
-     * @param depth the depth of the frame
+     * @param depth  the depth of the frame
      */
     public void drawHighlightPlatform(float x, float y, float width, float height, float depth) {
+        boolean scissored = depth <= 0 && pushScissors(x, y, width, height);
         if (depth <= -1f) {
             draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 7, 21, 21, 7, 1, 2, 4, 2, 256, 256);
             draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 7, 28, 21, 12, 3, 3, 0, 3, 256, 256);
@@ -2710,6 +2731,7 @@ public class Renderer implements Disposable {
             draw9Slice(id("textures/gui/widgets.png"), x, y + height - depth, width, depth, 21, 18, 21, 3, 1, 256, 256);
             fill(x + 1, y + height, width - 2, depth / 2f + 1, DARK_TRANSPARENT);
         }
+        if (scissored) popScissors();
     }
 
     public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
@@ -2814,21 +2836,31 @@ public class Renderer implements Disposable {
     }
 
     public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float insetTop, float insetRight, float insetBottom, float insetLeft, float texWidth, float texHeight) {
-        this
-                // top
-                .blit(texture, x, y, insetLeft, insetTop, u, v, insetLeft, insetTop, texWidth, texHeight) // left
-                .blit(texture, x + insetLeft, y, width - insetLeft - insetRight, insetTop, insetLeft + u, v, uWidth - insetLeft - insetRight, insetTop, texWidth, texHeight) // center
-                .blit(texture, x + width - insetRight, y, insetRight, insetTop, uWidth - insetRight + u, v, insetRight, insetTop, texWidth, texHeight) // right
+        if (pushScissors(x, y, width, height)) {
+            if (insetTop < 0) insetTop = 0;
+            if (insetRight < 0) insetRight = 0;
+            if (insetBottom < 0) insetBottom = 0;
+            if (insetLeft < 0) insetLeft = 0;
+            // top
+            if (insetTop > 0) this
+                    .blit(texture, x, y, insetLeft, insetTop, u, v, insetLeft, insetTop, texWidth, texHeight) // left
+                    .blit(texture, x + insetLeft, y, width - insetLeft - insetRight, insetTop, insetLeft + u, v, uWidth - insetLeft - insetRight, insetTop, texWidth, texHeight) // center
+                    .blit(texture, x + width - insetRight, y, insetRight, insetTop, uWidth - insetRight + u, v, insetRight, insetTop, texWidth, texHeight); // right
 
-                // center
-                .blit(texture, x, y + insetTop, insetLeft, height - insetTop - insetBottom, u, insetTop + v, insetLeft, vHeight - insetTop - insetBottom, texWidth, texHeight) // left
-                .blit(texture, x + insetLeft, y + insetTop, width - insetLeft - insetRight, height - insetTop - insetBottom, insetLeft + u, insetTop + v, uWidth - insetLeft - insetRight, vHeight - insetTop - insetBottom, texWidth, texHeight) // center
-                .blit(texture, x + width - insetRight, y + insetTop, insetRight, height - insetTop - insetBottom, uWidth - insetRight + u, insetTop + v, insetRight, vHeight - insetTop - insetBottom, texWidth, texHeight) // right
+            // center
+            this
+                    .blit(texture, x, y + insetTop, insetLeft, height - insetTop - insetBottom, u, insetTop + v, insetLeft, vHeight - insetTop - insetBottom, texWidth, texHeight) // left
+                    .blit(texture, x + insetLeft, y + insetTop, width - insetLeft - insetRight, height - insetTop - insetBottom, insetLeft + u, insetTop + v, uWidth - insetLeft - insetRight, vHeight - insetTop - insetBottom, texWidth, texHeight) // center
+                    .blit(texture, x + width - insetRight, y + insetTop, insetRight, height - insetTop - insetBottom, uWidth - insetRight + u, insetTop + v, insetRight, vHeight - insetTop - insetBottom, texWidth, texHeight); // right
 
-                // bottom
-                .blit(texture, x, y + height - insetBottom, insetLeft, insetBottom, u, vHeight - insetBottom + v, insetLeft, insetBottom, texWidth, texHeight) // left
-                .blit(texture, x + insetLeft, y + height - insetBottom, width - insetLeft - insetRight, insetBottom, insetLeft + u, vHeight - insetBottom + v, uWidth - insetLeft - insetRight, insetBottom, texWidth, texHeight) // center
-                .blit(texture, x + width - insetRight, y + height - insetBottom, insetRight, insetBottom, uWidth - insetRight + u, vHeight - insetBottom + v, insetRight, insetBottom, texWidth, texHeight); // right
+            // bottom
+            if (insetBottom > 0) this
+                    .blit(texture, x, y + height - insetBottom, insetLeft, insetBottom, u, vHeight - insetBottom + v, insetLeft, insetBottom, texWidth, texHeight) // left
+                    .blit(texture, x + insetLeft, y + height - insetBottom, width - insetLeft - insetRight, insetBottom, insetLeft + u, vHeight - insetBottom + v, uWidth - insetLeft - insetRight, insetBottom, texWidth, texHeight) // center
+                    .blit(texture, x + width - insetRight, y + height - insetBottom, insetRight, insetBottom, uWidth - insetRight + u, vHeight - insetBottom + v, insetRight, insetBottom, texWidth, texHeight); // right
+
+            popScissors();
+        }
     }
 
     public void begin() {
@@ -2972,7 +3004,7 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(float overlayOpacity, float radius, boolean grid, int guiScale, Runnable block) {
-        if (GamePlatform.get().isWeb() || !ClientConfig.blurEnabled || this.blurred) {
+        if (GamePlatform.get().isLowPowerDevice() || !ClientConfig.blurEnabled || this.blurred) {
             block.run();
             return;
         }

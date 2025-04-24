@@ -4,7 +4,6 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
-import dev.ultreon.quantum.server.PlatformOS;
 
 import java.io.IOException;
 import java.nio.file.Files;

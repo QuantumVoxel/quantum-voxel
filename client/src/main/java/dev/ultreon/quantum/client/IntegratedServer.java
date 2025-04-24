@@ -84,7 +84,6 @@ public class IntegratedServer extends QuantumServer {
     @Override
     public void start() {
         this.networker = new MemoryNetworker(this, MemoryConnectionContext.get());
-
         super.start();
     }
 

@@ -76,13 +76,6 @@ graalvmNative {
     toolchainDetection = true
 }
 
-repositories {
-    maven {
-        url = "https://maven.fabricmc.net"
-        name = "FabricMC"
-    }
-}
-
 configurations {
     addToJar {
         canBeResolved true
@@ -153,13 +146,6 @@ dependencies {
 
     api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
-    // ImGui
-    api("io.github.spair:imgui-java-binding:$imGuiVersion")
-    api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion")
-    api("io.github.spair:imgui-java-natives-linux:$imGuiVersion")
-    api("io.github.spair:imgui-java-natives-macos:$imGuiVersion")
-    api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")
-
     api("it.unimi.dsi:fastutil-core:8.5.9")
     api("com.google.code.findbugs:jsr305:$jsrVersion")
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
@@ -189,7 +175,7 @@ dependencies {
     api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
     api('net.fabricmc:access-widener:2.1.0')
 
-    api("dev.ultreon.quantum-fabric-loader:fabric-loader:$fabricVersion")
+    api("net.fabricmc:fabric-loader:$fabricVersion")
     
     natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows")
     natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")

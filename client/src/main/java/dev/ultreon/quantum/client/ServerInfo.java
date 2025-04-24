@@ -12,20 +12,23 @@ import java.util.Objects;
 public final class ServerInfo {
     private final String name;
     private final String address;
+    private boolean secure;
 
     /**
      * Constructs a ServerInfo record with the specified name and address.
      *
-     * @param name the name of the server
+     * @param name    the name of the server
      * @param address the address of the server
+     * @param secure
      */
-    public ServerInfo(String name, String address) {
+    public ServerInfo(String name, String address, boolean secure) {
         this.name = name;
         this.address = address;
+        this.secure = secure;
     }
 
     public static ServerInfo load(MapType data) {
-        return new ServerInfo(data.getString("name"), data.getString("address"));
+        return new ServerInfo(data.getString("name"), data.getString("address"), data.getBoolean("secure"));
     }
 
     public MapType save() {
@@ -41,6 +44,10 @@ public final class ServerInfo {
 
     public String address() {
         return address;
+    }
+
+    public boolean secure() {
+        return secure;
     }
 
     @Override
