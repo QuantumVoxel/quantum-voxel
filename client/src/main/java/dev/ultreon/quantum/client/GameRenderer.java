@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
@@ -104,17 +104,17 @@ public class GameRenderer implements Disposable {
                     int centerY = height / 2;
                     if (GamePlatform.get().isMobile()) {
                         if (Gdx.input.isTouched()) {
-                            float dx = (int) (-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity);
-                            float dy = (int) (-Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
+                            float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
+                            float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
                             player.rotateHead(dx, dy);
                         }
                     } else if (GamePlatform.get().isWeb()) {
-                        float dx = (int) (-Gdx.input.getDeltaX() * ClientConfig.cameraSensitivity);
-                        float dy = (int) (-Gdx.input.getDeltaY() * ClientConfig.cameraSensitivity);
+                        float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
+                        float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
                         player.rotateHead(dx, dy);
                     } else if (GamePlatform.get().isDesktop()) {
-                        float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfig.cameraSensitivity);
-                        float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfig.cameraSensitivity);
+                        float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfiguration.cameraSensitivity.getValue());
+                        float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfiguration.cameraSensitivity.getValue());
                         player.rotateHead(dx, dy);
                     }
 
@@ -123,7 +123,7 @@ public class GameRenderer implements Disposable {
                 }
 
                 this.client.camera.update(player);
-                this.client.camera.far = ((float) ClientConfig.renderDistance / CS - 1) * World.CS / WorldRenderer.SCALE;
+                this.client.camera.far = ((float) ClientConfiguration.renderDistance.getValue() / CS - 1) * World.CS / WorldRenderer.SCALE;
 
                 var rotation = this.tmp.set(player.xHeadRot, player.yRot);
                 var quaternion = new Quaternion();
@@ -177,7 +177,9 @@ public class GameRenderer implements Disposable {
             this.renderOverlays(renderer, screen, world, deltaTime);
 
             if (this.client.crashOverlay != null) {
-                if (Gdx.input.isKeyPressed(Input.Keys.F1) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                if (!GamePlatform.get().isMacOSX() && Gdx.input.isKeyPressed(Input.Keys.F1) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    this.client.crashOverlay.render(renderer, deltaTime);
+                } else if (GamePlatform.get().isMacOSX() && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyPressed(Input.Keys.C)) {
                     this.client.crashOverlay.render(renderer, deltaTime);
                 } else {
                     this.client.crashOverlay.reset();

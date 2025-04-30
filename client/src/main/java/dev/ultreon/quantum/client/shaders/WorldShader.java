@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
@@ -207,7 +207,7 @@ public class WorldShader extends DefaultShader {
         public final static Setter lodThreshold = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                shader.set(inputID, ClientConfig.lodThreshold);
+                shader.set(inputID, ClientConfiguration.lodThreshold.getValue());
             }
         };
 

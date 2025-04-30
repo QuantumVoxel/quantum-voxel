@@ -9,7 +9,7 @@ import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.LoadingContext;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Fonts;
 import dev.ultreon.quantum.client.gui.Hud;
 import dev.ultreon.quantum.client.gui.Overlays;
@@ -114,7 +114,7 @@ class QuantumClientLoader implements Runnable {
         QuantumClient.createDir("game-crashes/");
         QuantumClient.createDir("logs/");
 
-        int scale = ClientConfig.guiScale;
+        int scale = ClientConfiguration.guiScale.getValue();
         if (scale == 0) {
             client.setAutomaticScale(true);
         }

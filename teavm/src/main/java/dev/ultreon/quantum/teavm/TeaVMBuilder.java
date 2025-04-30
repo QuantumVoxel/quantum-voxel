@@ -34,7 +34,8 @@ public class TeaVMBuilder {
         // For many (or most) applications, using the highest optimization won't add much to build time.
         // If your builds take too long, and runtime performance doesn't matter, you can change FULL to SIMPLE .
         tool.setOptimizationLevel(TeaVMOptimizationLevel.SIMPLE);
-        tool.setTargetType(TeaVMTargetType.JAVASCRIPT);
+        tool.setTargetType(TeaVMTargetType.WEBASSEMBLY_GC);
+        tool.setMaxDirectBuffersSize(536870912);
         tool.setObfuscated(true);
         tool.setShortFileNames(false);
         tool.setSourceMapsFileGenerated(true);

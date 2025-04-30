@@ -53,6 +53,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -347,7 +348,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public void start() {
         if (this.running) throw new IllegalStateException("Server already running!");
         this.running = true;
-        if (!GamePlatform.get().isWeb()) this.thread.start();
+        if (!GamePlatform.get().isWeb()) GamePlatform.get().runNotOnWeb(() -> this.thread.start());
     }
 
     /**
@@ -422,14 +423,13 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                     tickTime = 0;
                 }
 
-                // Allow thread interrupting.
-                sleepDuration.sleep();
+                if (GamePlatform.get().isThreadInterrupted()) {
+                    this.running = false;
+                }
             }
 
             // Server stopped.
             LOGGER.info("Stopping server...");
-        } catch (InterruptedException ignored) {
-            // Ignore interruption exception.
         } catch (Throwable t) {
             // Server crashed.
             this.crash(t);
@@ -520,11 +520,13 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         // Set running flag to make server stop.
         this.running = false;
 
-        try {
-            this.thread.join(60000);
-        } catch (InterruptedException e) {
-            this.fatalCrash(new RuntimeException("Safe shutdown got interrupted."));
-        }
+        Instant now = Instant.now();
+        do {
+            if (Instant.now().toEpochMilli() - now.toEpochMilli() > 10000) {
+                this.fatalCrash(new RuntimeException("Safe shutdown failed."));
+                throw new RuntimeException("Safe shutdown failed.");
+            }
+        } while (this.running);
 
         // Shut down the parent executor service.
         super.shutdownNow();

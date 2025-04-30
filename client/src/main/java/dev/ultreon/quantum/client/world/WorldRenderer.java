@@ -28,7 +28,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
 import dev.ultreon.quantum.client.management.MaterialManager;
@@ -453,7 +453,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         drawSelf:
         try (var ignored = QuantumClient.PROFILER.start("(Local Player)")) {
             LocalPlayer localPlayer = this.client.player;
-            if (localPlayer == null || !this.client.isInThirdPerson() && ClientConfig.hideFirstPersonPlayer) {
+            if (localPlayer == null || !this.client.isInThirdPerson() && !ClientConfiguration.firstPersonPlayerModel.getValue()) {
                 if (localPlayer != null) modelInstances.remove(localPlayer.getId());
                 break drawSelf;
             }
@@ -978,7 +978,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      */
     @Override
     public void updateBackground() {
-        if (ClientConfig.showSunAndMoon) {
+        if (ClientConfiguration.showSunAndMoon.getValue()) {
             updateSunMoon();
         } else if (wasSunMoonShown) {
             if (this.sun != null) this.sun.setVisible(false);

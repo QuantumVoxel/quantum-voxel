@@ -6,7 +6,7 @@
 //import dev.ultreon.libs.datetime.v0.Duration;
 //import dev.ultreon.quantum.CommonConstants;
 //import dev.ultreon.quantum.client.QuantumClient;
-//import dev.ultreon.quantum.client.config.ClientConfig;
+//import dev.ultreon.quantum.client.config.ClientConfiguration;
 //import dev.ultreon.quantum.client.gui.Notification;
 //import dev.ultreon.quantum.client.gui.icon.ControllerIcon;
 //import dev.ultreon.quantum.client.gui.screens.ChatScreen;
@@ -116,7 +116,7 @@
 //    }
 //
 //    public void openVirtualKeyboard(@NotNull String value, VirtualKeyboardEditCallback callback) {
-//        if (!ClientConfig.enableVirtualKeyboard) return;
+//        if (!ClientConfiguration.enableVirtualKeyboard) return;
 //
 //        this.virtualKeyboardValue = value;
 //        this.virtualKeyboardOpen = true;

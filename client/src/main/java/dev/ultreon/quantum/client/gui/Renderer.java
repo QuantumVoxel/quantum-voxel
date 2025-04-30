@@ -20,7 +20,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.widget.CompatTypingLabel;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.world.RenderablePool;
@@ -2994,7 +2994,7 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(boolean grid, int guiScale, Runnable block) {
-        blurred(ClientConfig.blurRadius, grid, guiScale, block);
+        blurred(ClientConfiguration.blurRadius.getValue(), grid, guiScale, block);
     }
 
     @ApiStatus.Experimental
@@ -3004,7 +3004,7 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(float overlayOpacity, float radius, boolean grid, int guiScale, Runnable block) {
-        if (GamePlatform.get().isLowPowerDevice() || !ClientConfig.blurEnabled || this.blurred) {
+        if (GamePlatform.get().isLowPowerDevice() || !ClientConfiguration.blurEnabled.getValue() || this.blurred) {
             block.run();
             return;
         }
@@ -3301,7 +3301,7 @@ public class Renderer implements Disposable {
 
         if (shadow) {
             batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
-            if (ClientConfig.diagonalFontShadow) {
+            if (ClientConfiguration.diagonalFontShadow.getValue()) {
                 this.drawText0(this.batch, text, x + 1, y + 1, c);
             } else {
                 this.drawText0(this.batch, text, x, y + 1, c);
@@ -3321,7 +3321,7 @@ public class Renderer implements Disposable {
 
         if (shadow) {
             batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
-            if (ClientConfig.diagonalFontShadow) {
+            if (ClientConfiguration.diagonalFontShadow.getValue()) {
                 this.drawText0(this.batch, string, x + 1, y + 1, c);
             } else {
                 this.drawText0(this.batch, string, x, y + 1, c);
@@ -3342,7 +3342,7 @@ public class Renderer implements Disposable {
 
         if (shadow) {
             batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
-            if (ClientConfig.diagonalFontShadow) {
+            if (ClientConfiguration.diagonalFontShadow.getValue()) {
                 this.drawText0(this.batch, string, x + 1, y + 1, c);
             } else {
                 this.drawText0(this.batch, string, x, y + 1, c);
@@ -3363,7 +3363,7 @@ public class Renderer implements Disposable {
 
         if (shadow) {
             batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
-            if (ClientConfig.diagonalFontShadow) {
+            if (ClientConfiguration.diagonalFontShadow.getValue()) {
                 this.drawText0(this.batch, string, x + 1, y + 1, c);
             } else {
                 this.drawText0(this.batch, string, x, y + 1, c);

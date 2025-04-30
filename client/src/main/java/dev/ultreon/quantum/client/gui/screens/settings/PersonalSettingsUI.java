@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui.screens.settings;
 
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Alignment;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
@@ -15,11 +15,9 @@ import dev.ultreon.quantum.text.TextObject;
 
 public class PersonalSettingsUI {
     static final TextObject TITLE = TextObject.translation("quantum.screen.options.personalisation.title");
-    private QuantumClient client;
 
     public void build(TabBuilder builder) {
-        this.client = builder.client();
-        
+
         builder.add(Label.of(builder.title())
                 .alignment(Alignment.CENTER)
                 .scale(2)
@@ -27,52 +25,47 @@ public class PersonalSettingsUI {
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.diagonalFontShadow"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(ClientConfig.diagonalFontShadow ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfiguration.diagonalFontShadow.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
                 .setCallback(this::setDiagonalFontShadow));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.enforceUnicode"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(ClientConfig.enforceUnicode ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfiguration.enforceUnicode.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
                 .setCallback(this::setEnforceUnicode));
 
-        builder.add(TextObject.translation("quantum.screen.options.personalisation.blurRadius"), new Slider(ClientConfig.blurRadius == 0 ? 32 : (int) ClientConfig.blurRadius, 4, 128)
+        builder.add(TextObject.translation("quantum.screen.options.personalisation.blurRadius"), new Slider(ClientConfiguration.blurRadius.getValue() == 0 ? 32 : ClientConfiguration.blurRadius.getValue().intValue(), 4, 128)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .text(TextObject.translation("quantum.screen.options.personalisation.blurRadius.text"))
                 .setCallback(this::setBlurRadius));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.blurEnabled"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(ClientConfig.blurEnabled ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfiguration.blurEnabled.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
                 .setCallback(this::setBlurEnabled));
 
-        builder.add(TextObject.translation("quantum.screen.options.personalisation.vignetteOpacity"), new Slider((int) (ClientConfig.vignetteOpacity * 100), 0, 100)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
-                .text(TextObject.translation("quantum.screen.options.personalisation.vignetteOpacity.text"))
-                .setCallback(this::setVignetteOpacity));
-
         builder.add(TextObject.translation("quantum.screen.options.personalisation.showMemoryUsage"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(ClientConfig.showMemoryUsage ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfiguration.showMemoryUsage.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
                 .setCallback(this::setShowMemoryUsage));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.enableFpsCounter"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(ClientConfig.enableFpsCounter ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfiguration.enableFpsHud.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 200, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
                 .setCallback(this::setFpsCounter));
 
         builder.add(TextObject.translation("quantum.screen.options.personalisation.showOnlyCraftable"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
-                .value(ClientConfig.showOnlyCraftable ? BooleanEnum.TRUE : BooleanEnum.FALSE)
+                .value(ClientConfiguration.showOnlyCraftable.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
                 .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 225, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
                 .setCallback(this::setShowOnlyCraftable));
@@ -106,42 +99,37 @@ public class PersonalSettingsUI {
     }
 
     private void setShowOnlyCraftable(CycleButton<BooleanEnum> cycleButton) {
-        ClientConfig.showOnlyCraftable = cycleButton.getValue().get();
-        this.client.newConfig.save();
+        ClientConfiguration.showOnlyCraftable.setValue(cycleButton.getValue().get());
+        ClientConfiguration.save();
     }
 
     private void setFpsCounter(CycleButton<BooleanEnum> cycleButton) {
-        ClientConfig.enableFpsCounter = cycleButton.getValue().get();
-        this.client.newConfig.save();
+        ClientConfiguration.enableFpsHud.setValue(cycleButton.getValue().get());
+        ClientConfiguration.save();
     }
 
     private void setShowMemoryUsage(CycleButton<BooleanEnum> cycleButton) {
-        ClientConfig.showMemoryUsage = cycleButton.getValue().get();
-        this.client.newConfig.save();
+        ClientConfiguration.showMemoryUsage.setValue(cycleButton.getValue().get());
+        ClientConfiguration.save();
     }
 
     private void setBlurEnabled(CycleButton<BooleanEnum> cycleButton) {
-        ClientConfig.blurEnabled = cycleButton.getValue().get();
-        this.client.newConfig.save();
-    }
-
-    private void setVignetteOpacity(Slider slider) {
-        ClientConfig.vignetteOpacity = slider.value().get() / 100f;
-        this.client.newConfig.save();
+        ClientConfiguration.blurEnabled.setValue(cycleButton.getValue().get());
+        ClientConfiguration.save();
     }
 
     private void setBlurRadius(Slider slider) {
-        ClientConfig.blurRadius = (float) slider.value().get();
-        this.client.newConfig.save();
+        ClientConfiguration.blurRadius.setValue((float) slider.value().get());
+        ClientConfiguration.save();
     }
 
     private void setEnforceUnicode(CycleButton<BooleanEnum> booleanEnumCycleButton) {
-        ClientConfig.enforceUnicode = booleanEnumCycleButton.getValue().get();
-        this.client.newConfig.save();
+        ClientConfiguration.enforceUnicode.setValue(booleanEnumCycleButton.getValue().get());
+        ClientConfiguration.save();
     }
 
     private void setDiagonalFontShadow(CycleButton<BooleanEnum> booleanEnumCycleButton) {
-        ClientConfig.diagonalFontShadow = booleanEnumCycleButton.getValue().get();
-        this.client.newConfig.save();
+        ClientConfiguration.diagonalFontShadow.setValue(booleanEnumCycleButton.getValue().get());
+        ClientConfiguration.save();
     }
 }

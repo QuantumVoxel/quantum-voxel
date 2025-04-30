@@ -481,4 +481,8 @@ public class TextEntry extends Widget {
     public TextObject getHint() {
         return this.hint.get();
     }
+
+    public void setValue(String name) {
+        this.value = name;
+    }
 }

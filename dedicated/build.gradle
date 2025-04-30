@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'java-library'
+    id 'application'
 }
 
 group = 'dev.ultreon.quantum'
@@ -43,4 +44,23 @@ test {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+application {
+    applicationDefaultJvmArgs = [
+            "-Xmx4g",
+            "-Xms4g",
+            "-Dfabric.dli.env=SERVER",
+            "-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer",
+            "-Dfabric.development=true",
+            "-Dlog4j2.formatMsgNoLookups=true",
+            "-Dfabric.log.disableAnsi=false",
+            "-Dfabric.skipMcProvider=true",
+            "-Dfabric.zipfs.use_temp_file=false",
+            "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml"
+    ] + (System.getProperty("os.name").toLowerCase().startsWith("mac")
+            ? ["-XstartOnFirstThread"]
+            : [])
+
+    mainClass.set("net.fabricmc.devlaunchinjector.Main")
 }

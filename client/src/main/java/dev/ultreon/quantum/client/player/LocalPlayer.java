@@ -15,7 +15,7 @@ import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.screens.ChunkLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
@@ -245,7 +245,7 @@ public class LocalPlayer extends ClientPlayer {
         if (connection == null) {
             return;
         }
-        int renderDistance = Math.max(2, ClientConfig.renderDistance / CS);
+        int renderDistance = Math.max(2, ClientConfiguration.renderDistance.getValue() / CS);
 
         for (ClientChunkAccess chunk : this.clientWorld.getLoadedChunks()) {
             if (chunk.getVec().dst(chunkVec) > renderDistance) {

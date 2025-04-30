@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
+import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.dedicated.FabricMod;
@@ -47,10 +48,12 @@ import static dev.ultreon.quantum.desktop.DesktopLauncher.LOGGER;
 public abstract class DesktopPlatform extends GamePlatform {
     private final Map<String, FabricMod> mods = new IdentityHashMap<>();
     private final boolean angleGLES;
+    private SafeLoadWrapper safeWrapper;
 
-    DesktopPlatform(boolean angleGLES) {
+    DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
         this.angleGLES = angleGLES;
+        this.safeWrapper = safeWrapper;
         if (angleGLES)
             System.setProperty("quantum.platform.anglegles", "true");
     }
@@ -481,6 +484,11 @@ public abstract class DesktopPlatform extends GamePlatform {
         }
 
         super.handleDisconnect(e);
+    }
+
+    @Override
+    public void handleCrash(ApplicationCrash crash) {
+        safeWrapper.crash(crash);
     }
 
     @Override

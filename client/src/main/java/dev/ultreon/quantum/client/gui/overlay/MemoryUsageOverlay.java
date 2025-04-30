@@ -4,7 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
@@ -16,7 +16,7 @@ public class MemoryUsageOverlay extends Overlay {
 
     @Override
     public void render(Renderer renderer, float deltaTime) {
-        if (!ClientConfig.showMemoryUsage) return;
+        if (!ClientConfiguration.showMemoryUsage.getValue()) return;
 
         int scrWidth = QuantumClient.get().getScaledWidth();
         int scrHeight = QuantumClient.get().getScaledHeight();

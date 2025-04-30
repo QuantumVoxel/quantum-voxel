@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.entity.player.Player;
@@ -213,7 +213,7 @@ public abstract class GameInput implements Disposable {
     }
 
     public static boolean startVibration(int duration, float strength) {
-        if (!ClientConfig.vibration) return false;
+        if (!ClientConfiguration.vibration.getValue()) return false;
 
         Controller current = Controllers.getCurrent();
         if (current == null) return false;

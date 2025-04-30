@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.client.IntegratedServer;
@@ -74,8 +75,7 @@ public class WorldLoadScreen extends Screen {
                 .alignment(Alignment.CENTER)
                 .position(() -> new Position(this.size.width / 2, this.size.height / 3 + 31)));
 
-        Thread worldLoading = new Thread(this::run, "World Loading");
-        worldLoading.start();
+        GamePlatform.get().runAsync(this::run);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class WorldLoadScreen extends Screen {
             this.world.setupSpawn();
 
             while (!loggedIn) {
-                Thread.sleep(100);
+                GamePlatform.get().sleep(100);
             }
 
             ChunkVec chunkVec = Objects.requireNonNull(this.client.player, "Player is null").getChunkVec();

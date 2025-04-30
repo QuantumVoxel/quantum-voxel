@@ -2,6 +2,7 @@ package dev.ultreon.quantum;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
@@ -306,6 +307,8 @@ public abstract class GamePlatform {
         return 0;
     }
 
+    public abstract void handleCrash(ApplicationCrash crash);
+
     public long totalMemory() {
         return 0;
     }
@@ -372,6 +375,22 @@ public abstract class GamePlatform {
 
     public void handleDisconnect(Throwable e) {
 
+    }
+
+    public void sleep(int i) throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
+    public void runNotOnWeb(Runnable runnable) {
+        runnable.run();
+    }
+
+    public boolean isThreadInterrupted() {
+        return Thread.interrupted();
+    }
+
+    public TimerInstance getTimer() {
+        return new TimerInstanceImpl();
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

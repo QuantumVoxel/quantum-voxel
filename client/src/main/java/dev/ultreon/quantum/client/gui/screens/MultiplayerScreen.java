@@ -10,7 +10,6 @@ import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MultiplayerScreen extends Screen {
@@ -26,6 +25,7 @@ public class MultiplayerScreen extends Screen {
     private ServerInfo server;
     private Panel listPanel;
     private Panel listButtonPanel;
+    private TextButton editButton;
 
     public MultiplayerScreen() {
         super(Language.translate("quantum.screen.multiplayer"));
@@ -41,10 +41,10 @@ public class MultiplayerScreen extends Screen {
 
         listPanel = add(Panel.create());
         listPanel.setPos(0, 0);
-        listPanel.setSize(200, size.height - 30);
+        listPanel.setSize(200, size.height - 27);
 
         listButtonPanel = add(Panel.create());
-        listButtonPanel.setPos(0, size.height - 30);
+        listButtonPanel.setPos(0, size.height - 327);
         listButtonPanel.setSize(200, 30);
 
         selectionList = add(new SelectionList<>());
@@ -72,13 +72,8 @@ public class MultiplayerScreen extends Screen {
         client.localData.servers.forEach(info -> selectionList.entry(new ServerEntry(info)));
 
         panel = add(Panel.create());
-        panel.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 47);
-        panel.setSize(110, 92);
-
-        backButton = add(TextButton.of(UITranslations.BACK, 98));
-        backButton.setPos(panel.getPos().x + 5, panel.getPos().y + 65);
-        backButton.setType(Button.Type.DARK_EMBED);
-        backButton.setCallback(this::back);
+        panel.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 61);
+        panel.setSize(110, 122);
 
         joinButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98));
         joinButton.setPos(panel.getPos().x + 5, panel.getPos().y + 5);
@@ -90,6 +85,20 @@ public class MultiplayerScreen extends Screen {
         removeButton.setPos(panel.getPos().x + 5, panel.getPos().y + 35);
         removeButton.setType(Button.Type.DARK_EMBED);
         removeButton.setCallback(this::removeServer);
+
+        editButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.edit"), 98));
+        editButton.setPos(panel.getPos().x + 5, panel.getPos().y + 65);
+        editButton.setType(Button.Type.DARK_EMBED);
+        editButton.setCallback(this::editServer);
+
+        backButton = add(TextButton.of(UITranslations.BACK, 98));
+        backButton.setPos(panel.getPos().x + 5, panel.getPos().y + 95);
+        backButton.setType(Button.Type.DARK_EMBED);
+        backButton.setCallback(this::back);
+    }
+
+    private void editServer(TextButton textButton) {
+        client.showScreen(new EditServerScreen(this, selectionList.getSelected(), server));
     }
 
     private void removeServer(TextButton textButton) {
@@ -226,12 +235,96 @@ public class MultiplayerScreen extends Screen {
             String[] portSplitOff = hostSplitOff[1].split("/", 2);
             var port = Integer.parseInt(portSplitOff[0]);
 
-            if (port < 1000 || port > 65535) {
+            if (port != 80 && port != 443 && !(port >= 1000 && port <= 65535)) {
                 this.addButton.isEnabled = false;
                 return;
             }
 
             this.addButton.isEnabled = true;
         }
+    }
+
+    private class EditServerScreen extends Screen {
+        private final TextEntry nameEntry;
+        private final TextEntry entry;
+        private final TextButton addButton;
+        private final CycleButton<Boolean> secureBtn;
+        private final ServerEntry serverEntry;
+
+        public EditServerScreen(MultiplayerScreen parent, ServerEntry serverEntry, ServerInfo info) {
+            super(TextObject.translation("quantum.screen.multiplayer.add_server"), parent);
+
+            this.serverEntry = serverEntry;
+
+            title = TextObject.translation("quantum.screen.multiplayer.add_server");
+
+            nameEntry = add(TextEntry.of());
+            nameEntry.setPos(pos.x + 5, pos.y + 30);
+            nameEntry.setSize(190, 20);
+            nameEntry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_name"));
+
+            entry = add(TextEntry.of());
+            entry.setSize(190, 20);
+            entry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_ip"));
+            entry.callback().set(this::validateServerIp);
+
+            secureBtn = add(new CycleButton<Boolean>().values(Boolean.TRUE, Boolean.FALSE).formatter(bool -> bool
+                    ? SECURE_CONNECTION_YES
+                    : SECURE_CONNECTION_NO));
+            secureBtn.setSize(190, 20);
+
+            addButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.add"), 98));
+            addButton.setSize(190, 20);
+            addButton.setType(Button.Type.DARK_EMBED);
+            addButton.setCallback((button) -> {
+                MultiplayerScreen multiplayerScreen = MultiplayerScreen.this;
+                multiplayerScreen.removeServer(serverEntry);
+                int i = multiplayerScreen.selectionList.getSelectedIndex();
+                multiplayerScreen.selectionList.removeEntry(i);
+                client.localData.servers.remove(i);
+                client.localData.save();
+                multiplayerScreen.addServer(new ServerInfo(nameEntry.getValue(), entry.getValue(), secureBtn.getValue()));
+                back();
+            });
+
+            nameEntry.setValue(info.name());
+            entry.setValue(info.address());
+            secureBtn.value(info.secure());
+
+            validateServerIp(entry);
+        }
+
+        @Override
+        public void revalidate() {
+            super.revalidate();
+
+            nameEntry.setPos(size.width / 2 - nameEntry.size.width / 2, size.height / 2 - 60);
+            entry.setPos(size.width / 2 - entry.size.width / 2, size.height / 2 - 30);
+            secureBtn.setPos(size.width / 2 - secureBtn.size.width / 2, size.height / 2);
+            addButton.setPos(size.width / 2 - addButton.size.width / 2, size.height / 2 + 30);
+        }
+
+        private void validateServerIp(TextEntry caller) {
+            var text = caller.getValue();
+            boolean matches = text.matches("[^:]+:\\d{1,5}(/[^@:]+)?");
+            if (!matches) {
+                this.addButton.isEnabled = false;
+                return;
+            }
+            var hostSplitOff = text.split(":", 2);
+            String[] portSplitOff = hostSplitOff[1].split("/", 2);
+            var port = Integer.parseInt(portSplitOff[0]);
+
+            if (port != 80 && port != 443 && !(port >= 1000 && port <= 65535)) {
+                this.addButton.isEnabled = false;
+                return;
+            }
+
+            this.addButton.isEnabled = true;
+        }
+    }
+
+    private void removeServer(ServerEntry entry) {
+        this.selectionList.removeEntry(entry);
     }
 }

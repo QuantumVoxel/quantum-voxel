@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static dev.ultreon.quantum.client.QuantumClient.id;
-
 @ApiStatus.NonExtendable
 public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private static final int SCROLLBAR_WIDTH = 5;
@@ -36,6 +34,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private boolean drawBackground;
     private boolean drawButtons = true;
     private boolean cutButtons = true;
+    private int selectedIndex;
 
     public SelectionList(int x, int y, int width, int height) {
         super(width, height);
@@ -105,28 +104,33 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Nullable
     public Entry<T> getEntryAt(int x, int y) {
-        if (!this.isWithinBounds(x, y)) return null;
+        int entryIndexAt = getEntryIndexAt(x, y);
+        return entries.get(entryIndexAt);
+    }
+
+    public int getEntryIndexAt(int x, int y) {
+        if (!this.isWithinBounds(x, y)) return -1;
         List<Entry<T>> entries = this.entries;
         for (int i = entries.size() - 1; i >= 0; i--) {
             Entry<T> entry = entries.get(i);
             if (!entry.isEnabled || !entry.isVisible) continue;
-            if (entry.isWithinBounds(x, y)) return entry;
+            if (entry.isWithinBounds(x, y)) return i;
         }
-        return null;
+        return -1;
     }
 
     @Override
     public boolean mouseClick(int x, int y, int button, int count) {
-        if (this.selectable) {
-            Entry<T> entryAt = this.getEntryAt(x, y);
-
-            if (entryAt != null) {
-                this.selected = entryAt;
-                this.onSelected.call(this.selected.getValue());
-                return true;
-            }
+        int index = this.getEntryIndexAt(x, y);
+        Entry<T> entry = index == -1 ? null : entries.get(index);
+        if (this.selectable && index >= 0) {
+            this.selectedIndex = index;
+            this.selected = entry;
+            this.onSelected.call(this.selected.getValue());
+            return true;
         }
-        @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
+
+        @Nullable Entry<T> widgetAt = entry;
         return widgetAt != null && widgetAt.mouseClick(x - widgetAt.getX(), y - widgetAt.getY(), button, count);
     }
 
@@ -316,6 +320,14 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     public SelectionList<T> cutButtons(boolean b) {
         this.cutButtons = b;
         return this;
+    }
+
+    public int getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public Entry<T> removeEntry(int index) {
+        return entries.remove(index);
     }
 
     public static class Entry<T> extends Widget {

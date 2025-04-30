@@ -95,10 +95,10 @@ public class DesktopLauncher {
      * Launches the game.
      * This method gets invoked dynamically by the FabricMC game provider.
      *
-     * @param argv the arguments to pass to the game
+     * @param args the arguments to pass to the game
      */
     @SuppressWarnings("unused")
-    private static void launch(String[] argv) {
+    private static void launch(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
 
         LauncherConfig launcherConfig = LauncherConfig.get();
@@ -108,7 +108,8 @@ public class DesktopLauncher {
 
         LauncherConfig.save();
 
-        platform = new DesktopPlatform(useAngleGraphics) {
+        SafeLoadWrapper safeWrapper = new SafeLoadWrapper(args);
+        platform = new DesktopPlatform(useAngleGraphics, safeWrapper) {
             @Override
             public GameWindow createWindow() {
                 return gameWindow;
@@ -163,9 +164,6 @@ public class DesktopLauncher {
         CrashHandler.addHandler(crashLog -> {
             try {
                 KeyAndMouseInput.setCursorCaught(false);
-                if (gameWindow != null) {
-                    gameWindow.setVisible(false);
-                }
             } catch (Exception e) {
                 QuantumClient.LOGGER.error("Failed to hide cursor", e);
             }
@@ -182,8 +180,8 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
             try {
-                if (GamePlatform.get().isAngleGLES()) new Lwjgl3VulkanApplication(Main.createInstance(argv), DesktopLauncher.createVulkanConfig());
-                else new Lwjgl3Application(Main.createInstance(argv), DesktopLauncher.createConfig());
+                if (GamePlatform.get().isAngleGLES()) new Lwjgl3VulkanApplication(safeWrapper, DesktopLauncher.createVulkanConfig());
+                else new Lwjgl3Application(safeWrapper, DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);

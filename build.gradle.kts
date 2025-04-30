@@ -14,6 +14,7 @@ buildscript {
   repositories {
     mavenCentral()
 
+    maven("https://teavm.org/maven/repository")
     maven {
       url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
       name = "sonatype"
@@ -67,6 +68,7 @@ repositories {
   maven("https://repo1.maven.org/maven2/")
   maven("https://repo.runelite.net/")
   maven("https://repo.glaremasters.me/repository/public/")
+  maven("https://teavm.org/maven/repository")
   maven("https://jitpack.io") {
     content {
       includeGroup("dev.ultreon")
@@ -166,6 +168,7 @@ allprojects {
     mavenCentral()
     google()
     maven("https://maven.fabricmc.net/")
+    maven("https://teavm.org/maven/repository")
     maven("https://oss.sonatype.org/content/repositories/releases")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.glaremasters.me/repository/public/")

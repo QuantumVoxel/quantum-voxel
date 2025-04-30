@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplicationConfiguration;
 import dev.ultreon.quantum.client.Main;
+import dev.ultreon.quantum.crash.ApplicationCrash;
 import org.jetbrains.annotations.Nullable;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSObject;
@@ -72,6 +73,24 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @JSBody(script = "return t.stack;", params = {"t"})
     public static native String getJSStackNative(Object o);
+
+    void crash(ApplicationCrash e) {
+        if (crash != null) return;
+
+        JSError.catchNative(() -> {
+            crash = e.toString();
+            Console.error(crash);
+            CrashOverlay.createOverlay(crash);
+            return null;
+        }, t -> {
+            crash = getJSStack(e);
+            Console.error(crash);
+            CrashOverlay.createOverlay(crash);
+            return null;
+        });
+        exceptionMessage = e.getClass().getName() + ": " + e.getMessage();
+        quantum = null;
+    }
 
     void crash(Throwable e) {
         if (crash != null) return;

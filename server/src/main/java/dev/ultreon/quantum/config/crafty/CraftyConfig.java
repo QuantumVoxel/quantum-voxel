@@ -74,7 +74,7 @@ public abstract class CraftyConfig {
             throw new IllegalStateException("Class " + configClass + " is not annotated with @ConfigInfo");
 
         // Set the file name for the configuration
-        this.configPath = GamePlatform.get().getConfigDir().child(annotation.fileName() + ".json5");
+        this.configPath = GamePlatform.get().getConfigDir().child(annotation.fileName() + ".quant");
 
         // Get all declared fields of the class
 //        Field[] declaredFields = configClass.getDeclaredFields();

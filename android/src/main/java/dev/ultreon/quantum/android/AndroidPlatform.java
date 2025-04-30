@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.IntSet;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
@@ -230,6 +231,12 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public int cpuCores() {
         return Runtime.getRuntime().availableProcessors();
+    }
+
+    @Override
+    public void handleCrash(ApplicationCrash crash) {
+        crash.printCrash();
+        System.exit(1);
     }
 
     @Override

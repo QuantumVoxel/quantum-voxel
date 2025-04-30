@@ -8,7 +8,7 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
@@ -143,7 +143,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 }
 
                 double dst = pos.dst(player.getChunkVec());
-                if (dst > (double) ClientConfig.renderDistance / CS) {
+                if (dst > (double) ClientConfiguration.renderDistance.getValue() / CS) {
                     this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
                     return;
                 }

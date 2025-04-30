@@ -24,7 +24,7 @@ public class ClientTcpConnection/* extends TcpConnection<ClientPacketHandler, Se
 //    public static Result<ClientTcpConnection> connectToServer(String address, int port) {
 //        try {
 //            Client kryoClient = new Client(2 * 1024 * 1024, 2 * 1024 * 1024);
-//            kryoClient.setKeepAliveTCP(ClientConfig.networkKeepAliveTime);
+//            kryoClient.setKeepAliveTCP(ClientConfiguration.networkKeepAliveTime);
 //            kryoClient.setName("Quantum:Multiplayer");
 //            kryoClient.getKryo().setReferences(false);
 //            kryoClient.getKryo().setRegistrationRequired(false);
@@ -32,7 +32,7 @@ public class ClientTcpConnection/* extends TcpConnection<ClientPacketHandler, Se
 //            kryoClient.start();
 //            ClientTcpConnection connection = new ClientTcpConnection(kryoClient, QuantumClient.get());
 //            connection.moveTo(PacketStages.LOGIN, new LoginClientPacketHandlerImpl(connection));
-//            kryoClient.connect(ClientConfig.networkTimeout, address, port);
+//            kryoClient.connect(ClientConfiguration.networkTimeout, address, port);
 //            return Result.ok(connection);
 //        } catch (IOException e) {
 //            return Result.failure(e);

@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline.RenderNode;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -46,7 +46,7 @@ public class MainRenderNode extends RenderNode {
         if (blurScale > 0f) {
             client.renderer.blurred(
                     blurScale,
-                    ClientConfig.blurRadius * blurScale,
+                    ClientConfiguration.blurRadius.getValue() * blurScale,
                     true,
                     1,
                     () -> render(textures)

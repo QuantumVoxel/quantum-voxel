@@ -41,7 +41,7 @@ import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.audio.ClientSound;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.config.ConfigScreenFactory;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.debug.DebugOverlay;
@@ -118,14 +118,10 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.http.WebSocketHandshakeException;
-import java.nio.channels.ClosedChannelException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -260,7 +256,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private boolean startDevLoading = false;
 
     // Configuration
-    public ClientConfig newConfig;
+    public ClientConfiguration newConfig;
 
     // HUD stuff
     public boolean hideHud = false;
@@ -569,9 +565,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Load the configuration
         ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(() -> new IllegalStateException("Failed to get mod instance")), () -> {
-            this.newConfig = new ClientConfig();
-            this.newConfig.event.subscribe(this::onReloadConfig);
-            this.newConfig.load();
+            ClientConfiguration.load();
+            onReloadConfig();
         });
 
         // Set the command line arguments
@@ -695,39 +690,39 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * This method is used to reload the config.
      */
     void onReloadConfig() {
-        if (ClientConfig.fullscreen) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        if (ClientConfiguration.fullscreen.getValue()) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
-        String[] split = ClientConfig.language.getPath().split("_");
+        String[] split = ClientConfiguration.language.getValue().getPath().split("_");
         if (split.length == 2) {
             LanguageManager.setCurrentLanguage(new Locale(split[0], split[1]));
         } else {
-            QuantumClient.LOGGER.error("Invalid language: {}", ClientConfig.language);
+            QuantumClient.LOGGER.error("Invalid language: {}", ClientConfiguration.language);
             LanguageManager.setCurrentLanguage(new Locale("en", "us"));
-            ClientConfig.language = QuantumClient.id("en_us");
+            ClientConfiguration.language.setValue(QuantumClient.id("en_us"));
             this.newConfig.save();
         }
 
-        if (ClientConfig.guiScale != 0) {
+        if (ClientConfiguration.guiScale.getValue() != 0) {
             this.setAutomaticScale(false);
-            this.setGuiScale(ClientConfig.guiScale);
+            this.setGuiScale(ClientConfiguration.guiScale.getValue());
         } else {
             this.setAutomaticScale(true);
         }
 
-        this.camera.fov = ClientConfig.fov;
+        this.camera.fov = ClientConfiguration.fov.getValue();
 
         // Cancel vibration if it is not enabled
-        if (!ClientConfig.vibration) {
+        if (!ClientConfiguration.vibration.getValue()) {
             GameInput.cancelVibration();
         }
 
         QuantumClient.invoke(() -> {
             // Set vsync
-            boolean enableVsync = ClientConfig.enableVsync;
+            boolean enableVsync = ClientConfiguration.enableVsync.getValue();
             Gdx.graphics.setVSync(enableVsync);
 
             // Set fps limit
-            int fpsLimit = ClientConfig.fpsLimit;
+            int fpsLimit = ClientConfiguration.fpsLimit.getValue();
             if (fpsLimit >= 240) QuantumClient.setFpsLimit(0);
             else QuantumClient.setFpsLimit(fpsLimit < 10 ? 60 : fpsLimit);
         });
@@ -750,7 +745,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @see #getGameDir()
      */
     public static FileHandle data(String path) {
-        return GamePlatform.get().isMobile() ? Gdx.files.local(path) : Gdx.files.local(path);
+        return GamePlatform.get().isMobile() ? Gdx.files.external(path) : Gdx.files.local(path);
     }
 
     /**
@@ -1368,7 +1363,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void prepareScreenshot() {
         this.screenshotScale = 1;
 
-        if (ClientConfig.enable4xScreenshot && (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))) {
+        if (ClientConfiguration.enable4xScreenshot.getValue() && (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))) {
             this.screenshotScale = 4;
         }
 
@@ -1887,9 +1882,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             CrashHandler.handleCrash(crashLog);
             String string = crashLog.toString();
             LOGGER.error("Dumping crash report...\n{}", string);
-
-            if (instance != null) instance.shutdown();
-            GamePlatform.get().halt(1);
+            GamePlatform.get().handleCrash(crash);
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
 
@@ -2116,13 +2109,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Resize the renderer
         this.renderer.resize(width, height);
 
-        this.autoScale = ClientConfig.guiScale == 0;
+        this.autoScale = ClientConfiguration.guiScale.getValue() == 0;
 
         // Auto-scale the GUI if enabled
         if (this.autoScale) {
             this.guiScale = this.calcMaxGuiScale();
         } else {
-            this.guiScale = Mth.clamp(ClientConfig.guiScale, 1, calcMaxGuiScale());
+            this.guiScale = Mth.clamp(ClientConfiguration.guiScale.getValue(), 1, calcMaxGuiScale());
         }
 
         // Update the camera if present
@@ -2419,7 +2412,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         ClientLifecycleEvents.WINDOW_CLOSED.factory().onWindowClose();
 
-        if (ClientConfig.showClosePrompt && this.screen != null) {
+        if (ClientConfiguration.closePrompt.getValue() && this.screen != null) {
             this.screen.showDialog(new DialogBuilder(this.screen).message(TextObject.literal("Are you sure you want to close the game?")).button(UITranslations.YES, () -> {
                 if (this.world != null) {
                     this.exitWorldAndThen(this::shutdown);
@@ -2979,7 +2972,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return whether the debug HUD is shown.
      */
     public boolean isShowDebugHud() {
-        return ClientConfig.enableDebugUtils;
+        return ClientConfiguration.enableDebugUtils.getValue();
     }
 
     /**
@@ -2988,7 +2981,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param showDebugHud whether the debug HUD is shown.
      */
     public void setShowDebugHud(boolean showDebugHud) {
-        ClientConfig.enableDebugUtils = showDebugHud;
+        ClientConfiguration.enableDebugUtils.setValue(showDebugHud);
         this.newConfig.save();
     }
 
@@ -3043,12 +3036,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         while (!context.isDone()) {
-            try {
-                Duration.ofSeconds(0.1).sleep();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                crash(new IllegalThreadInterruptionError("Thread interrupted while reloading resources!", e));
-            }
+            GamePlatform.get().yield();
         }
     }
 
@@ -3311,7 +3299,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                         shutdownScreen.setMessage("Waiting for server to terminate");
                     }
                     LOGGER.info("Waiting for server to terminate");
-                    Thread.sleep(1000);
+                    GamePlatform.get().sleep(1000);
                 }
             }
 

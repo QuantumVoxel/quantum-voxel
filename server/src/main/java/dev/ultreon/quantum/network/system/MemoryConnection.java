@@ -10,6 +10,7 @@ import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.server.CloseCodes;
+import dev.ultreon.quantum.server.PlatformOS;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -51,13 +52,15 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         this.executor = executor;
 
         if (!GamePlatform.get().isWeb()) {
-            Thread receiver = new Thread(this::receiverThread, env == Env.CLIENT ? "ClientNetReceiver" : "ServerNetReceiver");
-            Thread sender = new Thread(this::senderThread, env == Env.CLIENT ? "ClientNetSender" : "ServerNetSender");
-            receiver.setDaemon(true);
-            sender.setDaemon(true);
+            GamePlatform.get().runNotOnWeb(() -> {
+                Thread receiver = new Thread(this::receiverThread, env == Env.CLIENT ? "ClientNetReceiver" : "ServerNetReceiver");
+                Thread sender = new Thread(this::senderThread, env == Env.CLIENT ? "ClientNetSender" : "ServerNetSender");
+                receiver.setDaemon(true);
+                sender.setDaemon(true);
 
-            receiver.start();
-            sender.start();
+                receiver.start();
+                sender.start();
+            });
         } else {
             CommonConstants.LOGGER.info("Memory connection on web started!");
         }

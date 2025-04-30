@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.*;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.BoxGizmo;
 import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.player.LocalPlayer;
@@ -135,7 +135,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
     @Override
     public int getRenderDistance() {
-        return ClientConfig.renderDistance / CS;
+        return ClientConfiguration.renderDistance.getValue() / CS;
     }
 
     /**
@@ -867,7 +867,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
         // Calculate the distance between the chunk and the player
         synchronized (this.chunkManager) {
-            if (pos.dst(player.getChunkVec()) > ClientConfig.renderDistance / CS) {
+            if (pos.dst(player.getChunkVec()) > ClientConfiguration.renderDistance.getValue() / CS) {
                 player.pendingChunks.remove(pos);
 
                 // If the distance is greater than the render distance, send a skip chunk status packet and return
@@ -942,7 +942,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
             ChunkVec chunkVec = clientChunk.vec;
 
             // Check if the distance between the chunk and the player's position is greater than the render distance
-            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfig.renderDistance / CS) {
+            if (new Vec2d(chunkVec.getIntX(), chunkVec.getIntZ()).dst(player.getChunkVec().getIntX(), player.getChunkVec().getIntZ()) > ClientConfiguration.renderDistance.getValue() / CS) {
                 // Remove the chunk from the map and dispose it
                 iterator.remove();
                 clientChunk.dispose();

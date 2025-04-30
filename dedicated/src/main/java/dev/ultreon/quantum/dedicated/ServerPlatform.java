@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.dedicated;
 
 import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import net.fabricmc.loader.api.FabricLoader;
@@ -67,6 +68,12 @@ public class ServerPlatform extends GamePlatform {
     @Override
     public int cpuCores() {
         return Runtime.getRuntime().availableProcessors();
+    }
+
+    @Override
+    public void handleCrash(ApplicationCrash crash) {
+        crash.printCrash();
+        crash.getCrashLog().defaultSave();
     }
 
     @Override

@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
 
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.TimerInstance;
+import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import com.badlogic.gdx.graphics.Color;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 
-import dev.ultreon.quantum.client.config.ClientConfig;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.BoxGizmo;
 import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.gui.Notification;
@@ -46,7 +49,7 @@ public class IntegratedServer extends QuantumServer {
     private final QuantumClient client = QuantumClient.get();
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
-    private final Timer timer = new Timer();
+    private final TimerInstance timer = GamePlatform.get().getTimer();
 
     /**
      * Constructs a new IntegratedServer with the given WorldStorage.
@@ -183,7 +186,7 @@ public class IntegratedServer extends QuantumServer {
      */
     @Override
     public int getRenderDistance() {
-        return ClientConfig.renderDistance;
+        return ClientConfiguration.renderDistance.getValue();
     }
 
     /**
@@ -193,7 +196,7 @@ public class IntegratedServer extends QuantumServer {
      */
     @Override
     public int getEntityRenderDistance() {
-        return ClientConfig.entityRenderDistance / CS;
+        return ClientConfiguration.entityRenderDistance.getValue() / CS;
     }
 
     /**
@@ -380,7 +383,7 @@ public class IntegratedServer extends QuantumServer {
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
-                this.timer.schedule(new TimerTask() {
+                this.timer.schedule(new dev.ultreon.quantum.TimerTask() {
                     @Override
                     public void run() {
                         clientWorld.removeGizmo(gizmo);
@@ -407,7 +410,7 @@ public class IntegratedServer extends QuantumServer {
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
-                this.timer.schedule(new TimerTask() {
+                this.timer.schedule(new dev.ultreon.quantum.TimerTask() {
                     @Override
                     public void run() {
                         clientWorld.removeGizmo(gizmo);
@@ -434,7 +437,7 @@ public class IntegratedServer extends QuantumServer {
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
-                this.timer.schedule(new TimerTask() {
+                this.timer.schedule(new dev.ultreon.quantum.TimerTask() {
                     @Override
                     public void run() {
                         clientWorld.removeGizmo(gizmo);
@@ -480,7 +483,7 @@ public class IntegratedServer extends QuantumServer {
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
-                this.timer.schedule(new TimerTask() {
+                this.timer.schedule(new dev.ultreon.quantum.TimerTask() {
                     @Override
                     public void run() {
                         clientWorld.removeGizmo(gizmo);
@@ -505,7 +508,7 @@ public class IntegratedServer extends QuantumServer {
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
-                this.timer.schedule(new TimerTask() {
+                this.timer.schedule(new dev.ultreon.quantum.TimerTask() {
                     @Override
                     public void run() {
                         clientWorld.removeGizmo(gizmo);
