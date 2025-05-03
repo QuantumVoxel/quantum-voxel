@@ -33,7 +33,7 @@ buildscript {
 
   dependencies {
     classpath("gradle.plugin.org.danilopianini:javadoc.io-linker:0.1.4-700fdb6")
-    classpath("com.android.tools.build:gradle:8.1.2")
+    classpath("com.android.tools.build:gradle:8.9.2")
     classpath(group = "org.mini2Dx", name = "butler", version = "2.1.0")
   }
 }

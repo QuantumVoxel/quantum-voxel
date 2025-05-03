@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -14,11 +15,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
+import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
@@ -30,17 +31,18 @@ import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
-import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.badlogic.gdx.Gdx.gl;
-import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 import static dev.ultreon.quantum.world.World.CS;
 
@@ -54,13 +56,16 @@ import static dev.ultreon.quantum.world.World.CS;
  */
 public class GameRenderer implements Disposable {
     private final QuantumClient client;
-    private final ModelBatch modelBatch;
     private final Vector2 tmp = new Vector2();
     private final RenderContext context;
     private float cameraBop = 0.0f;
     private float blurScale = 0.0f;
-    private @NotNull Texture vignetteTex;
+    private @Nullable Texture vignetteTex;
     private boolean disposed;
+    private final LineRenderer lineRenderer = new LineRenderer();
+    private final float[] mouseVec = new float[2];
+    private final Vector3 tmp3 = new Vector3();
+    private Vec3f tmp1 = new Vec3f();
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
@@ -70,13 +75,12 @@ public class GameRenderer implements Disposable {
      */
     public GameRenderer(QuantumClient client, ModelBatch modelBatch) {
         this.client = client;
-        this.modelBatch = modelBatch;
 
         this.context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
     }
 
     public void resize(int width, int height) {
-        if (width <= 0 || height <= 0) return;
+
     }
 
     /**
@@ -96,48 +100,7 @@ public class GameRenderer implements Disposable {
 
         if (player != null) {
             try (var ignored1 = QuantumClient.PROFILER.start("camera")) {
-                if (this.client.screen == null && Gdx.input.isCursorCatched() || GamePlatform.get().isMobile()) {
-                    // Calculate delta position for player rotation.
-                    int width = QuantumClient.get().getWidth();
-                    int height = QuantumClient.get().getHeight();
-                    int centerX = width / 2;
-                    int centerY = height / 2;
-                    if (GamePlatform.get().isMobile()) {
-                        if (Gdx.input.isTouched()) {
-                            float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
-                            float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
-                            player.rotateHead(dx, dy);
-                        }
-                    } else if (GamePlatform.get().isWeb()) {
-                        float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
-                        float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
-                        player.rotateHead(dx, dy);
-                    } else if (GamePlatform.get().isDesktop()) {
-                        float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfiguration.cameraSensitivity.getValue());
-                        float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfiguration.cameraSensitivity.getValue());
-                        player.rotateHead(dx, dy);
-                    }
-
-                    // Reset position
-                    Gdx.input.setCursorPosition(centerX, centerY);
-                }
-
-                this.client.camera.update(player);
-                this.client.camera.far = ((float) ClientConfiguration.renderDistance.getValue() / CS - 1) * World.CS / WorldRenderer.SCALE;
-
-                var rotation = this.tmp.set(player.xHeadRot, player.yRot);
-                var quaternion = new Quaternion();
-                quaternion.setFromAxis(Vector3.Y, rotation.x);
-                quaternion.mul(new Quaternion(Vector3.X, rotation.y));
-                quaternion.conjugate();
-
-                // Add camera bop. Use easing and animate with cameraBop. Camera Bop is a sort of camera movement while walking.
-                float cameraBop = calculateCameraBop(deltaTime);
-
-                this.client.camera.up.set(0, 1, 0);
-                this.client.camera.up.rotate(Vector3.Y, rotation.x);
-                this.client.camera.up.rotate(Vector3.Z, cameraBop);
-                this.client.camera.up.rotate(Vector3.Y, -rotation.x);
+                positionCamera(deltaTime, player);
             }
         }
 
@@ -145,27 +108,19 @@ public class GameRenderer implements Disposable {
         client.mainCat.update(deltaTime);
         client.worldCat.update(deltaTime);
 
-        if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
-
-            try (var ignored = QuantumClient.PROFILER.start("world")) {
-                RenderEvents.PRE_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
-
-                var blurScale = this.blurScale;
-                blurScale += client.screen != null ? Gdx.graphics.getDeltaTime() * 3f : -Gdx.graphics.getDeltaTime() * 3f;
-
-                blurScale = Mth.clamp(blurScale, 0f, 1f);
-                this.blurScale = blurScale;
-
-                this.renderWorld(Math.max(blurScale, 0f), deltaTime);
-                RenderEvents.POST_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
-            }
-        }
+        renderWorld(deltaTime, world, worldRenderer);
 
         renderer.begin();
 
         var screen = this.client.screen;
 
 
+        renderOverlays(renderer, deltaTime, world, worldRenderer, screen);
+
+        renderer.end();
+    }
+
+    private void renderOverlays(Renderer renderer, float deltaTime, ClientWorld world, WorldRenderer worldRenderer, Screen screen) {
         renderer.pushMatrix();
         renderer.translate(this.client.getDrawOffset().x, this.client.getDrawOffset().y);
         renderer.scale(this.client.getGuiScale(), this.client.getGuiScale());
@@ -192,8 +147,69 @@ public class GameRenderer implements Disposable {
         }
 
         renderer.popMatrix();
+    }
 
-        renderer.end();
+    private void renderWorld(float deltaTime, ClientWorld world, WorldRenderer worldRenderer) {
+        if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
+
+            try (var ignored = QuantumClient.PROFILER.start("world")) {
+                RenderEvents.PRE_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
+
+                var blurScale = this.blurScale;
+                blurScale += client.screen != null ? Gdx.graphics.getDeltaTime() * 3f : -Gdx.graphics.getDeltaTime() * 3f;
+
+                blurScale = Mth.clamp(blurScale, 0f, 1f);
+                this.blurScale = blurScale;
+
+                this.renderWorld(deltaTime);
+                RenderEvents.POST_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
+            }
+        }
+    }
+
+    private void positionCamera(float deltaTime, LocalPlayer player) {
+        if (this.client.screen == null && Gdx.input.isCursorCatched() || GamePlatform.get().isMobile()) {
+            // Calculate delta position for player rotation.
+            int width = QuantumClient.get().getWidth();
+            int height = QuantumClient.get().getHeight();
+            int centerX = width / 2;
+            int centerY = height / 2;
+            if (GamePlatform.get().isMobile()) {
+                if (Gdx.input.isTouched()) {
+                    float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
+                    float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
+                    player.rotateHead(dx, dy);
+                }
+            } else if (GamePlatform.get().isWeb()) {
+                float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
+                float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
+                player.rotateHead(dx, dy);
+            } else if (GamePlatform.get().isDesktop()) {
+                float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfiguration.cameraSensitivity.getValue());
+                float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfiguration.cameraSensitivity.getValue());
+                player.rotateHead(dx, dy);
+            }
+
+            // Reset position
+            Gdx.input.setCursorPosition(centerX, centerY);
+        }
+
+        this.client.camera.update(player);
+        this.client.camera.far = ((float) ClientConfiguration.renderDistance.getValue() / CS - 1) * World.CS / WorldRenderer.SCALE;
+
+        var rotation = this.tmp.set(player.xHeadRot, player.yRot);
+        var quaternion = new Quaternion();
+        quaternion.setFromAxis(Vector3.Y, rotation.x);
+        quaternion.mul(new Quaternion(Vector3.X, rotation.y));
+        quaternion.conjugate();
+
+        // Add camera bop. Use easing and animate with cameraBop. Camera Bop is a sort of camera movement while walking.
+        float cameraBop = calculateCameraBop(deltaTime);
+
+        this.client.camera.up.set(0, 1, 0);
+        this.client.camera.up.rotate(Vector3.Y, rotation.x);
+        this.client.camera.up.rotate(Vector3.Z, cameraBop);
+        this.client.camera.up.rotate(Vector3.Y, -rotation.x);
     }
 
     /**
@@ -219,10 +235,9 @@ public class GameRenderer implements Disposable {
      * Renders the world with the given blur scale (for when a screen is open) and delta time.
      * This uses the {@link RenderPipeline} to render the world.
      * 
-     * @param blurScale The blur scale.
      * @param deltaTime The time elapsed since the last frame.
      */
-    void renderWorld(float blurScale, float deltaTime) {
+    void renderWorld(float deltaTime) {
         RenderBufferSource bufferSource = this.client.renderBuffers();
         bufferSource.begin(this.client.camera);
 
@@ -256,11 +271,12 @@ public class GameRenderer implements Disposable {
             worldRenderer.collectEntity(entity, client.renderBuffers());
         }
 
+        // Particles
         ParticleSystem particleSystem = worldRenderer.getParticleSystem();
         particleSystem.begin();
         particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
         particleSystem.end();
-//            modelBatch.render(particleSystem);
+//        modelBatch.render(particleSystem);
         // TODO add particle system
 
         // Foreground
@@ -272,6 +288,17 @@ public class GameRenderer implements Disposable {
         }
 
         bufferSource.end();
+
+        // Cursor
+        if (client.cursor instanceof BlockHit) {
+            BlockHit blockHit = (BlockHit) client.cursor;
+            BlockVec blockVec = blockHit.getBlockVec();
+            BlockVec next = blockHit.getNext();
+            BoundingBox boundingBox = blockHit.getBlockMeta().getBoundingBox(blockVec.x, blockVec.y, blockVec.z);
+            Vec3f vec = blockVec.f();
+            Vec3f nextVec = next.f();
+            lineRenderer.renderBox(client.camera, boundingBox, new Vector3((float) blockHit.getNormal().x, (float) blockHit.getNormal().y, (float) blockHit.getNormal().z), 6, Color.WHITE);
+        }
     }
 
     /**
@@ -283,46 +310,57 @@ public class GameRenderer implements Disposable {
      * @param deltaTime The time elapsed since the last frame.
      */
     private void renderOverlays(Renderer renderer, @Nullable Screen screen, ClientWorldAccess world, float deltaTime) {
-        if (world != null) {
-            try (var ignored = QuantumClient.PROFILER.start("hud")) {
-                if (this.client.hideHud) return;
-                OverlayManager.render(renderer, deltaTime);
-                RenderEvents.RENDER_OVERLAY.factory().onRenderOverlay(renderer, deltaTime);
+        renderHUD(renderer, world, deltaTime);
+
+        if (screen == null) return;
+
+        try (var ignored = QuantumClient.PROFILER.start("screen")) {
+            GridPoint2 mouseOffset = this.client.getMousePos();
+            mouseVec[0] = GamePlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
+            mouseVec[1] = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
+
+            processMouseCoords(mouseVec);
+            RenderEvents.PRE_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, mouseVec[0], mouseVec[1], deltaTime);
+            Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+            renderer.getBatch().enableBlending();
+            renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
+
+            screen.render(renderer, deltaTime);
+            screen.renderTooltips(renderer, (int) mouseVec[0], (int) mouseVec[1], deltaTime);
+            renderTopOverlay(renderer, screen, deltaTime, mouseVec[0], mouseVec[1]);
+        }
+    }
+
+    private void processMouseCoords(float[] vec) {
+        if (GamePlatform.get().isMobile()) {
+            MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();
+            if (mouseDevice != null) {
+                vec[0] = mouseDevice.getX() / this.client.getGuiScale();
+                vec[1] = mouseDevice.getY() / this.client.getGuiScale();
+            } else if (TouchInput.isPressingAnyButton()) {
+                vec[0] = Gdx.input.getX() / this.client.getGuiScale();
+                vec[1] = Gdx.input.getY() / this.client.getGuiScale();
+            } else {
+                vec[0] = Integer.MIN_VALUE;
+                vec[1] = Integer.MIN_VALUE;
             }
         }
+    }
 
-        if (screen != null) {
-            try (var ignored = QuantumClient.PROFILER.start("screen")) {
-                GridPoint2 mouseOffset = this.client.getMousePos();
-                float x = GamePlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
-                float y = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
+    private static void renderTopOverlay(Renderer renderer, @NotNull Screen screen, float deltaTime, float x, float y) {
+        WindowManager.render(renderer, (int) x, (int) y, deltaTime);
+        renderer.getBatch().enableBlending();
+        renderer.flush();
 
-                if (GamePlatform.get().isMobile()) {
-                    MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();
-                    if (mouseDevice != null) {
-                        x = mouseDevice.getX() / this.client.getGuiScale();
-                        y = mouseDevice.getY() / this.client.getGuiScale();
-                    } else if (TouchInput.isPressingAnyButton()) {
-                        x = Gdx.input.getX() / this.client.getGuiScale();
-                        y = Gdx.input.getY() / this.client.getGuiScale();
-                    } else {
-                        x = Integer.MIN_VALUE;
-                        y = Integer.MIN_VALUE;
-                    }
-                }
-                RenderEvents.PRE_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
-                Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
-                renderer.getBatch().enableBlending();
-                renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
+        Overlays.MEMORY.render(renderer, deltaTime);
+        RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
+    }
 
-                screen.render(renderer, deltaTime);
-                screen.renderTooltips(renderer, (int) x, (int) y, deltaTime);
-                WindowManager.render(renderer, (int) x, (int) y, deltaTime);
-                renderer.getBatch().enableBlending();
-                renderer.flush();
-
-                Overlays.MEMORY.render(renderer, deltaTime);
-                RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
+    private void renderHUD(Renderer renderer, ClientWorldAccess world, float deltaTime) {
+        if (world != null) {
+            try (var ignored = QuantumClient.PROFILER.start("hud")) {
+                OverlayManager.render(renderer, deltaTime);
+                RenderEvents.RENDER_OVERLAY.factory().onRenderOverlay(renderer, deltaTime);
             }
         }
     }
@@ -346,6 +384,7 @@ public class GameRenderer implements Disposable {
         if (disposed) return;
         disposed = true;
 
+        lineRenderer.dispose();
         if (vignetteTex != null) vignetteTex.dispose();
     }
 }

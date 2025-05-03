@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+base {
+    archivesName = 'quantum-dedicated-server'
+}
+
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.11.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -63,4 +67,53 @@ application {
             : [])
 
     mainClass.set("net.fabricmc.devlaunchinjector.Main")
+}
+
+distZip {
+    archiveFileName = 'quantum-dedicated-server.zip'
+    from("${project.rootDir}/LICENSE") {
+        into "quantum-dedicated-server/licenses"
+    }
+    
+    from("${project.rootDir}/README.md") {
+        into "quantum-dedicated-server"
+    }
+}
+
+distTar {
+    archiveFileName = 'quantum-dedicated-server.tar'
+    from("${project.rootDir}/LICENSE") {
+        into "quantum-dedicated-server/licenses"
+    }
+
+    from("${project.rootDir}/README.md") {
+        into "quantum-dedicated-server"
+    }
+}
+
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from("${project.rootDir}/LICENSE") {
+        into "META-INF"
+    }
+
+    from("${project.rootDir}/README.md") {
+        into "META-INF"
+    }
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes([
+                "Specification-Title": "Quantum Dedicated Server",
+                "Specification-Vendor": "Ultreon Studios",
+                "Specification-Version": "0.2.0",
+                "Implementation-Title": "Quantum Dedicated Server",
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor": "Ultreon Studios",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "Main-Class": "net.fabricmc.loader.impl.launch.knot.KnotServer"
+        ])
+    }
 }

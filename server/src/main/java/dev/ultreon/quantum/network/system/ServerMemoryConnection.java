@@ -27,6 +27,10 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
 
     @Override
     protected void received(Packet<? extends ServerPacketHandler> packet, @Nullable PacketListener resultListener) {
+        if (packet == null) {
+            CommonConstants.LOGGER.warn("Received null packet!", new Exception());
+            return;
+        }
         QuantumServer.invoke(() -> {
             try {
                 super.received(packet, resultListener);

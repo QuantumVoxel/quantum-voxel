@@ -210,18 +210,7 @@ public class SafeLoadWrapper implements ApplicationListener {
         public CrashScreen() {
             viewport.setUnitsPerPixel(Gdx.graphics.getBackBufferScale());
 
-            stage.addActor(new Actor() {
-                @Override
-                public void draw(Batch batch, float parentAlpha) {
-                    super.draw(batch, 0.3f);
-
-                    batch.draw(texture, 0, 0, stage.getWidth(), stage.getHeight());
-
-                    batch.setColor(1, 1, 1, 0.3f);
-                    batch.draw(whitePixel, 0, 0, stage.getWidth(), stage.getHeight());
-                    batch.setColor(1, 1, 1, 1f);
-                }
-            });
+            stage.addActor(new Background());
             window = new VisWindow("Game Crashed");
             window.setResizable(true);
             window.setMovable(false);
@@ -253,43 +242,14 @@ public class SafeLoadWrapper implements ApplicationListener {
             VisTextButton button = new VisTextButton("Copy");
             button.setClip(true);
 
-            button.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    String text = textArea.getText();
-                    Gdx.app.getClipboard().setContents(text);
-                }
-            });
+            button.addListener(new CopyClickListener(textArea));
 
             buttons.add(button);
 
             VisTextButton saveButton = new VisTextButton("Save As...");
             saveButton.setClip(true);
 
-            saveButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    String text = textArea.getText();
-                    Gdx.app.getClipboard().setContents(text);
-
-                    FileChooser actor = new FileChooser(new FileHandle(System.getProperty("user.dir", ".")).child("game-crashes"), FileChooser.Mode.SAVE);
-                    actor.setDefaultFileName("crash-" + DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss") + ".txt");
-                    actor.setWatchingFilesEnabled(true);
-                    actor.setListener(new FileChooserListener() {
-                        @Override
-                        public void selected(Array<FileHandle> files) {
-                            FileHandle fileHandle = files.get(0);
-                            fileHandle.writeString(crash, false);
-                        }
-
-                        @Override
-                        public void canceled() {
-
-                        }
-                    });
-                    stage.addActor(actor);
-                }
-            });
+            saveButton.addListener(new SaveClickListener(textArea));
 
             buttons.add(saveButton);
             table.add(buttons).bottom().fillX().expandX().pad(5);
@@ -319,6 +279,64 @@ public class SafeLoadWrapper implements ApplicationListener {
 
             stage.act(delta);
             stage.draw();
+        }
+
+        private class Background extends Actor {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                super.draw(batch, 0.3f);
+
+                batch.draw(texture, 0, 0, stage.getWidth(), stage.getHeight());
+
+                batch.setColor(1, 1, 1, 0.3f);
+                batch.draw(whitePixel, 0, 0, stage.getWidth(), stage.getHeight());
+                batch.setColor(1, 1, 1, 1f);
+            }
+        }
+
+        private class CopyClickListener extends ClickListener {
+            private final VisTextArea textArea;
+
+            public CopyClickListener(VisTextArea textArea) {
+                this.textArea = textArea;
+            }
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String text = textArea.getText();
+                Gdx.app.getClipboard().setContents(text);
+            }
+        }
+
+        private class SaveClickListener extends ClickListener {
+            private final VisTextArea textArea;
+
+            public SaveClickListener(VisTextArea textArea) {
+                this.textArea = textArea;
+            }
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String text = textArea.getText();
+                Gdx.app.getClipboard().setContents(text);
+
+                FileChooser actor = new FileChooser(new FileHandle(System.getProperty("user.dir", ".")).child("game-crashes"), FileChooser.Mode.SAVE);
+                actor.setDefaultFileName("crash-" + DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss") + ".txt");
+                actor.setWatchingFilesEnabled(true);
+                actor.setListener(new FileChooserListener() {
+                    @Override
+                    public void selected(Array<FileHandle> files) {
+                        FileHandle fileHandle = files.get(0);
+                        fileHandle.writeString(crash, false);
+                    }
+
+                    @Override
+                    public void canceled() {
+
+                    }
+                });
+                stage.addActor(actor);
+            }
         }
     }
 }

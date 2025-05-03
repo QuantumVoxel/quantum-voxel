@@ -6,6 +6,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.audio.music.MusicManager;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -26,6 +27,8 @@ import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 public class GenericDebugPage implements DebugPage {
     @Override
@@ -53,6 +56,10 @@ public class GenericDebugPage implements DebugPage {
                     .left("Packets", "rx = " + IConnection.rx.get() + ", tx = " + IConnection.tx.get())
                     .left();
         }
+
+        context.left("Music");
+        context.left("Music Volume", MusicManager.get().getVolume());
+        context.left("Time Until Next Track", String.format(Locale.getDefault(), "%.2f seconds", MusicManager.get().getTimeUntilNextTrack()));
 
         if (world != null) {
             // Player

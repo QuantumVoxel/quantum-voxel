@@ -81,7 +81,6 @@ public class BlockHit implements Hit {
 
     public BlockHit setInput(Ray ray) {
         this.ray = ray;
-        this.setDirection(ray.getDirection());
         return this;
     }
 

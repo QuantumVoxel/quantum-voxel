@@ -25,6 +25,10 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
 
     @Override
     protected void received(@NotNull Packet<? extends ClientPacketHandler> packet, @Nullable PacketListener resultListener) {
+        if (packet == null) {
+            CommonConstants.LOGGER.warn("Received null packet!", new Exception());
+            return;
+        }
         QuantumClient.invoke(() -> super.received(packet, resultListener));
     }
 

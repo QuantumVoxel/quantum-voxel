@@ -6,6 +6,7 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
+import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
@@ -106,16 +107,32 @@ public class WorldLoadScreen extends Screen {
 
             this.world.setupSpawn();
 
-            while (!loggedIn) {
-                GamePlatform.get().sleep(100);
-            }
+            waitUntilLoggedIn();
+        } catch (Exception throwable) {
+            QuantumClient.LOGGER.error("Failed to load world:", throwable);
+            QuantumClient.crash(throwable);
+        }
+    }
 
+    private void waitUntilLoggedIn() {
+        if (loggedIn) {
+            completeRun();
+        } else {
+            GamePlatform.get().getTimer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    waitUntilLoggedIn();
+                }
+            }, 100);
+        }
+    }
+
+    private void completeRun() {
+        try {
             ChunkVec chunkVec = Objects.requireNonNull(this.client.player, "Player is null").getChunkVec();
             this.client.connection.send(new C2SRequestChunkLoadPacket(chunkVec));
 
             this.message("Waiting for server to finalize...");
-        } catch (InterruptedException e) {
-            QuantumClient.LOGGER.info("World load interrupted");
         } catch (Exception throwable) {
             QuantumClient.LOGGER.error("Failed to load world:", throwable);
             QuantumClient.crash(throwable);

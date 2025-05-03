@@ -63,6 +63,14 @@ public enum Direction implements StringSerializable {
         return Direction.values()[random.nextInt(6)];
     }
 
+    public static Direction ofNormalNew(Vec3f set) {
+        float[] comps = new float[]{set.x, set.y, set.z};
+        float max = Math.max(comps[0], Math.max(comps[1], comps[2]));
+        if (max == comps[0]) return max < 0 ? SOUTH : NORTH;
+        else if (max == comps[1]) return max < 0 ? DOWN : UP;
+        else return max < 0 ? WEST : EAST;
+    }
+
     public Vector3 getNormal() {
         return this.normal;
     }

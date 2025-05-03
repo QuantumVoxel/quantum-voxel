@@ -107,9 +107,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             instance = this.sendQueue.removeFirst();
         }
 
-        if (GamePlatform.get().isDevEnvironment())
-            CommonConstants.LOGGER.debug("Sending Packet: " + instance.packet().getClass().getName());
-
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             PacketIO io = new PacketIO(null, bos);
@@ -155,8 +152,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             packet = this.receiveQueue.removeFirst();
         }
 
-        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Received Packet: " + packet.getClass().getName());
-
         this.received(packet, null);
     }
 
@@ -180,7 +175,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
         PacketIO io = new PacketIO(bis, null);
         Packet<? extends OurHandler> packet = ourPacketData.decode(id, io);
-        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Received memory packet: " + packet.getClass().getName());
         this.receiveQueue.addLast(packet);
     }
 
@@ -213,7 +207,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
         tx.incrementAndGet();
         synchronized (sendQueue) {
-            if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Queued packet for sending to " + otherSide.env + ": " + packet.getClass().getName());
             this.sendQueue.addLast(new PacketInstance<>(packet, resultListener));
         }
 

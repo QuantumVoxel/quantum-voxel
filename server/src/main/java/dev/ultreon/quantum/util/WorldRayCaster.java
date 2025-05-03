@@ -3,6 +3,7 @@ package dev.ultreon.quantum.util;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.world.ChunkReader;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.WorldReader;
 
 import static dev.ultreon.quantum.world.World.CS;
@@ -136,14 +137,18 @@ public class WorldRayCaster {
             if (absZ > absY) {
                 // face Z+
                 result.normal.set(0, 0, local.z < 0 ? -1 : 1);
+                result.direction = local.z < 0 ? Direction.WEST : Direction.EAST;
             } else {
                 result.normal.set(0, local.y < 0 ? -1 : 1, 0);
+                result.direction = local.y < 0 ? Direction.DOWN : Direction.UP;
             }
         } else {
             if (absZ > absX) {
                 result.normal.set(0, 0, local.z < 0 ? -1 : 1);
+                result.direction = local.z < 0 ? Direction.WEST : Direction.EAST;
             } else {
                 result.normal.set(local.x < 0 ? -1 : 1, 0, 0);
+                result.direction = local.x < 0 ? Direction.SOUTH : Direction.NORTH;
             }
         }
     }

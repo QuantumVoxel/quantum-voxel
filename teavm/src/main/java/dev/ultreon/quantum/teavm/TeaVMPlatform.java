@@ -17,8 +17,6 @@ import org.teavm.jso.core.JSError;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -287,92 +285,5 @@ public class TeaVMPlatform extends GamePlatform {
             }
         }, 0);
         return promise;
-    }
-
-    private class TeaVMCompletionPromise<T> implements CompletionPromise<T> {
-        private boolean done = false;
-        private boolean cancelled = false;
-        private Throwable throwable;
-        private T value;
-        private final List<BiConsumer<? super T, ? super Throwable>> listeners = new ArrayList<>();
-
-        @Override
-        public Promise<T> whenComplete(BiConsumer<? super T, ? super Throwable> runnable) {
-            return apply((t, throwable1) -> {
-                runnable.accept(t, throwable1);
-                return t;
-            });
-        }
-
-        @Override
-        public <V> Promise<V> apply(BiFunction<? super T, ? super Throwable, ? extends V> function) {
-            TeaVMCompletionPromise<V> promise = new TeaVMCompletionPromise<>();
-            this.listeners.add((value, throwable) -> {
-                try {
-                    promise.complete(function.apply(value, throwable));
-                } catch (Exception e) {
-                    promise.fail(e);
-                }
-            });
-
-            return promise;
-        }
-
-        @Override
-        public T join() throws AsyncException {
-            while (!isDone()) {
-                if (cancelled) {
-                    throw new AsyncException("Cancelled");
-                }
-            }
-            if (isFailed()) {
-                throw new AsyncException(throwable);
-            }
-            return value;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return cancelled;
-        }
-
-        @Override
-        public void cancel() {
-            cancelled = true;
-        }
-
-        @Override
-        public T getNow(T defaultValue) {
-            return done ? value : defaultValue;
-        }
-
-        @Override
-        public boolean isFailed() {
-            return done && throwable != null;
-        }
-
-        @Override
-        public void complete(T value) {
-            this.value = value;
-            done = true;
-            listeners.forEach(listener -> listener.accept(value, null));
-        }
-
-        @Override
-        public void fail(Throwable throwable) {
-            this.throwable = throwable;
-            done = true;
-            listeners.forEach(listener -> listener.accept(null, throwable));
-        }
-
-        @Override
-        public boolean isDone() {
-            return done;
-        }
-
-        @Override
-        public boolean isCanceled() {
-            return cancelled;
-        }
     }
 }

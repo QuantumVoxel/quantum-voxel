@@ -1,4 +1,3 @@
-
 #ifdef GL_ES
 #define LOWP lowp
 precision mediump float;

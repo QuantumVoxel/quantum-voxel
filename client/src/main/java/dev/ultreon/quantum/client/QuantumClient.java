@@ -41,6 +41,7 @@ import dev.ultreon.quantum.client.api.events.WindowEvents;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.audio.ClientSound;
+import dev.ultreon.quantum.client.audio.music.MusicManager;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.config.ConfigScreenFactory;
 import dev.ultreon.quantum.client.gui.*;
@@ -1200,8 +1201,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * This is invoked by libGDX.</p>
      */
     public void render() {
-        if (world != null && screen == null && !Gdx.input.isCursorCatched() && GamePlatform.get().isWeb()) {
-            showScreen(new PauseScreen());
+        if (world != null) {
+            if (screen == null) {
+                if (!Gdx.input.isCursorCatched() && GamePlatform.get().isWeb()) {
+                    showScreen(new PauseScreen());
+                    MusicManager.get().pause();
+                } else {
+                    MusicManager.get().resume();
+                    MusicManager.get().update();
+                }
+            } else {
+                MusicManager.get().pause();
+            }
+        } else {
+            MusicManager.get().stop();
         }
 
         IConnection<ClientPacketHandler, ServerPacketHandler> connection1 = connection;
@@ -1294,7 +1307,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Then, grab a screenshot, complete the screenshot future, clear the screen, set the screenshot world only flag to false, and set the capture screenshot and trigger screenshot flags to false.
         if (this.screenshotWorldOnly) {
             ScreenUtils.clear(0, 0, 0, 0, true);
-            this.gameRenderer.renderWorld(0f, deltaTime);
+            this.gameRenderer.renderWorld(deltaTime);
             this.captureScreenshot = false;
             this.triggerScreenshot = false;
 
@@ -3017,6 +3030,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         QuantumClient.LOGGER.info("Initializing sounds");
         this.soundRegistry.reload();
+        MusicManager.get().reload();
 
         this.entityModelManager.reload(this.resourceManager, context);
         this.entityRendererManager.reload(this.resourceManager, context);

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
@@ -87,12 +88,10 @@ public abstract class GameInput implements Disposable {
 
     private static GameInput getDefault() {
         QuantumClient client = QuantumClient.get();
-        if (Gdx.input.isPeripheralAvailable(Input.Peripheral.HardwareKeyboard)) {
-            return client.keyAndMouseInput;
-        } else if (Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen)) {
+        if (Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen) || GamePlatform.get().isMobile()) {
             return client.touchInput;
-//        } else if (!Controllers.getControllers().isEmpty()) {
-//            return client.controllerInput;
+        } else if (Gdx.input.isPeripheralAvailable(Input.Peripheral.HardwareKeyboard) && !GamePlatform.get().isMobile()) {
+            return client.keyAndMouseInput;
         } else {
             Gdx.app.log("GameInput", "No input devices found, using fallback input");
             return client.keyAndMouseInput;
