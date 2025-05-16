@@ -19,7 +19,7 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
     private final QuantumClient client;
 
     public ClientMemoryConnection(QuantumClient client, Thread thread) {
-        super(null, client, Env.CLIENT);
+        super(null, client, Env.CLIENT, client.registries);
         this.client = client;
     }
 
@@ -37,7 +37,7 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
         CommonConstants.LOGGER.info("Received disconnect with message: " + message);
 
         this.connected = false;
-        this.client.onDisconnect(message);
+        this.client.onDisconnect(message, true);
         return null;
     }
 

@@ -3,8 +3,8 @@ package dev.ultreon.quantum.text;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.text.icon.IconMap;
-import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 public class FontIconObject extends MutableText {

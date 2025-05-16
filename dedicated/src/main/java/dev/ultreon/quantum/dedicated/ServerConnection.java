@@ -12,6 +12,7 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.registry.RegistryHandle;
 import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
@@ -32,18 +33,20 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
     private @Nullable ServerPlayer player = null;
     private long ping;
     private ServerPacketHandler handler;
+    private final RegistryHandle handle;
 
     public ServerConnection(Session session, QuantumServer server) {
         this.session = session;
         handler = new LoginServerPacketHandler(server, this);
+        handle = server.getRegistries();
     }
 
     @Override
     public void send(Packet<? extends ClientPacketHandler> packet, @Nullable PacketListener resultListener) {
-        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Sending: " + packet.getClass().getName());;
+        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Sending: " + packet.getClass().getName());
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            PacketIO io = new PacketIO(null, out);
+            PacketIO io = new PacketIO(null, out, handle);
             io.writeShort(stage.getClientPackets().getId(packet));
             packet.toBytes(io);
             session.getBasicRemote().sendBinary(ByteBuffer.wrap(out.toByteArray()));
@@ -104,7 +107,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
     }
 
     @Override
-    public void setPlayer(ServerPlayer player) {
+    public void setPlayer(@Nullable ServerPlayer player) {
         this.player = player;
     }
 
@@ -139,13 +142,12 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
 
     public void onMessage(InputStream stream) {
         try {
-            PacketIO io = new PacketIO(stream, null);
+            PacketIO io = new PacketIO(stream, null, handle);
             short id = io.readShort();
             Packet<ServerPacketHandler> packet = stage.getServerPackets().decode(id, io);
 
             if (GamePlatform.get().isDevEnvironment())
                 CommonConstants.LOGGER.debug("Received: " + packet.getClass().getName());
-            ;
 
             packet.handle(new PacketContext(player, this, Env.SERVER), handler);
         } catch (Exception e) {

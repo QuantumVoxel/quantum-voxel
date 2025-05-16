@@ -35,13 +35,10 @@ import dev.ultreon.quantum.client.registry.LanguageRegistry;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
-import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.text.LanguageManager;
-import dev.ultreon.quantum.crash.ApplicationCrash;
-import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.menu.MenuTypes;
-import dev.ultreon.quantum.registry.GlobalRegistry;
+import dev.ultreon.quantum.registry.SimpleRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
@@ -64,6 +61,7 @@ class QuantumClientLoader implements Runnable {
     private static void registerDebugPages() {
         ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("simple"), new SimpleDebugPage());
         ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("generic"), new GenericDebugPage());
+        ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("timings"), new TimingsDebugPage());
         ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("value_tracker"), new ValueTrackerPage());
         ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("rendering"), new RenderingDebugPage());
         if (!GamePlatform.get().isWeb()) ClientRegistries.DEBUG_PAGE.register(NamespaceID.of("profiler"), new ProfilerDebugPage());
@@ -131,7 +129,6 @@ class QuantumClientLoader implements Runnable {
         progress(client, progress);
 
         QuantumClient.LOGGER.info("Generating bitmap fonts");
-        var resource = QuantumClient.resource(NamespaceID.of("texts/unicode.txt"));
 
         client.crashOverlay = new ManualCrashOverlay(client);
 
@@ -196,8 +193,8 @@ class QuantumClientLoader implements Runnable {
         for (var mod : GamePlatform.get().getMods()) {
             final String id = mod.getName();
             LoadingContext.withinContext(new LoadingContext(id), () -> {
-                for (Registry<?> registry : GlobalRegistry.getRegistries()) {
-//                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
+                for (Registry<?> registry : SimpleRegistry.getRegistries()) {
+                    RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);
                 }
             });
         }

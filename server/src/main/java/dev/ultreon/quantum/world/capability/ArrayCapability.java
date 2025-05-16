@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.world.capability;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

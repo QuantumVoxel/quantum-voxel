@@ -3,8 +3,8 @@ package dev.ultreon.quantum.item;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

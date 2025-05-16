@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.entity;
 
-import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.quantum.ubo.types.IntType;
-import dev.ultreon.quantum.ubo.types.MapType;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.ubo.types.IntType;
+import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 
 public class DroppedItem extends Entity {
     private ItemStack stack;

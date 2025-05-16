@@ -4,8 +4,8 @@ import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.events.ConfigEvents;
 import dev.ultreon.quantum.text.icon.EmoteMap;
 import dev.ultreon.quantum.text.icon.IconMap;
-import dev.ultreon.quantum.util.ModLoadingContext;
 import dev.ultreon.quantum.util.Env;
+import dev.ultreon.quantum.util.ModLoadingContext;
 
 /**
  * Class responsible for initializing configuration entry points.

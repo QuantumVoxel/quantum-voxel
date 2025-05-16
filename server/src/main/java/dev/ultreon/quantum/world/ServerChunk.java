@@ -8,7 +8,6 @@ import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.debug.DebugFlags;
-import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CChunkDataPacket;
@@ -16,15 +15,15 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
+import dev.ultreon.quantum.ubo.DataTypes;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.SanityCheckException;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.ubo.DataTypes;
-import dev.ultreon.quantum.ubo.types.ListType;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -257,28 +256,16 @@ public final class ServerChunk extends Chunk {
         this.tracker.stopTracking(serverPlayer);
     }
 
-    public boolean randomTick() {
-        BlockState random = this.storage.getRandom(CommonConstants.RANDOM, rTick, BlockState::doesRandomTick);
-        if (random == null) return false;
-        if (!random.doesRandomTick()) throw new SanityCheckException("Block state does not randomly tick");
+    public void randomTick() {
+        int randX = CommonConstants.RANDOM.nextInt(CS);
+        int randY = CommonConstants.RANDOM.nextInt(CS);
+        int randZ = CommonConstants.RANDOM.nextInt(CS);
 
-        int index = rTick.get();
+        BlockState blockState = this.get(randX, randY, randZ);
+        if (!blockState.doesRandomTick())
+            return;
 
-
-        // Calculate x, y, and z
-        int randX = index % CS;
-        int randYZ = index / CS;
-        int randY = randYZ % CS;
-        int randZ = randYZ / CS;
-
-        if (GamePlatform.get().isDevEnvironment()) {
-            BlockState blockState = this.get(randX, randY, randZ);
-            if (blockState != random)
-                throw new SanityCheckException("Block state is not the same as the random tick block state");
-        }
-
-        random.randomTick(this, vec.blockInWorldSpace(new BlockVec(randX, randY, randZ, BlockVecSpace.CHUNK)));
-        return true;
+        blockState.randomTick(this, vec.blockInWorldSpace(new BlockVec(randX, randY, randZ, BlockVecSpace.CHUNK)));
     }
 
     public boolean isEmpty() {

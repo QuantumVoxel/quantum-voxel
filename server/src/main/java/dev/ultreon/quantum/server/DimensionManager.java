@@ -5,12 +5,12 @@ import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.dimension.Dimension;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;

@@ -1,12 +1,12 @@
 package dev.ultreon.quantum.events;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.LivingEntity;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.events.api.Event;
 import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.events.api.ValueEventResult;
+import dev.ultreon.quantum.util.Vec3d;
 
 public class EntityEvents {
     public static final Event<Damage> DAMAGE = Event.withValue(listeners -> (entity, source, damage) -> {

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.events.api;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

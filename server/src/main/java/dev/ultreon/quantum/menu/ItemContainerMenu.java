@@ -2,9 +2,9 @@ package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

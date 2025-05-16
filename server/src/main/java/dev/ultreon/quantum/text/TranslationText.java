@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.text;
 
-import com.badlogic.gdx.utils.Array;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;

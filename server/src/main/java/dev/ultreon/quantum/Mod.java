@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.logging.FileHandler;
 
 /**
  * This interface represents a mod.

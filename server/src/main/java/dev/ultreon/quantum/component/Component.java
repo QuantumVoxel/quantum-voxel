@@ -3,7 +3,6 @@ package dev.ultreon.quantum.component;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.util.GameNode;
-import dev.ultreon.quantum.util.GameObject;
 
 public abstract class Component<T> implements Disposable {
     private final Class<? extends T> holder;

@@ -1,8 +1,11 @@
 package dev.ultreon.quantum.world;
 
+import java.util.BitSet;
+
 public class Heightmap {
     private short[] map;
     private final int width;
+    private boolean initialized;
 
     public Heightmap(int width) {
         this.map = new short[width * width];
@@ -34,5 +37,13 @@ public class Heightmap {
 
     public short[] save() {
         return this.map;
+    }
+
+    public void init() {
+        this.initialized = true;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 }

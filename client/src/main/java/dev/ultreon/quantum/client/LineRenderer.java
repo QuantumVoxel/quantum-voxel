@@ -115,7 +115,7 @@ public class LineRenderer {
         Vector3 center = new Vector3();
         center.add(a).add(b).add(c).add(d).scl(0.25f);
 
-        float inset = 0.0025f;
+        float inset = 0.00250f;
 
         // Move corners slightly inward
         Vector3 aInset = a.cpy().lerp(center, inset);

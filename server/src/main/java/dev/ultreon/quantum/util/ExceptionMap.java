@@ -1,9 +1,8 @@
 package dev.ultreon.quantum.util;
 
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
-import dev.ultreon.quantum.api.commands.*;
+import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.server.QuantumServer;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.crypto.NoSuchMechanismException;

@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.util;
 
-import java.io.Externalizable;
-import java.io.IOException;
 import java.util.Objects;
 
 /**

@@ -7,10 +7,10 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.S2CInventoryItemChangedPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

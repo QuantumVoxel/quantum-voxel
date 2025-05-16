@@ -3,16 +3,23 @@ package dev.ultreon.quantum.registry;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Logger;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.event.RegistryEvents;
+import dev.ultreon.quantum.registry.exception.RegistryException;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.tags.NamedTag;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
-public abstract class Registry<T> extends AbstractRegistryMap<RegistryKey<T>, T> implements RawIdMap<T> {
+public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<RegistryKey<T>, T> {
     private static Logger dumpLogger = (level, msg, t) -> {};
     private static boolean frozen;
     private final ObjectMap<RegistryKey<T>, T> registry = new ObjectMap<>();
@@ -183,7 +190,7 @@ public abstract class Registry<T> extends AbstractRegistryMap<RegistryKey<T>, T>
     }
 
     @Override
-    public @Nullable T byId(int id) {
+    public @Nullable T byRawId(int id) {
         return this.idMap.get(id);
     }
 
@@ -221,6 +228,22 @@ public abstract class Registry<T> extends AbstractRegistryMap<RegistryKey<T>, T>
         this.tags.put(namespaceID, tag);
 
         return tag;
+    }
+
+    public void send(IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
+        connection.send(new S2CRegistrySync(this));
+    }
+
+    @Override
+    public RegistryKey<T> nameById(int rawID) {
+        return registry.findKey(idMap.get(rawID), true);
+    }
+
+    @Override
+    public int idByName(RegistryKey<T> key) {
+        int rawId = idMap.findKey(registry.get(key), true, -1);
+        if (rawId == -1) throw new RegistryException("Missing key: " + key);
+        return rawId;
     }
 
     public static abstract class Builder<T> {

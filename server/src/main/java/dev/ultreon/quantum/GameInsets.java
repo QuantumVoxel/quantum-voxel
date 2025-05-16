@@ -3,13 +3,13 @@ package dev.ultreon.quantum;
 import java.util.Objects;
 
 public class GameInsets {
-    public int mouseX, mouseY, width, height;
+    public int left, top, right, bottom;
 
-    public GameInsets(int mouseX, int mouseY, int width, int height) {
-        this.mouseX = mouseX;
-        this.mouseY = mouseY;
-        this.width = width;
-        this.height = height;
+    public GameInsets(int left, int top, int right, int bottom) {
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
     }
 
     public GameInsets(int horizontal, int vertical) {
@@ -25,10 +25,10 @@ public class GameInsets {
     }
 
     public GameInsets set(int left, int top, int right, int bottom) {
-        this.mouseX = left;
-        this.mouseY = top;
-        this.width = right;
-        this.height = bottom;
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
 
         return this;
     }
@@ -46,7 +46,7 @@ public class GameInsets {
     }
 
     public GameInsets set(GameInsets insets) {
-        return set(insets.mouseX, insets.mouseY, insets.width, insets.height);
+        return set(insets.left, insets.top, insets.right, insets.bottom);
     }
 
     @Override
@@ -54,11 +54,11 @@ public class GameInsets {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GameInsets that = (GameInsets) o;
-        return mouseX == that.mouseX && mouseY == that.mouseY && width == that.width && height == that.height;
+        return left == that.left && top == that.top && right == that.right && bottom == that.bottom;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mouseX, mouseY, width, height);
+        return Objects.hash(left, top, right, bottom);
     }
 }

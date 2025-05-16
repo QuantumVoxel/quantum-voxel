@@ -1,10 +1,11 @@
 package dev.ultreon.quantum.client.render.meshing;
 
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.BlockLike;
+import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.ChunkModelBuilder;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Turns an array of voxels into OpenGL vertices
@@ -31,7 +32,7 @@ public interface Mesher {
          * @param pass
          * @return True if the block should be used in this mesh
          */
-        boolean shouldUse(Block block, BlockModel model, RenderPass pass);
+        boolean shouldUse(@Nullable BlockLike block, BlockModel model, RenderPass pass);
     }
 
 }

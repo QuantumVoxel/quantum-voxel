@@ -17,6 +17,8 @@ import dev.ultreon.quantum.network.packets.s2c.S2CLoginAcceptedPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.registry.S2CRegistrySync;
+import dev.ultreon.quantum.server.S2CRegistriesSync;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.Vec3d;
 
@@ -74,6 +76,16 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
                 this.client.showScreen(null);
             });
         }
+    }
+
+    @Override
+    public void onRegistrySync(S2CRegistrySync packet) {
+        this.client.registries.load(packet.getRegistryID(), packet.getRegistryMap());
+    }
+
+    @Override
+    public void onRegistriesSync(S2CRegistriesSync packet) {
+        this.client.registries.load(packet.getRegistries());
     }
 
     @Override

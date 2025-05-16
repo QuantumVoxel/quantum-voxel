@@ -18,7 +18,7 @@ public class ClientWebSocketConnection extends WebSocketConnection<ClientPacketH
     private final QuantumClient client;
 
     public ClientWebSocketConnection(QuantumClient client, String location, Runnable success, Consumer<Throwable> error) {
-        super(Env.CLIENT);
+        super(Env.CLIENT, client.registries);
         this.client = client;
         setSocket(GamePlatform.get().newWebSocket(location, error, socket -> {
             socket.addOpenListener(socket1 -> success.run());
@@ -79,12 +79,7 @@ public class ClientWebSocketConnection extends WebSocketConnection<ClientPacketH
             }
         }
 
-        client.onDisconnect(message);
+        client.onDisconnect(message, false);
         return Result.ok(null);
-    }
-
-    @Override
-    public void onPing(long ping) {
-        this.ping = ping;
     }
 }

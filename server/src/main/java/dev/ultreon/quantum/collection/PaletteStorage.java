@@ -5,9 +5,9 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.ubo.DataKeys;
-import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.world.rng.RNG;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.commons.lang3.ArrayUtils;
@@ -196,7 +196,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         this.palette = null;
     }
 
-    @Nullable
+    @NotNull
     @Override
     public D get(int idx) {
         short paletteIdx = this.toDataIdx(idx);
@@ -285,14 +285,14 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     @Override
-    public D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
+    public @NotNull D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
         if (this.data.size == 0) return null;
 
         IntList list = new IntArrayList();
         D[] array = this.data.toArray();
         for (int i = 0, arrayLength = array.length; i < arrayLength; i++) {
             D d = array[i];
-            if (d == null || !predicate.test(d)) continue;
+            if (!predicate.test(d)) continue;
             list.add(i);
         }
         if (list.isEmpty()) return null;

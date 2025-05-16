@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.network.api;
 
-import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.HashMap;
 import java.util.Map;

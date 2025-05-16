@@ -118,13 +118,11 @@ public final class BuilderChunk extends Chunk {
     }
 
     @Override
-    @Deprecated
     public int getHeight(int x, int z) {
         return world.getHeight(x, z);
     }
 
     @Override
-    @Deprecated
     public int getHeight(int x, int z, HeightmapType type) {
         return world.getHeight(x, z, type);
     }

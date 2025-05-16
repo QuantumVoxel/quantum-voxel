@@ -2,9 +2,9 @@ package dev.ultreon.quantum.entity;
 
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 

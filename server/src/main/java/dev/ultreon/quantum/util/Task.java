@@ -3,7 +3,6 @@ package dev.ultreon.quantum.util;
 import dev.ultreon.quantum.CompletionPromise;
 import org.jetbrains.annotations.Nullable;
 
-import dev.ultreon.quantum.Promise;
 import java.util.function.Supplier;
 
 public class Task <T> implements Runnable {

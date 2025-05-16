@@ -217,7 +217,7 @@ public class ImGuiOverlay {
 
     private static void process(QuantumClient client) {
         if (frameBufferPixels != null) frameBufferPixels.getTexture().dispose();
-        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, QuantumClient.get().getHeight() - bounds.height, bounds.width, bounds.height);
+        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, QuantumClient.get().getHeight() - bounds.bottom, bounds.right, bounds.bottom);
 
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
@@ -324,12 +324,12 @@ public class ImGuiOverlay {
         // Set the padding to 0 (or any value you need)
         style.setWindowPadding(0, 0);
         if (ImGui.begin("Game", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
-            bounds.mouseX = (int) ((ImGui.getMousePosX() - ImGui.getCursorPosX() - ImGui.getWindowPosX()) * ImGui.getWindowDpiScale());
-            bounds.mouseY = (int) ((ImGui.getMousePosY() - ImGui.getCursorPosY() - ImGui.getWindowPosY()) * ImGui.getWindowDpiScale());
+            bounds.left = (int) ((ImGui.getMousePosX() - ImGui.getCursorPosX() - ImGui.getWindowPosX()) * ImGui.getWindowDpiScale());
+            bounds.top = (int) ((ImGui.getMousePosY() - ImGui.getCursorPosY() - ImGui.getWindowPosY()) * ImGui.getWindowDpiScale());
             float contentRegionAvailX = ImGui.getContentRegionAvailX();
             float contentRegionAvailY = ImGui.getContentRegionAvailY();
-            bounds.width = (int) (contentRegionAvailX * ImGui.getWindowDpiScale());
-            bounds.height = (int) (contentRegionAvailY * ImGui.getWindowDpiScale());
+            bounds.right = (int) (contentRegionAvailX * ImGui.getWindowDpiScale());
+            bounds.bottom = (int) (contentRegionAvailY * ImGui.getWindowDpiScale());
 
             TextureRegion gameTex = frameBufferPixels;
             ImGui.image(gameTex.getTexture().getTextureObjectHandle(), contentRegionAvailX, contentRegionAvailY, frameBufferPixels.getU(), frameBufferPixels.getV(), frameBufferPixels.getU2(), frameBufferPixels.getV2(), 1, 1, 1, 1);

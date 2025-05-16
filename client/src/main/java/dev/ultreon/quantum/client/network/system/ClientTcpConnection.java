@@ -1,15 +1,7 @@
 package dev.ultreon.quantum.client.network.system;
 
 import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.network.PacketData;
-import dev.ultreon.quantum.network.client.ClientPacketHandler;
-import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.network.packets.c2s.C2SDisconnectPacket;
-import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.stage.PacketStage;
-import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
 public class ClientTcpConnection/* extends TcpConnection<ClientPacketHandler, ServerPacketHandler>*/ {

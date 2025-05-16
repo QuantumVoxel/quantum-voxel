@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface CompletionPromise<T> extends Promise<T> {
-    static <T> CompletionPromise<T> completedFuture() {
+    static <T> CompletionPromise<T> completedPromise() {
         return new PromiseImpl<>(null);
     }
 
@@ -75,11 +75,11 @@ public interface CompletionPromise<T> extends Promise<T> {
         return applyAsync((value, throwable) -> function.apply(throwable), executor);
     }
 
-    static <T> CompletionPromise<T> completedFuture(T value) {
+    static <T> CompletionPromise<T> completedPromise(T value) {
         return new PromiseImpl<>(value);
     }
 
-    static <T> CompletionPromise<T> failedFuture(Throwable throwable) {
+    static <T> CompletionPromise<T> failedPromise(Throwable throwable) {
         return new FailedPromise<>(throwable);
     }
 
@@ -151,7 +151,7 @@ public interface CompletionPromise<T> extends Promise<T> {
 
         @Override
         public <V> Promise<V> apply(BiFunction<? super T, ? super Throwable, ? extends V> function) {
-            return completedFuture(function.apply(value, null));
+            return completedPromise(function.apply(value, null));
         }
 
         @Override
@@ -214,7 +214,7 @@ public interface CompletionPromise<T> extends Promise<T> {
 
         @Override
         public <V> Promise<V> apply(BiFunction<? super T, ? super Throwable, ? extends V> function) {
-            return completedFuture(function.apply(null, throwable));
+            return completedPromise(function.apply(null, throwable));
         }
 
         @Override

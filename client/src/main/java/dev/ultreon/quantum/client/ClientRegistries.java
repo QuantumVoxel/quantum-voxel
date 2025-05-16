@@ -6,11 +6,9 @@ import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRende
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.gui.debug.DebugPage;
-import dev.ultreon.quantum.client.gui.widget.HorizontalList;
-import dev.ultreon.quantum.client.registry.ClientRegistry;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.CelestialBody;
 import dev.ultreon.quantum.registry.Registry;
+import dev.ultreon.quantum.registry.SimpleRegistry;
 
 /**
  * A class that contains registries for the client.
@@ -24,7 +22,7 @@ public class ClientRegistries {
      * 
      * @see RenderPass
      */
-    public static final Registry<RenderPass> RENDER_EFFECT = ClientRegistries.<RenderPass>builder("render_effect").build();
+    public static final Registry<RenderPass> RENDER_PASS = ClientRegistries.<RenderPass>builder("render_pass").build();
 
     /**
      * The registry for fonts.
@@ -76,7 +74,8 @@ public class ClientRegistries {
      * @param <T>        The type of the registry.
      * @return The Registry builder.
      */
-    private static <T> Registry.Builder<T> builder(String name, T... typeGetter) {
-        return ClientRegistry.builder(name, typeGetter).doNotSync();
+    @SafeVarargs
+    private static <T> SimpleRegistry.Builder<T> builder(String name, T... typeGetter) {
+        return (SimpleRegistry.Builder<T>) SimpleRegistry.builder(name, typeGetter).doNotSync();
     }
 }

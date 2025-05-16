@@ -1,7 +1,9 @@
 package dev.ultreon.quantum.config.api;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 import dev.ultreon.quantum.GamePlatform;
 
 public class Configuration extends ConfigCategory {

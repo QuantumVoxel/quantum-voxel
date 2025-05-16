@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
-import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.texture.TextureManager;
@@ -232,7 +231,9 @@ public class RenderPass {
                 instanceAttributeDelegates.forEach(delegate -> delegate.apply(material));
                 return material;
             });
-            return new RenderPass(this);
+            RenderPass renderPass = new RenderPass(this);
+            register(renderPass);
+            return renderPass;
         }
 
         public static final class CullFace implements AttributeDelegate {
@@ -771,7 +772,7 @@ public class RenderPass {
      * @return The registered render effect.
      */
     public static RenderPass register(RenderPass renderType) {
-        ClientRegistries.RENDER_EFFECT.register(new NamespaceID(CommonConstants.NAMESPACE, renderType.name), renderType);
+        ClientRegistries.RENDER_PASS.register(new NamespaceID(CommonConstants.NAMESPACE, renderType.name), renderType);
         return renderType;
     }
 
@@ -780,7 +781,7 @@ public class RenderPass {
     }
 
     public static RenderPass byName(String renderPass) {
-        RenderPass pass = ClientRegistries.RENDER_EFFECT.get(new NamespaceID(CommonConstants.NAMESPACE, renderPass));
+        RenderPass pass = ClientRegistries.RENDER_PASS.get(new NamespaceID(CommonConstants.NAMESPACE, renderPass));
         if (pass == null) throw new IllegalArgumentException("Unknown render pass: " + renderPass);
         return pass;
     }

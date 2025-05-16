@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.desktop;
+package dev.ultreon.quantum.desktop.platform.win32;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

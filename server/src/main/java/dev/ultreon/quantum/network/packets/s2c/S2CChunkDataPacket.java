@@ -16,6 +16,7 @@ import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
+import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -36,6 +37,7 @@ public final class S2CChunkDataPacket implements Packet<InGameClientPacketHandle
     private final @NotNull Storage<RegistryKey<Biome>> biomeStorage;
     private final IntList blockEntityPositions;
     private final IntList blockEntities;
+    private static final ThreadLocal<Map<BlockVec, BlockEntityType<?>>> blockEntitiesByLocation = ThreadLocal.withInitial(HashMap::new);
 
     public S2CChunkDataPacket(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, IntList blockEntityPositions, IntList blockEntities) {
         this.pos = pos;
@@ -60,7 +62,7 @@ public final class S2CChunkDataPacket implements Packet<InGameClientPacketHandle
         var pos = buffer.readChunkVec();
         var info = new ChunkBuildInfo(buffer);
         var storage = new PaletteStorage<>(Blocks.AIR.getDefaultState(), buffer, PacketIO::readBlockState);
-        var biomeStorage = new PaletteStorage<>(RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("unknown")), buffer, buf -> RegistryKey.of(RegistryKeys.BIOME, buf.readId()));
+        var biomeStorage = new PaletteStorage<>(RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("unknown")), buffer, buf -> Registries.BIOME.nameById(buf.readVarInt()));
 
         var blockEntityPositions = new IntArrayList();
         var blockEntities = new IntArrayList();
@@ -81,10 +83,10 @@ public final class S2CChunkDataPacket implements Packet<InGameClientPacketHandle
         this.storage.write(buffer, (encode, block) -> block.write(encode));
         this.biomeStorage.write(buffer, (encode, biome) -> {
             if (biome == null) {
-                encode.writeId(new NamespaceID("error"));
+                encode.writeVarInt(encode.get(RegistryKeys.BIOME).idByName(Biomes.VOID));
                 return;
             }
-            encode.writeId(biome.id());
+            encode.writeVarInt(encode.get(biome.parent()).idByName(biome));
         });
 
         buffer.writeVarInt(this.blockEntities.size());
@@ -98,16 +100,16 @@ public final class S2CChunkDataPacket implements Packet<InGameClientPacketHandle
 
     @Override
     public void handle(PacketContext ctx, InGameClientPacketHandler handler) {
-        Map<BlockVec, BlockEntityType<?>> blockEntities = new HashMap<>();
+        blockEntitiesByLocation.get().clear();
         int i = 0;
         for (Integer blkEntityVec : this.blockEntityPositions) {
             int x = (blkEntityVec >> 16) & 0xFF;
             int y = (blkEntityVec >> 8) & 0xFF;
             int z = blkEntityVec & 0xFF;
-            blockEntities.put(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byId(this.blockEntities.getInt(i)));
+            blockEntitiesByLocation.get().put(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byRawId(this.blockEntities.getInt(i)));
         }
 
-        handler.onChunkData(this.pos, this.info, this.storage, this.biomeStorage, blockEntities);
+        handler.onChunkData(this.pos, this.info, this.storage, this.biomeStorage, blockEntitiesByLocation.get());
     }
 
     public ChunkVec pos() {

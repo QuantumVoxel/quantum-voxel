@@ -4,8 +4,6 @@ import com.badlogic.gdx.utils.IntMap;
 import dev.ultreon.quantum.util.Color;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 
 import java.util.regex.Pattern;
 

@@ -2,7 +2,10 @@ package dev.ultreon.quantum.debug.profiler;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class Section {
     private long start;

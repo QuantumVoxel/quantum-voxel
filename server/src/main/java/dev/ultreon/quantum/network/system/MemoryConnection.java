@@ -3,14 +3,15 @@ package dev.ultreon.quantum.network.system;
 import com.badlogic.gdx.utils.Queue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
+import dev.ultreon.quantum.registry.RegistryHandle;
 import dev.ultreon.quantum.server.CloseCodes;
-import dev.ultreon.quantum.server.PlatformOS;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -24,8 +25,6 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
-    @NotNull
-    private final Env env;
     private MemoryConnection<TheirHandler, OurHandler> otherSide;
     private final Executor executor;
     private OurHandler handler;
@@ -38,62 +37,67 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = new Queue<>();
     private boolean loggingIn = true;
     protected boolean connected = false;
+    private boolean closed;
+    private final RegistryHandle handle;
 
-    public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor, @NotNull Env env) {
-        this.env = env;
+    public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor, @NotNull Env env, RegistryHandle handle) {
+        this.handle = handle;
         CommonConstants.LOGGER.info("Starting " + env.name() + " memory connection...");
 
         this.otherSide = otherSide;
         if (otherSide != null) {
-            otherSide.otherSide = this;
             connected = true;
+            otherSide.otherSide = this;
+            loggingIn = false;
             CommonConstants.LOGGER.info("Memory connections connected!");
         }
         this.executor = executor;
 
-        if (!GamePlatform.get().isWeb()) {
-            GamePlatform.get().runNotOnWeb(() -> {
-                Thread receiver = new Thread(this::receiverThread, env == Env.CLIENT ? "ClientNetReceiver" : "ServerNetReceiver");
-                Thread sender = new Thread(this::senderThread, env == Env.CLIENT ? "ClientNetSender" : "ServerNetSender");
-                receiver.setDaemon(true);
-                sender.setDaemon(true);
+        GamePlatform.get().getTimer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!isConnected() && !loggingIn) return;
 
-                receiver.start();
-                sender.start();
-            });
-        } else {
-            CommonConstants.LOGGER.info("Memory connection on web started!");
-        }
+                try {
+                    receive();
+                } catch (Throwable e) {
+                    disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Error receiving packet");
+                    cancel();
+
+                    closeSoon();
+                }
+            }
+        }, 0, 1);
+
+        GamePlatform.get().getTimer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!isConnected()) return;
+
+                try {
+                    send();
+                } catch (Throwable e) {
+                    disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Error sending packet");
+                    cancel();
+
+                    closeSoon();
+                }
+            }
+        }, 0, 1);
     }
 
-    private void receiverThread() {
-        CommonConstants.LOGGER.info("Receiver for memory connection started!");
-        try {
-            while (connected || loggingIn) {
-                receive();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            CommonConstants.LOGGER.info("Receiver for memory connection interrupted!");
-            return;
-        } catch (Throwable e) {
-            Thread.currentThread().interrupt();
-            CommonConstants.LOGGER.info("Error in memory connection receiver:", e);
-            return;
-        }
-        CommonConstants.LOGGER.info("Receiver for memory connection shutdown!");
-    }
+    private void closeSoon() {
+        this.closed = true;
 
-    private void senderThread() {
-        CommonConstants.LOGGER.info("Sender for memory connection started!");
-        try {
-            while (connected || loggingIn) {
-                send();
+        GamePlatform.get().getTimer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                close();
+
+                tx.set(0);
+                rx.set(0);
             }
-        } catch (Throwable e) {
-            CommonConstants.LOGGER.info("Error in memory connection sender:", e);
-        }
-        CommonConstants.LOGGER.info("Sender for memory connection shutdown!");
+        }, 10);
     }
 
     private void send() {
@@ -109,7 +113,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            PacketIO io = new PacketIO(null, bos);
+            PacketIO io = new PacketIO(null, bos, handle);
             Packet<? extends TheirHandler> packet = instance.packet();
             packet.toBytes(io);
             bos.close();
@@ -171,9 +175,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     }
 
     private void receive(int id, byte[] ourPacket) {
+        if (closed) return;
         rx.incrementAndGet();
         ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
-        PacketIO io = new PacketIO(bis, null);
+        PacketIO io = new PacketIO(bis, null, handle);
         Packet<? extends OurHandler> packet = ourPacketData.decode(id, io);
         this.receiveQueue.addLast(packet);
     }
@@ -199,6 +204,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @Override
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
+        if (closed) {
+            if (resultListener != null) resultListener.onFailure();
+            return;
+        }
         if (otherSide == null || this.readOnly)
             throw new ReadOnlyConnectionException();
         final int id = theirPacketData.getId(packet);

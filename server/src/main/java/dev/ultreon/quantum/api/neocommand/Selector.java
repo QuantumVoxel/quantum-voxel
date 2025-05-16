@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.api.neocommand;
 
 import dev.ultreon.libs.functions.v0.misc.ThrowingFunction;
-import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.ubo.DataIo;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

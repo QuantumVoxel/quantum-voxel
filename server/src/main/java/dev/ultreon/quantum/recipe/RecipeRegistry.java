@@ -3,7 +3,8 @@ package dev.ultreon.quantum.recipe;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
-import dev.ultreon.quantum.registry.AbstractRegistryMap;
+import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.RegistryMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
-public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<NamespaceID, T> {
+public class RecipeRegistry<T extends Recipe> implements RegistryMap<NamespaceID, T> {
     public static final String CATEGORY = "recipe";
     final ObjectMap<NamespaceID, T> registry = new ObjectMap<>();
     private boolean frozen = false;
@@ -36,6 +37,11 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
     }
 
     @Override
+    public RegistryKey<T> nameById(int rawID) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public ObjectMap.Keys<NamespaceID> keys() {
         return this.registry.keys();
     }
@@ -46,7 +52,7 @@ public class RecipeRegistry<T extends Recipe> extends AbstractRegistryMap<Namesp
     }
 
     @Override
-    protected int size() {
+    public int size() {
         return this.registry.size;
     }
 

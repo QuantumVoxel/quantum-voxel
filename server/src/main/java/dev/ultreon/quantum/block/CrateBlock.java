@@ -5,10 +5,10 @@ import dev.ultreon.quantum.block.entity.BlockEntityTypes;
 import dev.ultreon.quantum.block.entity.CrateBlockEntity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
 public class CrateBlock extends EntityBlock {

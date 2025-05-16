@@ -8,7 +8,6 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
 
-import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;

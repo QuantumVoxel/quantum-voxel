@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.block.state;
 
 import com.badlogic.gdx.utils.JsonValue;
+import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.types.BooleanType;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.ubo.types.IntType;
-import dev.ultreon.quantum.network.PacketIO;
 
 import java.util.Locale;
 import java.util.Objects;

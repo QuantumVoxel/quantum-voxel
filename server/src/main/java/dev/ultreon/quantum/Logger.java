@@ -1,7 +1,5 @@
 package dev.ultreon.quantum;
 
-import java.text.MessageFormat;
-
 public interface Logger {
     enum Level {
         TRACE,

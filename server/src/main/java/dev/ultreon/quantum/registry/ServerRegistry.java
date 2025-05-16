@@ -4,7 +4,7 @@ import dev.ultreon.quantum.LoadingContext;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 
-public class ServerRegistry<T> extends Registry<T> implements RawIdMap<T> {
+public class ServerRegistry<T> extends Registry<T> implements IdRegistry<T> {
     private final QuantumServer server;
 
     public ServerRegistry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {

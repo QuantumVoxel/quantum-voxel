@@ -18,7 +18,7 @@ public class ServerMemoryConnection extends MemoryConnection<ServerPacketHandler
     private ServerPlayer player;
 
     public ServerMemoryConnection(@Nullable MemoryConnection<ClientPacketHandler, ServerPacketHandler> otherSide, QuantumServer server) {
-        super(otherSide, server, Env.SERVER);
+        super(otherSide, server, Env.SERVER, server.getRegistries());
     }
 
     public void setPlayer(ServerPlayer player) {

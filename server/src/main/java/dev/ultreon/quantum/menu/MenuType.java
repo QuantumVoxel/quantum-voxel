@@ -3,8 +3,8 @@ package dev.ultreon.quantum.menu;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 public class MenuType<T extends ContainerMenu> {

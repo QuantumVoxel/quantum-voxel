@@ -5,8 +5,8 @@ import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.util.NamespaceID;
 
 import java.util.List;
 

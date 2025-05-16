@@ -14,10 +14,10 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

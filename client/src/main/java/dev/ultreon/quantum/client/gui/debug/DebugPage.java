@@ -6,4 +6,8 @@ public interface DebugPage {
     };
 
     void render(DebugPageContext context);
+
+    default void update(boolean selected) {
+
+    }
 }

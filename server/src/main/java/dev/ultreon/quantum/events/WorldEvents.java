@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.events;
 
 import dev.ultreon.quantum.events.api.Event;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
@@ -9,7 +10,6 @@ import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.ubo.types.MapType;
 
 import java.util.List;
 

@@ -13,13 +13,13 @@ import dev.ultreon.quantum.events.EntityEvents;
 import dev.ultreon.quantum.events.api.ValueEventResult;
 import dev.ultreon.quantum.item.food.AppliedEffect;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

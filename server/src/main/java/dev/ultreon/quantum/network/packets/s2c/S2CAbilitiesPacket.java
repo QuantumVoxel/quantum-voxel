@@ -7,7 +7,6 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.Packet;
 
-import java.util.BitSet;
 import java.util.Objects;
 
 public final class S2CAbilitiesPacket implements AbilitiesPacket, Packet<InGameClientPacketHandler> {

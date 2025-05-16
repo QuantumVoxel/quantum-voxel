@@ -51,7 +51,7 @@ public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketH
     }
 
     public ParticleType particleType() {
-        return Registries.PARTICLE_TYPES.byId(this.particleTypeId);
+        return Registries.PARTICLE_TYPES.byRawId(this.particleTypeId);
     }
 
     @Override

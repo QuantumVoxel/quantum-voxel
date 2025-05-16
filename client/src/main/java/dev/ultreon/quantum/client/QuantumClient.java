@@ -64,6 +64,7 @@ import dev.ultreon.quantum.client.network.system.ClientTcpConnection;
 import dev.ultreon.quantum.client.network.system.ClientWebSocketConnection;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.SkinManager;
+import dev.ultreon.quantum.client.registry.ClientSyncRegistries;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
@@ -86,6 +87,7 @@ import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.debug.profiler.Profiler;
+import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
@@ -198,6 +200,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     // Local data
     public LocalData localData = LocalData.load();
+    public ClientSyncRegistries registries = new ClientSyncRegistries(this);
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -700,7 +703,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             QuantumClient.LOGGER.error("Invalid language: {}", ClientConfiguration.language);
             LanguageManager.setCurrentLanguage(new Locale("en", "us"));
             ClientConfiguration.language.setValue(QuantumClient.id("en_us"));
-            this.newConfig.save();
+            ClientConfiguration.save();
         }
 
         if (ClientConfiguration.guiScale.getValue() != 0) {
@@ -1248,8 +1251,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         try {
             QuantumClient.PROFILER.update();
 
-            if (this.debugGui != null && this.isShowDebugHud() && !this.loading) {
-                this.debugGui.updateProfiler();
+            if (this.debugGui != null && !this.loading) {
+                if (this.isShowDebugHud()) this.debugGui.updateProfiler();
+                this.debugGui.update();
             }
 
             try (var ignored = PROFILER.start("render")) {
@@ -1436,7 +1440,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.pollAll();
 
-        QuantumClient.PROFILER.section("client-tick", this::tryClientTick);
+        Timing.start("try_client_tick");
+        tryClientTick();
+        Timing.end("try_client_tick");
 
         boolean renderSplash = this.showUltreonSplash || this.showLibGDXSplash;
         if (this.showLibGDXSplash) {
@@ -1465,7 +1471,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         ScreenUtils.clear(0, 0, 0, 0, true);
         Gdx.gl.glFlush();
 
+        Timing.start("render_main");
         this.renderMain(renderer, deltaTime);
+        Timing.end("render_main");
         return false;
     }
 
@@ -1518,6 +1526,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         RenderEvents.PRE_RENDER_GAME.factory().onRenderGame(gameRenderer, renderer, deltaTime);
+        Timing.start("render_game");
         this.gameRenderer.render(renderer, deltaTime);
 
         try (var ignored = QuantumClient.PROFILER.start("debug")) {
@@ -1529,7 +1538,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             renderer.end();
         }
 
-
+        Timing.end("render_game");
         RenderEvents.POST_RENDER_GAME.factory().onRenderGame(gameRenderer, renderer, deltaTime);
     }
 
@@ -1713,7 +1722,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (canTick) {
             this.ticksPassed++;
             try {
+                Timing.start("client_tick");
                 this.clientTick();
+                Timing.end("client_tick");
             } catch (ApplicationCrash e) {
                 QuantumClient.crash(e.getCrashLog());
             } catch (Exception t) {
@@ -2262,8 +2273,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public int getWidth() {
         GameInsets insets = GamePlatform.get().getInsets();
-        if (insets.width == 0) return Gdx.graphics.getWidth();
-        return GamePlatform.get().isShowingImGui() ? insets.width : Gdx.graphics.getWidth();
+        if (insets.right == 0) return Gdx.graphics.getWidth();
+        return GamePlatform.get().isShowingImGui() ? insets.right : Gdx.graphics.getWidth();
     }
 
     /**
@@ -2273,8 +2284,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public int getHeight() {
         GameInsets insets = GamePlatform.get().getInsets();
-        if (insets.height == 0) return Gdx.graphics.getHeight();
-        return GamePlatform.get().isShowingImGui() ? insets.height : Gdx.graphics.getHeight();
+        if (insets.bottom == 0) return Gdx.graphics.getHeight();
+        return GamePlatform.get().isShowingImGui() ? insets.bottom : Gdx.graphics.getHeight();
     }
 
     /**
@@ -2660,7 +2671,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public GridPoint2 getMousePos() {
         GameInsets insets = GamePlatform.get().getInsets();
         return GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched()
-                ? this.offset.set(insets.mouseX, insets.mouseY)
+                ? this.offset.set(insets.left, insets.top)
                 : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
     }
 
@@ -3086,8 +3097,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @param message the message.
      */
-    public void onDisconnect(String message) {
-        this.showScreen(new DisconnectedScreen(message, !connection.isMemoryConnection()));
+    public void onDisconnect(String message, boolean isMemoryConnection) {
+        this.showScreen(new DisconnectedScreen(message, !isMemoryConnection));
     }
 
     /**

@@ -3,6 +3,7 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
+import dev.ultreon.quantum.Promise;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.entity.Entity;
@@ -10,18 +11,17 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import dev.ultreon.quantum.Promise;
 
 /**
  * The {@code WorldAccess} interface provides a set of methods for interacting with the world,

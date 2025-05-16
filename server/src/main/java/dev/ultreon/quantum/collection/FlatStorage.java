@@ -2,11 +2,12 @@ package dev.ultreon.quantum.collection;
 
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.DataKeys;
-import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.world.rng.RNG;
 import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;
 import it.unimi.dsi.fastutil.shorts.Short2ReferenceFunction;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -171,7 +172,7 @@ public class FlatStorage<D> implements Storage<D> {
     }
 
     @Override
-    public D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
+    public @NotNull D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
         throw new UnsupportedOperationException();
     }
 

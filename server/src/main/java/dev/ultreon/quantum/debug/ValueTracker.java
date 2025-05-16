@@ -13,7 +13,6 @@ public class ValueTracker {
     private static int poolMax;
     private static int obtainedRenderables;
     private static int renderableFlushes;
-    private static int flushAttempts;
     private static int obtainRequests;
     private static int freeRequests;
     private static int flushRequests;
@@ -122,16 +121,7 @@ public class ValueTracker {
         renderableFlushes = 0;
     }
 
-    public static int getFlushAttempts() {
-        return flushAttempts;
-    }
-
-    public static void trackFlushAttempt() {
-        flushAttempts++;
-    }
-
     public static void resetFlushAttempts() {
-        flushAttempts = 0;
     }
 
     public static void trackObtainRequest() {

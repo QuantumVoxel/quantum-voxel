@@ -3,8 +3,6 @@ package dev.ultreon.quantum;
 import com.badlogic.gdx.Gdx;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.awt.*;
-
 /**
  * Represents the game window using LWJGL3.
  *

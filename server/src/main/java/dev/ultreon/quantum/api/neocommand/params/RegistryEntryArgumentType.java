@@ -1,6 +1,9 @@
 package dev.ultreon.quantum.api.neocommand.params;
 
-import dev.ultreon.quantum.api.neocommand.*;
+import dev.ultreon.quantum.api.neocommand.CommandParseException;
+import dev.ultreon.quantum.api.neocommand.CommandReader;
+import dev.ultreon.quantum.api.neocommand.Parameter;
+import dev.ultreon.quantum.api.neocommand.SuggestionProvider;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;

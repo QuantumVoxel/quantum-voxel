@@ -2,8 +2,6 @@ package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
-import java.io.Externalizable;
-import java.io.IOException;
 import java.util.Objects;
 
 @SuppressWarnings("unused")

@@ -11,6 +11,8 @@ import dev.ultreon.quantum.network.packets.s2c.S2CBlockEntityUpdatePacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CMenuItemChangedPacket;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.ubo.types.ListType;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.Audience;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.Capabilities;
@@ -18,8 +20,6 @@ import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.capability.ItemStorageCapability;
 import dev.ultreon.quantum.world.container.ItemContainer;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.ubo.types.ListType;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.codehaus.groovy.util.ArrayIterator;
 import org.jetbrains.annotations.NotNull;
 

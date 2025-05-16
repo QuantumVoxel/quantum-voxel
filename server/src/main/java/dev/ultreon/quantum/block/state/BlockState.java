@@ -1,13 +1,16 @@
 package dev.ultreon.quantum.block.state;
 
 import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.BlockLike;
 import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.item.tool.ToolType;
 import dev.ultreon.quantum.network.DecoderException;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.ServerChunk;
@@ -15,7 +18,6 @@ import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +37,7 @@ import java.util.Objects;
  * @author XyperCode
  * @since 0.1.0
  */
-public class BlockState {
+public class BlockState implements BlockLike {
     @Nullable BlockStateDefinition def;
     private final int id;
 
@@ -54,12 +56,15 @@ public class BlockState {
      * @throws DecoderException if the block with the given ID does not exist
      */
     public static @NotNull BlockState read(@NotNull PacketIO packetBuffer) {
+        Timing.start("read_block_state");
         int rawId = packetBuffer.readVarInt();
-        Block block = Registries.BLOCK.byId(rawId);
+        Block block = Registries.BLOCK.byRawId(rawId);
         if (block == null)
             throw new DecoderException("Block " + rawId + " does not exist");
 
-        return block.readBlockState(packetBuffer);
+        BlockState blockState = block.readBlockState(packetBuffer);
+        Timing.end("read_block_state");
+        return blockState;
     }
 
     public static BlockState empty(BlockStateDefinition definition) {
@@ -74,10 +79,12 @@ public class BlockState {
      * @param encode the buffer to write to
      */
     public void write(PacketIO encode) {
+        Timing.start("write_block_state");
         assert def != null;
         encode.writeVarInt(Registries.BLOCK.getRawId(def.block));
 
         def.block.writeBlockState(encode, this);
+        Timing.end("write_block_state");
     }
 
     /**
@@ -87,8 +94,11 @@ public class BlockState {
      * @return the loaded {@link BlockState} object
      */
     public static BlockState load(MapType data) {
+        Timing.start("load_block_state");
         Block block = Registries.BLOCK.get(NamespaceID.parse(data.getString("block")));
-        return block.loadBlockState(data);
+        BlockState blockState = block.loadBlockState(data);
+        Timing.end("load_block_state");
+        return blockState;
     }
 
     /**
@@ -307,9 +317,7 @@ public class BlockState {
         assert def != null;
         PropertyInfo info = def.propertyMap.get(key);
         int valueIndex = key.indexOf(value);
-
         if (valueIndex >= (1 << info.bits)) throw new IllegalArgumentException("Value index too large for bitmask!");
-
         int newId = (id & ~info.mask) | (valueIndex << info.offset);
         return def.byId(newId);
     }

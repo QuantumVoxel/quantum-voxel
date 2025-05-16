@@ -4,8 +4,8 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.menu.CrateMenu;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.menu.MenuTypes;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

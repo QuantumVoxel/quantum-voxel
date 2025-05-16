@@ -11,12 +11,13 @@ import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.text.icon.FontIconMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.weather.Weather;
+import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.particles.ParticleType;
 
 public final class Registries {
-    public static final Registry<Registry<?>> REGISTRY = GlobalRegistry.REGISTRY;
+    public static final Registry<Registry<?>> REGISTRY = SimpleRegistry.REGISTRY;
 
     public static final Registry<Block> BLOCK = Registries.create(RegistryKeys.BLOCK);
     public static final Registry<Item> ITEM = Registries.create(RegistryKeys.ITEM);
@@ -31,6 +32,7 @@ public final class Registries {
     public static final Registry<ParticleType> PARTICLE_TYPES = Registries.create(RegistryKeys.PARTICLE_TYPE);
     public static final Registry<FontIconMap> FONT_ICON_MAP = Registries.create(RegistryKeys.FONT_ICON_MAP);
     public static final Registry<CapabilityType<?, ?>> CAPABILITY_TYPE = Registries.create(RegistryKeys.CAPABILITY_TYPE);
+    public static final Registry<Biome> BIOME = Registries.create(RegistryKeys.BIOME);
 
     public static void nopInit() {
         // Load class
@@ -38,14 +40,14 @@ public final class Registries {
 
     @SafeVarargs
     public static <T> Registry<T> create(NamespaceID id, T... typeGetter) {
-        Registry<T> registry = GlobalRegistry.builder(id, typeGetter).build();
+        Registry<T> registry = SimpleRegistry.builder(id, typeGetter).build();
         Registries.REGISTRY.register(id, registry);
         return registry;
     }
 
     @SafeVarargs
     public static <T> Registry<T> create(RegistryKey<Registry<T>> id, T... typeGetter) {
-        Registry<T> registry = GlobalRegistry.builder(id.id(), typeGetter).build();
+        Registry<T> registry = SimpleRegistry.builder(id.id(), typeGetter).build();
         Registries.REGISTRY.register(id.id(), registry);
         return registry;
     }

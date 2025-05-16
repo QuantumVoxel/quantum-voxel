@@ -12,6 +12,7 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec3d;
@@ -20,7 +21,6 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * The Block class encapsulates properties such as transparency, collision behavior, fluidity,
  * tool requirements, hardness, loot generation, rendering options, and more.
  */
-public class Block {
+public class Block implements BlockLike {
     private final boolean transparent;
     private final boolean collides;
     private final boolean fluid;
@@ -348,12 +348,12 @@ public class Block {
     }
 
     public BlockState readBlockState(@NotNull PacketIO buffer) {
-        int stateId = buffer.readInt();
+        int stateId = buffer.readVarInt();
         return definition.byId(stateId);
     }
 
     public void writeBlockState(PacketIO buffer, BlockState state) {
-        buffer.writeInt(state.getStateId());
+        buffer.writeVarInt(state.getStateId());
     }
 
     public BlockState loadBlockState(MapType data) {
@@ -387,6 +387,11 @@ public class Block {
 
     public boolean doesRandomTick() {
         return doesRandomTick;
+    }
+
+    @Override
+    public Block getBlock() {
+        return this;
     }
 
     /**

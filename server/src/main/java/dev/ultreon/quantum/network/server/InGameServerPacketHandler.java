@@ -255,7 +255,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onCraftRecipe(int typeId, NamespaceID recipeId) {
-        RecipeType<?> recipeType = Registries.RECIPE_TYPE.byId(typeId);
+        RecipeType<?> recipeType = Registries.RECIPE_TYPE.byRawId(typeId);
         Recipe recipe = RecipeManager.get().get(recipeId, recipeType);
         if (recipe == null) throw new IllegalStateException("Recipe not found: " + recipeId);
         if (!recipe.canCraft(this.player.inventory)) return;
@@ -264,7 +264,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onCraftAdvancedRecipe(int typeId, NamespaceID recipeId) {
-        RecipeType<?> recipeType = Registries.RECIPE_TYPE.byId(typeId);
+        RecipeType<?> recipeType = Registries.RECIPE_TYPE.byRawId(typeId);
         Recipe recipe = RecipeManager.get().get(recipeId, recipeType);
         if (!(recipe instanceof CraftingRecipe)) throw new IllegalStateException("Not a crafting recipe: " + recipeId);
         CraftingRecipe craftingRecipe = (CraftingRecipe) recipe;

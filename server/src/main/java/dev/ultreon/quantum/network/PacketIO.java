@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.network;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
@@ -8,15 +7,21 @@ import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.registry.IdRegistry;
+import dev.ultreon.quantum.registry.Registry;
+import dev.ultreon.quantum.registry.RegistryHandle;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.ubo.DataTypeRegistry;
+import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
-import dev.ultreon.quantum.ubo.DataTypeRegistry;
-import dev.ultreon.quantum.ubo.types.DataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.Socket;
@@ -35,12 +40,13 @@ import java.util.function.Function;
  * The PacketIO class provides methods for reading and writing various data types to and from input and output streams.
  */
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public class PacketIO {
+public class PacketIO implements RegistryHandle {
     private static final int MAX_UBO_SIZE = 1024 * 1024 * 2;
     private final DataInputStream input;
     private final DataOutputStream output;
     private final InputStream inputOrig;
     private final OutputStream outputOrig;
+    private final RegistryHandle handle;
 
     /**
      * Initializes a new PacketIO instance with the specified input and output streams.
@@ -51,13 +57,14 @@ public class PacketIO {
      * @param out the output stream to which packets will be written. If null, defaults to a NullOutputStream.
      */
     @SuppressWarnings("resource")
-    public PacketIO(InputStream in, OutputStream out) {
+    public PacketIO(InputStream in, OutputStream out, RegistryHandle handle) {
         if (in == null) in = new NullInputStream();
         if (out == null) out = new NullOutputStream();
         this.input = new DataInputStream(in);
         this.output = new DataOutputStream(out);
         this.inputOrig = in;
         this.outputOrig = out;
+        this.handle = handle;
     }
 
     /**
@@ -67,8 +74,8 @@ public class PacketIO {
      * @param socket the socket to be used for input and output streams.
      * @throws IOException if an I/O error occurs when creating the input or output streams.
      */
-    public PacketIO(Socket socket) throws IOException {
-        this(socket.getInputStream(), socket.getOutputStream());
+    public PacketIO(Socket socket, RegistryHandle handle) throws IOException {
+        this(socket.getInputStream(), socket.getOutputStream(), handle);
     }
 
     public String readString(int max) {
@@ -133,8 +140,10 @@ public class PacketIO {
     }
 
     public void writeId(NamespaceID id) {
+        Timing.start("write_id");
         this.writeString(id.getDomain(), 100);
         this.writeString(id.getPath(), 200);
+        Timing.end("write_id");
     }
 
     public byte readByte() {
@@ -539,20 +548,29 @@ public class PacketIO {
     }
 
     public int readVarInt() {
-        return readInt();
+        int numRead = 0;
+        int result = 0;
+        byte read;
+        do {
+            read = readByte();
+            int value = (read & 0x7F);
+            result |= (value << (7 * numRead));
+
+            numRead++;
+            if (numRead > 5) {
+                throw new RuntimeException("VarInt too big");
+            }
+        } while ((read & 0x80) != 0);
+
+        return result;
     }
 
-    public PacketIO writeVarInt(int value) {
-        return writeInt(value);
-    }
-
-    public int getVarIntSize(int value) {
-        int size = 0;
-        while ((value & ~0x7F)!= 0) {
-            size++;
+    public void writeVarInt(int value) {
+        while ((value & 0xFFFFFF80) != 0L) {
+            writeByte((value & 0x7F) | 0x80);
             value >>>= 7;
         }
-        return size + 1;
+        writeByte(value & 0x7F);
     }
 
     public void writeUbo(DataType<?> ubo) {
@@ -667,11 +685,16 @@ public class PacketIO {
     }
 
     public PacketIO readBytes(int length) {
-        try {
-            return new PacketIO(new ByteArrayInputStream(this.input.readNBytes(length)), null);
-        } catch (IOException e) {
-            throw new PacketException(e);
+        byte[] bytes = readNBytes(length);
+        return new PacketIO(new ByteArrayInputStream(bytes), null, handle);
+    }
+
+    private byte @NotNull [] readNBytes(int length) {
+        byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = readByte();
         }
+        return bytes;
     }
 
     public PacketIO readBytes(byte[] dst) {
@@ -690,7 +713,7 @@ public class PacketIO {
 
     public PacketIO readBytes(OutputStream out, int length) {
         try {
-            byte[] bytes = this.input.readNBytes(length);
+            byte[] bytes = readNBytes(length);
             out.write(bytes);
         } catch (IOException e) {
             throw new PacketException(e);
@@ -706,7 +729,7 @@ public class PacketIO {
 
     public int readBytes(FileChannel out, long position, int length) {
         try {
-            return out.write(ByteBuffer.wrap(this.input.readNBytes(length)), position);
+            return out.write(ByteBuffer.wrap(readNBytes(length)), position);
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -757,7 +780,13 @@ public class PacketIO {
 
     public void writeBytes(InputStream in, int length) {
         try {
-            this.output.write(in.readNBytes(length));
+            byte[] bytes = new byte[length];
+            for (int i = 0; i < length; i++) {
+                int read = in.read();
+                if (read < 0) throw new EncoderException("EOF reached");
+                bytes[i] = (byte) read;
+            }
+            this.output.write(bytes);
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -775,7 +804,7 @@ public class PacketIO {
 
     public int writeBytes(FileChannel in, long position, int length) {
         try {
-            return in.read(ByteBuffer.wrap(this.input.readNBytes(length)), position);
+            return in.read(ByteBuffer.wrap(readNBytes(length)), position);
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -1209,6 +1238,11 @@ public class PacketIO {
             keyEncoder.accept(this, entry.key);
             valueEncoder.accept(this, entry.value);
         }
+    }
+
+    @Override
+    public <T> IdRegistry<T> get(RegistryKey<? extends Registry<T>> key) {
+        return handle.get(key);
     }
 
     private static class NullInputStream extends InputStream {

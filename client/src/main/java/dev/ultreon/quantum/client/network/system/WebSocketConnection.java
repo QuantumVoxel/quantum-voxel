@@ -10,6 +10,7 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.registry.RegistryHandle;
 import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
@@ -26,14 +27,17 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
     protected PacketStage stage = PacketStages.LOGIN;
     protected WebSocket socket;
     protected long ping;
+    private RegistryHandle handle;
 
-    public WebSocketConnection(WebSocket socket, Env env) {
+    public WebSocketConnection(WebSocket socket, Env env, RegistryHandle handle) {
         this.socket = socket;
         this.env = env;
+        this.handle = handle;
     }
 
-    public WebSocketConnection(Env env) {
+    public WebSocketConnection(Env env, RegistryHandle handle) {
         this.env = env;
+        this.handle = handle;
     }
 
     protected void setSocket(WebSocket socket) {
@@ -53,7 +57,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
         if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Sending: " + packet.getClass().getName());;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PacketIO io = new PacketIO(null, out);
+        PacketIO io = new PacketIO(null, out, handle);
         io.writeShort(getOtherSidePackets().getId(packet));
         packet.toBytes(io);
         socket.send(out.toByteArray(), resultListener);
@@ -148,7 +152,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
     protected abstract Packet<ServerPacketHandler> getDisconnectPacket(String message);
 
     public final boolean received(byte[] bytes) {
-        PacketIO io = new PacketIO(new ByteArrayInputStream(bytes), null);
+        PacketIO io = new PacketIO(new ByteArrayInputStream(bytes), null, handle);
         short i = io.readShort();
         Packet<OurHandler> packet = getPackets().decode(i, io);
         if (packet == null) {

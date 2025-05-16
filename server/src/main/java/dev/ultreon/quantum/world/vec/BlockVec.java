@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.world.vec;
 
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.Direction;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.server.util;
 
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;

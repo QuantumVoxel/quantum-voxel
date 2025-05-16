@@ -7,8 +7,8 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.ubo.types.MapType;
+import dev.ultreon.quantum.util.Vec3d;
 
 import java.util.Objects;
 
@@ -31,7 +31,7 @@ public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandle
 
     public static S2CAddEntityPacket read(PacketIO buffer) {
         var id = buffer.readVarInt();
-        var type = Registries.ENTITY_TYPE.byId(buffer.readVarInt());
+        var type = Registries.ENTITY_TYPE.byRawId(buffer.readVarInt());
         var position = new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
         MapType pipeline = buffer.readUbo();
 

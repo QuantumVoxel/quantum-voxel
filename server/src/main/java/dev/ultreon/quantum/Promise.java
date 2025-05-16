@@ -15,7 +15,7 @@ public interface Promise<T> {
     }
 
     static @NotNull Promise<Void> failedFuture(Throwable e) {
-        return CompletionPromise.failedFuture(e);
+        return CompletionPromise.failedPromise(e);
     }
 
     static <T> Promise<T> supplyAsync(Supplier<T> o, AsyncExecutor executor) {

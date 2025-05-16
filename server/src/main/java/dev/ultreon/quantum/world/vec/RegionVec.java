@@ -1,11 +1,12 @@
 package dev.ultreon.quantum.world.vec;
 
-import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.util.Point;
+import dev.ultreon.quantum.util.Vec3i;
 
 import java.util.Objects;
 
-import static dev.ultreon.quantum.world.World.*;
+import static dev.ultreon.quantum.world.World.CS;
+import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
 /**
  * Represents a region position in the world.

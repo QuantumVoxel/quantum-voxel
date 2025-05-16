@@ -2,7 +2,6 @@ package dev.ultreon.quantum.resources;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.Os;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
 import dev.ultreon.libs.commons.v0.util.IOUtils;

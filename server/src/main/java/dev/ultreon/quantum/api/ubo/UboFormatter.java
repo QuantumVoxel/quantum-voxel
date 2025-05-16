@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.api.ubo;
 
-import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.ubo.types.DataType;
 
 public class UboFormatter {
     public static TextObject format(DataType<?> message) {

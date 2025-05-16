@@ -61,7 +61,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -709,7 +708,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 modelInstance.userData = Shaders.MODEL_VIEW.get();
                 modelInstance.transform.setTranslation(translation);
 
-                bufferSource.getBuffer(BlockRenderPassRegistry.get(blockState.getBlock())).render(modelInstance);
+                bufferSource.getBuffer(BlockRenderPassRegistry.get(blockState)).render(modelInstance);
             }
     }
 

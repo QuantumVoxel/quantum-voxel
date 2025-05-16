@@ -12,12 +12,12 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
-import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -164,7 +164,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      */
     public static Block decodeBlock(PacketIO buffer) {
         int id = buffer.readInt();
-        return Registries.BLOCK.byId(id);
+        return Registries.BLOCK.byRawId(id);
     }
 
     /**
@@ -571,6 +571,32 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
             return 0;
 
         return lightMap.getSunlight(x, y, z);
+    }
+
+    public BlockState getSafe(int x, int y, int z) {
+        if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
+            BlockVec start = vec.start();
+            x += start.x;
+            y += start.y;
+            z += start.z;
+
+            return world.get(x, y, z);
+        }
+
+        return get(x, y, z);
+    }
+
+    public boolean setSafe(int x, int y, int z, BlockState state) {
+        if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
+            BlockVec start = vec.start();
+            x += start.x;
+            y += start.y;
+            z += start.z;
+
+            return world.set(x, y, z, state);
+        }
+
+        return set(x, y, z, state);
     }
 
     /**

@@ -7,8 +7,6 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonWriter;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.rng.JavaRNG;
-import dev.ultreon.quantum.Logger;
-import dev.ultreon.quantum.LoggerFactory;
 
 import java.time.format.DateTimeFormatter;
 

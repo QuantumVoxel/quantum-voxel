@@ -10,29 +10,29 @@ import java.util.Collection;
 
 import static dev.ultreon.quantum.registry.RegistryKey.ROOT;
 
-public class GlobalRegistry<T> extends Registry<T> implements RawIdMap<T> {
-    public static final Registry<Registry<?>> REGISTRY = new GlobalRegistry<>(new Builder<>(new NamespaceID("registry")), ROOT);
-    private static final OrderedMap<RegistryKey<Registry<?>>, GlobalRegistry<?>> REGISTRIES = new OrderedMap<>();
+public class SimpleRegistry<T> extends Registry<T> {
+    public static final Registry<Registry<?>> REGISTRY = new SimpleRegistry<>(new Builder<>(new NamespaceID("registry")), ROOT);
+    private static final OrderedMap<RegistryKey<Registry<?>>, SimpleRegistry<?>> REGISTRIES = new OrderedMap<>();
 
-    private GlobalRegistry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {
+    private SimpleRegistry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {
         super(builder, key);
         RegistryEvents.REGISTRY_DUMP.subscribe(this::dumpRegistry);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private GlobalRegistry(Builder<T> builder) {
+    private SimpleRegistry(Builder<T> builder) {
         super(builder);
 
-        GlobalRegistry.REGISTRIES.put((RegistryKey) this.key, this);
+        SimpleRegistry.REGISTRIES.put((RegistryKey) this.key, this);
     }
 
-    public static Collection<GlobalRegistry<?>> getRegistries() {
-        return GlobalRegistry.REGISTRIES.valueList();
+    public static Collection<SimpleRegistry<?>> getRegistries() {
+        return SimpleRegistry.REGISTRIES.valueList();
     }
 
     @SafeVarargs
     @Deprecated
-    public static <T> GlobalRegistry<T> create(NamespaceID id, @NotNull T... type) {
+    public static <T> SimpleRegistry<T> create(NamespaceID id, @NotNull T... type) {
         return new Builder<>(id, type).build();
     }
 
@@ -52,8 +52,8 @@ public class GlobalRegistry<T> extends Registry<T> implements RawIdMap<T> {
             super(id, typeGetter);
         }
 
-        public GlobalRegistry<T> build() {
-            return new GlobalRegistry<>(this);
+        public SimpleRegistry<T> build() {
+            return new SimpleRegistry<>(this);
         }
     }
 }

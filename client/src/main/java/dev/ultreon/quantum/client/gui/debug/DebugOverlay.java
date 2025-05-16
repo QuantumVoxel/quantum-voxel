@@ -68,7 +68,7 @@ public class DebugOverlay {
         if (ClientRegistries.DEBUG_PAGE.isEmpty()) {
             return DebugPage.EMPTY;
         }
-        return ClientRegistries.DEBUG_PAGE.byId(this.page);
+        return ClientRegistries.DEBUG_PAGE.byRawId(this.page);
     }
 
     public DebugOverlay left(Renderer renderer, String name, Object value) {
@@ -189,4 +189,9 @@ public class DebugOverlay {
         }
     }
 
+    public void update() {
+        for (DebugPage page : ClientRegistries.DEBUG_PAGE.values()) {
+            page.update(page == this.getPage());
+        }
+    }
 }

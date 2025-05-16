@@ -34,6 +34,7 @@ import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.*;
@@ -325,8 +326,11 @@ public class GameRenderer implements Disposable {
             renderer.getBatch().enableBlending();
             renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
 
+            Timing.start("screen");
             screen.render(renderer, deltaTime);
             screen.renderTooltips(renderer, (int) mouseVec[0], (int) mouseVec[1], deltaTime);
+            Timing.end("screen");
+
             renderTopOverlay(renderer, screen, deltaTime, mouseVec[0], mouseVec[1]);
         }
     }

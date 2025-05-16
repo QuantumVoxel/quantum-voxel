@@ -6,7 +6,7 @@ import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.registry.ClientRegistry;
+import dev.ultreon.quantum.registry.SimpleRegistry;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -18,7 +18,7 @@ import java.util.*;
 
 public class LanguageManager {
     public static final LanguageManager INSTANCE = new LanguageManager();
-    public static final Registry<Language> REGISTRY = ClientRegistry.<Language>builder(new NamespaceID("language")).build();
+    public static final Registry<Language> REGISTRY = SimpleRegistry.<Language>builder(new NamespaceID("language")).build();
     private static Locale currentLanguage;
     private final Map<Locale, Language> languages = new HashMap<>();
     private final Set<Locale> locales = new HashSet<>();

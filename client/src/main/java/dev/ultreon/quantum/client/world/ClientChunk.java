@@ -303,20 +303,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public BlockState getSafe(int x, int y, int z) {
-        if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
-            BlockVec start = vec.start();
-            x += start.x;
-            y += start.y;
-            z += start.z;
-
-            return clientWorld.get(x, y, z);
-        }
-
-        return get(x, y, z);
-    }
-
-    @Override
     public int getBlockLightSafe(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
             BlockVec start = vec.start();

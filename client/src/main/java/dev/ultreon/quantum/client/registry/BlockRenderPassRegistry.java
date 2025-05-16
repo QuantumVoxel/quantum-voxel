@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.registry;
 
 import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.BlockLike;
 import dev.ultreon.quantum.client.render.RenderPass;
 
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class BlockRenderPassRegistry {
      * @param block the block.
      * @return the block render type.
      */ 
-    public static RenderPass get(Block block) {
-        return BlockRenderPassRegistry.registry.getOrDefault(block, RenderPass.OPAQUE);
+    public static RenderPass get(BlockLike block) {
+        return BlockRenderPassRegistry.registry.getOrDefault(block.getBlock(), RenderPass.OPAQUE);
     }
 }

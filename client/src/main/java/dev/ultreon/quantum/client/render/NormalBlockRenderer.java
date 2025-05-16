@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.render;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
+import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
 import dev.ultreon.quantum.client.render.meshing.GreedyMesher.LightLevelData;
 import dev.ultreon.quantum.client.render.meshing.PerCornerLightData;
 import dev.ultreon.quantum.client.world.AOUtils;

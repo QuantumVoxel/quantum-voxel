@@ -8,15 +8,15 @@ import java.util.Objects;
 
 public final class RegistryKey<T> {
     public static final RegistryKey<Registry<Registry<?>>> ROOT = new RegistryKey<>(null, new NamespaceID("root"));
-    private final @Nullable RegistryKey<Registry<T>> parent;
+    private final @Nullable RegistryKey<? extends Registry<T>> parent;
     private final @NotNull NamespaceID id;
 
-    public RegistryKey(@Nullable RegistryKey<Registry<T>> parent, @NotNull NamespaceID id) {
+    public RegistryKey(@Nullable RegistryKey<? extends Registry<T>> parent, @NotNull NamespaceID id) {
         this.parent = parent;
         this.id = id;
     }
 
-    public static <T> RegistryKey<T> of(RegistryKey<Registry<T>> parent, NamespaceID element) {
+    public static <T> RegistryKey<T> of(RegistryKey<? extends Registry<T>> parent, NamespaceID element) {
         if (element == null) throw new IllegalArgumentException("Element ID cannot be null");
         return new RegistryKey<>(parent, element);
     }
@@ -50,7 +50,7 @@ public final class RegistryKey<T> {
         return (parent == null ? 0 : parent.hashCode()) * 31 + id.hashCode();
     }
 
-    public @Nullable RegistryKey<Registry<T>> parent() {
+    public @Nullable RegistryKey<? extends Registry<T>> parent() {
         return parent;
     }
 

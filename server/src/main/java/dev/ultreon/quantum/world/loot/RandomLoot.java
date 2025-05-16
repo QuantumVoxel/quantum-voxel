@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.world.loot;
 
-import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
+import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.apache.commons.lang3.IntegerRange;
 

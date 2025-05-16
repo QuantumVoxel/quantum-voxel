@@ -2,6 +2,8 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.server.QuantumServer;
 
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 public class RandomTicker implements Disposable {
     private final ServerWorld world;
     private final int interval;
+    private boolean running = false;
 
     public RandomTicker(ServerWorld world, int interval) {
         this.world = world;
@@ -16,7 +19,15 @@ public class RandomTicker implements Disposable {
     }
 
     public void start() {
-//        this.service.scheduleAtFixedRate(() -> QuantumServer.invoke(this::randomTick), 0, this.interval, java.util.concurrent.TimeUnit.MILLISECONDS);
+        this.running = true;
+
+        GamePlatform.get().getTimer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (world.disposed || !world.enabled) return;
+                QuantumServer.invoke(RandomTicker.this::randomTick);
+            }
+        }, 0, this.interval);
     }
 
     private void randomTick() {
@@ -28,11 +39,11 @@ public class RandomTicker implements Disposable {
         ServerChunk serverChunk = loadedChunks.get(i);
         if (serverChunk.isEmpty()) return;
 
-//        serverChunk.randomTick();
+        serverChunk.randomTick();
     }
 
     @Override
     public void dispose() {
-//        this.service.shutdown();
+        this.running = false;
     }
 }

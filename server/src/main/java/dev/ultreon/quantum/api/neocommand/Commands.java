@@ -29,7 +29,16 @@ public class Commands {
         String[] args = new String[s.length - 1];
         System.arraycopy(s, 1, args, 0, args.length);
         try {
-            return Commands.getCommand(cmd).execute(server, sender, args);
+            CommandRegistrant command1 = Commands.getCommand(cmd);
+            if (command1 == null) {
+                return new CommandError(MessageCode.GENERIC, "[red]Unknown command: [light red]" + cmd) {
+                    @Override
+                    public String getName() {
+                        return cmd;
+                    }
+                };
+            }
+            return command1.execute(server, sender, args);
         } catch (CommandParseException e) {
             return new CommandError(MessageCode.GENERIC, "[red]Error: [light red]" + e.getMessage()) {
                 @Override

@@ -116,9 +116,7 @@ public class ChunkModel extends GameObject {
 
             if (!chunk.mesher.buildMesh((blk, model, pass) -> {
                 if (model == null) return true;
-                boolean b = pass.equals(model.getRenderPass());
-                chunk.meshLog += "Meshing " + blk + " in " + pass + " (MRP: " + model.getRenderPass() + ")" + ": " + b + "\n";
-                return b;
+                return pass.equals(model.getRenderPass());
             }, chunkModelBuilder)) {
                 chunk.meshStatus = MeshStatus.SKIPPED;
                 chunk.meshDuration = System.currentTimeMillis() - millis;

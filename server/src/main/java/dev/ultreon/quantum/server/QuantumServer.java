@@ -30,9 +30,9 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.recipe.RecipeManager;
 import dev.ultreon.quantum.recipe.Recipes;
+import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.registry.RegistryKeys;
-import dev.ultreon.quantum.registry.ServerRegistry;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.player.CacheablePlayer;
@@ -229,7 +229,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     private void reload(ReloadContext context) {
-        for (ServerRegistry<?> registry : registries.stream().collect(Collectors.toList()))
+        for (Registry<?> registry : registries.stream().collect(Collectors.toList()))
             registry.reload(context);
 
         this.recipeManager.reload(context);
@@ -318,7 +318,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     public static @NotNull Promise<Void> invoke(Runnable func) {
         if (GamePlatform.get().isWeb() || Thread.currentThread() == QuantumServer.instance.thread()) {
             func.run();
-            return CompletionPromise.completedFuture(null);
+            return CompletionPromise.completedPromise(null);
         }
         QuantumServer server = QuantumServer.instance;
         if (server == null) return Promise.failedFuture(new ServerStatusException("Server is offline!"));
@@ -490,7 +490,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         LOGGER.error("Crash reported:", t);
 
         // Create crash log.
-        CrashLog crashLog = new CrashLog("xServer crashed! :(", t);
+        CrashLog crashLog = new CrashLog("Server crashed! :(", t);
 
         for (ServerWorld world : this.dimManager.getWorlds().values()) {
             world.fillCrashInfo(crashLog);

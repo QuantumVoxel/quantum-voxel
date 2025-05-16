@@ -105,6 +105,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     @Nullable
     public Entry<T> getEntryAt(int x, int y) {
         int entryIndexAt = getEntryIndexAt(x, y);
+        if (entryIndexAt < 0) return null;
         return entries.get(entryIndexAt);
     }
 

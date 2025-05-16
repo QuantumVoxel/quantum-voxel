@@ -49,7 +49,7 @@ public class BlockHit implements Hit {
         this.normal.set(buffer.readVec3d());
         this.vec.set(buffer.readVec3i());
         this.blockMeta = buffer.readBlockState();
-        this.block = Registries.BLOCK.byId(buffer.readVarInt());
+        this.block = Registries.BLOCK.byRawId(buffer.readVarInt());
         this.collide = buffer.readBoolean();
         this.distance = buffer.readFloat();
     }

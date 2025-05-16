@@ -154,13 +154,6 @@ public class SafeLoadWrapper implements ApplicationListener {
         }
         if (quantum != null) {
             quantum.render();
-            Pixmap pixels = Pixmap.createFromFrameBuffer(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
-            PixmapTextureData pixmapTextureData = new PixmapTextureData(pixels, Pixmap.Format.RGB888, false, true, true);
-            if (texture == null) {
-                texture = new Texture(pixmapTextureData);
-            } else {
-                texture.load(pixmapTextureData);
-            }
         }
     }
 
@@ -286,7 +279,7 @@ public class SafeLoadWrapper implements ApplicationListener {
             public void draw(Batch batch, float parentAlpha) {
                 super.draw(batch, 0.3f);
 
-                batch.draw(texture, 0, 0, stage.getWidth(), stage.getHeight());
+                if (texture != null) batch.draw(texture, 0, 0, stage.getWidth(), stage.getHeight());
 
                 batch.setColor(1, 1, 1, 0.3f);
                 batch.draw(whitePixel, 0, 0, stage.getWidth(), stage.getHeight());

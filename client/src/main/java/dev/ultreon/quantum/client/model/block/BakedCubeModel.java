@@ -40,6 +40,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private static final VertexInfo V_10 = new VertexInfo();
     private static final VertexInfo V_11 = new VertexInfo();
     private final String renderPass;
+    private RenderPass renderPassObj;
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion all, Model model, String renderPass) {
         this(resourceId, all, all, all, all, all, all, model, renderPass);
@@ -347,7 +348,8 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
 
     @Override
     public RenderPass getRenderPass() {
-        return RenderPass.byName(renderPass);
+        if (renderPassObj != null) return renderPassObj;
+        return renderPassObj = RenderPass.byName(renderPass);
     }
 
     @Override

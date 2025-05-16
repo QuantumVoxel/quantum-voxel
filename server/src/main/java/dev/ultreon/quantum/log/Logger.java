@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.log;
 
-import java.io.File;
-
 @Deprecated
 public interface Logger {
     void debug(String s);
