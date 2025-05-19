@@ -380,6 +380,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     // Texture Atlases
     public TextureAtlas blocksTextureAtlas;
     public TextureAtlas itemTextureAtlas;
+    public TextureAtlas environmentTextureAtlas;
 
     // Baked Models
     @HiddenNode

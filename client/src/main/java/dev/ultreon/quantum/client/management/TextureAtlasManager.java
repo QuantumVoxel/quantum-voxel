@@ -69,6 +69,7 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
             Pixmap tex = new Pixmap(resource);
             itemTextures.add(texId, tex);
         }
+        this.client.itemTextureAtlas = this.register(ITEM_ATLAS_ID, itemTextures.stitch());
         TextureStitcher environmentTextures = new TextureStitcher(ENVIRONMENT_ID);
         for (NamespaceID e : CelestialBody.REGISTRY) {
             NamespaceID texId = e.mapPath(path -> "textures/environment/" + path + ".png");
@@ -80,6 +81,6 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
             Pixmap tex = new Pixmap(resource);
             environmentTextures.add(texId, tex);
         }
-        this.client.itemTextureAtlas = this.register(ITEM_ATLAS_ID, environmentTextures.stitch());
+        this.client.environmentTextureAtlas = this.register(ITEM_ATLAS_ID, environmentTextures.stitch());
     }
 }
