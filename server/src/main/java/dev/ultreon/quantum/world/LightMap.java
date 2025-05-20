@@ -79,4 +79,8 @@ public class LightMap {
     public void setSunlight(int idx, byte value) {
         this.data[idx] = (byte) ((this.data[idx] & 0xF0) | (value & 0x0F));
     }
+
+    public byte get(int index) {
+        return this.data[index];
+    }
 }

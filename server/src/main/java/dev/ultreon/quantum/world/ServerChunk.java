@@ -31,8 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static dev.ultreon.quantum.world.World.CS;
-import static dev.ultreon.quantum.world.World.LOGGER;
+import static dev.ultreon.quantum.world.World.*;
 import static java.lang.System.currentTimeMillis;
 
 /**
@@ -73,8 +72,8 @@ public final class ServerChunk extends Chunk {
             LOGGER.debug("Loading chunk at {}", pos);
         }
 
-        var storage = new PaletteStorage<>(CS * CS * CS, Blocks.AIR.getDefaultState());
-        var biomeStorage = new PaletteStorage<>(CS * CS, world.getServer().getBiomes().getDefaultKey());
+        var storage = new PaletteStorage<>(CS_3, Blocks.AIR.getDefaultState());
+        var biomeStorage = new PaletteStorage<>(CS_2, world.getServer().getBiomes().getDefaultKey());
 
         MapType blockData = chunkData.getMap("Blocks");
         storage.load(blockData, BlockState::load);

@@ -632,8 +632,6 @@ public class ServerWorld extends World implements Audience {
             return;
         }
 
-        LOGGER.debug("Unloaded chunk " + chunkVec);
-
         if (region.isEmpty() && save) {
             try {
                 this.saveRegion(region);
@@ -947,7 +945,7 @@ public class ServerWorld extends World implements Audience {
                 if (region.isDirty())
                     this.saveRegion(region, false);
             } catch (Exception e) {
-                World.LOGGER.warn("Failed to save region {}:", region.getPos(), e);
+                World.LOGGER.warn("Failed to save region {}:", e, region.getPos());
                 var remove = this.regionStorage.regions.remove(region.getPos());
                 if (remove != region)
                     this.server.crash(new ValidationError("Removed region is not the region that got saved."));

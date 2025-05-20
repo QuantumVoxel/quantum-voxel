@@ -26,7 +26,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
 
 import static dev.ultreon.libs.commons.v0.Mth.lerp;
-import static dev.ultreon.quantum.world.World.CS;
+import static dev.ultreon.quantum.world.World.*;
 
 /**
  * Represents a chunk in the world.
@@ -54,7 +54,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     protected final @NotNull World world;
 
     public final @NotNull Storage<BlockState> storage;
-    protected final @NotNull LightMap lightMap = new LightMap(CS * CS * CS);
+    protected final @NotNull LightMap lightMap = new LightMap(CS_3);
     public final @NotNull Storage<RegistryKey<Biome>> biomeStorage;
 
     static {
@@ -86,7 +86,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
                     int height,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, size, height, vec, storage, new PaletteStorage<>(CS * CS, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
+        this(world, size, height, vec, storage, new PaletteStorage<>(CS_2, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      */
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec) {
-        this(world, vec, new PaletteStorage<>(CS * CS * CS, Blocks.AIR.getDefaultState()));
+        this(world, vec, new PaletteStorage<>(CS_3, Blocks.AIR.getDefaultState()));
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
                     @NotNull Storage<BlockState> storage) {
-        this(world, vec, storage, new PaletteStorage<>(CS * CS, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
+        this(world, vec, storage, new PaletteStorage<>(CS_2, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
     /**
@@ -328,7 +328,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      */
     private int getIndex(int x, int y, int z) {
         if (x >= 0 && x < CS && y >= 0 && y < CS && z >= 0 && z < CS) {
-            return z * (CS * CS) + y * CS + x;
+            return z * (CS_2) + y * CS + x;
         }
         return -1; // Out of bounds
     }

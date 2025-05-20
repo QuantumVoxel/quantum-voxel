@@ -608,19 +608,6 @@ public class PacketIO implements RegistryHandle {
         return data;
     }
 
-    public int capacity() {
-        return Integer.MAX_VALUE;
-    }
-
-    public PacketIO capacity(int newCapacity) {
-        return this;
-    }
-
-    @Deprecated
-    public int maxCapacity() {
-        return Integer.MAX_VALUE;
-    }
-
     public ByteOrder order() {
         return ByteOrder.nativeOrder();
     }

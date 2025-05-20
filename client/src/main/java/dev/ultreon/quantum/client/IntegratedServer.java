@@ -8,6 +8,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerInstance;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.util.Shutdownable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,7 +83,7 @@ public class IntegratedServer extends QuantumServer {
      *
      * @see QuantumServer#start()
      * @see #start()
-     * @see #shutdown()
+     * @see Shutdownable#shutdown(Runnable)
      */
     @Override
     public void start() {
@@ -162,7 +163,8 @@ public class IntegratedServer extends QuantumServer {
      */
     @Override
     public void crash(CrashLog crashLog) {
-        this.shutdown();
+        this.shutdown(() -> {
+        });
         crashLog.writeToLog();
 
         client.delayCrash(crashLog);
@@ -296,10 +298,9 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
-    public void shutdown() {
-        super.shutdown();
+    public void shutdown(Runnable finalizer) {
+        super.shutdown(finalizer);
 
-        this.timer.cancel();
         this.client.remove(this);
         this.client.integratedServer = null;
     }
@@ -307,8 +308,6 @@ public class IntegratedServer extends QuantumServer {
     @Override
     @SuppressWarnings("ConvertToTryWithResources")
     public void close() {
-        this.timer.cancel();
-
         super.close();
 
         try {
@@ -357,13 +356,6 @@ public class IntegratedServer extends QuantumServer {
     @Override
     public void fatalCrash(Throwable throwable) {
         QuantumClient.crash(throwable);
-    }
-
-    @Override
-    public @NotNull List<Runnable> shutdownNow() {
-        this.timer.cancel();
-
-        return super.shutdownNow();
     }
 
     @Override

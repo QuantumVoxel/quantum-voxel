@@ -69,15 +69,7 @@ repositories {
   maven("https://repo.runelite.net/")
   maven("https://repo.glaremasters.me/repository/public/")
   maven("https://teavm.org/maven/repository")
-  maven("https://jitpack.io") {
-    content {
-      includeGroup("dev.ultreon")
-      includeGroup("com.github.mgsx-dev.gdx-gltf")
-      includeGroup("com.github.JnCrMx")
-      includeGroup("com.github.jagrosh")
-      includeGroup("space.earlygrey")
-    }
-  }
+  maven("https://jitpack.io")
   flatDir {
     name = "Project Libraries"
     dirs = setOf(file("${projectDir}/libs"))
@@ -172,20 +164,7 @@ allprojects {
     maven("https://oss.sonatype.org/content/repositories/releases")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.glaremasters.me/repository/public/")
-    maven("https://jitpack.io") {
-      content {
-        includeGroup("dev.ultreon")
-        includeGroup("dev.ultreon.JNoiseJDK11")
-        includeGroup("dev.ultreon.quantum-fabric-loader")
-        includeGroup("com.github.mgsx-dev.gdx-gltf")
-        includeGroup("com.github.JnCrMx")
-        includeGroup("com.github.jagrosh")
-        includeGroup("com.github.crykn.guacamole")
-        includeGroup("com.github.Ultreon")
-        includeGroup("com.github.Dgzt")
-        includeGroup("space.earlygrey")
-      }
-    }
+    maven("https://jitpack.io")
 
     flatDir {
       name = "Project Libraries"
@@ -647,7 +626,7 @@ tasks.register<DefaultTask>("docker-push") {
 }
 
 tasks.register<JavaExec>("runClient") {
-  workingDir = file("$projectDir/run/client/")
+  workingDir = file("$projectDir/run/client/main")
   Files.createDirectories(Path.of(workingDir.path))
 
   dependsOn(":desktop:build")

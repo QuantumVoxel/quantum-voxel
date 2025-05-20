@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Disposable;
 import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
-import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
@@ -53,7 +52,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -123,6 +121,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     @ShowInNodeView
     private long seed;
+    private Runnable finalizer;
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -388,13 +387,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         double time = System.currentTimeMillis();
 
-        Duration sleepDuration = Duration.ofMilliseconds(5);
         try {
             // Send server started event to mods.
             ModApi.getGlobalEventHandler().call(new ServerStartedEvent(this));
 
             //* Main-loop.
             while (this.running) {
+                if (Thread.interrupted()) {
+                    break;
+                }
                 var canTick = false;
 
                 double time2 = System.currentTimeMillis();
@@ -478,6 +479,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         // Log server stopped event.
         QuantumServer.LOGGER.info("Server stopped.");
+
+        Runnable runnable = finalizer;
+        if (runnable != null) runnable.run();
     }
 
     /**
@@ -513,20 +517,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      */
     @Override
     @Blocking
-    public void shutdown() {
+    public void shutdown(Runnable finalizer) {
         // Send event for server stopping.
         kickAllPlayers();
 
         // Set running flag to make server stop.
+        this.finalizer = finalizer;
         this.running = false;
-
-        Instant now = Instant.now();
-        do {
-            if (Instant.now().toEpochMilli() - now.toEpochMilli() > 10000) {
-                this.fatalCrash(new RuntimeException("Safe shutdown failed."));
-                throw new RuntimeException("Safe shutdown failed.");
-            }
-        } while (this.running);
+        this.thread.interrupt();
 
         // Shut down the parent executor service.
         super.shutdownNow();

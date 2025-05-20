@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 @ApiStatus.NonExtendable
 @ParametersAreNonnullByDefault
 public abstract class World extends GameObject implements Disposable, WorldAccess {
-    public static final int CS = 32;
+    public static final int CS = 16;
     public static final int CS_2 = CS * CS;
     public static final int CS_3 = CS_2 * CS;
 
@@ -913,6 +913,10 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public int getBlockLight(int x, int y, int z) {
         return 0;
+    }
+
+    public int getLight(int x, int y, int z) {
+        return 0xF0;
     }
 
     @Override

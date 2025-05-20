@@ -18,6 +18,8 @@ import kotlin.ranges.IntRange;
  * The class provides methods to initialize and register biomes.
  */
 public class Biomes extends GameObject {
+    public static final RegistryKey<Biome> VOID = RegistryKey.of(RegistryKeys.BIOME, NamespaceID.of("void"));
+
     private final QuantumServer server;
 
     public final Biome void_;

@@ -12,11 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ClientRecipeManager {
     public static final ClientRecipeManager INSTANCE = new ClientRecipeManager();
-    private final Map<RecipeType<?>, Map<NamespaceID, Recipe>> recipes = new HashMap<>();
+    private final Map<RecipeType<?>, ObjectMap<NamespaceID, Recipe>> recipes = new HashMap<>();
 
     private ClientRecipeManager() {
 
@@ -24,7 +25,7 @@ public class ClientRecipeManager {
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
     public <T extends Recipe> void onPacket(S2CRecipeSyncPacket<T> packet) {
-        Map<NamespaceID, Recipe> namespaceIDRecipeMap = this.recipes.computeIfAbsent(packet.type(), k -> new HashMap<>());
+        var namespaceIDRecipeMap = this.recipes.computeIfAbsent(packet.type(), k -> new ObjectMap<>());
         for (ObjectMap.Entry<NamespaceID, ? extends T> entry : packet.recipes()) {
             namespaceIDRecipeMap.put(entry.key, entry.value);
         }
@@ -38,7 +39,7 @@ public class ClientRecipeManager {
     public <T extends Recipe> PagedList<T> getRecipes(RecipeType<T> type, int limit, ContainerMenu inventory) {
         PagedList<T> recipes = new PagedList<>(limit);
 
-        for (Recipe recipe : this.recipes.getOrDefault(type, Map.of()).values()) {
+        for (Recipe recipe : this.recipes.getOrDefault(type, new ObjectMap<>()).values()) {
             if (recipe.canCraft(inventory) || !ClientConfiguration.showOnlyCraftable.getValue())
                 recipes.add(type.cast(recipe));
         }
@@ -48,7 +49,7 @@ public class ClientRecipeManager {
 
     @Nullable
     public <T extends Recipe> T getRecipe(RecipeType<T> type, ContainerMenu inventory) {
-        for (Recipe recipe : this.recipes.getOrDefault(type, Map.of()).values()) {
+        for (Recipe recipe : this.recipes.getOrDefault(type, new ObjectMap<>()).values()) {
             if (recipe.canCraft(inventory))
                 return type.cast(recipe);
         }
@@ -57,11 +58,11 @@ public class ClientRecipeManager {
     }
 
     public NamespaceID getId(RecipeType<?> type, Recipe recipe) {
-        for (Map.Entry<NamespaceID, Recipe> entry : this.recipes.getOrDefault(type, Map.of()).entrySet()) {
-            if (entry.getValue() == recipe)
-                return entry.getKey();
-        }
+        var orDefault = recipes.getOrDefault(type, new ObjectMap<>());
+        var key = orDefault.findKey(recipe, false);
+        if (key == null)
+            throw new IllegalArgumentException("Fabricated recipe");
 
-        throw new IllegalArgumentException("Fabricated recipe");
+        return key;
     }
 }

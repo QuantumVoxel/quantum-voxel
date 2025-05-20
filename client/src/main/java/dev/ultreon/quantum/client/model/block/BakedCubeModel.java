@@ -11,22 +11,30 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.model.BakedModel;
+import dev.ultreon.quantum.client.model.model.Json5Model;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.texture.TextureManager;
+import dev.ultreon.quantum.client.render.meshing.FaceCull;
+import dev.ultreon.quantum.client.render.meshing.Light;
+import dev.ultreon.quantum.client.world.AOUtils;
 import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public final class BakedCubeModel extends BakedModel implements BlockModel {
-    private static final LazyValue<BakedCubeModel> DEFAULT = new LazyValue<>();
+    private static final LazyValue<BlockModel> DEFAULT = new LazyValue<>();
     private static final Vector3 from = new Vector3(-8f, 8f, -8f);
     private static final Vector3 to = new Vector3(8f, 24f, 8f);
+    public static final Vector3 w_from = new Vector3(0, 0, 0);
+    public static final Vector3 w_to = new Vector3(16, 16, 16);
     private final TextureRegion top;
     private final TextureRegion bottom;
     private final TextureRegion left;
@@ -35,22 +43,8 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     private final TextureRegion back;
     public final ModelProperties properties;
 
-    private static final VertexInfo V_00 = new VertexInfo();
-    private static final VertexInfo V_01 = new VertexInfo();
-    private static final VertexInfo V_10 = new VertexInfo();
-    private static final VertexInfo V_11 = new VertexInfo();
     private final String renderPass;
     private RenderPass renderPassObj;
-
-    private BakedCubeModel(NamespaceID resourceId, TextureRegion all, Model model, String renderPass) {
-        this(resourceId, all, all, all, all, all, all, model, renderPass);
-    }
-
-    private BakedCubeModel(NamespaceID resourceId, TextureRegion top, TextureRegion bottom,
-                           TextureRegion left, TextureRegion right,
-                           TextureRegion front, TextureRegion back, Model model, String renderPass) {
-        this(resourceId, top, bottom, left, right, front, back, ModelProperties.builder().build(), model, renderPass);
-    }
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion all, ModelProperties properties, Model model, String renderPass) {
         this(resourceId, all, all, all, all, all, all, properties, model, renderPass);
@@ -71,13 +65,16 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         this.renderPass = renderPass;
     }
 
-    public synchronized static BakedCubeModel defaultModel() {
+    public synchronized static BlockModel defaultModel() {
         if (DEFAULT.isInitialized()) {
             return DEFAULT.get();
         }
 
-        BakedCubeModel bakedCubeModel = BakedCubeModel.of(new NamespaceID("block/default"), TextureManager.DEFAULT_TEX_REG, "opaque");
+        ModelProperties properties1 = new ModelProperties();
+        properties1.renderPass = "opaque";
+        BlockModel bakedCubeModel = Json5Model.cubeOf(CubeModel.of(new NamespaceID("block/default"), QuantumClient.id("block/error"), properties1));
         DEFAULT.set(bakedCubeModel);
+        QuantumClient.invokeAndWait(() -> bakedCubeModel.load(QuantumClient.get()));
         return bakedCubeModel;
     }
 
@@ -180,7 +177,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
             if (entry == null) continue;
 
             faces++;
-            
+
             v00.setCol(RgbColor.WHITE.toGdx());
             v01.setCol(RgbColor.WHITE.toGdx());
             v10.setCol(RgbColor.WHITE.toGdx());
@@ -239,94 +236,6 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         return builder.end();
     }
 
-    private static void createTop(TextureRegion region, MeshPartBuilder builder) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 1, 0);
-        V_01.setPos(-1 + 1, 1, 0);
-        V_10.setPos(-1 + 1, 1, 1);
-        V_11.setPos(-1, 1, 1);
-
-        setNor(0, 1, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createBottom(TextureRegion region, MeshPartBuilder builder) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 0);
-        V_01.setPos(-1, 0, 1);
-        V_10.setPos(-1 + 1, 0, 1);
-        V_11.setPos(-1 + 1, 0, 0);
-
-        setNor(0, -1, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createLeft(TextureRegion region, MeshPartBuilder builder) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 0);
-        V_01.setPos(-1, 1, 0);
-        V_10.setPos(-1, 1, 1);
-        V_11.setPos(-1, 0, 1);
-
-        setNor(-1, 0, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createRight(TextureRegion region, MeshPartBuilder builder) {
-        if (region == null) return;
-
-        V_00.setPos(-1 + 1, 0, 0);
-        V_01.setPos(-1 + 1, 0, 1);
-        V_10.setPos(-1 + 1, 1, 1);
-        V_11.setPos(-1 + 1, 1, 0);
-
-        setNor(1, 0, 0);
-        finishRect(region, builder);
-    }
-
-    private static void createFront(TextureRegion region, MeshPartBuilder builder) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 0);
-        V_01.setPos(-1 + 1, 0, 0);
-        V_10.setPos(-1 + 1, 1, 0);
-        V_11.setPos(-1, 1, 0);
-
-        setNor(0, 0, 1);
-        finishRect(region, builder);
-    }
-
-    private static void createBack(TextureRegion region, MeshPartBuilder builder) {
-        if (region == null) return;
-
-        V_00.setPos(-1, 0, 1);
-        V_01.setPos(-1, 1, 1);
-        V_10.setPos(-1 + 1, 1, 1);
-        V_11.setPos(-1 + 1, 0, 1);
-
-        setNor(0, 0, -1);
-        finishRect(region, builder);
-    }
-
-    private static void setNor(int x, int y, int z) {
-        V_00.setNor(x, y, z);
-        V_01.setNor(x, y, z);
-        V_10.setNor(x, y, z);
-        V_11.setNor(x, y, z);
-    }
-
-    private static void finishRect(TextureRegion region, MeshPartBuilder builder) {
-        V_00.setUV(region.getU2(), region.getV2());
-        V_01.setUV(region.getU2(), region.getV());
-        V_01.setUV(region.getU(), region.getV());
-        V_11.setUV(region.getU(), region.getV2());
-
-        builder.rect(V_00, V_01, V_10, V_11);
-    }
-
     @Override
     public void load(QuantumClient client) {
         // Do nothing
@@ -350,6 +259,96 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     public RenderPass getRenderPass() {
         if (renderPassObj != null) return renderPassObj;
         return renderPassObj = RenderPass.byName(renderPass);
+    }
+
+    @Override
+    public Collection<NamespaceID> getAllTextures() {
+        return List.of();
+    }
+
+    @Override
+    public void bakeInto(MeshPartBuilder meshPartBuilder, int x, int y, int z, int cull, int[] ao, long light) {
+        final var from = w_from;
+        final var to = w_to;
+
+        final var v00 = new VertexInfo();
+        final var v01 = new VertexInfo();
+        final var v10 = new VertexInfo();
+        final var v11 = new VertexInfo();
+        for (var direction : Direction.values()) {
+            if (FaceCull.culls(direction, cull)) continue;
+
+            int sAo = AOUtils.aoForSide(ao, direction);
+            byte sLight = Light.get(light, direction);
+            v00.setCol(0f, AOUtils.hasAoCorner00(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v01.setCol(0f, AOUtils.hasAoCorner01(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v10.setCol(0f, AOUtils.hasAoCorner10(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v11.setCol(0f, AOUtils.hasAoCorner11(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+
+            v00.setNor(direction.getNormal());
+            v01.setNor(direction.getNormal());
+            v10.setNor(direction.getNormal());
+            v11.setNor(direction.getNormal());
+
+            var region = this.tex(direction);
+            if (region == null) {
+                region = QuantumClient.get().blocksTextureAtlas.get(NamespaceID.of("blocks/error"), TextureAtlas.TextureAtlasType.DIFFUSE);
+            }
+
+            if (region == null) {
+                throw new IllegalArgumentException("Undefined error texture!");
+            }
+
+            v00.setUV(region.getU(), region.getV2());
+            v01.setUV(region.getU(), region.getV());
+            v10.setUV(region.getU2(), region.getV2());
+            v11.setUV(region.getU2(), region.getV());
+
+            switch (direction) {
+                case UP:
+                    v01.setPos(to.x, to.y, from.z);
+                    v00.setPos(to.x, to.y, to.z);
+                    v11.setPos(from.x, to.y, from.z);
+                    v10.setPos(from.x, to.y, to.z);
+                    break;
+                case DOWN:
+                    v10.setPos(to.x, from.y, from.z);
+                    v11.setPos(to.x, from.y, to.z);
+                    v00.setPos(from.x, from.y, from.z);
+                    v01.setPos(from.x, from.y, to.z);
+                    break;
+                case WEST:
+                    v00.setPos(from.x, from.y, from.z);
+                    v01.setPos(from.x, to.y, from.z);
+                    v10.setPos(from.x, from.y, to.z);
+                    v11.setPos(from.x, to.y, to.z);
+                    break;
+                case EAST:
+                    v00.setPos(to.x, from.y, to.z);
+                    v01.setPos(to.x, to.y, to.z);
+                    v10.setPos(to.x, from.y, from.z);
+                    v11.setPos(to.x, to.y, from.z);
+                    break;
+                case NORTH:
+                    v00.setPos(to.x, from.y, from.z);
+                    v01.setPos(to.x, to.y, from.z);
+                    v10.setPos(from.x, from.y, from.z);
+                    v11.setPos(from.x, to.y, from.z);
+                    break;
+                case SOUTH:
+                    v00.setPos(from.x, from.y, to.z);
+                    v01.setPos(from.x, to.y, to.z);
+                    v10.setPos(to.x, from.y, to.z);
+                    v11.setPos(to.x, to.y, to.z);
+                    break;
+            }
+            v00.position.add(x, y, z);
+            v01.position.add(x, y, z);
+            v10.position.add(x, y, z);
+            v11.position.add(x, y, z);
+
+            meshPartBuilder.rect(v00, v10, v11, v01);
+        }
     }
 
     @Override

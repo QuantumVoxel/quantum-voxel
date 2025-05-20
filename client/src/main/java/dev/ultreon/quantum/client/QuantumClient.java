@@ -508,7 +508,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Add a shutdown hook to gracefully shut down the server
         GamePlatform.get().addShutdownHook(() -> {
-            this.shutdown();
+            this.shutdown(() -> {
+
+            });
 
             QuantumClient.LOGGER.info("Shutting down game!");
             QuantumClient.instance = null;
@@ -1102,7 +1104,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             PauseScreen pause = (PauseScreen) next;
             this.screenshot(true, screenshot -> {
                 if (screenshot != null) {
-                    screenshot.save(theWorldStorage.getDirectory().child("picture.png"));
+                    try {
+                        screenshot.save(theWorldStorage.getDirectory().child("picture.png"));
+                    } catch (Exception e) {
+                        notifications.add("Save Error", "Failed to save world screenshot", "AUTO SAVE");
+                    }
                 }
 
                 this.skipScreenshot = true;
@@ -1137,7 +1143,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (openResult.isInterrupted()) {
             next = openResult.getValue();
-            LOGGER.warn("Opening screen was interrupted, and new screen was {}", next == null ? "null" : next.getClass().getName());
+            LOGGER.warn("Opening screen was interrupted, and new screen was {}", next == null ? "null" : next);
         }
 
         if (cur != null && this.closeScreen(next, cur)) {
@@ -1152,10 +1158,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         if (cur != null) {
-            LOGGER.warn("Switching from {} to {}", cur.getClass().getName(), next.getClass().getName());
+            LOGGER.warn("Switching from {} to {}", cur, next);
             cur.mouseExit();
         } else {
-            LOGGER.warn("Switching to {}", next.getClass().getName());
+            LOGGER.warn("Switching to {}", next);
         }
         this.screen = next;
 
@@ -1911,7 +1917,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
 
-            if (instance != null) instance.shutdown();
+            if (instance != null) instance.shutdown(() -> {
+            });
             GamePlatform.get().halt(1);
         }
     }
@@ -1942,7 +1949,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (disposable == null) return;
 
         try {
-            disposable.shutdown();
+            disposable.shutdown(() -> {});
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception throwable) {
@@ -2199,9 +2206,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.cleanUp(this.world);
                 QuantumClient.cleanUp(this.profiler);
 
-                if (this.imGui) {
-                    GamePlatform.get().onGameDispose();
-                }
+                GamePlatform.get().onGameDispose();
 
                 this.disposables.forEach(QuantumClient::cleanUp);
                 this.shutdownables.forEach(QuantumClient::cleanUp);
@@ -2440,21 +2445,25 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (ClientConfiguration.closePrompt.getValue() && this.screen != null) {
             this.screen.showDialog(new DialogBuilder(this.screen).message(TextObject.literal("Are you sure you want to close the game?")).button(UITranslations.YES, () -> {
                 if (this.world != null) {
-                    this.exitWorldAndThen(this::shutdown);
+                    this.exitWorldAndThen(() -> shutdown(() -> {
+                    }));
                     return;
                 }
 
-                this.shutdown();
+                this.shutdown(() -> {
+                });
             }));
             return false;
         }
 
         if (this.world != null) {
-            this.exitWorldAndThen(this::shutdown);
+            this.exitWorldAndThen(() -> shutdown(() -> {
+            }));
             return false;
         }
 
-        Promise.runAsync(this::shutdown);
+        Promise.runAsync(() -> shutdown(() -> {
+        }));
 
         return false;
     }
@@ -2492,24 +2501,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return the block model.
      */
     public @NotNull BlockModel getBlockModel(BlockState block) {
-        List<Pair<Predicate<BlockState>, BakedCubeModel>> orDefault = this.bakedBlockModels.bakedModels().getOrDefault(block.getBlock(), List.of());
-
-        if (orDefault == null) {
+        return QuantumClient.invokeAndWait(() -> {
             BlockModel blockModel = BlockModelRegistry.get().get(block);
             return Objects.requireNonNullElse(blockModel, BakedCubeModel.defaultModel());
-
-        }
-
-        BlockModel blockModel = orDefault
-                .stream()
-                .filter(pair -> pair.getFirst().test(block))
-                .findFirst()
-                .map(pair -> (BlockModel) pair.getSecond())
-                .orElseGet(() -> BlockModelRegistry.get().get(block));
-
-        if (blockModel == null) return BakedCubeModel.defaultModel();
-
-        return blockModel;
+        });
     }
 
     /**
@@ -3044,6 +3039,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.soundRegistry.reload();
         MusicManager.get().reload();
 
+        BlockModelRegistry.get().reload(resourceManager, context);
+
         this.entityModelManager.reload(this.resourceManager, context);
         this.entityRendererManager.reload(this.resourceManager, context);
         this.textureAtlasManager.reload(context);
@@ -3052,8 +3049,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.itemRenderer != null)
             this.itemRenderer.reload();
         this.skinManager.reload();
-
-        BlockModelRegistry.get().reload(resourceManager, context);
 
         RenderingRegistration.registerRendering(this);
 
@@ -3099,7 +3094,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param message the message.
      */
     public void onDisconnect(String message, boolean isMemoryConnection) {
-        this.showScreen(new DisconnectedScreen(message, !isMemoryConnection));
+        try {
+            var conn = this.connection;
+            if (conn != null) conn.close();
+        } catch (IOException e) {
+            CommonConstants.LOGGER.warn("Failed to close connection", e);
+        }
+        this.connection = null;
+        IntegratedServer server = this.integratedServer;
+        this.showScreen(new MessageScreen(TextObject.translation("quantum.message.disconnecting"), TextObject.translation("quantum.message.disconnecting.desc")));
+        if (server != null) {
+            server.shutdown(() -> {
+                this.showScreen(new DisconnectedScreen(message, !isMemoryConnection));
+            });
+        }
     }
 
     /**
@@ -3305,36 +3313,33 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     @SuppressWarnings("BusyWait")
     @Override
-    public void shutdown() {
-        try {
-            if (this.shuttingDown) return;
-            this.shuttingDown = true;
-            super.shutdown();
+    public void shutdown(Runnable finalizer) {
+        if (this.shuttingDown) return;
+        this.shuttingDown = true;
+        super.shutdown(finalizer);
 
-            LOGGER.info("Shutting down executor service");
-            executor.dispose();
+        LOGGER.info("Shutting down executor service");
+        executor.dispose();
 
-            IntegratedServer server = this.integratedServer;
-            if (server != null) {
-                server.shutdown();
-
-                // Wait for the server to terminate
-                while (!server.isShutdown()) {
-                    if (this.screen instanceof ShutdownScreen) {
-                        ShutdownScreen shutdownScreen = (ShutdownScreen) this.screen;
-                        shutdownScreen.setMessage("Waiting for server to terminate");
-                    }
-                    LOGGER.info("Waiting for server to terminate");
-                    GamePlatform.get().sleep(1000);
-                }
+        IntegratedServer server = this.integratedServer;
+        if (server != null) {
+            if (this.screen instanceof ShutdownScreen) {
+                ShutdownScreen shutdownScreen;
+                shutdownScreen = (ShutdownScreen) this.screen;
+                shutdownScreen.setMessage("Waiting for server to terminate");
             }
-
-            CommonConstants.LOGGER.info("Shutting down RPC handler");
-            RpcHandler.disable();
-        } catch (InterruptedException e) {
-            QuantumClient.LOGGER.error("Failed to shutdown background tasks", e);
-            GamePlatform.get().halt(1); // Forcefully terminate the process
+            LOGGER.info("Waiting for server to terminate");
+            server.shutdown(() -> {
+                if (this.screen instanceof ShutdownScreen) {
+                    ShutdownScreen shutdownScreen;
+                    shutdownScreen = (ShutdownScreen) this.screen;
+                    shutdownScreen.setMessage("Finalizing...");
+                }
+            });
         }
+
+        CommonConstants.LOGGER.info("Shutting down RPC handler");
+        RpcHandler.disable();
 
         LOGGER.info("Shutting down Quantum Client");
         Gdx.app.exit();

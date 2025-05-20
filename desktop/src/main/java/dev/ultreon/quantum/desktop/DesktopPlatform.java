@@ -48,7 +48,8 @@ import static dev.ultreon.quantum.desktop.DesktopLauncher.LOGGER;
 public abstract class DesktopPlatform extends GamePlatform {
     private final Map<String, FabricMod> mods = new IdentityHashMap<>();
     private final boolean angleGLES;
-    private SafeLoadWrapper safeWrapper;
+    private final SafeLoadWrapper safeWrapper;
+    private final TimerInstanceImpl timer = new TimerInstanceImpl();
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
@@ -85,7 +86,9 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void onGameDispose() {
-        ImGuiOverlay.dispose();
+        super.onGameDispose();
+        if (hasImGui())
+            ImGuiOverlay.dispose();
     }
 
     @Override

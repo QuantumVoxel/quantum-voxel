@@ -17,6 +17,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
+import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.item.BlockItemModel;
 import dev.ultreon.quantum.client.model.item.FlatItemModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
@@ -182,7 +183,9 @@ public class ItemRenderer implements Disposable {
             modelInstance.userData = new BlockItemModel(BakedCubeModel::defaultModel);
             return modelInstance;
         }
-        ModelInstance modelInstance = new ModelInstance(itemModel.getModel());
+        Model model = itemModel.getModel();
+        if (model == null) model = BakedCubeModel.defaultModel().getModel();
+        ModelInstance modelInstance = new ModelInstance(model);
         modelInstance.userData = itemModel;
         return modelInstance;
     }
@@ -192,10 +195,15 @@ public class ItemRenderer implements Disposable {
     }
 
     public void registerBlockModel(BlockItem blockItem, Supplier<BlockModel> model) {
-        models.put(blockItem, new BlockItemModel(Suppliers.memoize(model::get)));
+        models.put(blockItem, new BlockItemModel(Suppliers.memoize(model)));
         ItemModel itemModel = models.get(blockItem);
         Vector3 scale = itemModel.getScale();
-        ModelInstance value = new ModelInstance(itemModel.getModel());
+        Model model1 = itemModel.getModel();
+        if (model1 == null) {
+            BlockModel defaultBlockModel = BakedCubeModel.defaultModel();
+            model1 = defaultBlockModel.getModel();
+        }
+        ModelInstance value = new ModelInstance(model1);
         value.transform.scale(scale.x, scale.y, scale.z);
         value.calculateTransforms();
         this.modelsInstances.put(blockItem, value);
@@ -208,6 +216,7 @@ public class ItemRenderer implements Disposable {
             value.load(client);
 
             Model model = value.getModel();
+            if (model == null) model = BakedCubeModel.defaultModel().getModel();
             this.modelsInstances.put(item, new ModelInstance(model));
         }
     }

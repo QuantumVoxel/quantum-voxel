@@ -110,7 +110,8 @@ public class Main {
 
                 if (commandline.equals("stop")) {
                     // Handle stop command.
-                    Main.server.shutdown();
+                    Main.server.shutdown(() -> {
+                    });
                     if (!Main.server.awaitTermination(60, TimeUnit.SECONDS)) {
                         Main.server.onTerminationFailed();
                     }

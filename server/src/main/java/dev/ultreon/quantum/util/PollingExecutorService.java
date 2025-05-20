@@ -56,7 +56,7 @@ public class PollingExecutorService extends GameObject implements Executor {
         this.profiler = profiler;
     }
 
-    public void shutdown() {
+    public void shutdown(Runnable finalizer) {
         if (this.isSameThread()) {
             this.isShutdown = true;
             for (CompletionPromise<?> future : this.futures) {
@@ -65,6 +65,8 @@ public class PollingExecutorService extends GameObject implements Executor {
 
             this.tasks.clear();
             this.futures.clear();
+
+            finalizer.run();
         } else {
             this.submit(() -> {
                 this.isShutdown = true;
@@ -74,6 +76,8 @@ public class PollingExecutorService extends GameObject implements Executor {
 
                 this.tasks.clear();
                 this.futures.clear();
+
+                finalizer.run();
             });
         }
     }

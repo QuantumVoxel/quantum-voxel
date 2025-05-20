@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import de.articdive.jnoise.core.api.functions.Combiner;
-import de.articdive.jnoise.core.api.functions.Interpolation;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
-import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
@@ -39,7 +37,7 @@ public class TerrainNoise implements NoiseSource {
                 ).combine(
                         JNoise.newBuilder().fastSimplex(seed++, Simplex2DVariant.CLASSIC, Simplex3DVariant.IMPROVE_XZ, Simplex4DVariant.IMRPOVE_XYZ)
                                 .scale(1 / 256f)
-                                .addModifier(result -> result * 64)
+                                .addModifier(result -> result * 64 + 64)
                                 .build(),
                         Combiner.ADD
                 ).combine(
@@ -85,7 +83,10 @@ public class TerrainNoise implements NoiseSource {
                                 .addModifier(result -> result * 8)
                                 .build(),
                         Combiner.ADD
-                ).build();
+                )
+                .addModifier(result -> (result + 16) < 68 ? ((result + 16) - 68) / 1.5 + 68 : result + 16)
+                .addModifier(result -> result < 32 ? (result - 32) / 8 + 32 : result)
+                .scale(1 / 16f).build();
     }
 
     /**
@@ -121,18 +122,7 @@ public class TerrainNoise implements NoiseSource {
      */
     @Override
     public double evaluateNoise(double x, double y, double z) {
-        // Terrain density
-        double base = noise.evaluateNoise(x, y, z);
-        return base - getDensityFalloff(y);
-    }
-
-    /**
-     * Falloff for shaping terrain vertically.
-     */
-    private double getDensityFalloff(double y) {
-        double yNorm = y / 256.0;
-        double center = 0.5;
-        return Math.abs(yNorm - center) * 4.8; // tweak curve strength
+        return noise.evaluateNoise(x, y, z);
     }
 
     /**

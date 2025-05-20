@@ -6,7 +6,7 @@ public class TimerInstanceImpl implements TimerInstance {
     private final Timer timer = new Timer("Quantum Timer");
 
     @Override
-    public void cancel() {
+    public void dispose() {
         timer.cancel();
     }
 

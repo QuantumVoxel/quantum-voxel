@@ -180,8 +180,7 @@ public class DesktopLauncher {
         // Before initializing LibGDX or creating a window:
         try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
             try {
-                if (GamePlatform.get().isAngleGLES()) new Lwjgl3VulkanApplication(safeWrapper, DesktopLauncher.createVulkanConfig());
-                else new Lwjgl3Application(safeWrapper, DesktopLauncher.createConfig());
+                new Lwjgl3Application(safeWrapper, DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
                 CrashLog crashLog = e.getCrashLog();
                 QuantumClient.crash(crashLog);

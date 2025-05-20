@@ -247,7 +247,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 throw new RuntimeException(e);
             }
             if (this.client.integratedServer != null) {
-                this.client.integratedServer.shutdown();
+                this.client.integratedServer.shutdown(() -> {
+                });
                 this.client.remove(this.client.integratedServer);
                 this.client.integratedServer = null;
             }

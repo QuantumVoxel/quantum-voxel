@@ -25,7 +25,7 @@ import java.util.function.Function;
  */
 public class ModelManager {
     public static final ModelManager INSTANCE = new ModelManager();
-    private final ModelBuilder builder = new ModelBuilder();
+    private final ThreadLocal<ModelBuilder> builder = ThreadLocal.withInitial(() -> new ModelBuilder());
     private final Map<NamespaceID, Model> models = new ConcurrentHashMap<>();
 
     private ModelManager() {
@@ -42,9 +42,9 @@ public class ModelManager {
      * @return the created box model
      */
     public Model createBox(float width, float height, float depth, Material material) {
-        builder.begin();
-        builder.createBox(width, height, depth, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return builder.end();
+        builder.get().begin();
+        builder.get().createBox(width, height, depth, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -69,9 +69,9 @@ public class ModelManager {
      * @return a {@link Model} representing the created cylinder
      */
     public Model createCylinder(float width, float height, float depth, int divisions, Material material) {
-        builder.begin();
-        builder.createCylinder(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return builder.end();
+        builder.get().begin();
+        builder.get().createCylinder(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -85,9 +85,9 @@ public class ModelManager {
      * @return A {@link Model} instance representing the created cone.
      */
     public Model createCone(float width, float height, float depth, int divisions, Material material) {
-        builder.begin();
-        builder.createCone(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return builder.end();
+        builder.get().begin();
+        builder.get().createCone(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -102,9 +102,9 @@ public class ModelManager {
      * @return the created spherical model
      */
     public Model createSphere(float width, float height, float depth, int divisionsU, int divisionsV, Material material) {
-        builder.begin();
-        builder.createSphere(width, height, depth, divisionsU, divisionsV, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return builder.end();
+        builder.get().begin();
+        builder.get().createSphere(width, height, depth, divisionsU, divisionsV, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -144,12 +144,14 @@ public class ModelManager {
             return this.models.get(id);
         }
 
-        this.builder.begin();
-        builder.accept(this.builder);
-        Model model = this.builder.end();
-
+        this.builder.get().begin();
+        Model model;
+        try {
+            builder.accept(this.builder.get());
+        } finally {
+            model = this.builder.get().end();
+        }
         this.models.put(id, model);
-
         return model;
     }
 
@@ -161,7 +163,7 @@ public class ModelManager {
      * @return The generated Model instance.
      */
     public Model generateModel(NamespaceID id, Function<ModelBuilder, Model> builder) {
-        Model model = builder.apply(this.builder);
+        Model model = builder.apply(this.builder.get());
 
         this.models.put(id, model);
 
