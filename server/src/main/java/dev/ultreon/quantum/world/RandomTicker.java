@@ -21,13 +21,7 @@ public class RandomTicker implements Disposable {
     public void start() {
         this.running = true;
 
-        GamePlatform.get().getTimer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (world.disposed || !world.enabled) return;
-                QuantumServer.invoke(RandomTicker.this::randomTick);
-            }
-        }, 0, this.interval);
+        GamePlatform.get().getTimer().schedule(new RamdomTickTask(), 0, this.interval);
     }
 
     private void randomTick() {
@@ -45,5 +39,18 @@ public class RandomTicker implements Disposable {
     @Override
     public void dispose() {
         this.running = false;
+    }
+
+    private class RamdomTickTask extends TimerTask {
+        @Override
+        public void run() {
+            if (!running || world.disposed) {
+                cancel();
+                return;
+            } else if (!world.enabled) {
+                return;
+            }
+            QuantumServer.invoke(RandomTicker.this::randomTick);
+        }
     }
 }

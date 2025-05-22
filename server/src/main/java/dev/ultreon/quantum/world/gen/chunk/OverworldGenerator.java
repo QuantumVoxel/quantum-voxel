@@ -2,6 +2,7 @@ package dev.ultreon.quantum.world.gen.chunk;
 
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
+import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.ServerRegistry;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.util.Vec2i;
@@ -39,7 +40,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     private @UnknownNullability BiomeNoise variationNoise;
     private @UnknownNullability Carver carver;
 
-    public OverworldGenerator(ServerRegistry<Biome> biomeRegistry) {
+    public OverworldGenerator(Registry<Biome> biomeRegistry) {
         super(biomeRegistry);
 
         biomeRegistry.keys().forEach(this::addBiome);

@@ -1,8 +1,10 @@
 package dev.ultreon.quantum;
 
-public interface TimerInstance {
+import com.badlogic.gdx.utils.Disposable;
 
-    void cancel();
+public interface TimerInstance extends Disposable {
+
+    void dispose();
 
     void schedule(TimerTask timerTask, long millis);
 

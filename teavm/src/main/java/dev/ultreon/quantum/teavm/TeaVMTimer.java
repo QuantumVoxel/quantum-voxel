@@ -9,7 +9,7 @@ public class TeaVMTimer implements TimerInstance {
     private final IntArray timers = new IntArray();
 
     @Override
-    public void cancel() {
+    public void dispose() {
         for (int i = 0; i < this.timers.size; i++) {
             Window.clearTimeout(this.timers.get(i));
         }

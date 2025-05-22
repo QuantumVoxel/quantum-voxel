@@ -180,7 +180,16 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
         PacketIO io = new PacketIO(bis, null, handle);
         Packet<? extends OurHandler> packet = ourPacketData.decode(id, io);
-        this.receiveQueue.addLast(packet);
+        if (packet == null) {
+            CommonConstants.LOGGER.warn("Unknown packet ID: " + id);
+            rx.decrementAndGet();
+            return;
+        }
+        if (handler.isAsync()) {
+            this.receiveQueue.addLast(packet);
+        } else {
+            received(packet, null);
+        }
     }
 
     public static int getRx() {

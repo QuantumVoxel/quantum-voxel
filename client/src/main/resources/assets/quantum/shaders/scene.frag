@@ -129,33 +129,15 @@ vec3 gamma(vec3 color) {
     return pow(color, vec3(1.0 / 2.0));
 }
 
-vec2 transformUV(vec2 uv) {
-    int blockWidth = 16;
-    int blocksPerRow = int(u_atlasSize.x) / blockWidth;
-    float uPerBlock = float(blockWidth) / float(u_atlasSize.x);
-    float vPerBlock = float(blockWidth) / float(u_atlasSize.y);
-
-    vec3 texGetNormal = -abs(v_modelNormal);
-    vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
-                dot(texGetNormal.yzx, v_position)));
-    vec2 uvStart = uv;
-    vec2 v_texUV;
-    if (v_modelNormal.x != 0.0) {
-        v_texUV = uvStart / u_atlasOffset + vec2(vPerBlock * uvMult.y, uPerBlock * uvMult.x);
-    } else {
-        v_texUV = uvStart / u_atlasOffset + vec2(uPerBlock * uvMult.x, vPerBlock * uvMult.y);
-    }
-    return v_texUV;
-}
-
 void main() {
-    vec2 v_diffuseTexUV = transformUV(v_diffuseUV);
-    vec2 v_emissiveTexUV = transformUV(v_emissiveUV);
+    vec2 v_diffuseTexUV = v_diffuseUV;
+    vec2 v_emissiveTexUV = v_emissiveUV;
 
     vec3 normal = v_normal;
 
     float sunLight = v_color.a;
-    vec4 blockLight = vec4(v_color.rgb, 1.0);
+    vec4 blockLight = vec4(v_color.b);
+    float ao = v_color.g;
 
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
     #if LOD_LEVEL < 1
@@ -164,11 +146,13 @@ void main() {
     gl_FragColor.a = 1.0;
 
     #if LOD_LEVEL < 2
-    vec3 light = vec3(u_globalSunlight) * sunLight;
+    vec3 light = vec3(2.0-u_globalSunlight) * sunLight;
     light += blockLight.rgb * (1.0 - light);
     #else
     vec3 light = vec3(u_globalSunlight);
     #endif
+
+    light *= ao;
 
     vec3 emissive = vec3(0.0);
     #if LOD_LEVEL < 1

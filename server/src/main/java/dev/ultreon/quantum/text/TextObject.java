@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TextObject {
+    private static EmptyText empty;
+
     protected TextObject() {
         super();
     }
@@ -39,7 +41,8 @@ public abstract class TextObject {
     public abstract MapType serialize();
 
     public static TextObject empty() {
-        return new MyTextObject();
+        if (empty == null) empty = new EmptyText();
+        return empty;
     }
 
     public static LiteralText literal(@Nullable String text) {
@@ -74,7 +77,7 @@ public abstract class TextObject {
         return getText();
     }
 
-    private static class MyTextObject extends TextObject {
+    private static class EmptyText extends TextObject {
         private static final StylePart BAKED = new StylePart("", 0, 0, (byte) 1);
 
         @Override

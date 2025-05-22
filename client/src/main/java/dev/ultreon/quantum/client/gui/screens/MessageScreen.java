@@ -7,7 +7,7 @@ import dev.ultreon.quantum.text.TranslationText;
 import org.jetbrains.annotations.NotNull;
 
 public class MessageScreen extends Screen {
-    private String deferredMessage = "";
+    private TextObject deferredMessage = TextObject.empty();
     private Label messageLabel;
 
     public MessageScreen(TextObject title) {
@@ -15,6 +15,12 @@ public class MessageScreen extends Screen {
     }
 
     public MessageScreen(TranslationText title, String message) {
+        super(title);
+
+        this.deferredMessage = TextObject.nullToEmpty(message);
+    }
+
+    public MessageScreen(TranslationText title, TranslationText message) {
         super(title);
 
         this.deferredMessage = message;
@@ -38,7 +44,7 @@ public class MessageScreen extends Screen {
     }
 
     @Override
-    public boolean canClose() {
+    public boolean canCloseWithEsc() {
         return false;
     }
 

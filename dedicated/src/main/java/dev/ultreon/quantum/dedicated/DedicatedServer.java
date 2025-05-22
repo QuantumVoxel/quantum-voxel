@@ -150,8 +150,8 @@ public class DedicatedServer extends QuantumServer {
      */
     @Override
     @Blocking
-    public void shutdown() {
-        super.shutdown();
+    public void shutdown(Runnable finalizer) {
+        super.shutdown(finalizer);
 
         this.profiler.dispose();
         this.server.stop();

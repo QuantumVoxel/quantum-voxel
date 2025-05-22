@@ -239,4 +239,8 @@ public final class CubeModel {
     public NamespaceID resourceId() {
         return resourceId;
     }
+
+    public String pass() {
+        return properties.renderPass;
+    }
 }

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world.gen.chunk;
 
 import dev.ultreon.quantum.block.Blocks;
+import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.ServerRegistry;
 import dev.ultreon.quantum.tags.NamedTag;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -27,7 +28,7 @@ public class DebugGenerator implements ChunkGenerator {
 
     private BiomeGenerator voidBiome;
 
-    public DebugGenerator(ServerRegistry<Biome> biomeRegistry) {
+    public DebugGenerator(Registry<Biome> biomeRegistry) {
         super();
 
         this.biomeTag = biomeRegistry.getTag(new NamespaceID("overworld_biomes")).orElseThrow();

@@ -38,7 +38,7 @@ public class InventoryScreen extends ContainerScreen {
     private PagedList<? extends CraftingRecipe> recipes;
     private List<? extends CraftingRecipe> currentPage;
     private int page = 0;
-    private final List<ItemSlot> recipeSlots = new ArrayList<>();
+    private final List<RecipeSlot> recipeSlots = new ArrayList<>();
 
     public InventoryScreen(ContainerMenu menu, TextObject title) {
         super(menu, title, InventoryScreen.CONTAINER_SIZE);
@@ -89,7 +89,7 @@ public class InventoryScreen extends ContainerScreen {
         }
 
         this.recipeSlots.clear();
-        List<ItemSlot> list = new ArrayList<>();
+        List<RecipeSlot> list = new ArrayList<>();
         int x = 0;
         int y = 0;
         this.recipes = ClientRecipeManager.INSTANCE.getRecipes(RecipeType.CRAFTING, 30, menu);
@@ -101,8 +101,9 @@ public class InventoryScreen extends ContainerScreen {
                     y++;
                 }
                 ItemSlot itemSlot = this.createItemSlot(recipe, x, y);
-                list.add(itemSlot);
-                add(new RecipeSlot(recipe, itemSlot, this.left() + itemSlot.getSlotX(), this.top() + itemSlot.getSlotY(), this));
+                RecipeSlot recipeSlot = new RecipeSlot(recipe, itemSlot, this.left() + itemSlot.getSlotX(), this.top() + itemSlot.getSlotY(), this);
+                add(recipeSlot);
+                list.add(recipeSlot);
                 x++;
             }
         }
@@ -178,11 +179,9 @@ public class InventoryScreen extends ContainerScreen {
 
     @Override
     public boolean mouseClick(int x, int y, int button, int count) {
-        List<ItemSlot> slots = this.recipeSlots;
-        for (int i = 0, slotsSize = slots.size(); i < slotsSize; i++) {
-            ItemSlot slot = slots.get(i);
-            if (slot.isWithinBounds(x - this.left(), y - this.top())) {
-                Recipe recipe = this.recipes.get(this.page, i);
+        for (RecipeSlot slot : this.recipeSlots) {
+            if (slot.slot.isWithinBounds(x - this.left(), y - this.top())) {
+                Recipe recipe = slot.recipe;
                 if (recipe == null) return false;
                 this.client.connection.send(getPacket(recipe));
                 this.rebuildSlots();

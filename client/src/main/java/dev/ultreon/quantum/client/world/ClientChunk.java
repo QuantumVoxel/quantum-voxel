@@ -18,7 +18,7 @@ import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
-import dev.ultreon.quantum.client.render.meshing.GreedyMesher;
+import dev.ultreon.quantum.client.render.meshing.FaceCullMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.collection.Storage;
@@ -101,7 +101,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             }
         });
 
-        this.mesher = new GreedyMesher(this, false);
+        this.mesher = new FaceCullMesher(this);
 
         for (int i = 0; i < CS; i++) {
             for (int j = 0; j < CS; j++) {
@@ -416,7 +416,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             lightMap.setBlockLight(idx, newValue);
             int x = idx % CS;
             int y = (idx / CS) % CS;
-            int z = idx / (CS * CS);
+            int z = idx / (CS_2);
             for (int i = 0; i < 6; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
@@ -467,5 +467,18 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         for (ChunkMesh chunkMesh : this.meshes.values()) {
             chunkMesh.render(client.camera, source);
         }
+    }
+
+    public int getLight(int x, int y, int z) {
+        if (x < 0 || y < 0 || z < 0 || x >= CS || y >= CS || z >= CS) {
+            BlockVec start = vec.start();
+            x += start.x;
+            y += start.y;
+            z += start.z;
+
+            return world.getLight(x, y, z);
+        }
+
+        return 0xF0;
     }
 }

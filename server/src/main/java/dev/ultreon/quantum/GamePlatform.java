@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 public abstract class GamePlatform {
     protected static GamePlatform instance;
     protected final GameInsets insets = new GameInsets(0, 0, 0, 0);
+    private final TimerInstanceImpl timer = new TimerInstanceImpl();
 
     protected GamePlatform() {
         instance = this;
@@ -66,7 +67,7 @@ public abstract class GamePlatform {
     }
 
     public void onGameDispose() {
-        // Implemented in subclasses
+        timer.dispose();
     }
 
     public boolean isShowingImGui() {
@@ -390,7 +391,7 @@ public abstract class GamePlatform {
     }
 
     public TimerInstance getTimer() {
-        return new TimerInstanceImpl();
+        return timer;
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {
