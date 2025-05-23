@@ -43,8 +43,39 @@ public class Shaders {
      */
     public static final Supplier<SceneShaders> WORLD = Shaders.register("world", () -> new SceneShaders(
             QuantumClient.resource(NamespaceID.of("shaders/scene.vert")),
-            QuantumClient.resource(NamespaceID.of("shaders/scene.frag")),
-            QuantumClient.resource(NamespaceID.of("shaders/scene.geom"))));
+            QuantumClient.resource(NamespaceID.of("shaders/scene.frag"))
+    ));
+
+    /**
+     * The scene shader provider.
+     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     *
+     * @see SceneShaders
+     */
+    public static final Supplier<SceneShaders> TRANSPARENT = Shaders.register("transparent", () -> new SceneShaders(
+            QuantumClient.resource(NamespaceID.of("shaders/transparent.vert")),
+            QuantumClient.resource(NamespaceID.of("shaders/transparent.frag"))));
+
+    /**
+     * The scene shader provider.
+     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     *
+     * @see SceneShaders
+     */
+    public static final Supplier<SceneShaders> WATER = Shaders.register("water", () -> new SceneShaders(
+            QuantumClient.resource(NamespaceID.of("shaders/water.vert")),
+            QuantumClient.resource(NamespaceID.of("shaders/water.frag"))));
+
+    /**
+     * The scene shader provider.
+     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     *
+     * @see SceneShaders
+     */
+    public static final Supplier<SceneShaders> CUTOUT = Shaders.register("cutout", () -> new SceneShaders(
+            QuantumClient.resource(NamespaceID.of("shaders/cutout.vert")),
+            QuantumClient.resource(NamespaceID.of("shaders/cutout.frag"))
+    ));
 
     /**
      * The skybox shader provider. Located in {@code shaders/skybox.vert} and {@code shaders/skybox.frag}.
@@ -61,8 +92,7 @@ public class Shaders {
      */
     public static final Supplier<ModelShaders> MODEL_VIEW = Shaders.register("model_view", () -> new ModelShaders(
             QuantumClient.shader(NamespaceID.of("model.vert")),
-            QuantumClient.shader(NamespaceID.of("model.frag")),
-            QuantumClient.shader(NamespaceID.of("model.geom"))));
+            QuantumClient.shader(NamespaceID.of("model.frag"))));
 
     /**
      * The gizmo shader provider. Located in {@code shaders/gizmo.vert}, {@code shaders/gizmo.frag}, and {@code shaders/gizmo.geom}.

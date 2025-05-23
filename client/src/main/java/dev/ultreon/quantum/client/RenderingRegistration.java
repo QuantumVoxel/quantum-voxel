@@ -114,7 +114,6 @@ public class RenderingRegistration {
         registry.registerDefault(Blocks.LEAVES);
         registry.registerDefault(Blocks.PLANKS);
         registry.registerDefault(Blocks.COBBLESTONE);
-        registry.registerDefault(Blocks.TALL_GRASS);
     }
 
     /**
@@ -129,10 +128,10 @@ public class RenderingRegistration {
     public static void registerEntityRenderers() {
         // Register the entity models
         EntityModelRegistry entityModelManager = QuantumClient.get().entityModelManager;
-        entityModelManager.registerBBModel(EntityTypes.PLAYER, NamespaceID.of("player"));
-        entityModelManager.registerBBModel(EntityTypes.SOMETHING, NamespaceID.of("something"));
-        entityModelManager.registerBBModel(EntityTypes.PIG, NamespaceID.of("pig"));
-        entityModelManager.registerBBModel(EntityTypes.BANVIL, NamespaceID.of("banvil"));
+        entityModelManager.registerG3d(EntityTypes.PLAYER, NamespaceID.of("player"));
+        entityModelManager.registerG3d(EntityTypes.SOMETHING, NamespaceID.of("something"));
+        entityModelManager.registerG3d(EntityTypes.PIG, NamespaceID.of("pig"));
+        entityModelManager.registerG3d(EntityTypes.BANVIL, NamespaceID.of("banvil"));
 
         // Register the player entity renderer
         EntityRendererRegistry.register(EntityTypes.PLAYER, PlayerRenderer::new);

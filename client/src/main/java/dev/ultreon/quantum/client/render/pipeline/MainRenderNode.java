@@ -56,14 +56,10 @@ public class MainRenderNode extends RenderNode {
         }
 
         // Disable blending and end rendering
-        client.renderer.getBatch().disableBlending();
         client.renderer.end();
         client.spriteBatch.setShader(null);
 
         gl.glActiveTexture(GL_TEXTURE0);
-
-        // Enable blending and set blend function
-        client.renderer.getBatch().enableBlending();
     }
 
     private void render(ObjectMap<String, Texture> textures) {

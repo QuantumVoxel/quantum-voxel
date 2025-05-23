@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
@@ -19,7 +18,6 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
-import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
@@ -38,7 +36,6 @@ import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
@@ -72,9 +69,8 @@ public class GameRenderer implements Disposable {
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
      *
      * @param client     the client instance to be used by the renderer
-     * @param modelBatch the batch used for rendering 3D models
      */
-    public GameRenderer(QuantumClient client, ModelBatch modelBatch) {
+    public GameRenderer(QuantumClient client) {
         this.client = client;
 
         this.context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));

@@ -14,15 +14,14 @@ public class ModelViewShader extends DefaultShader {
         this(renderable, new GeomShaderConfig());
     }
 
-    public ModelViewShader(final Renderable renderable, final GeomShaderConfig config) {
+    public ModelViewShader(final Renderable renderable, final Config config) {
         this(renderable, config, "");
     }
 
-    public ModelViewShader(final Renderable renderable, final GeomShaderConfig config, final String prefix) {
+    public ModelViewShader(final Renderable renderable, final Config config, final String prefix) {
         this(renderable, config, prefix,
                 config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
-                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
-                config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader());
     }
 
     @Override
@@ -66,7 +65,7 @@ public class ModelViewShader extends DefaultShader {
     }
 
     public ModelViewShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
-                           final String fragmentShader, String geometryShader) {
+                           final String fragmentShader) {
         this(renderable, config, new ShaderProgram(prefix + fragmentShader, prefix + vertexShader));
     }
 

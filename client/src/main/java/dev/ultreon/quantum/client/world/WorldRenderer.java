@@ -527,7 +527,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             model.render(client.camera, bufferSource);
 
             this.renderBlockBreaking(bufferSource, chunk);
-            this.renderBlockModels(bufferSource, chunk);
 
             model.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
 

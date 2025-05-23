@@ -120,6 +120,8 @@ public class PollingExecutorService extends GameObject implements Executor {
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.fail(throwable);
+                throwable.addSuppressed(new Throwable());
+                PollingExecutorService.LOGGER.warn("Submitted task failed:", throwable);
             }
             return future;
         }
@@ -129,6 +131,8 @@ public class PollingExecutorService extends GameObject implements Executor {
                 future.complete(result);
             } catch (Throwable throwable) {
                 future.fail(throwable);
+                throwable.addSuppressed(new Throwable());
+                PollingExecutorService.LOGGER.warn("Submitted task failed:", throwable);
             }
         }));
         return future;

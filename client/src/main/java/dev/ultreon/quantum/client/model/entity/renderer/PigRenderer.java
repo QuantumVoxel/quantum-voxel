@@ -23,19 +23,19 @@ public class PigRenderer extends QVModelEntityRenderer<@NotNull Pig> {
 
         Entity.Pose pose = entity.getPose();
 
-        switch (pose) {
-            case IDLE:
-                QVModel model = instance.getModel();
-                if (model != null) {
-                    model.queue("animation.model.idle", -1, 1f, null, 0f);
-                }
-                break;
-            case WALKING:// TODO: Add walking animation
-                break;
-            default:
-                QuantumClient.LOGGER.warn("Unknown pose {} for entity {}", pose, entity.getId());
-                break;
-        }
+//        switch (pose) {
+//            case IDLE:
+//                QVModel model = instance.getModel();
+//                if (model != null) {
+//                    model.queue("animation.model.idle", -1, 1f, null, 0f);
+//                }
+//                break;
+//            case WALKING:// TODO: Add walking animation
+//                break;
+//            default:
+//                QuantumClient.LOGGER.warn("Unknown pose {} for entity {}", pose, entity.getId());
+//                break;
+//        }
     }
 
     @Override

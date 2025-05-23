@@ -251,7 +251,7 @@ public class Json5ModelLoader {
         private final UVs uvs;
         private final int rotation;
         private final int tintindex;
-        private final String cullface;
+        private final Direction cullface;
 
         public FaceElement(String texture, UVs uvs, int rotation, int tintindex,
                            String cullface) {
@@ -259,7 +259,31 @@ public class Json5ModelLoader {
             this.uvs = uvs;
             this.rotation = rotation;
             this.tintindex = tintindex;
-            this.cullface = cullface;
+
+            if (cullface != null)
+                switch (cullface) {
+                    case "north":
+                        this.cullface = Direction.NORTH;
+                        break;
+                    case "south":
+                        this.cullface = Direction.SOUTH;
+                        break;
+                    case "east":
+                        this.cullface = Direction.EAST;
+                        break;
+                    case "west":
+                        this.cullface = Direction.WEST;
+                        break;
+                    case "up":
+                        this.cullface = Direction.UP;
+                        break;
+                    case "down":
+                        this.cullface = Direction.DOWN;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Invalid cullface");
+                }
+            else this.cullface = null;
         }
 
         public String texture() {
@@ -278,7 +302,7 @@ public class Json5ModelLoader {
             return tintindex;
         }
 
-        public String cullface() {
+        public Direction cullface() {
             return cullface;
         }
 
@@ -288,10 +312,10 @@ public class Json5ModelLoader {
             if (obj == null || obj.getClass() != this.getClass()) return false;
             var that = (FaceElement) obj;
             return Objects.equals(this.texture, that.texture) &&
-                    Objects.equals(this.uvs, that.uvs) &&
-                    this.rotation == that.rotation &&
-                    this.tintindex == that.tintindex &&
-                    Objects.equals(this.cullface, that.cullface);
+                   Objects.equals(this.uvs, that.uvs) &&
+                   this.rotation == that.rotation &&
+                   this.tintindex == that.tintindex &&
+                   Objects.equals(this.cullface, that.cullface);
         }
 
         @Override
@@ -302,11 +326,11 @@ public class Json5ModelLoader {
         @Override
         public String toString() {
             return "FaceElement[" +
-                    "texture=" + texture + ", " +
-                    "uvs=" + uvs + ", " +
-                    "rotation=" + rotation + ", " +
-                    "tintindex=" + tintindex + ", " +
-                    "cullface=" + cullface + ']';
+                   "texture=" + texture + ", " +
+                   "uvs=" + uvs + ", " +
+                   "rotation=" + rotation + ", " +
+                   "tintindex=" + tintindex + ", " +
+                   "cullface=" + cullface + ']';
         }
 
     }
@@ -353,9 +377,9 @@ public class Json5ModelLoader {
             if (obj == null || obj.getClass() != this.getClass()) return false;
             var that = (UVs) obj;
             return Float.floatToIntBits(this.x1) == Float.floatToIntBits(that.x1) &&
-                    Float.floatToIntBits(this.y1) == Float.floatToIntBits(that.y1) &&
-                    Float.floatToIntBits(this.x2) == Float.floatToIntBits(that.x2) &&
-                    Float.floatToIntBits(this.y2) == Float.floatToIntBits(that.y2);
+                   Float.floatToIntBits(this.y1) == Float.floatToIntBits(that.y1) &&
+                   Float.floatToIntBits(this.x2) == Float.floatToIntBits(that.x2) &&
+                   Float.floatToIntBits(this.y2) == Float.floatToIntBits(that.y2);
         }
 
         @Override
@@ -366,10 +390,10 @@ public class Json5ModelLoader {
         @Override
         public String toString() {
             return "UVs[" +
-                    "x1=" + x1 + ", " +
-                    "y1=" + y1 + ", " +
-                    "x2=" + x2 + ", " +
-                    "y2=" + y2 + ']';
+                   "x1=" + x1 + ", " +
+                   "y1=" + y1 + ", " +
+                   "x2=" + x2 + ", " +
+                   "y2=" + y2 + ']';
         }
 
 
@@ -408,8 +432,8 @@ public class Json5ModelLoader {
             final var v11 = new VertexInfo();
             for (var $ : blockFaceFaceElementMap.entrySet()) {
                 final var direction = $.getKey();
-                if (FaceCull.culls(direction, cull)) continue;
                 final var faceElement = $.getValue();
+                if (FaceCull.culls(faceElement.cullface, cull)) continue;
                 final var texRef = faceElement.texture;
                 final @Nullable NamespaceID texture = Objects.equals(texRef, "#missing") ? NamespaceID.of("blocks/error")
                         : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))
@@ -590,10 +614,10 @@ public class Json5ModelLoader {
             if (obj == null || obj.getClass() != this.getClass()) return false;
             var that = (ModelElement) obj;
             return Objects.equals(this.blockFaceFaceElementMap, that.blockFaceFaceElementMap) &&
-                    this.shade == that.shade &&
-                    Objects.equals(this.rotation, that.rotation) &&
-                    Objects.equals(this.from, that.from) &&
-                    Objects.equals(this.to, that.to);
+                   this.shade == that.shade &&
+                   Objects.equals(this.rotation, that.rotation) &&
+                   Objects.equals(this.from, that.from) &&
+                   Objects.equals(this.to, that.to);
         }
 
         @Override
@@ -604,11 +628,11 @@ public class Json5ModelLoader {
         @Override
         public String toString() {
             return "ModelElement[" +
-                    "blockFaceFaceElementMap=" + blockFaceFaceElementMap + ", " +
-                    "shade=" + shade + ", " +
-                    "rotation=" + rotation + ", " +
-                    "from=" + from + ", " +
-                    "to=" + to + ']';
+                   "blockFaceFaceElementMap=" + blockFaceFaceElementMap + ", " +
+                   "shade=" + shade + ", " +
+                   "rotation=" + rotation + ", " +
+                   "from=" + from + ", " +
+                   "to=" + to + ']';
         }
 
     }
@@ -662,10 +686,10 @@ public class Json5ModelLoader {
         @Override
         public @NotNull String toString() {
             return "ElementRotation[" +
-                    "originVec=" + originVec + ", " +
-                    "axis=" + axis + ", " +
-                    "angle=" + angle + ", " +
-                    "rescale=" + rescale + ']';
+                   "originVec=" + originVec + ", " +
+                   "axis=" + axis + ", " +
+                   "angle=" + angle + ", " +
+                   "rescale=" + rescale + ']';
         }
 
         public Vector3 originVec() {
@@ -690,9 +714,9 @@ public class Json5ModelLoader {
             if (obj == null || obj.getClass() != this.getClass()) return false;
             var that = (ElementRotation) obj;
             return Objects.equals(this.originVec, that.originVec) &&
-                    Objects.equals(this.axis, that.axis) &&
-                    Float.floatToIntBits(this.angle) == Float.floatToIntBits(that.angle) &&
-                    this.rescale == that.rescale;
+                   Objects.equals(this.axis, that.axis) &&
+                   Float.floatToIntBits(this.angle) == Float.floatToIntBits(that.angle) &&
+                   this.rescale == that.rescale;
         }
 
         @Override

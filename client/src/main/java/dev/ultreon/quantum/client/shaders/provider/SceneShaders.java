@@ -16,19 +16,19 @@ import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 
 public class SceneShaders extends DefaultShaderProvider implements GameShaders {
-    private final GeomShaderConfig config;
+    private final DefaultShader.Config config;
 
-    public SceneShaders(final GeomShaderConfig config) {
+    public SceneShaders(final DefaultShader.Config config) {
         super(config);
         this.config = config;
     }
 
-    public SceneShaders(final String vertexShader, final String fragmentShader, String geometryShader) {
-        this(new GeomShaderConfig(vertexShader, fragmentShader, geometryShader));
+    public SceneShaders(final String vertexShader, final String fragmentShader) {
+        this(new DefaultShader.Config(vertexShader, fragmentShader));
     }
 
-    public SceneShaders(final FileHandle vertexShader, final FileHandle fragmentShader, FileHandle geometryShader) {
-        this(vertexShader.readString(), fragmentShader.readString(), "");
+    public SceneShaders(final FileHandle vertexShader, final FileHandle fragmentShader) {
+        this(vertexShader.readString(), fragmentShader.readString());
     }
 
     public SceneShaders() {

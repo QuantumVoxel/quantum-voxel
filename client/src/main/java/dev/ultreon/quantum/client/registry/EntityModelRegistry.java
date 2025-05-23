@@ -10,7 +10,6 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
-import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -47,14 +46,6 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
      */
     private final Map<EntityType<?>, NamespaceID> g3dRegistry = new HashMap<>();
     /**
-     * The registry of GLTF models.
-     */
-    private final Map<EntityType<?>, NamespaceID> gltfRegistry = new HashMap<>();
-    /**
-     * The registry of BlockBench models.
-     */
-    private final Map<EntityType<?>, NamespaceID> bbModelRegistry = new HashMap<>();
-    /**
      * The registry of finished models.
      */
     private final Map<EntityType<?>, Model> finishedRegistry = new HashMap<>();
@@ -90,29 +81,6 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
      */
     public <T extends Entity> void registerG3d(EntityType<@NotNull T> entityType, NamespaceID id) {
         this.g3dRegistry.put(entityType, id);
-    }
-
-    /**
-     * @param entityType
-     * @param id
-     * @param <T>
-     * @deprecated Use {@link #registerBBModel(EntityType, NamespaceID)} or {@link #registerG3d(EntityType, NamespaceID)} instead.
-     *             This method breaks models when having multiple in a scene and will be removed in the future.
-     */
-    @Deprecated(forRemoval = true)
-    public <T extends Entity> void registerGltf(EntityType<@NotNull T> entityType, NamespaceID id) {
-        this.gltfRegistry.put(entityType, id);
-    }
-
-    /**
-     * Registers a BlockBench model.
-     *
-     * @param entityType the entity type.
-     * @param id the id.
-     */
-    @Deprecated(forRemoval = true)
-    public <T extends Entity> void registerBBModel(EntityType<@NotNull T> entityType, NamespaceID id) {
-        this.bbModelRegistry.put(entityType, id);
     }
 
     /**
@@ -178,39 +146,27 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
 
         for (Map.Entry<EntityType<?>, NamespaceID> e : this.g3dRegistry.entrySet()) {
             NamespaceID id = e.getValue();
-            Model model = QuantumClient.invokeAndWait(() -> this.modelLoader.loadModel(QuantumClient.resource(id.mapPath(path -> "models/entity/" + path + ".g3dj")),fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
-                if (path.startsWith("models/entity/")) {
-                    path = path.substring("models/entity/".length());
-                }
-                return "textures/entity/" + path;
-            }))));
-            this.finishedRegistry.put(e.getKey(), model);
-        }
-
-        for (Map.Entry<EntityType<?>, NamespaceID> e : this.bbModelRegistry.entrySet()) {
-            NamespaceID id = e.getValue();
             NamespaceID mappedId = id.mapPath(path -> "models/entity/" + path + ".g3dj");
 
-//            Model model = QuantumClient.invokeAndWait(() -> MODEL_LOADER.loadModel(QuantumClient.resource(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
-//                if (path.startsWith("models/entity/")) {
-//                    path = path.substring("models/entity/".length());
-//                } else if (path.startsWith(mappedId.toString())) {
-//                    path = path.substring(mappedId.toString().length());
-//                } else {
-//                    String string = mappedId.toString();
-//                    System.out.println(string);
-//                    System.out.println(path);
-//                    int len = string.length() - path.length() - ".g3dj".length();
-//                    System.out.println(len);
-//                    if (path.startsWith(string.substring(0, len))) {
-//                        path = path.substring(len);
-//                    }
-//                }
-//
-//                return "textures/entity/" + path;
-//            }))));
+            Model model = QuantumClient.invokeAndWait(() -> MODEL_LOADER.loadModel(QuantumClient.resource(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
+                if (path.startsWith("models/entity/")) {
+                    path = path.substring("models/entity/".length());
+                } else if (path.startsWith(mappedId.toString())) {
+                    path = path.substring(mappedId.toString().length());
+                } else {
+                    String string = mappedId.toString();
+                    System.out.println(string);
+                    System.out.println(path);
+                    int len = string.length() - path.length() - ".g3dj".length();
+                    System.out.println(len);
+                    if (path.startsWith(string.substring(0, len))) {
+                        path = path.substring(len);
+                    }
+                }
+
+                return "textures/entity/" + path;
+            }))));
             LOGGER.warn("TOOD: Implement model loader for: {}", mappedId);
-            Model model = null;
             this.finishedRegistry.put(e.getKey(), model);
         }
 

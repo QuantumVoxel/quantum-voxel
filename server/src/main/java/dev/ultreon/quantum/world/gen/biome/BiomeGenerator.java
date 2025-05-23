@@ -64,7 +64,7 @@ public class BiomeGenerator implements Disposable {
      */
     public void generateTerrainFeatures(BuilderChunk chunk, int x, int z, int groundPos) {
         for (int y = 0; y < CS; y++) {
-            BlockVec blockInWorld = chunk.getVec().blockInWorldSpace(x, y, z);
+            BlockVec blockInWorld = chunk.vec.blockInWorldSpace(x, y, z);
 
             for (var feature : this.undergroundFeatures) {
                 if (genFeature(chunk, blockInWorld.x, blockInWorld.y, blockInWorld.z, feature)) break;
@@ -72,7 +72,7 @@ public class BiomeGenerator implements Disposable {
         }
 
         for (var feature : this.surfaceFeatures) {
-            BlockVec blockInWorld = chunk.getVec().blockInWorldSpace(x, 0, z);
+            BlockVec blockInWorld = chunk.vec.blockInWorldSpace(x, 0, z);
 
             if (genFeature(chunk, blockInWorld.x, groundPos, blockInWorld.z, feature)) break;
         }

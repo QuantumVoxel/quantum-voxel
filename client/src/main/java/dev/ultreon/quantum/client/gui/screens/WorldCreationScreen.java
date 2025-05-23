@@ -15,9 +15,12 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
+import kotlin.random.Random;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+
+import static dev.ultreon.quantum.CommonConstants.RANDOM;
 
 public class WorldCreationScreen extends Screen {
     private static final WordGenerator WORD_GEN = new WordGenerator(new WordGenerator.Config().minSize(4).maxSize(6).named());
@@ -25,7 +28,7 @@ public class WorldCreationScreen extends Screen {
     private IconButton reloadButton;
     private TextButton createButton;
     private String worldName = "";
-    private long seed;
+    private final long seed = RANDOM.nextLong();
     private final GameMode gameMode = GameMode.SURVIVAL;
 
     public WorldCreationScreen() {

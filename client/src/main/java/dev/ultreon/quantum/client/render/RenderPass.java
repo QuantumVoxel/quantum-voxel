@@ -385,7 +385,7 @@ public class RenderPass {
             }
 
             @Override
-                    public void apply(Material material) {
+            public void apply(Material material) {
                         material.set(new BlendingAttribute(src, dst));
                     }
 
@@ -720,7 +720,7 @@ public class RenderPass {
 
     public static final RenderPass TRANSPARENT = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
             .name("transparent")
-            .shader(Shaders.WORLD)
+            .shader(Shaders.TRANSPARENT)
             .blending()
             .depthTest()
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
@@ -751,7 +751,7 @@ public class RenderPass {
 
     public static final RenderPass WATER = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
             .name("water")
-            .shader(Shaders.WORLD)
+            .shader(Shaders.WATER)
             .blending()
             .depthTest()
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
@@ -759,7 +759,7 @@ public class RenderPass {
 
     public static final RenderPass CUTOUT = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
             .name("cutout")
-            .shader(Shaders.WORLD)
+            .shader(Shaders.CUTOUT)
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .alphaTest()
             .depthTest()

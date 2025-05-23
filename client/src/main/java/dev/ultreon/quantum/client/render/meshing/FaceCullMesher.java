@@ -58,12 +58,12 @@ public class FaceCullMesher implements Mesher {
 
             model.bakeInto(
                     meshPartBuilder.get(model.getRenderPass()), x, y, z, FaceCull.of(
-                            !top.isAir(),
-                            !bottom.isAir(),
-                            !front.isAir(),
-                            !right.isAir(),
-                            !back.isAir(),
-                            !left.isAir()
+                            !top.isTransparent() && top.hasCollider(),
+                            !bottom.isTransparent() && bottom.hasCollider(),
+                            !front.isTransparent() && front.hasCollider(),
+                            !right.isTransparent() && right.hasCollider(),
+                            !back.isTransparent() && back.hasCollider(),
+                            !left.isTransparent() && left.hasCollider()
                     ), AOUtils.calculate(chunk, x, y, z), light);
             return true;
         }

@@ -80,11 +80,10 @@ public class WorldShader extends DefaultShader {
      * @param config The configuration for the geometry shader, containing shader sources and settings.
      * @param prefix A string prefix used to resolve shader source paths.
      */
-    public WorldShader(final Renderable renderable, final GeomShaderConfig config, final String prefix) {
+    public WorldShader(final Renderable renderable, final Config config, final String prefix) {
         this(renderable, config, prefix,
                 config.vertexShader != null ? config.vertexShader : getDefaultVertexShader(),
-                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader(),
-                config.geometryShader != null ? config.geometryShader : getDefaultGeometryShader());
+                config.fragmentShader != null ? config.fragmentShader : getDefaultFragmentShader());
     }
 
     /**
@@ -94,7 +93,7 @@ public class WorldShader extends DefaultShader {
      * @param config The configuration for the geometry shader, containing shader sources and settings.
      * @param lod The level of detail used for rendering, influencing the #define LOD_LEVEL in the shader.
      */
-    public WorldShader(Renderable renderable, GeomShaderConfig config, int lod) {
+    public WorldShader(Renderable renderable, Config config, int lod) {
         this(renderable, config, String.format("#define LOD_LEVEL %s\n", lod));
         this.lod = lod;
     }
@@ -134,15 +133,14 @@ public class WorldShader extends DefaultShader {
      * Constructs a WorldShader instance with the specified parameters, initializing
      * a geometry shader program using the provided vertex, fragment, and geometry shader sources.
      *
-     * @param renderable The Renderable instance to be rendered by this shader.
-     * @param config The configuration for the geometry shader, containing shader settings and additional parameters.
-     * @param prefix A string prefix used to resolve shader source paths.
-     * @param vertexShader The name of the vertex shader file or source code to be used.
+     * @param renderable     The Renderable instance to be rendered by this shader.
+     * @param config         The configuration for the geometry shader, containing shader settings and additional parameters.
+     * @param prefix         A string prefix used to resolve shader source paths.
+     * @param vertexShader   The name of the vertex shader file or source code to be used.
      * @param fragmentShader The name of the fragment shader file or source code to be used.
-     * @param geometryShader The name of the geometry shader file or source code to be used.
      */
     public WorldShader(final Renderable renderable, final Config config, final String prefix, final String vertexShader,
-                       final String fragmentShader, String geometryShader) {
+                       final String fragmentShader) {
         this(renderable, config, new ShaderProgram(prefix + vertexShader, prefix + fragmentShader));
     }
 

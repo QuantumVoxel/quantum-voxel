@@ -72,7 +72,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -89,7 +89,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.01f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -106,7 +106,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -123,7 +123,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -140,7 +140,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.GRASS_BLOCK, 0.2f, 1))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -157,7 +157,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.GRASS_BLOCK, 0.2f, 1))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -174,7 +174,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.GRASS_BLOCK, 0.2f, 1))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.003f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -191,7 +191,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.GRASS_BLOCK, 0.2f, 1))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -208,7 +208,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 3, 5))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -225,7 +225,7 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.007f, 4, 8))
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
@@ -240,7 +240,7 @@ public class Biomes extends GameObject {
                 .layer(new SurfaceTerrainLayer(Blocks.GRASS_BLOCK, 0))
                 .layer(new WaterTerrainLayer(64))
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.DIRT, 0.5f, 4))
-                .surfaceFeature(new FoliageFeature(noiseConfigs.foliage, Blocks.TALL_GRASS, -0.15f))
+                .surfaceFeature(new FoliageFeature(Blocks.TALL_GRASS, 0.425f))
                 .surfaceFeature(new RockFeature(noiseConfigs.rock, Blocks.STONE, 0.0005f))
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.05f, 3, 6))
                 .build());

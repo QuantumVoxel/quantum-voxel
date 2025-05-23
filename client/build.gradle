@@ -128,7 +128,7 @@ dependencies {
 
 processResources {
     from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
-    exclude "*.pdn", "*.xcf", "*.ps"
+    exclude "*.pdn", "*.xcf", "*.ps", "*.bbmodel"
 
     inputs.property "version", version
 

@@ -9,8 +9,8 @@ varying LOWP vec4 v_color;
 varying vec2 v_texCoords;
 
 uniform sampler2D u_texture;
-uniform sampler2D u_texture;
+
 void main()
 {
-    gl_gl_FragColor = texture2D(u_texture, v_texCoords) * 2.0;
+    gl_FragColor = texture2D(u_texture, v_texCoords) * 2.0;
 }

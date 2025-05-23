@@ -42,7 +42,6 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
         if (instance.getModel().getInstance().nodes.size == 0)
             throw new IllegalStateException("Cannot render entity " + instance.getEntity().getType().getId() + " without nodes");
 
-        Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         instance.getModel().getInstance().materials.forEach(m -> {
@@ -55,8 +54,6 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
             instance.getModel().getInstance().userData = Shaders.MODEL_VIEW.get();
         instance.translate(0, -1.625, 0);
         instance.render(context, context.getBufferSource().getBuffer(getRenderPass(context)));
-
-        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     private RenderPass getRenderPass(WorldRenderContext<E> context) {

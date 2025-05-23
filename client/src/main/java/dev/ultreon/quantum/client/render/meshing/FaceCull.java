@@ -8,6 +8,7 @@ public class FaceCull {
     }
 
     public static boolean culls(Direction direction, int cull) {
+        if (direction == null) return false;
         return (cull & 1 << direction.getOpposite().ordinal()) != 0;
     }
 }

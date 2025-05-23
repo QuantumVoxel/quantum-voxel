@@ -24,7 +24,7 @@ public final class Blocks {
     public static final Block BARRIER = Blocks.register("barrier", new Block(new Properties().soundType(SoundType.STONE).transparent().noRendering()));
     public static final Block ERROR = Blocks.register("error", new Block(new Properties().soundType(SoundType.STONE)));
     public static final GrassBlock GRASS_BLOCK = Blocks.register("grass_block", new GrassBlock(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT).doRandomTick()));
-    public static final Block DIRT = Blocks.register("dirt", new Block(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT)));
+    public static final Block DIRT = Blocks.register("dirt", new DirtBlock(new Properties().hardness(3F).soundType(SoundType.GRASS).effectiveTool(ToolType.SHOVEL).dropsItems(Items.DIRT)));
     public static final Block VOIDGUARD = Blocks.register("voidguard", new Block(new Properties().unbreakable().soundType(SoundType.STONE).effectiveTool(ToolType.PICKAXE).dropsItems(new ItemStack[0])));
     public static final Block SAND = Blocks.register("sand", new Block(new Properties().hardness(2.5F).soundType(SoundType.SAND).effectiveTool(ToolType.SHOVEL).dropsItems(Items.SAND)));
     public static final Block GRAVEL = Blocks.register("gravel", new Block(new Properties().hardness(2.7F).soundType(SoundType.SAND).effectiveTool(ToolType.SHOVEL).dropsItems(Items.GRAVEL)));

@@ -29,7 +29,6 @@ import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.KnownFonts;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
@@ -72,7 +71,6 @@ import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.rpc.RpcHandler;
-import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
 import dev.ultreon.quantum.client.sound.ClientSoundRegistry;
 import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.LanguageManager;
@@ -128,7 +126,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -314,7 +311,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //    private FrameBuffer fbo;
 
     public SpriteBatch spriteBatch;
-    public ModelBatch modelBatch;
     public ShapeDrawer shapes;
     public Renderer renderer;
 
@@ -620,14 +616,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.shapes = new ShapeDrawer(this.spriteBatch, white);
         this.renderer = new Renderer(this.shapes);
 
-        // Initialize ModelBatch with GameShaderProvider
-        this.modelBatch = deferDispose(new ModelBatch(new SceneShaders(
-                resource(id("shaders/scene.vert")),
-                resource(id("shaders/scene.frag")),
-                resource(id("shaders/scene.geom")))));
-
         // Initialize GameRenderer
-        this.gameRenderer = new GameRenderer(this, this.modelBatch);
+        this.gameRenderer = new GameRenderer(this);
 
         // Set up modifications
         this.setupMods();
@@ -1764,7 +1754,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     private void saveScreenshot() {
         if (this.spriteBatch.isDrawing()) this.spriteBatch.flush();
-        if (this.modelBatch.getCamera() != null) this.modelBatch.flush();
 
         Screenshot grabbed = Screenshot.grab(this.width, this.height);
         FileHandle save = grabbed.save(Gdx.files.local("screenshots").child(String.format("%s.png", DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss").format(LocalDateTime.now()))));
@@ -2215,7 +2204,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 // Dispose renderers
                 QuantumClient.cleanUp(this.renderer);
                 QuantumClient.cleanUp(this.gameRenderer);
-                QuantumClient.cleanUp(this.modelBatch);
                 QuantumClient.cleanUp(this.itemRenderer);
                 QuantumClient.cleanUp(this.worldRenderer);
 //                QuantumClient.cleanUp(this.fbo);
@@ -3041,6 +3029,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         BlockModelRegistry.get().reload(resourceManager, context);
 
+        RenderingRegistration.registerRendering(this);
+
         this.entityModelManager.reload(this.resourceManager, context);
         this.entityRendererManager.reload(this.resourceManager, context);
         this.textureAtlasManager.reload(context);
@@ -3049,8 +3039,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.itemRenderer != null)
             this.itemRenderer.reload();
         this.skinManager.reload();
-
-        RenderingRegistration.registerRendering(this);
 
         if (this.worldRenderer != null) {
             this.worldRenderer.reload(context, materialManager);
