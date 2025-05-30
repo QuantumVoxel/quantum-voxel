@@ -7,7 +7,7 @@ import dev.ultreon.quantum.network.system.IConnection;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
-public abstract sealed class Packet<T extends Packet<T>> permits BiDirectionalPacket, PacketToClient, PacketToServer {
+public abstract class Packet<T extends Packet<T>> {
     protected abstract boolean handle(Supplier<IPacketContext> context);
 
     public final boolean handlePacket(Supplier<IPacketContext> context) {

@@ -2,8 +2,8 @@ package dev.ultreon.quantapi.networking.impl;
 
 import dev.ultreon.quantapi.networking.api.IPacketRegisterContext;
 import dev.ultreon.quantapi.networking.api.packet.Packet;
+import dev.ultreon.quantum.network.DecoderException;
 import dev.ultreon.quantum.network.PacketIO;
-import io.netty.handler.codec.DecoderException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -54,8 +54,7 @@ public class PacketRegisterContext implements IPacketRegisterContext {
                         throw new RuntimeException("Couldn't decode packet " + construct.getClass().getName() + " because it couldn't be accessed.", e);
                     } catch (InvocationTargetException e) {
                         if (e.getCause() instanceof DecoderException) {
-                            DecoderException ex = (DecoderException) e.getCause();
-                            throw ex;
+                            throw (DecoderException) e.getCause();
                         } else if (e.getCause() instanceof InstantiationException) {
                             InstantiationException ex = (InstantiationException) e.getCause();
                             if (ex.getCause() instanceof DecoderException) {

@@ -3,8 +3,6 @@ package dev.ultreon.quantapi.kotlin.text
 import dev.ultreon.quantum.text.LiteralText
 import dev.ultreon.quantum.text.MutableText
 import dev.ultreon.quantum.text.TextObject
-import org.graalvm.polyglot.Context
-import org.graalvm.polyglot.Value
 
 // Generic
 val String.literal: LiteralText get() = TextObject.literal(this)

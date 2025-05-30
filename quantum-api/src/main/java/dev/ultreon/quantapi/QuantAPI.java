@@ -5,6 +5,7 @@ import dev.ultreon.quantapi.networking.impl.Network;
 import dev.ultreon.quantapi.networking.impl.NetworkManager;
 import dev.ultreon.quantapi.networking.impl.test.TestNetworkEntry;
 import dev.ultreon.quantapi.networking.impl.test.TestPacket;
+import dev.ultreon.quantum.ModInitializer;
 import dev.ultreon.quantum.events.PlayerEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import dev.ultreon.quantum.Logger;
@@ -13,7 +14,7 @@ import dev.ultreon.quantum.LoggerFactory;
 import java.util.ServiceLoader;
 
 @SuppressWarnings("unused")
-public class QuantAPI implements ModInit {
+public class QuantAPI implements ModInitializer {
     public static final String MOD_ID = "uc_networking";
     public static final Logger LOGGER = LoggerFactory.getLogger(QuantAPI.class);
 

@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.GridPoint2;
@@ -1083,24 +1082,30 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return true if the screen was opened, false if opening was canceled.
      */
     public boolean showScreen(@Nullable Screen next) {
+        // If not on render thread, invoke on it
         if (!isOnRenderThread()) {
             @Nullable Screen finalNext = next;
             return invokeAndWait(() -> this.showScreen(finalNext));
         }
 
+        // Remove current screen if exists
         if (this.screen != null) this.remove(this.screen);
+
+        // Handle pause screen screenshot
         WorldStorage theWorldStorage = openedWorld;
         if (!skipScreenshot && next instanceof PauseScreen && world != null && theWorldStorage != null) {
             PauseScreen pause = (PauseScreen) next;
             this.screenshot(true, screenshot -> {
                 if (screenshot != null) {
                     try {
+                        // Save world screenshot
                         screenshot.save(theWorldStorage.getDirectory().child("picture.png"));
                     } catch (Exception e) {
                         notifications.add("Save Error", "Failed to save world screenshot", "AUTO SAVE");
                     }
                 }
 
+                // Show pause screen after screenshot
                 this.skipScreenshot = true;
                 invoke(() -> {
                     boolean b = this.showScreen(pause);
@@ -1110,13 +1115,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             });
         }
 
-
+        // Store current screen reference
         var cur = this.screen;
+
+        // Show title screen if no world loaded
         if (next == null && this.world == null) {
             next = new TitleScreen();
             LOGGER.warn("World is null, showing title screen");
         }
 
+        // Handle null next screen
         if (next == null) {
             Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
@@ -1124,22 +1132,26 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return cur == null || this.closeScreen(cur);
         }
 
-        // Call open event.
+        // Fire screen open event
         var openResult = ScreenEvents.OPEN.factory().onOpenScreen(next);
         if (openResult.isCanceled()) {
             LOGGER.warn("Opening screen was canceled");
             return false;
         }
 
+        // Handle interrupted open event
         if (openResult.isInterrupted()) {
             next = openResult.getValue();
             LOGGER.warn("Opening screen was interrupted, and new screen was {}", next == null ? "null" : next);
         }
 
+        // Close current screen if it exists
         if (cur != null && this.closeScreen(next, cur)) {
             LOGGER.warn("Closing screen was canceled");
             return false; // Close was canceled
         }
+
+        // Handle null next screen after events
         if (next == null) {
             LOGGER.warn("Next screen is null, cancelling");
             Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
@@ -1147,36 +1159,59 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return false; // The next screen is null, cancelling.
         }
 
+        // Log screen switch
         if (cur != null) {
             LOGGER.warn("Switching from {} to {}", cur, next);
             cur.mouseExit();
         } else {
             LOGGER.warn("Switching to {}", next);
         }
-        this.screen = next;
 
+        // Set and initialize new screen
+        this.screen = next;
         GridPoint2 mouse = getMousePos();
         this.screen.mouseEnter(mouse.x, mouse.y);
         this.screen.init(this.getScaledWidth(), this.getScaledHeight());
         this.add("Screen", next);
         KeyAndMouseInput.setCursorCaught(false);
 
+        // Update window title
         this.setWindowTitle(this.screen.getTitle());
 
         return true;
     }
 
+    /**
+     * Handles the closing of a screen.
+     *
+     * @param next The screen to switch to, may be null
+     * @param cur  The current screen being closed
+     * @return true if screen close was cancelled, false if screen was closed successfully
+     */
     private boolean closeScreen(@Nullable Screen next, Screen cur) {
+        // Fire screen close event and check if cancelled
         var closeResult = ScreenEvents.CLOSE.factory().onCloseScreen(cur);
         if (closeResult.isCanceled()) return true;
 
+        // Allow screen to handle its own closing and check if cancelled
         if (!cur.onClose(next)) return true;
+
+        // Screen close was successful, notify screen it is now closed
         cur.onClosed();
         return false;
     }
 
+    /**
+     * Closes the current screen.
+     *
+     * @param cur The screen to close
+     * @return true if screen was closed successfully, false if closing was cancelled
+     */
     private boolean closeScreen(Screen cur) {
+        // Try to close the screen, return false if cancelled
         if (this.closeScreen(null, cur)) return false;
+
+        // Clear current screen reference and catch cursor
         this.screen = null;
         KeyAndMouseInput.setCursorCaught(true);
 
@@ -1201,8 +1236,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * This is invoked by libGDX.</p>
      */
     public void render() {
+        // Handle music based on world and screen state
         if (world != null) {
             if (screen == null) {
+                // If in web platform and cursor not caught, show pause screen
                 if (!Gdx.input.isCursorCatched() && GamePlatform.get().isWeb()) {
                     showScreen(new PauseScreen());
                     MusicManager.get().pause();
@@ -1217,6 +1254,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             MusicManager.get().stop();
         }
 
+        // Handle memory connection updates for web platform
         IConnection<ClientPacketHandler, ServerPacketHandler> connection1 = connection;
         if (connection1 instanceof MemoryConnection) {
             MemoryConnection<ClientPacketHandler, ServerPacketHandler> connection2 = (MemoryConnection<ClientPacketHandler, ServerPacketHandler>) connection1;
@@ -1228,14 +1266,17 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         float deltaTime = Gdx.graphics.getDeltaTime();
 
+        // Handle window resize if dimensions changed
         if (this.cachedWidth != this.getWidth() || this.cachedHeight != this.getHeight()) {
             this.cachedWidth = this.getWidth();
             this.cachedHeight = this.getHeight();
             this.resize(this.getWidth(), this.getHeight());
         }
 
+        // Set OpenGL viewport
         Gdx.gl.glViewport(0, 0, this.getWidth(), this.getHeight());
 
+        // Clean up any pending disposables
         Disposable disposable;
         while ((disposable = this.disposalQueue.poll()) != null) {
             try {
@@ -1246,19 +1287,23 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         try {
+            // Update profiler
             QuantumClient.PROFILER.update();
 
+            // Update debug GUI if enabled
             if (this.debugGui != null && !this.loading) {
                 if (this.isShowDebugHud()) this.debugGui.updateProfiler();
                 this.debugGui.update();
             }
 
+            // Do main rendering
             try (var ignored = PROFILER.start("render")) {
                 this.doRender(deltaTime);
             }
             this.renderer.actuallyEnd();
         } catch (OutOfMemoryError e) {
-            System.gc(); // try to free up some memory before handling out of memory.
+            // Try to free memory and show the OOM screen
+            System.gc();
             try {
                 if (this.integratedServer != null) {
                     this.integratedServer.shutdownNow();
@@ -1279,8 +1324,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             QuantumClient.crash(t);
         }
 
+        // Disable face culling
         Gdx.gl.glDisable(GL_CULL_FACE);
 
+        // Finish rendering
         renderer.finish();
     }
 
@@ -1372,52 +1419,69 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Prepares the screenshot.
+     * Prepares the application for capturing a screenshot. This method adjusts
+     * the screenshot scale, viewport dimensions, and necessary flags to ensure
+     * a screenshot is properly captured at the desired resolution.
      */
     private void prepareScreenshot() {
+        // Default to 1x scale
         this.screenshotScale = 1;
 
+        // Check if 4x screenshot is enabled and shift is being held
         if (ClientConfiguration.enable4xScreenshot.getValue() && (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))) {
             this.screenshotScale = 4;
         }
 
+        // Scale the viewport dimensions
         this.width = this.width * this.screenshotScale;
         this.height = this.height * this.screenshotScale;
 
+        // Set screenshot flags
         this.captureScreenshot = true;
         this.triggerScreenshot = false;
 
-//        this.fbo = new FrameBuffer(Pixmap.Format.RGB888, this.width, this.height, true);
-//        this.fbo.begin();
-
+        // Clear the screen to black
         ScreenUtils.clear(0, 0, 0, 1, true);
     }
 
     /**
-     * Draws the custom border.
+     * Draws the custom window border with title bar and control buttons.
      *
-     * @param renderer the renderer.
+     * @param renderer The renderer used to draw the border graphics
      */
     private void drawCustomBorder(Renderer renderer) {
+        // Begin rendering
         this.renderer.begin();
+
+        // Save current transform and scale up by 2x
         renderer.pushMatrix();
         renderer.scale(2, 2);
+
+        // Draw window border with title bar at calculated position
         this.renderWindow(renderer, this.getWidth() / 2 + 36, this.getHeight() / 2 + 44);
+
+        // Restore transform
         renderer.popMatrix();
+
+        // End rendering
         this.renderer.end();
     }
 
     /**
-     * Handles the screenshot.
+     * Handles the screenshot capture and saves it to disk.
+     * After saving, resets the viewport and resizes the game window.
      */
     private void handleScreenshot() {
+        // Reset screenshot capture flag
         this.captureScreenshot = false;
 
+        // Save screenshot to disk
         this.saveScreenshot();
-//        this.fbo.end();
-        Gdx.gl.glViewport(0, 0, getWidth(), getHeight());
-//        this.fbo.dispose();
 
+        // Reset viewport to original dimensions
+        Gdx.gl.glViewport(0, 0, getWidth(), getHeight());
+
+        // Reset window size
         this.resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
 
@@ -1429,45 +1493,60 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return whether the game was rendered.
      */
     private boolean renderGame(Renderer renderer, float deltaTime) {
+        // Handle first render
         if (Gdx.graphics.getFrameId() == 2) {
             this.firstRender();
         }
 
+        // Update game activity
         this.updateActivity();
 
+        // Poll for updates
         this.pollAll();
 
+        // Process game ticks
         Timing.start("try_client_tick");
         tryClientTick();
         Timing.end("try_client_tick");
 
+        // Check if splash screens should be shown
         boolean renderSplash = this.showUltreonSplash || this.showLibGDXSplash;
+
+        // Render LibGDX splash screen
         if (this.showLibGDXSplash) {
             this.renderLibGDXSplash(renderer);
         }
 
+        // Render Ultreon splash screen 
         if (this.showUltreonSplash) {
             this.renderUltreonSplash(renderer);
         }
+
+        // Start loading in dev environment
         if (GamePlatform.get().isDevEnvironment() && this.startDevLoading) {
             this.startLoading();
         }
+
+        // Return early if splash screens are showing
         if (renderSplash) {
             return true;
         }
 
+        // Show loading overlay if needed
         final LoadingOverlay loading = this.loadingOverlay;
         if (loading != null) {
             this.renderLoadingOverlay(renderer, deltaTime, loading);
             return true;
         }
 
+        // Set up OpenGL blending
         Gdx.gl.glEnable(GL_BLEND);
         Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Gdx.gl.glFlush();
         ScreenUtils.clear(0, 0, 0, 0, true);
         Gdx.gl.glFlush();
 
+        // Render main game content
         Timing.start("render_main");
         this.renderMain(renderer, deltaTime);
         Timing.end("render_main");
@@ -1481,6 +1560,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param deltaTime the delta time.
      */
     private void renderMain(Renderer renderer, float deltaTime) {
+        // Handle player raycast 
         Player player = this.player;
         if (player == null) {
             this.hit = null;
@@ -1488,6 +1568,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             QuantumClient.PROFILER.section("playerRayCast", () -> this.hit = player.rayCast());
         }
 
+        // Draw black background if needed
         renderer.begin();
         GridPoint2 drawOffset = this.getDrawOffset();
         if (!GamePlatform.get().hasBackPanelRemoved()) {
@@ -1495,6 +1576,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
         renderer.end();
 
+        // Update keyboard/mouse and touch input
         if (this.keyAndMouseInput != null) {
             try (var ignored = QuantumClient.PROFILER.start("input")) {
                 this.keyAndMouseInput.update();
@@ -1502,6 +1584,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
         }
 
+        // TODO: Properly support controllers without breaking TeaVM
 //        if (this.controllerInput != null && this.keyAndMouseInput != null) {
 //            try (var ignored = QuantumClient.PROFILER.start("input")) {
 //                this.controllerInput.update();
@@ -1513,6 +1596,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //        ControllerContext.register(InGameControllerContext.INSTANCE, client -> client.screen == null);
 //        ControllerContext.register(MenuControllerContext.INSTANCE, client -> client.screen != null);
 
+        // Update cursor icon based on mouse state
         Screen screen = this.screen;
         if (screen != null && KeyAndMouseInput.isPressingAnyButton() && !this.wasClicking) {
             this.setCursor(this.clickCursor);
@@ -1522,10 +1606,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.wasClicking = false;
         }
 
+        // Render the game
         RenderEvents.PRE_RENDER_GAME.factory().onRenderGame(gameRenderer, renderer, deltaTime);
         Timing.start("render_game");
         this.gameRenderer.render(renderer, deltaTime);
 
+        // Render debug overlay if enabled
         try (var ignored = QuantumClient.PROFILER.start("debug")) {
             if (this.hideHud || this.isLoading()) return;
             renderer.begin();
@@ -1535,6 +1621,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             renderer.end();
         }
 
+        // End game rendering
         Timing.end("render_game");
         RenderEvents.POST_RENDER_GAME.factory().onRenderGame(gameRenderer, renderer, deltaTime);
     }
@@ -1581,17 +1668,25 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     /**
      * Starts the loading of the game.
      */
+    /**
+     * Starts loading game resources asynchronously. Shows loading overlay and handles crashes.
+     * This is called when the game starts up.
+     */
     private void startLoading() {
         this.startDevLoading = false;
 
+        // Set crash hook to collect any crashes during loading
         QuantumClient.setCrashHook(this.crashes::add);
 
+        // Show loading overlay
         this.loadingOverlay = new LoadingOverlay();
 
+        // Start async loading process
         Promise.runAsync(loader).exceptionally(throwable -> {
             // Clear the crash handling
             QuantumClient.crashHook = null;
 
+            // Record the loading failure
             this.crashes.add(new CrashLog("Failed to load", throwable));
 
             // Show the crash screen
@@ -1605,16 +1700,20 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             });
             return null;
         }).thenRun(() -> {
-            // Clear the crash handling
+            // Clear the crash handling after successful load
             QuantumClient.crashHook = null;
 
+            // Initialize appropriate screen based on load results
             QuantumClient.invoke(() -> {
                 if (crashes.isEmpty()) {
+                    // Show dev preview if no crashes, with username screen if needed
                     screen = new DevPreviewScreen(user == null ? new UsernameScreen() : null);
                 } else {
+                    // Show crash screen if there were crashes
                     screen = new CrashScreen(crashes);
                 }
 
+                // Initialize the screen and remove loading overlay
                 screen.init(getScaledWidth(), getScaledHeight());
                 loadingOverlay = null;
             }).exceptionally(throwable -> {
@@ -1650,35 +1749,41 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Renders the Ultreon splash.
+     * Renders the Ultreon splash screen with zoom animation.
      *
-     * @param renderer the renderer.
+     * @param renderer The renderer used to draw the splash screen
      */
     private void renderUltreonSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
+            // Initialize splash screen timing and play sound on first render
             if (this.ultreonSplashTime == 0L) {
                 this.ultreonSplashTime = System.currentTimeMillis();
-
                 this.logoRevealSound.play(0.5f);
             }
 
+            // Clear screen to black
             ScreenUtils.clear(0, 0, 0, 1, true);
 
+            // Calculate zoom animation based on elapsed time
             final long timeDiff = System.currentTimeMillis() - this.ultreonSplashTime;
             float zoom = (float) QuantumClient.interpolate(QuantumClient.FROM_ZOOM, QuantumClient.TO_ZOOM, Mth.clamp(timeDiff / QuantumClient.DURATION, 0f, 1f));
-            Vec2f thumbnail = this.resizer.thumbnail(this.getWidth() * zoom, this.getHeight() * zoom);
 
+            // Calculate scaled thumbnail dimensions
+            Vec2f thumbnail = this.resizer.thumbnail(this.getWidth() * zoom, this.getHeight() * zoom);
             float drawWidth = thumbnail.x;
             float drawHeight = thumbnail.y;
 
+            // Center the thumbnail on screen
             float drawX = (this.getWidth() - drawWidth) / 2;
             float drawY = (this.getHeight() - drawHeight) / 2;
 
+            // Render background and logo textures
             this.renderer.begin();
             renderer.blit(this.ultreonBgTex, 0, 0, this.getWidth(), this.getHeight(), 0, 0, 1024, 1024, 1024, 1024);
             renderer.blit(this.ultreonLogoTex, (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, 1920, 1080, 1920, 1080);
             this.renderer.end();
 
+            // Stop showing splash and start loading when duration elapsed
             if (System.currentTimeMillis() - this.ultreonSplashTime > QuantumClient.DURATION) {
                 showUltreonSplash = false;
                 this.startLoading();
@@ -1698,9 +1803,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     /**
      * Tries to tick the client.
      */
+    /**
+     * Handles client-side game tick logic and timing
+     */
     private void tryClientTick() {
         var canTick = false;
 
+        // Get current time and calculate time passed since last update
         double time2 = System.currentTimeMillis();
         var passed = time2 - this.time;
         this.frameTime += (float) passed;
@@ -1708,7 +1817,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         this.time = time2;
 
+        // Calculate tick interval based on server TPS
         float tickCap = 1000f / QuantumServer.TPS;
+
+        // Process any accumulated tick time
         while (this.frameTime >= tickCap) {
             this.frameTime -= tickCap;
             this.partialTick = this.frameTime / tickCap;
@@ -1716,6 +1828,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             canTick = true;
         }
 
+        // Execute client tick if enough time has passed
         if (canTick) {
             this.ticksPassed++;
             try {
@@ -1731,6 +1844,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
         }
 
+        // Update TPS counter every second
         if (this.tickTime >= 1000.0d) {
             this.currentTps = this.ticksPassed;
             this.ticksPassed = 0;
@@ -1753,15 +1867,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * Saves a screenshot.
      */
     private void saveScreenshot() {
-        if (this.spriteBatch.isDrawing()) this.spriteBatch.flush();
+        // Beginning of the method
+        if (this.spriteBatch != null && this.spriteBatch.isDrawing()) this.spriteBatch.flush();
 
         Screenshot grabbed = Screenshot.grab(this.width, this.height);
         FileHandle save = grabbed.save(Gdx.files.local("screenshots").child(String.format("%s.png", DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss").format(LocalDateTime.now()))));
 
+        // Saving screenshot to a file
         this.screenshotFlashTime = System.currentTimeMillis();
 
+        // Playing sound effect for taking a screenshot
         this.playSound(SoundEvents.SCREENSHOT, 0.5f);
 
+        // Adding notification message with the saved file name and path
         this.notifications.add("Screenshot taken.", save.name(), "screenshots");
 
         onScreenshot.accept(grabbed);
@@ -1938,7 +2056,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (disposable == null) return;
 
         try {
-            disposable.shutdown(() -> {});
+            disposable.shutdown(() -> {
+            });
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception throwable) {

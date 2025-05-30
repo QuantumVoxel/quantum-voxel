@@ -436,7 +436,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     }
 
     /**
-     * @deprecated use {@link #vec)} instead.
+     * @deprecated use {@link #vec} instead.
      */
     @Deprecated
     public @NotNull ChunkVec getVec() {

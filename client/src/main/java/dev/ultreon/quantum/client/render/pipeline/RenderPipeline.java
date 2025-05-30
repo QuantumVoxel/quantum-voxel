@@ -144,8 +144,6 @@ public class RenderPipeline implements Disposable {
         }
         node.textureBinder.end();
 
-        RenderPipeline.capture(node);
-
         frameBuffer.end();
         Gdx.gl.glViewport(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
@@ -169,34 +167,8 @@ public class RenderPipeline implements Disposable {
         node.render(textures, this.camera, deltaTime);
         node.textureBinder.end();
 
-        // Capture the node.
-        RenderPipeline.capture(node);
-
-
         frameBuffer.end();
         Gdx.gl.glViewport(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
-    }
-
-    /**
-     * Captures the node. This is used to capture the node and save it as a PNG file. And dump info about the node.
-     * This is useful for debugging. And only happens when the F8 key is pressed.
-     * <p>
-     *  The file is saved in the game directory, and is named like "FBO_<NodeName>.png" and "INFO_<NodeName>.txt"
-     *  Where <NodeName> is the name of the node.
-     * </p>
-     *
-     * @param node the node.
-     */
-    private static void capture(RenderNode node) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F8)) {
-            Pixmap screenshot = Pixmap.createFromFrameBuffer(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
-            PixmapIO.writePNG(QuantumClient.data("FBO_" + node.getClass().getSimpleName() + ".png"), screenshot, Deflater.DEFAULT_COMPRESSION, true);
-
-            // Dump info about the node.
-            try (var stream = new PrintStream(QuantumClient.data("INFO_" + node.getClass().getSimpleName() + ".txt").write(false))) {
-                node.dumpInfo(stream);
-            }
-        }
     }
 
     /**

@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'application'
+    id 'maven-publish'
 }
 
 group = 'dev.ultreon.quantum'
@@ -12,7 +13,7 @@ repositories {
 }
 
 base {
-    archivesName = 'quantum-dedicated-server'
+    archivesName = 'dedicated'
 }
 
 dependencies {
@@ -115,5 +116,39 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 "Main-Class": "net.fabricmc.loader.impl.launch.knot.KnotServer"
         ])
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId base.archivesName.get()
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "UltreonMavenReleases"
+            url = "https://maven.ultreon.dev/releases"
+            credentials(PasswordCredentials) {
+                username = findProperty("ultreonmvn.name") ?: System.getenv("ULTREON_MVN_NAME")
+                password = findProperty("ultreonmvn.secret") ?: System.getenv("ULTREON_MVN_SEC")
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+
+        maven {
+            name = "UltreonMavenSnapshots"
+            url = "https://maven.ultreon.dev/snapshots"
+            credentials(PasswordCredentials) {
+                username = findProperty("ultreonmvn.name") ?: System.getenv("ULTREON_MVN_NAME")
+                password = findProperty("ultreonmvn.secret") ?: System.getenv("ULTREON_MVN_SEC")
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
     }
 }

@@ -72,6 +72,15 @@ repositories {
     }
 }
 
+sourceSets {
+    lua {
+        allSource.srcDirs = []
+        resources {
+            srcDir 'src/lualib'
+        }
+    }
+}
+
 dependencies {
     implementation api(project(":gameprovider"))
     implementation api(project(":client"))
@@ -97,6 +106,8 @@ dependencies {
         exclude group: "org.lwjgl", module: "lwjgl-opengles"
         exclude group: "org.lwjgl", module: "lwjgl-stb"
     }
+
+    implementation 'org.reflections:reflections:0.10.2'
     implementation api("org.lwjgl:lwjgl:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-egl:3.3.3!!") { version { strictly "3.3.3" } }
@@ -200,6 +211,9 @@ dependencies {
     implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
     implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
     implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
+
+    implementation 'party.iroiro.luajava:luajit:4.0.2'
+    runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
 
     implementation api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
         exclude module: 'launchwrapper'

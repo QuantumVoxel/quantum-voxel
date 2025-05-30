@@ -21,8 +21,10 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModOrigin;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.Platform;
+import party.iroiro.luajava.luajit.LuaJit;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +52,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     private final boolean angleGLES;
     private final SafeLoadWrapper safeWrapper;
     private final TimerInstanceImpl timer = new TimerInstanceImpl();
+    private final LuaJit luaJit;
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
@@ -57,6 +60,19 @@ public abstract class DesktopPlatform extends GamePlatform {
         this.safeWrapper = safeWrapper;
         if (angleGLES)
             System.setProperty("quantum.platform.anglegles", "true");
+
+        luaJit = new LuaJit();
+        @Language("lua") String script = "--[[\n" +
+                                         "print = java.method(java.import('java.lang.System').out, 'println', 'java.lang.Object')\n" +
+                                         "thread = java.import('java.lang.Thread')(function()\n" +
+                                         "\n" +
+                                         "    print('Hello World from LuaJ')\n" +
+                                         "\n" +
+                                         "end)\n" +
+                                         "thread:start()]]\n" +
+                                         "\n" +
+                                         "print(\"Hello World from LuaJ\")\n";
+        luaJit.run(script);
     }
 
     @Override
