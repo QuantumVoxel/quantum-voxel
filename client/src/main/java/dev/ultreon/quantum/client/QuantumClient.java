@@ -596,13 +596,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.entityRendererManager = new EntityRendererRegistry(this.entityModelManager);
         this.modelLoader = modelLoader;
 
-        // Initialize the render pipeline
-//        this.pipeline = deferDispose(new RenderPipeline(new MainRenderNode(), this.camera)
-//                .node(new CollectNode())
-//                .node(new WorldNode())
-//                .node(new ForegroundNode())
-//                .node(new BackgroundNode()));
-
         // Create a white pixel for the shape drawer
         Pixmap pixmap = deferDispose(new Pixmap(1, 1, Pixmap.Format.RGBA8888));
         pixmap.setColor(1F, 1F, 1F, 1F);
@@ -778,8 +771,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     /**
      * Gets the icons for the game.
+     * <p>
+     * This method initializes an array of strings representing the icons based on whether the platform is macOS or not.
+     * If the platform is macOS, it sets all icons to "icons/mac.png". Otherwise, it sets them to "icons/icon.png".
      *
-     * @return the icons for the game.
+     * @return The array of icon paths. Each element in the array corresponds to an icon size defined in QuantumClient.SIZES or a single size if not macOS.
      */
     public static String[] getIcons() {
         int[] sizes = QuantumClient.SIZES;
@@ -1046,17 +1042,24 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return new GG();
     }
 
+    /**
+     * Creates a directory if it does not exist, and recreates it if it is a non-directory file.
+     *
+     * @param dirName The name of the directory to create or recreate.
+     * @return The handle to the created or recreated directory.
+     */
     static FileHandle createDir(String dirName) {
         var directory = QuantumClient.data(dirName);
         if (!directory.exists()) {
+            // Create the directory if it doesn't exist
             directory.mkdirs();
         } else if (!directory.isDirectory()) {
+            // Delete the non-directory file, and recreate directory.
             directory.delete();
             directory.mkdirs();
         }
-        return directory;
+        return directory; // Return the created or recreated directory
     }
-
     /**
      * Pauses the game by showing the pause screen.
      * If the current screen is not null and the world is not null, it will show the pause screen.
@@ -1085,23 +1088,23 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return true if the screen was opened, false if opening was canceled.
      */
     public boolean showScreen(@Nullable Screen next) {
-        // If not on render thread, invoke on it
+        // If not on render thread, invoke on render thread
         if (!isOnRenderThread()) {
             @Nullable Screen finalNext = next;
             return invokeAndWait(() -> this.showScreen(finalNext));
         }
 
-        // Remove current screen if exists
+        // Remove previous screen if it exists
         if (this.screen != null) this.remove(this.screen);
 
-        // Handle pause screen screenshot
+        // Handle pause screen screenshots for world
         WorldStorage theWorldStorage = openedWorld;
         if (!skipScreenshot && next instanceof PauseScreen && world != null && theWorldStorage != null) {
             PauseScreen pause = (PauseScreen) next;
             this.screenshot(true, screenshot -> {
                 if (screenshot != null) {
                     try {
-                        // Save world screenshot
+                        // Try to save world screenshot
                         screenshot.save(theWorldStorage.getDirectory().child("picture.png"));
                     } catch (Exception e) {
                         notifications.add("Save Error", "Failed to save world screenshot", "AUTO SAVE");
@@ -1118,16 +1121,16 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             });
         }
 
-        // Store current screen reference
+        // Get current screen for handling transitions
         var cur = this.screen;
 
-        // Show title screen if no world loaded
+        // Default to title screen if no world loaded
         if (next == null && this.world == null) {
             next = new TitleScreen();
             LOGGER.warn("World is null, showing title screen");
         }
 
-        // Handle null next screen
+        // Handle null screen cases
         if (next == null) {
             Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
             this.setWindowTitle(TextObject.literal("Playing in a world!"));
@@ -1135,7 +1138,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return cur == null || this.closeScreen(cur);
         }
 
-        // Fire screen open event
+        // Call screen open event handlers
         var openResult = ScreenEvents.OPEN.factory().onOpenScreen(next);
         if (openResult.isCanceled()) {
             LOGGER.warn("Opening screen was canceled");
@@ -1148,13 +1151,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             LOGGER.warn("Opening screen was interrupted, and new screen was {}", next == null ? "null" : next);
         }
 
-        // Close current screen if it exists
+        // Close current screen if needed
         if (cur != null && this.closeScreen(next, cur)) {
             LOGGER.warn("Closing screen was canceled");
             return false; // Close was canceled
         }
 
-        // Handle null next screen after events
+        // Handle null screen after events
         if (next == null) {
             LOGGER.warn("Next screen is null, cancelling");
             Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
@@ -1162,7 +1165,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             return false; // The next screen is null, cancelling.
         }
 
-        // Log screen switch
+        // Log screen transition
         if (cur != null) {
             LOGGER.warn("Switching from {} to {}", cur, next);
             cur.mouseExit();
@@ -1170,7 +1173,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             LOGGER.warn("Switching to {}", next);
         }
 
-        // Set and initialize new screen
+        // Initialize new screen
         this.screen = next;
         GridPoint2 mouse = getMousePos();
         this.screen.mouseEnter(mouse.x, mouse.y);
@@ -1520,7 +1523,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.renderLibGDXSplash(renderer);
         }
 
-        // Render Ultreon splash screen 
+        // Render Ultreon splash screen
         if (this.showUltreonSplash) {
             this.renderUltreonSplash(renderer);
         }
@@ -1563,7 +1566,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param deltaTime the delta time.
      */
     private void renderMain(Renderer renderer, float deltaTime) {
-        // Handle player raycast 
+        // Handle player raycast
         Player player = this.player;
         if (player == null) {
             this.hit = null;
@@ -1733,18 +1736,29 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     private void renderLibGDXSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("libGdxSplash")) {
+            // Initialize splash time if not already set
             if (this.libGDXSplashTime == 0L) {
                 this.libGDXSplashTime = System.currentTimeMillis();
             }
 
+            // Clear the screen with white color
             ScreenUtils.clear(1, 1, 1, 1, true);
 
+            // Begin rendering
             this.renderer.begin();
+
+            // Calculate the size of the logo to be half of the smaller screen dimension
             int size = Math.min(this.getWidth(), this.getHeight()) / 2;
+
+            // Draw the libGDX logo centered on the screen
             renderer.blit(this.libGDXLogoTex, (float) this.getWidth() / 2 - (float) size / 2, (float) this.getHeight() / 2 - (float) size / 2, size, size);
+
+            // End rendering
             this.renderer.end();
 
+            // Check if 4 seconds have passed since splash started
             if (System.currentTimeMillis() - this.libGDXSplashTime > 4000f) {
+                // Hide libGDX splash and show Ultreon splash
                 this.showLibGDXSplash = false;
                 this.showUltreonSplash = true;
             }
@@ -2160,28 +2174,47 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     private void handleBlockBreaking(BlockVec breaking, BlockHit hitResult) {
         @Nullable ClientWorldAccess world = this.world;
+
+        // Return early if world is null
         if (world == null) return;
+
+        // Check if the block position or block meta has changed, or if player is null
         if (!hitResult.getBlockVec().equals(breaking.asBlockVec()) || !hitResult.getBlockMeta().equals(this.breakingBlock) || this.player == null) {
+            // Reset breaking state if any condition fails
             this.resetBreaking(hitResult);
         } else {
             float efficiency = 1.0F;
+
+            // Get the player's currently selected item stack
             ItemStack stack = this.player.getSelectedItem();
+
+            // Get the item from the stack
             Item item = stack.getItem();
+
+            // Check if the item is a tool and matches the effective tool type for the breaking block
             if (item instanceof ToolItem && this.breakingBlock.getEffectiveTool() == ((ToolItem) item).getToolType()) {
                 ToolItem toolItem = (ToolItem) item;
+                // Get the tool efficiency for faster breaking
                 efficiency = toolItem.getEfficiency();
             }
 
+            // Continue breaking the block with adjusted progress based on hardness and tool efficiency
             BreakResult breakResult = world.continueBreaking(breaking, 1.0F / (Math.max((this.breakingBlock.getHardness() / efficiency) * QuantumServer.TPS, 1) + 1), this.player);
+
+            // Handle the result of the breaking attempt
             if (breakResult == BreakResult.FAILED) {
+                // Reset breaking state if breaking failed
                 this.resetBreaking();
             } else if (breakResult == BreakResult.BROKEN) {
+                // Clear breaking state if block was broken
                 this.breaking = null;
                 this.breakingBlock = null;
             } else {
+                // If the selected item has changed, reset brNULLeaking state
                 if (this.oldSelected != this.player.selected) {
                     this.resetBreaking();
                 }
+                // Update oldSelected to current selected item
                 this.oldSelected = this.player.selected;
             }
         }
@@ -2195,19 +2228,26 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void resetBreaking(BlockHit hitResult) {
         LocalPlayer player = this.player;
 
-        if (this.world == null) return;
-        if (this.breaking == null) return;
-        if (player == null) return;
+        // Return early if world, breaking block or player isn't available.
+        if (this.world == null || this.breaking == null || player == null) return;
 
+        // Stop breaking the current block
         this.world.stopBreaking(new BlockVec(this.breaking), player);
+
+        // Get the block state at the hit result position
         BlockState block = hitResult.getBlockMeta();
 
+        // Check if the block is null or air (non-solid)
         if (block == null || block.isAir()) {
+            // Clear breaking references if the block is no longer valid
             this.breaking = null;
             this.breakingBlock = null;
         } else {
+            // Update the breaking block position and state
             this.breaking = hitResult.getBlockVec();
             this.breakingBlock = block;
+
+            // Start breaking the new block
             this.world.startBreaking(new BlockVec(hitResult.getBlockVec()), player);
         }
     }
@@ -2286,9 +2326,14 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         OverlayManager.resize(ceil(getWidth() / this.getGuiScale()), ceil(height / this.getGuiScale()));
     }
-
+    
     /**
-     * Disposes of the client.
+     * Disposes of all game-related resources and performs necessary cleanup operations.
+     * This method should only be invoked on the LibGDX main render thread.
+     * <p>
+     * Exceptions occurring during disposal will result in the client crashing to ensure
+     * proper error handling and reporting. Misuse of this method outside the render thread
+     * will throw an IllegalThreadError.
      */
     @Override
     public void dispose() {
@@ -2300,86 +2345,88 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.disposed = true;
 
             try {
+                // Remove completed futures from the list
                 while (!this.futures.isEmpty()) {
                     this.futures.removeIf(Promise::isDone);
                 }
 
+                // Cancel any ongoing vibration effects
                 GameInput.cancelVibration();
 
-//                QuantumServer.getWatchManager().stop();
-
+                // Clean up integrated server resources
                 QuantumClient.cleanUp((Shutdownable) this.integratedServer);
 
+                // Clean up font resources
                 QuantumClient.cleanUp(this.unifont);
                 QuantumClient.cleanUp(this.font);
                 QuantumClient.cleanUp(this.fontManager);
 
+                // Clean up world and profiler
                 QuantumClient.cleanUp(this.world);
                 QuantumClient.cleanUp(this.profiler);
 
+                // Notify platform that the game is disposing
                 GamePlatform.get().onGameDispose();
 
+                // Clean up various disposables
                 this.disposables.forEach(QuantumClient::cleanUp);
                 this.shutdownables.forEach(QuantumClient::cleanUp);
                 this.closeables.forEach(QuantumClient::cleanUp);
 
-                // Dispose renderers
+                // Dispose renderers to free graphics resources
                 QuantumClient.cleanUp(this.renderer);
                 QuantumClient.cleanUp(this.gameRenderer);
                 QuantumClient.cleanUp(this.itemRenderer);
                 QuantumClient.cleanUp(this.worldRenderer);
-//                QuantumClient.cleanUp(this.fbo);
 
+                // Pop the main category from the stack
                 mainCat.pop(this);
 
-                // Clear scenes
+                // Clear different scene categories
                 backgroundCat.clear();
                 worldCat.clear();
                 mainCat.clear();
 
-                // Dispose Models
+                // Dispose model manager and baked models
                 ModelManager.INSTANCE.dispose();
                 BakedModelRegistry bakedBlockModels1 = this.bakedBlockModels;
                 if (bakedBlockModels1 != null) QuantumClient.cleanUp(bakedBlockModels1.atlas());
                 if (bakedBlockModels1 != null) QuantumClient.cleanUp(bakedBlockModels1);
                 QuantumClient.cleanUp(this.entityModelManager);
 
+                // Dispose mesh manager
                 MeshManager.INSTANCE.dispose();
 
-                // Dispose textures
+                // Dispose various textures
                 QuantumClient.cleanUp(this.ultreonBgTex);
                 QuantumClient.cleanUp(this.ultreonLogoTex);
                 QuantumClient.cleanUp(this.libGDXLogoTex);
                 QuantumClient.cleanUp(this.textureManager);
 
-                // Dispose resources
+                // Dispose resource manager and skin manager
                 QuantumClient.cleanUp((AutoCloseable) this.resourceManager);
                 QuantumClient.cleanUp(this.skinManager);
 
-                // Dispose cursors
+                // Dispose cursor resources
                 QuantumClient.cleanUp(this.normalCursor);
                 QuantumClient.cleanUp(this.clickCursor);
 
-                // Dispose connections
+                // Dispose connection resources
                 QuantumClient.cleanUp(this.connection);
 
+                // Fire client stopped event
                 ClientLifecycleEvents.CLIENT_STOPPED.factory().onGameDisposed();
+
+                // Suggest garbage collection to free memory
                 System.gc();
 
+                // Nuke all platform threads to ensure clean shutdown
                 GamePlatform.get().nukeThreads();
             } catch (Exception t) {
+                // Crash the client on any exception during disposal
                 QuantumClient.crash(t);
             }
         }
-    }
-
-    /**
-     * Checks if the game is in dev mode.
-     *
-     * @return whether the game is in dev mode.
-     */
-    public boolean isDevMode() {
-        return this.isDevMode;
     }
 
     /**
@@ -2466,48 +2513,64 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Exits the world and then runs a runnable.
+     * Handles the sequence of exiting the current game world and performing subsequent actions.
+     * This method ensures proper cleanup of resources, including server, network connections,
+     * and rendering components, and then executes the specified callback once the world-exit
+     * process is complete.
      *
-     * @param afterExit the runnable.
+     * @param afterExit a {@link Runnable} to be executed after the world exit and cleanup process is finished
      */
     public void exitWorldAndThen(Runnable afterExit) {
         this.closingWorld = true;
         this.renderWorld = false;
 
         final @Nullable TerrainRenderer worldRenderer = this.worldRenderer;
+        
+        // Display a message screen indicating the world is being saved
         this.showScreen(new MessageScreen(TextObject.translation("quantum.screen.message.saving_world"))); // "Saving world..."
 
+        // Run the following code asynchronously
         Promise.runAsync(() -> {
             try {
+                // Attempt to close the network connection
                 this.connection.close();
             } catch (IOException e) {
+                // Crash the client if closing connection fails
                 QuantumClient.crash(e);
                 return;
             }
 
             IntegratedServer server = integratedServer;
             if (server != null)
+                // Remove the integrated server if it exists
                 this.remove(integratedServer);
 
+            // Clean up the integrated server resources
             QuantumClient.cleanUp((Shutdownable) this.integratedServer);
 
+            // Clear the server tick queue
             this.serverTickQueue.clear();
 
             try {
                 QuantumClient.invoke(() -> {
+                    // Clean up the world renderer and world resources
                     QuantumClient.cleanUp(worldRenderer);
                     QuantumClient.cleanUp(this.world);
+                    // Disable rendering and nullify references
                     this.renderWorld = false;
                     this.worldRenderer = null;
                     this.world = null;
                     this.integratedServer = null;
                     this.player = null;
 
+                    // Cancel any ongoing game input vibrations
                     GameInput.cancelVibration();
 
+                    // Run the after-exit callback
                     afterExit.run();
                 });
             } catch (Exception e) {
+                // Crash the client if any exception occurs during cleanup
                 QuantumClient.crash(e);
             }
         });
@@ -2547,34 +2610,42 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public boolean tryShutdown() {
         if (WindowEvents.WINDOW_CLOSE_REQUESTED.factory().onWindowCloseRequested(this.window).isCanceled()) {
+            // Check if the window close event is canceled
             return false;
         }
 
+        // Trigger window closed event (uncancellable)
         ClientLifecycleEvents.WINDOW_CLOSED.factory().onWindowClose();
 
+        // If a close prompt is enabled and there is a screen, show a confirmation dialog
         if (ClientConfiguration.closePrompt.getValue() && this.screen != null) {
             this.screen.showDialog(new DialogBuilder(this.screen).message(TextObject.literal("Are you sure you want to close the game?")).button(UITranslations.YES, () -> {
                 if (this.world != null) {
+                    // Exit the world before shutting down if a world is open
                     this.exitWorldAndThen(() -> shutdown(() -> {
                     }));
                     return;
                 }
 
+                // Shutdown directly if no world is open
                 this.shutdown(() -> {
                 });
             }));
             return false;
         }
 
+        // If there is a world, exit it then shutdown
         if (this.world != null) {
             this.exitWorldAndThen(() -> shutdown(() -> {
             }));
             return false;
         }
 
+        // Run shutdown asynchronously if no world and no prompt
         Promise.runAsync(() -> shutdown(() -> {
         }));
 
+        // Prevent default close handling
         return false;
     }
 
@@ -2694,16 +2765,22 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         Hit hit = this.hit;
         LocalPlayer player = this.player;
 
+        // Check if the hit is not a block hit
         if (!(hit instanceof BlockHit)) {
+            // Reset breaking state if not hitting a block
             this.breaking = null;
             this.breakingBlock = null;
             return;
         }
         BlockHit blockHitResult = (BlockHit) hit;
 
+        // Return early if world, player, or breaking state is null
         if (this.world == null || player == null || this.breaking == null) return;
 
+        // Stop breaking the block at the hit position
         this.world.stopBreaking(new BlockVec(blockHitResult.getBlockVec()), player);
+
+        // Reset breaking state after stopping
         this.breaking = null;
         this.breakingBlock = null;
     }
@@ -2729,14 +2806,18 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         var windowWidth = getWidth();
         var windowHeight = getHeight();
 
+        // Compare width ratio and height ratio to determine the scaling factor
         if (windowWidth / QuantumClient.MINIMUM_WIDTH < windowHeight / QuantumClient.MINIMUM_HEIGHT) {
+            // If the width ratio is smaller, return the max of width ratio or 1
             return Math.max(windowWidth / QuantumClient.MINIMUM_WIDTH, 1);
         }
 
         if (windowHeight / QuantumClient.MINIMUM_HEIGHT < windowWidth / QuantumClient.MINIMUM_WIDTH) {
+            // If the height ratio is smaller, return the max of height ratio or 1
             return Math.max(windowHeight / QuantumClient.MINIMUM_HEIGHT, 1);
         }
 
+        // If both ratios are equal, take the minimum and ensure it is at least 1
         int min = Math.min(windowWidth / QuantumClient.MINIMUM_WIDTH, windowHeight / QuantumClient.MINIMUM_HEIGHT);
         return Math.max(min, 1);
     }
@@ -2820,7 +2901,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Checks if the game is singleplayer.
+     * Checks if the game is in singleplayer.
      *
      * @return whether the game is singleplayer.
      */
@@ -2851,21 +2932,26 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * Starts the integrated server.
      */
     public void startIntegratedServer() {
+        // Connect to the local server and unwrap the connection object
         var mem = ClientTcpConnection.connectToLocalServer().unwrap();
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
+        // Create a new client world for the overworld dimension
         this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
         this.mainCat.add("Client World", this.world);
 
+        // Start the integrated server instance
         this.integratedServer.start();
 
+        // Set the other side of the memory connection to the server's network connection
         mem.setOtherSide((MemoryConnection<ServerPacketHandler, ClientPacketHandler>) this.integratedServer.getNetworker().getConnections().get(0));
 
-        // Initialize (memory) connection.
+        // Initialize multiplayer data for the client
         this.multiplayerData = new MultiplayerData(this);
-        this.connection.initiate(new LoginClientPacketHandlerImpl(this.connection), new C2SLoginPacket(this.user.name()));
-    }
+
+        // Initiate the connection with the login packet handler and login packet
+        this.connection.initiate(new LoginClientPacketHandlerImpl(this.connection), new C2SLoginPacket(this.user.name()));    }
 
     /**
      * Connects to a server.
@@ -2873,40 +2959,48 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param location The webserver location (e.g., wss://play.example.com:38800)
      */
     public void connectToServer(String location) {
+        // Initialize the overworld client world
         this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
+        // Establish connection to the server
         this.connection = ClientWebSocketConnection.connectToServer(this, location + "/server", () -> {
             var conn = this.connection;
             if (conn == null) return;
 
-            // Initialize remote connection.
+            // Initialize remote connection and multiplayer data
             this.multiplayerData = new MultiplayerData(this);
 
+            // Begin the login handshake with server using client packet handler and login packet
             conn.initiate(new LoginClientPacketHandlerImpl(conn), new C2SLoginPacket(this.user.name()));
         }, e -> {
+            // Log error and handle disconnection on failure to connect
             CommonConstants.LOGGER.error(
                     "Failed to connect to " + location + ":", e);
             GamePlatform.get().handleDisconnect(e);
             Throwable cause = e.getCause();
             if (cause != null) {
+                // Show disconnect screen with cause if available
                 this.showScreen(new DisconnectedScreen("Failed to connect!\n" + cause, true));
                 return;
             }
+            // Show disconnect screen with exception message
             this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e, true));
             connection = null;
         }).map(Function.identity(), e -> {
+            // Log error and display disconnect screen if map operation fails
             CommonConstants.LOGGER.error("Failed to connect:", e);
             Throwable cause = e.getCause();
             if (cause != null) {
+                // Show a disconnect screen with cause if present
                 this.showScreen(new DisconnectedScreen("Failed to connect!\n" + cause, true));
                 return null;
             }
+
+            // Show a disconnect screen with the exception message
             this.showScreen(new DisconnectedScreen("Failed to connect!\n" + e, true));
             connection = null;
             return null;
         }).getValueOrNull();
-
-        if (connection == null) return;
     }
 
     /**
@@ -2934,10 +3028,15 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public void setFullScreen(boolean fullScreen) {
         if (Gdx.graphics.isFullscreen() != fullScreen) {
+            // Check if the desired fullscreen state is different from the current state
             if (fullScreen) {
+                // Save the current window size before switching to fullscreen
                 this.oldMode = new Vec2i(this.getWidth(), this.getHeight());
+
+                // Set the display mode to fullscreen using the current display's mode
                 Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
             } else {
+                // Restore the windowed mode using the previously saved window size
                 Gdx.graphics.setWindowedMode(this.oldMode.x, this.oldMode.y);
             }
         }
@@ -3119,40 +3218,60 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public void reloadResourcesAsync() {
         if (!isOnRenderThread()) {
+            // If not on the render thread, schedule resource reload on the render thread and return
             invokeAndWait(this::reloadResourcesAsync);
             return;
         }
 
+        // Initialize the loading overlay and mark loading as true
         this.loadingOverlay = new LoadingOverlay();
         loading = true;
+
+        // Run resource reloading asynchronously
         Promise.runAsync(() -> {
             LOGGER.info("Reloading resources...");
+
+            // Perform the actual resource reload
             this.reloadResources();
             LOGGER.info("Resources reloaded.");
+
+            // Mark loading as complete and clear the loading overlay
             this.loading = false;
             this.loadingOverlay = null;
         }).exceptionally(throwable -> {
+            // Log any errors that occur during resource reload
             LOGGER.error("Failed to reload resources:", throwable);
             return null;
         });
     }
 
     public void reloadResources() {
+        // Create a reload context using the current instance and resource manager
         ReloadContext context = ReloadContext.create(this, this.resourceManager);
+
+        // Reload all resources from the resource manager
         this.resourceManager.reload();
+
+        // Reload textures, cubemaps and materials using the context.
         this.textureManager.reload(context);
         this.cubemapManager.reload(context);
         this.materialManager.reload(context);
 
+        // Log information about sound initialization
         QuantumClient.LOGGER.info("Initializing sounds");
+
+        // Reload sound & music
         this.soundRegistry.reload();
         MusicManager.get().reload();
 
+        // Reload block models with resource manager and context
         BlockModelRegistry.get().reload(resourceManager, context);
         ItemModelRegistry.get().reload(resourceManager, context);
 
+        // Register rendering components for the current instance
         RenderingRegistration.registerRendering(this);
 
+        // Reload the managers with resource manager and context
         this.entityModelManager.reload(this.resourceManager, context);
         this.entityRendererManager.reload(this.resourceManager, context);
         this.textureAtlasManager.reload(context);
@@ -3160,10 +3279,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.shaderProviderManager.reload(context);
         this.skinManager.reload();
 
+        // If a world renderer exists, reload it with context and material manager
         if (this.worldRenderer != null) {
             this.worldRenderer.reload(context, materialManager);
         }
 
+        // Wait until the reload context signals completion, yielding control in the meantime
         while (!context.isDone()) {
             GamePlatform.get().yield();
         }
@@ -3421,7 +3542,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     /**
      * Shuts down the client, waiting for all tasks to complete.
      */
-    @SuppressWarnings("BusyWait")
     @Override
     public void shutdown(Runnable finalizer) {
         if (this.shuttingDown) return;
