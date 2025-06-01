@@ -124,13 +124,19 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
                 if (widget instanceof UIContainer<?>) {
                     UIContainer<?> uiContainer = (UIContainer<?>) widget;
                     uiContainer.mouseMoved(x, y);
+                    super.mouseMoved(x, y);
+                    trackMouse(x, y);
                     return;
                 }
                 widget.mouseMoved(x, y);
-                if (widget == this.hoveredWidget) return;
+                if (widget == this.hoveredWidget) {
+                    trackMouse(x, y);
+                    return;
+                }
                 widget.mouseEnter(x - widget.getX(), y - widget.getY());
                 if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
                 this.hoveredWidget = widget;
+                trackMouse(x, y);
                 return;
             }
         }

@@ -17,6 +17,7 @@ import dev.ultreon.quantum.menu.Inventory;
 import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.C2SItemSpawnPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SItemDeletePacket;
+import dev.ultreon.quantum.network.packets.c2s.C2SItemUpdatePacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SMenuTakeItemPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -53,7 +54,8 @@ public class BuilderInventoryScreen extends ContainerScreen {
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
                 if (i >= items.size()) {
-                    break;
+                    this.add(new FakeItemSlot(ItemStack.EMPTY, left() + 113 + x * 19, top() + 15 + y * 19));
+                    continue;
                 }
                 this.add(new FakeItemSlot(items.get(i++), left() + 113 + x * 19, top() + 15 + y * 19));
             }
@@ -165,7 +167,7 @@ public class BuilderInventoryScreen extends ContainerScreen {
         private final ItemStack stack;
 
         public FakeItemSlot(ItemStack stack, int x, int y) {
-            super(null, x, y);
+            super(x, y);
             this.stack = stack;
         }
 
@@ -176,6 +178,16 @@ public class BuilderInventoryScreen extends ContainerScreen {
             if (isHovered) {
                 renderer.fill(pos.x, pos.y, size.width, size.height, COLOR);
             }
+        }
+
+        @Override
+        protected boolean mayPickup(@Nullable LocalPlayer player) {
+            return true;
+        }
+
+        @Override
+        protected @NotNull ItemStack getStack() {
+            return stack;
         }
 
         public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
@@ -199,25 +211,32 @@ public class BuilderInventoryScreen extends ContainerScreen {
                 && player.getCursor().sameItemSameData(stack)
             ) {
                 player.getCursor().grow(1);
+                this.client.connection.send(new C2SItemUpdatePacket(1));
+                return true;
             } else if (button == Input.Buttons.LEFT
                        && player.getCursor().isEmpty()) {
                 player.setCursor(stack.copy());
-            } else if (button == Input.Buttons.RIGHT
+                this.client.connection.send(new C2SItemSpawnPacket(stack));
+                return true;
+            } else if (button == Input.Buttons.LEFT
                        && !player.getCursor().isEmpty()) {
                 player.setCursor(ItemStack.empty());
                 this.client.connection.send(new C2SItemDeletePacket());
+                return true;
+            } else if (button == Input.Buttons.RIGHT
+                       && !player.getCursor().isEmpty()) {
+                player.getCursor().shrink(1);
+                this.client.connection.send(new C2SItemUpdatePacket(1));
                 return true;
             } else if (button == Input.Buttons.RIGHT
                        && player.getCursor().isEmpty()) {
                 ItemStack copy = stack.copy();
                 copy.setCount(copy.getItem().getMaxStackSize());
                 player.setCursor(copy);
-            } else {
-                return false;
+                this.client.connection.send(new C2SItemSpawnPacket(copy));
+                return true;
             }
-
-            this.client.connection.send(new C2SItemSpawnPacket(this.stack.copy(), button == Input.Buttons.LEFT));
-            return true;
+            return false;
         }
     }
 
@@ -226,7 +245,7 @@ public class BuilderInventoryScreen extends ContainerScreen {
         private final int index;
 
         public HotbarItemSlot(Inventory inventory, int x, int y, int index) {
-            super(null, x, y);
+            super(x, y);
             this.index = index;
             this.inventory = inventory;
         }
@@ -238,6 +257,16 @@ public class BuilderInventoryScreen extends ContainerScreen {
             if (isHovered) {
                 renderer.fill(pos.x, pos.y, size.width, size.height, COLOR);
             }
+        }
+
+        @Override
+        protected boolean mayPickup(@Nullable LocalPlayer player) {
+            return true;
+        }
+
+        @Override
+        protected @NotNull ItemStack getStack() {
+            return inventory.getHotbarSlot(index).getItem();
         }
 
         public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {

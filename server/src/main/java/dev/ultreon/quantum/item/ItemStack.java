@@ -18,12 +18,9 @@ import java.util.stream.Collectors;
  * @see Item
  */
 public class ItemStack {
-    public static final ItemStack EMPTY = new ItemStack() {
-        @Override
-        public void setCount(int count) {
-
-        }
-    };
+    @Deprecated
+    public static final ItemStack EMPTY = empty();
+    private static ItemStack empty;
     private Item item;
     @NotNull
     private MapType data;
@@ -103,7 +100,13 @@ public class ItemStack {
     }
 
     public static ItemStack empty() {
-        return EMPTY;
+        if (empty != null) return empty;
+        return empty = new ItemStack() {
+            @Override
+            public void setCount(int count) {
+
+            }
+        };
     }
 
     /**

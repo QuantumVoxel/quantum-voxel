@@ -270,6 +270,7 @@ public abstract class TabbedUI extends Screen {
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(x, y)) {
                 tab.mouseMove(x, y);
+                super.mouseMoved(x, oldMouseY);
                 return;
             }
         }

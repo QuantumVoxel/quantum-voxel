@@ -13,7 +13,6 @@ import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.block.property.BlockDataEntry;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
@@ -29,23 +28,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class Json5Model implements BlockModel, ItemModel {
+public class JsonModel implements BlockModel, ItemModel {
     public final Map<String, NamespaceID> textureElements;
-    public final List<Json5ModelLoader.ModelElement> modelElements;
+    public final List<ModelElement> modelElements;
     public final boolean ambientOcclusion;
-    public final Json5ModelLoader.Display display;
+    public final Display display;
     private final NamespaceID id;
     private Model model;
-    private final Table<String, BlockDataEntry<?>, Json5Model> overrides;
+    private final Table<String, BlockDataEntry<?>, JsonModel> overrides;
     private static final Vector3 SCALE = new Vector3(0.0625f, 0.0625f, 0.0625f);
     private ModelInstance modelInstance;
     private BlockState block;
-    private final Vector3 rotation = new Vector3(-30, 45, 0);
-    private final Vector3 position = new Vector3(0, 0, -1000);
-    private final Vector3 scale = new Vector3(20, 20, 20);
+    private final Vector3 rotation = new Vector3(15, 0, 0);
+    private final Vector3 position = new Vector3(0, 4, 0);
+    private final Vector3 scale = new Vector3(1, 1.155f, 1);
     private ModelInstance instance;
 
-    public Json5Model(NamespaceID id, Map<String, NamespaceID> textureElements, List<Json5ModelLoader.ModelElement> modelElements, boolean ambientOcclusion, Json5ModelLoader.Display display, Table<String, BlockDataEntry<?>, Json5Model> overrides) {
+    public JsonModel(NamespaceID id, Map<String, NamespaceID> textureElements, List<ModelElement> modelElements, boolean ambientOcclusion, Display display, Table<String, BlockDataEntry<?>, JsonModel> overrides) {
         this.textureElements = textureElements;
         this.modelElements = modelElements;
         this.ambientOcclusion = ambientOcclusion;
@@ -54,8 +53,8 @@ public class Json5Model implements BlockModel, ItemModel {
         this.id = id;
     }
 
-    public static Json5Model cubeOf(CubeModel model) {
-        return new Json5Model(
+    public static JsonModel cubeOf(CubeModel model) {
+        return new JsonModel(
                 model.resourceId(),
                 Map.of(
                         "top", model.top(),
@@ -66,23 +65,23 @@ public class Json5Model implements BlockModel, ItemModel {
                         "back", model.back()
                 ),
                 List.of(
-                        new Json5ModelLoader.ModelElement(
+                        new ModelElement(
                                 Map.of(
-                                        Direction.UP, new Json5ModelLoader.FaceElement("#top", new Json5ModelLoader.UVs(0, 0, 16, 16), 0, 0, "up"),
-                                        Direction.DOWN, new Json5ModelLoader.FaceElement("#bottom", new Json5ModelLoader.UVs(0, 0, 16, 16), 0, 0, "down"),
-                                        Direction.NORTH, new Json5ModelLoader.FaceElement("#front", new Json5ModelLoader.UVs(0, 0, 16, 16), 0, 0, "north"),
-                                        Direction.SOUTH, new Json5ModelLoader.FaceElement("#back", new Json5ModelLoader.UVs(0, 0, 16, 16), 0, 0, "south"),
-                                        Direction.EAST, new Json5ModelLoader.FaceElement("#left", new Json5ModelLoader.UVs(0, 0, 16, 16), 0, 0, "east"),
-                                        Direction.WEST, new Json5ModelLoader.FaceElement("#right", new Json5ModelLoader.UVs(0, 0, 16, 16), 0, 0, "west")
+                                        Direction.UP, new FaceElement("#top", new UVs(0, 0, 16, 16), 0, 0, "up"),
+                                        Direction.DOWN, new FaceElement("#bottom", new UVs(0, 0, 16, 16), 0, 0, "down"),
+                                        Direction.NORTH, new FaceElement("#front", new UVs(0, 0, 16, 16), 0, 0, "north"),
+                                        Direction.SOUTH, new FaceElement("#back", new UVs(0, 0, 16, 16), 0, 0, "south"),
+                                        Direction.EAST, new FaceElement("#left", new UVs(0, 0, 16, 16), 0, 0, "east"),
+                                        Direction.WEST, new FaceElement("#right", new UVs(0, 0, 16, 16), 0, 0, "west")
                                 ),
                                 true,
-                                Json5ModelLoader.ElementRotation.ZERO,
+                                ElementRotation.ZERO,
                                 BakedCubeModel.w_from,
                                 BakedCubeModel.w_to
                         )
                 ),
                 true,
-                new Json5ModelLoader.Display(model.pass() == null ? "opaque" : model.pass()),
+                new Display(model.pass() == null ? "opaque" : model.pass()),
                 new HashTable<>()
         );
     }
@@ -90,7 +89,7 @@ public class Json5Model implements BlockModel, ItemModel {
     @Override
     public void bakeInto(MeshPartBuilder meshPartBuilder, int x, int y, int z, int cull, int[] ao, long light) {
         for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
-            Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
+            ModelElement modelElement = modelElements.get(i);
             modelElement.bakeInto(i, meshPartBuilder, textureElements, x, y, z, cull, ao, light);
         }
     }
@@ -100,7 +99,7 @@ public class Json5Model implements BlockModel, ItemModel {
         if (model != null) return;
         this.model = ModelManager.INSTANCE.generateModel(id, modelBuilder -> {
             for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
-                Json5ModelLoader.ModelElement modelElement = modelElements.get(i);
+                ModelElement modelElement = modelElements.get(i);
                 modelElement.bake(i,
                         modelBuilder,
                         textureElements);
@@ -167,17 +166,27 @@ public class Json5Model implements BlockModel, ItemModel {
                 instance = new ModelInstance(model);
 
             float guiScale = QuantumClient.get().getGuiScale();
-            itemCam.zoom = guiScale / 2.0f;
+            itemCam.zoom = guiScale;
             itemCam.far = 100000;
             itemCam.update();
-            scale.set(40, 40, 40).scl(guiScale / 8f);
+            scale.set(16, 16, 16).scl(guiScale);
             Vector3 scl = scale.cpy().scl(getScale());
-            instance.transform.idt().translate(this.position.cpy().add((finalX / 2f - (int) (QuantumClient.get().getScaledWidth() / 4.0F)) * guiScale, (finalY / 2f - (int) (QuantumClient.get().getScaledHeight() / 4.0F)) * guiScale, 100)).translate(getOffset().add(2, 20, 0).scl(-1 / scl.x, 1 / scl.y, 1 / scl.z).scl(0.4f)).scale(-scl.x, -scl.y, scl.z);
-            instance.transform.rotate(Vector3.X, this.rotation.x);
+            instance.transform.idt()
+                    .translate(this.position.cpy()
+                            .sub(0, 0, 1000)
+                            .add(
+                                    ((finalX - 8) - (int) (QuantumClient.get().getScaledWidth() / 2.0F)) * guiScale,
+                                    ((finalY + 6) - (int) (QuantumClient.get().getScaledHeight() / 2.0F)) * guiScale,
+                                    100
+                            ))
+                    .translate(getOffset()
+                            .scl(-1 / scl.x, 1 / scl.y, 1 / scl.z))
+                    .scale(-scl.x, -scl.y, scl.z)
+                    .rotate(Vector3.X, -this.rotation.x);
             instance.transform.rotate(Vector3.Y, this.rotation.y);
-            instance.transform.rotate(Vector3.Y, 180);
+            instance.transform.rotate(Vector3.Y, 0);
             instance.transform.rotate(Vector3.Z, 180);
-            instance.transform.scale(1/16f, 1/16f, 1/16f);
+            instance.transform.scale(1 / 16f, 1 / 16f, 1 / 16f);
 
             batch.begin(itemCam);
             Gdx.gl.glDepthMask(false);
@@ -187,7 +196,7 @@ public class Json5Model implements BlockModel, ItemModel {
         });
     }
 
-    public Table<String, BlockDataEntry<?>, Json5Model> getOverrides() {
+    public Table<String, BlockDataEntry<?>, JsonModel> getOverrides() {
         return this.overrides;
     }
 

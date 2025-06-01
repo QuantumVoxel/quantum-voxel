@@ -5,6 +5,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
+import com.badlogic.gdx.utils.async.AsyncTask;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
@@ -14,7 +16,6 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.dedicated.FabricMod;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
-import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
@@ -39,10 +40,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.client.QuantumClient.crash;
@@ -52,7 +50,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     private final Map<String, FabricMod> mods = new IdentityHashMap<>();
     private final boolean angleGLES;
     private final SafeLoadWrapper safeWrapper;
-    private final TimerInstanceImpl timer = new TimerInstanceImpl();
     private final LuaJit luaJit;
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
@@ -234,7 +231,7 @@ public abstract class DesktopPlatform extends GamePlatform {
             for (Path rootPath : mod.getRootPaths()) {
                 // Try to import a resource package for the given mod path.
                 try {
-                    QuantumClient.get().getResourceManager().importPackage(Gdx.files.internal("./"));
+                    QuantumClient.get().getResourceManager().importPackage(rootPath.toUri());
                 } catch (IOException e) {
                     CommonConstants.LOGGER.warn("Importing resources failed for path: {}", rootPath.toFile(), e);
                 }
@@ -255,11 +252,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean isLinux() {
         return Platform.get() == Platform.LINUX;
-    }
-
-    @Override
-    public void launch(String[] argv) {
-
     }
 
     @Override
@@ -385,7 +377,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public @NotNull <T> Promise<T> supplyAsync(Supplier<T> o) {
-        return new JavaPromise(CompletableFuture.supplyAsync(o));
+        return new JavaPromise<>(CompletableFuture.supplyAsync(o));
     }
 
     @Override
@@ -528,6 +520,169 @@ public abstract class DesktopPlatform extends GamePlatform {
         }
 
         @Override
+        public Promise<T> thenRun(Runnable runnable) {
+            return new JavaPromise<>(completableFuture.thenApply(t -> {
+                runnable.run();
+                return t;
+            }));
+        }
+
+        @Override
+        public Promise<T> thenRunAsync(Runnable runnable) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> {
+                runnable.run();
+                return t;
+            }));
+        }
+
+        @Override
+        public <V> Promise<V> thenApply(Function<T, V> function) {
+            return new JavaPromise<>(completableFuture.thenApply(function));
+        }
+
+        @Override
+        public <V> Promise<V> thenApplyAsync(Function<T, V> function) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(function));
+        }
+
+        @Override
+        public Promise<Object> thenAccept(Consumer<T> runnable) {
+            return new JavaPromise<>(completableFuture.thenApply(t -> {
+                runnable.accept(t);
+                return null;
+            }));
+        }
+
+        @Override
+        public Promise<Object> thenAcceptAsync(Consumer<T> runnable) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> {
+                runnable.accept(t);
+                return null;
+            }));
+        }
+
+        @Override
+        public <V> Promise<V> thenApplyAsync(Function<T, V> function, AsyncExecutor executor) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(function, command -> executor.submit(() -> {
+                command.run();
+                return null;
+            })));
+        }
+
+        @Override
+        public Promise<T> thenRunAsync(Runnable runnable, AsyncExecutor executor) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> {
+                runnable.run();
+                return t;
+            }, command -> executor.submit(() -> {
+                command.run();
+                return null;
+            })));
+        }
+
+        @Override
+        public <V> Promise<V> thenCompose(Function<T, Promise<V>> function) {
+            return new JavaPromise<>(completableFuture.thenCompose(t -> ((JavaPromise<V>) function.apply(t)).completableFuture));
+        }
+
+        @Override
+        public <V> Promise<V> thenComposeAsync(Function<T, Promise<V>> function) {
+            return new JavaPromise<>(completableFuture.thenComposeAsync(t -> ((JavaPromise<V>) function.apply(t)).completableFuture));
+        }
+
+        @Override
+        public <V> Promise<V> thenComposeAsync(Function<T, Promise<V>> function, AsyncExecutor executor) {
+            return new JavaPromise<>(completableFuture.thenComposeAsync(t -> ((JavaPromise<V>) function.apply(t)).completableFuture, command -> executor.submit(() -> {
+                command.run();
+                return null;
+            })));
+        }
+
+        @Override
+        public <V> Promise<V> handle(Function<Throwable, V> function) {
+            return new JavaPromise<>(completableFuture.handle((t, throwable) -> {
+                if (throwable != null) {
+                    return function.apply(throwable);
+                }
+                return null;
+            }));
+        }
+
+        @Override
+        public <V> Promise<V> handleAsync(Function<Throwable, V> function) {
+            return new JavaPromise<>(completableFuture.handleAsync((t, throwable) -> {
+                if (throwable != null) {
+                    return function.apply(throwable);
+                }
+                return null;
+            }));
+        }
+
+        @Override
+        public <V> Promise<V> handleAsync(Function<Throwable, V> function, AsyncExecutor executor) {
+            return new JavaPromise<>(completableFuture.handleAsync((t, throwable) -> {
+                if (throwable != null) {
+                    return function.apply(throwable);
+                }
+                return null;
+            }, command -> executor.submit(() -> {
+                command.run();
+                return null;
+            })));
+        }
+
+        @Override
+        public Promise<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> runnable) {
+            return new JavaPromise<>(completableFuture.whenCompleteAsync(runnable));
+        }
+
+        @Override
+        public Promise<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> runnable, AsyncExecutor executor) {
+            return new JavaPromise<>(completableFuture.whenCompleteAsync(runnable, command -> executor.submit(() -> {
+                command.run();
+                return null;
+            })));
+        }
+
+        @Override
+        public T getOrDefault(T defaultValue) throws AsyncException {
+            return completableFuture.getNow(defaultValue);
+        }
+
+        @Override
+        public T get() {
+            return completableFuture.join();
+        }
+
+        @Override
+        public T getOrThrow() throws Throwable {
+            return completableFuture.get();
+        }
+
+        @Override
+        public <V> Promise<V> applyAsync(BiFunction<? super T, ? super Throwable, ? extends V> function) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> function.apply(t, null)));
+        }
+
+        @Override
+        public <V> Promise<V> applyAsync(BiFunction<? super T, ? super Throwable, ? extends V> function, AsyncExecutor executor) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> function.apply(t, null), command -> executor.submit(() -> {
+                command.run();
+                return null;
+            })));
+        }
+
+        @Override
+        public Promise<T> exceptionally(Function<Throwable, T> function) {
+            return new JavaPromise<>(completableFuture.exceptionally(function));
+        }
+
+        @Override
+        public Promise<T> exceptionallyAsync(Function<Throwable, T> function) {
+            return new JavaPromise<>(completableFuture.exceptionally(throwable -> GamePlatform.get().supplyAsync(() -> function.apply(throwable)).get()));
+        }
+
+        @Override
         public T join() {
             return completableFuture.join();
         }
@@ -574,7 +729,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         @Override
         public <V> Promise<V> apply(BiFunction<? super T, ? super Throwable, ? extends V> function) {
-            return new JavaPromise<V>(completableFuture.handle((t, throwable) -> {
+            return new JavaPromise<>(completableFuture.handle((t, throwable) -> {
                 try {
                     return function.apply(t, throwable);
                 } catch (Exception e) {

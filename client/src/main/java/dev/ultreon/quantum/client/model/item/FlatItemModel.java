@@ -34,39 +34,41 @@ public class FlatItemModel implements ItemModel {
 
     @Override
     public void load(QuantumClient client) {
-        ModelBuilder modelBuilder = new ModelBuilder();
-        Material material = new Material(item.getId().toString());
-        Texture texture = client.itemTextureAtlas.getTexture();
-        Texture emissiveTexture = client.itemTextureAtlas.getEmissiveTexture();
-        if (texture != null) material.set(TextureAttribute.createDiffuse(texture));
-        if (emissiveTexture != null) material.set(TextureAttribute.createEmissive(emissiveTexture));
+//        ModelBuilder modelBuilder = new ModelBuilder();
+//        Material material = new Material(item.getId().toString());
+//        Texture texture = client.itemTextureAtlas.getTexture();
+//        Texture emissiveTexture = client.itemTextureAtlas.getEmissiveTexture();
+//        if (texture != null) material.set(TextureAttribute.createDiffuse(texture));
+//        if (emissiveTexture != null) material.set(TextureAttribute.createEmissive(emissiveTexture));
+//
+//        material.set(IntAttribute.createCullFace(0));
+//
+//        modelBuilder.begin();
+//        MeshPartBuilder item1 = modelBuilder.part("item", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, material);
+//        TextureRegion r = client.itemTextureAtlas.getDiffuse(item.getId().mapPath(path -> "textures/items/" + path + ".png"));
+//        if (r == null) {
+//            QuantumClient.LOGGER.warn("Missing item texture {}", item.getId().mapPath(path -> "textures/items/" + path + ".png"));
+//        }
+//        item1.setUVRange(r);
+//
+//        var v1 = new VertexInfo();
+//        item1.rect(
+//                v1.setPos(0, 0, 0).setNor(1, 0, 0).setUV(0, 0),
+//                v1.setPos(1, 0, 0).setNor(1, 0, 0).setUV(1, 0),
+//                v1.setPos(1, 1, 0).setNor(1, 0, 0).setUV(1, 1),
+//                v1.setPos(0, 1, 0).setNor(1, 0, 0).setUV(0, 1)
+//        );
+//
+//        item1.rect(
+//                v1.setPos(0, 0, 0).setNor(-1, 0, 0).setUV(0, 0),
+//                v1.setPos(1, 0, 0).setNor(-1, 0, 0).setUV(1, 0),
+//                v1.setPos(1, 1, 0).setNor(-1, 0, 0).setUV(1, 1),
+//                v1.setPos(0, 1, 0).setNor(-1, 0, 0).setUV(0, 1)
+//        );
+//
+//        QuantumClient.invokeAndWait(() -> this.model = modelBuilder.end());
 
-        material.set(IntAttribute.createCullFace(0));
-
-        modelBuilder.begin();
-        MeshPartBuilder item1 = modelBuilder.part("item", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, material);
-        TextureRegion r = client.itemTextureAtlas.getDiffuse(item.getId().mapPath(path -> "textures/items/" + path + ".png"));
-        if (r == null) {
-            QuantumClient.LOGGER.warn("Missing item texture {}", item.getId().mapPath(path -> "textures/items/" + path + ".png"));
-        }
-        item1.setUVRange(r);
-
-        var v1 = new VertexInfo();
-        item1.rect(
-                v1.setPos(0, 0, 0).setNor(1, 0, 0).setUV(0, 0),
-                v1.setPos(1, 0, 0).setNor(1, 0, 0).setUV(1, 0),
-                v1.setPos(1, 1, 0).setNor(1, 0, 0).setUV(1, 1),
-                v1.setPos(0, 1, 0).setNor(1, 0, 0).setUV(0, 1)
-        );
-
-        item1.rect(
-                v1.setPos(0, 0, 0).setNor(-1, 0, 0).setUV(0, 0),
-                v1.setPos(1, 0, 0).setNor(-1, 0, 0).setUV(1, 0),
-                v1.setPos(1, 1, 0).setNor(-1, 0, 0).setUV(1, 1),
-                v1.setPos(0, 1, 0).setNor(-1, 0, 0).setUV(0, 1)
-        );
-
-        QuantumClient.invokeAndWait(() -> this.model = modelBuilder.end());
+        // TODO: Temporarily disabled
     }
 
     @Override
@@ -82,7 +84,7 @@ public class FlatItemModel implements ItemModel {
 
     @Override
     public Collection<NamespaceID> getAllTextures() {
-        return List.of(item.getId().mapPath(path -> "blocks/" + item.getId()));
+        return List.of(item.getId().mapPath(path -> "blocks/" + path));
     }
 
     @Override

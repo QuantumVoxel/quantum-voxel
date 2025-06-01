@@ -57,7 +57,7 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.model.item.ItemModelRegistry;
-import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
 import dev.ultreon.quantum.client.network.system.ClientTcpConnection;
@@ -231,7 +231,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Vector2 scrollPointer = new Vector2();
 
     // JSON5 model loader
-    public Json5ModelLoader j5ModelLoader;
+    public JsonModelLoader j5ModelLoader;
     public WorldStorage openedWorld;
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
 
@@ -922,6 +922,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return A new instance of FileHandle for the specified resource.
      */
     public static @NotNull FileHandle resource(NamespaceID id) {
+        if (instance.resourceManager != null) {
+            ResourceFileHandle handle = new ResourceFileHandle(id);
+            if (handle.getResource() != null) return handle;
+        }
         return Gdx.files.internal("assets/" + id.getDomain() + "/" + id.getPath());
     }
 
@@ -1498,7 +1502,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param deltaTime the delta time.
      * @return whether the game was rendered.
      */
-    private boolean renderGame(Renderer renderer, float deltaTime) {
+    private void renderGame(Renderer renderer, float deltaTime) {
         // Handle first render
         if (Gdx.graphics.getFrameId() == 2) {
             this.firstRender();
@@ -1528,21 +1532,21 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.renderUltreonSplash(renderer);
         }
 
+        // Return early if splash screens are showing
+        if (renderSplash) {
+            return;
+        }
+
         // Start loading in dev environment
         if (GamePlatform.get().isDevEnvironment() && this.startDevLoading) {
             this.startLoading();
-        }
-
-        // Return early if splash screens are showing
-        if (renderSplash) {
-            return true;
         }
 
         // Show loading overlay if needed
         final LoadingOverlay loading = this.loadingOverlay;
         if (loading != null) {
             this.renderLoadingOverlay(renderer, deltaTime, loading);
-            return true;
+            return;
         }
 
         // Set up OpenGL blending
@@ -1556,7 +1560,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         Timing.start("render_main");
         this.renderMain(renderer, deltaTime);
         Timing.end("render_main");
-        return false;
+        return;
     }
 
     /**

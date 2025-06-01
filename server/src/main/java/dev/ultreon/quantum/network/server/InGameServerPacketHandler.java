@@ -302,11 +302,24 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.server.execute(() -> this.player.stopTracking(c2SUnloadChunkPacket.vec()));
     }
 
-    public void onItemSpawn(ItemStack stack, boolean isLeftClick) {
-        this.player.setCursor(stack);
+    public void onItemSpawn(ItemStack stack) {
+        if (this.player.isBuilder()) {
+            this.player.setCursor(stack);
+        }
     }
 
     public void onItemDelete() {
-        this.player.setCursor(ItemStack.empty());
+        if (this.player.isBuilder()) {
+            this.player.setCursor(ItemStack.empty());
+        }
+    }
+
+    public void onItemUpdate(int delta) {
+        if (!this.player.isBuilder()) return;
+        if (delta < 0) {
+            this.player.getCursor().shrink(-delta);
+        } else {
+            this.player.getCursor().grow(delta);
+        }
     }
 }

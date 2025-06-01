@@ -96,17 +96,17 @@ public abstract class ContainerScreen extends Screen {
 
     public void renderForeground(Renderer renderer, float deltaTime) {
         ItemStack cursor = this.player.getCursor();
-        if (!cursor.isEmpty()) {
-            this.client.itemRenderer.render(cursor.getItem(), renderer, mousePos.x - 8, mousePos.y - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
-        }
+        if (cursor.isEmpty()) return;
+        this.client.itemRenderer.render(cursor.getItem(), renderer, mousePos.x - 8, mousePos.y - 8, this.titleWidget == null ? 0 : this.titleWidget.getHeight());
+        if (cursor.getCount() <= 1) return;
+        renderer.textLeft(String.valueOf(cursor.getCount()), mousePos.x + 8, mousePos.y);
     }
 
     protected @Nullable ItemSlot getSlotAt(int mouseX, int mouseY) {
         for (ItemSlot slot : this.menu.slots) {
-            if (slot == null) continue;
-            if (slot.isWithinBounds(mouseX - this.left(), mouseY - this.top())) {
-                return slot;
-            }
+            if (slot == null || !slot.isWithinBounds(mouseX - this.left(), mouseY - this.top()))
+                continue;
+            return slot;
         }
         return null;
     }

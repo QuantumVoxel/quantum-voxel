@@ -18,7 +18,7 @@ import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.BakedModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
-import dev.ultreon.quantum.client.model.model.Json5Model;
+import dev.ultreon.quantum.client.model.model.JsonModel;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 public final class BakedCubeModel extends BakedModel implements BlockModel, ItemModel {
-    private static final LazyValue<Json5Model> DEFAULT = new LazyValue<>();
+    private static final LazyValue<JsonModel> DEFAULT = new LazyValue<>();
     private static final Vector3 from = new Vector3(-8f, 8f, -8f);
     private static final Vector3 to = new Vector3(8f, 24f, 8f);
     public static final Vector3 w_from = new Vector3(0, 0, 0);
@@ -71,14 +71,14 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
         this.renderPass = renderPass;
     }
 
-    public synchronized static Json5Model defaultModel() {
+    public synchronized static JsonModel defaultModel() {
         if (DEFAULT.isInitialized()) {
             return DEFAULT.get();
         }
 
         ModelProperties properties1 = new ModelProperties();
         properties1.renderPass = "opaque";
-        Json5Model bakedCubeModel = Json5Model.cubeOf(CubeModel.of(NamespaceID.of("block/default"), NamespaceID.of("blocks/error"), properties1));
+        JsonModel bakedCubeModel = JsonModel.cubeOf(CubeModel.of(NamespaceID.of("block/default"), NamespaceID.of("blocks/error"), properties1));
         DEFAULT.set(bakedCubeModel);
         QuantumClient.invokeAndWait(() -> bakedCubeModel.load(QuantumClient.get()));
         return bakedCubeModel;

@@ -9,8 +9,8 @@ import dev.ultreon.quantum.client.atlas.TextureStitcher;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.block.CubeModel;
-import dev.ultreon.quantum.client.model.model.Json5Model;
-import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.model.model.JsonModel;
+import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -60,7 +60,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Item block, CubeModel model) {
-        this.customRegistry.putIfAbsent(block, () -> Json5Model.cubeOf(model));
+        this.customRegistry.putIfAbsent(block, () -> JsonModel.cubeOf(model));
     }
 
     public void registerCustom(Item item, Supplier<ItemModel> model) {
@@ -68,12 +68,12 @@ public class ItemModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Supplier<Item> item, Supplier<CubeModel> model) {
-        this.customRegistry.put(item.get(), Suppliers.memoize(() -> Json5Model.cubeOf(model.get())));
+        this.customRegistry.put(item.get(), Suppliers.memoize(() -> JsonModel.cubeOf(model.get())));
     }
 
     public void registerDefault(Item item) {
         NamespaceID key = Registries.ITEM.getId(item);
-        if (key == null) throw new SanityCheckException("Fabricated block!");
+        if (key == null) throw new SanityCheckException("Fabricated item!");
         if (item instanceof BlockItem) {
             this.register(item, new BlockItemModel(item, () -> BlockModelRegistry.get()
                     .get(((BlockItem) item).getBlock().getDefaultState())));
@@ -126,24 +126,24 @@ public class ItemModelRegistry implements ContextAwareReloadable {
         for (var entry : customRegistry.entrySet()) {
             ItemModel model = entry.getValue().get();
             if (model == null) {
-                QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), entry.getKey());
+                QuantumClient.LOGGER.error("Failed to load item model for {}: {}", entry.getKey().getId(), entry.getKey());
                 continue;
             }
             QuantumClient.invokeAndWait(() -> model.load(client));
         }
     }
 
-    public void load(Json5ModelLoader loader) {
+    public void load(JsonModelLoader loader) {
         for (Item value : Registries.ITEM.values()) {
             if (value == Items.AIR) continue;
 
             this.loadingItem = value;
             try {
                 if (customRegistry.containsKey(value)) continue;
-                Json5Model load = loader.load(value);
+                JsonModel load = loader.load(value);
                 customRegistry.computeIfAbsent(value, key -> () -> Objects.requireNonNullElseGet(load, () -> new FlatItemModel(value)));
             } catch (Exception e) {
-                QuantumClient.LOGGER.error("Failed to load block model for {}: {}", value.getId(), e.toString());
+                QuantumClient.LOGGER.error("Failed to load item model for {}: {}", value.getId(), e.toString());
             }
             this.loadingItem = null;
         }
@@ -158,7 +158,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
                     TEXTURES.addAll(model.getAllTextures());
                 }
             } catch (Exception e) {
-                QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), e.toString());
+                QuantumClient.LOGGER.error("Failed to load item model for {}: {}", entry.getKey().getId(), e.toString());
             }
             this.loadingItem = null;
         }
@@ -174,12 +174,14 @@ public class ItemModelRegistry implements ContextAwareReloadable {
                 QuantumClient.LOGGER.info("Baking item models");
                 this.bakeJsonModels(client);
             } catch (Exception e) {
-                QuantumClient.LOGGER.error("Failed to reload block models", e);
-                CrashLog crashLog = new CrashLog("Failed to load block models", e);
-                CrashCategory model = new CrashCategory("Model");
-                model.add("Block", this.loadingItem.getId());
-                model.add("Location", this.loadingItem.getId().mapPath(path -> "models/blocks/" + path + ".quant"));
-                crashLog.addCategory(model);
+                QuantumClient.LOGGER.error("Failed to reload item models", e);
+                CrashLog crashLog = new CrashLog("Failed to load item models", e);
+                if (loadingItem != null) {
+                    CrashCategory model = new CrashCategory("Model");
+                    model.add("item", this.loadingItem.getId());
+                    model.add("Location", this.loadingItem.getId().mapPath(path -> "models/items/" + path + ".quant"));
+                    crashLog.addCategory(model);
+                }
                 QuantumClient.crash(crashLog);
             } catch (ApplicationCrash e) {
                 QuantumClient.crash(e.getCrashLog());

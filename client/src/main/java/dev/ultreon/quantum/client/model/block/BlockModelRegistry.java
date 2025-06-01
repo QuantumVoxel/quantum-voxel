@@ -13,8 +13,8 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
-import dev.ultreon.quantum.client.model.model.Json5Model;
-import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.model.model.JsonModel;
+import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -59,11 +59,11 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Block block, BlockState predicate, CubeModel model) {
-        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(predicate, () -> Json5Model.cubeOf(model));
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(predicate, () -> JsonModel.cubeOf(model));
     }
 
     public void register(Block block, CubeModel model) {
-        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(block.getDefaultState(), () -> Json5Model.cubeOf(model));
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(block.getDefaultState(), () -> JsonModel.cubeOf(model));
     }
 
     public void registerCustom(Block block, BlockState predicate, Supplier<BlockModel> model) {
@@ -71,7 +71,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Supplier<Block> block, BlockState predicate, Supplier<CubeModel> model) {
-        this.customRegistry.computeIfAbsent(block.get(), key -> new HashMap<>()).put(predicate, Suppliers.memoize(() -> Json5Model.cubeOf(model.get())));
+        this.customRegistry.computeIfAbsent(block.get(), key -> new HashMap<>()).put(predicate, Suppliers.memoize(() -> JsonModel.cubeOf(model.get())));
     }
 
     public void registerDefault(Block block) {
@@ -146,18 +146,18 @@ public class BlockModelRegistry implements ContextAwareReloadable {
         }
     }
 
-    public void load(Json5ModelLoader loader) {
+    public void load(JsonModelLoader loader) {
         for (Block value : Registries.BLOCK.values()) {
             if (value == Blocks.AIR) continue;
 
             this.loadingBlock = value;
             try {
                 if (customRegistry.containsKey(value)) continue;
-                Json5Model load = loader.load(value);
+                JsonModel load = loader.load(value);
                 if (load != null) {
                     customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState(), () -> load);
 
-                    Table<String, BlockDataEntry<?>, Json5Model> overrides = load.getOverrides();
+                    Table<String, BlockDataEntry<?>, JsonModel> overrides = load.getOverrides();
                     if (overrides == null) continue;
                     overrides.cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState().with((StatePropertyKey) value.getDefinition().keyByName(cell.getRow()), cell.getColumn().value), cell::getValue));
                 } else if (value.doesRender()) {

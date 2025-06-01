@@ -291,6 +291,10 @@ public abstract class Widget extends GameObject implements StaticWidget {
     }
 
     public void mouseMoved(int x, int y) {
+        trackMouse(x, y);
+    }
+
+    protected final void trackMouse(int x, int y) {
         mousePos.set(x, y);
         isHovered = true;
     }

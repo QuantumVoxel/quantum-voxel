@@ -138,8 +138,9 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
             // Load and register the model if it exists
             if (handle.exists()) {
                 Model model = QuantumClient.invokeAndWait(() -> this.modelManager.modelLoader.loadModel(handle, fileName -> {
-                    String filePath = fileName.substring(("assets/" + key.getDomain() + "/models/entity/").length());
-                    return new Texture(QuantumClient.resource(key.mapPath(path -> "textures/entity/" + filePath)));
+                    String filePath = fileName.substring(("models/entity/").length());
+                    FileHandle resource = QuantumClient.resource(NamespaceID.parse(fileName));
+                    return new Texture(resource.parent().parent().sibling("textures").child("entity").child(resource.name()));
                 }));
                 if (model == null)
                     throw new RuntimeException("Failed to load entity model: " + key.mapPath(path -> "models/entity/" + path + ".g3dj"));

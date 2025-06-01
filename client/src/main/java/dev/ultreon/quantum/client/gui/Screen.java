@@ -464,14 +464,13 @@ public abstract class Screen extends UIContainer<Screen> {
 
     @Override
     public void mouseMoved(int x, int y) {
-        if (!this.isHovered) return;
-
         if (this.dialog != null && this.dialog.isVisible() && this.dialog.getX() <= x && x <= this.dialog.getX() + this.dialog.getWidth() && this.dialog.getY() <= y && y <= this.dialog.getY() + this.dialog.getHeight()) {
             this.dialog.mouseMoved(x, y);
             if (this.dialog == this.hoveredWidget) return;
             this.dialog.mouseEnter(x - this.dialog.getX(), y - this.dialog.getY());
             if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
             this.hoveredWidget = this.dialog;
+            super.mouseMoved(x, y);
             return;
         }
 

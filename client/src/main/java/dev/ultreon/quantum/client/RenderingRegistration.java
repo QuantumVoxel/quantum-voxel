@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.block.ModelProperties;
 import dev.ultreon.quantum.client.model.entity.renderer.*;
-import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.registry.EntityModelRegistry;
@@ -95,9 +95,9 @@ public class RenderingRegistration {
             registry.register(Blocks.BLAST_FURNACE, Blocks.BLAST_FURNACE.getDefaultState().with(StateProperties.LIT, false).with(StateProperties.FACING, direction), CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
         }
 
-        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.TOP), () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_top")));
-        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.BOTTOM), () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_bottom")));
-        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.DOUBLE), () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_double")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.TOP), () -> new JsonModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_top")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.BOTTOM), () -> new JsonModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_bottom")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.DOUBLE), () -> new JsonModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_double")));
 
         // Trigger the block models factory registration event
         ClientRegistrationEvents.BLOCK_MODELS.factory().onRegister();

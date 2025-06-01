@@ -27,7 +27,7 @@ import dev.ultreon.quantum.client.input.TouchInput;
 //import dev.ultreon.quantum.client.input.controller.ControllerInput;
 //import dev.ultreon.quantum.client.input.controller.gui.VirtualKeyboard;
 import dev.ultreon.quantum.client.item.ItemRenderer;
-import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.particle.ClientParticleRegistry;
 import dev.ultreon.quantum.client.particle.ParticleControllerRenderers;
 import dev.ultreon.quantum.client.particle.ParticleControllers;
@@ -124,9 +124,6 @@ class QuantumClientLoader implements Runnable {
 
         progress(client, 0.15F);
 
-        QuantumClient.LOGGER.info("Importing resources");
-        client.getResourceManager().importModResources();
-
         float progress = 0.35F;
         progress(client, progress);
 
@@ -207,7 +204,7 @@ class QuantumClientLoader implements Runnable {
         registerMenuScreens();
         RenderingRegistration.registerRendering(client);
 
-        client.j5ModelLoader = new Json5ModelLoader(client.getResourceManager());
+        client.j5ModelLoader = new JsonModelLoader(client.getResourceManager());
 
         QuantumClient.LOGGER.info("Reloading resources");
         client.reloadResources();
@@ -261,9 +258,9 @@ class QuantumClientLoader implements Runnable {
                 client.startDevWorld();
             } else {
                 client.showScreen(new DevPreviewScreen(client.getUser() != null ? new TitleScreen() : new UsernameScreen()));
+                client.loadingOverlay = null;
             }
         }));
-        client.loadingOverlay = null;
 
         OverlayManager.resize(ceil(client.getWidth() / client.getGuiScale()), ceil(client.getHeight() / client.getGuiScale()));
     }
