@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.world;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.ChunkAccess;

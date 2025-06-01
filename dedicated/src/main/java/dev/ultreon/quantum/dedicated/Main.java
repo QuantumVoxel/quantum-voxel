@@ -188,7 +188,7 @@ public class Main {
         if (!serverConfig.getConfigPath().exists()) {
             serverConfig.save();
 
-            Main.LOGGER.info("First-initialization finished, set up your config in server_config.json5 and restart the server.");
+            Main.LOGGER.info("First-initialization finished, set up your config in server_config.quant and restart the server.");
             Main.LOGGER.info("We will wait 10 seconds so you would be able to stop the server for configuration.");
 
             Thread thread = new Thread(Main::waitForKey);

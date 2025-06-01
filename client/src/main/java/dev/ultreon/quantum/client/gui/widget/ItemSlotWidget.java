@@ -6,7 +6,7 @@ import dev.ultreon.quantum.menu.ItemSlot;
 
 public class ItemSlotWidget extends Widget {
     public final ItemSlot slot;
-    private static final Color COLOR = new Color(1, 1, 1, .5f);
+    protected static final Color COLOR = new Color(1, 1, 1, .5f);
 
     public ItemSlotWidget(ItemSlot slot, int x, int y) {
         super(16, 16);

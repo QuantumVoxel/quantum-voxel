@@ -42,6 +42,7 @@ public abstract class BakedModel {
      * @return the 3D model
      */
     public Model getModel() {
+        if (model == null) throw new IllegalStateException("Model not loaded: " + resourceId());
         return model;
     }
 

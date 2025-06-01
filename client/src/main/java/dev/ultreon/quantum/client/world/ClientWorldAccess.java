@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.utils.Array;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;

@@ -41,7 +41,7 @@ public class InventoryScreen extends ContainerScreen {
     private final List<RecipeSlot> recipeSlots = new ArrayList<>();
 
     public InventoryScreen(ContainerMenu menu, TextObject title) {
-        super(menu, title, InventoryScreen.CONTAINER_SIZE);
+        super(menu, QuantumClient.get().screen, title, InventoryScreen.CONTAINER_SIZE);
         this.menu = menu;
 
         if (menu.getEntity() instanceof Player) {

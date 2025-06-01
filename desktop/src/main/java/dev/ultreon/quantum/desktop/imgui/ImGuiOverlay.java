@@ -21,8 +21,8 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.quantum.GameInsets;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockState;
-import dev.ultreon.quantum.block.state.StatePropertyKey;
+import dev.ultreon.quantum.block.BlockState;
+import dev.ultreon.quantum.block.property.StatePropertyKey;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
@@ -950,11 +950,11 @@ public class ImGuiOverlay {
                             ImGui.text("Value");
 
                             ImGui.tableNextRow();
-                            for (StatePropertyKey<?> key : state.getBlock().getDefinition().keys()) {
+                            for (StatePropertyKey<?> key : state.getBlock().getDefinition().getKeys()) {
                                 ImGui.tableSetColumnIndex(0);
                                 ImGui.text(key.getName());
                                 ImGui.tableSetColumnIndex(1);
-                                ImGui.text(state.get(key.getName()));
+                                ImGui.text(String.valueOf(state.get(state.getDefinition().keyByName(key.getName()))));
                             }
                         }
                         ImGui.endTable();

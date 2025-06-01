@@ -25,7 +25,7 @@ import java.util.*;
  * Those files are also automatically reloaded when they are modified.
  * Configs are saved in JSON5 format. See {@link com.badlogic.gdx.utils.Json} for more information.
  *
- * @see <a href="https://spec.json5.org/">JSON5 Specification</a>
+ * @see <a href="https://spec.quant.org/">JSON5 Specification</a>
  * @see com.badlogic.gdx.utils.Json
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
@@ -105,7 +105,7 @@ public abstract class CraftyConfig {
         this.mod = modLoadingContext.getMod();
 
         // Add the configuration to the global map
-        CONFIGS.put(annotation.fileName() + ".json5", this);
+        CONFIGS.put(annotation.fileName() + ".quant", this);
     }
 
     /**

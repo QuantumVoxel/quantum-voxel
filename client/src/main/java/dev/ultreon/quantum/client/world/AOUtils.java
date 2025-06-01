@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.world.Direction;

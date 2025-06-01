@@ -13,7 +13,7 @@ import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
 import dev.ultreon.quantum.api.events.block.BlockSetEvent;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.entity.DroppedItem;

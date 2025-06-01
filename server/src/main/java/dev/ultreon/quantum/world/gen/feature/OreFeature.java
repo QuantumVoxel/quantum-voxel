@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.gen.feature;
 
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.world.Direction;

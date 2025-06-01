@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.network.stage;
 
+import dev.ultreon.quantum.network.packets.C2SItemSpawnPacket;
 import dev.ultreon.quantum.network.packets.c2s.*;
 import dev.ultreon.quantum.network.packets.s2c.*;
 
@@ -36,6 +37,8 @@ public class InGamePacketStage extends PacketStage {
         this.addServerBound(C2SAttackPacket::read);
         this.addServerBound(C2SRequestChunkLoadPacket::read);
         this.addServerBound(C2SUnloadChunkPacket::read);
+        this.addServerBound(C2SItemSpawnPacket::read);
+        this.addServerBound(C2SItemDeletePacket::read);
 
         this.addClientBound(S2CKeepAlivePacket::read);
         this.addClientBound(S2CPingPacket::read);

@@ -31,7 +31,7 @@ public class LauncherConfig {
     private static void load() {
         LauncherConfig config;
         try {
-            JsonValue json = JSON_READER.parse(Files.readString(Path.of("config.json5")));
+            JsonValue json = JSON_READER.parse(Files.readString(Path.of("config.quant")));
             int version = json.get("schemaVersion").asInt();
             config = new LauncherConfig();
             if (version == 1) {
@@ -83,7 +83,7 @@ public class LauncherConfig {
 //         json.setComment("removeBorder", "Whether the border should be removed.\nThis is only supported on Windows for now.\nOff by default");
 
         try {
-            Files.writeString(Path.of("config.json5"), json.prettyPrint(settings));
+            Files.writeString(Path.of("config.quant"), json.prettyPrint(settings));
         } catch (IOException e) {
             DesktopLauncher.LOGGER.warn("Failed to save launcher config", e);
         }

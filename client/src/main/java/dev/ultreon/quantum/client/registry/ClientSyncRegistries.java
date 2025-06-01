@@ -4,9 +4,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.MissingRegistriesScreen;
-import dev.ultreon.quantum.registry.Registry;
-import dev.ultreon.quantum.registry.RegistryHandle;
-import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.*;
 import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.util.NamespaceID;
 
@@ -22,15 +20,22 @@ public class ClientSyncRegistries implements RegistryHandle {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public <T> SyncedRegistry<T> get(RegistryKey<? extends Registry<T>> registryKey) {
+    public <T> IdRegistry<T> get(RegistryKey<? extends Registry<T>> registryKey) {
+        if (Registries.REGISTRY.contains((RegistryKey) registryKey)) {
+            return Registries.REGISTRY.get((RegistryKey) registryKey);
+        }
         return registries.get((RegistryKey) registryKey);
     }
 
-    public <T> void set(RegistryKey<SyncedRegistry<T>> registryKey, SyncedRegistry<T> registry) {
+    public <T> void set(RegistryKey<ExternalRegistry<T>> registryKey, ExternalRegistry<T> registry) {
         registries.set(registryKey, registry);
     }
 
     public void load(NamespaceID registryID, IntMap<NamespaceID> registryMap) {
+        if (Registries.REGISTRY.contains(registryID)) {
+            Registries.REGISTRY.get(registryID).sync(registryMap);
+            return;
+        }
         registries.get(registryID).load(registryMap);
     }
 

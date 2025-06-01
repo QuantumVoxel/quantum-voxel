@@ -3,7 +3,7 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.block.state.StringSerializable;
+import dev.ultreon.quantum.block.property.StringSerializable;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.Vec3d;

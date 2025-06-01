@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 
 /**
  * Block flags for block updates.

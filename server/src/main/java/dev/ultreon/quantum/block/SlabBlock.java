@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockState;
-import dev.ultreon.quantum.block.state.BlockStateDefinition;
-import dev.ultreon.quantum.block.state.StateProperties;
-import dev.ultreon.quantum.block.state.StringSerializable;
+import dev.ultreon.quantum.block.property.StateProperties;
+import dev.ultreon.quantum.block.property.StringSerializable;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -16,12 +14,12 @@ public class SlabBlock extends Block {
     public SlabBlock(Properties properties) {
         super(properties);
 
-        definition.setDefault(definition.empty().with(StateProperties.SLAB_TYPE, Type.BOTTOM));
+        setDefaultState(definition.empty().with(StateProperties.SLAB_TYPE, Type.BOTTOM));
     }
 
     @Override
     public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
-        var type = blockState.<Type>get("type");
+        var type = blockState.get(StateProperties.SLAB_TYPE);
 
         switch (type) {
             case TOP:

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.network.server;
 
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.block.BlockAttemptBreakEvent;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.item.Item;
@@ -300,5 +300,13 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
     public void handleUnloadChunk(C2SUnloadChunkPacket c2SUnloadChunkPacket) {
         this.server.execute(() -> this.player.stopTracking(c2SUnloadChunkPacket.vec()));
+    }
+
+    public void onItemSpawn(ItemStack stack, boolean isLeftClick) {
+        this.player.setCursor(stack);
+    }
+
+    public void onItemDelete() {
+        this.player.setCursor(ItemStack.empty());
     }
 }

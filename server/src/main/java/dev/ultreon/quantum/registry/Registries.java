@@ -51,4 +51,9 @@ public final class Registries {
         Registries.REGISTRY.register(id.id(), registry);
         return registry;
     }
+
+    public static void unload() {
+        REGISTRY.values().forEach(Registry::unload);
+        REGISTRY.unload();
+    }
 }

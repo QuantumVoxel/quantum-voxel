@@ -6,13 +6,11 @@ import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.debug.timing.Timing;
+import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
-import dev.ultreon.quantum.registry.IdRegistry;
-import dev.ultreon.quantum.registry.Registry;
-import dev.ultreon.quantum.registry.RegistryHandle;
-import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.registry.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.ubo.DataTypeRegistry;
 import dev.ultreon.quantum.ubo.types.DataType;
@@ -1127,12 +1125,22 @@ public class PacketIO implements RegistryHandle {
     }
 
     public ItemStack readItemStack() {
-        return ItemStack.load(this.readUbo());
+        return new ItemStack(readItem(), this.readByte(), this.readUbo());
     }
 
     public PacketIO writeItemStack(ItemStack stack) {
-        this.writeUbo(stack.save());
+        this.writeItem(stack.getItem());
+        this.writeByte(stack.getCount());
+        this.writeUbo(stack.getData());
         return this;
+    }
+
+    public Item readItem() {
+        return get(RegistryKeys.ITEM).byRawId(this.readVarInt());
+    }
+
+    public void writeItem(Item item) {
+        this.writeVarInt(get(RegistryKeys.ITEM).getRawId(item));
     }
 
     public TextObject readTextObject() {

@@ -105,7 +105,7 @@ public class TextureManager implements Disposable {
 
     @NotNull
     public Texture getTexture(NamespaceID id) {
-        return this.getTexture(id, TextureManager.getDefaultTex());
+        return this.getTexture(id, TextureManager.defaultTex);
     }
 
     public boolean isTextureLoaded(NamespaceID id) {

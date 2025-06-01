@@ -27,8 +27,8 @@ public class NamedTag<T> {
         Resource res = resourceManager.getResource(name.mapPath(path -> {
             String domain = registry.id().getDomain();
             if (domain.equals(CommonConstants.NAMESPACE))
-                return "tags/" + registry.id().getPath() + "/" + path + ".json5";
-            return "tags/" + domain + "." + registry.id().getPath() + path + ".json5";
+                return "tags/" + registry.id().getPath() + "/" + path + ".quant";
+            return "tags/" + domain + "." + registry.id().getPath() + path + ".quant";
         }));
         if (res == null) {
             CommonConstants.LOGGER.warn("Tag not found: {} for registry {}", name, registry.id());

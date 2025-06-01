@@ -2,7 +2,7 @@ package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.Direction;

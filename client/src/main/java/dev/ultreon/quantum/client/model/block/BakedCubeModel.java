@@ -2,17 +2,22 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
+import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.BakedModel;
+import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.model.model.Json5Model;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
@@ -29,8 +34,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public final class BakedCubeModel extends BakedModel implements BlockModel {
-    private static final LazyValue<BlockModel> DEFAULT = new LazyValue<>();
+public final class BakedCubeModel extends BakedModel implements BlockModel, ItemModel {
+    private static final LazyValue<Json5Model> DEFAULT = new LazyValue<>();
     private static final Vector3 from = new Vector3(-8f, 8f, -8f);
     private static final Vector3 to = new Vector3(8f, 24f, 8f);
     public static final Vector3 w_from = new Vector3(0, 0, 0);
@@ -45,6 +50,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
 
     private final String renderPass;
     private RenderPass renderPassObj;
+    private BlockState block;
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion all, ModelProperties properties, Model model, String renderPass) {
         this(resourceId, all, all, all, all, all, all, properties, model, renderPass);
@@ -65,14 +71,14 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
         this.renderPass = renderPass;
     }
 
-    public synchronized static BlockModel defaultModel() {
+    public synchronized static Json5Model defaultModel() {
         if (DEFAULT.isInitialized()) {
             return DEFAULT.get();
         }
 
         ModelProperties properties1 = new ModelProperties();
         properties1.renderPass = "opaque";
-        BlockModel bakedCubeModel = Json5Model.cubeOf(CubeModel.of(new NamespaceID("block/default"), QuantumClient.id("block/error"), properties1));
+        Json5Model bakedCubeModel = Json5Model.cubeOf(CubeModel.of(NamespaceID.of("block/default"), NamespaceID.of("blocks/error"), properties1));
         DEFAULT.set(bakedCubeModel);
         QuantumClient.invokeAndWait(() -> bakedCubeModel.load(QuantumClient.get()));
         return bakedCubeModel;
@@ -246,6 +252,11 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     }
 
     @Override
+    public BlockState getBlock() {
+        return block;
+    }
+
+    @Override
     public @Nullable TextureRegion getBuriedTexture() {
         return front;
     }
@@ -264,6 +275,11 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
     @Override
     public Collection<NamespaceID> getAllTextures() {
         return List.of();
+    }
+
+    @Override
+    public void renderItem(Renderer renderer, ModelBatch batch, OrthographicCamera itemCam, Environment environment, int x, int y) {
+        throw new IllegalStateException("Invalid model to render!");
     }
 
     @Override
@@ -397,5 +413,9 @@ public final class BakedCubeModel extends BakedModel implements BlockModel {
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    public void setBlock(BlockState block) {
+        this.block = block;
     }
 }

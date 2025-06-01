@@ -1,12 +1,14 @@
 package dev.ultreon.quantum.server.player;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
 import dev.ultreon.quantum.api.neocommand.Commands;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.debug.DebugFlags;
+import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.LivingEntity;
@@ -598,7 +600,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
-            QuantumServer.LOGGER.warn("Player moved into an untracked chunk: {}", this.getName());
+            if (!isSpectator()) QuantumServer.LOGGER.warn("Player moved into an untracked chunk: {}", this.getName());
             return;
         }
 
@@ -625,7 +627,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             return;
         }
         if (!chunk.getTracker().isTracking(this)) {
-            QuantumServer.LOGGER.warn("Player moved into an inactive chunk: {}", this.getName());
+            if (!isSpectator()) QuantumServer.LOGGER.warn("Player moved into an inactive chunk: {}", this.getName());
             return;
         }
 
@@ -663,6 +665,46 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void onMessageSent(String message) {
+        if (GamePlatform.get().isDevEnvironment()) {
+            String[] cmd = message.split(" ");
+            if (cmd.length != 0) {
+                if (cmd[0].equals("!dbg")) {
+                    if (cmd.length > 1) {
+                        if (cmd[1].equals("log")) {
+                            if (cmd.length > 2) {
+                                String[] args = new String[cmd.length - 2];
+                                System.arraycopy(cmd, 2, args, 0, args.length);
+                                Debugger.log(String.join(" ", args));
+                            }
+                            return;
+                        } else if (cmd[1].equals("gm")) {
+                            if (cmd.length == 3) {
+                                switch (cmd[2]) {
+                                    case "builder":
+                                        this.setGameMode(GameMode.BUILDER);
+                                        break;
+                                    case "builder-plus":
+                                        this.setGameMode(GameMode.BUILDER_PLUS);
+                                        break;
+                                    case "spectator":
+                                        this.setGameMode(GameMode.SPECTATOR);
+                                        break;
+                                    case "survival":
+                                        this.setGameMode(GameMode.SURVIVAL);
+                                        break;
+                                    default:
+                                        Chat.sendError(this, "Unknown gamemode: " + cmd[2]);
+                                        break;
+                                }
+                                return;
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+
         for (ServerPlayer player : this.server.getPlayers()) {
             player.sendMessage("[cyan]<" + this.getName() + "> [white]" + message);
         }

@@ -60,7 +60,7 @@ public class Renderer implements Disposable {
     public static final int TOOLTIP_ZINDEX = 100;
     public static final @NotNull RgbColor TRANSPARENT_BLACK = RgbColor.BLACK.withAlpha(0x80);
 
-    private final QuantumClient client = QuantumClient.get();
+    public final QuantumClient client = QuantumClient.get();
     private final Deque<Vector3> globalTranslation = new ArrayDeque<>();
     private final Deque<Vector3> globalScale = new ArrayDeque<>();
     private final Batch batch;

@@ -26,7 +26,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DisposableContainer;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.Gizmo;

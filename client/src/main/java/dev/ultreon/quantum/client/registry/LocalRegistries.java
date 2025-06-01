@@ -10,19 +10,19 @@ import java.util.Map;
 import java.util.Set;
 
 public class LocalRegistries implements RegistryHandle {
-    private final Map<NamespaceID, SyncedRegistry<?>> registries = new HashMap<>();
+    private final Map<NamespaceID, ExternalRegistry<?>> registries = new HashMap<>();
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public <T> SyncedRegistry<T> get(RegistryKey<? extends Registry<T>> registryKey) {
-        return (SyncedRegistry<T>) registries.computeIfAbsent(registryKey.id(), id -> new SyncedRegistry<>(registryKey));
+    public <T> ExternalRegistry<T> get(RegistryKey<? extends Registry<T>> registryKey) {
+        return (ExternalRegistry<T>) registries.computeIfAbsent(registryKey.id(), id -> new ExternalRegistry<>(registryKey));
     }
 
-    public <T> void set(RegistryKey<SyncedRegistry<T>> registryKey, SyncedRegistry<T> registry) {
+    public <T> void set(RegistryKey<ExternalRegistry<T>> registryKey, ExternalRegistry<T> registry) {
         registries.put(registryKey.id(), registry);
     }
 
-    public SyncedRegistry<?> get(NamespaceID registryID) {
+    public ExternalRegistry<?> get(NamespaceID registryID) {
         return registries.get(registryID);
     }
 

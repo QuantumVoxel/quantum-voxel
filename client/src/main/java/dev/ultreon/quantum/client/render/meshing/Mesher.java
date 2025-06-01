@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.render.meshing;
 
 import dev.ultreon.quantum.block.BlockLike;
-import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.ChunkModelBuilder;

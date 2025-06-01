@@ -3,7 +3,7 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.events.WorldLifecycleEvents;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;

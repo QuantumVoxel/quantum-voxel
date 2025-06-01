@@ -14,6 +14,7 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.dedicated.FabricMod;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
+import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
@@ -482,7 +483,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void handleDisconnect(Throwable e) {
         QuantumClient client = QuantumClient.get();
-
         if (e instanceof CompletionException) {
             if (e.getCause() instanceof ConnectException) {
                 if (e.getCause().getCause() instanceof ClosedChannelException) {

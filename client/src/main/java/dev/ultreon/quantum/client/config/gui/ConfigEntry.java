@@ -88,7 +88,7 @@ public abstract class ConfigEntry<T> {
     }
 
     public String getDescription() {
-        return Language.translate("config." + this.config.getFileName().replace(".json5", "") + "." + this.getKey());
+        return Language.translate("config." + this.config.getFileName().replace(".quant", "") + "." + this.getKey());
     }
 
     public T getDefaultValue() {

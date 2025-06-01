@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.world;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.*;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.BoxGizmo;

@@ -2,11 +2,13 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
-import dev.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
+import dev.ultreon.quantum.block.property.BlockDataEntry;
+import dev.ultreon.quantum.block.property.StatePropertyKey;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
@@ -26,12 +28,11 @@ import dev.ultreon.quantum.util.SanityCheckException;
 import dev.ultreon.quantum.util.Suppliers;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class BlockModelRegistry implements ContextAwareReloadable {
     private static final BlockModelRegistry INSTANCE = new BlockModelRegistry();
-    private final Map<Block, List<Pair<Predicate<BlockState>, Supplier<BlockModel>>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
+    private final Map<Block, Map<BlockState, Supplier<BlockModel>>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private final Set<NamespaceID> TEXTURES = new HashSet<>();
     private Block loadingBlock = null;
 
@@ -49,35 +50,43 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public BlockModel get(BlockState meta) {
-        for (Pair<Predicate<BlockState>, Supplier<BlockModel>> p : this.customRegistry.getOrDefault(meta.getBlock(), new ArrayList<>())) {
-            if (p.getFirst().test(meta)) {
-                return p.getSecond().get();
+        for (Map.Entry<BlockState, Supplier<BlockModel>> p : this.customRegistry.getOrDefault(meta.getBlock(), Collections.emptyMap()).entrySet()) {
+            if (p.getKey().equals(meta)) {
+                return p.getValue().get();
             }
         }
         return null;
     }
 
-    public void register(Block block, Predicate<BlockState> predicate, CubeModel model) {
-        this.customRegistry.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, () -> Json5Model.cubeOf(model)));
+    public void register(Block block, BlockState predicate, CubeModel model) {
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(predicate, () -> Json5Model.cubeOf(model));
     }
 
-    public void registerCustom(Block block, Predicate<BlockState> predicate, Supplier<BlockModel> model) {
-        this.customRegistry.computeIfAbsent(block, key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(model)));
+    public void register(Block block, CubeModel model) {
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(block.getDefaultState(), () -> Json5Model.cubeOf(model));
     }
 
-    public void register(Supplier<Block> block, Predicate<BlockState> predicate, Supplier<CubeModel> model) {
-        this.customRegistry.computeIfAbsent(block.get(), key -> new ArrayList<>()).add(new Pair<>(predicate, Suppliers.memoize(() -> Json5Model.cubeOf(model.get()))));
+    public void registerCustom(Block block, BlockState predicate, Supplier<BlockModel> model) {
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(predicate, Suppliers.memoize(model));
+    }
+
+    public void register(Supplier<Block> block, BlockState predicate, Supplier<CubeModel> model) {
+        this.customRegistry.computeIfAbsent(block.get(), key -> new HashMap<>()).put(predicate, Suppliers.memoize(() -> Json5Model.cubeOf(model.get())));
     }
 
     public void registerDefault(Block block) {
         NamespaceID key = Registries.BLOCK.getId(block);
         if (key == null) throw new SanityCheckException("Fabricated block!");
-        this.register(block, meta -> true, CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
+        this.register(block, block.getDefaultState(), CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
     }
 
     public void registerDefault(Supplier<Block> block) {
-        this.register(block, meta -> true, Suppliers.memoize(() -> {
-            NamespaceID key = Registries.BLOCK.getId(block.get());
+        Block blk = block.get();
+        this.register(block, blk.getDefaultState(), Suppliers.memoize(() -> {
+            NamespaceID key = Registries.BLOCK.getId(blk);
+            if (key == null) {
+                throw new IllegalStateException("Block not registered: " + blk);
+            }
             return CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path));
         }));
     }
@@ -124,15 +133,15 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
     public void bakeJsonModels(QuantumClient client) {
         for (var entry : customRegistry.entrySet()) {
-            List<Pair<Predicate<BlockState>, Supplier<BlockModel>>> models = new ArrayList<>();
-            for (var pair : entry.getValue()) {
-                BlockModel model = pair.getSecond().get();
+            Map<BlockState, Supplier<BlockModel>> models = new HashMap<>();
+            for (var pair : entry.getValue().entrySet()) {
+                BlockModel model = pair.getValue().get();
                 if (model == null) {
-                    QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), pair.getFirst());
+                    QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), pair.getKey());
                     continue;
                 }
                 QuantumClient.invokeAndWait(() -> model.load(client));
-                models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
+                models.put(pair.getKey(), Suppliers.memoize(() -> model));
             }
         }
     }
@@ -146,9 +155,11 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                 if (customRegistry.containsKey(value)) continue;
                 Json5Model load = loader.load(value);
                 if (load != null) {
-                    customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> true, () -> load));
+                    customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState(), () -> load);
 
-                    load.getOverrides().cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new ArrayList<>()).add(new Pair<>(meta -> meta.get(cell.getRow()).equals(cell.getColumn()), cell::getValue)));
+                    Table<String, BlockDataEntry<?>, Json5Model> overrides = load.getOverrides();
+                    if (overrides == null) continue;
+                    overrides.cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState().with((StatePropertyKey) value.getDefinition().keyByName(cell.getRow()), cell.getColumn().value), cell::getValue));
                 } else if (value.doesRender()) {
                     this.registerDefault(value);
                 }
@@ -162,10 +173,10 @@ public class BlockModelRegistry implements ContextAwareReloadable {
             if (entry.getKey() == Blocks.AIR) continue;
             this.loadingBlock = entry.getKey();
             try {
-                List<Pair<Predicate<BlockState>, Supplier<BlockModel>>> models = new ArrayList<>();
-                for (var pair : entry.getValue()) {
-                    BlockModel model = pair.getSecond().get();
-                    models.add(new Pair<>(pair.getFirst(), Suppliers.memoize(() -> model)));
+                Map<BlockState, Supplier<BlockModel>> models = new HashMap<>();
+                for (var pair : entry.getValue().entrySet()) {
+                    BlockModel model = pair.getValue().get();
+                    models.put(pair.getKey(), Suppliers.memoize(() -> model));
 
                     if (entry.getValue() != null) {
                         TEXTURES.addAll(model.getAllTextures());
@@ -192,7 +203,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                 CrashLog crashLog = new CrashLog("Failed to load block models", e);
                 CrashCategory model = new CrashCategory("Model");
                 model.add("Block", this.loadingBlock.getId());
-                model.add("Location", this.loadingBlock.getId().mapPath(path -> "models/blocks/" + path + ".json5"));
+                model.add("Location", this.loadingBlock.getId().mapPath(path -> "models/blocks/" + path + ".quant"));
                 crashLog.addCategory(model);
                 QuantumClient.crash(crashLog);
             } catch (ApplicationCrash e) {

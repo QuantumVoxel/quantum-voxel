@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.gen;
 
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.world.Fork;
 import dev.ultreon.quantum.world.ServerWorld;
 import org.jetbrains.annotations.ApiStatus;

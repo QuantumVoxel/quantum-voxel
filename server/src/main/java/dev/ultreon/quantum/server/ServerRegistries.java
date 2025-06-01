@@ -68,7 +68,11 @@ public class ServerRegistries implements RegistryHandle {
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> Registry<T> get(RegistryKey<? extends Registry<T>> registryKey) {
-        return (Registry<T>) registries.get((RegistryKey) registryKey);
+        if (registries.contains((RegistryKey) registryKey)) {
+            return (Registry<T>) registries.get((RegistryKey) registryKey);
+        } else {
+            return Registries.REGISTRY.get((RegistryKey) registryKey);
+        }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

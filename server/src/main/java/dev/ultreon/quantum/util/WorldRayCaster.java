@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.world.ChunkReader;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.WorldReader;

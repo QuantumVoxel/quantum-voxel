@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.api.events.block;
 
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;

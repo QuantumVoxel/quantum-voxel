@@ -1,0 +1,16 @@
+{
+  elements: [
+    {
+      from: [0, 0, 0]
+      to: [16, 16, 16]
+      faces: {
+        north: {uv: [8, 3.5, 8.5, 6.5], cull: north, texture: #side}
+        east: {uv: [4, 8, 4.5, 11], cull: east, texture: #side}
+        south: {uv: [4.5, 8, 5, 11], cull: south, texture: #side}
+        west: {uv: [5, 8, 5.5, 11], cull: west, texture: #side}
+        up: {uv: [3.5, 9, 3, 8.5], cull: up, texture: #up}
+        down: {uv: [4, 8.5, 3.5, 9], cull: down, texture: #down}
+      }
+    }
+  ]
+}

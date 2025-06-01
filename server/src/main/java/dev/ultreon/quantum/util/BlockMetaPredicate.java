@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.util;
 
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 
 import java.util.function.Predicate;
 

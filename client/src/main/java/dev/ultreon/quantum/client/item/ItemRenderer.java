@@ -11,17 +11,14 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
-import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.item.BlockItemModel;
-import dev.ultreon.quantum.client.model.item.FlatItemModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
-import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
+import dev.ultreon.quantum.client.model.item.ItemModelRegistry;
 import dev.ultreon.quantum.item.BlockItem;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -29,14 +26,11 @@ import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 public class ItemRenderer implements Disposable {
     private final QuantumClient client;
@@ -48,9 +42,8 @@ public class ItemRenderer implements Disposable {
     private final Vector3 position = new Vector3(0, 0, -1000);
     private final Vector3 scale = new Vector3(20, 20, 20);
     protected final Vector3 tmp = new Vector3();
-    private final Map<Item, ItemModel> models = new HashMap<>();
-    private final Map<Item, ModelInstance> modelsInstances = new HashMap<>();
-    private Map<BlockState, ModelInstance> blockModelCache = new HashMap<>();
+    private final Map<BlockState, ModelInstance> blockModelCache = new HashMap<>();
+    private final Map<Item, ModelInstance> itemModelCache = new HashMap<>();
 
     public ItemRenderer(QuantumClient client) {
         this.client = client;
@@ -73,48 +66,7 @@ public class ItemRenderer implements Disposable {
             return;
         }
 
-        if (item instanceof BlockItem) {
-            BlockItem blockItem = (BlockItem) item;
-            ModelInstance modelInstance = modelsInstances.get(item);
-            if (modelInstance != null) {
-                this.renderModel(modelInstance, models.get(item), renderer, x + 8, this.client.getScaledHeight() - y - 16 - offset);
-                return;
-            }
-
-            this.renderBlockItem(blockItem,blockItem.createBlockMeta(), renderer, x + 8, this.client.getScaledHeight() - y - 16 - offset);
-            return;
-        }
-
-        NamespaceID curKey = Registries.ITEM.getId(item);
-        if (curKey == null) {
-            renderer.blitColor(RgbColor.WHITE);
-            renderer.blit((TextureRegion) null, x, y, 16, 16);
-        } else {
-            TextureRegion texture = this.client.itemTextureAtlas.getDiffuse(curKey.mapPath(path -> "textures/items/" + path + ".png"));
-            renderer.blitColor(RgbColor.WHITE);
-            renderer.blit(texture, x, y, 16, 16);
-        }
-    }
-
-    private void renderModel(ModelInstance instance, ItemModel itemModel, Renderer renderer, int x, int y) {
-        if (instance != null) {
-            renderer.external(() -> {
-                float guiScale = this.client.getGuiScale();
-                this.itemCam.zoom = guiScale / 2.0f;
-                this.itemCam.far = 100000;
-                this.itemCam.update();
-                this.batch.begin(this.itemCam);
-                this.scale.set(40, 40, 40).scl(guiScale / 8f);
-                Vector3 scl = this.scale.cpy().scl(itemModel.getScale());
-                instance.transform.idt().translate(this.position.cpy().add((x / 2f - (int) (this.client.getScaledWidth() / 4.0F)) * guiScale, (y / 2f - (int) (this.client.getScaledHeight() / 4.0F)) * guiScale, 100)).translate(itemModel.getOffset().add(2, 20, 0).scl(-1 / scl.x, 1 / scl.y, 1 / scl.z).scl(0.4f)).scale(-scl.x, -scl.y, scl.z);
-                instance.transform.rotate(Vector3.X, this.rotation.x);
-                instance.transform.rotate(Vector3.Y, this.rotation.y);
-                instance.transform.rotate(Vector3.Y, 180);
-                instance.transform.rotate(Vector3.Z, 180);
-                this.batch.render(instance, environment);
-                this.batch.end();
-            });
-        }
+        renderItem(item, renderer, x, y);
     }
 
     private void renderBlockItem(Item item, BlockState block, Renderer renderer, int x, int y) {
@@ -124,46 +76,29 @@ public class ItemRenderer implements Disposable {
             this.itemCam.far = 100000;
             this.itemCam.update();
             @NotNull BlockModel blockModel = this.client.getBlockModel(block);
-            if (blockModel == BakedCubeModel.defaultModel()) {
-                renderCustomBlock(item, block, renderer, x, y);
-                return;
+
+            ItemModel itemModel = client.getItemModel(item);
+            ModelInstance modelInstance;
+            if (itemModel != null) {
+                modelInstance = new ModelInstance(itemModel.getModel());
+                this.blockModelCache.put(block, modelInstance);
+            } else {
+                Model model = blockModel.getModel();
+                modelInstance = new ModelInstance(model == null ? BakedCubeModel.defaultModel().getModel() : model);
+                this.blockModelCache.put(block, modelInstance);
             }
-//            if (blockModel instanceof BakedCubeModel) {
-//                BakedCubeModel bakedModel = (BakedCubeModel) blockModel;
-//                this.batch.begin(this.itemCam);
-//                Mesh mesh = bakedModel.getMesh();
-//                Renderable renderable = renderer.obtainRenderable();
-//                renderable.meshPart.mesh = mesh;
-//                renderable.meshPart.center.set(0F, 0F, 0F);
-//                renderable.meshPart.offset = 0;
-//                renderable.meshPart.size = mesh.getMaxVertices();
-//                renderable.meshPart.primitiveType = GL20.GL_TRIANGLES;
-//                renderable.material = this.material;
-//                renderable.environment = this.environment;
-//                renderable.worldTransform.set(this.position.cpy().add((setX - (int) (this.client.getScaledWidth() / 2.0F)) * guiScale, -(-setY + (int) (this.client.getScaledHeight() / 2.0F)) * guiScale, 100), this.quaternion, this.scale);
-//                renderable.worldTransform.rotate(Vector3.X, this.rotation.setX);
-//                renderable.worldTransform.rotate(Vector3.Y, this.rotation.setY);
-//                this.batch.render(renderable);
-//                this.batch.end();
-//            } else {
-            ModelInstance modelInstance = this.blockModelCache.putIfAbsent(block, new ModelInstance(blockModel.getModel()));
             this.batch.render(modelInstance, this.environment);
         });
     }
 
-    private void renderCustomBlock(Item item, BlockState block, Renderer renderer, int x, int y) {
-        ModelInstance modelInstance = new ModelInstance(getModel(block));
-        this.modelsInstances.put(item, modelInstance);
+    private void renderItem(Item item, Renderer renderer, int x, int y) {
+        @Nullable ItemModel itemModel = this.client.getItemModel(item);
+        if (itemModel != null) {
+            itemModel.renderItem(renderer, batch, itemCam, environment, x, y);
+            return;
+        }
 
-        renderModel(modelInstance, models.get(item), renderer, x, y);
-    }
-
-    private static Model getModel(BlockState block) {
-        BlockModel blockModel = BlockModelRegistry.get().get(block);
-        Model defaultModel = BakedCubeModel.defaultModel().getModel();
-        if (blockModel == null) return defaultModel;
-        Model model = blockModel.getModel();
-        return model == null ? defaultModel : model;
+        BakedCubeModel.defaultModel().renderItem(renderer, batch, itemCam, environment, x, y);
     }
 
     public OrthographicCamera getItemCam() {
@@ -177,10 +112,10 @@ public class ItemRenderer implements Disposable {
     }
 
     public ModelInstance createModelInstance(ItemStack stack) {
-        ItemModel itemModel = models.get(stack.getItem());
+        ItemModel itemModel = ItemModelRegistry.get().get(stack.getItem());
         if (itemModel == null) {
             ModelInstance modelInstance = new ModelInstance(BakedCubeModel.defaultModel().getModel());
-            modelInstance.userData = new BlockItemModel(BakedCubeModel::defaultModel);
+            modelInstance.userData = new BlockItemModel(stack.getItem(), BakedCubeModel::defaultModel);
             return modelInstance;
         }
         Model model = itemModel.getModel();
@@ -190,76 +125,9 @@ public class ItemRenderer implements Disposable {
         return modelInstance;
     }
 
-    public void registerModel(Item item, ItemModel model) {
-        models.put(item, model);
-    }
-
-    public void registerBlockModel(BlockItem blockItem, Supplier<BlockModel> model) {
-        models.put(blockItem, new BlockItemModel(Suppliers.memoize(model)));
-        ItemModel itemModel = models.get(blockItem);
-        Vector3 scale = itemModel.getScale();
-        Model model1 = itemModel.getModel();
-        if (model1 == null) {
-            BlockModel defaultBlockModel = BakedCubeModel.defaultModel();
-            model1 = defaultBlockModel.getModel();
-        }
-        ModelInstance value = new ModelInstance(model1);
-        value.transform.scale(scale.x, scale.y, scale.z);
-        value.calculateTransforms();
-        this.modelsInstances.put(blockItem, value);
-    }
-
-    public void loadModels(QuantumClient client) {
-        for (Map.Entry<Item, ItemModel> e : models.entrySet()) {
-            Item item = e.getKey();
-            ItemModel value = e.getValue();
-            value.load(client);
-
-            Model model = value.getModel();
-            if (model == null) model = BakedCubeModel.defaultModel().getModel();
-            this.modelsInstances.put(item, new ModelInstance(model));
-        }
-    }
-
-    public void registerModels(Json5ModelLoader loader) {
-        Registries.ITEM.values().forEach((e) -> {
-            try {
-                if (e instanceof BlockItem) {
-                    BlockItem blockItem = (BlockItem) e;
-                    this.registerBlockModel(blockItem, () -> this.client.getBlockModel(blockItem.createBlockMeta()));
-                    return;
-                }
-
-                ItemModel load = loader.load(e);
-                if (load == null) {
-                    load = new FlatItemModel(e);
-                }
-
-                this.registerModel(e, Objects.requireNonNullElseGet(load, () -> new FlatItemModel(e)));
-            } catch (IOException ex) {
-                QuantumClient.LOGGER.error("Failed to load item model for {}", e, ex);
-                fallbackModel(e);
-            }
-        });
-    }
-
-    private void fallbackModel(Item e) {
-        if (e instanceof BlockItem) {
-            BlockItem blockItem = (BlockItem) e;
-            //            this.registerBlockModel(blockItem, () -> this.client.getBakedBlockModel(blockItem.createBlockMeta()));
-        }
-    }
-
-    public void reload() {
-        this.modelsInstances.clear();
-    }
-
     @Override
     public void dispose() {
-        this.modelsInstances.clear();
-        this.models.clear();
         this.blockModelCache.clear();
-
         this.batch.dispose();
 
         this.itemCam = null;

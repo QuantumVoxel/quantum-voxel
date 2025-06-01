@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;

@@ -31,7 +31,7 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
 import dev.ultreon.quantum.client.api.events.ClientTickEvents;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
@@ -55,6 +55,8 @@ import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BakedModelRegistry;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
+import dev.ultreon.quantum.client.model.item.ItemModel;
+import dev.ultreon.quantum.client.model.item.ItemModelRegistry;
 import dev.ultreon.quantum.client.model.model.Json5ModelLoader;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
@@ -97,6 +99,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SLoginPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.network.system.MemoryConnection;
+import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.PlatformOS;
@@ -2762,7 +2765,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return the draw offset.
      */
     public GridPoint2 getDrawOffset() {
-        GameInsets insets = GamePlatform.get().getInsets();
         return this.offset.set(0, 0);
     }
 
@@ -3147,6 +3149,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         MusicManager.get().reload();
 
         BlockModelRegistry.get().reload(resourceManager, context);
+        ItemModelRegistry.get().reload(resourceManager, context);
 
         RenderingRegistration.registerRendering(this);
 
@@ -3155,8 +3158,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.textureAtlasManager.reload(context);
         this.shaderProgramManager.reload(context);
         this.shaderProviderManager.reload(context);
-        if (this.itemRenderer != null)
-            this.itemRenderer.reload();
         this.skinManager.reload();
 
         if (this.worldRenderer != null) {
@@ -3201,6 +3202,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param message the message.
      */
     public void onDisconnect(String message, boolean isMemoryConnection) {
+        Registries.unload();
+
         try {
             var conn = this.connection;
             if (conn != null) conn.close();
@@ -3530,5 +3533,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public TextureAtlas getAtlas(NamespaceID id) {
         return textureAtlasManager.get(id);
+    }
+
+    public @Nullable ItemModel getItemModel(Item item) {
+        return ItemModelRegistry.get().get(item);
     }
 }

@@ -90,7 +90,7 @@ public class MaterialManager implements Manager<Material> {
             return this.materials.get(id);
         }
 
-        try (InputStream inputStream = resourceManager.openResourceStream(id.mapPath(path -> "materials/" + path + ".json5"))) {
+        try (InputStream inputStream = resourceManager.openResourceStream(id.mapPath(path -> "materials/" + path + ".quant"))) {
             if (inputStream == null) {
                 return null;
             }

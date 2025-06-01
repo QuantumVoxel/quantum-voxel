@@ -522,11 +522,6 @@ public abstract class Screen extends UIContainer<Screen> {
         if (this.dialog != null) return this.dialog.mouseClick(mouseX, mouseY, button, clicks);
         if (title != null) mouseY -= title.getHeight();
 
-        Widget widgetsAt = this.getWidgetAt(mouseX, mouseY);
-        if (this.focused != null) this.focused.onFocusLost();
-        this.focused = widgetsAt;
-        if (this.focused != null) this.focused.onFocusGained();
-
         return super.mouseClick(mouseX, mouseY, button, clicks);
     }
 

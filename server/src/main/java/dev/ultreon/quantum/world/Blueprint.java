@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.world.structure.BlockPoint;

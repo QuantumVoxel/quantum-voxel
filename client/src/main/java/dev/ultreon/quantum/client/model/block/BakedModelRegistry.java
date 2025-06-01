@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.model.block;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 
 import java.util.List;

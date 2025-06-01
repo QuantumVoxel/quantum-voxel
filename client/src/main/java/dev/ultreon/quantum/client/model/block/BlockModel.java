@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.NodeCategory;
@@ -21,6 +22,8 @@ public interface BlockModel extends LoadableResource {
     Vector3 DEFAULT_ITEM_SCALE = new Vector3(1, 1, 1);
 
     boolean isCustom();
+
+    @Nullable BlockState getBlock();
 
     default void render(Vector3 pos, NodeCategory nodeCategory) {
         // Do nothing

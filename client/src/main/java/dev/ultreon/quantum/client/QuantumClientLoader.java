@@ -16,6 +16,7 @@ import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.debug.*;
 import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
+import dev.ultreon.quantum.client.gui.screens.BuilderInventoryScreen;
 import dev.ultreon.quantum.client.gui.screens.TitleScreen;
 import dev.ultreon.quantum.client.gui.screens.container.AdvancedCraftingScreen;
 import dev.ultreon.quantum.client.gui.screens.container.BlastFurnaceScreen;
@@ -37,6 +38,7 @@ import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.text.LanguageManager;
+import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.menu.MenuTypes;
 import dev.ultreon.quantum.registry.SimpleRegistry;
 import dev.ultreon.quantum.registry.Registries;
@@ -222,8 +224,6 @@ class QuantumClientLoader implements Runnable {
         progress(client, 0.98F);
 
         client.itemRenderer = QuantumClient.invokeAndWait(() -> new ItemRenderer(client));
-        client.itemRenderer.registerModels(client.j5ModelLoader);
-        client.itemRenderer.loadModels(client);
 
         if (client.deferredWidth != null && client.deferredHeight != null) {
             client.camera.viewportWidth = client.getWidth();
@@ -292,7 +292,7 @@ class QuantumClientLoader implements Runnable {
      * @param client The QuantumClient.
      */
     private void loadLanguages(QuantumClient client) {
-        var internal = QuantumClient.resource(new NamespaceID("languages.json5"));
+        var internal = QuantumClient.resource(new NamespaceID("languages.quant"));
         JsonValue asJsonObject = CommonConstants.JSON_READ.parse(internal.reader());
 
         String[] languagesJ5 = asJsonObject.get("Languages").asStringArray();
@@ -333,7 +333,14 @@ class QuantumClientLoader implements Runnable {
      * Registers the menu screens.
      */
     private void registerMenuScreens() {
-        MenuRegistry.registerScreen(MenuTypes.INVENTORY, InventoryScreen::new);
+        MenuRegistry.registerScreen(MenuTypes.INVENTORY, (menu, title) -> {
+            Player holder = menu.getHolder();
+            if (holder.isBuilder()) {
+                return new BuilderInventoryScreen(menu);
+            } else {
+                return new InventoryScreen(menu, title);
+            }
+        });
         MenuRegistry.registerScreen(MenuTypes.ADVANCED_CRAFTING, AdvancedCraftingScreen::new);
         MenuRegistry.registerScreen(MenuTypes.CRATE, CrateScreen::new);
         MenuRegistry.registerScreen(MenuTypes.BLAST_FURNACE, BlastFurnaceScreen::new);

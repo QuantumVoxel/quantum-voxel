@@ -22,7 +22,7 @@ public abstract class Button<T extends Button<T>> extends Widget {
     public boolean pressed;
     public boolean wasPressed;
     private final Color tmp = new Color();
-    protected float yOffset = 0f;
+    protected float yOffset;
 
     protected Button(int width, int height) {
         this(width, height, Type.DARK);
@@ -35,6 +35,8 @@ public abstract class Button<T extends Button<T>> extends Widget {
         this.callback = this.register(id("callback"), new CallbackComponent<>(it -> {
 
         }));
+
+        yOffset = calculateGoal();
     }
 
     protected void renderButton(Renderer renderer, Texture texture, int x, int y) {

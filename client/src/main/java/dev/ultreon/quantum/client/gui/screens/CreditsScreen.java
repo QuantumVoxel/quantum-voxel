@@ -20,7 +20,7 @@ import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 
 public class CreditsScreen extends TabbedUI {
     public static final MutableText ASSETS_DESCRIPTION = TextObject.translation("quantum.gui.credits.assets.description").setBold(true);
-    private final JsonValue credits = client.getResourceManager().getResource(new NamespaceID("texts/credits.json5")).loadJson();
+    private final JsonValue credits = client.getResourceManager().getResource(new NamespaceID("texts/credits.quant")).loadJson();
 
     public CreditsScreen(Screen parent) {
         super(TextObject.translation("quantum.gui.credits.title"), parent);

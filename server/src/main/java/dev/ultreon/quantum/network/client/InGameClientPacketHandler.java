@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.network.client;
 
 import dev.ultreon.quantum.block.entity.BlockEntityType;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.item.ItemStack;

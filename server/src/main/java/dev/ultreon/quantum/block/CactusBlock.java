@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockState;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.BlockFlags;

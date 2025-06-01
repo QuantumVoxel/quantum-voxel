@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.gui.debug;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Mesh;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.audio.music.MusicManager;

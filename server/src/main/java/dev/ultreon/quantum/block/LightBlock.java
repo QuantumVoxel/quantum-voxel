@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.block;
 
-import dev.ultreon.quantum.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class LightBlock extends Block {

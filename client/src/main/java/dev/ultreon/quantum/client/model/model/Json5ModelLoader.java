@@ -1,13 +1,20 @@
 package dev.ultreon.quantum.client.model.model;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
@@ -17,14 +24,15 @@ import de.damios.guacamole.Preconditions;
 import dev.ultreon.libs.collections.v0.tables.HashTable;
 import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.Block;
-import dev.ultreon.quantum.block.state.BlockDataEntry;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.property.BlockDataEntry;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
 import dev.ultreon.quantum.client.world.AOUtils;
+import dev.ultreon.quantum.item.BlockItem;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -84,12 +92,14 @@ public class Json5ModelLoader {
      * @throws IOException if an I/O error occurs during reading of the resource
      */
     public Json5Model load(Block block) throws IOException {
-        NamespaceID namespaceID = block.getId().mapPath(path -> "models/blocks/" + path + ".json5");
+        NamespaceID namespaceID = block.getId().mapPath(path -> "models/blocks/" + path + ".quant");
         Resource resource = this.resourceManager.getResource(namespaceID);
         if (resource == null)
             return null;
         QuantumClient.LOGGER.debug("Loading block model: {}", namespaceID);
-        return this.load(Registries.BLOCK.getKey(block), JSON_READ.parse(resource.openReader()));
+        Json5Model model = this.load(Registries.BLOCK.getKey(block), JSON_READ.parse(resource.openReader()));
+        model.setBlock(block.getDefaultState());
+        return model;
     }
 
     /**
@@ -103,12 +113,16 @@ public class Json5ModelLoader {
      * @throws IOException if an I/O error occurs during reading of the resource
      */
     public Json5Model load(Item item) throws IOException {
-        NamespaceID namespaceID = item.getId().mapPath(path -> "models/items/" + path + ".json5");
+        NamespaceID namespaceID = item.getId().mapPath(path -> "models/items/" + path + ".quant");
         Resource resource = this.resourceManager.getResource(namespaceID);
         if (resource == null)
             return null;
         QuantumClient.LOGGER.debug("Loading item model: {}", namespaceID);
-        return this.load(Registries.ITEM.getKey(item), JSON_READ.parse(resource.openReader()));
+        Json5Model model = this.load(Registries.ITEM.getKey(item), JSON_READ.parse(resource.openReader()));
+        if (item instanceof BlockItem) {
+            model.setBlock(((BlockItem) item).getBlock().getDefaultState());
+        }
+        return model;
     }
 
     /**
@@ -129,22 +143,21 @@ public class Json5ModelLoader {
             throw new IllegalArgumentException("Invalid model key, must be block or item: " + key);
         }
 
-        JsonValue root = modelData;
-        JsonValue textures = root.get("textures");
+        JsonValue textures = modelData.get("textures");
         Map<String, NamespaceID> textureElements = loadTextures(textures);
 
 //        GridPoint2 textureSize = loadVec2i(root.get("texture_size"), new GridPoint2(16, 16));
         GridPoint2 textureSize = new GridPoint2(16, 16);
 
-        JsonValue elements = root.get("elements");
+        JsonValue elements = modelData.get("elements");
         List<ModelElement> modelElements = loadElements(elements, textureSize.x, textureSize.y);
 
-        JsonValue ambientocclusion = root.get("ambientocclusion");
+        JsonValue ambientocclusion = modelData.get("ambientocclusion");
         boolean ambientOcclusion = ambientocclusion == null || ambientocclusion.asBoolean();
 
         Table<String, BlockDataEntry<?>, Json5Model> overrides = null;
 
-        JsonValue displayJson = root.get("display");
+        JsonValue displayJson = modelData.get("display");
         if (displayJson == null)
             displayJson = new JsonValue(JsonValue.ValueType.object);
 
@@ -154,22 +167,21 @@ public class Json5ModelLoader {
         return new Json5Model(key.id(), textureElements, modelElements, ambientOcclusion, display, overrides);
     }
 
-    private Table<String, BlockDataEntry<?>, Json5Model> loadOverrides(RegistryKey<Block> key, JsonValue overridesJson5) {
-        Table<String, BlockDataEntry<?>, Json5Model> overrides = new HashTable<>();
+    private Table<String, Object, Json5Model> loadOverrides(RegistryKey<Block> key, JsonValue overridesJson5) {
+        Table<String, Object, Json5Model> overrides = new HashTable<>();
         Block block = Registries.BLOCK.get(key);
         BlockState meta = block.getDefaultState();
 
         for (JsonValue overrideElem : overridesJson5) {
             String keyName = overrideElem.name;
-            JsonValue overrideObj = overrideElem;
 
-            Json5Model model = load(key, overrideObj);
-            BlockDataEntry<?> entry1 = meta.get(keyName);
+            Json5Model model = load(key, overrideElem);
+            Object entry1 = meta.get(block.getDefinition().keyByName(keyName));
 
             if (model == null)
                 throw new IllegalArgumentException("Invalid model override: " + keyName);
 
-            overrides.put(keyName, entry1.parse(overrideObj), model);
+            overrides.put(keyName, entry1, model);
         }
 
         return overrides;
@@ -179,17 +191,16 @@ public class Json5ModelLoader {
         List<ModelElement> modelElements = new ArrayList<>();
 
         for (JsonValue elem : elements) {
-            JsonValue element = elem;
-            JsonValue faces = element.get("faces");
+            JsonValue faces = elem.get("faces");
             Map<Direction, FaceElement> blockFaceFaceElementMap = loadFaces(faces, textureWidth, textureHeight);
 
-            JsonValue shade1 = element.get("shade");
+            JsonValue shade1 = elem.get("shade");
             boolean shade = shade1 != null && shade1.asBoolean();
-            JsonValue rotation1 = element.get("rotation");
+            JsonValue rotation1 = elem.get("rotation");
             ElementRotation rotation = ElementRotation.deserialize(rotation1 == null ? null : rotation1);
 
-            Vector3 from = loadVec3(element.get("from"));
-            Vector3 to = loadVec3(element.get("to"));
+            Vector3 from = loadVec3(elem.get("from"));
+            Vector3 to = loadVec3(elem.get("to"));
 
             ModelElement modelElement = new ModelElement(blockFaceFaceElementMap, shade, rotation, from, to);
             modelElements.add(modelElement);
@@ -237,7 +248,7 @@ public class Json5ModelLoader {
     }
 
     public BlockModel load(RegistryKey<?> key, NamespaceID id) {
-        Resource resource = this.resourceManager.getResource(id.mapPath(path -> "models/" + path + ".json5"));
+        Resource resource = this.resourceManager.getResource(id.mapPath(path -> "models/" + path + ".quant"));
         if (resource != null) {
             return this.load(key, resource.loadJson());
         }
@@ -422,7 +433,7 @@ public class Json5ModelLoader {
             this.to = to;
         }
 
-        public void bake(int idx, MeshPartBuilder meshBuilder, Map<String, NamespaceID> textureElements, int x, int y, int z, int cull, int[] ao, long light) {
+        public void bakeInto(int idx, MeshPartBuilder meshBuilder, Map<String, NamespaceID> textureElements, int x, int y, int z, int cull, int[] ao, long light) {
             final var from = this.from();
             final var to = this.to();
 
@@ -535,6 +546,108 @@ public class Json5ModelLoader {
                 material.set(new FloatAttribute(FloatAttribute.AlphaTest));
                 material.set(new DepthTestAttribute(GL20.GL_LEQUAL));
             }
+        }
+
+        public void bake(int idx, ModelBuilder modelBuilder, Map<String, NamespaceID> textureElements) {
+            Vector3 from = this.from();
+            Vector3 to = this.to();
+
+            ModelBuilder nodeBuilder = new ModelBuilder();
+            nodeBuilder.begin();
+
+            MeshBuilder meshBuilder = new MeshBuilder();
+            VertexInfo v00 = new VertexInfo();
+            VertexInfo v01 = new VertexInfo();
+            VertexInfo v10 = new VertexInfo();
+            VertexInfo v11 = new VertexInfo();
+            for (Map.Entry<Direction, FaceElement> entry : blockFaceFaceElementMap.entrySet()) {
+                Direction direction = entry.getKey();
+                FaceElement faceElement = entry.getValue();
+
+                final var texRef = faceElement.texture;
+                final @Nullable NamespaceID texture = (Objects.equals(texRef, "#missing") ? NamespaceID.of("blocks/error")
+                        : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))
+                        : NamespaceID.parse(texRef)).mapPath(path -> "textures/" + path + ".png");
+
+                meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
+                v00.setCol(Color.WHITE);
+                v01.setCol(Color.WHITE);
+                v10.setCol(Color.WHITE);
+                v11.setCol(Color.WHITE);
+
+                v00.setNor(direction.getNormal());
+                v01.setNor(direction.getNormal());
+                v10.setNor(direction.getNormal());
+                v11.setNor(direction.getNormal());
+
+                v00.setUV(faceElement.uvs.x1, faceElement.uvs.y2);
+                v01.setUV(faceElement.uvs.x1, faceElement.uvs.y1);
+                v10.setUV(faceElement.uvs.x2, faceElement.uvs.y2);
+                v11.setUV(faceElement.uvs.x2, faceElement.uvs.y1);
+
+                switch (direction) {
+                    case UP:
+                        v00.setPos(to.x, to.y, from.z);
+                        v01.setPos(to.x, to.y, to.z);
+                        v10.setPos(from.x, to.y, from.z);
+                        v11.setPos(from.x, to.y, to.z);
+                        break;
+                    case DOWN:
+                        v00.setPos(from.x, from.y, from.z);
+                        v01.setPos(from.x, from.y, to.z);
+                        v10.setPos(to.x, from.y, from.z);
+                        v11.setPos(to.x, from.y, to.z);
+                        break;
+                    case WEST:
+                        v00.setPos(from.x, from.y, from.z);
+                        v01.setPos(from.x, to.y, from.z);
+                        v10.setPos(from.x, from.y, to.z);
+                        v11.setPos(from.x, to.y, to.z);
+                        break;
+                    case EAST:
+                        v00.setPos(to.x, from.y, to.z);
+                        v01.setPos(to.x, to.y, to.z);
+                        v10.setPos(to.x, from.y, from.z);
+                        v11.setPos(to.x, to.y, from.z);
+                        break;
+                    case NORTH:
+                        v00.setPos(to.x, from.y, from.z);
+                        v01.setPos(to.x, to.y, from.z);
+                        v10.setPos(from.x, from.y, from.z);
+                        v11.setPos(from.x, to.y, from.z);
+                        break;
+                    case SOUTH:
+                        v00.setPos(from.x, from.y, to.z);
+                        v01.setPos(from.x, to.y, to.z);
+                        v10.setPos(to.x, from.y, to.z);
+                        v11.setPos(to.x, to.y, to.z);
+                        break;
+                }
+
+                meshBuilder.rect(v00, v10, v11, v01);
+
+                Material material = new Material();
+                material.set(TextureAttribute.createDiffuse(QuantumClient.get().getTextureManager().getTexture(texture)));
+                material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
+                material.set(new FloatAttribute(FloatAttribute.AlphaTest));
+                material.set(new DepthTestAttribute(GL20.GL_LEQUAL));
+                nodeBuilder.part(idx + "." + direction.name(), meshBuilder.end(), GL20.GL_TRIANGLES, material);
+            }
+
+            Model end = nodeBuilder.end();
+            Node node = modelBuilder.node("[" + idx + "]", end);
+
+            Vector3 originVec = rotation.originVec;
+            Axis axis = rotation.axis;
+            float angle = rotation.angle;
+            boolean rescale = rotation.rescale; // TODO: implement
+
+            node.localTransform.translate(originVec.x, originVec.y, originVec.z);
+            node.localTransform.rotate(axis.getVector(), angle);
+            node.localTransform.translate(-originVec.x, -originVec.y, -originVec.z);
+            node.scale.set(node.localTransform.getScale(tmp));
+            node.translation.set(node.localTransform.getTranslation(tmp));
+            node.rotation.set(node.localTransform.getRotation(tmpQ));
         }
 
         private void rotate(

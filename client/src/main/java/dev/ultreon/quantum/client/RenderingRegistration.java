@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client;
 
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.SlabBlock;
+import dev.ultreon.quantum.block.property.StateProperties;
 import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.block.CubeModel;
@@ -82,21 +83,21 @@ public class RenderingRegistration {
     private static void registerBlockModels() {
         // Register block models for grass block, log, and crafting bench
         BlockModelRegistry registry = BlockModelRegistry.get();
-        registry.register(Blocks.GRASS_BLOCK, meta -> true, CubeModel.of(NamespaceID.of("blocks/grass"), NamespaceID.of("blocks/grass_top"), NamespaceID.of("blocks/dirt"), NamespaceID.of("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.SNOWY_GRASS_BLOCK, meta -> true, CubeModel.of(NamespaceID.of("blocks/snowy_grass"), NamespaceID.of("blocks/snowy_grass_top"), NamespaceID.of("blocks/dirt"), NamespaceID.of("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.SNOW_BLOCK, meta -> true, CubeModel.of(NamespaceID.of("blocks/snowy_grass_top"), NamespaceID.of("blocks/snowy_grass_top"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.LOG, meta -> true, CubeModel.of(NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
-        registry.register(Blocks.CRAFTING_BENCH, meta -> true, CubeModel.of(NamespaceID.of("blocks/crafting_bench"), NamespaceID.of("blocks/crafting_bench_top"), NamespaceID.of("blocks/crafting_bench_bottom"), NamespaceID.of("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.GRASS_BLOCK, CubeModel.of(NamespaceID.of("blocks/grass"), NamespaceID.of("blocks/grass_top"), NamespaceID.of("blocks/dirt"), NamespaceID.of("blocks/grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.SNOWY_GRASS_BLOCK, CubeModel.of(NamespaceID.of("blocks/snowy_grass"), NamespaceID.of("blocks/snowy_grass_top"), NamespaceID.of("blocks/dirt"), NamespaceID.of("blocks/snowy_grass_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.SNOW_BLOCK, CubeModel.of(NamespaceID.of("blocks/snowy_grass_top"), NamespaceID.of("blocks/snowy_grass_top"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.LOG, CubeModel.of(NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log"), NamespaceID.of("blocks/log_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
+        registry.register(Blocks.CRAFTING_BENCH, CubeModel.of(NamespaceID.of("blocks/crafting_bench"), NamespaceID.of("blocks/crafting_bench_top"), NamespaceID.of("blocks/crafting_bench_bottom"), NamespaceID.of("blocks/crafting_bench_side"), ModelProperties.builder().top(FaceProperties.builder().randomRotation().build()).build()));
 
         // Register block models for blast furnace with different rotations based on metadata
         for (Direction direction : Direction.HORIZONTAL) {
-            registry.register(Blocks.BLAST_FURNACE, meta -> meta.<Boolean>get("lit") && meta.<Direction>get("facing") == direction, CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
-            registry.register(Blocks.BLAST_FURNACE, meta -> !meta.<Boolean>get("lit") && meta.<Direction>get("facing") == direction, CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            registry.register(Blocks.BLAST_FURNACE, Blocks.BLAST_FURNACE.getDefaultState().with(StateProperties.LIT, true).with(StateProperties.FACING, direction), CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT) + "_lit"), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front_lit"), ModelProperties.builder().rotateHorizontal(direction).build()));
+            registry.register(Blocks.BLAST_FURNACE, Blocks.BLAST_FURNACE.getDefaultState().with(StateProperties.LIT, false).with(StateProperties.FACING, direction), CubeModel.of(NamespaceID.of("blocks/blast_furnace_" + direction.toString().toLowerCase(Locale.ROOT)), NamespaceID.of("blocks/blast_furnace_top"), NamespaceID.of("blocks/blast_furnace_bottom"), NamespaceID.of("blocks/blast_furnace_side"), NamespaceID.of("blocks/blast_furnace_front"), ModelProperties.builder().rotateHorizontal(direction).build()));
         }
 
-        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.TOP, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_top")));
-        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.BOTTOM, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_bottom")));
-        registry.registerCustom(Blocks.PLANKS_SLAB, (meta) -> meta.<SlabBlock.Type>get("type") == SlabBlock.Type.DOUBLE, () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_double")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.TOP), () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_top")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.BOTTOM), () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_bottom")));
+        registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.DOUBLE), () -> new Json5ModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_double")));
 
         // Trigger the block models factory registration event
         ClientRegistrationEvents.BLOCK_MODELS.factory().onRegister();

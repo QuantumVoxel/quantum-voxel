@@ -246,6 +246,22 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
         return rawId;
     }
 
+    public boolean contains(RegistryKey<T> registryKey) {
+        return registry.containsKey(registryKey);
+    }
+
+    public void sync(IntMap<NamespaceID> registryMap) {
+        if (syncDisabled) return;
+        idMap.clear();
+        for (var e : registryMap.entries()) {
+            idMap.put(e.key, get(e.value));
+        }
+    }
+
+    public void unload() {
+        idMap.clear();
+    }
+
     public static abstract class Builder<T> {
         private final Class<T> type;
         private final NamespaceID id;

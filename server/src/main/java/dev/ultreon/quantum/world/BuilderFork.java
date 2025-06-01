@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.structure.BlockPoint;
 import dev.ultreon.quantum.world.vec.BlockVec;

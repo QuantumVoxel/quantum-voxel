@@ -1,0 +1,22 @@
+{
+  parent: quantum:base/cube_sided
+  textures: {
+    side: quantum:blocks/log_side
+    up: blocks/log
+    down: blocks/log
+  }
+  elements: [
+    {
+      from: [0, 0, 0]
+      to: [16, 16, 16]
+      faces: {
+        north: {uv: [0,0,16,16], cull: north, texture: #side}
+        east: {uv: [0,0,16,16], cull: east, texture: #side}
+        south: {uv: [0,0,16,16], cull: south, texture: #side}
+        west: {uv: [0,0,16,16], cull: west, texture: #side}
+        up: {uv: [0,0,16,16], cull: up, texture: #up}
+        down: {uv: [0,0,16,16], cull: down, texture: #down}
+      }
+    }
+  ]
+}

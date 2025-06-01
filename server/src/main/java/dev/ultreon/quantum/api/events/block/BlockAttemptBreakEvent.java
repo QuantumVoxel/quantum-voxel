@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.api.events.block;
 
 import dev.ultreon.quantum.api.events.Cancelable;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.world.ServerWorld;

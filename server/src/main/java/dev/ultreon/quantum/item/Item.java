@@ -2,6 +2,7 @@ package dev.ultreon.quantum.item;
 
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.food.FoodData;
+import dev.ultreon.quantum.item.group.ItemGroup;
 import dev.ultreon.quantum.item.tool.ToolItem;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.text.TextObject;
@@ -18,11 +19,18 @@ public class Item {
     private final int maxStackSize;
     private final FoodData food;
     private final ItemRarity rarity;
+    private final ItemGroup group;
 
     public Item(Properties propertiesIn) {
         maxStackSize = propertiesIn.maxStackSize;
         food = propertiesIn.food;
         rarity = propertiesIn.rarity;
+        group = propertiesIn.group;
+    }
+
+    public void fillItemGroup() {
+        if (group == null) return;
+        group.addItem(this.defaultStack());
     }
 
     public UseResult use(UseItemContext useItemContext) {
@@ -111,6 +119,7 @@ public class Item {
         private ItemRarity rarity = ItemRarity.COMMON;
         private int maxStackSize = 64;
         private FoodData food;
+        private ItemGroup group;
 
         /**
          * Set the max stack size.
@@ -124,6 +133,11 @@ public class Item {
 
         public Properties food(FoodData foodIn) {
             food = foodIn;
+            return this;
+        }
+
+        public Properties group(ItemGroup group) {
+            this.group = group;
             return this;
         }
 

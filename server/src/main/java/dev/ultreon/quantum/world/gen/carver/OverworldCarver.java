@@ -2,7 +2,7 @@ package dev.ultreon.quantum.world.gen.carver;
 
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import dev.ultreon.quantum.block.Blocks;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.HeightmapType;

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.block.state.BlockState;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.CS_2;
 
 /**

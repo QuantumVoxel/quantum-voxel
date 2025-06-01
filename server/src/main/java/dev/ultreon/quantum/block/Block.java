@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.block.state.BlockState;
-import dev.ultreon.quantum.block.state.BlockStateDefinition;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -51,6 +49,7 @@ public class Block implements BlockLike {
     private final SoundType soundType;
     protected final BlockStateDefinition definition;
     private final boolean doesRandomTick;
+    private BlockState defaultState;
 
     /**
      * Constructs a new Block object with default properties.
@@ -92,7 +91,11 @@ public class Block implements BlockLike {
         var definitionBuilder = BlockStateDefinition.builder(this);
         defineState(definitionBuilder);
         this.definition = definitionBuilder.build();
-        this.definition.setDefault(BlockState.empty(definition));
+        this.defaultState = BlockState.empty(definition);
+    }
+
+    public void setDefaultState(BlockState state) {
+        defaultState = state;
     }
 
     public void onStateReload() {
@@ -242,7 +245,7 @@ public class Block implements BlockLike {
     }
 
     public final @NotNull BlockState getDefaultState() {
-        return definition.getDefault();
+        return defaultState;
     }
 
     /**
@@ -349,11 +352,11 @@ public class Block implements BlockLike {
 
     public BlockState readBlockState(@NotNull PacketIO buffer) {
         int stateId = buffer.readVarInt();
-        return definition.byId(stateId);
+        return definition.getStateByIndex(stateId);
     }
 
     public void writeBlockState(PacketIO buffer, BlockState state) {
-        buffer.writeVarInt(state.getStateId());
+        buffer.writeVarInt(state.getIndex());
     }
 
     public BlockState loadBlockState(MapType data) {

@@ -5,6 +5,7 @@ import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntityTypes;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.item.Items;
+import dev.ultreon.quantum.item.group.ItemGroups;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.world.capability.Capabilities;
@@ -24,6 +25,8 @@ public class CommonRegistries {
         RecipeType.nopInit();
 
         registerFuels();
+
+        ItemGroups.init();
 
         CommandRegistration.register();
     }
