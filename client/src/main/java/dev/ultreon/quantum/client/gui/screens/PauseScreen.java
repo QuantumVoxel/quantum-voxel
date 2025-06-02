@@ -3,16 +3,17 @@ package dev.ultreon.quantum.client.gui.screens;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.Screenshot;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Panel;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.ServerWorld;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 public class PauseScreen extends Screen {
     private Label gamePausedLabel;
@@ -24,6 +25,25 @@ public class PauseScreen extends Screen {
 
     public PauseScreen() {
         super("Game Paused");
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        IntegratedServer integratedServer = client.integratedServer;
+        if (integratedServer != null) {
+            client.saving = true;
+
+            QuantumServer.invoke(() -> {
+                try {
+                    integratedServer.save(false);
+                } catch (Throwable e) {
+                    client.notifications.add("Saving Failed", e.getLocalizedMessage(), "Failed to save world");
+                }
+                client.saving = false;
+            });
+        }
     }
 
     @Override
@@ -50,6 +70,15 @@ public class PauseScreen extends Screen {
         this.exitWorldButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"), 95)
                         .bounds(() -> new Bounds(15, this.size.height - 36, 120, 21)))
                 .setCallback(this::exitWorld);
+    }
+
+    @Override
+    public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
+        super.renderWidget(renderer, deltaTime);
+
+        if (QuantumClient.get().saving) {
+            renderer.textRight(TextObject.translation("quantum.ui.saving_world"), size.width - 20, size.height - 20);
+        }
     }
 
     @Override
