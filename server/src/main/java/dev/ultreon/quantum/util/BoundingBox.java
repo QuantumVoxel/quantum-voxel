@@ -310,7 +310,7 @@ public class BoundingBox implements Serializable {
         double lz = Math.abs(this.cnt.z - b.cnt.z);
         double sumz = (this.dim.z / 2.0) + (b.dim.z / 2.0);
 
-        return (lx <= sumx && ly <= sumy && lz <= sumz);
+        return (lx < sumx && ly < sumy && lz < sumz);
 
     }
 
