@@ -172,7 +172,7 @@ public abstract class GameInput implements Disposable {
             return UseResult.DENY;
 
         UseResult useResult = useItem0(player, world, hit, amount);
-        this.itemUseCooldown = System.currentTimeMillis() + 1000;
+        this.itemUseCooldown = System.currentTimeMillis() + 200;
 
         return useResult;
     }
