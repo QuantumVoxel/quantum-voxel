@@ -132,9 +132,7 @@ public class Main {
 
     private static void setupMods() {
         // Invoke FabricMC entrypoint for dedicated server.
-        LOGGER.info("Invoking FabricMC entrypoints");
-        GamePlatform.get().invokeEntrypoint("main", ModInitializer.class, ModInitializer::onInitialize);
-        GamePlatform.get().invokeEntrypoint("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+        GamePlatform.get().initMods();
 
         ModApi.init();
     }

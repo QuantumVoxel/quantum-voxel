@@ -106,6 +106,10 @@ public abstract class GamePlatform {
         return Collections.emptyList();
     }
 
+    public void initMods() {
+        // No mods available I guess :(
+    }
+
     public boolean isDevEnvironment() {
         return false;
     }

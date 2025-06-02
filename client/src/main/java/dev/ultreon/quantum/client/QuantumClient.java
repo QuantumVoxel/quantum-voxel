@@ -518,6 +518,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         QuantumClient.LOGGER.info("Booting game!");
         QuantumClient.instance = this;
 
+        GamePlatform.get().initMods();
+
 //        FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
 //        FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
 

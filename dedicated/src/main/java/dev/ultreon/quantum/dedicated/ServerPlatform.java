@@ -4,6 +4,8 @@ import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
@@ -148,6 +150,14 @@ public class ServerPlatform extends GamePlatform {
         list.addAll(FabricLoader.getInstance().getAllMods().stream().map(container -> this.mods.computeIfAbsent(container.getMetadata().getId(), v -> new FabricMod(container))).collect(Collectors.toList()));
         list.addAll(super.getMods());
         return list;
+    }
+
+    @Override
+    public void initMods() {
+        CommonConstants.LOGGER.info("Initializing mods...");
+
+        FabricLoader.getInstance().invokeEntrypoints("main", net.fabricmc.api.ModInitializer.class, ModInitializer::onInitialize);
+        FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
     }
 
     @Override
