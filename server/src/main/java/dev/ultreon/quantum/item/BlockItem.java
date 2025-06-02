@@ -83,11 +83,9 @@ public class BlockItem extends Item {
         if (world.intersectEntities(this.getBlock().getBoundingBox(vec)))
             return UseResult.DENY;
 
-        if (world.isClientSide()) {
-            BlockVec blockVec = new BlockVec(vec);
-            var state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
-            world.set(blockVec, state);
-        }
+        BlockVec blockVec = new BlockVec(vec);
+        var state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
+        world.set(blockVec, state);
 
         ItemStack stack = useItemContext.stack();
         stack.shrink(1);
