@@ -60,6 +60,7 @@
   "quantum.ui.toggle_all": "Toggle All",
   "quantum.ui.enable_all": "Enable All",
   "quantum.ui.disable_all": "Disable All",
+  "quantum.ui.saving_world": "Saving World...",
   "quantum.dialog.delete_world.title": "Delete World?",
   "quantum.dialog.delete_world.message": "Are you sure you want to\ndelete this world?\nThis cannot be undone.",
   "quantum.screen.worldLoad.enteringWorld": "Entering your world",

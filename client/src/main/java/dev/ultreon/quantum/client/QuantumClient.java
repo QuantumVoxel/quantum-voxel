@@ -200,6 +200,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     // Local data
     public LocalData localData = LocalData.load();
     public ClientSyncRegistries registries = new ClientSyncRegistries(this);
+    public boolean saving;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
