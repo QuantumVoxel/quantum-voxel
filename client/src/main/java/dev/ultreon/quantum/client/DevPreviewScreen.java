@@ -33,11 +33,11 @@ public class DevPreviewScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(TextObject.translation("quantum.screen.dev.message"))
                 .alignment(Alignment.LEFT)
-                .position(() -> new Position(40, 40)));
+                .withPositioning(() -> new Position(40, 40)));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.dev.close"))
-                .bounds(() -> new Bounds(client.getScaledWidth() / 2 - 50, size.height - 40, 100, 20))
-                .setCallback(caller -> back()));
+                .withBounding(() -> new Bounds(client.getScaledWidth() / 2 - 50, size.height - 40, 100, 20))
+                .withCallback(caller -> back()));
     }
 
     /**

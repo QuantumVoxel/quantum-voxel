@@ -53,13 +53,13 @@ public class ConfigGui extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         this.list = builder.add(new SelectionList<ConfigEntry<?>>(40)
-                .entries(entries)
-                .drawBackground(true)
-                .itemRenderer(this::renderItem)
-                .callback((config) -> {
+                .addEntries(entries)
+                .withDrawBackground(true)
+                .withItemRenderer(this::renderItem)
+                .withCallback((config) -> {
 
                 })
-                .bounds(() -> new Bounds(10, 10, size.width - 20, size.height - 20)));
+                .withBounding(() -> new Bounds(10, 10, size.width - 20, size.height - 20)));
 
         this.revalidate();
     }

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class UsernameScreen extends Screen {
     private static final Pattern USERNAME_REGEX = Pattern.compile("^[a-zA-Z0-9_][a-zA-Z0-9_]+[a-zA-Z0-9_]$");
 
-    private Panel panel;
+    private Platform platform;
     private TextEntry usernameInput;
     private TextButton nextButton;
     private Label errorLabel;
@@ -35,9 +35,9 @@ public class UsernameScreen extends Screen {
     protected void init() {
         super.init();
 
-        panel = this.add(Panel.create());
-        panel.setPos(this.size.width / 2 - 105, this.size.height / 2 - 15);
-        panel.setSize(210, 66);
+        platform = this.add(Platform.create());
+        platform.setPos(this.size.width / 2 - 105, this.size.height / 2 - 15);
+        platform.setSize(210, 66);
 
         usernameInput = this.add(TextEntry.of()
                 .hint(TextObject.translation("quantum.screen.username.hint"))
@@ -46,7 +46,7 @@ public class UsernameScreen extends Screen {
         usernameInput.setSize(200, 20);
 
         nextButton = this.add(TextButton.of(UITranslations.PROCEED, 95)
-                .setCallback(button -> {
+                .withCallback(button -> {
                     if (!nextButton.isEnabled()) return;
 
                     assert this.client != null;
@@ -58,17 +58,17 @@ public class UsernameScreen extends Screen {
                     this.client.showScreen(new TitleScreen());
                 }));
         nextButton.setPos(this.size.width / 2 + 2, this.size.height / 2 + 26);
-        nextButton.setType(Button.Type.DARK_EMBED);
+        nextButton.withType(Button.Type.DARK_EMBED);
         nextButton.disable();
 
         skipButton = this.add(TextButton.of(TextObject.translation("quantum.ui.skip"), 95)
-                .setCallback(button -> {
+                .withCallback(button -> {
                     assert this.client != null;
                     this.client.setUser(new User("Anonymous"));
                     this.client.showScreen(new TitleScreen());
                 }));
         skipButton.setPos(this.size.width / 2 - 100, this.size.height / 2 + 26);
-        skipButton.setType(Button.Type.DARK_EMBED);
+        skipButton.withType(Button.Type.DARK_EMBED);
 
         errorLabel = this.add(Label.of());
         errorLabel.setPos(this.size.width / 2 - 100, this.size.height / 2 + 15);
@@ -81,7 +81,7 @@ public class UsernameScreen extends Screen {
     public void resized(int width, int height) {
         super.resized(width, height);
 
-        panel.setPos(this.size.width / 2 - 105, this.size.height / 2 - 15);
+        platform.setPos(this.size.width / 2 - 105, this.size.height / 2 - 15);
         usernameInput.setPos(this.size.width / 2 - 100, this.size.height / 2 - 10);
         nextButton.setPos(this.size.width / 2 + 2, this.size.height / 2 + 26);
         skipButton.setPos(this.size.width / 2 - 100, this.size.height / 2 + 26);

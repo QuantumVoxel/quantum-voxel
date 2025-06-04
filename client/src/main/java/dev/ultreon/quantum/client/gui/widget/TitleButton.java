@@ -72,19 +72,19 @@ public class TitleButton extends Button<TitleButton> {
     }
 
     @Override
-    public TitleButton position(Supplier<Position> position) {
+    public TitleButton withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
 
     @Override
-    public TitleButton bounds(Supplier<Bounds> position) {
+    public TitleButton withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> this.setBounds(position.get()));
         return this;
     }
 
     @Override
-    public TitleButton setCallback(Callback<TitleButton> callback) {
+    public TitleButton withCallback(Callback<TitleButton> callback) {
         this.callback.set(callback);
         return this;
     }

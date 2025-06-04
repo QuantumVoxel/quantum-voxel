@@ -80,13 +80,13 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
     }
 
     @Override
-    public CycleButton<T> position(Supplier<Position> position) {
+    public CycleButton<T> withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
 
     @Override
-    public CycleButton<T> bounds(Supplier<Bounds> position) {
+    public CycleButton<T> withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> this.setBounds(position.get()));
         return this;
     }

@@ -69,19 +69,19 @@ public class TextButton extends Button<TextButton> {
     }
 
     @Override
-    public TextButton position(Supplier<Position> position) {
+    public TextButton withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
 
     @Override
-    public TextButton bounds(Supplier<Bounds> position) {
+    public TextButton withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> this.setBounds(position.get()));
         return this;
     }
 
     @Override
-    public TextButton setCallback(Callback<TextButton> callback) {
+    public TextButton withCallback(Callback<TextButton> callback) {
         this.callback.set(callback);
         return this;
     }

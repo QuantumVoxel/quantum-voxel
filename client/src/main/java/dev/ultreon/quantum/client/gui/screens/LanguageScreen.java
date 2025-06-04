@@ -29,21 +29,21 @@ public class LanguageScreen extends Screen {
 
         this.titleLabel = builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, 15))
+                .withPositioning(() -> new Position(this.size.width / 2, 15))
                 .scale(2));
 
-        this.list = builder.add(new SelectionList<Locale>(21).bounds(() -> new Bounds(this.size.width / 2 - 200, 50, 400, this.size.height - 90)))
-                .selectable(true)
-                .entries(locales)
-                .drawBackground(true)
-                .itemRenderer(this::renderItem)
-                .callback(this::setLanguage);
+        this.list = builder.add(new SelectionList<Locale>(21).withBounding(() -> new Bounds(this.size.width / 2 - 200, 50, 400, this.size.height - 90)))
+                .withSelectable(true)
+                .addEntries(locales)
+                .withDrawBackground(true)
+                .withItemRenderer(this::renderItem)
+                .withCallback(this::setLanguage);
 
         this.list.entry(LanguageManager.getCurrentLanguage()).select();
 
         this.backButton = builder.add(TextButton.of(UITranslations.BACK)
-                .bounds(() -> new Bounds(this.size.width / 2 - 75, this.size.height - 30, 150, 21))
-                .setCallback(caller -> this.back()));
+                .withBounding(() -> new Bounds(this.size.width / 2 - 75, this.size.height - 30, 150, 21))
+                .withCallback(caller -> this.back()));
     }
 
     private void renderItem(Renderer renderer, Locale locale, int y, boolean selected, float deltaTime) {

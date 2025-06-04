@@ -88,7 +88,7 @@ public interface CompletionPromise<T> extends Promise<T> {
     }
 
     @Override
-    T join();
+    T join() throws AsyncException;
 
     @Override
     boolean isFailed();

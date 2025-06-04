@@ -3,6 +3,8 @@ package dev.ultreon.quantum.client.gui.screens;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
+import dev.ultreon.quantum.client.gui.screens.test.UITestScreen;
+import dev.ultreon.quantum.client.gui.screens.test.WorldGenTestScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
 import dev.ultreon.quantum.client.gui.widget.Rectangle;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
@@ -33,46 +35,51 @@ public class TitleScreen extends Screen {
     }
 
     @Override
+    protected boolean isTitleEnabled() {
+        return false;
+    }
+
+    @Override
     public void build(@NotNull GuiBuilder builder) {
         this.client.setActivity(GameActivity.MAIN_MENU);
 
         if (!GamePlatform.get().hasBackPanelRemoved())
-            builder.add(Rectangle.create().bounds(() -> new Bounds(0, 0, this.size.width, this.size.height)).backgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
+            builder.add(Rectangle.create().withBounding(() -> new Bounds(0, 0, this.size.width, this.size.height)).withBackgroundColor(RgbColor.rgba(0, 0, 0, .4f)));
 
         this.singleplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.singleplayer"), 100)
                         .icon(NamespaceID.of("textures/gui/title/singleplayer.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
-                .setCallback(this::openSingleplayer));
+                .withBounding(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .withCallback(this::openSingleplayer));
 
         if (GamePlatform.get().isDevEnvironment()) {
             this.worldGenTestButton = builder.add(TextButton.of(TextObject.literal("WORLD-GEN TEST"), 100)
-                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 125))
-                    .setCallback(this::openWorldGenTest));
+                    .withPositioning(() -> new Position(this.size.width / 2 - 50 - 10 - 100 - 10 - 100, 2 * this.size.height / 3 - 125))
+                    .withCallback(this::openWorldGenTest));
 
             this.uiTestButton = builder.add(TextButton.of(TextObject.literal("UI TEST"), 100)
-                    .position(() -> new Position(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 150))
-                    .setCallback(this::openUITest));
+                    .withPositioning(() -> new Position(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 150))
+                    .withCallback(this::openUITest));
         }
 
         this.multiplayerButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.multiplayer"), 100)
                         .icon(NamespaceID.of("textures/gui/title/multiplayer.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
-                .setCallback(this::openMultiplayer));
+                .withBounding(() -> new Bounds(this.size.width / 2 - 50 - 10 - 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .withCallback(this::openMultiplayer));
 
         this.modListButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.mod_list"), 100)
                         .icon(NamespaceID.of("textures/gui/title/mods.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 - 50, 2 * this.size.height / 3 - 100, 100, 150))
-                .setCallback(this::showModList));
+                .withBounding(() -> new Bounds(this.size.width / 2 - 50, 2 * this.size.height / 3 - 100, 100, 150))
+                .withCallback(this::showModList));
 
         this.optionsButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.options"), 100)
                         .icon(NamespaceID.of("textures/gui/title/options.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50, 2 * this.size.height / 3 - 100, 100, 150))
-                .setCallback(this::showOptions));
+                .withBounding(() -> new Bounds(this.size.width / 2 + 10 + 50, 2 * this.size.height / 3 - 100, 100, 150))
+                .withCallback(this::showOptions));
 
         this.quitButton = builder.add(TitleButton.of(TextObject.translation("quantum.screen.title.quit"), 100)
                         .icon(NamespaceID.of("textures/gui/title/quit.png"))
-                .bounds(() -> new Bounds(this.size.width / 2 + 10 + 50 + 10 + 100, 2 * this.size.height / 3 - 100, 100, 150))
-                .setCallback(this::quitGame));
+                .withBounding(() -> new Bounds(this.size.width / 2 + 10 + 50 + 10 + 100, 2 * this.size.height / 3 - 100, 100, 150))
+                .withCallback(this::quitGame));
 
         // FIXME Mod sidebar
 //        this.modSidebar = builder.add(new ModSidebar(this));

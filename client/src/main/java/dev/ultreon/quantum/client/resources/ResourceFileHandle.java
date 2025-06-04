@@ -347,11 +347,6 @@ public class ResourceFileHandle extends FileHandle {
     }
 
     @Override
-    public Files.FileType type() {
-        return Files.FileType.Internal;
-    }
-
-    @Override
     public ByteBuffer map() {
         if (this.resource == null) throw new GdxRuntimeException(String.format("Resource %s not found", this.id));
         byte[] data = this.resource.loadOrGet();

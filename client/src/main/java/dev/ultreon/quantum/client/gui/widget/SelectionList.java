@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -17,6 +18,7 @@ import java.util.function.Supplier;
 @ApiStatus.NonExtendable
 public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private static final int SCROLLBAR_WIDTH = 5;
+    private static final Color COLOR = new Color(0.175f, 0.175f, 0.175f, 1f);
     protected final List<Entry<T>> entries = new ArrayList<>();
     private float scrollY = 0;
     private int itemHeight = 20;
@@ -53,7 +55,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     public SelectionList(int itemHeight) {
         this();
-        this.itemHeight(itemHeight);
+        this.withItemHeight(itemHeight);
     }
 
     public SelectionList<T> gap(int gap) {
@@ -61,7 +63,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this;
     }
 
-    public SelectionList<T> drawButtons(boolean drawButtons) {
+    public SelectionList<T> withDrawButtons(boolean drawButtons) {
         this.drawButtons = drawButtons;
         return this;
     }
@@ -77,7 +79,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     @Override
     public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         if (this.drawBackground) {
-            renderer.renderFrame(pos.x - 2, pos.y - 2, size.width + 4, size.height + 4);
+            renderer.fill(pos.x, pos.y, size.width, size.height, COLOR);
         }
 
         renderer.pushMatrix();
@@ -266,12 +268,12 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this.entries;
     }
 
-    public SelectionList<T> itemRenderer(ItemRenderer<T> itemRenderer) {
+    public SelectionList<T> withItemRenderer(ItemRenderer<T> itemRenderer) {
         this.itemRenderer = itemRenderer;
         return this;
     }
 
-    public SelectionList<T> selectable(boolean selectable) {
+    public SelectionList<T> withSelectable(boolean selectable) {
         this.selectable = selectable;
         return this;
     }
@@ -282,34 +284,34 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return entry;
     }
 
-    public SelectionList<T> entries(Collection<? extends T> values) {
+    public SelectionList<T> addEntries(Collection<? extends T> values) {
         values.forEach(this::entry);
         return this;
     }
 
-    public SelectionList<T> callback(Callback<T> onSelected) {
+    public SelectionList<T> withCallback(Callback<T> onSelected) {
         this.onSelected = onSelected;
         return this;
     }
 
-    public SelectionList<T> itemHeight(int itemHeight) {
+    public SelectionList<T> withItemHeight(int itemHeight) {
         this.itemHeight = itemHeight;
         return this;
     }
 
-    public SelectionList<T> drawBackground(boolean drawBackground) {
+    public SelectionList<T> withDrawBackground(boolean drawBackground) {
         this.drawBackground = drawBackground;
         return this;
     }
 
     @Override
-    public SelectionList<T> position(Supplier<Position> position) {
+    public SelectionList<T> withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public SelectionList<T> bounds(Supplier<Bounds> position) {
+    public SelectionList<T> withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }
@@ -318,7 +320,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this.scrollY;
     }
 
-    public SelectionList<T> cutButtons(boolean b) {
+    public SelectionList<T> withCutButtons(boolean b) {
         this.cutButtons = b;
         return this;
     }
@@ -376,12 +378,12 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         }
 
         @Override
-        public Entry<T> position(Supplier<Position> position) {
+        public Entry<T> withPositioning(Supplier<Position> position) {
             return this;
         }
 
         @Override
-        public Entry<T> bounds(Supplier<Bounds> position) {
+        public Entry<T> withBounding(Supplier<Bounds> position) {
             return this;
         }
 

@@ -30,7 +30,7 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.Gizmo;
-import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
+import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.management.MaterialManager;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.QVModel;

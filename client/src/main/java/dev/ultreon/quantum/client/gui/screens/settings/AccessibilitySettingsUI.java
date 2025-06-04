@@ -9,7 +9,6 @@ import dev.ultreon.quantum.client.gui.screens.options.BooleanEnum;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
 import dev.ultreon.quantum.client.gui.widget.CycleButton;
 import dev.ultreon.quantum.client.gui.widget.Label;
-import dev.ultreon.quantum.client.gui.widget.Slider;
 import dev.ultreon.quantum.text.TextObject;
 
 public class AccessibilitySettingsUI {
@@ -25,42 +24,42 @@ public class AccessibilitySettingsUI {
         builder.add(Label.of(builder.title())
                 .alignment(Alignment.CENTER)
                 .scale(2)
-                .position(() -> new Position(builder.content().getX() + 235, builder.content().getY() + 25)));
+                .withPositioning(() -> new Position(builder.content().getX() + 235, builder.content().getY() + 25)));
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.hideHotbarWhenThirdPerson"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.thirdpersonHotbar.getValue() ? BooleanEnum.FALSE : BooleanEnum.TRUE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.hidden" : "quantum.ui.visible"))
-                .setCallback(this::setHideHotbarWhenThirdPerson));
+                .withCallback(this::setHideHotbarWhenThirdPerson));
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.vibration"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.vibration.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .setCallback(this::setVibration));
+                .withCallback(this::setVibration));
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.enableCrosshair"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.enableCrosshair.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .setCallback(this::setEnableCrosshair));
+                .withCallback(this::setEnableCrosshair));
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.enableHud"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.enableHud.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .setCallback(this::setEnableHud));
+                .withCallback(this::setEnableHud));
 
         builder.add(TextObject.translation("quantum.screen.options.accessibility.exitConfirmation"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.closePrompt.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 225, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 225, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .setCallback(this::setExitConfirmation));
+                .withCallback(this::setExitConfirmation));
     }
 
     private void setExitConfirmation(CycleButton<BooleanEnum> booleanEnumCycleButton) {

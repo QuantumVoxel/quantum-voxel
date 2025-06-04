@@ -47,11 +47,11 @@ public abstract class GamePlatform {
     }
 
     public void onEnterTextInput() {
-        // Implemented in subclasses
+        Gdx.input.setOnscreenKeyboardVisible(true);
     }
 
     public void onExitTextInput() {
-        // Implemented in subclasses
+        Gdx.input.setOnscreenKeyboardVisible(false);
     }
 
     public void setupImGui() {

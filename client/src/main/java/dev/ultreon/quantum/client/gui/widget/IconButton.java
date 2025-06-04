@@ -42,19 +42,19 @@ public class IconButton extends Button<IconButton> {
     }
 
     @Override
-    public IconButton position(Supplier<Position> position) {
+    public IconButton withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
 
     @Override
-    public IconButton bounds(Supplier<Bounds> position) {
+    public IconButton withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> this.setBounds(position.get()));
         return this;
     }
 
     @Override
-    public IconButton setCallback(Callback<IconButton> callback) {
+    public IconButton withCallback(Callback<IconButton> callback) {
         this.callback.set(callback);
         return this;
     }

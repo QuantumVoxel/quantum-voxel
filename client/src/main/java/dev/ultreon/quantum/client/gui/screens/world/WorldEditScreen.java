@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.gui.screens;
+package dev.ultreon.quantum.client.gui.screens.world;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Bounds;
@@ -31,18 +31,18 @@ public class WorldEditScreen extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         ScrollableContainer container = builder.add(new ScrollableContainer())
-                .bounds(() -> new Bounds(size.width / 2 - 200, size.height / 2 - 100, 400, 200));
+                .withBounding(() -> new Bounds(size.width / 2 - 200, size.height / 2 - 100, 400, 200));
 
         container.add(TextEntry.of())
                 .callback(this::updateName);
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.worlds.edit.save")))
-                .setCallback(this::save)
-                .bounds(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 100, 200, 20));
+                .withCallback(this::save)
+                .withBounding(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 100, 200, 20));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.worlds.edit.cancel")))
-                .setCallback(this::cancel)
-                .bounds(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 130, 200, 20));
+                .withCallback(this::cancel)
+                .withBounding(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 130, 200, 20));
 
     }
 

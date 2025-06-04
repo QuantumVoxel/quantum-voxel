@@ -230,7 +230,7 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .addContributor("Creatomat Gaming", Map.of("github", "https://github.com/Creatomat"))
                         .addIcon(128, "assets/craft/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://gitlab.com/ultreon/quantum/game", "email", "contact.ultreon@gmail.com", "homepage", "https://ultreon.dev/?id=quantum#project", "discord", "https://discord.gg/WePT9v2CmQ", "issues", "https://gitlab.com/ultreon/quantum/game/-/issues")))
+                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/QuantumVoxel/quantum-voxel", "email", "contact.ultreon@gmail.com", "homepage", "https://ultreon.dev/?id=quantum#project", "discord", "https://discord.gg/WePT9v2CmQ", "issues", "https://github.com/QuantumVoxel/quantum-voxel/issues")))
                         .setDescription("A blocky, voxel-based world where you can explore,\n" +
                                         " build, and survive in a vast and ever-changing environment.\n" +
                                         "Inspired by the best of the voxel game genre.\n" +

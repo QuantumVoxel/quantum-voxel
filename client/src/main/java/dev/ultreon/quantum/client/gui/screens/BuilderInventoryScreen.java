@@ -68,7 +68,7 @@ public class BuilderInventoryScreen extends ContainerScreen {
         for (i = 0; i < groups.size(); i++) {
             ItemGroup itemGroup = groups.get(i);
             TextButton widget = TextButton.of(itemGroup.getTitle(), 92);
-            widget.setCallback(caller -> {
+            widget.withCallback(caller -> {
                 group = itemGroup;
                 widgets.clear();
                 init();

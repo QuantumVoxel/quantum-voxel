@@ -91,9 +91,9 @@ public class CrashScreen extends Screen {
         // Add a SelectionList of CrashLog items to the GUI
         this.list = builder.add(
                 new SelectionList<CrashLog>(itemSize)
-                        .entries(crashes)
-                        .itemRenderer(this::renderItem)
-                        .bounds(() -> new Bounds(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight())
+                        .addEntries(crashes)
+                        .withItemRenderer(this::renderItem)
+                        .withBounding(() -> new Bounds(0, 0, QuantumClient.get().getWidth(), QuantumClient.get().getHeight())
                         ));
 
         // Define the file destination for saving crash reports

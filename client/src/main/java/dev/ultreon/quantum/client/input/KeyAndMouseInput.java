@@ -106,6 +106,9 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     }
 
     public static boolean isCtrlDown() {
+        if (GamePlatform.get().isMacOSX()) {
+            return Gdx.input.isKeyPressed(Input.Keys.SYM);
+        }
         return Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT);
     }
 

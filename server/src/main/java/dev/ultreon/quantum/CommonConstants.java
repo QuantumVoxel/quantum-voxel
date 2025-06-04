@@ -121,6 +121,7 @@ public class CommonConstants {
     public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final JsonReader JSON_READ = new JsonReader();
     public static final int MAX_BLOCK_REGISTRY = 256;
+    public static final int GENERATOR_ID = 0;
 
     private CommonConstants() {
 

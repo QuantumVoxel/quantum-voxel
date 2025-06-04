@@ -10,21 +10,17 @@ import java.util.function.Supplier;
 
 public class TitleWidget extends Widget {
     private final Screen screen;
-    private TextObject title;
     private Screen parent;
     private boolean backPressed;
 
-    public TitleWidget(Screen screen, TextObject title) {
+    public TitleWidget(Screen screen) {
         super(screen.getWidth(), 21);
         this.screen = screen;
-        this.title = title;
 
         this.onRevalidate(widget -> {
             this.size.width = screen.getWidth();
             this.size.height = 21;
             this.setPos(0, 0);
-
-            this.title = screen.getTitle();
         });
     }
 
@@ -34,6 +30,7 @@ public class TitleWidget extends Widget {
 
         NamespaceID texture = new NamespaceID("textures/gui/title.png");
 
+        TextObject title = screen.title;
         if (GamePlatform.get().hasBackPanelRemoved()) {
 //            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
             renderer.fill(0, 0, size.width, size.height, RgbColor.WHITE.withAlpha(0x20));
@@ -49,7 +46,9 @@ public class TitleWidget extends Widget {
                 renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);
             }
 
-            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
+            if (title != null) {
+                renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
+            }
         } else {
             renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
 
@@ -64,7 +63,9 @@ public class TitleWidget extends Widget {
                 renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);
             }
 
-            renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
+            if (title != null) {
+                renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
+            }
         }
     }
 
@@ -94,12 +95,12 @@ public class TitleWidget extends Widget {
     }
 
     @Override
-    public TitleWidget position(Supplier<Position> position) {
+    public TitleWidget withPositioning(Supplier<Position> position) {
         return this;
     }
 
     @Override
-    public Widget bounds(Supplier<Bounds> position) {
+    public Widget withBounding(Supplier<Bounds> position) {
         return this;
     }
 
@@ -108,7 +109,7 @@ public class TitleWidget extends Widget {
     }
 
     public TextObject getTitle() {
-        return title;
+        return screen.title;
     }
 
     public void parent(Screen parentScreen) {

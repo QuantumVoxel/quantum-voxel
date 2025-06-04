@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.gui.screens;
+package dev.ultreon.quantum.client.gui.screens.world;
 
 import dev.ultreon.libs.datetime.v0.DateTime;
 import dev.ultreon.quantum.CommonConstants;
@@ -7,6 +7,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.GenericIcon;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
+import dev.ultreon.quantum.client.gui.screens.UntestedAreaScreen;
 import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.text.WordGenerator;
@@ -15,7 +16,6 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import kotlin.random.Random;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class WorldCreationScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         var titleLabel = builder.add(Label.of(title)
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(getWidth() / 2, getHeight() / 2 - 60))
+                .withPositioning(() -> new Position(getWidth() / 2, getHeight() / 2 - 60))
                 .scale(2));
 
         titleLabel.text().set(getTitle());
@@ -47,31 +47,29 @@ public class WorldCreationScreen extends Screen {
 
         worldName = WorldCreationScreen.WORD_GEN.generate() + " " + WorldCreationScreen.WORD_GEN.generate();
 
-        builder.add(Panel.create())
-                .bounds(() -> new Bounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 240, 60));
+        builder.add(Platform.create())
+                .withBounding(() -> new Bounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 240, 60));
 
-        worldNameEntry = builder.add(TextEntry.of(worldName).position(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 - 20))
+        worldNameEntry = builder.add(TextEntry.of(worldName).withPositioning(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 - 20))
                 .callback(this::updateWorldName)
                 .hint(TextObject.translation("quantum.screen.world_creation.name")));
 
-        reloadButton = builder.add(IconButton.of(GenericIcon.RELOAD).position(() -> new Position(getWidth() / 2 + 105, getHeight() / 2 - 24))
-                .setCallback(this::regenerateName));
+        reloadButton = builder.add(IconButton.of(GenericIcon.RELOAD).withPositioning(() -> new Position(getWidth() / 2 + 105, getHeight() / 2 - 24))
+                .withCallback(this::regenerateName));
 
         createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_creation.create"), 95)
-                .position(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 + 5))
-                .setCallback(caller -> {
+                .withPositioning(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 + 5))
+                .withCallback(caller -> {
                     if (GamePlatform.get().isWeb()) {
-                        client.showScreen(new UntestedAreaScreen("World creation on web is experimental", () -> {
-                            createWorld(caller);
-                        }));
+                        client.showScreen(new UntestedAreaScreen("World creation on web is experimental", this::createWorld));
                         return;
                     }
-                    createWorld(caller);
+                    createWorld();
                 }));
 
         builder.add(TextButton.of(UITranslations.CANCEL, 95)
-                .position(() -> new Position(getWidth() / 2 + 5, getHeight() / 2 + 5))
-                .setCallback(this::onBack));
+                .withPositioning(() -> new Position(getWidth() / 2 + 5, getHeight() / 2 + 5))
+                .withCallback(this::onBack));
     }
 
     private void regenerateName(IconButton iconButton) {
@@ -83,7 +81,7 @@ public class WorldCreationScreen extends Screen {
         back();
     }
 
-    private void createWorld(TextButton caller) {
+    private void createWorld() {
         try {
             String folderName = WorldStorage.createFolderName();
             WorldStorage storage = new WorldStorage(QuantumClient.data("worlds").child(folderName));

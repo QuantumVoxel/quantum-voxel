@@ -32,15 +32,15 @@ public class CraftyConfigGui extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         builder.add(new SelectionList<CraftyConfig>(40)
-                .entries(configs)
-                .itemRenderer(this::renderItem)
-                .selectable(true)
-                .drawBackground(true)
-                .callback((config) -> {
+                .addEntries(configs)
+                .withItemRenderer(this::renderItem)
+                .withSelectable(true)
+                .withDrawBackground(true)
+                .withCallback((config) -> {
                     ConfigGui configGui = new ConfigGui(this, config);
                     this.client.showScreen(configGui);
                 })
-                .bounds(() -> new Bounds(10, 10, this.size.width - 20, this.size.height - 20)));
+                .withBounding(() -> new Bounds(10, 10, this.size.width - 20, this.size.height - 20)));
     }
 
     private void renderItem(Renderer renderer, CraftyConfig value, int y, boolean selected, float deltaTime) {

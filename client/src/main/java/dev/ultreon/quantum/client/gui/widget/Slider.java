@@ -39,13 +39,13 @@ public class Slider extends Widget {
     }
 
     @Override
-    public Slider position(Supplier<Position> position) {
+    public Slider withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public Slider bounds(Supplier<Bounds> position) {
+    public Slider withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }

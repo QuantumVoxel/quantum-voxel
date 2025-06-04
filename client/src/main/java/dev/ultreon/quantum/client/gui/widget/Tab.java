@@ -36,7 +36,7 @@ public class Tab extends Button<Tab> {
         this.builder = builder;
 
         this.content = new TabContent(this.parent, 0, 0, 0, 0, title);
-        this.content.bounds(() -> new Bounds(this.parent.getContentX(), this.parent.getContentY(), this.parent.getContentWidth(), this.parent.getContentHeight()));
+        this.content.withBounding(() -> new Bounds(this.parent.getContentX(), this.parent.getContentY(), this.parent.getContentWidth(), this.parent.getContentHeight()));
         ((UIContainer<?>) parent).defineRoot(this.content);
         this.build();
     }
@@ -48,7 +48,7 @@ public class Tab extends Button<Tab> {
     }
 
     @Override
-    public Tab position(Supplier<Position> position) {
+    public Tab withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
@@ -76,7 +76,7 @@ public class Tab extends Button<Tab> {
     }
 
     @Override
-    public Tab bounds(Supplier<Bounds> position) {
+    public Tab withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> this.setBounds(position.get()));
         return this;
     }

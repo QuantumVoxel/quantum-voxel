@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -22,6 +24,7 @@ import com.kotcrab.vis.ui.widget.*;
 import com.kotcrab.vis.ui.widget.file.FileChooser;
 import com.kotcrab.vis.ui.widget.file.FileChooserListener;
 import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -101,7 +104,13 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     void crash(Throwable e) {
         if (crash != null) return;
-        crash = ExceptionUtils.getStackTrace(e);
+        try {
+            CommonConstants.LOGGER.error("Game Crashed:", e);
+        } catch (Throwable t) {
+            e.addSuppressed(t);
+            e.printStackTrace();
+        }
+        crash = ExceptionUtils.getStackTrace(e).replace("\t", "    ");
         quantum = null;
 
         Gdx.app.postRunnable(() -> openScreen(new CrashScreen()));
@@ -139,11 +148,7 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void render() {
-        try {
-            this.unsafeRender();
-        } catch (Throwable t) {
-            this.crash(t);
-        }
+        this.unsafeRender();
     }
 
     private void unsafeRender() {
@@ -152,8 +157,14 @@ public class SafeLoadWrapper implements ApplicationListener {
                 currentScreen.render(Gdx.graphics.getDeltaTime());
             return;
         }
-        if (quantum != null) {
-            quantum.render();
+        try {
+            if (quantum != null) {
+                quantum.render();
+            }
+        } catch (Throwable t) {
+            Lwjgl3Graphics graphics = (Lwjgl3Graphics) Gdx.app.getGraphics();
+            graphics.getWindow().setVisible(true);
+            this.crash(t);
         }
     }
 

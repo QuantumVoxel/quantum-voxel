@@ -220,13 +220,13 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     }
 
     @Override
-    public ScrollableContainer position(Supplier<Position> position) {
+    public ScrollableContainer withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public ScrollableContainer bounds(Supplier<Bounds> position) {
+    public ScrollableContainer withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }

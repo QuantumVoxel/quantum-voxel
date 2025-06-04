@@ -1,4 +1,4 @@
-package dev.ultreon.quantum.client.gui.screens;
+package dev.ultreon.quantum.client.gui.screens.world;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
@@ -10,14 +10,12 @@ import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
-import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
-import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -68,16 +66,16 @@ public class WorldLoadScreen extends Screen {
 
         this.titleLabel = builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 25))
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 25))
                 .scale(2));
 
         this.descriptionLabel = builder.add(Label.of("Preparing")
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3 + 3)));
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 + 3)));
 
         this.subTitleLabel = builder.add(Label.of()
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3 + 31)));
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 + 31)));
 
         GamePlatform.get().runAsync(this::run);
     }

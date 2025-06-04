@@ -31,24 +31,24 @@ public class Rectangle extends Widget {
         return new Rectangle();
     }
 
-    public Rectangle backgroundColor(RgbColor color) {
+    public Rectangle withBackgroundColor(RgbColor color) {
         this.backgroundColor.set(color);
         return this;
     }
 
     @Override
-    public Rectangle position(Supplier<Position> position) {
+    public Rectangle withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
 
     @Override
-    public Rectangle bounds(Supplier<Bounds> bounds) {
+    public Rectangle withBounding(Supplier<Bounds> bounds) {
         this.onRevalidate(widget -> this.setBounds(bounds.get()));
         return this;
     }
 
-    public ColorComponent backgroundColor() {
+    public ColorComponent withBackgroundColor() {
         return this.backgroundColor;
     }
 

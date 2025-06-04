@@ -73,7 +73,7 @@ public abstract class TabbedUI extends Screen {
         for (Tab tab : this.tabs) {
             tab.revalidate();
             tab.content().revalidate();
-            tab.content().bounds(this.contentBounds);
+            tab.content().withBounding(this.contentBounds);
         }
     }
 
@@ -97,7 +97,7 @@ public abstract class TabbedUI extends Screen {
 
         if (this.tab != null && renderer.pushScissors(contentBounds)) {
             TabContent content = this.tab.content();
-            content.bounds(contentBounds);
+            content.withBounding(contentBounds);
             content.render(renderer, deltaTime);
             renderer.popScissors();
         }
@@ -220,18 +220,12 @@ public abstract class TabbedUI extends Screen {
             return dialog.mouseClick(mouseX, mouseY, button, clicks);
         }
 
-        TitleWidget title = this.titleWidget;
-        int oldMouseY = mouseY;
-        if (title != null) {
-            mouseY -= title.getHeight();
-        }
-
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseClick(mouseX, mouseY, button, clicks)) return true;
             if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mouseClick(mouseX, mouseY, button, clicks)) return true;
         }
 
-        return super.mouseClick(mouseX, oldMouseY, button, clicks);
+        return super.mouseClick(mouseX, mouseY, button, clicks);
     }
 
     @Override
@@ -241,18 +235,12 @@ public abstract class TabbedUI extends Screen {
             return dialog.mousePress(mouseX, mouseY, button);
         }
 
-        TitleWidget title = this.titleWidget;
-        int oldMouseY = mouseY;
-        if (title != null) {
-            mouseY -= title.getHeight();
-        }
-
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mousePress(mouseX, mouseY, button)) return true;
             if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY) && tab.content().mousePress(mouseX, mouseY, button)) return true;
         }
 
-        return super.mousePress(mouseX, oldMouseY, button);
+        return super.mousePress(mouseX, mouseY, button);
     }
 
     @Override
@@ -262,20 +250,15 @@ public abstract class TabbedUI extends Screen {
             return;
         }
 
-        int oldMouseY = y;
-        if (this.titleWidget != null) {
-            y -= this.titleWidget.getHeight();
-        }
-
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(x, y)) {
                 tab.mouseMove(x, y);
-                super.mouseMoved(x, oldMouseY);
+                super.mouseMoved(x, y);
                 return;
             }
         }
 
-        super.mouseMoved(x, oldMouseY);
+        super.mouseMoved(x, y);
     }
 
     @Override
@@ -292,11 +275,6 @@ public abstract class TabbedUI extends Screen {
             }
         }
 
-        int oldMouseY = mouseY;
-        if (title != null) {
-            mouseY -= title.getHeight();
-        }
-
         boolean flag = false;
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(mouseX, mouseY) && tab.mouseRelease(mouseX, mouseY, button)) {
@@ -310,7 +288,7 @@ public abstract class TabbedUI extends Screen {
         }
 
         if (!flag) {
-            return super.mouseRelease(mouseX, oldMouseY, button);
+            return super.mouseRelease(mouseX, mouseY, button);
         }
 
         return true;

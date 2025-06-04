@@ -20,11 +20,11 @@ public class MultiplayerScreen extends Screen {
     private TextButton joinButton;
     private TextButton backButton;
     private TextButton removeButton;
-    private Panel panel;
+    private Platform platform;
     private SelectionList<ServerEntry> selectionList = new SelectionList<>();
     private ServerInfo server;
-    private Panel listPanel;
-    private Panel listButtonPanel;
+    private Platform listPlatform;
+    private Platform listButtonPlatform;
     private TextButton editButton;
 
     public MultiplayerScreen() {
@@ -39,20 +39,20 @@ public class MultiplayerScreen extends Screen {
     protected void init() {
         super.init();
 
-        listPanel = add(Panel.create());
-        listPanel.setPos(0, 0);
-        listPanel.setSize(200, size.height - 27);
+        listPlatform = add(Platform.create());
+        listPlatform.setPos(0, 0);
+        listPlatform.setSize(200, size.height - 27);
 
-        listButtonPanel = add(Panel.create());
-        listButtonPanel.setPos(0, size.height - 327);
-        listButtonPanel.setSize(200, 30);
+        listButtonPlatform = add(Platform.create());
+        listButtonPlatform.setPos(0, size.height - 327);
+        listButtonPlatform.setSize(200, 30);
 
         selectionList = add(new SelectionList<>());
         selectionList.setPos(2, 0);
         selectionList.setSize(196, size.height - 30);
-        selectionList.drawBackground(false);
-        selectionList.selectable(true);
-        selectionList.itemRenderer((renderer, value, y, selected, deltaTime) -> {
+        selectionList.withDrawBackground(false);
+        selectionList.withSelectable(true);
+        selectionList.withItemRenderer((renderer, value, y, selected, deltaTime) -> {
             ServerInfo info = value.info;
 
             renderer.renderFrame(2, y, 196, selectionList.getItemHeight());
@@ -61,40 +61,40 @@ public class MultiplayerScreen extends Screen {
             //noinspection IntegerDivisionInFloatingPointContext
             renderer.textCenter("[*]" + info.name(), 100, y + selectionList.getItemHeight() / 2 - font.getLineHeight() / 2, true);
         });
-        selectionList.itemHeight(30);
-        selectionList.callback(this::selectServer);
+        selectionList.withItemHeight(30);
+        selectionList.withCallback(this::selectServer);
 
         addButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.add"), 190));
         addButton.setPos(5, this.size.height - 26);
-        addButton.setType(Button.Type.DARK_EMBED);
-        addButton.setCallback(this::addServer);
+        addButton.withType(Button.Type.DARK_EMBED);
+        addButton.withCallback(this::addServer);
 
         client.localData.servers.forEach(info -> selectionList.entry(new ServerEntry(info)));
 
-        panel = add(Panel.create());
-        panel.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 61);
-        panel.setSize(110, 122);
+        platform = add(Platform.create());
+        platform.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 61);
+        platform.setSize(110, 122);
 
         joinButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98));
-        joinButton.setPos(panel.getPos().x + 5, panel.getPos().y + 5);
-        joinButton.setType(Button.Type.DARK_EMBED);
-        joinButton.setCallback(this::joinServer);
+        joinButton.setPos(platform.getPos().x + 5, platform.getPos().y + 5);
+        joinButton.withType(Button.Type.DARK_EMBED);
+        joinButton.withCallback(this::joinServer);
         joinButton.disable();
 
         removeButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.remove"), 98));
-        removeButton.setPos(panel.getPos().x + 5, panel.getPos().y + 35);
-        removeButton.setType(Button.Type.DARK_EMBED);
-        removeButton.setCallback(this::removeServer);
+        removeButton.setPos(platform.getPos().x + 5, platform.getPos().y + 35);
+        removeButton.withType(Button.Type.DARK_EMBED);
+        removeButton.withCallback(this::removeServer);
 
         editButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.edit"), 98));
-        editButton.setPos(panel.getPos().x + 5, panel.getPos().y + 65);
-        editButton.setType(Button.Type.DARK_EMBED);
-        editButton.setCallback(this::editServer);
+        editButton.setPos(platform.getPos().x + 5, platform.getPos().y + 65);
+        editButton.withType(Button.Type.DARK_EMBED);
+        editButton.withCallback(this::editServer);
 
         backButton = add(TextButton.of(UITranslations.BACK, 98));
-        backButton.setPos(panel.getPos().x + 5, panel.getPos().y + 95);
-        backButton.setType(Button.Type.DARK_EMBED);
-        backButton.setCallback(this::back);
+        backButton.setPos(platform.getPos().x + 5, platform.getPos().y + 95);
+        backButton.withType(Button.Type.DARK_EMBED);
+        backButton.withCallback(this::back);
     }
 
     private void editServer(TextButton textButton) {
@@ -133,23 +133,23 @@ public class MultiplayerScreen extends Screen {
     public void resized(int width, int height) {
         super.resized(width, height);
 
-        listPanel.setPos(0, 0);
-        listPanel.setSize(200, size.height - 30);
+        listPlatform.setPos(0, 0);
+        listPlatform.setSize(200, size.height - 30);
 
-        listButtonPanel.setPos(0, size.height - 30);
-        listButtonPanel.setSize(200, 30);
+        listButtonPlatform.setPos(0, size.height - 30);
+        listButtonPlatform.setSize(200, 30);
 
         selectionList.setPos(2, 0);
         selectionList.setSize(196, size.height - 30);
 
         addButton.setPos(5, this.size.height - 26);
 
-        panel.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 47);
-        panel.setSize(110, 92);
+        platform.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 47);
+        platform.setSize(110, 92);
 
-        joinButton.setPos(panel.getPos().x + 5, panel.getPos().y + 5);
-        removeButton.setPos(panel.getPos().x + 5, panel.getPos().y + 35);
-        backButton.setPos(panel.getPos().x + 5, panel.getPos().y + 65);
+        joinButton.setPos(platform.getPos().x + 5, platform.getPos().y + 5);
+        removeButton.setPos(platform.getPos().x + 5, platform.getPos().y + 35);
+        backButton.setPos(platform.getPos().x + 5, platform.getPos().y + 65);
     }
 
     private void back(TextButton textButton) {
@@ -204,8 +204,8 @@ public class MultiplayerScreen extends Screen {
 
             addButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.add"), 98));
             addButton.setSize(190, 20);
-            addButton.setType(Button.Type.DARK_EMBED);
-            addButton.setCallback((button) -> {
+            addButton.withType(Button.Type.DARK_EMBED);
+            addButton.withCallback((button) -> {
                 MultiplayerScreen multiplayerScreen = MultiplayerScreen.this;
                 multiplayerScreen.addServer(new ServerInfo(nameEntry.getValue(), entry.getValue(), secureBtn.getValue()));
                 back();
@@ -275,8 +275,8 @@ public class MultiplayerScreen extends Screen {
 
             addButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.add"), 98));
             addButton.setSize(190, 20);
-            addButton.setType(Button.Type.DARK_EMBED);
-            addButton.setCallback((button) -> {
+            addButton.withType(Button.Type.DARK_EMBED);
+            addButton.withCallback((button) -> {
                 MultiplayerScreen multiplayerScreen = MultiplayerScreen.this;
                 multiplayerScreen.removeServer(serverEntry);
                 int i = multiplayerScreen.selectionList.getSelectedIndex();

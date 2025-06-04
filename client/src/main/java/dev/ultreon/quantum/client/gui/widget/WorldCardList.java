@@ -1,11 +1,10 @@
 package dev.ultreon.quantum.client.gui.widget;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.gui.*;
-import dev.ultreon.quantum.client.gui.screens.WorldEditScreen;
+import dev.ultreon.quantum.client.gui.screens.world.WorldEditScreen;
 import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.TextObject;
@@ -19,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-
-import static dev.ultreon.quantum.client.QuantumClient.id;
 
 public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
     protected WorldCardList(IntSupplier countSupplier) {
@@ -81,13 +78,13 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
     }
 
     @Override
-    public WorldCardList position(Supplier<Position> position) {
-        return (WorldCardList) super.position(position);
+    public WorldCardList withPositioning(Supplier<Position> position) {
+        return (WorldCardList) super.withPositioning(position);
     }
 
     @Override
-    public WorldCardList bounds(Supplier<Bounds> position) {
-        return (WorldCardList) super.bounds(position);
+    public WorldCardList withBounding(Supplier<Bounds> position) {
+        return (WorldCardList) super.withBounding(position);
     }
 
     @Override
@@ -118,9 +115,9 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
             this.world = world;
 
             this.button = TextButton.of(TextObject.translation("quantum.screen.worlds.edit"))
-                    .bounds(() -> new Bounds(this.pos.x + 5, this.pos.y + this.size.height - 25, this.size.width - 10, 21))
-                    .setType(Button.Type.DARK_EMBED)
-                    .setCallback(this::openWorldEditScreen);
+                    .withBounding(() -> new Bounds(this.pos.x + 5, this.pos.y + this.size.height - 25, this.size.width - 10, 21))
+                    .withType(Button.Type.DARK_EMBED)
+                    .withCallback(this::openWorldEditScreen);
 
             this.list.defineRoot(this.button);
         }

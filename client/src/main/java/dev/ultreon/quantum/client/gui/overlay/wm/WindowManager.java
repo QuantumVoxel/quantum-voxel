@@ -218,7 +218,7 @@ public class WindowManager {
                 return TextObject.nullToEmpty("Info: Enabled");
             else
                 return TextObject.nullToEmpty("Info: Disabled");
-        }).setCallback(bool -> {
+        }).withCallback(bool -> {
             if (bool.getValue() == Boolean.TRUE) {
                 addWindow(INFO_WINDOW);
             } else {

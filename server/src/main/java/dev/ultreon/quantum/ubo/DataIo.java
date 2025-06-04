@@ -28,8 +28,15 @@ public class DataIo {
         }
     }
 
+    @SafeVarargs
+    public static <T extends DataType<?>> T read(byte[] data, T... type) throws IOException {
+        try (InputStream stream = new BufferedInputStream(new ByteArrayInputStream(data), BUFFER_SIZE)) {
+            return read(stream, type);
+        }
+    }
+
     /**
-     * @throws IOException when an I/O error occurs.
+     * @throws IOException       when an I/O error occurs.
      * @throws DataTypeException when the read data type is invalid.
      */
     @SafeVarargs
@@ -41,7 +48,7 @@ public class DataIo {
     }
 
     /**
-     * @throws IOException when an I/O error occurs.
+     * @throws IOException       when an I/O error occurs.
      * @throws DataTypeException when the read data type is invalid.
      */
     @SafeVarargs
@@ -83,6 +90,13 @@ public class DataIo {
     }
 
     @SafeVarargs
+    public static <T extends DataType<?>> T readCompressed(byte[] data, T... type) throws IOException {
+        try (InputStream stream = new BufferedInputStream(new ByteArrayInputStream(data))) {
+            return readCompressed(stream, type);
+        }
+    }
+
+    @SafeVarargs
     public static <T extends DataType<?>> T readCompressed(InputStream stream, T... type) throws IOException {
         GZIPInputStream gzipStream = new GZIPInputStream(stream);
         return read(gzipStream, type);
@@ -98,6 +112,14 @@ public class DataIo {
         try (OutputStream stream = new BufferedOutputStream(file.openConnection().getOutputStream(), BUFFER_SIZE)) {
             write(dataType, stream);
         }
+    }
+
+    public static byte[] write(DataType<?> dataType) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (OutputStream stream = new BufferedOutputStream(bos, BUFFER_SIZE)) {
+            write(dataType, stream);
+        }
+        return bos.toByteArray();
     }
 
     public static void write(DataType<?> dataType, OutputStream stream) throws IOException {
@@ -118,6 +140,14 @@ public class DataIo {
         try (OutputStream stream = new BufferedOutputStream(file.openConnection().getOutputStream(), BUFFER_SIZE)) {
             writeCompressed(dataType, stream);
         }
+    }
+
+    public static byte[] writeCompressed(DataType<?> dataType) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (OutputStream stream = new BufferedOutputStream(bos, BUFFER_SIZE)) {
+            writeCompressed(dataType, stream);
+        }
+        return bos.toByteArray();
     }
 
     public static void writeCompressed(DataType<?> dataType, File file) throws IOException {
@@ -153,4 +183,5 @@ public class DataIo {
     private static DataType<?> readUso(String value) throws IOException {
         return new UsoParser(value).parse();
     }
+
 }

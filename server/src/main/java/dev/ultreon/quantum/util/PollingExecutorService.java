@@ -111,6 +111,7 @@ public class PollingExecutorService extends GameObject implements Executor {
 
     public <T> @NotNull CompletionPromise<T> submit(@NotNull Callable<T> task) {
         var future = CompletionPromise.<T>create();
+        Throwable exception = new Throwable();
         if (this.isSameThread()) {
             try {
                 future.complete(task.call());
@@ -120,7 +121,7 @@ public class PollingExecutorService extends GameObject implements Executor {
                     PollingExecutorService.LOGGER.warn("Submitted task failed \"" + id + "\":", throwable);
                 }
                 future.fail(throwable);
-                throwable.addSuppressed(new Throwable());
+                throwable.addSuppressed(exception);
                 PollingExecutorService.LOGGER.warn("Submitted task failed:", throwable);
             }
             return future;
@@ -131,7 +132,7 @@ public class PollingExecutorService extends GameObject implements Executor {
                 future.complete(result);
             } catch (Throwable throwable) {
                 future.fail(throwable);
-                throwable.addSuppressed(new Throwable());
+                throwable.addSuppressed(exception);
                 PollingExecutorService.LOGGER.warn("Submitted task failed:", throwable);
             }
         }));

@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
 
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerInstance;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.Shutdownable;
+import dev.ultreon.quantum.world.WorldSaveInfo;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +54,7 @@ public class IntegratedServer extends QuantumServer {
     private boolean openToLan = false;
     private @Nullable ServerPlayer host;
     private final TimerInstance timer = GamePlatform.get().getTimer();
+    private @NotNull GameMode defaultGameMode = GameMode.SURVIVAL;
 
     /**
      * Constructs a new IntegratedServer with the given WorldStorage.
@@ -70,6 +74,8 @@ public class IntegratedServer extends QuantumServer {
                 throw new RuntimeException(e);
             }
         }
+
+        client.worldSaveInfo = storage.loadInfo();
     }
 
     /**
@@ -278,9 +284,11 @@ public class IntegratedServer extends QuantumServer {
         try {
             // Normal server saving.
             super.save(silent);
+            this.storage.saveInfo(client.worldSaveInfo);
         } catch (IOException e) {
             QuantumServer.LOGGER.error("Failed to save world", e);
         }
+
 
         try {
             // Save player data.
@@ -459,6 +467,11 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
+    public void handleIOError(String title, String body) {
+        client.notifications.add(title, body, "Game IO");
+    }
+
+    @Override
     public void onChunkUnloaded(ServerChunk unloadedChunk) {
         super.onChunkUnloaded(unloadedChunk);
 
@@ -542,5 +555,13 @@ public class IntegratedServer extends QuantumServer {
      */
     public QuantumClient getClient() {
         return client;
+    }
+
+    public @NotNull GameMode getDefaultGameMode() {
+        return defaultGameMode;
+    }
+
+    public void setDefaultGameMode(@NotNull GameMode defaultGameMode) {
+        this.defaultGameMode = defaultGameMode;
     }
 }

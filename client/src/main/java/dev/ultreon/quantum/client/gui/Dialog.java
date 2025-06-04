@@ -22,9 +22,9 @@ public class Dialog extends UIContainer<Dialog> {
 
     List<Button<?>> buttons = new ArrayList<>();
     private final TextButton closeButton = TextButton.of(TextObject.literal("x"))
-            .position(() -> new Position(size.width - 21, 0))
-            .setCallback(caller -> close())
-            .setType(Button.Type.DARK_EMBED);
+            .withPositioning(() -> new Position(size.width - 21, 0))
+            .withCallback(caller -> close())
+            .withType(Button.Type.DARK_EMBED);
     private final Rectangle contentBounds = new Rectangle();
     private final Rectangle titleBounds = new Rectangle();
 
@@ -33,7 +33,7 @@ public class Dialog extends UIContainer<Dialog> {
         parent.defineRoot(this);
         this.defineRoot(this.closeButton);
 
-        closeButton.bounds(() -> new Bounds(pos.x + size.width - 21, pos.y, 20, 20));
+        closeButton.withBounding(() -> new Bounds(pos.x + size.width - 21, pos.y, 20, 20));
 
         this.parent = parent;
     }
@@ -65,8 +65,8 @@ public class Dialog extends UIContainer<Dialog> {
             this.add(button);
             dx -= button.getWidth();
             int finalDx = dx;
-            button.position(() -> new Position((pos.x + size.width / 2 + ref.width / 2) + finalDx, pos.y + size.height - 22))
-                    .setType(Button.Type.DARK_EMBED);
+            button.withPositioning(() -> new Position((pos.x + size.width / 2 + ref.width / 2) + finalDx, pos.y + size.height - 32))
+                    .withType(Button.Type.DARK_EMBED);
             dx -= 5;
             ref.width += button.getWidth() + 5;
         }
@@ -76,9 +76,9 @@ public class Dialog extends UIContainer<Dialog> {
 
     public void render(@NotNull Renderer renderer, float deltaTime) {
         pos.y = parent.getHeight() / 2 - size.height / 2 - 2;
-        closeButton.setPos(pos.x + size.width - 21, pos.y);
+        closeButton.setPos(pos.x + size.width - 21, pos.y - 2);
 
-        renderer.renderFrame(parent.getWidth() / 2 - size.width / 2 - 2, parent.getHeight() / 2 - size.height / 2 - 2, size.width + 4, size.height + 4);
+        renderer.drawPlatform(parent.getWidth() / 2 - size.width / 2 - 2, parent.getHeight() / 2 - size.height / 2 - 2, size.width + 4, size.height + 4);
         renderer.drawPlatform(pos.x - 1, pos.y - 2, size.width + 2, 27);
 
         this.titleBounds.set(pos.x, pos.y, size.width - 21, 21);
@@ -105,12 +105,12 @@ public class Dialog extends UIContainer<Dialog> {
     }
 
     @Override
-    public Dialog position(Supplier<Position> position) {
+    public Dialog withPositioning(Supplier<Position> position) {
         return this;
     }
 
     @Override
-    public Dialog bounds(Supplier<Bounds> position) {
+    public Dialog withBounding(Supplier<Bounds> position) {
         return this;
     }
 
@@ -152,5 +152,29 @@ public class Dialog extends UIContainer<Dialog> {
         }
 
         return super.keyRelease(keyCode);
+    }
+
+    @Override
+    public void mouseMove(int mouseX, int mouseY) {
+        boolean buttonHovered = closeButton.isWithin(mouseX, mouseY);
+        if (buttonHovered) {
+            closeButton.mouseEnter(mouseX, mouseY);
+            closeButton.mouseMove(mouseX, mouseY);
+        } else {
+            closeButton.mouseExit();
+        }
+        super.mouseMove(mouseX, mouseY);
+    }
+
+    @Override
+    public void mouseMoved(int mouseX, int mouseY) {
+        boolean buttonHovered = closeButton.isWithin(mouseX, mouseY);
+        if (buttonHovered) {
+            closeButton.mouseEnter(mouseX, mouseY);
+            closeButton.mouseMoved(mouseX, mouseY);
+        } else {
+            closeButton.mouseExit();
+        }
+        super.mouseMoved(mouseX, mouseY);
     }
 }

@@ -1,10 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabbedUI;
@@ -13,8 +10,6 @@ import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
 
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
 
@@ -41,11 +36,11 @@ public class CreditsScreen extends TabbedUI {
     }
 
     private void buildPage(TabBuilder tabBuilder, String key) {
-        tabBuilder.add(Label.of(ASSETS_DESCRIPTION).position(() -> new Position(100, 10)));
+        tabBuilder.add(Label.of(ASSETS_DESCRIPTION).withPositioning(() -> new Position(100, 10)));
         int y = tabBuilder.content().getY() + 30;
         for (JsonValue entry : credits.get(key)) {
             int finalY = y;
-            tabBuilder.add(new CreditWidget(entry.name, entry).position(() -> new Position(tabBuilder.content().getX() + 10, finalY + 40)));
+            tabBuilder.add(new CreditWidget(entry.name, entry).withPositioning(() -> new Position(tabBuilder.content().getX() + 10, finalY + 40)));
             y += 30;
         }
     }
@@ -61,10 +56,10 @@ public class CreditsScreen extends TabbedUI {
 
             this.root = CreditsScreen.this;
 
-            add(Label.of(name).bounds(() -> new Bounds(0, 10, 100, 20))).width(100);
+            add(Label.of(name).withBounding(() -> new Bounds(0, 10, 100, 20))).width(100);
 
             if (assetInfo.has("url") && assetInfo.get("url").isString())
-                add(TextButton.of("Open page", 80, 21).setCallback(btn -> {
+                add(TextButton.of("Open page", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("url") && assetInfo.get("url").isString()) {
                     String url = assetInfo.get("url").asString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal(name + "'s website:")).message(TextObject.literal(url)).button(TextObject.literal("Ok"), () -> CreditsScreen.this.getDialog().close()).button(TextObject.literal("Open in browser"), () -> {
@@ -76,7 +71,7 @@ public class CreditsScreen extends TabbedUI {
                     }));
                 }
             }));
-            if (assetInfo.has("roles")) add(TextButton.of("View roles", 80, 21).setCallback(btn -> {
+            if (assetInfo.has("roles")) add(TextButton.of("View roles", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("roles") && assetInfo.get("roles").isArray()) {
                     JsonValue roles = assetInfo.get("roles");
                     StringBuilder sb = new StringBuilder();
@@ -89,7 +84,7 @@ public class CreditsScreen extends TabbedUI {
                     CreditsScreen.this.getDialog().height(200);
                 }
             }));
-            if (assetInfo.has("for")) add(TextButton.of("Has made", 80, 21).setCallback(btn -> {
+            if (assetInfo.has("for")) add(TextButton.of("Has made", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("for") && assetInfo.get("for").isArray()) {
                     JsonValue for_ = assetInfo.get("for");
                     StringBuilder sb = new StringBuilder();
@@ -102,7 +97,7 @@ public class CreditsScreen extends TabbedUI {
                     CreditsScreen.this.getDialog().height(200);
                 }
             }));
-            if (assetInfo.has("description")) add(TextButton.of("View description", 80, 21).setCallback(btn -> {
+            if (assetInfo.has("description")) add(TextButton.of("View description", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("description") && assetInfo.get("description").isString()) {
                     String description = assetInfo.get("description").asString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("Description of " + name + ":")).message(TextObject.literal(description)));
@@ -110,14 +105,14 @@ public class CreditsScreen extends TabbedUI {
                 }
             }));
 
-            if (assetInfo.has("license")) add(TextButton.of("View license", 80, 21).setCallback(btn -> {
+            if (assetInfo.has("license")) add(TextButton.of("View license", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("license") && assetInfo.get("license").isString()) {
                     String license = assetInfo.get("license").asString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("License of " + name + ":")).message(TextObject.literal(license)));
                 }
             }));
 
-            if (assetInfo.has("links")) add(TextButton.of("View links", 80, 21).setCallback(btn -> {
+            if (assetInfo.has("links")) add(TextButton.of("View links", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("links") && assetInfo.get("links").isArray()) {
                     JsonValue links = assetInfo.get("links");
                     StringBuilder sb = new StringBuilder();

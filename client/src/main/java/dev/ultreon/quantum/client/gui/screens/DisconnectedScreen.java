@@ -25,8 +25,8 @@ public class DisconnectedScreen extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"), 150)
-                .position(() -> new Position(this.size.width / 2 - 75, this.size.height / 2 - 10))
-                .setCallback(caller -> this.client.showScreen(wasMultiplayer ? new MultiplayerScreen() : new TitleScreen())));
+                .withPositioning(() -> new Position(this.size.width / 2 - 75, this.size.height / 2 - 10))
+                .withCallback(caller -> this.client.showScreen(wasMultiplayer ? new MultiplayerScreen() : new TitleScreen())));
 
         try {
             // Make sure the connection is closed

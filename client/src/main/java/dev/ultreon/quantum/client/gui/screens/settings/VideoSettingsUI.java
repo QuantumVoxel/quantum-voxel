@@ -27,47 +27,47 @@ public class VideoSettingsUI {
         builder.add(Label.of(builder.title())
                 .alignment(Alignment.CENTER)
                 .scale(2)
-                .position(() -> new Position(builder.content().getX() + 235, builder.content().getY() + 25)));
+                .withPositioning(() -> new Position(builder.content().getX() + 235, builder.content().getY() + 25)));
 
         builder.add(TextObject.translation("quantum.screen.options.video.fov"), Slider.of(30, 160)
                 .value(ClientConfiguration.fov.getValue())
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 50, 150, 21))
                 .setCallback(this::setFov));
 
         builder.add(TextObject.translation("quantum.screen.options.video.renderDistance"), Slider.of(CS, 256)
                 .value(ClientConfiguration.renderDistance.getValue())
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 75, 150, 21))
                 .setCallback(this::setRenderDistance));
 
         builder.add(TextObject.translation("quantum.screen.options.video.vSync"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.enableVsync.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 100, 150, 21))
                 .formatter(scale -> scale == BooleanEnum.TRUE ? TextObject.translation("quantum.ui.enabled") : TextObject.translation("quantum.ui.disabled"))
-                .setCallback(this::setVsync));
+                .withCallback(this::setVsync));
 
         builder.add(TextObject.translation("quantum.screen.options.video.fullscreen"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.fullscreen.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 125, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .setCallback(this::setFullscreen));
+                .withCallback(this::setFullscreen));
 
         builder.add(TextObject.translation("quantum.screen.options.video.guiScale"), new CycleButton<Scale>()
                 .values(Scale.values())
                 .value(Objects.requireNonNullElse(Scale.of(ClientConfiguration.guiScale.getValue()), Scale.MEDIUM))
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
                 .formatter(scale -> {
                     if (scale.get() == 0) {
                         return TextObject.translation("quantum.ui.auto");
                     }
                     return TextObject.literal(scale.get() + "x");
                 })
-                .setCallback(this::setScale));
+                .withCallback(this::setScale));
 
         builder.add(TextObject.translation("quantum.screen.options.video.frameRate"), Slider.of(10, 240)
                 .value(ClientConfiguration.fpsLimit.getValue())
-                .bounds(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
                 .setCallback(this::setFrameRate));
     }
 

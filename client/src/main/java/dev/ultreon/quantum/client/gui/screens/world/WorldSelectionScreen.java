@@ -2,19 +2,21 @@ package dev.ultreon.quantum.client.gui.screens.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.gui.*;
-import dev.ultreon.quantum.client.gui.screens.WorldCreationScreen;
 import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,56 +29,76 @@ public class WorldSelectionScreen extends Screen {
     private TextButton deleteWorld;
     private TextButton prevButton;
     private TextButton nextButton;
+    private Rectangle shadowFar;
+    private Rectangle shadowNear;
+    private Platform buttonPlatform;
+    private WorldInfoWidget worldInfo;
 
     public WorldSelectionScreen() {
         super(TextObject.translation("quantum.screen.world_selection.title"));
     }
 
     @Override
-    public void build(@NotNull GuiBuilder builder) {
-        this.worldList = builder.add(new SelectionList<WorldStorage>())
-                .entries(this.locateWorlds())
-                .selectable(true)
-                .callback(this::selectWorld)
-                .itemRenderer(this::renderWorldItem)
-                .itemHeight(60)
-                .drawBackground(true)
-                .drawButtons(false)
-                .cutButtons(false)
-                .bounds(() -> new Bounds(0, 0, this.getWidth(), this.getHeight() - 38));
+    public TitleRenderMode titleRenderMode() {
+        return TitleRenderMode.First;
+    }
 
-        builder.add(Rectangle.create())
-                .bounds(() -> new Bounds(2, this.getHeight() - 40, this.getWidth() - 4, 46))
-                .backgroundColor(RgbColor.BLACK.withAlpha(0x40));
+    @Override
+    public void init() {
+        this.worldList = add(new SelectionList<WorldStorage>())
+                .addEntries(this.locateWorlds())
+                .withSelectable(true)
+                .withCallback(this::selectWorld)
+                .withItemRenderer(this::renderWorldItem)
+                .withItemHeight(60)
+                .withDrawBackground(true)
+                .withDrawButtons(false)
+                .withCutButtons(false);
 
-        builder.add(Rectangle.create())
-                .bounds(() -> new Bounds(1, this.getHeight() - 39, this.getWidth() - 2, 44))
-                .backgroundColor(RgbColor.BLACK.withAlpha(0x40));
+        this.worldInfo = add(new WorldInfoWidget(worldList));
 
-        builder.add(Panel.create()
-                .bounds(() -> new Bounds(-5, this.getHeight() - 41, this.getWidth() + 10, 46)));
+        shadowFar = add(Rectangle.create())
+                .withBackgroundColor(RgbColor.BLACK.withAlpha(0x40));
 
-        this.createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
-                .position(() -> new Position(this.getWidth() / 2 - 227, this.getHeight() - 31))
-                .setCallback(this::createWorld)
-                .setType(Button.Type.DARK_EMBED));
+        shadowNear = add(Rectangle.create())
+                .withBackgroundColor(RgbColor.BLACK.withAlpha(0x40));
 
-        this.playButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.play"), 150)
-                .position(() -> new Position(this.getWidth() / 2 - 75, this.getHeight() - 31))
-                .setCallback(this::playWorld)
-                .setType(Button.Type.DARK_EMBED));
+        buttonPlatform = add(Platform.create());
 
-        this.deleteWorld = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
-                .position(() -> new Position(this.getWidth() / 2 + 77, this.getHeight() - 31))
-                .setCallback(this::deleteWorld)
-                .setType(Button.Type.DARK_EMBED));
+        createButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
+                .withCallback(this::createWorld)
+                .withType(Button.Type.DARK_EMBED));
+
+        playButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.play"), 150)
+                .withCallback(this::playWorld)
+                .withType(Button.Type.DARK_EMBED));
+
+        deleteWorld = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
+                .withCallback(this::deleteWorld)
+                .withType(Button.Type.DARK_EMBED));
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        super.resized(width, height);
+
+        worldList.setBounds(pos.x, pos.y - 3, 250, size.height - 35);
+        worldInfo.setBounds(pos.x + 250, pos.y - 1, size.width-250, size.height - 37);
+        shadowFar.setBounds(2, size.height - 37, size.width - 4, 46);
+        shadowNear.setBounds(1, size.height - 36, size.width - 2, 44);
+
+        buttonPlatform.setBounds(-5, size.height - 38, size.width + 10, 46);
+
+        createButton.setPos(this.getWidth() / 2 - 227, this.getHeight() - 31);
+        playButton.setPos(this.getWidth() / 2 - 75, this.getHeight() - 31);
+        deleteWorld.setPos(this.getWidth() / 2 + 77, this.getHeight() - 31);
     }
 
     private void renderWorldItem(Renderer renderer, WorldStorage worldStorage, int y, boolean selected, float delta) {
         if (selected) {
-            renderer.drawHighlightPlatform(0, y - 1, this.getWidth(), 60, 2);
+            renderer.drawHighlightPlatform(-2, y - 1, size.width+4, 60, 2);
         } else {
-            renderer.drawPlatform(0, y - 3, this.getWidth(), 60, 4);
+            renderer.drawPlatform(-2, y - 3, size.width+4, 60, 4);
         }
 
         renderer.setColor(RgbColor.WHITE);
@@ -101,7 +123,7 @@ public class WorldSelectionScreen extends Screen {
                     try {
                         selected.delete();
                         worldList.clear();
-                        worldList.entries(this.locateWorlds());
+                        worldList.addEntries(this.locateWorlds());
                     } catch (IOException e) {
                         CommonConstants.LOGGER.error("Failed to delete world", e);
                     } finally {
@@ -167,5 +189,67 @@ public class WorldSelectionScreen extends Screen {
 
     public TextButton getPlayButton() {
         return this.playButton;
+    }
+
+    private static class WorldInfoWidget extends Widget {
+        private final SelectionList<WorldStorage> worldList;
+        private FileHandle currentPicFile;
+        private Texture currentPic;
+        private WorldSaveInfo info;
+        private String lastSave;
+
+        public WorldInfoWidget(SelectionList<WorldStorage> worldList) {
+            super(0, 0);
+            this.worldList = worldList;
+        }
+
+        @Override
+        public void renderWidget(Renderer renderer, float deltaTime) {
+            super.renderWidget(renderer, deltaTime);
+
+            renderer.drawPlatform(pos.x, pos.y, size.width, size.height);
+
+            WorldStorage selected = worldList.getSelected();
+            if (selected == null) return;
+            FileHandle child = selected.getDirectory().child("picture.png");
+            if (!Objects.equals(child, currentPicFile)) {
+                if (currentPic != null) {
+                    currentPic = null;
+                }
+                currentPic = new Texture(child);
+                currentPicFile = child;
+                info = selected.loadInfo();
+                lastSave = info.lastSave().toLocalDateTime().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+            }
+            int scaledHeight = (size.width - 4) * currentPic.getHeight() / currentPic.getWidth();
+            int displayHeight = Math.min(scaledHeight, size.height / 2);
+
+            // Compute the source height we need to extract from the image
+            int cropSourceHeight = (int)((float)displayHeight * currentPic.getHeight() / scaledHeight);
+
+            // Center crop vertically in source image
+            int sourceY = (currentPic.getHeight() - cropSourceHeight) / 2;
+
+            renderer.blit(
+                    currentPic,
+                    pos.x + 2, pos.y,
+                    size.width, displayHeight,
+                    0, sourceY,
+                    currentPic.getWidth(), cropSourceHeight,
+                    currentPic.getWidth(), currentPic.getHeight()
+            );
+
+            renderer.textLeft(selected.getName(), 2, pos.x + 10, pos.y + displayHeight + 12);
+            renderer.textLeft("[gray]" + selected.getMD5Name(), pos.x + 10, pos.y + displayHeight + 32);
+            renderer.textLeft("[gold]Seed: [white]" + info.seed(), pos.x + 10, pos.y + displayHeight + 52);
+            renderer.textLeft("[gold]Gamemode: [white]" + info.gamemode(), pos.x + 10, pos.y + displayHeight + 62);
+            renderer.textLeft("[gold]Last Gamemode: [white]" + info.lastPlayedInMode(), pos.x + 10, pos.y + displayHeight + 72);
+            renderer.textLeft("[gold]Last Saved: [white]" + lastSave, pos.x + 10, pos.y + displayHeight + 82);
+            renderer.textLeft("[gold]Generator: [white]v" + info.generatorVersion(), pos.x + 10, pos.y + displayHeight + 92);
+        }
+
+        public void dispose() {
+
+        }
     }
 }

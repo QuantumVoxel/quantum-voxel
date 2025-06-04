@@ -39,8 +39,10 @@ import java.net.http.WebSocketHandshakeException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -385,8 +387,18 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
+    public <T> CompletionPromise<T> createCompletionPromise() {
+        return new JavaPromise<>(new CompletableFuture<>());
+    }
+
+    @Override
     public @NotNull <T> Promise<T> supplyAsync(Supplier<T> o) {
         return new JavaPromise<>(CompletableFuture.supplyAsync(o));
+    }
+
+    @Override
+    public Promise<Void> runAsync(Runnable o) {
+        return new JavaPromise<>(CompletableFuture.runAsync(o));
     }
 
     @Override
@@ -516,7 +528,7 @@ public abstract class DesktopPlatform extends GamePlatform {
         return Runtime.getRuntime().totalMemory();
     }
 
-    private class JavaPromise<T> implements CompletionPromise<T> {
+    private static class JavaPromise<T> implements CompletionPromise<T> {
         private final CompletableFuture<T> completableFuture;
 
         public JavaPromise(CompletableFuture<T> completableFuture) {
@@ -660,7 +672,13 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         @Override
         public T get() {
-            return completableFuture.join();
+            try {
+                return completableFuture.get();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
@@ -693,7 +711,13 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         @Override
         public T join() {
-            return completableFuture.join();
+            try {
+                return completableFuture.join();
+            } catch (CompletionException e) {
+                throw new GdxRuntimeException("Failed to complete promise", e);
+            } catch (CancellationException e) {
+                throw new GdxRuntimeException("Promise cancelled", e);
+            }
         }
 
         @Override
@@ -708,7 +732,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         @Override
         public void fail(Throwable throwable) {
-
+            completableFuture.completeExceptionally(throwable);
         }
 
         @Override

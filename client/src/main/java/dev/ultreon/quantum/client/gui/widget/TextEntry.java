@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.widget;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Callback;
@@ -11,6 +12,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import it.unimi.dsi.fastutil.chars.CharPredicate;
 import org.jetbrains.annotations.ApiStatus;
@@ -21,6 +23,7 @@ import static dev.ultreon.quantum.client.QuantumClient.id;
 import static dev.ultreon.quantum.client.input.KeyAndMouseInput.*;
 
 public class TextEntry extends Widget {
+    private static final Color SELECT_COLOR = new Color(1, 1, 1, 0.5f);
     private CharPredicate filter = c -> true;
 
     private int cursorIdx = 0;
@@ -32,6 +35,7 @@ public class TextEntry extends Widget {
     private int selectFrom = -1;
     private int selectTo = -1;
     private float yOffset = 0f;
+    private Layout layout = new Layout();
 
     /**
      * @param width  the width of the text entry.
@@ -40,8 +44,8 @@ public class TextEntry extends Widget {
     public TextEntry(int width, int height) {
         super(width, height);
 
-        this.hint = this.register(id("hint"), new TextComponent());
-        this.callback = this.register(id("callback"), new CallbackComponent<>(caller -> {
+        this.hint = this.register(NamespaceID.of("hint"), new TextComponent());
+        this.callback = this.register(NamespaceID.of("callback"), new CallbackComponent<>(caller -> {
         }));
     }
 
@@ -56,13 +60,13 @@ public class TextEntry extends Widget {
     }
 
     @Override
-    public TextEntry position(Supplier<Position> position) {
+    public TextEntry withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public Widget bounds(Supplier<Bounds> position) {
+    public Widget withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }
@@ -73,6 +77,11 @@ public class TextEntry extends Widget {
 
     public TextEntry(int width) {
         this(width, 21);
+    }
+
+    @Override
+    public boolean mousePress(int mouseX, int mouseY, int button) {
+        return true;
     }
 
     @Override
@@ -91,7 +100,7 @@ public class TextEntry extends Widget {
 
         if (!isEnabled) {
             renderer.drawDisabledPlatform(pos.x, pos.y, size.width, size.height, yOffset);
-        } else if (isHovered) {
+        } else if (isHovered | isFocused) {
             renderer.drawHighlightPlatform(pos.x, pos.y, size.width, size.height, yOffset);
         } else {
             renderer.drawPlatform(pos.x, pos.y, size.width, size.height, yOffset);
@@ -115,7 +124,7 @@ public class TextEntry extends Widget {
             int selectedWidth = renderer.textWidth(selected);
 
             renderer.textLeft(before, this.pos.x + 5, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), true);
-            renderer.fill(this.pos.x + 5 + beforeWidth, (int) (this.pos.y - yOffset + this.font.getLineHeight()), selectedWidth, 10, RgbColor.WHITE.withAlpha(0x80));
+            renderer.fill(this.pos.x + 5 + beforeWidth, (int) (this.pos.y - yOffset + this.font.getLineHeight()), selectedWidth, 10, SELECT_COLOR);
             renderer.textLeft(selected, this.pos.x + 5 + beforeWidth, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.RED, true);
             renderer.textLeft(after, this.pos.x + 5 + beforeWidth + selectedWidth, this.pos.y - yOffset + this.font.getLineHeight(), RgbColor.WHITE.withAlpha(0x80), true);
         } else {
@@ -138,6 +147,7 @@ public class TextEntry extends Widget {
         if (!Character.isISOControl(character) && this.filter.test(character)) {
             if (this.selectFrom != -1 && this.selectTo == -1) {
                 this.replaceSelection(String.valueOf(character));
+                this.revalidateCursor();
                 return true;
             }
 
@@ -146,6 +156,7 @@ public class TextEntry extends Widget {
             this.value = start + character + end;
             this.cursorIdx++;
             this.deselect();
+            this.revalidateCursor();
             return true;
         }
         return super.charType(character);
@@ -156,6 +167,7 @@ public class TextEntry extends Widget {
         if (keyCode == Input.Keys.BACKSPACE) {
             if (this.selectFrom != -1 && this.selectTo != -1) {
                 deleteSelection();
+                this.revalidateCursor();
                 return true;
             }
             if (this.cursorIdx > 0) {
@@ -164,12 +176,14 @@ public class TextEntry extends Widget {
                 this.value = start + end;
                 this.cursorIdx--;
                 this.deselect();
+                this.revalidateCursor();
                 return true;
             }
         }
         if (keyCode == Input.Keys.FORWARD_DEL) {
             if (this.selectFrom != -1 && this.selectTo != -1) {
                 this.deleteSelection();
+                this.revalidateCursor();
                 return true;
             }
             if (this.cursorIdx < this.value.length()) {
@@ -177,6 +191,7 @@ public class TextEntry extends Widget {
                 var end = this.value.substring(this.cursorIdx + 1);
                 this.value = start + end;
                 this.deselect();
+                this.revalidateCursor();
                 return true;
             }
         }
@@ -186,11 +201,13 @@ public class TextEntry extends Widget {
             if (this.isWordMoving()) {
                 int index = this.value.lastIndexOf(' ', this.cursorIdx - 1);
                 nextIdx = index == -1 ? 0 : index;
+                this.revalidateCursor();
             }
 
             if (!isShiftDown()) {
                 this.cursorIdx = nextIdx;
                 this.deselect();
+                this.revalidateCursor();
                 return true;
             }
             if (this.isSelecting()) {
@@ -225,6 +242,7 @@ public class TextEntry extends Widget {
             if (!isShiftDown()) {
                 this.cursorIdx = nextIdx;
                 this.deselect();
+                this.revalidateCursor();
                 return true;
             }
             if (isSelecting()) {
@@ -410,7 +428,9 @@ public class TextEntry extends Widget {
     }
 
     private float textWidth(String substring) {
-        return 0;
+        layout.clear();
+        font.markup(substring, layout);
+        return layout.getWidth();
     }
 
     @Override

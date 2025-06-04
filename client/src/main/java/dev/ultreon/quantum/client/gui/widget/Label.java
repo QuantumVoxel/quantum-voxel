@@ -129,7 +129,7 @@ public class Label extends Widget {
      * @return this label
      */
     @Override
-    public Label position(Supplier<Position> position) {
+    public Label withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> this.setPos(position.get()));
         return this;
     }
@@ -143,7 +143,7 @@ public class Label extends Widget {
      * @return this label
      */
     @Override
-    public Label bounds(Supplier<Bounds> position) {
+    public Label withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> this.setBounds(position.get()));
         return this;
     }

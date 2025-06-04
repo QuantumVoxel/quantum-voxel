@@ -659,11 +659,24 @@ public class Renderer implements Disposable {
      * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int)
      */
     @ApiStatus.Internal
-    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
+    public Renderer blit(Texture tex, float x, float y, float width, float height,
+                         float u, float v, float uWidth, float vHeight,
+                         int texWidth, int texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
+
+        // Normalize UV coordinates (convert from pixel coordinates to 0.0 - 1.0)
+        float u1 = u / texWidth;
+        float v1 = v / texHeight;
+        float u2 = (u + uWidth) / texWidth;
+        float v2 = (v + vHeight) / texHeight;
+
+        // Set texture and UV region
         this.tmpUv.setTexture(tex);
-        this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
+        this.tmpUv.setRegion(u1, v1, u2, v2);
+
+        // Flip V-axis for libGDX (origin is top-left in pixel coordinates but bottom-left in UVs)
         this.batch.draw(tmpUv, x, y + height, width, -height);
+
         return this;
     }
 
@@ -793,9 +806,20 @@ public class Renderer implements Disposable {
     public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
         Texture tex = this.textureManager.getTexture(id);
+
+        // Normalize UV coordinates (convert from pixel coordinates to 0.0 - 1.0)
+        float u1 = u / texWidth;
+        float v1 = v / texHeight;
+        float u2 = (u + uWidth) / texWidth;
+        float v2 = (v + vHeight) / texHeight;
+
+        // Set texture and UV region
         this.tmpUv.setTexture(tex);
-        this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
-        this.batch.draw(this.tmpUv, x, y + height, width, -height);
+        this.tmpUv.setRegion(u1, v1, u2, v2);
+
+        // Flip V-axis for libGDX (origin is top-left in pixel coordinates but bottom-left in UVs)
+        this.batch.draw(tmpUv, x, y + height, width, -height);
+
         return this;
     }
 
@@ -816,7 +840,8 @@ public class Renderer implements Disposable {
      * @param backgroundColor the background color
      * @return this
      */
-    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight, Color backgroundColor) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v,
+                         float uWidth, float vHeight, int texWidth, int texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
@@ -848,7 +873,8 @@ public class Renderer implements Disposable {
      * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int, Color)
      */
     @ApiStatus.Internal
-    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight, Color backgroundColor) {
+    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth,
+                         float vHeight, float texWidth, float texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         this.batch.setColor(this.blitColor.toGdx());
@@ -876,7 +902,8 @@ public class Renderer implements Disposable {
      * @see #blit(NamespaceID, float, float, float, float, float, float, float, float, int, int)
      */
     @ApiStatus.Internal
-    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight) {
+    public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth,
+                         float vHeight, float texWidth, float texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
         this.tmpUv.setTexture(tex);
         this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
@@ -900,7 +927,8 @@ public class Renderer implements Disposable {
      * @param texHeight the texture height
      * @return this
      */
-    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v,
+                         float uWidth, float vHeight, float texWidth, float texHeight) {
         this.batch.setColor(this.blitColor.toGdx());
         Texture tex = this.textureManager.getTexture(id);
         this.tmpUv.setTexture(tex);
@@ -926,7 +954,8 @@ public class Renderer implements Disposable {
      * @param backgroundColor the background color
      * @return this
      */
-    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float texWidth, float texHeight, Color backgroundColor) {
+    public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v,
+                         float uWidth, float vHeight, float texWidth, float texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
@@ -1210,7 +1239,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow, float maxWidth, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow,
+                             float maxWidth, String truncate) {
         this.drawText(text, x, y, color, shadow);
         return this;
     }
@@ -1227,7 +1257,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow,
+                             float maxWidth, String truncate) {
         this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
@@ -1260,7 +1291,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, Color color, float maxWidth, boolean wrap, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, Color color, float maxWidth,
+                             boolean wrap, String truncate) {
         this.textLeft(text, x, y, color, true, maxWidth, wrap, truncate);
         return this;
     }
@@ -1277,7 +1309,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, float maxWidth, boolean wrap, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, float maxWidth,
+                             boolean wrap, String truncate) {
         this.textLeft(text, x, y, RgbColor.of(color), true, maxWidth, wrap, truncate);
         return this;
     }
@@ -1293,7 +1326,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, boolean shadow, float maxWidth, boolean wrap, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, boolean shadow, float maxWidth,
+                             boolean wrap, String truncate) {
         this.textLeft(text, x, y, RgbColor.WHITE, shadow, maxWidth, wrap, truncate);
         return this;
     }
@@ -1311,7 +1345,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow, float maxWidth, boolean wrap, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, Color color, boolean shadow, float maxWidth,
+                             boolean wrap, String truncate) {
         this.drawText(text, x, y, color, shadow);
         return this;
     }
@@ -1329,7 +1364,8 @@ public class Renderer implements Disposable {
      * @param truncate the text to show when truncated
      * @return this
      */
-    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth, boolean wrap, String truncate) {
+    public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow, float maxWidth,
+                             boolean wrap, String truncate) {
         this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
     }
@@ -2157,7 +2193,8 @@ public class Renderer implements Disposable {
         return this;
     }
 
-    public Renderer textRight(@NotNull TextObject text, float scale, float x, float value, Color color, boolean shadow) {
+    public Renderer textRight(@NotNull TextObject text, float scale, float x, float value, Color color,
+                              boolean shadow) {
         this.pushMatrix();
         this.scale(scale, scale);
         this.textRight(text, x / scale - this.textWidth(text), value / scale, color, shadow);
@@ -2491,7 +2528,8 @@ public class Renderer implements Disposable {
         return this;
     }
 
-    public Renderer draw9PatchTexture(Texture texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int texWidth, int texHeight) {
+    public Renderer draw9PatchTexture(Texture texture, int x, int y, int width, int height, int u, int v,
+                                      int uWidth, int vHeight, int texWidth, int texHeight) {
         this.blit(texture, x, y, uWidth, vHeight, u, v, uWidth, vHeight, texWidth, texHeight);
         this.blit(texture, x + width - uWidth, y, uWidth, vHeight, u + uWidth * 2, v, uWidth, vHeight, texWidth, texHeight);
         this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
@@ -2513,7 +2551,8 @@ public class Renderer implements Disposable {
         return this;
     }
 
-    public Renderer draw9PatchTexture(NamespaceID id, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int texWidth, int texHeight) {
+    public Renderer draw9PatchTexture(NamespaceID id, int x, int y, int width, int height, int u, int v, int uWidth,
+                                      int vHeight, int texWidth, int texHeight) {
         Texture texture = this.client.getTextureManager().getTexture(id);
 
         this.blit(texture, x, y + height - vHeight, uWidth, vHeight, u, v + vHeight * 2, uWidth, vHeight, texWidth, texHeight);
@@ -2624,7 +2663,8 @@ public class Renderer implements Disposable {
             blit(id("textures/gui/widgets.png"), x + 3, y, width - 6, vHeight, 129, 21, 15, vHeight, 256, 256); // center
             blit(id("textures/gui/widgets.png"), x + width - 3, y, 3, vHeight, 144, 21, 3, vHeight, 256, 256); // right
             draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 126, 41, 21, 1, 0, 3, 0, 3, 256, 256);
-        } else */if (/*depth > -height + 3 && */depth <= -1f) {
+        } else */
+        if (/*depth > -height + 3 && */depth <= -1f) {
             draw9Slice(id("textures/gui/widgets.png"), x, y, width, -depth + 4, 21 * 6, 21, 21, 7, 1, 2, 4, 2, 256, 256);
             draw9Slice(id("textures/gui/widgets.png"), x, y - depth + 4, width, height + depth - 4, 21 * 6, 28, 21, 12, 3, 3, 0, 3, 256, 256);
             draw9Slice(id("textures/gui/widgets.png"), x, y + height - 1, width, 1, 21 * 6, 41, 21, 1, 0, 3, 0, 3, 256, 256);
@@ -2734,11 +2774,13 @@ public class Renderer implements Disposable {
         if (scissored) popScissors();
     }
 
-    public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight) {
+    public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW,
+                            int uvH, int texWidth, int texHeight) {
         renderFrame(texture, x, y, w, h, u, v, uvW, uvH, texWidth, texHeight, RgbColor.WHITE);
     }
 
-    public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW, int uvH, int texWidth, int texHeight, @NotNull Color color) {
+    public void renderFrame(@NotNull NamespaceID texture, int x, int y, int w, int h, int u, int v, int uvW,
+                            int uvH, int texWidth, int texHeight, @NotNull Color color) {
         Texture handle = this.client.getTextureManager().getTexture(texture);
 
         w = Math.max(w, uvW * 2);
@@ -2763,7 +2805,8 @@ public class Renderer implements Disposable {
 
     }
 
-    public void draw9Slice(Texture texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int inset, int texWidth, int texHeight) {
+    public void draw9Slice(Texture texture, int x, int y, int width, int height, int u, int v, int uWidth,
+                           int vHeight, int inset, int texWidth, int texHeight) {
         this
                 // top
                 .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
@@ -2781,7 +2824,8 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
-    public void draw9Slice(NamespaceID texture, int x, int y, int width, int height, int u, int v, int uWidth, int vHeight, int inset, int texWidth, int texHeight) {
+    public void draw9Slice(NamespaceID texture, int x, int y, int width, int height, int u, int v, int uWidth,
+                           int vHeight, int inset, int texWidth, int texHeight) {
         this
                 // top
                 .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
@@ -2799,7 +2843,8 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
-    public void draw9Slice(Texture texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float inset, float texWidth, float texHeight) {
+    public void draw9Slice(Texture texture, float x, float y, float width, float height, float u, float v,
+                           float uWidth, float vHeight, float inset, float texWidth, float texHeight) {
         this
                 // top
                 .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
@@ -2817,7 +2862,8 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
-    public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float inset, float texWidth, float texHeight) {
+    public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v,
+                           float uWidth, float vHeight, float inset, float texWidth, float texHeight) {
         this
                 // top
                 .blit(texture, x, y, inset, inset, u, v, inset, inset, texWidth, texHeight) // left
@@ -2835,7 +2881,9 @@ public class Renderer implements Disposable {
                 .blit(texture, x + width - inset, y + height - inset, inset, inset, uWidth - inset + u, vHeight - inset + v, inset, inset, texWidth, texHeight); // right
     }
 
-    public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, float insetTop, float insetRight, float insetBottom, float insetLeft, float texWidth, float texHeight) {
+    public void draw9Slice(NamespaceID texture, float x, float y, float width, float height, float u, float v,
+                           float uWidth, float vHeight, float insetTop, float insetRight, float insetBottom, float insetLeft,
+                           float texWidth, float texHeight) {
         if (pushScissors(x, y, width, height)) {
             if (insetTop < 0) insetTop = 0;
             if (insetRight < 0) insetRight = 0;
@@ -2899,78 +2947,78 @@ public class Renderer implements Disposable {
     }
 
     final String VERT = "attribute vec4 a_position;\n" +
-                        "attribute vec4 a_color;\n" +
-                        "attribute vec2 a_texCoord0;\n" +
-                        "uniform mat4 u_projTrans;\n" +
-                        "\n" +
-                        "varying vec4 vColor;\n" +
-                        "varying vec2 vTexCoord;\n" +
-                        "\n" +
-                        "void main() {\n" +
-                        "\tvColor = a_color;\n" +
-                        "\tvTexCoord = a_texCoord0;\n" +
-                        "\tgl_Position =  u_projTrans * a_position;\n" +
-                        "}\n";
+            "attribute vec4 a_color;\n" +
+            "attribute vec2 a_texCoord0;\n" +
+            "uniform mat4 u_projTrans;\n" +
+            "\n" +
+            "varying vec4 vColor;\n" +
+            "varying vec2 vTexCoord;\n" +
+            "\n" +
+            "void main() {\n" +
+            "\tvColor = a_color;\n" +
+            "\tvTexCoord = a_texCoord0;\n" +
+            "\tgl_Position =  u_projTrans * a_position;\n" +
+            "}\n";
 
     final String FRAG = GamePlatform.get().isWeb()
             ? "// Fragment shader\n" +
-              "#ifdef GL_ES\n" +
-              "precision mediump float;\n" +
-              "#endif\n" +
-              "\n" +
-              "#define pi 3.14159265\n" +
-              "\n" +
-              "varying vec4 vColor;\n" +
-              "varying vec2 vTexCoord;\n" +
-              "\n" +
-              "uniform sampler2D u_texture;\n" +
-              "uniform vec2 iResolution;\n" +
-              "uniform float iBlurRadius; // Radius of the blur\n" +
-              "uniform vec2 iBlurDirection; // Direction of the blur\n" +
-              "uniform vec4 iClamp;\n" +
-              "\n" +
-              "void main() {\n" +
-              "    gl_FragColor = texture2D(u_texture, vTexCoord);\n" +
-              "}\n"
+            "#ifdef GL_ES\n" +
+            "precision mediump float;\n" +
+            "#endif\n" +
+            "\n" +
+            "#define pi 3.14159265\n" +
+            "\n" +
+            "varying vec4 vColor;\n" +
+            "varying vec2 vTexCoord;\n" +
+            "\n" +
+            "uniform sampler2D u_texture;\n" +
+            "uniform vec2 iResolution;\n" +
+            "uniform float iBlurRadius; // Radius of the blur\n" +
+            "uniform vec2 iBlurDirection; // Direction of the blur\n" +
+            "uniform vec4 iClamp;\n" +
+            "\n" +
+            "void main() {\n" +
+            "    gl_FragColor = texture2D(u_texture, vTexCoord);\n" +
+            "}\n"
             : "// Fragment shader\n" +
-              "#ifdef GL_ES\n" +
-              "precision mediump float;\n" +
-              "#endif\n" +
-              "\n" +
-              "#define pi 3.14159265\n" +
-              "\n" +
-              "varying vec4 vColor;\n" +
-              "varying vec2 vTexCoord;\n" +
-              "\n" +
-              "uniform sampler2D u_texture;\n" +
-              "uniform vec2 iResolution;\n" +
-              "uniform float iBlurRadius; // Radius of the blur\n" +
-              "uniform vec2 iBlurDirection; // Direction of the blur\n" +
-              "uniform vec4 iClamp;\n" +
-              "\n" +
-              "// Function to calculate Gaussian weights\n" +
-              "float gaussian(float x, float sigma) {\n" +
-              "    return exp(-0.5 * (x * x) / (sigma * sigma)) / (sigma * sqrt(2.0 * pi));\n" +
-              "}\n" +
-              "\n" +
-              "void main() {\n" +
-              "    float sigma = iBlurRadius;  // Sigma is usually proportional to the radius\n" +
-              "    vec4 color = vec4(0.0);\n" +
-              "    float total = 0.0;\n" +
-              "\n" +
-              "    vec2 iPos = vTexCoord * iResolution;\n" +
-              "\n" +
-              "    // Gaussian kernel size depends on the radius (optimize for reasonable radius)\n" +
-              "    for (int i = -int(iBlurRadius); i <= int(iBlurRadius); i++) {\n" +
-              "        float weight = gaussian(float(i), sigma);\n" +
-              "        vec2 offset = vec2(float(i) / (iResolution.x), float(i) / (iResolution.y)) * iBlurDirection; // Horizontal blur\n" +
-              "\n" +
-              "        color += texture2D(u_texture, vTexCoord + offset) * weight;\n" +
-              "        total += weight;\n" +
-              "    }\n" +
-              "\n" +
-              "    gl_FragColor = color / total;  // Normalize by total weight\n" +
-              "}\n";
+            "#ifdef GL_ES\n" +
+            "precision mediump float;\n" +
+            "#endif\n" +
+            "\n" +
+            "#define pi 3.14159265\n" +
+            "\n" +
+            "varying vec4 vColor;\n" +
+            "varying vec2 vTexCoord;\n" +
+            "\n" +
+            "uniform sampler2D u_texture;\n" +
+            "uniform vec2 iResolution;\n" +
+            "uniform float iBlurRadius; // Radius of the blur\n" +
+            "uniform vec2 iBlurDirection; // Direction of the blur\n" +
+            "uniform vec4 iClamp;\n" +
+            "\n" +
+            "// Function to calculate Gaussian weights\n" +
+            "float gaussian(float x, float sigma) {\n" +
+            "    return exp(-0.5 * (x * x) / (sigma * sigma)) / (sigma * sqrt(2.0 * pi));\n" +
+            "}\n" +
+            "\n" +
+            "void main() {\n" +
+            "    float sigma = iBlurRadius;  // Sigma is usually proportional to the radius\n" +
+            "    vec4 color = vec4(0.0);\n" +
+            "    float total = 0.0;\n" +
+            "\n" +
+            "    vec2 iPos = vTexCoord * iResolution;\n" +
+            "\n" +
+            "    // Gaussian kernel size depends on the radius (optimize for reasonable radius)\n" +
+            "    for (int i = -int(iBlurRadius); i <= int(iBlurRadius); i++) {\n" +
+            "        float weight = gaussian(float(i), sigma);\n" +
+            "        vec2 offset = vec2(float(i) / (iResolution.x), float(i) / (iResolution.y)) * iBlurDirection; // Horizontal blur\n" +
+            "\n" +
+            "        color += texture2D(u_texture, vTexCoord + offset) * weight;\n" +
+            "        total += weight;\n" +
+            "    }\n" +
+            "\n" +
+            "    gl_FragColor = color / total;  // Normalize by total weight\n" +
+            "}\n";
 
     @ApiStatus.Experimental
     public void blurred(Runnable block) {

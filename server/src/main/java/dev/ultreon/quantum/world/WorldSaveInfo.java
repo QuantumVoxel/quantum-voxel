@@ -20,7 +20,7 @@ public final class WorldSaveInfo {
     private final long seed;
     private final int generatorVersion;
     private final @NotNull GameMode gamemode;
-    private final @Nullable GameMode lastPlayedInMode;
+    private @Nullable GameMode lastPlayedInMode;
     private @NotNull String name;
     private DateTime lastSave;
 
@@ -142,5 +142,9 @@ public final class WorldSaveInfo {
         save.putString("name", name);
         save.putLong("lastSave", lastSave.toEpochMilli());
         storage.write(save, "info.ubo");
+    }
+
+    public void setLastPlayedInMode(@Nullable GameMode lastPlayedInMode) {
+        this.lastPlayedInMode = lastPlayedInMode;
     }
 }

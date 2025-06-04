@@ -19,7 +19,7 @@ public class ShutdownScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         this.message = builder.add(Label.of(TextObject.translation("Quantum.screen.shutdown.message")))
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 2 - 40))
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 2 - 40))
                 .scale(2);
     }
 

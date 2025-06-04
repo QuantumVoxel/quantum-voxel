@@ -54,6 +54,12 @@ public abstract class Screen extends UIContainer<Screen> {
     private Dialog dialog;
     private boolean dialogHovered;
 
+    public enum TitleRenderMode {
+        First,
+        Last,
+        Manually,
+    }
+
     /**
      * Creates a new screen with the given title.
      *
@@ -94,8 +100,13 @@ public abstract class Screen extends UIContainer<Screen> {
         this.root = this;
         this.title = title;
         this.isVisible = true;
+        this.clipped = false;
 
         this.resizer = new Resizer(7680, 4320);
+    }
+
+    public TitleRenderMode titleRenderMode() {
+        return TitleRenderMode.Last;
     }
 
     /**
@@ -105,12 +116,12 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param height the height of the screen.
      */
     public final void resize(int width, int height) {
-        if (this.titleWidget != null) {
-            height -= this.titleWidget.getHeight();
-        }
         this.size.set(width, height);
+        if (this.titleWidget != null) {
+            this.pos.y = titleWidget.getHeight();
+        }
         this.revalidate();
-        this.resized(width, height);
+        this.resized(this.size.width, this.size.height);
     }
 
     /**
@@ -133,7 +144,6 @@ public abstract class Screen extends UIContainer<Screen> {
      * @see #add(Widget)
      */
     public void resized(int width, int height) {
-
     }
 
     /**
@@ -147,33 +157,32 @@ public abstract class Screen extends UIContainer<Screen> {
      */
     @Override
     public final void render(@NotNull Renderer renderer, float deltaTime) {
-        if (this.titleWidget != null) {
-            renderer.pushMatrix();
-            renderer.translate(0, this.titleWidget.getHeight(), 0);
-            renderer.scissorOffset(0, this.titleWidget.getHeight());
-
-            super.render(renderer, deltaTime);
-
-            renderer.scissorOffset(0, -this.titleWidget.getHeight());
-            renderer.popMatrix();
-
-            if (this.dialog != null) {
-                renderer.fill(0, 0, this.size.width, this.size.height + this.titleWidget.getHeight(), DIALOG_BACKGROUND);
-                this.dialog.render(renderer, deltaTime);
-            }
-
-            this.titleWidget.render(renderer, deltaTime);
-            return;
-        }
-
         if (this.dialog != null) {
+            onBeforeRenderDialog(renderer, deltaTime);
             if (!GamePlatform.get().isWeb()) renderer.blurred(() -> super.render(renderer, deltaTime));
             renderer.fill(0, 0, this.size.width, this.size.height, DIALOG_BACKGROUND);
+            if (titleRenderMode() == TitleRenderMode.First) renderTitle(renderer, deltaTime);
             this.dialog.render(renderer, deltaTime);
+            if (titleRenderMode() == TitleRenderMode.Last) renderTitle(renderer, deltaTime);
+            onAfterRenderDialog(renderer, deltaTime);
             return;
         }
 
         super.render(renderer, deltaTime);
+        if (titleRenderMode() == TitleRenderMode.Last) renderTitle(renderer, deltaTime);
+    }
+
+    protected final void renderTitle(@NotNull Renderer renderer, float deltaTime) {
+        if (this.titleWidget != null)
+            this.titleWidget.render(renderer, deltaTime);
+    }
+
+    protected void onBeforeRenderDialog(@NotNull Renderer renderer, float deltaTime) {
+
+    }
+
+    protected void onAfterRenderDialog(@NotNull Renderer renderer, float deltaTime) {
+
     }
 
     /**
@@ -233,9 +242,18 @@ public abstract class Screen extends UIContainer<Screen> {
     public final void init(int width, int height) {
         this.setSize(width, height);
         GuiBuilder builder = new GuiBuilder(this);
+        if (isTitleEnabled()) {
+            this.titleWidget = new TitleWidget(this);
+            this.pos.y = titleWidget.getHeight();
+        }
         this.build(builder);
         this.revalidate();
         this.init();
+        this.resized(width, height);
+    }
+
+    protected boolean isTitleEnabled() {
+        return true;
     }
 
     /**
@@ -274,6 +292,8 @@ public abstract class Screen extends UIContainer<Screen> {
 
         this.renderBackground(renderer);
         super.renderBackground(renderer, deltaTime);
+
+        if (titleRenderMode() == TitleRenderMode.First && dialog == null) renderTitle(renderer, deltaTime);
     }
 
     /**
@@ -285,6 +305,11 @@ public abstract class Screen extends UIContainer<Screen> {
     @Override
     public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
         super.renderChildren(renderer, deltaTime);
+    }
+
+    @Override
+    protected void trackMouse(int x, int y) {
+        super.trackMouse(x, y);
     }
 
     /**
@@ -300,9 +325,8 @@ public abstract class Screen extends UIContainer<Screen> {
         } else {
             renderer.clearColor(0, 0, 0, 1);
             renderer.clear();
-            int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
             renderer.blurred(true, () -> {
-                Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
+                Vec2f thumbnail = this.resizer.thumbnail(this.client.getScaledWidth(), this.client.getScaledHeight());
 
                 float drawWidth = thumbnail.x;
                 float drawHeight = thumbnail.y;
@@ -313,7 +337,7 @@ public abstract class Screen extends UIContainer<Screen> {
                 renderer.blit(NamespaceID.of("textures/gui/title_background.png"), (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, this.resizer.getSourceWidth(), this.resizer.getSourceHeight(), (int) this.resizer.getSourceWidth(), (int) this.resizer.getSourceHeight());
             });
             renderer.flush();
-            renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, BACKGOUND_OVERLAY);
+            renderer.fill(0, 0, this.size.width, this.size.height, BACKGOUND_OVERLAY);
         }
     }
 
@@ -323,8 +347,7 @@ public abstract class Screen extends UIContainer<Screen> {
      * @param renderer renderer to draw/render with.
      */
     protected void renderTransparentBackground(Renderer renderer) {
-        int extraHeight = this.titleWidget != null ? this.titleWidget.getHeight() : 0;
-        renderer.fill(0, 0, this.size.width, this.size.height + extraHeight, BACKGOUND_OVERLAY);
+        renderer.fill(0, 0, this.size.width, this.size.height, BACKGOUND_OVERLAY);
     }
 
     /**
@@ -488,7 +511,6 @@ public abstract class Screen extends UIContainer<Screen> {
         }
 
         if (this.dialog != null) return this.dialog.mousePress(mouseX, mouseY, button);
-        if (title != null) mouseY -= title.getHeight();
         return super.mousePress(mouseX, mouseY, button);
     }
 
@@ -503,8 +525,7 @@ public abstract class Screen extends UIContainer<Screen> {
         }
 
         if (this.dialog != null) return this.dialog.mouseRelease(mouseX, mouseY, button);
-        if (title != null) mouseY -= title.getHeight();
-
+        
         return super.mouseRelease(mouseX, mouseY, button);
     }
 
@@ -519,8 +540,7 @@ public abstract class Screen extends UIContainer<Screen> {
         }
 
         if (this.dialog != null) return this.dialog.mouseClick(mouseX, mouseY, button, clicks);
-        if (title != null) mouseY -= title.getHeight();
-
+        
         return super.mouseClick(mouseX, mouseY, button, clicks);
     }
 

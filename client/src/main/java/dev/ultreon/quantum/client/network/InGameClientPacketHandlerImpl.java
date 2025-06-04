@@ -12,7 +12,7 @@ import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
-import dev.ultreon.quantum.client.gui.screens.WorldLoadScreen;
+import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;

@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
-public class PlatformTest extends Panel {
+public class PlatformTest extends Platform {
     public PlatformTest(int x, int y, int width, int height) {
         super(x, y, width, height);
     }

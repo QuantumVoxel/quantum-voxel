@@ -42,8 +42,8 @@ public final class ServerChunk extends Chunk {
     private final @NotNull ServerWorld world;
     private final @NotNull ServerWorld.Region region;
     public final ChunkBuildInfo info = new ChunkBuildInfo();
-    private boolean modified = false;
-    private boolean original = true;
+    protected boolean modified = false;
+    protected boolean original = true;
 
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
@@ -202,10 +202,6 @@ public final class ServerChunk extends Chunk {
     public void reset() {
         this.storage.setUniform(Blocks.AIR.getDefaultState());
         sendChunk();
-    }
-
-    public boolean shouldSave() {
-        return modified && ready;
     }
 
     public boolean isOriginal() {

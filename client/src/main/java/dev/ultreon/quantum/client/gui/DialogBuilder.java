@@ -21,7 +21,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder button(TextObject text, Runnable callback) {
-        dialog.buttons.add(TextButton.of(text, 80).setCallback(caller -> {
+        dialog.buttons.add(TextButton.of(text, 80).withCallback(caller -> {
             callback.run();
             dialog.close();
         }));
@@ -29,7 +29,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder button(TextObject text, Callback<Dialog> callback) {
-        dialog.buttons.add(TextButton.of(text, 80).setCallback(caller -> {
+        dialog.buttons.add(TextButton.of(text, 80).withCallback(caller -> {
             callback.call(this.dialog);
             dialog.close();
         }));

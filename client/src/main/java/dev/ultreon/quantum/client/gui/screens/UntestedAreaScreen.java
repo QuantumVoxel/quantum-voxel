@@ -17,7 +17,7 @@ public class UntestedAreaScreen extends Screen {
     private TextButton continueBtn;
     private TextButton backButton;
 
-    protected UntestedAreaScreen(String description, @Nullable Runnable continueAction) {
+    public UntestedAreaScreen(String description, @Nullable Runnable continueAction) {
         super("Untested Area", QuantumClient.get().screen);
         this.description = description;
         this.continueAction = continueAction;
@@ -44,20 +44,20 @@ public class UntestedAreaScreen extends Screen {
         this.descriptionLabel.setPos(this.size.width / 2, this.size.height / 3);
 
         this.continueBtn = add(TextButton.of("Continue")
-                .setCallback(btn -> {
+                .withCallback(btn -> {
                     if (continueAction == null) {
                         return;
                     }
                     continueAction.run();
                 })
-                .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3 + 25)));
+                .withPositioning(() -> new Position(this.size.width / 2 - 100, this.size.height / 3 + 25)));
 
         this.continueBtn.setSize(95, 20);
         this.continueBtn.setPos(this.size.width / 2 - 100, this.size.height / 3 + 25);
 
         this.backButton = add(TextButton.of("Back")
-                .setCallback(btn -> back())
-                .position(() -> new Position(this.size.width / 2 + 100, this.size.height / 3 + 25)));
+                .withCallback(btn -> back())
+                .withPositioning(() -> new Position(this.size.width / 2 + 100, this.size.height / 3 + 25)));
 
         this.backButton.setSize(95, 20);
         this.backButton.setPos(this.size.width / 2 + 5, this.size.height / 3 + 25);

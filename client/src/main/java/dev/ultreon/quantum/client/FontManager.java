@@ -1,10 +1,15 @@
 package dev.ultreon.quantum.client;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
+import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceCategory;
@@ -86,8 +91,7 @@ public class FontManager implements Disposable, ContextAwareReloadable {
      * @return The font.
      */
     private GameFont loadFont(NamespaceID namespaceID) {
-        @NotNull FileHandle handle = QuantumClient.resource(namespaceID.mapPath(path -> "font/" + path + ".fnt"));
-        return QuantumClient.invokeAndWait(() -> new GameFont(new BitmapFont(handle, false), Font.DistanceFieldType.STANDARD, 0f, 0f, 0f, 0f, false));
+        return QuantumClient.invokeAndWait(() -> new GameFont(QuantumClient.get().loadFont(namespaceID, false), Font.DistanceFieldType.STANDARD, 0f, 0f, 0f, 0f, false));
     }
 
     /**

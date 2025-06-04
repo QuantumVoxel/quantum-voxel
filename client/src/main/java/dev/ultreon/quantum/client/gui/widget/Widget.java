@@ -33,8 +33,8 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     @ApiStatus.Internal
     protected Screen root;
-    protected final Bounds bounds = new Bounds();
-    protected final Position pos = bounds.pos;
+    public final Bounds bounds = new Bounds();
+    public final Position pos = bounds.pos;
     public final Size size = bounds.size;
     public boolean clipped = true;
     public boolean topMost = false;
@@ -74,11 +74,11 @@ public abstract class Widget extends GameObject implements StaticWidget {
         return false;
     }
 
-    public Widget position(Supplier<Position> position) {
+    public Widget withPositioning(Supplier<Position> position) {
         return this;
     }
 
-    public Widget bounds(Supplier<Bounds> position) {
+    public Widget withBounding(Supplier<Bounds> position) {
         return this;
     }
 
@@ -181,7 +181,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
         this.size.height = height;
     }
 
-    public void bounds(int x, int y, int width, int height) {
+    public void withBounding(int x, int y, int width, int height) {
         this.bounds.set(x, y, width, height);
     }
 
@@ -294,7 +294,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
         trackMouse(x, y);
     }
 
-    protected final void trackMouse(int x, int y) {
+    protected void trackMouse(int x, int y) {
         mousePos.set(x, y);
         isHovered = true;
     }
@@ -342,7 +342,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     }
 
-    public void bounds(Bounds bounds) {
+    public void withBounding(Bounds bounds) {
         this.bounds.set(bounds);
     }
 
@@ -352,6 +352,10 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     public boolean isWithin(int mouseX, int mouseY) {
         return Widget.isPosWithin(mouseX, mouseY, this.pos.x, this.pos.y, this.size.width, this.size.height);
+    }
+
+    public void setBounds(int x, int y, int width, int height) {
+        this.bounds.set(x, y, width, height);
     }
 
     @FunctionalInterface

@@ -20,16 +20,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.KnownFonts;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
@@ -48,6 +46,7 @@ import dev.ultreon.quantum.client.gui.overlay.LoadingOverlay;
 import dev.ultreon.quantum.client.gui.overlay.ManualCrashOverlay;
 import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.screens.*;
+import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.input.*;
 import dev.ultreon.quantum.client.item.ItemRenderer;
 import dev.ultreon.quantum.client.management.*;
@@ -70,6 +69,7 @@ import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
+import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.rpc.RpcHandler;
 import dev.ultreon.quantum.client.sound.ClientSoundRegistry;
@@ -108,10 +108,7 @@ import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.BreakResult;
-import dev.ultreon.quantum.world.DimensionInfo;
-import dev.ultreon.quantum.world.SoundEvent;
-import dev.ultreon.quantum.world.WorldStorage;
+import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -124,6 +121,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -201,6 +199,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public LocalData localData = LocalData.load();
     public ClientSyncRegistries registries = new ClientSyncRegistries(this);
     public boolean saving;
+    public WorldSaveInfo worldSaveInfo;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -521,22 +520,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         GamePlatform.get().initMods();
 
-//        FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
-//        FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
-
         if (this.localData.username != null) {
             this.user = new User(this.localData.username);
         }
 
         // Initialize the unifont and font
-        this.font = new GameFont(new BitmapFont(resource(id("font/luna_pixel.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
+        this.font = new GameFont(loadFont(id("luna_pixel"), false), Font.DistanceFieldType.STANDARD, 0, -13, 0, -20, true);
         this.font.useIntegerPositions(true);
         this.font.setBoldStrength(0.33f);
         this.font.lineHeight = 7f;
 
         KnownFonts.addEmoji(font);
 
-        this.unifont = new GameFont(new BitmapFont(resource(id("unifont/unifont.fnt")), false), Font.DistanceFieldType.STANDARD, 0, -14, 0, -28, true);
+        this.unifont = new GameFont(loadFont(id("unifont"), false), Font.DistanceFieldType.STANDARD, 0, -14, 0, -28, true);
         this.unifont.useIntegerPositions(true);
         this.unifont.setBoldStrength(0.33f);
         this.unifont.scale(0.5f, 0.5f);
@@ -639,6 +635,37 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.closeButton = new ControlButton(ControlIcon.Close);
         this.maximizeButton = new ControlButton(ControlIcon.Maximize);
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);
+    }
+
+    public BitmapFont loadFont(@NotNull NamespaceID resource, boolean b) {
+        NamespaceID id = resource.mapPath(path -> "font/" + path + ".fnt");
+        var handle = resource(id);
+        if (!handle.exists()) {
+            throw new ResourceNotFoundException(id);
+        }
+        BitmapFont.BitmapFontData data = new BitmapFont.BitmapFontData(handle, false);
+        if (data.imagePaths == null)
+            throw new IllegalArgumentException("The font data must have an images path.");
+
+        // Load each path.
+        int n = data.imagePaths.length;
+        Array<TextureRegion> regions = new Array(n);
+        for (int i = 0; i < n; i++) {
+            if (handle instanceof ResourceFileHandle) {
+                id = NamespaceID.parse(data.imagePaths[i]).mapPath(path -> "textures/" + path);
+            } else {
+                String path = handle.parent().path().replace('\\', '/');
+                if (path.endsWith("/")) {
+                    path += "/";
+                }
+                id = NamespaceID.of("textures/font" + data.imagePaths[i].substring(path.length()));
+            }
+            FileHandle file = resource(id);
+            if (!file.exists())
+                throw new ResourceNotFoundException(id);
+            regions.add(new TextureRegion(new Texture(file, false)));
+        }
+        return new BitmapFont(data, regions, true);
     }
 
     /**
@@ -3340,7 +3367,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
         this.connection = null;
         IntegratedServer server = this.integratedServer;
-        this.showScreen(new MessageScreen(TextObject.translation("quantum.message.disconnecting"), TextObject.translation("quantum.message.disconnecting.desc")));
+        QuantumClient.invokeAndWait(() -> {
+            if (this.screen instanceof TitleScreen) return;
+            this.showScreen(new MessageScreen(TextObject.translation("quantum.message.disconnecting"), TextObject.translation("quantum.message.disconnecting.desc")));
+        });
         if (server != null) {
             server.shutdown(() -> {
                 this.showScreen(new DisconnectedScreen(message, !isMemoryConnection));

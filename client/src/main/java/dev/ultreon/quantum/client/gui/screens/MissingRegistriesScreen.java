@@ -39,16 +39,16 @@ public class MissingRegistriesScreen extends Screen {
         selectionList = add(new SelectionList<>());
         selectionList.setPos(this.size.width / 2, this.size.height / 2);
         selectionList.setSize(200, 100);
-        selectionList.drawBackground(false);
-        selectionList.selectable(true);
-        selectionList.itemRenderer(this::renderItem);
-        selectionList.itemHeight(20);
-        selectionList.callback(value -> client.clipboard.copy(value.toString()));
-        selectionList.entries(clientSet);
+        selectionList.withDrawBackground(false);
+        selectionList.withSelectable(true);
+        selectionList.withItemRenderer(this::renderItem);
+        selectionList.withItemHeight(20);
+        selectionList.withCallback(value -> client.clipboard.copy(value.toString()));
+        selectionList.addEntries(clientSet);
 
         add(TextButton.of("Back", 50))
-                .setCallback(button -> client.showScreen(new TitleScreen()))
-                .bounds(70, 10, 50, 20);
+                .withCallback(button -> client.showScreen(new TitleScreen()))
+                .withBounding(70, 10, 50, 20);
     }
 
     @Override

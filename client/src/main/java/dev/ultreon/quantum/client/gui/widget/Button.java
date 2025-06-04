@@ -138,19 +138,19 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     @Override
-    public abstract Button<T> position(Supplier<Position> position);
+    public abstract Button<T> withPositioning(Supplier<Position> position);
 
     @Override
-    public abstract Button<T> bounds(Supplier<Bounds> position);
+    public abstract Button<T> withBounding(Supplier<Bounds> position);
 
     @SuppressWarnings("unchecked")
-    public T setCallback(Callback<T> callback) {
+    public T withCallback(Callback<T> callback) {
         this.callback.set(callback);
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public T setType(Type type) {
+    public T withType(Type type) {
         this.type = type;
         return (T) this;
     }

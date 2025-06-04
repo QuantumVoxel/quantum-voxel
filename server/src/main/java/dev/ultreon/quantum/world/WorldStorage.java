@@ -50,7 +50,7 @@ public final class WorldStorage {
      */
     @SafeVarargs
     public final <T extends DataType<?>> T read(String path, T... typeGetter) throws IOException {
-        return DataIo.read(Gdx.files.local(path).read(), typeGetter);
+        return DataIo.read(directory.child(path).read(), typeGetter);
     }
 
     /**
@@ -61,7 +61,7 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     public void write(DataType<?> data, String path) throws IOException {
-        DataIo.write(data, Gdx.files.local(path).write(false));
+        DataIo.write(data, directory.child(path).write(false));
     }
 
     /**
@@ -107,7 +107,7 @@ public final class WorldStorage {
      * @return the region file.
      */
     public FileHandle regionFile(int x, int y, int z) {
-        return this.getDirectory().child("regions/" + x + "." + y + "." + z + ".ubo");
+        return this.getDirectory().child("regions/" + x + "." + y + "." + z + ".qvr");
     }
 
     /**

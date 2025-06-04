@@ -349,13 +349,13 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     @Override
-    public HorizontalList<T> position(Supplier<Position> position) {
+    public HorizontalList<T> withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public HorizontalList<T> bounds(Supplier<Bounds> position) {
+    public HorizontalList<T> withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }
@@ -414,12 +414,12 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         public abstract void renderEntry(Renderer renderer, int x, int y, boolean selected, float deltaTime);
 
         @Override
-        public Entry position(Supplier<Position> position) {
+        public Entry withPositioning(Supplier<Position> position) {
             return this;
         }
 
         @Override
-        public Entry bounds(Supplier<Bounds> position) {
+        public Entry withBounding(Supplier<Bounds> position) {
             return this;
         }
 

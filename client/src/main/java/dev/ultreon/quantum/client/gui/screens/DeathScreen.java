@@ -24,20 +24,20 @@ public class DeathScreen extends Screen {
         builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
                 .scale(2)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 50)));
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 50)));
 
         builder.add(Label.of(source.getDescription(client.player != null ? client.player : null))
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 25)));
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 25)));
 
         this.respawnButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.death.respawn"))
-                .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3))
-                .setCallback(this::respawn)
+                .withPositioning(() -> new Position(this.size.width / 2 - 100, this.size.height / 3))
+                .withCallback(this::respawn)
                 .translation("quantum.screen.death.respawn"));
 
         this.exitWorldButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"))
-                        .position(() -> new Position(this.size.width / 2 - 100, this.size.height / 3 + 25)))
-                .setCallback(this::exitWorld)
+                        .withPositioning(() -> new Position(this.size.width / 2 - 100, this.size.height / 3 + 25)))
+                .withCallback(this::exitWorld)
                 .translation("quantum.ui.exitWorld");
     }
 

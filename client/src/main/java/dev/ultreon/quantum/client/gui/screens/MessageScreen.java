@@ -30,12 +30,12 @@ public class MessageScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title)
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3 - 40))
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 40))
                 .scale(2));
 
         this.messageLabel = builder.add(Label.of(deferredMessage)
                 .alignment(Alignment.CENTER)
-                .position(() -> new Position(this.size.width / 2, this.size.height / 3)));
+                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3)));
     }
 
     @Override

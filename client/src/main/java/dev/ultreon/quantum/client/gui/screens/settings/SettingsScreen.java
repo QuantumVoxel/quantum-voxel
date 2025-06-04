@@ -32,19 +32,19 @@ public class SettingsScreen extends TabbedUI {
         setTabX(220);
 
         builder.add(TextButton.of(UITranslations.BACK, 50))
-                .bounds(() -> new Bounds(20, 29, 48, 19))
-                .setCallback(button -> back());
+                .withBounding(() -> new Bounds(20, 29, 48, 19))
+                .withCallback(button -> back());
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.settings.configs"), 50))
-                .bounds(() -> new Bounds(70, 29, 48, 19))
-                .setCallback(button -> this.client.showScreen(new CraftyConfigGui(this)));
+                .withBounding(() -> new Bounds(70, 29, 48, 19))
+                .withCallback(button -> this.client.showScreen(new CraftyConfigGui(this)));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.language"), 50))
-                .bounds(() -> new Bounds(120, 29, 48, 19))
-                .setCallback(button -> this.client.showScreen(new LanguageScreen(this)));
+                .withBounding(() -> new Bounds(120, 29, 48, 19))
+                .withCallback(button -> this.client.showScreen(new LanguageScreen(this)));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.credits"), 50))
-                .bounds(() -> new Bounds(170, 29, 48, 19))
-                .setCallback(button -> this.client.showScreen(new CreditsScreen(this)));
+                .withBounding(() -> new Bounds(170, 29, 48, 19))
+                .withCallback(button -> this.client.showScreen(new CreditsScreen(this)));
     }
 }

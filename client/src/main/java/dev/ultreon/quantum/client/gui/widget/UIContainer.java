@@ -58,13 +58,13 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     @Override
-    public UIContainer<T> position(Supplier<Position> position) {
+    public UIContainer<T> withPositioning(Supplier<Position> position) {
         this.onRevalidate(widget -> widget.setPos(position.get()));
         return this;
     }
 
     @Override
-    public UIContainer<T> bounds(Supplier<Bounds> position) {
+    public UIContainer<T> withBounding(Supplier<Bounds> position) {
         this.onRevalidate(widget -> widget.setBounds(position.get()));
         return this;
     }
@@ -89,9 +89,13 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
-        if (renderer.pushScissors(this.getBounds())) {
+        if (clipped) {
+            if (renderer.pushScissors(this.getBounds())) {
+                this.renderChildren(renderer, deltaTime);
+                renderer.popScissors();
+            }
+        } else {
             this.renderChildren(renderer, deltaTime);
-            renderer.popScissors();
         }
     }
 
@@ -260,19 +264,23 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
                 if (widget.ignoreBounds && widget.mousePress(mouseX, mouseY, button)) return true;
                 continue;
             }
-            if (widget.isWithinBounds(mouseX, mouseY)) {
-                if (focused != widget && focused != null) focused.onFocusLost();
-                this.focused = widget;
-                root.focused = widget;
-                widget.setFocused(true);
-                widget.onFocusGained();
-
-                if (widget.mousePress(mouseX, mouseY, button)) {
-                    return true;
-                }
+            if (widget.isWithinBounds(mouseX, mouseY) && widget.mousePress(mouseX, mouseY, button)) {
+                changeFocus(widget);
+                return true;
             }
         }
         return super.mousePress(mouseX, mouseY, button);
+    }
+
+    public void changeFocus(Widget widget) {
+        if (focused == widget) return;
+        if (focused != null) focused.onFocusLost();
+        this.focused = widget;
+        root.focused = widget;
+        if (widget != null) {
+            widget.setFocused(true);
+            widget.onFocusGained();
+        }
     }
 
     @Override

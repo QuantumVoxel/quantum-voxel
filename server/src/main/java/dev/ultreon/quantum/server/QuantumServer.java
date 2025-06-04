@@ -95,7 +95,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private final Map<UUID, ServerPlayer> players = new ConcurrentHashMap<>();
     private final MapType worldData;
     protected Networker networker;
-    private final WorldStorage storage;
+    protected final WorldStorage storage;
     private final ResourceManager resourceManager;
     //    protected InspectionNode<QuantumServer> node;
 //    private InspectionNode<Object> playersNode;
@@ -120,7 +120,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     private final NoiseConfigs noiseConfigs;
 
     @ShowInNodeView
-    private long seed;
+    protected long seed;
     private Runnable finalizer;
 
     /**
@@ -1071,5 +1071,13 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public Stream<Entity> getEntities() {
         return this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class)));
+    }
+
+    public void handleIOError(String title, String body) {
+
+    }
+
+    public void onSaveEvent(SaveEventType type, int... args) {
+        CommonConstants.LOGGER.warn("SAVE [" + type + "] @ " + Arrays.stream(args).mapToObj(Integer::toString).collect(Collectors.joining(", ")));
     }
 }

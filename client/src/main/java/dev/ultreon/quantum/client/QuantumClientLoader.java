@@ -173,7 +173,6 @@ class QuantumClientLoader implements Runnable {
             CommonRegistries.register();
 
             // Client registry
-            Fonts.register();
             Overlays.init();
 
             // Stuff that needs to be initialized on the render thread
@@ -208,6 +207,9 @@ class QuantumClientLoader implements Runnable {
 
         QuantumClient.LOGGER.info("Reloading resources");
         client.reloadResources();
+
+        QuantumClient.LOGGER.info("Loading fonts");
+        Fonts.register();
 
         progress(client, 0.95F);
 

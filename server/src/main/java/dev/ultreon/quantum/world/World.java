@@ -58,7 +58,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     public static final int CS_2 = CS * CS;
     public static final int CS_3 = CS_2 * CS;
 
-    public static final int REGION_SIZE = 32;
+    public static final int REGION_SIZE = 16;
     public static final NamespaceID OVERWORLD = new NamespaceID("overworld");
     public static final int SEA_LEVEL = 64;
     public static final int REGION_DATA_VERSION = 0;
