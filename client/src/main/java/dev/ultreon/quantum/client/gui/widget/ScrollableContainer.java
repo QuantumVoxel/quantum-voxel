@@ -81,7 +81,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
     }
 
     @Override
-    public void mouseMove(int x, int y) {
+    public void mouseMoved(int x, int y) {
         @Nullable Widget widgetAt = this.getWidgetAt(x, y);
         boolean widgetChanged = false;
         if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
@@ -92,13 +92,13 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY());
+            this.hoveredWidget.mouseMoved(x - widgetAt.getX(), y - widgetAt.getY());
 
             if (widgetChanged) {
                 this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
             }
         }
-        super.mouseMove(x, y);
+        super.mouseMoved(x, y);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class ScrollableContainer extends UIContainer<ScrollableContainer> {
                 this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
             }
         }
-        super.mouseMove(x, y);
+        super.mouseMoved(x, y);
     }
 
     @Override

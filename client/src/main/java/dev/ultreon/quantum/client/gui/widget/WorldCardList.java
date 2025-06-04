@@ -282,16 +282,16 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
         }
 
         @Override
-        public void mouseMove(int mouseX, int mouseY) {
+        public void mouseMoved(int mouseX, int mouseY) {
             if (!this.isEnabled) return;
             if (!this.isWithinBounds(mouseX, mouseY)) return;
 
             if (this.button.isHovered() && isSelected()) {
-                this.button.mouseMove(mouseX, mouseY);
+                this.button.mouseMoved(mouseX, mouseY);
                 return;
             }
 
-            super.mouseMove(mouseX, mouseY);
+            super.mouseMoved(mouseX, mouseY);
         }
 
         @Override

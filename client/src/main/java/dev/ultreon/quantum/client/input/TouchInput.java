@@ -163,7 +163,7 @@ public class TouchInput extends GameInput implements InputProcessor {
             if (currentScreen == null)
                 return;
 
-            currentScreen.mouseMove((int) (finalScreenX / this.client.getGuiScale()), (int) (finalScreenY / this.client.getGuiScale()));
+            currentScreen.mouseMoved((int) (finalScreenX / this.client.getGuiScale()), (int) (finalScreenY / this.client.getGuiScale()));
         });
         return true;
     }

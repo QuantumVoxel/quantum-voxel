@@ -151,7 +151,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     }
 
     @Override
-    public void mouseMove(int x, int y) {
+    public void mouseMoved(int x, int y) {
         @Nullable Entry<T> widgetAt = this.getEntryAt(x, y);
         boolean widgetChanged = false;
         if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
@@ -162,13 +162,13 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            this.hoveredWidget.mouseMove(x - widgetAt.getX(), y - widgetAt.getY());
+            this.hoveredWidget.mouseMoved(x - widgetAt.getX(), y - widgetAt.getY());
 
             if (widgetChanged) {
                 this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
             }
         }
-        super.mouseMove(x, y);
+        super.mouseMoved(x, y);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
                 this.hoveredWidget.mouseEnter(x - widgetAt.getX(), y - widgetAt.getY());
             }
         }
-        super.mouseMove(x, y);
+        super.mouseMoved(x, y);
     }
 
     @Override

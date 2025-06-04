@@ -246,13 +246,13 @@ public abstract class TabbedUI extends Screen {
     @Override
     public void mouseMoved(int x, int y) {
         if (this.titleWidget != null && isPosWithin(x, y, 0, 0, this.titleWidget.getWidth(), this.titleWidget.getHeight())) {
-            this.titleWidget.mouseMove(x, y);
+            this.titleWidget.mouseMoved(x, y);
             return;
         }
 
         for (Tab tab : this.tabs) {
             if (tab.isWithinBounds(x, y)) {
-                tab.mouseMove(x, y);
+                tab.mouseMoved(x, y);
                 super.mouseMoved(x, y);
                 return;
             }
@@ -308,24 +308,6 @@ public abstract class TabbedUI extends Screen {
         }
 
         return super.mouseWheel(mouseX, oldMouseY, rotation);
-    }
-
-    @Override
-    public void mouseMove(int mouseX, int mouseY) {
-        TitleWidget title = this.titleWidget;
-        int oldMouseY = mouseY;
-        if (title != null) {
-            mouseY -= title.getHeight();
-        }
-
-        for (Tab tab : this.tabs) {
-            if (tab.isWithinBounds(mouseX, mouseY))
-                tab.mouseMove(mouseX, mouseY);
-            if (tab == this.tab && tab.content().isWithinBounds(mouseX, mouseY))
-                tab.content().mouseMove(mouseX, mouseY);
-        }
-
-        super.mouseMove(mouseX, oldMouseY);
     }
 
     @Override

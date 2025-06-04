@@ -252,10 +252,6 @@ public abstract class Widget extends GameObject implements StaticWidget {
         return false;
     }
 
-    public void mouseMove(int mouseX, int mouseY) {
-        this.mousePos.set(mouseX, mouseY);
-    }
-
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
         return false;
     }

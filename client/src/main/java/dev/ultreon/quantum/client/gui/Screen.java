@@ -52,7 +52,6 @@ public abstract class Screen extends UIContainer<Screen> {
     protected TitleWidget titleWidget = null;
 
     private Dialog dialog;
-    private boolean dialogHovered;
 
     public enum TitleRenderMode {
         First,
@@ -458,16 +457,6 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     @Override
-    public void mouseMove(int mouseX, int mouseY) {
-        if (this.dialog != null) {
-            this.dialog.mouseMove(mouseX, mouseY);
-            return;
-        }
-
-        super.mouseMove(mouseX, mouseY);
-    }
-
-    @Override
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
         if (this.dialog != null) {
             return this.dialog.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);
@@ -487,13 +476,9 @@ public abstract class Screen extends UIContainer<Screen> {
 
     @Override
     public void mouseMoved(int x, int y) {
-        if (this.dialog != null && this.dialog.isVisible() && this.dialog.getX() <= x && x <= this.dialog.getX() + this.dialog.getWidth() && this.dialog.getY() <= y && y <= this.dialog.getY() + this.dialog.getHeight()) {
+        if (this.dialog != null && this.dialog.isVisible()) {
             this.dialog.mouseMoved(x, y);
-            if (this.dialog == this.hoveredWidget) return;
-            this.dialog.mouseEnter(x - this.dialog.getX(), y - this.dialog.getY());
-            if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
-            this.hoveredWidget = this.dialog;
-            super.mouseMoved(x, y);
+            trackMouse(x, y);
             return;
         }
 
@@ -589,17 +574,19 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     public void showDialog(DialogBuilder message) {
-        this.mouseExit();
-
         this.dialog = message.build();
         this.dialog.init();
+        this.dialog.mouseEnter(mousePos.x - this.dialog.getX(), mousePos.y - this.dialog.getY());
+        if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
+        this.hoveredWidget = this.dialog;
     }
 
     public void showDialog(Dialog dialog) {
-        this.mouseExit();
-
         this.dialog = dialog;
         this.dialog.init();
+        this.dialog.mouseEnter(mousePos.x - this.dialog.getX(), mousePos.y - this.dialog.getY());
+        if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
+        this.hoveredWidget = this.dialog;
     }
 
     public Dialog getDialog() {
@@ -609,8 +596,7 @@ public abstract class Screen extends UIContainer<Screen> {
     public void closeDialog(Dialog dialog) {
         if (this.dialog == dialog) {
             this.dialog = null;
+            super.mouseMoved(mousePos.x, mousePos.y);
         }
-
-        this.mouseEnter((int) (Gdx.input.getX() / this.client.getGuiScale()), (int) (Gdx.input.getY() / this.client.getGuiScale()));
     }
 }

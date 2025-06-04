@@ -187,7 +187,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     @Override
-    public void mouseMove(int x, int y) {
+    public void mouseMoved(int x, int y) {
         @Nullable T widgetAt = this.getEntryAt(x, y);
         boolean widgetChanged = false;
         if (this.hoveredWidget != null && !this.hoveredWidget.isWithinBounds(x, y)) {
@@ -198,13 +198,13 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
         this.hoveredWidget = widgetAt;
 
         if (this.hoveredWidget != null) {
-            this.hoveredWidget.mouseMove(x, y);
+            this.hoveredWidget.mouseMoved(x, y);
 
             if (widgetChanged) {
                 this.hoveredWidget.mouseEnter(x, y);
             }
         }
-        super.mouseMove(x, y);
+        super.mouseMoved(x, y);
     }
 
     @Override
@@ -225,7 +225,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
                 this.hoveredWidget.mouseEnter(x, y);
             }
         }
-        super.mouseMove(x, y);
+        super.mouseMoved(x, y);
     }
 
     @Override

@@ -313,24 +313,6 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     @Override
-    public void mouseMove(int mouseX, int mouseY) {
-        List<Widget> widgetList = List.copyOf(this.widgets);
-        for (int i = widgetList.size() - 1; i >= 0; i--) {
-            var widget = widgetList.get(i);
-            if (!widget.isVisible) {
-                if (widget.ignoreBounds) {
-                    widget.mouseMove(mouseX, mouseY);
-                }
-                continue;
-            }
-            if (widget.isWithinBounds(mouseX, mouseY)) {
-                widget.mouseMove(mouseX, mouseY);
-            }
-        }
-        super.mouseMove(mouseX, mouseY);
-    }
-
-    @Override
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
         List<Widget> widgetList = List.copyOf(this.widgets);
         for (int i = widgetList.size() - 1; i >= 0; i--) {
