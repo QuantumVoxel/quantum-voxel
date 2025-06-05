@@ -11,7 +11,7 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.dedicated.gui.DedicatedServerGui;
-//import dev.ultreon.quantum.server.dedicated.http.ServerHttpSite;
+//import dev.ultreon.quantum.dedicated.http.ServerHttpSite;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;

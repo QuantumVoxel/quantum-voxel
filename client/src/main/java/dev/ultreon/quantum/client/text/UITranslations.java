@@ -21,4 +21,6 @@ public class UITranslations {
     public static final TranslationText TOGGLE_ALL = TextObject.translation("quantum.ui.toggle_all");
     public static final TranslationText ENABLE_ALL = TextObject.translation("quantum.ui.enable_all");
     public static final TranslationText DISABLE_ALL = TextObject.translation("quantum.ui.disable_all");
+    public static final TranslationText ENABLED = TextObject.translation("quantum.ui.enabled");
+    public static final TranslationText DISABLED = TextObject.translation("quantum.ui.disabled");
 }

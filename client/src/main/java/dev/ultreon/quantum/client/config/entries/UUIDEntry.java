@@ -20,7 +20,7 @@ public class UUIDEntry extends ConfigEntry<UUID> {
     @Override
     public Widget createWidget() {
         return TextEntry.of(value.toString())
-                .callback(this::set);
+                .withCallback(this::set);
     }
 
     private void set(TextEntry textEntry) {

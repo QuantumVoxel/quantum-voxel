@@ -11,6 +11,7 @@ import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
+import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
@@ -54,27 +55,41 @@ public class WorldLoadScreen extends Screen {
 
     @Override
     public void build(@NotNull GuiBuilder builder) {
-        IntegratedServer server = new IntegratedServer(this.storage);
+        final IntegratedServer server;
+        try {
+            server = new IntegratedServer(this.storage);
+        } catch (IOException e) {
+            client.showScreen(new DisconnectedScreen("Server failed to initialize!", false));
+            return;
+        }
         this.client.integratedServer = server;
 
         this.client.add("Integrated Server", server);
 
-        server.init();
+        try {
+            server.init();
+        } catch (IOException e) {
+            server.shutdown(() -> {
+                this.client.remove(server);;
+                client.showScreen(new DisconnectedScreen("Server failed to initialize!", false));
+            });
+            return;
+        }
 
         this.world = server.getDimManager().getWorld(DimensionInfo.OVERWORLD);
         this.client.openedWorld = this.storage;
 
         this.titleLabel = builder.add(Label.of(this.title)
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 25))
-                .scale(2));
+                .withScale(2));
 
         this.descriptionLabel = builder.add(Label.of("Preparing")
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 + 3)));
 
         this.subTitleLabel = builder.add(Label.of()
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 + 31)));
 
         GamePlatform.get().runAsync(this::run);

@@ -154,7 +154,7 @@ public class Label extends Widget {
      * @param alignment the alignment of the label
      * @return this label
      */
-    public Label alignment(Alignment alignment) {
+    public Label withAlignment(Alignment alignment) {
         this.alignment.set(alignment);
         return this;
     }
@@ -176,7 +176,7 @@ public class Label extends Widget {
      * @param scale the scale of the text of the label
      * @return this label
      */
-    public Label scale(int scale) {
+    public Label withScale(int scale) {
         this.scale.set(scale);
         return this;
     }

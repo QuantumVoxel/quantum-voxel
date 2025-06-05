@@ -34,6 +34,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
     private long ping;
     private ServerPacketHandler handler;
     private final RegistryHandle handle;
+    private boolean loggingIn = true;
 
     public ServerConnection(Session session, QuantumServer server) {
         this.session = session;
@@ -89,6 +90,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
     public void moveTo(PacketStage stage, ServerPacketHandler handler) {
         this.stage = stage;
         this.handler = handler;
+        if (stage == PacketStages.IN_GAME) loggingIn = false;
     }
 
     @Override
@@ -128,7 +130,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
 
     @Override
     public boolean isLoggingIn() {
-        return false;
+        return loggingIn;
     }
 
     @Override
@@ -153,5 +155,9 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
         } catch (Exception e) {
             disconnect(CloseCodes.VIOLATED_POLICY.getCode(), e.toString());
         }
+    }
+
+    public void setLoggingIn(boolean loggingIn) {
+        this.loggingIn = loggingIn;
     }
 }

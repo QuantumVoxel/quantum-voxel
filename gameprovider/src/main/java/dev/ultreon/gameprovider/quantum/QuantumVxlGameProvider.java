@@ -124,10 +124,10 @@ public class QuantumVxlGameProvider implements GameProvider {
                 // Creating a BuiltinMod for LibGDX
                 new BuiltinMod(List.of(this.libGdxJar), new BuiltinModMetadata.Builder("gdx", getVersion("gdx"))
                         .setName("LibGDX")
-                        .setDescription("LibGDX is a Java game development framework for\n" +
-                                        " creating games across multiple platforms.\n" +
-                                        "It simplifies the development process with\n" +
-                                        " cross-platform capabilities, high-performance rendering,\n" +
+                        .setDescription("LibGDX is a Java game development framework for" +
+                                        " creating games across multiple platforms." +
+                                        "It simplifies the development process with" +
+                                        " cross-platform capabilities, high-performance rendering," +
                                         " and a large community.\n")
                         .addLicense("Apache-2.0")
                         .addAuthor("libGDX", Map.of("homepage", "http://www.libgdx.com/", "patreon", "https://patreon.com/libgdx", "github", "https://github.com/libgdx", "sources", "https://github.com/libgdx/libgdx"))
@@ -135,74 +135,6 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .addAuthor("Nathan Sweet", Map.of("github", "https://github.com/NathanSweet", "email", "nathan.sweet@gmail.com"))
                         .addIcon(200, "assets/gdx/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("log4j", getVersion("log4j"))
-                        .setName("Apache Log4J")
-                        .setDescription("Apache Log4J is an open source\n" +
-                                        " logging framework for Java.\n")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("homepage", "https://logging.apache.org/log4j/", "sources", "https://github.com/apache/logging-log4j2")))
-                        .addAuthor("The Apache Software Foundation", Map.of("homepage", "https://www.apache.org/", "sources", "https://github.com/apache/logging-log4j2"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("apache-commons-collections4", getVersion("apache-commons-collections4"))
-                        .setName("Apache Commons Collections")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/apache/commons-collections")))
-                        .addAuthor("The Apache Software Foundation", Map.of("homepage", "https://www.apache.org/", "sources", "https://github.com/apache/commons-collections"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("apache-commons-compress", getVersion("apache-commons-compress"))
-                        .setName("Apache Commons Compress")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/apache/commons-compress")))
-                        .addAuthor("The Apache Software Foundation", Map.of("homepage", "https://www.apache.org/", "sources", "https://github.com/apache/commons-compress"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("apache-commons-lang3", getVersion("apache-commons-lang3"))
-                        .setName("Apache Commons Lang")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/apache/commons-lang")))
-                        .addAuthor("The Apache Software Foundation", Map.of("homepage", "https://www.apache.org/", "sources", "https://github.com/apache/commons-lang"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("slf4j", getVersion("slf4j"))
-                        .setName("SLF4J")
-                        .setDescription("SLF4J is a simple logging API for Java.\n" +
-                                        "It is designed to be simple to use,\n" +
-                                        " but flexible enough to be a ServiceProvider.\n")
-                        .addLicense("MIT")
-                        .addAuthor("Q-OS.CH", Map.of("homepage", "https://q-os.ch/", "sources", "https://github.com/qos-ch/slf4j"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("gdx-controllers", getVersion("gdx-controllers"))
-                        .setName("LibGDX Controllers")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/libgdx/gdx-controllers")))
-                        .addAuthor("libGDX", Map.of("homepage", "http://libgdx.com/", "sources", "https://github.com/libgdx"))
-                        .setEnvironment(ModEnvironment.CLIENT)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("gdx-ai", getVersion("gdx-ai"))
-                        .setName("LibGDX AI")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/libgdx/gdx-ai")))
-                        .addAuthor("libGDX", Map.of("homepage", "http://libgdx.com/", "sources", "https://github.com/libgdx"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("asm", getVersion("asm"))
-                        .setName("ObjectWeb ASM")
-                        .setDescription("")
-                        .addLicense("MIT")
-                        .addAuthor("ObjectWeb", Map.of("homepage", "https://asm.ow2.io/", "sources", "https://gitlab.ow2.org/asm/asm"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(List.of(), new BuiltinModMetadata.Builder("vis-ui", getVersion("visui"))
-                        .setName("VisUI")
-                        .setDescription("")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/kotcrab/vis-ui")))
-                        .addAuthor("Kotcrab", Map.of("homepage", "https://github.com/kotcrab/vis-ui", "github", "https://github.com/kotcrab"))
-                        .setEnvironment(ModEnvironment.CLIENT)
                         .build()),
                 // Creating a BuiltinMod for Quantum Voxel
                 new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("ubo", getVersion("ubo"))
@@ -223,20 +155,22 @@ public class QuantumVxlGameProvider implements GameProvider {
 
                 // Creating a BuiltinMod for Quantum Voxel
                 new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("quantum", "0.2.0")
-                        .addLicense("Ultreon-PSL-1.0")
-                        .addAuthor("Ultreon Development Studios", Map.of("github", "https://github.com/Ultreon", "gitlab", "https://gitlab.com/ultreon", "email", "contact@ultreon.dev"))
-                        .addContributor("XyperCode", Map.of("github", "https://github.com/XyperCode", "gitlab", "https://gitlab.com/XyperCode", "email", "xypercode@ultreon.dev"))
+                        .setName("Quantum Voxel")
+                        .addLicense("Apache-2.0")
+                        .addAuthor("Ultreon Studios", Map.of("github", "https://github.com/Ultreon", "gitlab", "https://gitlab.com/ultreon", "email", "contact@ultreon.dev"))
+                        .addContributor("Qubix", Map.of("github", "https://github.com/XyperCode", "gitlab", "https://gitlab.com/XyperCode", "email", "xypercode@ultreon.dev"))
                         .addContributor("MincraftEinstein", Map.of("github", "https://github.com/MincraftEinstein"))
                         .addContributor("Creatomat Gaming", Map.of("github", "https://github.com/Creatomat"))
+                        .addContributor("Hellay", Map.of())
+                        .addContributor("ShadyCrow", Map.of())
                         .addIcon(128, "assets/craft/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/QuantumVoxel/quantum-voxel", "email", "contact.ultreon@gmail.com", "homepage", "https://ultreon.dev/?id=quantum#project", "discord", "https://discord.gg/WePT9v2CmQ", "issues", "https://github.com/QuantumVoxel/quantum-voxel/issues")))
-                        .setDescription("A blocky, voxel-based world where you can explore,\n" +
-                                        " build, and survive in a vast and ever-changing environment.\n" +
-                                        "Inspired by the best of the voxel game genre.\n" +
-                                        "\n" +
-                                        "It's also the game that you're playing right now!")
-                        .setName("Quantum Voxel")
+                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/QuantumVoxel/quantum-voxel", "email", "contact.ultreon@gmail.com", "homepage", "https://ultreon.dev/?id=quantum#project", "discord", "https://discord.gg/vM7ysZZ5q3", "issues", "https://github.com/QuantumVoxel/quantum-voxel/issues")))
+                        .setDescription("[b]Quantum Voxel[] is a custom block game built entirely in Java. It might look familiar if you're into block-based games, but this game will go [i]way[] beyond that at release.\n" +
+                                "Modding is quite normal and easy, just drop mods into a folder and they work. It uses proper registries, clean APIs, and event systems that make modding easy to do.\n" +
+                                "[b]Quantum Voxel[] is what block games should’ve been: [i]open[], [i]moddable[], and made to [i]push the limits[].\n" +
+                                "\n" +
+                                "This game has started development at April 3rd 2023, and the maintainer (Qubix) has worked on it since then.\n")
                         .build())
         );
     }

@@ -33,9 +33,11 @@ import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.ubo.types.DoubleArrayType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.GameMode;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -60,11 +62,11 @@ import java.util.stream.Collectors;
  */
 public class ServerPlayer extends Player implements CacheablePlayer {
     private final Vec3d tmp3d$1 = new Vec3d();
-    public IConnection<ServerPacketHandler, ClientPacketHandler> connection;
+    public @Nullable IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private ServerWorld world;
     public int hotbarIdx;
     private final UUID uuid;
-    private final String name;
+    private String name;
     private final QuantumServer server = QuantumServer.get();
     public boolean blockBrokenTick = false;
     private boolean sendingChunk;
@@ -372,6 +374,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     public @NotNull String getName() {
         return this.name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -863,5 +870,17 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public Collection<String> getVariableNames(Class<?> clazz) {
         return PlayerVariables.get(this).getVariablesByType(clazz).sorted().collect(Collectors.toList());
+    }
+
+    public void loadWithWorldPos(MapType data) {
+        loadWithPos(data);
+        this.world = server.getWorld(NamespaceID.parse(data.getString("world", world.getDimension().id().toString())));
+    }
+
+    @Override
+    public @NotNull MapType save(@NotNull MapType data) {
+        MapType save = super.save(data);
+        save.putString("world", getWorld().getDimension().id().toString());
+        return save;
     }
 }

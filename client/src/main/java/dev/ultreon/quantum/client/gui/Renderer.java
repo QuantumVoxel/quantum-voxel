@@ -1548,6 +1548,7 @@ public class Renderer implements Disposable {
     public int textWidth(@NotNull String text) {
         this.layout.setFont(font);
         this.layout.clear();
+        this.layout.setTargetWidth(0f);
         this.font.markup(text, this.layout);
         return (int) this.layout.getWidth();
     }
@@ -2235,28 +2236,78 @@ public class Renderer implements Disposable {
     }
 
     public Renderer textMultiline(@NotNull String text, int x, int y) {
-        this.textMultiline(text, x, y, RgbColor.WHITE);
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE);
         return this;
     }
 
-    public Renderer textMultiline(@NotNull String text, int x, int y, Color color) {
+    public Renderer textMultiline(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color) {
         this.textMultiline(text, x, y, color, true);
         return this;
     }
 
     public Renderer textMultiline(@NotNull String text, int x, int y, boolean shadow) {
-        this.textMultiline(text, x, y, RgbColor.WHITE, shadow);
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, shadow);
         return this;
     }
 
-    public Renderer textMultiline(@NotNull String text, int x, int y, Color color, boolean shadow) {
-        y -= (int) this.font.getLineHeight();
+    public Renderer textMultiline(@NotNull String text, int x, int y, boolean shadow, int targetWidth) {
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, shadow, targetWidth, Integer.MAX_VALUE, "...");
+        return this;
+    }
 
-        for (String line : text.split("\n")) {
-            y += (int) (this.font.getLineHeight() + 2);
-            this.textLeft(line, x, y, color, shadow);
+    public Renderer textMultiline(@NotNull String text, int x, int y, int targetWidth) {
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, true, targetWidth, Integer.MAX_VALUE, "...");
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, int targetWidth, String ellipsis) {
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, true, targetWidth, Integer.MAX_VALUE, ellipsis);
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, boolean shadow, int targetWidth, int targetHeight) {
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, shadow, targetWidth, targetHeight, "...");
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, int targetWidth, int targetHeight) {
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, true, targetWidth, targetHeight, "...");
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, int targetWidth, int targetHeight, String ellipsis) {
+        this.textMultiline(text, x, y, com.badlogic.gdx.graphics.Color.WHITE, true, targetWidth, targetHeight, ellipsis);
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
+        this.textMultiline(text, x, y, color, shadow, 0);
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color, boolean shadow, int targetWidth) {
+        this.textMultiline(text, x, y, color, shadow, targetWidth, Integer.MAX_VALUE, "...");
+        return this;
+    }
+
+    public Renderer textMultiline(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color, boolean shadow, int targetWidth, int targetHeight, String ellipsis) {
+        this.layout.clear();
+        this.layout.setTargetWidth(targetWidth);
+        this.layout.setEllipsis(ellipsis);
+        this.layout.setMaxLines(targetHeight == Integer.MAX_VALUE ? targetHeight : (int) (targetHeight / this.font.lineHeight));
+        this.font.markup(text, layout);
+
+        if (shadow) {
+            batch.setColor(.5f, .5f, .5f, 1f);
+            if (ClientConfiguration.diagonalFontShadow.getValue()) {
+                this.font.drawGlyphs(batch, layout, x + 1, y + 1);
+            } else {
+                this.font.drawGlyphs(batch, layout, x, y + 1);
+            }
+            batch.setColor(1f, 1f, 1f, 1f);
         }
 
+        this.font.drawGlyphs(batch, layout, x, y);
         return this;
     }
 

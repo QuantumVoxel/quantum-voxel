@@ -31,16 +31,16 @@ public class LongEntry extends ConfigEntry<Long> {
     @Override
     public Widget createWidget() {
         return TextEntry.of(Long.toString(this.value))
-                .filter(c -> Character.isDigit(c) || c == '-')
-                .callback(entry -> {
+                .withFilter(c -> Character.isDigit(c) || c == '-')
+                .withCallback(entry -> {
                     var value = entry.getValue();
                     try {
                         long value1 = Long.parseLong(value);
                         if (value1 < this.min) {
-                            entry.value(String.valueOf(this.min));
+                            entry.setValue(String.valueOf(this.min));
                             return;
                         } else if (value1 > this.max) {
-                            entry.value(String.valueOf(this.max));
+                            entry.setValue(String.valueOf(this.max));
                             return;
                         }
                         this.value = value1;

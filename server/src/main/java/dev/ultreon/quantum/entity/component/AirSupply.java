@@ -4,16 +4,16 @@ import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.component.GameComponent;
 
 public class AirSupply extends GameComponent {
-    public float air;
-    public int maxAir;
+    private float air;
+    private int maxAir;
 
     public AirSupply(float air, int maxAir) {
-        this.air = air;
-        this.maxAir = maxAir;
+        this.setAir(air);
+        this.setMaxAir(maxAir);
     }
 
     public AirSupply(AirSupply air) {
-        this(air.air, air.maxAir);
+        this(air.getAir(), air.getMaxAir());
     }
 
     public AirSupply() {
@@ -25,28 +25,44 @@ public class AirSupply extends GameComponent {
     }
 
     public AirSupply set(AirSupply airSupply) {
-        this.air = airSupply.air;
-        this.maxAir = airSupply.maxAir;
+        this.setAir(airSupply.getAir());
+        this.setMaxAir(airSupply.getMaxAir());
         return this;
     }
 
     public AirSupply set(float air, int maxAir) {
-        this.air = air;
-        this.maxAir = maxAir;
+        this.setAir(air);
+        this.setMaxAir(maxAir);
         return this;
     }
 
     public AirSupply useAir(float amount) {
-        this.air = Mth.clamp(this.air - amount, 0, this.maxAir);
+        this.setAir(Mth.clamp(this.getAir() - amount, 0, this.getMaxAir()));
         return this;
     }
 
     public AirSupply fillAir(float amount) {
-        this.air = Mth.clamp(this.air + amount, 0, this.maxAir);
+        this.setAir(Mth.clamp(this.getAir() + amount, 0, this.getMaxAir()));
         return this;
     }
 
     public boolean isSuffocating() {
-        return air <= 0;
+        return getAir() <= 0;
+    }
+
+    public float getAir() {
+        return air;
+    }
+
+    public void setAir(float air) {
+        this.air = air;
+    }
+
+    public int getMaxAir() {
+        return maxAir;
+    }
+
+    public void setMaxAir(int maxAir) {
+        this.maxAir = maxAir;
     }
 }

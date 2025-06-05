@@ -35,15 +35,15 @@ public class OutOfMemoryScreen extends Screen {
     public void build(@NotNull GuiBuilder builder) {
         // Add a label for the screen title
         builder.add(Label.of(this.getTitle()))
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.getWidth() / 4 , this.getHeight() / 4 - 25))
-                .scale(2)
+                .withScale(2)
                 .textColor(RgbColor.RED.brighter());
 
         // Add a label for the message
         builder.add(Label.of(TextObject.translation("quantum.screen.out_of_memory.message")))
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.getWidth() / 4 , this.getHeight() / 4))
-                .scale(1);
+                .withScale(1);
     }
 }

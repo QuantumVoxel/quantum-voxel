@@ -18,11 +18,11 @@ public class ModImportFailedScreen extends Screen {
 
     @Override
     public void build(@NotNull GuiBuilder builder) {
-        builder.add(Label.of(this.title).alignment(Alignment.CENTER).textColor(ColorCode.RED).withPositioning(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
-                .scale(2));
+        builder.add(Label.of(this.title).withAlignment(Alignment.CENTER).textColor(ColorCode.RED).withPositioning(() -> new Position(this.getWidth() / 2, this.getHeight() / 2 - 30))
+                .withScale(2));
 
         builder.add(Label.of(TextObject.translation("Quantum.screen.import_failed.message"))
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.getWidth() / 2, this.getHeight() / 2)));
 
         builder.add(TextButton.of(UITranslations.OK, 100)

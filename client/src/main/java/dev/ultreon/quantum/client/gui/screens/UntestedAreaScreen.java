@@ -34,11 +34,11 @@ public class UntestedAreaScreen extends Screen {
         super.init();
 
         this.titleLabel = add(Label.of(this.title)
-                .alignment(Alignment.CENTER)
-                .scale(2));
+                .withAlignment(Alignment.CENTER)
+                .withScale(2));
 
         this.descriptionLabel = add(Label.of(description)
-                .alignment(Alignment.CENTER));
+                .withAlignment(Alignment.CENTER));
 
         this.titleLabel.setPos(this.size.width / 2, this.size.height / 3 - 25);
         this.descriptionLabel.setPos(this.size.width / 2, this.size.height / 3);

@@ -187,12 +187,12 @@ public class MultiplayerScreen extends Screen {
 
             title = TextObject.translation("quantum.screen.multiplayer.add_server");
 
-            nameEntry = add(TextEntry.of());
+            nameEntry = add(TextEntry.create());
             nameEntry.setPos(pos.x + 5, pos.y + 30);
             nameEntry.setSize(190, 20);
             nameEntry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_name"));
 
-            entry = add(TextEntry.of());
+            entry = add(TextEntry.create());
             entry.setSize(190, 20);
             entry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_ip"));
             entry.callback().set(this::validateServerIp);
@@ -258,12 +258,12 @@ public class MultiplayerScreen extends Screen {
 
             title = TextObject.translation("quantum.screen.multiplayer.add_server");
 
-            nameEntry = add(TextEntry.of());
+            nameEntry = add(TextEntry.create());
             nameEntry.setPos(pos.x + 5, pos.y + 30);
             nameEntry.setSize(190, 20);
             nameEntry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_name"));
 
-            entry = add(TextEntry.of());
+            entry = add(TextEntry.create());
             entry.setSize(190, 20);
             entry.hint().set(TextObject.translation("quantum.screen.multiplayer.server_ip"));
             entry.callback().set(this::validateServerIp);

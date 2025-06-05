@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.entity.Entity;
-import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A class that holds a bunch of item slots.
@@ -25,7 +23,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see MenuType
  */
 public class AdvancedCraftingMenu extends ContainerMenu {
-    protected final List<Player> watching = new CopyOnWriteArrayList<>();
     private @Nullable TextObject customTitle = null;
 
     /**
@@ -43,11 +40,11 @@ public class AdvancedCraftingMenu extends ContainerMenu {
     /**
      * Constructs a new CraftingMenu.
      *
-     * @param type      the type of the menu, must not be null.
+     * @param type      the type of the menu must not be null.
      * @param world     the world where the menu is opened, must not be null.
-     * @param entity    the entity that opened the menu, must not be null.
+     * @param entity    the entity that opened the menu must not be null.
      * @param pos       the position where the menu is opened, may be null.
-     * @param size      the size of the menu, cannot be negative.
+     * @param size      the size of the menu cannot be negative.
      * @param container the container associated with the menu, may be null.
      */
     public AdvancedCraftingMenu(@NotNull MenuType<?> type, @NotNull WorldAccess world, @NotNull Entity entity, @Nullable BlockVec pos, int size, @Nullable Container<?> container) {
@@ -59,9 +56,9 @@ public class AdvancedCraftingMenu extends ContainerMenu {
     /**
      * Constructs a new CraftingMenu.
      *
-     * @param craftingMenuMenuType the type of the crafting menu, must not be null.
+     * @param craftingMenuMenuType the type of the crafting menu must not be null.
      * @param world the world where the menu is opened, must not be null.
-     * @param entity the entity that opened the menu, must not be null.
+     * @param entity the entity that opened the menu must not be null.
      * @param pos the position where the menu is opened, may be null.
      */
     public AdvancedCraftingMenu(MenuType<AdvancedCraftingMenu> craftingMenuMenuType, World world, Entity entity, @Nullable BlockVec pos) {
@@ -85,15 +82,12 @@ public class AdvancedCraftingMenu extends ContainerMenu {
         return List.of();
     }
 
-    private void close() {
-        this.getWorld().closeMenu(this);
-    }
-
     /**
      * Retrieves the title of the menu.
      *
      * @return the title
      */
+    @Override
     public TextObject getTitle() {
         NamespaceID id = this.getType().getId();
 

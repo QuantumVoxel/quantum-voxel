@@ -79,7 +79,7 @@ public class Dialog extends UIContainer<Dialog> {
         closeButton.setPos(pos.x + size.width - 21, pos.y - 2);
 
         renderer.drawPlatform(parent.getWidth() / 2 - size.width / 2 - 2, parent.getHeight() / 2 - size.height / 2 - 2, size.width + 4, size.height + 4);
-        renderer.drawPlatform(pos.x - 2, pos.y - 2, size.width + 4, 27);
+        renderer.drawHighlightPlatform(pos.x - 2, pos.y - 2, size.width + 4, 27);
 
         this.titleBounds.set(pos.x, pos.y, size.width - 21, 21);
         if (renderer.pushScissors(titleBounds)) {

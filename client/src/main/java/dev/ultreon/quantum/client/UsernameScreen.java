@@ -39,9 +39,9 @@ public class UsernameScreen extends Screen {
         platform.setPos(this.size.width / 2 - 105, this.size.height / 2 - 15);
         platform.setSize(210, 66);
 
-        usernameInput = this.add(TextEntry.of()
-                .hint(TextObject.translation("quantum.screen.username.hint"))
-                .callback(this::validateUsername));
+        usernameInput = this.add(TextEntry.create()
+                .withHint(TextObject.translation("quantum.screen.username.hint"))
+                .withCallback(this::validateUsername));
         usernameInput.setPos(this.size.width / 2 - 100, this.size.height / 2 - 10);
         usernameInput.setSize(200, 20);
 

@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget.components;
 
-import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
 public class TextComponent extends UIComponent {
@@ -45,8 +43,4 @@ public class TextComponent extends UIComponent {
         this.text = TextObject.translation(path, args);
     }
 
-    @Override
-    public void handleImGui(String path, NamespaceID key, Widget widget) {
-//        ImGuiEx.editString("Text (" + key + "): ", path, this::getRaw, this::setRaw);
-    }
 }

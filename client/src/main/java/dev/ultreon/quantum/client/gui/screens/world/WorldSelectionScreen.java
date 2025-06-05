@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.screens.world;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.*;
@@ -24,6 +25,7 @@ public class WorldSelectionScreen extends Screen {
     public static final FileHandle WORLDS_DIR = Gdx.files.local("worlds");
     private SelectionList<WorldStorage> worldList;
     private WorldStorage selected;
+    private IconButton editButton;
     private TextButton createButton;
     private TextButton playButton;
     private TextButton deleteWorld;
@@ -33,6 +35,8 @@ public class WorldSelectionScreen extends Screen {
     private Rectangle shadowNear;
     private Platform buttonPlatform;
     private WorldInfoWidget worldInfo;
+
+    private final Layout layout = new Layout();
 
     public WorldSelectionScreen() {
         super(TextObject.translation("quantum.screen.world_selection.title"));
@@ -65,6 +69,12 @@ public class WorldSelectionScreen extends Screen {
 
         buttonPlatform = add(Platform.create());
 
+        editButton = add(IconButton.of(ButtonIcon.Edit)
+                .withCallback(this::editWorld)
+                .withType(Button.Type.DARK_EMBED));
+        editButton.setSize(20, 20);
+        editButton.isVisible = false;
+
         createButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
                 .withCallback(this::createWorld)
                 .withType(Button.Type.DARK_EMBED));
@@ -76,6 +86,10 @@ public class WorldSelectionScreen extends Screen {
         deleteWorld = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
                 .withCallback(this::deleteWorld)
                 .withType(Button.Type.DARK_EMBED));
+    }
+
+    private void editWorld(IconButton iconButton) {
+        this.client.showScreen(new WorldEditScreen(selected));
     }
 
     @Override
@@ -90,6 +104,7 @@ public class WorldSelectionScreen extends Screen {
         buttonPlatform.setBounds(-5, size.height - 38, size.width + 10, 46);
 
         createButton.setPos(this.getWidth() / 2 - 227, this.getHeight() - 31);
+        editButton.setPos(this.getWidth() / 2 - 227, this.getHeight() - 31);
         playButton.setPos(this.getWidth() / 2 - 75, this.getHeight() - 31);
         deleteWorld.setPos(this.getWidth() / 2 + 77, this.getHeight() - 31);
     }
@@ -146,6 +161,35 @@ public class WorldSelectionScreen extends Screen {
 
     private void selectWorld(WorldStorage storage) {
         this.selected = storage;
+        this.editButton.isVisible = storage != null;
+        if (storage != null) {
+            layout.clear();
+            layout.setFont(font);
+            font.markup(storage.getName(), layout);
+            this.editButton.setX((int) (worldList.getX() + worldList.getWidth() + 10 + layout.getWidth() * 2 + 10));
+        }
+    }
+
+    @Override
+    protected void renderBackground(Renderer renderer) {
+        WorldStorage selected = worldList.getSelected();
+        if (selected == null) return;
+        FileHandle child = selected.getDirectory().child("picture.png");
+        if (!Objects.equals(child, worldInfo.currentPicFile)) {
+            if (worldInfo.currentPic != null) {
+                worldInfo.currentPic = null;
+            }
+            worldInfo.currentPic = new Texture(child);
+            worldInfo.currentPicFile = child;
+            worldInfo.info = selected.loadInfo();
+            worldInfo.lastSave = worldInfo.info.lastSave().toLocalDateTime().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+        }
+        int scaledHeight = (size.width - 4) * worldInfo.currentPic.getHeight() / worldInfo.currentPic.getWidth();
+        int displayHeight = Math.min(scaledHeight, size.height / 2);
+
+        this.editButton.setY(displayHeight + 6);
+
+        super.renderBackground(renderer);
     }
 
     public List<WorldStorage> locateWorlds() {

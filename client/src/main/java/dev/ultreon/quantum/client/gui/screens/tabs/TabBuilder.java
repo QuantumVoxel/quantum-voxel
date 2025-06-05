@@ -42,7 +42,7 @@ public class TabBuilder {
     public <T extends Widget> T add(TextObject label, T widget) {
         T add = this.tabContent.add(widget);
         add(Label.of(label)
-                .alignment(Alignment.LEFT)
+                .withAlignment(Alignment.LEFT)
                 .withPositioning(() -> new Position(content().getX(), widget.getY())));
 
         return add;

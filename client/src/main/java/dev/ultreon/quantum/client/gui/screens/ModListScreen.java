@@ -3,6 +3,8 @@ package dev.ultreon.quantum.client.gui.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.Align;
+import com.github.tommyettinger.textra.TextraLabel;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -10,9 +12,7 @@ import dev.ultreon.quantum.client.config.ConfigScreenFactory;
 import dev.ultreon.quantum.client.config.gui.CraftyConfigGui;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
-import dev.ultreon.quantum.client.gui.widget.Button;
-import dev.ultreon.quantum.client.gui.widget.SelectionList;
-import dev.ultreon.quantum.client.gui.widget.TextButton;
+import dev.ultreon.quantum.client.gui.widget.*;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.texture.TextureManager;
@@ -41,40 +41,33 @@ public class ModListScreen extends Screen {
     private TextButton homepageButton;
     private TextButton issuesButton;
     private TextButton discordInviteButton;
+    private Platform buttonPlatform;
+    private final TextraLabel infoLbl = new CompatTypingLabel(this);
+    private final TextraLabel descriptionLbl = new CompatTypingLabel(this);
 
     public ModListScreen(Screen back) {
         super(TextObject.translation("quantum.screen.mod_list"), back);
+        clipped = false;
     }
 
     @Override
-    public void build(@NotNull GuiBuilder builder) {
-        this.list = builder.add(new SelectionList<Mod>()
+    public void init() {
+        this.list = add(new SelectionList<Mod>()
                 .withItemHeight(48)
-                .withDrawBackground(false)
-                .withBounding(() -> new Bounds(0, 0, 200, this.size.height - 52))
+                .withDrawBackground(true)
+                .withDrawButtons(false)
                 .withItemRenderer(this::renderItem)
+                .withCutButtons(false)
                 .withSelectable(true)
-                .withCallback(caller -> {
-                    try {
-                        ConfigScreenFactory modConfigScreen = QuantumClient.get().getModConfigScreen(caller);
-                        if (modConfigScreen != null || !CraftyConfig.getByMod(caller).isEmpty()) {
-                            this.configButton.enable();
-                        } else {
-                            this.configButton.disable();
-                        }
-                    } catch (Exception e) {
-                        QuantumClient.LOGGER.error("Failed to get mod config screen factory", e);
-                        this.client.notifications.add(Notification.builder(TextObject.literal("Failed to show mod config"), TextObject.literal(e.getMessage()))
-                                .icon(MessageIcon.ERROR).build());
-                    }
-                })
+                .withCallback(this::selectMod)
                 .addEntries(GamePlatform.get().getMods()
                         .stream()
                         .sorted((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName()))
                         .collect(Collectors.toList())));
 
-        this.configButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
-                .withPositioning(() -> new Position(5, this.size.height - 51))
+        this.buttonPlatform = add(Platform.create());
+
+        this.configButton = add(TextButton.of(TextObject.translation("quantum.screen.mod_list.config"), 190)
                 .withCallback(button -> {
                     Mod mod = this.list.getSelected();
                     if (mod != null) {
@@ -95,34 +88,43 @@ public class ModListScreen extends Screen {
                 .withType(Button.Type.DARK_EMBED));
         this.configButton.disable();
 
-        this.sourcesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.sources"), 90)
-                .withPositioning(() -> new Position(5, this.size.height - 26))
+        this.sourcesButton = add(TextButton.of(TextObject.translation("quantum.screen.mod_list.sources"), 90)
                 .withCallback(this::onSources)
                 .withType(Button.Type.DARK_EMBED));
         this.sourcesButton.isVisible = false;
 
-        this.issuesButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.issues"), 90)
-                .withPositioning(() -> new Position(5, this.size.height - 26))
+        this.issuesButton = add(TextButton.of(TextObject.translation("quantum.screen.mod_list.issues"), 90)
                 .withCallback(this::onIssues)
                 .withType(Button.Type.DARK_EMBED));
         this.issuesButton.isVisible = false;
 
-        this.discordInviteButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.discord"), 90)
-                .withPositioning(() -> new Position(5, this.size.height - 26))
+        this.discordInviteButton = add(TextButton.of(TextObject.translation("quantum.screen.mod_list.discord"), 90)
                 .withCallback(this::onDiscordInvite)
                 .withType(Button.Type.DARK_EMBED));
         this.discordInviteButton.isVisible = false;
 
-        this.homepageButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.mod_list.homepage"), 90)
-                .withPositioning(() -> new Position(5, this.size.height - 26))
+        this.homepageButton = add(TextButton.of(TextObject.translation("quantum.screen.mod_list.homepage"), 90)
                 .withCallback(this::onHomepage)
                 .withType(Button.Type.DARK_EMBED));
         this.homepageButton.isVisible = false;
 
-        this.backButton = builder.add(TextButton.of(UITranslations.BACK, 190)
-                .withPositioning(() -> new Position(5, this.size.height - 26))
+        this.backButton = add(TextButton.of(UITranslations.BACK, 190)
                 .withCallback(this::onBack)
                 .withType(Button.Type.DARK_EMBED));
+    }
+
+    @Override
+    public TitleRenderMode titleRenderMode() {
+        return TitleRenderMode.First;
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        list.setBounds(pos.x, pos.y - 2, 200, this.size.height - 73 + 2);
+        buttonPlatform.setBounds(pos.x, pos.y + size.height - 73, 200, 73);
+
+        configButton.setPos(5, this.size.height - 51);
+        backButton.setPos(5, this.size.height - 26);
     }
 
     private void onSources(TextButton textButton) {
@@ -186,13 +188,18 @@ public class ModListScreen extends Screen {
     private void renderItem(Renderer renderer, Mod mod, int y, boolean selected, float deltaTime) {
         var x = this.list.getX();
 
+        if (selected) renderer.drawHighlightPlatform(list.pos.x, y, list.size.width, list.getItemHeight(), 2);
+        else renderer.drawPlatform(list.pos.x, y, list.size.width, list.getItemHeight(), 4);
+
+        if (selected) y += 2;
+
         renderer.textLeft(Formatter.format("[*]" + mod.getDisplayName()), x + 50, y + this.list.getItemHeight() - 34);
         renderer.textLeft("Version: " + mod.getVersion(), x + 50, y + this.list.getItemHeight() - 34 + 12, RgbColor.rgb(0xa0a0a0));
 
-        this.drawIcon(renderer, mod, x + 7, y + 7, 32);
+        this.drawIcon(renderer, mod, x + 7, y + 5, 32, selected);
     }
 
-    private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size) {
+    private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size, boolean higlight) {
         NamespaceID iconId;
         @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
         NamespaceID overrideId = ModIconOverrideRegistry.get(metadata.getName());
@@ -219,41 +226,48 @@ public class ModListScreen extends Screen {
 
         int texW = textureManager.getTexture(iconId).getWidth();
         int texH = textureManager.getTexture(iconId).getHeight();
-        renderer.blit(iconId, x, y, size, size, 0, 0, texW, texH, texW, texH);
+        if (higlight) renderer.drawHighlightPlatform(x - 2, y - 2, size + 4, size + 4, 1);
+        else renderer.drawPlatform(x - 2, y - 2, size + 4, size + 4, 1);
+        renderer.blit(iconId, x, y - 1, size, size, 0, 0, texW, texH, texW, texH);
     }
 
     @Override
     protected void renderBackground(Renderer renderer) {
         super.renderBackground(renderer);
-
-        renderer.renderFrame(-2, 0, this.list.getWidth() + 4, this.size.height);
     }
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
-        int x = 220;
-        int y = 20;
-        int xIcon = x + 84;
+        int x = pos.x + 220;
+        int y = pos.y + 20;
+        int xIcon = x + 104;
 
-        renderer.renderFrame(x - 8, y - 8, size.width - x - 4, size.height - y - 4);
+        renderer.drawPlatform(x - 20, y - 20, size.width - x + 22, size.height - y + 25);
 
         Mod selected = this.list.getSelected();
         if (selected != null) {
-            this.drawIcon(renderer, selected, x, y, 64);
+            this.drawIcon(renderer, selected, x + 20, y, 64, false);
 
-            renderer.textLeft(TextObject.literal(selected.getDisplayName()).setBold(true), 2, xIcon, y);
-            renderer.textLeft("[cyan]ID: [light grey]" + selected.getName(), xIcon, y + 24, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft("[cyan]Version: [light grey]" + selected.getVersion(), xIcon, y + 36, RgbColor.rgb(0xa0a0a0));
-            renderer.textLeft(selected.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")), xIcon, y + 54, RgbColor.rgb(0x808080));
+            this.infoLbl.setPosition(xIcon, y + 15);
+            this.infoLbl.setAlignment(Align.left);
+            this.infoLbl.setWidth(size.width - xIcon);
+            this.infoLbl.setWrap(true);
+            this.infoLbl.act(deltaTime);
+            this.infoLbl.draw(renderer.getBatch(), 1f);
+
+            this.descriptionLbl.setPosition(x, y + 129);
+            this.descriptionLbl.setAlignment(Align.topLeft);
+            this.descriptionLbl.setWidth(size.width - x);
+            this.descriptionLbl.setWrap(true);
+            this.descriptionLbl.act(deltaTime);
+            this.descriptionLbl.draw(renderer.getBatch(), 1f);
 
             this.sourcesButton.isVisible = selected.getSources() != null;
             this.homepageButton.isVisible = selected.getHomepage() != null;
             this.issuesButton.isVisible = selected.getIssues() != null;
             this.discordInviteButton.isVisible = selected.getDiscord() != null;
 
-            renderer.textLeft("[cyan]License: [light grey]" + selected.getLicense(), xIcon, y + 72, RgbColor.rgb(0xa0a0a0));
-
-            int btnX = x + 16;
+            int btnX = x;
             if (this.sourcesButton.isVisible) {
                 this.sourcesButton.setX(btnX);
                 this.sourcesButton.setY(y + 95);
@@ -274,10 +288,6 @@ public class ModListScreen extends Screen {
                 this.discordInviteButton.setY(y + 95);
                 btnX += this.discordInviteButton.getWidth() + 5;
             }
-
-            y += 129;
-            String description = selected.getDescription();
-            renderer.textMultiline(description != null ? description : "No description", x, y, ColorCode.GRAY);
         }
 
         super.renderWidget(renderer, deltaTime);
@@ -293,5 +303,27 @@ public class ModListScreen extends Screen {
 
     public TextButton getBackButton() {
         return this.backButton;
+    }
+
+    private void selectMod(Mod caller) {
+        this.descriptionLbl.setText(caller.getDescription() != null ? caller.getDescription() : "[/][gray]No description");
+        this.infoLbl.setText("[*][white]" + caller.getDisplayName() + "\n \n" +
+                "[ ][cyan]ID: [light grey]" + caller.getName() + "\n" +
+                "[ ][cyan]Version: [light grey]" + caller.getVersion() + "\n" +
+                caller.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")) + "\n" +
+                "[cyan]License: [light grey]" + caller.getLicense());
+
+        try {
+            ConfigScreenFactory modConfigScreen = QuantumClient.get().getModConfigScreen(caller);
+            if (modConfigScreen != null || !CraftyConfig.getByMod(caller).isEmpty()) {
+                this.configButton.enable();
+            } else {
+                this.configButton.disable();
+            }
+        } catch (Exception e) {
+            QuantumClient.LOGGER.error("Failed to get mod config screen factory", e);
+            this.client.notifications.add(Notification.builder(TextObject.literal("Failed to show mod config"), TextObject.literal(e.getMessage()))
+                    .icon(MessageIcon.ERROR).build());
+        }
     }
 }

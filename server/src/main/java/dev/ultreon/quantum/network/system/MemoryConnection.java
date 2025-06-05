@@ -303,7 +303,9 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         this.ourPacketData = this.getOurData(stage);
         this.theirPacketData = this.getTheirData(stage);
 
-        this.loggingIn = stage == PacketStages.LOGIN;
+        if (stage == PacketStages.IN_GAME) {
+            loggingIn = false;
+        }
 
         this.handler = handler;
     }

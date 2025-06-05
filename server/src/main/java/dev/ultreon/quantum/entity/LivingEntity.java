@@ -159,11 +159,11 @@ public abstract class LivingEntity extends Entity {
 
     protected void tickAirSupply() {
         if (isBuried() && getBuriedBlock().getBlock() == Blocks.WATER)
-            airSupply.air -= 0.1f;
+            airSupply.setAir(airSupply.getAir() - 0.1f);
 
         if (getY() > 320) {
             double air = (getY() - 320) / 120f;
-            airSupply.air = air >= 20 ? 0 : airSupply.air - (float) air;
+            airSupply.setAir(air >= 20 ? 0 : airSupply.getAir() - (float) air);
         }
     }
 
@@ -446,11 +446,11 @@ public abstract class LivingEntity extends Entity {
     }
 
     public float getAir() {
-        return airSupply.air;
+        return airSupply.getAir();
     }
 
     public int getMaxAir() {
-        return airSupply.maxAir;
+        return airSupply.getMaxAir();
     }
 
     /**

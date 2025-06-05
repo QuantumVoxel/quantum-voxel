@@ -19,7 +19,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
 
-import static dev.ultreon.quantum.client.QuantumClient.id;
 import static dev.ultreon.quantum.client.input.KeyAndMouseInput.*;
 
 public class TextEntry extends Widget {
@@ -50,12 +49,10 @@ public class TextEntry extends Widget {
     }
 
     public static TextEntry of(String value) {
-        TextEntry textEntry = new TextEntry();
-        textEntry.value = value;
-        return textEntry;
+        return new TextEntry().withValue(value);
     }
 
-    public static TextEntry of() {
+    public static TextEntry create() {
         return new TextEntry();
     }
 
@@ -457,22 +454,22 @@ public class TextEntry extends Widget {
         return this.value;
     }
 
-    public TextEntry value(String value) {
+    public TextEntry withValue(String value) {
         this.value = value;
         return this;
     }
 
-    public TextEntry hint(TextObject text) {
+    public TextEntry withHint(TextObject text) {
         this.hint.set(text);
         return this;
     }
 
-    public TextEntry filter(CharPredicate filter) {
+    public TextEntry withFilter(CharPredicate filter) {
         this.filter = filter;
         return this;
     }
 
-    public TextEntry callback(Callback<TextEntry> callback) {
+    public TextEntry withCallback(Callback<TextEntry> callback) {
         this.callback.set(callback);
         return this;
     }

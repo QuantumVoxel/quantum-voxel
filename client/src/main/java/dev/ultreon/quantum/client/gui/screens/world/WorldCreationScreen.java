@@ -16,7 +16,6 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -30,35 +29,37 @@ public class WorldCreationScreen extends Screen {
     private String worldName = "";
     private final long seed = RANDOM.nextLong();
     private final GameMode gameMode = GameMode.SURVIVAL;
+    private Label titleLabel;
+    private Platform platform;
+    private TextButton cancelButton;
 
     public WorldCreationScreen() {
         super(TextObject.translation("quantum.screen.world_creation.title"));
     }
 
     @Override
-    public void build(@NotNull GuiBuilder builder) {
-        var titleLabel = builder.add(Label.of(title)
-                .alignment(Alignment.CENTER)
-                .withPositioning(() -> new Position(getWidth() / 2, getHeight() / 2 - 60))
-                .scale(2));
+    public void init() {
+        worldName = WorldCreationScreen.WORD_GEN.generate() + " " + WorldCreationScreen.WORD_GEN.generate();
+        titleLabel = add(Label.of(title)
+                .withAlignment(Alignment.CENTER)
+                .withScale(2));
 
         titleLabel.text().set(getTitle());
         titleLabel.scale().set(2);
 
-        worldName = WorldCreationScreen.WORD_GEN.generate() + " " + WorldCreationScreen.WORD_GEN.generate();
 
-        builder.add(Platform.create())
-                .withBounding(() -> new Bounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 240, 60));
+        platform = add(Platform.create());
 
-        worldNameEntry = builder.add(TextEntry.of(worldName).withPositioning(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 - 20))
-                .callback(this::updateWorldName)
-                .hint(TextObject.translation("quantum.screen.world_creation.name")));
+        worldNameEntry = add(TextEntry.create()
+                .withCallback(this::updateWorldName)
+                .withValue(worldName)
+                .withHint(TextObject.translation("quantum.screen.world_creation.name")));
 
-        reloadButton = builder.add(IconButton.of(GenericIcon.RELOAD).withPositioning(() -> new Position(getWidth() / 2 + 105, getHeight() / 2 - 24))
-                .withCallback(this::regenerateName));
+        reloadButton = add(IconButton.of(GenericIcon.RELOAD))
+                .withType(Button.Type.DARK_EMBED)
+                .withCallback(this::regenerateName);
 
-        createButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.world_creation.create"), 95)
-                .withPositioning(() -> new Position(getWidth() / 2 - 100, getHeight() / 2 + 5))
+        createButton = add(TextButton.of(TextObject.translation("quantum.screen.world_creation.create"), 95)
                 .withCallback(caller -> {
                     if (GamePlatform.get().isWeb()) {
                         client.showScreen(new UntestedAreaScreen("World creation on web is experimental", this::createWorld));
@@ -67,14 +68,24 @@ public class WorldCreationScreen extends Screen {
                     createWorld();
                 }));
 
-        builder.add(TextButton.of(UITranslations.CANCEL, 95)
-                .withPositioning(() -> new Position(getWidth() / 2 + 5, getHeight() / 2 + 5))
+        cancelButton = add(TextButton.of(UITranslations.CANCEL, 95)
                 .withCallback(this::onBack));
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        titleLabel.setPos(getWidth() / 2, getHeight() / 2 - 60);
+        platform.setBounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 240, 60);
+
+        worldNameEntry.setPos(getWidth() / 2 - 100, getHeight() / 2 - 20);
+        reloadButton.setPos(getWidth() / 2 + 105, getHeight() / 2 - 24);
+        createButton.setPos(getWidth() / 2 - 100, getHeight() / 2 + 5);
+        cancelButton.setPos(getWidth() / 2 + 5, getHeight() / 2 + 5);
     }
 
     private void regenerateName(IconButton iconButton) {
         worldName = WorldCreationScreen.WORD_GEN.generate() + " " + WorldCreationScreen.WORD_GEN.generate();
-        worldNameEntry.value(worldName);
+        worldNameEntry.setValue(worldName);
     }
 
     private void onBack(TextButton caller) {

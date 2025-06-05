@@ -40,6 +40,7 @@
   "quantum.ui.back.arrow": "< Back",
   "quantum.ui.cancel": "Cancel",
   "quantum.ui.confirm": "Confirm",
+  "quantum.ui.save": "Save",
   "quantum.ui.proceed": "Proceed",
   "quantum.ui.skip": "Skip",
   "quantum.ui.accept": "Accept",

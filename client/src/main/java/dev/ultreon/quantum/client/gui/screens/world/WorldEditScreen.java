@@ -1,23 +1,23 @@
 package dev.ultreon.quantum.client.gui.screens.world;
 
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.DialogBuilder;
-import dev.ultreon.quantum.client.gui.GuiBuilder;
-import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.gui.widget.ScrollableContainer;
-import dev.ultreon.quantum.client.gui.widget.TextButton;
-import dev.ultreon.quantum.client.gui.widget.TextEntry;
+import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.widget.*;
+import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 public class WorldEditScreen extends Screen {
     private final WorldStorage world;
     private String nameToSet;
+    private Label titleLabel;
+    private Platform platform;
+    private TextEntry worldNameEntry;
+    private TextButton saveButton;
+    private TextButton cancelButton;
 
     public WorldEditScreen(WorldStorage world) {
         super(TextObject.translation("quantum.screen.worlds.edit.title"));
@@ -29,21 +29,40 @@ public class WorldEditScreen extends Screen {
     }
 
     @Override
-    public void build(@NotNull GuiBuilder builder) {
-        ScrollableContainer container = builder.add(new ScrollableContainer())
-                .withBounding(() -> new Bounds(size.width / 2 - 200, size.height / 2 - 100, 400, 200));
+    public void init() {
+        titleLabel = add(Label.of(title)
+                .withAlignment(Alignment.CENTER)
+                .withScale(2));
 
-        container.add(TextEntry.of())
-                .callback(this::updateName);
+        titleLabel.text().set(getTitle());
+        titleLabel.scale().set(2);
 
-        builder.add(TextButton.of(TextObject.translation("quantum.screen.worlds.edit.save")))
-                .withCallback(this::save)
-                .withBounding(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 100, 200, 20));
 
-        builder.add(TextButton.of(TextObject.translation("quantum.screen.worlds.edit.cancel")))
-                .withCallback(this::cancel)
-                .withBounding(() -> new Bounds(size.width / 2 - 100, size.height / 2 + 130, 200, 20));
+        platform = add(Platform.create());
 
+        worldNameEntry = add(TextEntry.create()
+                .withValue(world.getName())
+                .withHint(TextObject.translation("quantum.screen.world_creation.name")));
+
+        saveButton = add(TextButton.of(TextObject.translation("quantum.ui.save"), 97)
+                .withCallback(this::save));
+
+        cancelButton = add(TextButton.of(UITranslations.CANCEL, 97)
+                .withCallback(this::back));
+    }
+
+    private void back(TextButton textButton) {
+        back();
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        titleLabel.setPos(getWidth() / 2, getHeight() / 2 - 60);
+        platform.setBounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 210, 60);
+
+        worldNameEntry.setPos(getWidth() / 2 - 100, getHeight() / 2 - 20);
+        saveButton.setPos(getWidth() / 2 - 100, getHeight() / 2 + 5);
+        cancelButton.setPos(getWidth() / 2 + 2, getHeight() / 2 + 5);
     }
 
     private void cancel(TextButton textButton) {
@@ -52,7 +71,7 @@ public class WorldEditScreen extends Screen {
 
     private void save(TextButton textButton) {
         WorldSaveInfo worldSaveInfo = this.world.loadInfo();
-        worldSaveInfo.setName(this.nameToSet);
+        worldSaveInfo.setName(this.worldNameEntry.getValue());
         try {
             worldSaveInfo.save(this.world);
         } catch (IOException e) {

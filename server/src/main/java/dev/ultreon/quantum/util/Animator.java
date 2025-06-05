@@ -3,7 +3,10 @@ package dev.ultreon.quantum.util;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import dev.ultreon.quantum.component.GameComponent;
 
-@Deprecated
+/**
+ * @deprecated use {@link AnimationController} instead
+ */
+@Deprecated(since = "0.2.0", forRemoval = true)
 public class Animator extends GameComponent {
     private final AnimationController controller;
 

@@ -134,13 +134,8 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
 
         IConnection.LOGGER.info("{} joined the server.", name);
 
-        BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> {
-            server.getOverworld().getChunkAt(0, 0, 0);
-            return server.getOverworld().getSpawnPoint();
-        });
-
         player.connection.send(
-                new S2CLoginAcceptedPacket(uuid, spawnPoint.vec().d(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()),
+                new S2CLoginAcceptedPacket(uuid, player.getPosition(), player.getGamemode(), player.getHealth(), player.getFoodStatus().getFoodLevel()),
                 PacketListener.onSuccess(() -> {
                     connection.moveTo(PacketStages.IN_GAME, new InGameServerPacketHandler(server, player, connection));
                     server.placePlayer(player);
@@ -149,7 +144,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
                     player.sendAllData();
 
                     if (!player.isSpawned()) {
-                        player.spawn(spawnPoint.vec().d().add(0.5, 0, 0.5), connection);
+                        player.spawn(player.getPosition(), connection);
                     }
 
                     PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);

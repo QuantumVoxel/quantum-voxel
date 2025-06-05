@@ -32,7 +32,7 @@ public class DevPreviewScreen extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(TextObject.translation("quantum.screen.dev.message"))
-                .alignment(Alignment.LEFT)
+                .withAlignment(Alignment.LEFT)
                 .withPositioning(() -> new Position(40, 40)));
 
         builder.add(TextButton.of(TextObject.translation("quantum.screen.dev.close"))

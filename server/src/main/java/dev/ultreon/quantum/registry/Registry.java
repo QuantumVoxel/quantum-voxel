@@ -3,6 +3,7 @@ package dev.ultreon.quantum.registry;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Logger;
+import dev.ultreon.quantum.collection.OrderedMap;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -24,6 +25,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
     private static boolean frozen;
     private final ObjectMap<RegistryKey<T>, T> registry = new ObjectMap<>();
     private final IntMap<T> idMap = new IntMap<>();
+    private final IntMap<T> ogIdMap = new IntMap<>();
     private final Class<T> type;
     private final NamespaceID id;
     private final boolean overrideAllowed;
@@ -138,13 +140,13 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
         if (!this.type.isAssignableFrom(val.getClass()))
             throw new IllegalArgumentException("Not allowed type detected, got " + val.getClass() + " expected assignable to " + this.type);
 
-
         RegistryKey<T> key = new RegistryKey<>(this.key, rl);
         if (this.registry.containsKey(key) && !this.overrideAllowed)
             throw new IllegalArgumentException("Already registered: " + rl);
 
         int setId = curId++;
         this.idMap.put(setId, val);
+        this.ogIdMap.put(setId, val);
         this.registry.put(key, val);
     }
 
@@ -202,6 +204,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
             throw new IllegalArgumentException("Already registered: " + id);
 
         this.registry.put(id, element);
+        this.ogIdMap.put(curId, element);
         this.idMap.put(curId++, element);
     }
 
@@ -260,6 +263,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
 
     public void unload() {
         idMap.clear();
+        idMap.putAll(ogIdMap);
     }
 
     public static abstract class Builder<T> {

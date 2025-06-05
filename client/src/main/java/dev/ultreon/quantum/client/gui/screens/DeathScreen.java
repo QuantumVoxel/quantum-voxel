@@ -22,12 +22,12 @@ public class DeathScreen extends Screen {
     @Override
     public void build(@NotNull GuiBuilder builder) {
         builder.add(Label.of(this.title)
-                .alignment(Alignment.CENTER)
-                .scale(2)
+                .withAlignment(Alignment.CENTER)
+                .withScale(2)
                 .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 50)));
 
         builder.add(Label.of(source.getDescription(client.player != null ? client.player : null))
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 25)));
 
         this.respawnButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.death.respawn"))

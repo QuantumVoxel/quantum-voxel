@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget.components;
 
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.client.gui.widget.Widget;
-import dev.ultreon.quantum.util.NamespaceID;
 
 public class RangedValueComponent extends UIComponent {
     private int value;
@@ -31,8 +29,4 @@ public class RangedValueComponent extends UIComponent {
         return this.max;
     }
 
-    @Override
-    public void handleImGui(String path, NamespaceID key, Widget widget) {
-//        ImGuiEx.slider("Value (" + key + ")", path, this.value, this.min(), this.max(), this::set);
-    }
 }

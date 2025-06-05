@@ -28,9 +28,9 @@ public class LanguageScreen extends Screen {
         List<Locale> locales = LanguageManager.INSTANCE.getLocales().stream().sorted((a, b) -> a.getDisplayLanguage().compareToIgnoreCase(b.getDisplayLanguage())).collect(Collectors.toList());
 
         this.titleLabel = builder.add(Label.of(this.title)
-                .alignment(Alignment.CENTER)
+                .withAlignment(Alignment.CENTER)
                 .withPositioning(() -> new Position(this.size.width / 2, 15))
-                .scale(2));
+                .withScale(2));
 
         this.list = builder.add(new SelectionList<Locale>(21).withBounding(() -> new Bounds(this.size.width / 2 - 200, 50, 400, this.size.height - 90)))
                 .withSelectable(true)

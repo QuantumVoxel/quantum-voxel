@@ -18,7 +18,7 @@ public class StringEntry extends ConfigEntry<String> {
     @Override
     public Widget createWidget() {
         return TextEntry.of(this.value)
-                .callback(this::onValueChanged);
+                .withCallback(this::onValueChanged);
     }
 
     private void onValueChanged(TextEntry textEntry) {

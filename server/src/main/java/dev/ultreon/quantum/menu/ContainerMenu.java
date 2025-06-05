@@ -302,7 +302,7 @@ public abstract class ContainerMenu implements Menu {
 
             Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, slots);
             if (packet == null) continue;
-            if (!serverPlayer.connection.isLoggingIn())
+            if (serverPlayer.connection != null && !serverPlayer.connection.isLoggingIn())
                 serverPlayer.connection.send(packet);
             else
                 CommonConstants.LOGGER.debug("Player is logging in, not sending menu update packet.");

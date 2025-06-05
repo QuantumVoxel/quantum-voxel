@@ -72,10 +72,10 @@ public class ChatTextEntry extends TextEntry {
     private void complete(String s) {
         String value = this.revalidateCompleteX();
         if (value.startsWith("/")) {
-            this.value("/" + value.substring(1, this.completeX) + this.popup.get() + s);
+            this.setValue("/" + value.substring(1, this.completeX) + this.popup.get() + s);
         } else {
             this.completeX = this.getCursorIdx();
-            this.value(value.substring(0, this.completeX) + this.popup.get() + s);
+            this.setValue(value.substring(0, this.completeX) + this.popup.get() + s);
         }
         this.popup.visible = false;
         this.setCursorIdx(this.getValue().length());

@@ -16,8 +16,8 @@ public class PrivacySettingsUI {
     public void build(TabBuilder builder) {
 
         builder.add(Label.of(builder.title())
-                .alignment(Alignment.CENTER)
-                .scale(2)
+                .withAlignment(Alignment.CENTER)
+                .withScale(2)
                 .withPositioning(() -> new Position(builder.content().getX() + 235, builder.content().getY() + 25)));
         
         builder.add(TextObject.translation("quantum.screen.options.privacy.hideActiveServer"), new CycleButton<BooleanEnum>()

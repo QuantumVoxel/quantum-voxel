@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
 
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerInstance;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.world.ClientChunk;
-import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.Shutdownable;
-import dev.ultreon.quantum.world.WorldSaveInfo;
+import dev.ultreon.quantum.entity.EntityTypes;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.system.IConnection;
+import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,19 +28,17 @@ import dev.ultreon.quantum.client.debug.BoxGizmo;
 import dev.ultreon.quantum.client.debug.Gizmo;
 import dev.ultreon.quantum.client.gui.Notification;
 import dev.ultreon.quantum.client.gui.icon.MessageIcon;
-import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.MemoryConnectionContext;
 import dev.ultreon.quantum.network.MemoryNetworker;
-import dev.ultreon.quantum.network.packets.s2c.S2CPlayerSetPosPacket;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
-import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerChunk;
+
 import static dev.ultreon.quantum.world.World.CS;
+
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.ubo.types.MapType;
@@ -52,7 +54,7 @@ import dev.ultreon.quantum.ubo.types.MapType;
 public class IntegratedServer extends QuantumServer {
     private final QuantumClient client = QuantumClient.get();
     private boolean openToLan = false;
-    private @Nullable ServerPlayer host;
+    private ServerPlayer host;
     private final TimerInstance timer = GamePlatform.get().getTimer();
     private @NotNull GameMode defaultGameMode = GameMode.SURVIVAL;
 
@@ -62,7 +64,7 @@ public class IntegratedServer extends QuantumServer {
      * @param storage The WorldStorage to use.
      * @throws RuntimeException If the world directory does not exist and cannot be created.
      */
-    public IntegratedServer(WorldStorage storage) {
+    public IntegratedServer(WorldStorage storage) throws IOException {
         super(storage, QuantumClient.PROFILER);
 
         // Check if the world directory exists.
@@ -71,11 +73,26 @@ public class IntegratedServer extends QuantumServer {
                 // If the world directory does not exist, try to create it.
                 storage.createWorld();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new GdxRuntimeException(e);
             }
         }
 
+
         client.worldSaveInfo = storage.loadInfo();
+    }
+
+    @Override
+    public void init() throws IOException {
+        super.init();
+
+        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, getOverworld(), UUID.nameUUIDFromBytes(("QVPlay:" + client.getUser().name()).getBytes()), client.getUser().name(), null);
+        // Load player data from storage
+        var playerData = this.getStorage().<MapType>read("player.ubo");
+        BlockVec spawnPoint = getOverworld().getSpawnPoint();
+        player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));
+        player.loadWithWorldPos(playerData);
+
+        host = player;
     }
 
     /**
@@ -95,41 +112,6 @@ public class IntegratedServer extends QuantumServer {
     public void start() {
         this.networker = new MemoryNetworker(this, MemoryConnectionContext.get());
         super.start();
-    }
-
-    /**
-     * Loads the given player into the server.
-     *
-     * @param localPlayer The local player to load.
-     * @throws IllegalStateException If the player is not found.
-     * @throws RuntimeException If an I/O error occurs during player data loading.
-     */
-    public void loadPlayer(@NotNull LocalPlayer localPlayer) {
-        // Retrieve the player object from the server
-        ServerPlayer player = this.getPlayer(localPlayer.getUuid());
-
-        try {
-            // Check if the player exists on the server and the player data file exists
-            if (player != null && player.getUuid().equals(localPlayer.getUuid()) && this.getStorage().exists("player.ubo")) {
-                // Load player data from storage
-                var playerData = this.getStorage().<MapType>read("player.ubo");
-                player.loadWithPos(playerData);
-
-                // Send player a position update packet to player connection
-                player.connection.send(new S2CPlayerSetPosPacket(player.getPosition()));
-            } else if (player == null) {
-                // Throw exception if player not found
-                throw new IllegalStateException("Player not found.");
-            }
-        } catch (IOException e) {
-            // Wrap and rethrow IOException as a RuntimeException
-            throw new RuntimeException(e);
-        }
-
-        // Set the host player if the player UUID matches the local player UUID
-        if (this.host == null && (player.getUuid().equals(localPlayer.getUuid()) || player.getName().equals(localPlayer.getName()))) {
-            this.host = player;
-        }
     }
 
     /**
@@ -156,7 +138,7 @@ public class IntegratedServer extends QuantumServer {
             }
         } catch (IOException e) {
             // Throw a runtime exception if there is an IOException
-            throw new RuntimeException(e);
+            throw new GdxRuntimeException(e);
         }
     }
 
@@ -165,7 +147,6 @@ public class IntegratedServer extends QuantumServer {
      * <p>
      * This method crashes the server by shutting down the server and writing the crash log to the log file.
      * </p>
-     * 
      */
     @Override
     public void crash(CrashLog crashLog) {
@@ -215,14 +196,7 @@ public class IntegratedServer extends QuantumServer {
      */
     @Override
     public void placePlayer(ServerPlayer player) {
-        this.deferWorldLoad(() -> {
-            super.placePlayer(player);
-
-            LocalPlayer localPlayer = this.client.player;
-            if (localPlayer != null && player.getUuid().equals(localPlayer.getUuid())) {
-                this.client.integratedServer.loadPlayer(localPlayer);
-            }
-        });
+        this.deferWorldLoad(() -> super.placePlayer(player));
     }
 
     /**
@@ -285,7 +259,7 @@ public class IntegratedServer extends QuantumServer {
             // Normal server saving.
             super.save(silent);
             this.storage.saveInfo(client.worldSaveInfo);
-        } catch (IOException e) {
+        } catch (Exception e) {
             QuantumServer.LOGGER.error("Failed to save world", e);
         }
 
@@ -323,7 +297,7 @@ public class IntegratedServer extends QuantumServer {
         } catch (ClosedChannelException | ClosedConnectionException e) {
             // Ignore
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new GdxRuntimeException(e);
         }
     }
 
@@ -338,6 +312,18 @@ public class IntegratedServer extends QuantumServer {
     public UUID getHost() {
         ServerPlayer theHost = this.host;
         return theHost != null ? theHost.getUuid() : null;
+    }
+
+    @Override
+    public ServerPlayer loadPlayer(String name, UUID uuid, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
+        if (name.equals(host.getName())) {
+            CommonConstants.LOGGER.info("Host is logging in: " + name + " (" + uuid + ")");
+            host.connection = connection;
+            host.setName(name);
+            host.setUuid(uuid);
+            return host;
+        }
+        return super.loadPlayer(name, uuid, connection);
     }
 
     @Override
@@ -534,7 +520,7 @@ public class IntegratedServer extends QuantumServer {
                 Gizmo gizmo = new BoxGizmo(Objects.requireNonNull(clientWorld), "failed_chunk_indicator", "failed-chunk");
                 gizmo.color.set(1F, 0F, 1F, 1F);
                 gizmo.position.set(d.add(8, 8, 8));
-                gizmo.size.set(CS - 1, CS - 1, CS - 1);
+                gizmo.size.set(CS - 1f, CS - 1f, CS - 1f);
                 gizmo.outline = true;
                 clientWorld.addGizmo(gizmo);
 
