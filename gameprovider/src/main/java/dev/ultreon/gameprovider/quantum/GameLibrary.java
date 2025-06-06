@@ -24,15 +24,12 @@ enum GameLibrary implements LibraryType {
     QUANTUM_VXL_CLIENT("dev/ultreon/quantum/desktop/DesktopLauncher.class"),
     QUANTUM_VXL_SERVER("dev/ultreon/quantum/dedicated/Main.class"),
 	LIBGDX("com/badlogic/gdx/Gdx.class"),
-	LOG4J_API("org/apache/logging/log4j/LogManager.class"),
-	LOG4J_CORE("META-INF/services/org.apache.logging.log4j.spi.Provider", "META-INF/log4j-provider.properties"),
-	LOG4J_CONFIG("log4j2.xml"),
 	GSON("com/google/gson/TypeAdapter.class"), // used by log4j plugins
 	SLF4J_API("org/slf4j/Logger.class"),
 	SLF4J_CORE("META-INF/services/org.slf4j.spi.SLF4JServiceProvider");
 
 	static final GameLibrary[] GAME = {GameLibrary.QUANTUM_VXL_CLIENT, GameLibrary.QUANTUM_VXL_SERVER};
-	static final GameLibrary[] LOGGING = {GameLibrary.LOG4J_API, GameLibrary.LOG4J_CORE, GameLibrary.LOG4J_CONFIG, GameLibrary.GSON, GameLibrary.SLF4J_API, GameLibrary.SLF4J_CORE};
+	static final GameLibrary[] LOGGING = {GameLibrary.GSON, GameLibrary.SLF4J_API, GameLibrary.SLF4J_CORE};
 
 	private final EnvType env;
 	private final String[] paths;

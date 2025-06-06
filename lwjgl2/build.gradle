@@ -1,0 +1,215 @@
+//file:noinspection GroovyUnusedCatchParameter
+
+
+//import dev.ultreon.gameutils.ProjectType
+
+import java.nio.file.Files
+import java.nio.file.Paths
+
+buildscript {
+    repositories {
+        mavenCentral()
+
+        maven {
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            name = "sonatype"
+        }
+
+        maven {
+            url = "https://maven.atlassian.com/3rdparty/"
+        }
+
+        gradlePluginPortal()
+
+        google()
+    }
+
+    dependencies {
+        classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
+        classpath "com.google.code.gson:gson:2.10.1"
+        classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
+        classpath("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.8")
+    }
+}
+
+//*****************//
+//     Plugins     //
+//*****************//
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
+
+//****************************//
+// Setting up main properties //
+//****************************//
+//projectConfig {
+//    type ProjectType.Desktop
+//}
+
+evaluationDependsOn(":gameprovider")
+evaluationDependsOn(":server")
+evaluationDependsOn(":mixinprovider")
+evaluationDependsOn(":client")
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://maven.fabricmc.net"
+        name = "FabricMC"
+    }
+    maven {
+        url = "https://jitpack.io"
+        name = "JitPack"
+    }
+}
+
+sourceSets {
+    lua {
+        allSource.srcDirs = []
+        resources {
+            srcDir 'src/lualib'
+        }
+    }
+}
+
+dependencies {
+    implementation api(project(":gameprovider"))
+    implementation api(project(":client"))
+    implementation api(project(":server"))
+    implementation api(project(":dedicated"))
+
+    implementation api("com.formdev:flatlaf:3.2.1")
+
+    implementation api("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+    implementation api("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    implementation api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
+
+    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion")
+
+    implementation 'org.reflections:reflections:0.10.2'
+
+    implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+
+    // Others
+    implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
+
+    // Apache Log4J
+    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    implementation api("org.tukaani:xz:$tukaaniXzVersion")
+    implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
+
+    implementation api("ca.weblite:java-objc-bridge:1.2")
+
+    // SLF4J
+    api "org.slf4j:slf4j-api:$slf4jVersion"
+
+    // Misc
+    implementation api("it.unimi.dsi:fastutil:8.5.13", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    implementation api("com.raylabz:opensimplex:1.0.3")
+
+    implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+
+    implementation api("it.unimi.dsi:fastutil-core:8.5.13")
+    implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
+    implementation api("org.apache.logging.log4j:log4j:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
+
+    // fabric-loader dependencies
+    implementation api("org.ow2.asm:asm:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-analysis:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
+
+    implementation 'party.iroiro.luajava:luajit:4.0.2'
+    runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
+
+    implementation api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    implementation api('net.fabricmc:tiny-remapper:0.8.7')
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    implementation api('net.fabricmc:access-widener:2.1.0')
+
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
+
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    implementation api('net.fabricmc:tiny-remapper:0.8.7')
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    implementation api('net.fabricmc:access-widener:2.1.0')
+
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
+}
+
+compileJava {
+    dependsOn ":gameprovider:build"
+    dependsOn ":client:build"
+}
+
+processResources {
+    dependsOn ":gameprovider:build"
+    dependsOn ":client:build"
+    from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
+    exclude "*.pdn", "*.xcf", "*.ps"
+
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+}
+
+jar {
+    dependsOn ":gameprovider:build"
+    dependsOn ":client:build"
+    //noinspection GroovyAssignabilityCheck
+    manifest {
+        //noinspection GroovyAssignabilityCheck
+        attributes 'Implementation-Title': 'Quantum Voxel',
+                'Implementation-Vendor': 'Ultreon Studios',
+                project_version: project.projectVersion,
+                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
+                'Multi-Release': 'true'
+    }
+}
+
+tasks.register('prepareRun', {
+    Files.createDirectories(Path.of(rootProject.projectDir.getAbsolutePath(), "run"))
+})
+
+tasks.withType(ProcessResources).configureEach {
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}

@@ -24,9 +24,10 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * This class is the main entry point for the game provider of quantum.
@@ -56,21 +57,27 @@ public class QuantumVxlGameProvider implements GameProvider {
      * Reads version properties from a file and initializes the versions' property.
      */
     public QuantumVxlGameProvider() {
-        // Load version properties from versions.properties file
-        InputStream stream = this.getClass().getResourceAsStream("/versions.properties");
-
-        Properties properties = new Properties();
-
         try {
-            // Load properties from the input stream
-            properties.load(stream);
-        } catch (IOException e) {
-            // Throw a runtime exception if there is an issue with loading properties
-            throw new RuntimeException(e);
-        }
+            Logger.getLogger("Quantum Voxel").info("Initializing Quantum Voxel Game Provider...");
 
-        // Set the versions property to the loaded properties
-        this.versions = properties;
+            // Load version properties from versions.properties file
+            InputStream stream = this.getClass().getResourceAsStream("/versions.properties");
+
+            Properties properties = new Properties();
+
+            try {
+                // Load properties from the input stream
+                properties.load(stream);
+            } catch (IOException e) {
+                // Throw a runtime exception if there is an issue with loading properties
+                throw new RuntimeException(e);
+            }
+
+            // Set the versions property to the loaded properties
+            this.versions = properties;
+        } catch (Exception e) {
+            throw new FormattedException("Failed to initialize Quantum Voxel Game Provider", "Failed to initialize Quantum Voxel Game Provider", e);
+        }
     }
 
     /**
@@ -100,7 +107,7 @@ public class QuantumVxlGameProvider implements GameProvider {
      */
     @Override
     public String getRawGameVersion() {
-        return getVersion("quantum");
+        return "0.2.0";
     }
 
     /**
@@ -110,7 +117,7 @@ public class QuantumVxlGameProvider implements GameProvider {
      */
     @Override
     public String getNormalizedGameVersion() {
-        return getVersion("quantum");
+        return "0.2.0";
     }
 
     /**
@@ -186,18 +193,21 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     @Override
     public Path getLaunchDirectory() {
-        return Path.of(System.getProperty("user.dir"));
+        if (System.getProperty("cheerpj.dir") != null) {
+            return Paths.get(System.getProperty("cheerpj.dir"));
+        }
+        return Paths.get(System.getProperty("user.dir"));
     }
 
     @NotNull
     public static Path getDataDir() {
         Path path;
         if (OS.isWindows())
-            path = Path.of(System.getenv("APPDATA"), "QuantumVoxel");
+            path = Paths.get(System.getenv("APPDATA"), "QuantumVoxel");
         else if (OS.isMac())
-            path = Path.of(System.getProperty("user.home"), "Library/Application Support/QuantumVoxel");
+            path = Paths.get(System.getProperty("user.home"), "Library/Application Support/QuantumVoxel");
         else if (OS.isLinux())
-            path = Path.of(System.getProperty("user.home"), ".config/QuantumVoxel");
+            path = Paths.get(System.getProperty("user.home"), ".config/QuantumVoxel");
         else
             throw new FormattedException("Unsupported Platform", "Platform unsupported: " + System.getProperty("os.name"));
 
@@ -311,7 +321,6 @@ public class QuantumVxlGameProvider implements GameProvider {
             }
 
             // Check if log4j and slf4j are available
-            this.log4jAvailable = classifier.has(GameLibrary.LOG4J_API) && classifier.has(GameLibrary.LOG4J_CORE);
             this.slf4jAvailable = classifier.has(GameLibrary.SLF4J_API) && classifier.has(GameLibrary.SLF4J_CORE);
             var hasLogLib = this.log4jAvailable || this.slf4jAvailable;
 
@@ -360,6 +369,44 @@ public class QuantumVxlGameProvider implements GameProvider {
     public void initialize(FabricLauncher launcher) {
         // Set the valid parent class path
         launcher.setValidParentClassPath(this.validParentClassPath);
+
+        Path launchDirectory = getLaunchDirectory();
+        System.out.println(AnsiColors.PURPLE + "[LAUNCH]" + AnsiColors.RESET + "Launch directory: " + launchDirectory);
+        if (!Files.exists(launchDirectory.resolve("mods"))) {
+            try {
+                Files.createDirectories(launchDirectory.resolve("mods"));
+                Files.write(launchDirectory.resolve("mods").resolve(".nomedia"), new byte[0]);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        Path path = launchDirectory.resolve("mods");
+        long start = System.currentTimeMillis();
+        System.out.print(AnsiColors.PURPLE + "[RESOLVE] " + AnsiColors.RESET + "Resolving mods in " + path.toAbsolutePath() + "...\n");
+        try {
+            Files.walkFileTree(path, EnumSet.of(FileVisitOption.FOLLOW_LINKS), 1, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    System.out.print(AnsiColors.PURPLE + "[RESOLVE] " + AnsiColors.RESET + "Found mod file: " + file.toAbsolutePath() + " (" + attrs.size() + " bytes)\n");
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            System.out.print(AnsiColors.PURPLE + "[RESOLVE] " + AnsiColors.RED + "Failed to resolove mods!\n" + AnsiColors.RESET);
+        }
+        long end = System.currentTimeMillis();
+        System.out.print(AnsiColors.PURPLE + "[RESOLVE] " + AnsiColors.RESET + "Finished resolving mods in " + (end - start) + "ms\n");
+
+        if (!Files.exists(launchDirectory.resolve("config"))) {
+            try {
+                Files.createDirectories(launchDirectory.resolve("config"));
+                Files.write(launchDirectory.resolve("config").resolve(".nomedia"), new byte[0]);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         // Load the logger libraries on the platform CL when not in a unit test
         if (!this.logJars.isEmpty() && !Boolean.getBoolean(SystemProperties.UNIT_TEST)) {
@@ -422,7 +469,7 @@ public class QuantumVxlGameProvider implements GameProvider {
 
     @Override
     public boolean hasAwtSupport() {
-        return false;
+        return !System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
     /**

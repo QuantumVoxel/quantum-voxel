@@ -1,0 +1,164 @@
+plugins {
+    id "java"
+    id "java-library"
+    id 'org.gretty' version '3.1.0'
+}
+
+gretty {
+    contextPath = '/'
+    extraResourceBase 'build/dist'
+}
+
+group = "dev.ultreon.quantum"
+version = "0.2.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://maven.fabricmc.net"
+        name = "FabricMC"
+    }
+    maven {
+        url = "https://jitpack.io"
+        name = "JitPack"
+    }
+}
+
+dependencies {
+    implementation project(":lwjgl2")
+    implementation project(":gameprovider")
+    implementation project(":dedicated")
+    implementation project(":client")
+    implementation project(":server")
+
+    implementation api("com.formdev:flatlaf:3.2.1")
+
+    implementation api("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+    implementation api("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    implementation api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
+
+    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion")
+
+    implementation 'org.reflections:reflections:0.10.2'
+
+    implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+
+    // Others
+    implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
+
+    // Apache Log4J
+    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    implementation api("org.tukaani:xz:$tukaaniXzVersion")
+    implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
+
+    implementation api("ca.weblite:java-objc-bridge:1.2")
+
+    // SLF4J
+    api "org.slf4j:slf4j-api:$slf4jVersion"
+
+    // Misc
+    implementation api("it.unimi.dsi:fastutil:8.5.13", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    implementation api("com.raylabz:opensimplex:1.0.3")
+
+    implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+
+    implementation api("it.unimi.dsi:fastutil-core:8.5.13")
+    implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
+    implementation api("org.apache.logging.log4j:log4j:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
+
+    // fabric-loader dependencies
+    implementation api("org.ow2.asm:asm:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-analysis:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
+    implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
+
+    implementation 'party.iroiro.luajava:luajit:4.0.2'
+    runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
+
+    implementation api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    implementation api('net.fabricmc:tiny-remapper:0.8.7')
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    implementation api('net.fabricmc:access-widener:2.1.0')
+
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
+
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    implementation api('net.fabricmc:tiny-remapper:0.8.7')
+    //noinspection GradleDynamicVersion
+    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    implementation api('net.fabricmc:access-widener:2.1.0')
+
+    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+tasks.register("copyWeb", Copy) {
+    group = "build"
+    description = "Copies the web client to the build directory"
+
+    mustRunAfter("jar")
+
+    from("web") {
+        include("**/*")
+
+        inputs.property("classpath", configurations.runtimeClasspath.files.collect { "/app/lib/${it.name}" }.join(":") + ":/app/main.jar")
+        filesMatching("index.html") {
+            expand([
+                "classpath": configurations.runtimeClasspath.files.collect { "/app/lib/${it.name}" }.join(":") + ":/app/main.jar"
+            ])
+        }
+    }
+
+    destinationDir = file("build/dist")
+
+    tasks.build.dependsOn(it)
+}
+
+tasks.register("copyJarsToWeb", Copy) {
+    group = "build"
+    description = "Copies the jar files to the web client"
+
+    mustRunAfter("jar")
+
+    from(configurations.runtimeClasspath) {
+        include("**/*.jar")
+        into("lib/")
+    }
+
+    from(tasks.jar) {
+        rename { "main.jar" }
+    }
+
+    destinationDir = file("build/dist")
+
+    tasks.build.dependsOn(it)
+}
+tasks.register("runApp") {
+    description = "Run the JavaScript application hosted via a local Jetty server at http://localhost:8080/"
+    dependsOn(copyWeb, copyJarsToWeb, tasks.named("jettyRun"))
+}

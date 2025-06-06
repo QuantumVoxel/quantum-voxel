@@ -106,7 +106,7 @@ public class ServerHttpSite implements AutoCloseable {
         ServerHttpSite.serverDescription = serverDescription;
     }
 
-    private static void handleDL(HttpExchange exchange) {
+    private static void handleDL(HttpExchange exchange) throws IOException {
         // Download file from server
         String path1 = exchange.getRequestURI().getPath();
         if (!path1.startsWith(HttpPaths.PATH_DL) || path1.contains("..")) {
@@ -147,7 +147,7 @@ public class ServerHttpSite implements AutoCloseable {
         Files.copy(path, exchange.getResponseBody());
     }
 
-    private static void habdleImg(HttpExchange httpExchange) {
+    private static void habdleImg(HttpExchange httpExchange) throws IOException {
         OutputStream responseBody = new BufferedOutputStream(httpExchange.getResponseBody(), 8192);
         String path = httpExchange.getRequestURI().getPath();
         if (!path.startsWith(HttpPaths.PATH_ASSETS_IMG) || path.contains("..")) {
@@ -174,7 +174,7 @@ public class ServerHttpSite implements AutoCloseable {
         }
     }
 
-    private static void handleAssets(HttpExchange httpExchange) {
+    private static void handleAssets(HttpExchange httpExchange) throws IOException {
         OutputStream responseBody = new BufferedOutputStream(httpExchange.getResponseBody(), 8192);
         String path = httpExchange.getRequestURI().getPath();
         if (!path.startsWith(HttpPaths.PATH_ASSETS) || path.contains("..")) {
@@ -420,7 +420,7 @@ public class ServerHttpSite implements AutoCloseable {
         httpServer.stop(0);
     }
 
-    private void handleFavIcon(HttpExchange httpExchange) {
+    private void handleFavIcon(HttpExchange httpExchange) throws IOException {
         httpExchange.sendResponseHeaders(200, 0);
         OutputStream responseBody = httpExchange.getResponseBody();
         try (InputStream favicon = getClass().getClassLoader().getResourceAsStream("html/favicon.ico")) {
@@ -434,7 +434,7 @@ public class ServerHttpSite implements AutoCloseable {
         }
     }
 
-    private void handleLogin(HttpExchange exchange) {
+    private void handleLogin(HttpExchange exchange) throws IOException {
         // Get username and password from the query
         String query = exchange.getRequestURI().getQuery();
         try {

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>CheerpJ test</title>
+    <script src="https://cjrtnc.leaningtech.com/4.1/loader.js"></script>
+    <style>
+        #cheerpjDisplay {
+            width: 100%;
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<script>
+    (async function () {
+      await cheerpjInit({
+          version: 11,
+          javaProperties: ["java.library.path=/app/libraries/", "fabric.debug.discoveryTimeout=240", "user.dir=/files/", "cheerpj.dir=/files/", "fabric.modsFolder=/files/mods", "user.home=/files/"],
+          libraries: {"libGL.so.1": "/app/libraries/gl4es.wasm"},
+      });
+      cheerpjCreateDisplay(-1, -1, document.body);
+      cheerpjRunMain(
+        "dev.ultreon.quantum.cheerpj.Main",
+        "${classpath}"
+      );
+    })();
+</script>
+</body>
+</html>
