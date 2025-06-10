@@ -42,12 +42,12 @@ public class OverworldCarver implements Carver {
     }
 
     @Override
-    public int carve(BuilderChunk chunk, int x, int z) {
+    public float carve(BuilderChunk chunk, int x, int z) {
         long start = System.currentTimeMillis();
         Vec3i offset = chunk.getOffset();
         double hilliness = this.hillinessNoise.evaluateNoise(offset.x + x, offset.z + z) - 2.0f;
-        int groundPos = (int) ((this.getSurfaceHeightNoise(x, z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
-        int height = groundPos;
+        float groundPos = (float) ((this.getSurfaceHeightNoise(x, z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
+        float height = groundPos;
         if (height < 0) height = 0;
 
         // Carve the world into shape.
@@ -100,11 +100,11 @@ public class OverworldCarver implements Carver {
     }
 
     @Override
-    public int getSurfaceHeightNoise(float x, float z) {
+    public float getSurfaceHeightNoise(float x, float z) {
         double height;
 
         height = this.biomeNoise.evaluateNoise(x, z);
-        return (int) Math.ceil(Math.max(height, 1));
+        return Math.max((float) height, 1f);
     }
 
     @Override

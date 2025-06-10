@@ -15,7 +15,7 @@ import static dev.ultreon.quantum.world.World.CS;
  */
 public class FlatWorldCarver implements Carver {
     @Override
-    public int carve(@NotNull BuilderChunk chunk, int x, int z) {
+    public float carve(@NotNull BuilderChunk chunk, int x, int z) {
         Heightmap worldSurface = chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE);
         Heightmap motionBlocking = chunk.getWorld().heightMapAt(x, z, HeightmapType.MOTION_BLOCKING);
 
@@ -35,7 +35,7 @@ public class FlatWorldCarver implements Carver {
     }
 
     @Override
-    public int getSurfaceHeightNoise(float x, float z) {
+    public float getSurfaceHeightNoise(float x, float z) {
         return 3;
     }
 

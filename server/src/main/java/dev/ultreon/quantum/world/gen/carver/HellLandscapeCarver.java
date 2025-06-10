@@ -22,7 +22,7 @@ public class HellLandscapeCarver implements Carver {
     }
 
     @Override
-    public int carve(BuilderChunk chunk, int x, int z) {
+    public float carve(BuilderChunk chunk, int x, int z) {
         BlockVec offset = chunk.getOffset();
         for (int y = offset.y; y < offset.y + CS; y++) {
             double noise = this.source.evaluateNoise(x, y, z);
@@ -35,7 +35,7 @@ public class HellLandscapeCarver implements Carver {
     }
 
     @Override
-    public int getSurfaceHeightNoise(float x, float z) {
+    public float getSurfaceHeightNoise(float x, float z) {
         return 0;
     }
 

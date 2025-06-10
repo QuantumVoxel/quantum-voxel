@@ -5,12 +5,12 @@ import dev.ultreon.quantum.world.gen.carver.Carver;
 
 public class VoidCarver implements Carver {
     @Override
-    public int carve(BuilderChunk chunk, int x, int z) {
+    public float carve(BuilderChunk chunk, int x, int z) {
         return 0;
     }
 
     @Override
-    public int getSurfaceHeightNoise(float x, float z) {
+    public float getSurfaceHeightNoise(float x, float z) {
         return 0;
     }
 

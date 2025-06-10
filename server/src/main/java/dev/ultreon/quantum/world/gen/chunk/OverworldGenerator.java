@@ -3,7 +3,6 @@ package dev.ultreon.quantum.world.gen.chunk;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
 import dev.ultreon.quantum.registry.Registry;
-import dev.ultreon.quantum.registry.ServerRegistry;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3i;
@@ -74,11 +73,11 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         BlockVec offset = chunk.getOffset();
         for (var x = 0; x < CS; x++) {
             for (var z = 0; z < CS; z++) {
-                int groundPos = carver.carve(chunk, offset.x + x, offset.z + z);
+                float groundPos = carver.carve(chunk, offset.x + x, offset.z + z);
 
                 var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
-                index.biomeGenerator.processColumn(chunk, x, groundPos, z);
+                index.biomeGenerator.processColumn(chunk, x, (int) Math.floor(groundPos), z);
             }
         }
     }
@@ -90,7 +89,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @param height the height to determine which generator to use
      * @return the biome generator index for the specified offset and height
      */
-    public BiomeGenerator.Index findGenerator(Vec3i offset, int height) {
+    public BiomeGenerator.Index findGenerator(Vec3i offset, float height) {
         return this.findGenerator(offset, height, Modifications.enableDomainWarping);
     }
 
@@ -102,7 +101,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @param useDomainWarping flag indicating whether to apply domain warping to the offset
      * @return the biome generator index for the specified offset and height
      */
-    public BiomeGenerator.Index findGenerator(Vec3i offset, int height, boolean useDomainWarping) {
+    public BiomeGenerator.Index findGenerator(Vec3i offset, float height, boolean useDomainWarping) {
         if (useDomainWarping) {
             Vec2i domainOffset = MathHelper.round(this.biomeDomain.generateDomainOffset(offset.x, offset.z));
             offset.add(domainOffset.x, 0, domainOffset.y);
@@ -128,7 +127,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @param variation the variation index, used to account for terrain irregularities
      * @return the selected {@link BiomeGenerator} that matches the given parameters; if no suitable generator is found, a default generator is returned
      */
-    public BiomeGenerator selectGenerator(int height, double humid, double temp, double variation) {
+    public BiomeGenerator selectGenerator(float height, double humid, double temp, double variation) {
         BiomeGenerator biomeGen = null;
 
         if (variation < -2.0 || variation > 2.0) {

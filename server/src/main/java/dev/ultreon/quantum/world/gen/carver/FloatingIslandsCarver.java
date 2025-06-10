@@ -22,7 +22,7 @@ public class FloatingIslandsCarver implements Carver {
     }
 
     @Override
-    public int carve(BuilderChunk chunk, int x, int z) {
+    public float carve(BuilderChunk chunk, int x, int z) {
         BlockVec offset = chunk.getOffset();
         for (int y = 0; y < CS; y++) {
             double noise = this.source.evaluateNoise(x, offset.y + y, z);
@@ -35,7 +35,7 @@ public class FloatingIslandsCarver implements Carver {
     }
 
     @Override
-    public int getSurfaceHeightNoise(float x, float z) {
+    public float getSurfaceHeightNoise(float x, float z) {
         return 0;
     }
 

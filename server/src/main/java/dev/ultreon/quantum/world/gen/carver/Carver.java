@@ -14,7 +14,7 @@ public interface Carver {
      * @param z The z-coordinate within the chunk where the carving starts.
      * @return The height of the terrain at the given coordinates after carving, returns -1 if undetermined.
      */
-    int carve(BuilderChunk chunk, int x, int z);
+    float carve(BuilderChunk chunk, int x, int z);
 
     /**
      * Computes the height of the terrain surface noise at the specified coordinates.
@@ -23,7 +23,7 @@ public interface Carver {
      * @param z The z-coordinate to compute the surface height noise.
      * @return The height of the surface noise at the specified coordinates.
      */
-    int getSurfaceHeightNoise(float x, float z);
+    float getSurfaceHeightNoise(float x, float z);
 
     /**
      * Determines if the block at the specified coordinates (x, y, z) is air.
