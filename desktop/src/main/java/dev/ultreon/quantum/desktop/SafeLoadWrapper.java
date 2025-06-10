@@ -198,6 +198,10 @@ public class SafeLoadWrapper implements ApplicationListener {
         if (whitePixel != null) whitePixel.getTexture().dispose();
     }
 
+    public boolean isCrashed() {
+        return crash != null;
+    }
+
     private class CrashScreen extends ScreenAdapter {
         private final ScreenViewport viewport = new ScreenViewport();
         private final Stage stage = new Stage(viewport, batch);

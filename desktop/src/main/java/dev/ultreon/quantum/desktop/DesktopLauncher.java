@@ -48,6 +48,7 @@ public class DesktopLauncher {
     private static DesktopWindow gameWindow;
     private static boolean windowVibrancyEnabled = false;
     private static boolean fullVibrancyEnabled = false;
+    private static SafeLoadWrapper safeWrapper;
 
     /**
      * Launches the game.
@@ -107,7 +108,7 @@ public class DesktopLauncher {
 
         LauncherConfig.save();
 
-        SafeLoadWrapper safeWrapper = new SafeLoadWrapper(args);
+        safeWrapper = new SafeLoadWrapper(args);
         platform = new DesktopPlatform(useAngleGraphics, safeWrapper) {
             @Override
             public GameWindow createWindow() {
@@ -334,6 +335,11 @@ public class DesktopLauncher {
 
         @Override
         public boolean closeRequested() {
+            if (safeWrapper.isCrashed()) {
+                Runtime.getRuntime().halt(StatusCode.forAbort());
+                return true;
+            }
+
             return QuantumClient.get().tryShutdown();
         }
 

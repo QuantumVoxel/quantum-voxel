@@ -2344,6 +2344,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             } catch (Exception t) {
                 // Crash the client on any exception during disposal
                 QuantumClient.crash(t);
+
+                GamePlatform.get().halt(1);
             }
         }
     }
