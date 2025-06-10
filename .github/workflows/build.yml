@@ -1,8 +1,3 @@
-# Automatically build the project and run any configured tests for every push
-# and submitted pull request. This can help catch issues that only occur on
-# certain platforms or Java versions, and provides a first line of defence
-# against bad commits.
-
 name: Build package.zip
 on: [push]
 
@@ -27,7 +22,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build
-        run: chmod +x ./gradlew && ./gradlew pack
+        run: chmod +x ./gradlew && ./gradlew packageAll
         env:
           GH_BUILD_NUMBER: ${{ github.run_number }}
           USERNAME: ${{ github.actor }}
