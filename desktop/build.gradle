@@ -261,9 +261,8 @@ jar {
         //noinspection GroovyAssignabilityCheck
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.projectVersion,
-                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
-                'Multi-Release': 'true'
+                project_version: project.mavenVersion,
+                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'
     }
 }
 

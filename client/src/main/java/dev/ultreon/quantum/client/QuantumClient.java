@@ -303,7 +303,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     @Nullable
     public WorldRenderer worldRenderer;
     public ItemRenderer itemRenderer;
-    private GameRenderer gameRenderer;
+    GameRenderer gameRenderer;
 
     // GUI stuff
     @Nullable
@@ -327,12 +327,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     // World
     public ClientWorld world;
 
-    private boolean skipScreenshot = false;
-    private boolean screenshotWorldOnly = false;
-    private boolean triggerScreenshot = false;
-    private boolean captureScreenshot = false;
-    public int screenshotScale = 4;
-    private long screenshotFlashTime = 0;
+    private final Screenshots screenshots = new Screenshots(this);
+
 
     // Player
     @Nullable
@@ -393,8 +389,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     @Nullable
     Integer deferredHeight;
 
-    private int width;
-    private int height;
+    int width;
+    int height;
 
     @ShowInNodeView
     Texture windowTex;
@@ -455,8 +451,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final RenderBufferSource renderBuffers = new RenderBufferSource();
     private int cachedWidth;
     private int cachedHeight;
-    private Consumer<Screenshot> onScreenshot;
-
     {
         for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
             touchPosStartScl[i] = new Vector2();
@@ -616,7 +610,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Set up modifications
         this.setupMods();
 
-        // Load textures
+        // Load textures for splash screen
         this.ultreonBgTex = new Texture("assets/quantum/textures/gui/loading_overlay_bg.png");
         this.ultreonLogoTex = new Texture("assets/quantum/logo.png");
         this.libGDXLogoTex = new Texture("assets/quantum/libgdx_logo.png");
@@ -768,25 +762,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public static FileHandle data(String path) {
         return GamePlatform.get().isMobile() ? Gdx.files.external(path) : Gdx.files.local(path);
-    }
-
-    /**
-     * Makes a screenshot of the game.
-     */
-    public void screenshot(Consumer<Screenshot> screenshot) {
-        this.triggerScreenshot = true;
-        this.onScreenshot = screenshot;
-    }
-
-    /**
-     * Makes a screenshot of the game.
-     *
-     * @param worldOnly whether to only screenshot the world.
-     */
-    public void screenshot(boolean worldOnly, Consumer<Screenshot> screenshot) {
-        this.screenshotWorldOnly = worldOnly;
-        this.triggerScreenshot = true;
-        this.onScreenshot = screenshot;
     }
 
     /**
@@ -1133,9 +1108,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Handle pause screen screenshots for world
         WorldStorage theWorldStorage = openedWorld;
-        if (!skipScreenshot && next instanceof PauseScreen && world != null && theWorldStorage != null) {
+        if (!screenshots.isSkipScreenshot() && next instanceof PauseScreen && world != null && theWorldStorage != null) {
             PauseScreen pause = (PauseScreen) next;
-            this.screenshot(true, screenshot -> {
+            screenshots.screenshot(true, screenshot -> {
                 if (screenshot != null) {
                     try {
                         // Try to save world screenshot
@@ -1146,10 +1121,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 }
 
                 // Show pause screen after screenshot
-                this.skipScreenshot = true;
+                screenshots.setSkipScreenshot(true);
                 invoke(() -> {
                     boolean b = this.showScreen(pause);
-                    this.skipScreenshot = false;
+                    screenshots.setSkipScreenshot(false);
                     return b;
                 });
             });
@@ -1391,22 +1366,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
         }
 
-        // If the screenshot world only flag is true, clear the screen, render the world, and set the capture screenshot and trigger screenshot flags to false.
-        // Then, grab a screenshot, complete the screenshot future, clear the screen, set the screenshot world only flag to false, and set the capture screenshot and trigger screenshot flags to false.
-        if (this.screenshotWorldOnly) {
-            ScreenUtils.clear(0, 0, 0, 0, true);
-            this.gameRenderer.renderWorld(deltaTime);
-            this.captureScreenshot = false;
-            this.triggerScreenshot = false;
-
-            Screenshot grabbed = Screenshot.grab(this.width, this.height);
-            onScreenshot.accept(grabbed);
-            ScreenUtils.clear(0, 0, 0, 0, true);
-            this.screenshotWorldOnly = false;
-        }
-
-        // If the trigger screenshot flag is true, prepare the screenshot.
-        if (this.triggerScreenshot) this.prepareScreenshot();
+        screenshots.prepareScreenshot(deltaTime);
 
         // If the game bounds are not set, set them to the draw offset and the width and height.
         try (var ignored0 = PROFILER.start("renderGame")) {
@@ -1422,15 +1382,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
         }
 
-        // If the capture screenshot flag is true and the screenshot world only flag is false, handle the screenshot.
-        if (this.captureScreenshot && !this.screenshotWorldOnly) this.handleScreenshot();
-
-        // If the screenshot world only flag is false and the screenshot flash time is greater than the current time minus 200, draw the screenshot flash.
-        if (!this.screenshotWorldOnly && this.screenshotFlashTime > System.currentTimeMillis() - 200) {
-            this.renderer.begin();
-            this.shapes.filledRectangle(0, 0, this.width, this.height, this.tmpColor.set(1, 1, 1, 1 - (System.currentTimeMillis() - this.screenshotFlashTime) / 200f));
-            this.renderer.end();
-        }
+        screenshots.renderFlash(renderer, width, height);
 
         // If the custom border is shown and the loading flag is false, draw the custom border.
         if (this.isCustomBorderShown() && !loading) this.drawCustomBorder(renderer);
@@ -1459,32 +1411,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Prepares the application for capturing a screenshot. This method adjusts
-     * the screenshot scale, viewport dimensions, and necessary flags to ensure
-     * a screenshot is properly captured at the desired resolution.
-     */
-    private void prepareScreenshot() {
-        // Default to 1x scale
-        this.screenshotScale = 1;
-
-        // Check if 4x screenshot is enabled and shift is being held
-        if (ClientConfiguration.enable4xScreenshot.getValue() && (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))) {
-            this.screenshotScale = 4;
-        }
-
-        // Scale the viewport dimensions
-        this.width = this.width * this.screenshotScale;
-        this.height = this.height * this.screenshotScale;
-
-        // Set screenshot flags
-        this.captureScreenshot = true;
-        this.triggerScreenshot = false;
-
-        // Clear the screen to black
-        ScreenUtils.clear(0, 0, 0, 1, true);
-    }
-
-    /**
      * Draws the custom window border with title bar and control buttons.
      *
      * @param renderer The renderer used to draw the border graphics
@@ -1505,24 +1431,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // End rendering
         this.renderer.end();
-    }
-
-    /**
-     * Handles the screenshot capture and saves it to disk.
-     * After saving, resets the viewport and resizes the game window.
-     */
-    private void handleScreenshot() {
-        // Reset screenshot capture flag
-        this.captureScreenshot = false;
-
-        // Save screenshot to disk
-        this.saveScreenshot();
-
-        // Reset viewport to original dimensions
-        Gdx.gl.glViewport(0, 0, getWidth(), getHeight());
-
-        // Reset window size
-        this.resize(QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
     }
 
     /**
@@ -1912,29 +1820,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
             RpcHandler.newActivity(this.activity);
         }
-    }
-
-    /**
-     * Saves a screenshot.
-     */
-    private void saveScreenshot() {
-        // Beginning of the method
-        if (this.spriteBatch != null && this.spriteBatch.isDrawing()) this.spriteBatch.flush();
-
-        Screenshot grabbed = Screenshot.grab(this.width, this.height);
-        FileHandle save = grabbed.save(Gdx.files.local("screenshots").child(String.format("%s.png", DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss").format(LocalDateTime.now()))));
-
-        // Saving screenshot to a file
-        this.screenshotFlashTime = System.currentTimeMillis();
-
-        // Playing sound effect for taking a screenshot
-        this.playSound(SoundEvents.SCREENSHOT, 0.5f);
-
-        // Adding notification message with the saved file name and path
-        this.notifications.add("Screenshot taken.", save.name(), "screenshots");
-
-        onScreenshot.accept(grabbed);
-        grabbed.dispose();
     }
 
     /**
@@ -3694,5 +3579,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public @Nullable ItemModel getItemModel(Item item) {
         return ItemModelRegistry.get().get(item);
+    }
+
+    public Screenshots getScreenshots() {
+        return screenshots;
     }
 }

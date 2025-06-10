@@ -142,8 +142,7 @@ jar {
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
                 project_version: project.version,
-                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
-                'Multi-Release': 'true'
+                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'
     }
 
     from {

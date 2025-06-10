@@ -152,47 +152,49 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public boolean keyDown(int keyCode) {
-        GamePlatform.get().catchNative(() -> {
-            GameInput.switchTo(this);
-
-            if (WindowManager.keyPress(keyCode)) return;
-
-            if (!isActive()) return;
-
-            KeyAndMouseInput.KEYS.set(keyCode);
-
-            PRESSED.set(keyCode);
-
-            // Invoke the key press event for the current screen
-            Screen currentScreen = this.client.screen;
-            if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
-                ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
-                return;
-            }
-
-            lastKeyCancelFrame = Gdx.graphics.getFrameId();
-
-            // Handle key press for player
-            Player player = this.client.player;
-
-            if (GamePlatform.get().hasImGui() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
-            if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
-            devKeyHandler.handleViewMode(this);
-
-            devKeyHandler.handleDevKeys(this);
-
-            if (player != null) {
-                handleKeyBinds(keyCode, currentScreen, player);
-            }
-            if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
-                return;
-
-            // Select block by index based on keycode for number keys.
-            int index = keyCode - Input.Keys.NUM_1;
-            player.selectBlock(index);
-        });
+        GamePlatform.get().catchNative(() -> doKeyDown(keyCode));
         return false;
 
+    }
+
+    private void doKeyDown(int keyCode) {
+        GameInput.switchTo(this);
+
+        if (WindowManager.keyPress(keyCode)) return;
+
+        if (!isActive()) return;
+
+        KeyAndMouseInput.KEYS.set(keyCode);
+
+        PRESSED.set(keyCode);
+
+        // Invoke the key press event for the current screen
+        Screen currentScreen = this.client.screen;
+        if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
+            ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
+            return;
+        }
+
+        lastKeyCancelFrame = Gdx.graphics.getFrameId();
+
+        // Handle key press for player
+        Player player = this.client.player;
+
+        if (GamePlatform.get().hasImGui() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
+        if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
+        devKeyHandler.handleViewMode(this);
+
+        devKeyHandler.handleDevKeys(this);
+
+        if (player != null) {
+            handleKeyBinds(keyCode, currentScreen, player);
+        }
+        if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
+            return;
+
+        // Select block by index based on keycode for number keys.
+        int index = keyCode - Input.Keys.NUM_1;
+        player.selectBlock(index);
     }
 
     @SuppressWarnings("t")
@@ -202,12 +204,15 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         else if (KeyAndMouseInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen) client.showScreen(null);
         else if (KeyAndMouseInput.CHAT_KEY.is(keyCode) && currentScreen == null) client.showScreen(new ChatScreen());
         else if (KeyAndMouseInput.COMMAND_KEY.is(keyCode) && currentScreen == null) client.showScreen(new ChatScreen("/"));
-        else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) client.screenshot(screenshot -> {});
+        else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) client.getScreenshots().screenshot(screenshot -> {
+        });
         else if (KeyAndMouseInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
         else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(!client.isFullScreen());
         else if (KeyAndMouseInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
-        else if (client.world != null && KeyAndMouseInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched()) client.showScreen(new PauseScreen());
-        else if (KeyAndMouseInput.PAUSE_KEY.is(keyCode) && !Gdx.input.isCursorCatched() && client.screen instanceof PauseScreen) client.showScreen(null);
+        else if (client.world != null && KeyAndMouseInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched())
+            client.showScreen(new PauseScreen());
+        else if (KeyAndMouseInput.PAUSE_KEY.is(keyCode) && !Gdx.input.isCursorCatched() && client.screen instanceof PauseScreen)
+            client.showScreen(null);
         else if (KeyAndMouseInput.DROP_ITEM_KEY.is(keyCode)) player.dropItem();
     }
 
@@ -304,12 +309,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
     /**
      * Handles different input events like opening inventory, chat, debug keys, etc.
-     *
      */
     private void handleInputEvents() {
-        if (Gdx.input.isKeyPressed(Input.Keys.F12))
-            if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT))
-                QuantumClient.get().reloadResourcesAsync();
+        if (Gdx.input.isKeyPressed(Input.Keys.F12) && (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)))
+            QuantumClient.get().reloadResourcesAsync();
     }
 
     /**
@@ -464,7 +467,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * @param screenX The setX-coordinate of the touch event
      * @param screenY The setY-coordinate of the touch event
      * @param pointer The pointer index for the event
-     * @param button The button pressed
+     * @param button  The button pressed
      * @return Whether the touch event was successfully handled
      */
     @Override
@@ -490,8 +493,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * Handles player interaction with the game environment.
      *
      * @param button the input button pressed by the player
-     * @param hit the result of the player's hit test
-     * @param world the game world
+     * @param hit    the result of the player's hit test
+     * @param world  the game world
      * @param player the player entity
      */
     private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
@@ -543,7 +546,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * @param screenX The setX coordinate of the touch or mouse release event
      * @param screenY The setY coordinate of the touch or mouse release event
      * @param pointer The pointer for the event
-     * @param button The button that was released
+     * @param button  The button that was released
      * @return true if the event was handled, false otherwise
      */
     @Override

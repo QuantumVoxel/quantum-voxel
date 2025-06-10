@@ -2,6 +2,7 @@ package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Predicate;
+import org.jetbrains.annotations.NotNull;
 
 public class StringProperty implements ConfigProperty<String> {
     private String value;
@@ -21,7 +22,7 @@ public class StringProperty implements ConfigProperty<String> {
     }
 
     @Override
-    public String getValue() {
+    public @NotNull String getValue() {
         return value;
     }
 

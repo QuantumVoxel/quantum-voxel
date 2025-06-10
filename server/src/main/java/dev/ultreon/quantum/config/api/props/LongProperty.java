@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
+import org.jetbrains.annotations.NotNull;
 
 public class LongProperty implements ConfigProperty<Long> {
     private final String name;
@@ -23,7 +24,7 @@ public class LongProperty implements ConfigProperty<Long> {
     }
 
     @Override
-    public Long getValue() {
+    public @NotNull Long getValue() {
         return value;
     }
 

@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
+import org.jetbrains.annotations.NotNull;
 
 public class BooleanProperty implements ConfigProperty<Boolean> {
     private boolean value;
@@ -18,7 +19,7 @@ public class BooleanProperty implements ConfigProperty<Boolean> {
     }
 
     @Override
-    public Boolean getValue() {
+    public @NotNull Boolean getValue() {
         return value;
     }
 

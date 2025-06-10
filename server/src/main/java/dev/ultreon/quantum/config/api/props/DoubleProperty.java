@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
+import org.jetbrains.annotations.NotNull;
 
 public class DoubleProperty implements ConfigProperty<Double> {
     private final String name;
@@ -23,7 +24,7 @@ public class DoubleProperty implements ConfigProperty<Double> {
     }
 
     @Override
-    public Double getValue() {
+    public @NotNull Double getValue() {
         return value;
     }
 

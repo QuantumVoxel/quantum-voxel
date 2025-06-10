@@ -333,6 +333,10 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return entries.remove(index);
     }
 
+    public void clearEntries() {
+        entries.clear();
+    }
+
     public static class Entry<T> extends Widget {
         private final T value;
         private final SelectionList<T> list;

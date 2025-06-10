@@ -3,6 +3,7 @@ package dev.ultreon.quantum.config.api.props;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Predicate;
 import dev.ultreon.quantum.util.NamespaceID;
+import org.jetbrains.annotations.NotNull;
 
 public class NamespaceIDProperty implements ConfigProperty<NamespaceID> {
     private NamespaceID value;
@@ -22,7 +23,7 @@ public class NamespaceIDProperty implements ConfigProperty<NamespaceID> {
     }
 
     @Override
-    public NamespaceID getValue() {
+    public @NotNull NamespaceID getValue() {
         return value;
     }
 

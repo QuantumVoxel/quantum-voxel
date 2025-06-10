@@ -7,7 +7,9 @@ import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.widget.*;
+import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.text.TextObject;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
@@ -137,7 +139,7 @@ public class WorldSelectionScreen extends Screen {
                 .button(TextObject.translation("quantum.ui.yes"), () -> {
                     try {
                         selected.delete();
-                        worldList.clear();
+                        worldList.clearEntries();
                         worldList.addEntries(this.locateWorlds());
                     } catch (IOException e) {
                         CommonConstants.LOGGER.error("Failed to delete world", e);
@@ -175,6 +177,9 @@ public class WorldSelectionScreen extends Screen {
         WorldStorage selected = worldList.getSelected();
         if (selected == null) return;
         FileHandle child = selected.getDirectory().child("picture.png");
+        if (!child.exists()) {
+            child = new ResourceFileHandle(NamespaceID.of("textures/gui/world/default_picture.png"));
+        }
         if (!Objects.equals(child, worldInfo.currentPicFile)) {
             if (worldInfo.currentPic != null) {
                 worldInfo.currentPic = null;
@@ -256,6 +261,9 @@ public class WorldSelectionScreen extends Screen {
             WorldStorage selected = worldList.getSelected();
             if (selected == null) return;
             FileHandle child = selected.getDirectory().child("picture.png");
+            if (!child.exists()) {
+                child = new ResourceFileHandle(NamespaceID.of("textures/gui/world/default_picture.png"));
+            }
             if (!Objects.equals(child, currentPicFile)) {
                 if (currentPic != null) {
                     currentPic = null;

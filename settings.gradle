@@ -2,5 +2,4 @@ include 'launcher', 'gameprovider', 'desktop', 'teavm', 'android', 'client', 'se
 
 
 include 'dedicated'
-include 'cheerpj'
 include 'lwjgl2'

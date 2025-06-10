@@ -151,8 +151,7 @@ jar {
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
                 project_version: project.version,
-                'Main-Class': mainClass,
-                'Multi-Release': 'true'
+                'Main-Class': mainClass
     }
 
     from(compileJava.outputs)
@@ -189,8 +188,7 @@ tasks.create("serverJar", Jar) {
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
                 project_version: project.version,
-                'Main-Class': mainClass,
-                'Multi-Release': 'true'
+                'Main-Class': mainClass
     }
 
     zip64 true

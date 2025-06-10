@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
+import org.jetbrains.annotations.NotNull;
 
 public class FloatProperty implements ConfigProperty<Float> {
     private final String name;
@@ -23,7 +24,7 @@ public class FloatProperty implements ConfigProperty<Float> {
     }
 
     @Override
-    public Float getValue() {
+    public @NotNull Float getValue() {
         return value;
     }
 

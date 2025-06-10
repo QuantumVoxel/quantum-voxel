@@ -85,8 +85,7 @@ public class DesktopLauncher {
         try {
             DesktopLauncher.launch(argv);
         } catch (Exception | OutOfMemoryError e) {
-            CommonConstants.LOGGER.error("Failed to launch game", e);
-            CrashHandler.handleCrash(new CrashLog("Launch failed", e).createCrash().getCrashLog());
+            LOGGER.error("Failed to launch game", e);
         }
     }
 
@@ -157,9 +156,6 @@ public class DesktopLauncher {
                 return windowVibrancyEnabled;
             }
         };
-
-//        Log.setLogger(KyroSlf4jLogger.INSTANCE);
-//        com.esotericsoftware.minlog.Log.setLogger(KyroNetSlf4jLogger.INSTANCE);
 
         CrashHandler.addHandler(crashLog -> {
             try {

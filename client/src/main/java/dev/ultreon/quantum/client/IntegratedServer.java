@@ -15,6 +15,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -85,10 +86,23 @@ public class IntegratedServer extends QuantumServer {
     public void init() throws IOException {
         super.init();
 
-        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, getOverworld(), UUID.nameUUIDFromBytes(("QVPlay:" + client.getUser().name()).getBytes()), client.getUser().name(), null);
+        ServerWorld overworld = getOverworld();
+        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, overworld, UUID.nameUUIDFromBytes(("QVPlay:" + client.getUser().name()).getBytes()), client.getUser().name(), null);
         // Load player data from storage
+        if (!this.getStorage().exists("player.ubo")) {
+            QuantumServer.invoke(() -> {
+                BlockVec spawnPointXZ = overworld.getSpawnPoint();
+                for (int i = 0; i < 256 / CS; i++) {
+                    overworld.getChunkAt(spawnPointXZ.x, i * CS, spawnPointXZ.z);
+                }
+                BlockVec spawnPoint = overworld.getSpawnPoint();
+                player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));
+                host = player;
+            });
+            return;
+        }
         var playerData = this.getStorage().<MapType>read("player.ubo");
-        BlockVec spawnPoint = getOverworld().getSpawnPoint();
+        BlockVec spawnPoint = overworld.getSpawnPoint();
         player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));
         player.loadWithWorldPos(playerData);
 

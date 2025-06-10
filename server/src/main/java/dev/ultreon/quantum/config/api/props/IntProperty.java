@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
+import org.jetbrains.annotations.NotNull;
 
 public class IntProperty implements ConfigProperty<Integer> {
     private final String name;
@@ -23,7 +24,7 @@ public class IntProperty implements ConfigProperty<Integer> {
     }
 
     @Override
-    public Integer getValue() {
+    public @NotNull Integer getValue() {
         return value;
     }
 

@@ -8,6 +8,7 @@ import org.panteleyev.jpackage.ImageType
 
 import java.nio.file.Files
 import java.nio.file.Paths
+import io.github.fourlastor.construo.Target
 
 buildscript {
     repositories {
@@ -26,6 +27,7 @@ buildscript {
     }
 
     dependencies {
+        classpath "io.github.fourlastor:construo:1.5.1"
         classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
         classpath "com.google.code.gson:gson:2.10.1"
         classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
@@ -40,6 +42,7 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.10.3'
 }
 
+apply plugin: 'io.github.fourlastor.construo'
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'org.jetbrains.kotlin.jvm'
@@ -54,7 +57,7 @@ group = projectGroup
 def packageVersion = rootProject.version
 
 base {
-    archivesName = archivesBaseName + "-launcher"
+    archivesBaseName = "quantum-launcher-$mavenVersion"
 }
 
 java {
@@ -99,131 +102,131 @@ configurations {
 evaluationDependsOn(":client")
 
 dependencies {
-    addToJar api(project(":gameprovider"))
-    api(project(":client"))
-    api(project(":desktop"))
-    api(project(":mixinprovider"))
+    addToJar runtimeOnly(project(":gameprovider"))
+    runtimeOnly(project(":client"))
+    runtimeOnly(project(":desktop"))
+    runtimeOnly(project(":mixinprovider"))
 
-    api("com.formdev:flatlaf:3.2.1")
+    runtimeOnly("com.formdev:flatlaf:3.2.1")
 
-    api("com.badlogicgames.gdx:gdx:$gdxVersion")
-    api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
-    api("com.badlogicgames.ashley:ashley:$ashleyVersion")
-    api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
-    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
-    api("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
-    api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx:$gdxVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+    runtimeOnly("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+    runtimeOnly("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
+    runtimeOnly("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
-    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
-    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
-    api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
-    api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
-    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
-    api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
-    api("org.tukaani:xz:$tukaaniXzVersion")
-    api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+    runtimeOnly("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
+    runtimeOnly("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
+    runtimeOnly("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
+    runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
+    runtimeOnly("org.tukaani:xz:$tukaaniXzVersion")
+    runtimeOnly("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
     // Apache Log4J
-    api("org.apache.logging.log4j:log4j:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 
     // JNA
-    api("net.java.dev.jna:jna:$jnaVersion")
-    api("net.java.dev.jna:jna-platform:$jnaVersion")
+    runtimeOnly("net.java.dev.jna:jna:$jnaVersion")
+    runtimeOnly("net.java.dev.jna:jna-platform:$jnaVersion")
 
     // SLF4J
-    api("org.slf4j:slf4j-api:$slf4jVersion")
+    runtimeOnly("org.slf4j:slf4j-api:$slf4jVersion")
 
     // Google
-    api("com.google.code.gson:gson:2.10.1")
-    api("com.google.guava:guava:$guavaVersion")
+    runtimeOnly("com.google.code.gson:gson:2.10.1")
+    runtimeOnly("com.google.guava:guava:$guavaVersion")
 
     // Misc
-    api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
-    api('com.raylabz:opensimplex:1.0.3')
+    runtimeOnly("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    runtimeOnly('com.raylabz:opensimplex:1.0.3')
 
-    api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+    runtimeOnly("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
-    api("it.unimi.dsi:fastutil-core:8.5.9")
-    api("com.google.code.findbugs:jsr305:$jsrVersion")
+    runtimeOnly("it.unimi.dsi:fastutil-core:8.5.9")
+    runtimeOnly("com.google.code.findbugs:jsr305:$jsrVersion")
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
-    api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    api("org.apache.logging.log4j:log4j:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    runtimeOnly("org.xbib.elasticsearch:joptsimple:6.3.2.1")
+    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
 
     // fabric-loader dependencies
-    api("org.ow2.asm:asm:${project.asmVersion}")
-    api("org.ow2.asm:asm-analysis:${project.asmVersion}")
-    api("org.ow2.asm:asm-commons:${project.asmVersion}")
-    api("org.ow2.asm:asm-tree:${project.asmVersion}")
-    api("org.ow2.asm:asm-util:${project.asmVersion}")
+    runtimeOnly("org.ow2.asm:asm:${project.asmVersion}")
+    runtimeOnly("org.ow2.asm:asm-analysis:${project.asmVersion}")
+    runtimeOnly("org.ow2.asm:asm-commons:${project.asmVersion}")
+    runtimeOnly("org.ow2.asm:asm-tree:${project.asmVersion}")
+    runtimeOnly("org.ow2.asm:asm-util:${project.asmVersion}")
 
-    api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
+    runtimeOnly("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
 
     //noinspection GradleDynamicVersion
-    api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    api('net.fabricmc:tiny-remapper:0.8.7')
+    runtimeOnly('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
+    runtimeOnly('net.fabricmc:tiny-remapper:0.8.7')
     //noinspection GradleDynamicVersion
-    api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    api('net.fabricmc:access-widener:2.1.0')
+    runtimeOnly('net.fabricmc:dev-launch-injector:0.2.1+build.8')
+    runtimeOnly('net.fabricmc:access-widener:2.1.0')
 
-    api("net.fabricmc:fabric-loader:$fabricVersion")
+    runtimeOnly("net.fabricmc:fabric-loader:$fabricVersion")
     
-    natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows")
-    natives_win api("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")
-    natives_linux api("org.lwjgl:lwjgl:3.3.3:natives-linux")
-    natives_linux api("org.lwjgl:lwjgl:3.3.3:natives-linux-arm32")
-    natives_linux api("org.lwjgl:lwjgl:3.3.3:natives-linux-arm64")
-    natives_mac api("org.lwjgl:lwjgl:3.3.3:natives-macos")
-    natives_mac api("org.lwjgl:lwjgl:3.3.3:natives-macos-arm64")
+    natives_win runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-windows")
+    natives_win runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-linux")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-linux-arm32")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-linux-arm64")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-macos")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-macos-arm64")
     
-    natives_win api("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows")
-    natives_win api("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows-arm64")
-    natives_linux api("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux")
-    natives_linux api("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux-arm32")
-    natives_linux api("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux-arm64")
-    natives_mac api("org.lwjgl:lwjgl-glfw:3.3.3:natives-macos")
-    natives_mac api("org.lwjgl:lwjgl-glfw:3.3.3:natives-macos-arm64")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows-arm64")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux-arm32")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-linux-arm64")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-macos")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-macos-arm64")
     
-    natives_win api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows")
-    natives_win api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows-arm64")
-    natives_linux api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux")
-    natives_linux api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux-arm32")
-    natives_linux api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux-arm64")
-    natives_mac api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-macos")
-    natives_mac api("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-macos-arm64")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows-arm64")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux-arm32")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-linux-arm64")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-macos")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-jemalloc:3.3.3:natives-macos-arm64")
     
-    natives_win api("org.lwjgl:lwjgl-openal:3.3.3:natives-windows")
-    natives_win api("org.lwjgl:lwjgl-openal:3.3.3:natives-windows-arm64")
-    natives_linux api("org.lwjgl:lwjgl-openal:3.3.3:natives-linux")
-    natives_linux api("org.lwjgl:lwjgl-openal:3.3.3:natives-linux-arm32")
-    natives_linux api("org.lwjgl:lwjgl-openal:3.3.3:natives-linux-arm64")
-    natives_mac api("org.lwjgl:lwjgl-openal:3.3.3:natives-macos")
-    natives_mac api("org.lwjgl:lwjgl-openal:3.3.3:natives-macos-arm64")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-windows")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-windows-arm64")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-linux")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-linux-arm32")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-linux-arm64")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-macos")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-openal:3.3.3:natives-macos-arm64")
     
-    natives_win api("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows")
-    natives_win api("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows-arm64")
-    natives_linux api("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux")
-    natives_linux api("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux-arm32")
-    natives_linux api("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux-arm64")
-    natives_mac api("org.lwjgl:lwjgl-opengl:3.3.3:natives-macos")
-    natives_mac api("org.lwjgl:lwjgl-opengl:3.3.3:natives-macos-arm64")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows-arm64")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux-arm32")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-linux-arm64")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-macos")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-macos-arm64")
     
-    natives_win api("org.lwjgl:lwjgl-stb:3.3.3:natives-windows")
-    natives_win api("org.lwjgl:lwjgl-stb:3.3.3:natives-windows-arm64")
-    natives_linux api("org.lwjgl:lwjgl-stb:3.3.3:natives-linux")
-    natives_linux api("org.lwjgl:lwjgl-stb:3.3.3:natives-linux-arm32")
-    natives_linux api("org.lwjgl:lwjgl-stb:3.3.3:natives-linux-arm64")
-    natives_mac api("org.lwjgl:lwjgl-stb:3.3.3:natives-macos")
-    natives_mac api("org.lwjgl:lwjgl-stb:3.3.3:natives-macos-arm64")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-windows")
+    natives_win runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-windows-arm64")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-linux")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-linux-arm32")
+    natives_linux runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-linux-arm64")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-macos")
+    natives_mac runtimeOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-macos-arm64")
 }
 
 processResources {
@@ -244,21 +247,11 @@ jar {
         //noinspection GroovyAssignabilityCheck
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.projectVersion,
-                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
-                'Multi-Release': 'true'
+                project_version: project.mavenVersion,
+                'Main-Class': 'dev.ultreon.quantum.launcher.Launcher'
     }
 
     exclude "*.RSA", "*.SF", "*.MF"
-
-    from(project(":mixinprovider").tasks.jar.outputs) {
-        into("")
-        rename {
-            "mixinprovider.jar"
-        }
-
-        duplicatesStrategy DuplicatesStrategy.FAIL
-    }
 
     zip64 true
     duplicatesStrategy DuplicatesStrategy.INCLUDE
@@ -285,95 +278,120 @@ tasks.withType(Jar).configureEach {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
-delete "$projectDir/build/jars"
-
-tasks.register('copyDependencies', Copy) {
-    from(configurations.runtimeClasspath)
-    exclude "lwjgl-2.9.3.jar"
-    exclude "lwjgl-platform-2.9.3.jar"
-    exclude "lwjgl-platform-2.9.3-*.jar"
-    into("$projectDir/build/jars")
+build {
+    dependsOn ":gameprovider:build", ":desktop:build", ":server:build", ":dedicated:build", ":dedicated:build", ":client:build"
 }
 
-tasks.register('copyJar', Copy) {
-    from(tasks.jar)
-    into("$projectDir/build/jars")
-    doLast {
-        delete fileTree("$project/build/dist")
-        delete file("$project/build/dist")
+construo {
+    // name of the executable
+    name.set("Quantum Voxel")
+    // human-readable name, used for example in the `.app` name for macOS
+    humanName.set("Quantum Voxel")
+    // Optional, defaults to project version property
+    version.set("$projectVersion")
+
+    jdkRoot.dir(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }.get().getMetadata().installationPath.asFile.absolutePath)
+
+    roast {
+        it.useZgc.set true
     }
-}
 
-tasks.register('package', Zip) {
-    dependsOn("build", ":gameprovider:build", ":desktop:build", ":client:build", "copyDependencies", "copyJar")
-
-    from fileTree(dir: "$projectDir/build/jars", include: "*.jar")
-    archiveFileName = 'package.zip'
-    destinationDirectory = file("$rootProject/build/dist/")
-}
-
-tasks.register('packageBin', Zip) {
-    from fileTree(dir: "$projectDir/build/dist/")
-    archiveFileName = 'package.zip'
-
-    doLast {
-        copy {
-            from "${outputs.files.singleFile.path}"
-            into "$rootProject.projectDir/build/dist"
-            rename "package.zip", "${appName}-${projectVersion}.zip"
+    targets.configure {
+        create("linuxX64", Target.Linux) {
+            architecture.set(Target.Architecture.X86_64)
+            jdkUrl.set("https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz")
+        }
+        create("macM1", Target.MacOs) {
+            architecture.set(Target.Architecture.AARCH64)
+            jdkUrl.set("https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_macos-aarch64_bin.tar.gz")
+            // macOS needs an identifier
+            identifier.set("dev.ultreon.quantum." + appName)
+            // Optional: icon for macOS
+            macIcon.set(project.file("icons/icon.icns"))
+        }
+        create("macX64", Target.MacOs) {
+            architecture.set(Target.Architecture.X86_64)
+            jdkUrl.set("https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_macos-x64_bin.tar.gz")
+            // macOS needs an identifier
+            identifier.set("dev.ultreon.quantum." + appName)
+            // Optional: icon for macOS
+            macIcon.set(project.file("icons/icon.icns"))
+        }
+        create("winX64", Target.Windows) {
+            architecture.set(Target.Architecture.X86_64)
+            jdkUrl.set("https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip")
+            useGpuHint.set(true)
+            // Uncomment the next line to show a console when the game runs, to print messages.
+            //useConsole.set(true)
         }
     }
 }
 
-jpackage {
-    dependsOn("build", ":gameprovider:build", ":desktop:build", ":client:build", "copyDependencies", "copyJar")
-    finalizedBy("packageBin")
+tasks.register("packageAll") {
+    dependsOn("packageLinuxX64", "packageMacM1", "packageMacX64", "packageWinX64")
+}
 
-    input  = "$projectDir/build/jars"
-    destination = "$projectDir/build/dist"
+["LinuxX64", "MacM1", "MacX64", "WinX64"].forEach { str ->
+    tasks.register("copyDeps$str", Copy) {
+        dependsOn "roast$str"
+        from configurations.runtimeClasspath
+        exclude "lwjgl-2.9.3.jar"
+        exclude "lwjgl-platform-2.9.3.jar"
+        exclude "lwjgl-platform-2.9.3-*.jar"
+        into "$projectDir/build/construo/${str[0].toLowerCase()}${str[1..-1]}/roast/app"
 
-    appName = appName
-    appVersion = projectVersion
-    vendor = "Ultreon Studios"
-    copyright = "Copyright (c) 2023 Ultreon Studios"
-    runtimeImage = System.getProperty("java.home")
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            from configurations.natives_win
+        }
 
-    mainJar = jar.archiveFileName.get()
-    mainClass = "dev.ultreon.quantum.launcher.Launcher"
+        if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+            from configurations.natives_linux
+        }
 
-
-    javaOptions = [ "-Xmx8g", "-Dfile.encoding=UTF-8", "-Dquantum.environment=packaged","-Dfabric.skipMcProvider=true" ]
-    arguments = [ "--packaged" ]
-
-    mac {
-        javaOptions = javaOptions
-        icon = "$rootProject.projectDir/icons/icon.icns"
-        javaOptions += ["-XstartOnFirstThread"]
-        macPackageIdentifier = projectId
-        macPackageName = projectName
-        appVersion = "1.0.0"
-        type = ImageType.APP_IMAGE
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            from configurations.natives_mac
+        }
     }
 
-    linux {
-        icon = "$rootProject.projectDir/icons/icon.png"
-        appVersion = project.version.toString()
-        aboutUrl = null
-        licenseFile = null
-        type = ImageType.APP_IMAGE
+    tasks.named("roast$str").configure {
+        it.finalizedBy("copyDeps$str")
+    }
+    tasks.named("package$str").configure {
+        it.mustRunAfter("copyDeps$str")
+    }
+    if (str.startsWith("Mac")) {
+        tasks.named("buildMacAppBundle$str").configure {
+            it.mustRunAfter("copyDeps$str")
+        }
+        tasks.named("generatePList$str").configure {
+            it.mustRunAfter("copyDeps$str")
+        }
+    }
+    tasks.register("copyJdkBin$str", Copy) {
+        dependsOn "roast$str"
+
+        def path = Paths.get("$projectDir/build/construo/jdk/${str[0].toLowerCase()}${str[1..-1]}/graalvm-community-openjdk-21.0.2+13.1")
+        if (str.startsWith("Mac")) {
+            path = path.resolve("Contents/Home")
+        }
+        from files(path.toFile())
+        into "$projectDir/build/construo/${str[0].toLowerCase()}${str[1..-1]}/roast/jdk"
     }
 
-    windows {
-        winConsole = false
-
-        type ImageType.APP_IMAGE
-
-        doLast {
-            copy {
-                from configurations.natives_win.collect {  it.isDirectory() ? it : zipTree(it) }
-                into "$projectDir/build/dist/$jpackage.appName/natives"
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            }
+    tasks.named("roast$str").configure {
+        it.finalizedBy("copyJdkBin$str")
+    }
+    tasks.named("package$str").configure {
+        it.mustRunAfter("copyJdkBin$str")
+    }
+    if (str.startsWith("Mac")) {
+        tasks.named("buildMacAppBundle$str").configure {
+            it.mustRunAfter("copyJdkBin$str")
+        }
+        tasks.named("generatePList$str").configure {
+            it.mustRunAfter("copyJdkBin$str")
         }
     }
 }

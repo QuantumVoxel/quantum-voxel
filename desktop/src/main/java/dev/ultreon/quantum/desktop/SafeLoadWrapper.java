@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -28,7 +26,6 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.crash.ApplicationCrash;
-import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.time.format.DateTimeFormatter;
 
@@ -37,9 +34,6 @@ public class SafeLoadWrapper implements ApplicationListener {
     private SpriteBatch batch;
     private String crash;
     private final String[] args;
-    private boolean ended;
-    private Texture texture;
-    private ShapeDrawer shapes;
     private Screen currentScreen = new ScreenAdapter();
     private InputProcessor inputProcessor;
     private TextureRegion whitePixel;
@@ -54,7 +48,6 @@ public class SafeLoadWrapper implements ApplicationListener {
 
         batch = new SpriteBatch();
         whitePixel = createWhitePixel();
-        shapes = new ShapeDrawer(batch, whitePixel);
 
         batch.setTransformMatrix(batch.getTransformMatrix().scl(Gdx.graphics.getBackBufferScale(), Gdx.graphics.getBackBufferScale(), 1));
 
@@ -200,7 +193,6 @@ public class SafeLoadWrapper implements ApplicationListener {
             }
         }
 
-        if (texture != null) texture.dispose();
         batch.dispose();
 
         if (whitePixel != null) whitePixel.getTexture().dispose();
@@ -290,8 +282,6 @@ public class SafeLoadWrapper implements ApplicationListener {
             public void draw(Batch batch, float parentAlpha) {
                 super.draw(batch, 0.3f);
 
-                if (texture != null) batch.draw(texture, 0, 0, stage.getWidth(), stage.getHeight());
-
                 batch.setColor(1, 1, 1, 0.3f);
                 batch.draw(whitePixel, 0, 0, stage.getWidth(), stage.getHeight());
                 batch.setColor(1, 1, 1, 1f);
@@ -336,7 +326,7 @@ public class SafeLoadWrapper implements ApplicationListener {
 
                     @Override
                     public void canceled() {
-
+                        // No need to cancel
                     }
                 });
                 stage.addActor(actor);

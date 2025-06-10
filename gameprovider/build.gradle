@@ -103,8 +103,7 @@ jar {
         attributes 'Implementation-Title': 'QBubbles',
                 'Implementation-Vendor': 'Ultreon Studios',
                 project_version: "1.0-indev1",
-                'Main-Class': 'net.fabricmc.impl.launch.knot.KnotClient',
-                'Multi-Release': 'true'
+                'Main-Class': 'net.fabricmc.impl.launch.knot.KnotClient'
     }
     from(configurations.addToJar.collect {
         zipTree(it).matching {

@@ -7,6 +7,10 @@ ASSETS ARE ALL RIGHTS RESERVED UNLESS STATED OTHERWISE
 
 A voxel game that aims to do stuff differently.
 
+## Download & Play
+You can [open in the Itch.io App](itch://games/2401600) to play it. The link requires [the itch.io app](https://itch.io/app).  
+Downloading & running manually is discouraged due to issues with the game closing. So having a way to force close the game is recommended. (E.g., running from cmd/terminal or running with the launcher)
+
 ## Build From Source
 *Coming Soon* <!--Or maybe not? Who knows lmao-->
 

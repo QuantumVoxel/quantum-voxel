@@ -1,8 +1,6 @@
 package dev.ultreon.quantum.cheerpj;
 
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import dev.ultreon.gameprovider.quantum.AnsiColors;
-import org.lwjgl.Sys;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

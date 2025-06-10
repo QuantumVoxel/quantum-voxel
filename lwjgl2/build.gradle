@@ -150,6 +150,10 @@ dependencies {
         exclude module: 'guava'
     }
 
+    // Add JNA
+    implementation api('net.java.dev.jna:jna:5.15.0')
+    implementation api('net.java.dev.jna:jna-platform:5.15.0')
+
     //noinspection GradleDynamicVersion
     implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
     implementation api('net.fabricmc:tiny-remapper:0.8.7')
@@ -191,9 +195,8 @@ jar {
         //noinspection GroovyAssignabilityCheck
         attributes 'Implementation-Title': 'Quantum Voxel',
                 'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.projectVersion,
-                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher',
-                'Multi-Release': 'true'
+                project_version: project.mavenVersion,
+                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'
     }
 }
 

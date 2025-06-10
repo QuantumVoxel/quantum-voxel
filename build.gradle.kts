@@ -34,7 +34,7 @@ buildscript {
   dependencies {
     classpath("gradle.plugin.org.danilopianini:javadoc.io-linker:0.1.4-700fdb6")
     classpath("com.android.tools.build:gradle:8.9.2")
-    classpath(group = "org.mini2Dx", name = "butler", version = "2.1.0")
+    classpath(group = "org.mini2Dx", name = "butler", version = "2.+")
   }
 }
 
@@ -50,7 +50,7 @@ plugins {
 
 apply(plugin = "org.mini2Dx.butler")
 
-val gameVersion = property("projectVersion")?.toString() ?: throw IllegalStateException("project_version is not set")
+val gameVersion = property("mavenVersion")?.toString() ?: throw IllegalStateException("project_version is not set")
 //val gameVersion = "0.1.0+edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
 val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 version = gameVersion
@@ -816,26 +816,34 @@ extensions.configure<ButlerExtension>("butler") {
   game = "quantum-voxel"
   updateButler = true
   allChannelsPostfix = "-dev"
+
+  butlerInstallDirectory = "$projectDir/build/butler"
 }
 
 val butlerPushWindows = tasks.register<PushTask>("butlerPushWindows") {
-  dependsOn(tasks.build, ":launcher:jpackage")
-  binDirectory = file("$projectDir/launcher/build/dist")
+  dependsOn(tasks.build, ":launcher:packageWinX64")
+  binDirectory = file("$projectDir/launcher/build/construo/winX64/roast")
   channel = "windows"
 }
 
 val butlerPushLinux = tasks.register<PushTask>("butlerPushLinux") {
-  dependsOn(tasks.build, ":launcher:jpackage")
-  binDirectory = file("$projectDir/launcher/build/dist")
+  dependsOn(tasks.build, ":launcher:packageLinuxX64")
+  binDirectory = file("$projectDir/launcher/build/construo/linuxX64/roast")
   channel = "linux"
 }
 
-val butlerPushMac = tasks.register<PushTask>("butlerPushMac") {
-  dependsOn(tasks.build, ":launcher:jpackage")
-  binDirectory = file("$projectDir/launcher/build/dist")
+val butlerPushMacX64 = tasks.register<PushTask>("butlerPushMacX64") {
+  dependsOn(tasks.build, ":launcher:packageMacX64")
+  binDirectory = file("$projectDir/launcher/build/construo/macX64/roast")
   channel = "mac"
 }
 
+val butlerPushMacM1 = tasks.register<PushTask>("butlerPushMacM1") {
+  dependsOn(tasks.build, ":launcher:packageMacM1")
+  binDirectory = file("$projectDir/launcher/build/construo/macM1/roast")
+  channel = "mac-m1"
+}
+
 tasks.register("butlerPushAll") {
-  dependsOn(butlerPushWindows, butlerPushLinux, butlerPushMac)
+  dependsOn(butlerPushWindows, butlerPushLinux, butlerPushMacX64, butlerPushMacM1)
 }

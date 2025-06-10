@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.config.api.props;
 
 import com.badlogic.gdx.utils.JsonValue;
+import org.jetbrains.annotations.NotNull;
 
 public class ShortProperty implements ConfigProperty<Short> {
     private final String name;
@@ -23,7 +24,7 @@ public class ShortProperty implements ConfigProperty<Short> {
     }
 
     @Override
-    public Short getValue() {
+    public @NotNull Short getValue() {
         return value;
     }
 
