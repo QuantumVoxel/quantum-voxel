@@ -7,7 +7,6 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
-import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.model.JsonModel;
 import dev.ultreon.quantum.client.model.model.JsonModelLoader;
@@ -16,14 +15,12 @@ import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.item.BlockItem;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.SanityCheckException;
 import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +32,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
     private final Map<Item, Supplier<ItemModel>> customRegistry = new LinkedHashMap<>(CommonConstants.MAX_BLOCK_REGISTRY);
     private final Set<NamespaceID> TEXTURES = new HashSet<>();
     private Item loadingItem = null;
+    private final Map<Item, ItemModel> baked = new HashMap<>();
 
     public ItemModelRegistry() {
         this.TEXTURES.add(new NamespaceID("misc/breaking1"));
@@ -49,18 +47,16 @@ public class ItemModelRegistry implements ContextAwareReloadable {
         return INSTANCE;
     }
 
-    public @Nullable ItemModel get(Item meta) {
-        Supplier<ItemModel> itemModelSupplier = this.customRegistry.get(meta);
-        if (itemModelSupplier == null) return null;
-        return itemModelSupplier.get();
+    public @Nullable ItemModel get(Item item) {
+        return baked.get(item);
     }
 
-    public void register(Item block, ItemModel model) {
-        this.customRegistry.putIfAbsent(block, () -> model);
+    public void register(Item item, ItemModel model) {
+        this.customRegistry.putIfAbsent(item, () -> model);
     }
 
-    public void register(Item block, CubeModel model) {
-        this.customRegistry.putIfAbsent(block, () -> JsonModel.cubeOf(model));
+    public void register(Item item, CubeModel model) {
+        this.customRegistry.putIfAbsent(item, () -> JsonModel.cubeOf(model));
     }
 
     public void registerCustom(Item item, Supplier<ItemModel> model) {
@@ -69,17 +65,6 @@ public class ItemModelRegistry implements ContextAwareReloadable {
 
     public void register(Supplier<Item> item, Supplier<CubeModel> model) {
         this.customRegistry.put(item.get(), Suppliers.memoize(() -> JsonModel.cubeOf(model.get())));
-    }
-
-    public void registerDefault(Item item) {
-        NamespaceID key = Registries.ITEM.getId(item);
-        if (key == null) throw new SanityCheckException("Fabricated item!");
-        if (item instanceof BlockItem) {
-            this.register(item, new BlockItemModel(item, () -> BlockModelRegistry.get()
-                    .get(((BlockItem) item).getBlock().getDefaultState())));
-            return;
-        }
-        this.register(item, new FlatItemModel(item));
     }
 
     public TextureAtlas stitch(TextureManager textureManager) {
@@ -130,6 +115,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
                 continue;
             }
             QuantumClient.invokeAndWait(() -> model.load(client));
+            this.baked.put(entry.getKey(), model);
         }
     }
 

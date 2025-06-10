@@ -73,9 +73,6 @@ public class MusicManager implements Music.OnCompletionListener {
             music.dispose();
         }
         musicRegistry.clear();
-
-        registerMusic(NamespaceID.of("pixel_dreams"), "ambient");
-        registerMusic(NamespaceID.of("pixel_memories"), "ambient");
     }
 
     /**
