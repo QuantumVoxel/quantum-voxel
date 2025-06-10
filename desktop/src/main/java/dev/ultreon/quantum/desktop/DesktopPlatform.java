@@ -418,30 +418,34 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void nukeThreads() {
-        int secondsPassed = 0;
-        LongSet threadIds = new LongArraySet();
-        while (true) {
-            Set<Thread> threads = Thread.getAllStackTraces().keySet().stream().filter(t -> !t.isDaemon() && !t.isInterrupted() && t.getId() != Thread.currentThread().getId()).collect(Collectors.toSet());
-            for (Thread t : threads) {
-                if (threadIds.add(t.getId())) LOGGER.debug("{}: {}", t.getName(), t.getState());
-                t.interrupt();
-            }
+        try {
+            int secondsPassed = 0;
+            LongSet threadIds = new LongArraySet();
+            while (true) {
+                Set<Thread> threads = Thread.getAllStackTraces().keySet().stream().filter(t -> !t.isDaemon() && !t.isInterrupted() && t.getId() != Thread.currentThread().getId()).collect(Collectors.toSet());
+                for (Thread t : threads) {
+                    if (threadIds.add(t.getId())) LOGGER.debug("{}: {}", t.getName(), t.getState());
+                    t.interrupt();
+                }
 
-            if (threads.isEmpty()) {
-                break;
-            } else {
-                LOGGER.info("Waiting for {} threads to finish...", threads.size());
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
+                if (threads.isEmpty()) {
                     break;
-                }
+                } else {
+                    LOGGER.info("Waiting for {} threads to finish...", threads.size());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
 
-                if (secondsPassed++ > 10) {
-                    LOGGER.warn("Still waiting for {} threads to finish. Terminating...", threads.size());
-                    GamePlatform.get().halt(1);
+                    if (secondsPassed++ > 10) {
+                        LOGGER.warn("Still waiting for {} threads to finish. Terminating...", threads.size());
+                        GamePlatform.get().halt(1);
+                    }
                 }
             }
+        } catch (Throwable t) {
+            GamePlatform.get().halt(2);
         }
     }
 
