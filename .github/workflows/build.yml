@@ -33,22 +33,22 @@ jobs:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ github.token }}
       - name: Upload build for Mac (M1)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Quantum Voxel Build ${{ github.run_number }}
           path: launcher/build/construo/dist/Quantum Voxel-macM1.zip
       - name: Upload build for Mac (x64)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Quantum Voxel Build ${{ github.run_number }}
           path: launcher/build/construo/dist/Quantum Voxel-macX64.zip
       - name: Upload build for Linux (x64)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Quantum Voxel Build ${{ github.run_number }}
           path: launcher/build/construo/dist/Quantum Voxel-linuxX64.zip
       - name: Upload build for Windows (x64)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Quantum Voxel Build ${{ github.run_number }}
           path: launcher/build/construo/dist/Quantum Voxel-winX64.zip
