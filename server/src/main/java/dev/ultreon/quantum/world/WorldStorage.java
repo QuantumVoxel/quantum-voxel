@@ -61,6 +61,7 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     public void write(DataType<?> data, String path) throws IOException {
+        if (!directory.exists()) directory.mkdirs();
         DataIo.write(data, directory.child(path).write(false));
     }
 
@@ -174,7 +175,7 @@ public final class WorldStorage {
             String string = getDirectory().name();
 
             if (string == null) {
-                md5Name = Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8)).replace("/", "_").replace("+", "-").replace("=", ".");
+                md5Name = Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8)).replace("/", "_").replace("+", "-").replace("=", "");
                 return md5Name;
             }
 
