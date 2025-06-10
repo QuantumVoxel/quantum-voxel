@@ -218,7 +218,7 @@ public final class WorldStorage {
      * @return a byte array containing the MD5 hash of the input
      */
     public static String hashSHA256(byte @NotNull [] input) {
-        return Base64.getEncoder().encodeToString(input).replace("/", "_").replace("+", "-").replace("=", ".");
+        return Base64.getEncoder().encodeToString(input).replace("/", "_").replace("+", "-").replace("=", "");
     }
 
     /**
