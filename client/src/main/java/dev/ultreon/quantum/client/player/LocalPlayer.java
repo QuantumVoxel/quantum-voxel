@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.player;
 import java.util.*;
 import java.util.stream.Stream;
 
+import com.badlogic.gdx.math.Vector3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,13 +70,13 @@ import dev.ultreon.quantum.world.vec.ChunkVecSpace;
  */
 public class LocalPlayer extends ClientPlayer {
 
+    private double swimSpeed = 0.06;
     private final QuantumClient client = QuantumClient.get();
     public boolean movedLastFrame;
     private ClientWorldAccess clientWorld;
     private int oldSelected;
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
-    private final Vec3d tmp = new Vec3d();
     private final Vec2i tmp2I = new Vec2i();
     private final Set<ChunkVec> chunksToLoad = Collections.synchronizedSet(new HashSet<>());
     private long lastRefresh;
@@ -90,6 +91,7 @@ public class LocalPlayer extends ClientPlayer {
      */
     private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
     private boolean isLoading;
+    private final Vec3d vel = new Vec3d();
 
     /**
      * Constructs a new LocalPlayer.
@@ -120,6 +122,36 @@ public class LocalPlayer extends ClientPlayer {
             return;
         }
 
+        Vec3d tmp = new Vec3d();
+        Vector3 velocity = this.client.playerInput.getVelocity();
+        this.vel.set(velocity.x, velocity.y, velocity.z);
+
+        // Water movement
+        if (isAffectedByFluid() && this.client.playerInput.up) {
+            tmp.set(0, 1, 0).nor().scl(getSwimSpeed());
+            this.vel.add(tmp);
+        }
+
+        // If not affected by fluid, reset the flag and set the vertical velocity
+        if (wasInFluid && !isAffectedByFluid()) {
+            wasInFluid = false;
+            tmp.set(0, 0.3, 0);
+            this.vel.add(tmp);
+            fallDistance = 0;
+        }
+
+        // Flight movement
+        if (isFlying() && this.client.playerInput.up) {
+            tmp.set(0, 1, 0).nor().scl(0.2f);
+            this.vel.add(tmp);
+        }
+
+        if (isFlying() && this.client.playerInput.down) {
+            tmp.set(0, 1, 0).nor().scl(0.2f);
+            this.vel.add(tmp);
+        }
+
+        setVelocity(getVelocity().add(this.vel));
         // Determine if the player is jumping based on input
         this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched());
 
@@ -679,5 +711,13 @@ public class LocalPlayer extends ClientPlayer {
         if (currentMenu != null && currentMenu.getType().getId().equals(menuId)) {
             currentMenu.setAll(stack);
         }
+    }
+
+    public double getSwimSpeed() {
+        return swimSpeed;
+    }
+
+    public void setSwimSpeed(double swimSpeed) {
+        this.swimSpeed = swimSpeed;
     }
 }

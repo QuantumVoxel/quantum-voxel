@@ -110,9 +110,6 @@ public abstract class GameInput implements Disposable {
         this.update(deltaTime);
 
         LocalPlayer player = this.client.player;
-        if (player != null) {
-            this.updateMotion(deltaTime, player, 1.0F);
-        }
     }
 
     public final void tick() {
@@ -123,42 +120,6 @@ public abstract class GameInput implements Disposable {
             PlayerInput input = this.client.playerInput;
             input.tick(player, (float) player.getSpeed());
         }
-    }
-
-    public void updateMotion(float deltaTime, Player player, float speed) {
-        Vec3d tmp = new Vec3d();
-        Vector3 velocity = this.client.playerInput.getVelocity();
-        this.vel.set(velocity.x, velocity.y, velocity.z);
-
-        // Water movement
-        if (player.isInWater() && this.client.playerInput.up) {
-            tmp.set(0, 1, 0).nor().scl(speed);
-            this.vel.add(tmp);
-
-
-            // If not affected by fluid, reset the flag and set the vertical velocity
-            if (player.wasInFluid && !player.isAffectedByFluid()) {
-                player.wasInFluid = false;
-                player.jump();
-            }
-        }
-
-        // Flight movement
-        if (player.isFlying() && this.client.playerInput.up) {
-            tmp.set(0, 1, 0).nor().scl(speed);
-            this.vel.add(tmp);
-        }
-
-        if (player.isFlying() && this.client.playerInput.down) {
-            tmp.set(0, 1, 0).nor().scl(-speed);
-            this.vel.add(tmp);
-        }
-
-        this.vel.x *= deltaTime * QuantumServer.TPS;
-        this.vel.y *= deltaTime * QuantumServer.TPS;
-        this.vel.z *= deltaTime * QuantumServer.TPS;
-
-        player.setVelocity(player.getVelocity().add(this.vel));
     }
 
     public abstract void update(float deltaTime);

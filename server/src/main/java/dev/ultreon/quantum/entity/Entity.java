@@ -111,7 +111,7 @@ public abstract class Entity extends GameObject implements CommandSender {
      * Loads the entire entity data from a MapType object.
      *
      * @param world the world to load the entity in
-     * @param data the MapType object to load the data from
+     * @param data  the MapType object to load the data from
      * @return the loaded entity
      */
     public static @NotNull Entity loadFrom(World world, MapType data) {
@@ -207,7 +207,7 @@ public abstract class Entity extends GameObject implements CommandSender {
      * Marks the entity for removal.
      * When this is called the entity will be removed from the world in the next tick.
      * Removing players is not recommended, and should be avoided as it will cause the
-     *    player connection to bug out.
+     * player connection to bug out.
      *
      * @see #isMarkedForRemoval()
      * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities#entity-removal">Entity Removal</a>
@@ -218,6 +218,7 @@ public abstract class Entity extends GameObject implements CommandSender {
 
     /**
      * Returns whether the entity is marked for removal.
+     *
      * @return {@code true} if the entity is marked for removal, {@code false} otherwise
      * @see #markRemoved()
      * @see <a href="https://github.com/Ultreon/quantum-voxel/wiki/Entities#entity-removal">Entity Removal</a>
@@ -381,10 +382,10 @@ public abstract class Entity extends GameObject implements CommandSender {
     /**
      * Moves the entity with collision detection and response.
      *
-     * @param ext Bounding box of the entity
-     * @param dx Change in x-coordinate
-     * @param dy Change in y-coordinate
-     * @param dz Change in z-coordinate
+     * @param ext   Bounding box of the entity
+     * @param dx    Change in x-coordinate
+     * @param dy    Change in y-coordinate
+     * @param dz    Change in z-coordinate
      * @param oldDx Original change in x-coordinate
      * @param oldDy Original change in y-coordinate
      * @param oldDz Original change in z-coordinate
@@ -456,7 +457,13 @@ public abstract class Entity extends GameObject implements CommandSender {
         }
 
         // Handle collision responses and update fall distance
-        if (this.onGround && !this.wasOnGround) {
+        if (this.isAffectedByFluid()) {
+            wasInFluid = true;
+            fallDistance = 0;
+        } else if (wasInFluid && !isAffectedByFluid()) {
+            wasInFluid = false;
+            fallDistance = 0;
+        } else if (this.onGround && !this.wasOnGround) {
             this.hitGround();
             this.fallDistance = 0.0F;
             this.velocityY = 0.0f;
@@ -526,7 +533,7 @@ public abstract class Entity extends GameObject implements CommandSender {
     /**
      * Calculates and returns a bounding box based on the provided position and size.
      *
-     * @param pos The central position of the bounding box as a {@code Vec3d}.
+     * @param pos  The central position of the bounding box as a {@code Vec3d}.
      * @param size The size of the entity, which includes width and height, as an {@code EntitySize}.
      * @return A {@code BoundingBox} object that represents the boundary defined by the dimensions centered on the given position.
      */
@@ -794,7 +801,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         if (typeId == null) return "NULL";
 
         // Generate a display name based on the entity's type ID
-        return LanguageBootstrap.translate(String.format("%s.entity.%s.name", 
+        return LanguageBootstrap.translate(String.format("%s.entity.%s.name",
                 typeId.getDomain(),
                 typeId.getPath().replace('/', '.')
         ));
@@ -830,7 +837,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         if (typeId == null) return Translations.NULL_OBJECT;
 
         // Generate a display name based on the entity's type ID
-        return TextObject.translation(String.format("%s.entity.%s.name", 
+        return TextObject.translation(String.format("%s.entity.%s.name",
                 typeId.getDomain(),
                 typeId.getPath().replace('/', '.')
         ));
