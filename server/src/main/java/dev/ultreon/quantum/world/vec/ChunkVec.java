@@ -216,10 +216,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         int cy = this.y * CS;
         int cz = this.z * CS;
 
-        if (this.x < 0) cx -= CS;
-        if (this.y < 0) cy -= CS;
-        if (this.z < 0) cz -= CS;
-
         return new BlockVec(cx, cy, cz, this.space.block());
     }
 
@@ -232,10 +228,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         int cx = this.x * CS;
         int cy = this.y * CS;
         int cz = this.z * CS;
-
-        if (this.x < 0) cx += CS;
-        if (this.y < 0) cy += CS;
-        if (this.z < 0) cz += CS;
 
         return new BlockVec(cx + CS - 1, cy + CS - 1, cz + CS - 1, this.space.block());
     }
@@ -251,33 +243,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @throws IllegalArgumentException if the region is null and the current space is in region space
      */
     public BlockVec blockInWorldSpace(int x, int y, int z, @Nullable RegionVec region) {
-        switch (this.space) {
-            case REGION:
-                if (region == null)
-                    throw new IllegalArgumentException("Region cannot be null when converting from region space");
-
-                int rx = this.x * CS;
-                int ry = this.y * CS;
-                int rz = this.z * CS;
-
-                rx = rx % (REGION_SIZE * CS);
-                ry = ry % (REGION_SIZE * CS);
-                rz = rz % (REGION_SIZE * CS);
-
-                rx += region.x * REGION_SIZE * CS;
-                ry += region.y * REGION_SIZE * CS;
-                rz += region.z * REGION_SIZE * CS;
-
-                return new BlockVec(rx + x, ry + y, rz + z, BlockVecSpace.WORLD);
-            case WORLD:
-                int cx = this.x * CS;
-                int cy = this.y * CS;
-                int cz = this.z * CS;
-
-                return new BlockVec(cx + x, cy + y, cz + z, BlockVecSpace.WORLD);
-            default:
-                throw new IllegalArgumentException();
-        }
+        var start = start();
+        return new BlockVec(start.x + x, start.y + y, start.z + z, this.space.block());
     }
 
     /**
