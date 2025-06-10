@@ -406,6 +406,20 @@ public class TextEntry extends Widget {
     }
 
     public void revalidateCursor() {
+        if (this.selectFrom > this.value.length()) {
+            deselect();
+        } else if (this.selectTo > this.value.length()) {
+            this.selectTo = this.value.length();
+            if (selectFrom == selectTo) {
+                deselect();
+            }
+        }
+
+        if (cursorIdx > value.length()) {
+            cursorIdx = value.length();
+            deselect();
+        }
+
         int selFrom = Math.min(this.selectFrom, this.selectTo);
         int selTo = Math.max(this.selectFrom, this.selectTo);
 
@@ -414,6 +428,7 @@ public class TextEntry extends Widget {
 
         if (this.value.isEmpty()) {
             this.cursorX = 0;
+            this.cursorIdx = 0;
             return;
         }
 

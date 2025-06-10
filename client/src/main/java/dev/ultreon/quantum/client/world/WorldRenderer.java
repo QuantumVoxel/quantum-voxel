@@ -391,6 +391,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         var ref = new ChunkRenderRef();
         Array<ChunkVec> positions = new Array<>();
 
+        batch.getBuffer(RenderPass.OPAQUE);
+        batch.getBuffer(RenderPass.WATER);
+        batch.getBuffer(RenderPass.TRANSPARENT);
+        batch.getBuffer(RenderPass.CUTOUT);
+
         // Collect the chunks to render.
         try (var ignored = QuantumClient.PROFILER.start("chunks")) {
             this.collectChunks(batch, chunks, positions, player, ref);

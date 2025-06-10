@@ -674,19 +674,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     /**
      * Returns an instance of IClipboard.
-     * If the game platform is macOS, a {@link NullClipboard} is returned.
-     * Otherwise, a {@link DefaultClipboard} is returned.
      *
      * @return An instance of IClipboard.
      */
     private IClipboard createClipboard() {
-        // Check if the game platform is macOS
-        if (GamePlatform.get().isMacOSX()) {
-            // If it is, return a NullClipboard
-            return new NullClipboard();
-        }
-
-        // Otherwise, return a DefaultClipboard
         return new DefaultClipboard();
     }
 

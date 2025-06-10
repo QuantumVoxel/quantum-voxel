@@ -84,6 +84,10 @@ public class RenderPass {
         return new VertexAttributes(attributes);
     }
 
+    public boolean doesMerging() {
+        return true;
+    }
+
     public static class Builder {
         private final VertexAttribute[] attributes;
         private int mode = GL_TRIANGLES;
@@ -711,17 +715,25 @@ public class RenderPass {
             .depthTest(false)
             .build();
 
-    public static final RenderPass OPAQUE = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("opaque")
-            .shader(Shaders.WORLD)
-            .depthTest()
-            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
-            .build();
-
     public static final RenderPass TRANSPARENT = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
             .name("transparent")
             .shader(Shaders.TRANSPARENT)
             .blending()
+            .depthTest()
+            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
+            .build();
+
+    public static final RenderPass WATER = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+            .name("water")
+            .shader(Shaders.WATER)
+            .blending()
+            .depthTest()
+            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
+            .build();
+
+    public static final RenderPass OPAQUE = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+            .name("opaque")
+            .shader(Shaders.WORLD)
             .depthTest()
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .build();
@@ -747,14 +759,6 @@ public class RenderPass {
             .shader(Shaders.WORLD)
             .blending()
             .depthTest()
-            .build();
-
-    public static final RenderPass WATER = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("water")
-            .shader(Shaders.WATER)
-            .blending()
-            .depthTest()
-            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .build();
 
     public static final RenderPass CUTOUT = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))

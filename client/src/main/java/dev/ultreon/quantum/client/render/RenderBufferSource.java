@@ -13,6 +13,7 @@ public class RenderBufferSource extends GameObject implements Disposable {
 
     private final ObjectMap<RenderPass, RenderBuffer> buffers = new ObjectMap<>();
     private final ObjectMap<RenderPass, RenderBuffer> backBuffers = new ObjectMap<>();
+    private final Array<RenderPass> buffersSorted = new Array<>(RenderPass.class);
     private @Nullable GameCamera camera;
     private boolean started;
     public long timeSpan;
@@ -29,9 +30,10 @@ public class RenderBufferSource extends GameObject implements Disposable {
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void flush() {
         long start = System.nanoTime() / 1000;
-        for (RenderBuffer pass : this.buffers.values()) {
-            if (pass == null || !pass.isStarted()) continue;
-            pass.flush();
+        for (RenderPass pass : this.buffersSorted.toArray(RenderPass.class)) {
+            RenderBuffer buffer = buffers.get(pass);
+            if (buffer == null || !buffer.isStarted()) continue;
+            buffer.flush();
         }
         this.timeSpan = System.nanoTime() / 1000 - start;
     }
@@ -45,12 +47,13 @@ public class RenderBufferSource extends GameObject implements Disposable {
                 buffer = backBuffers.get(pass);
                 backBuffers.remove(pass);
             } else {
-                buffers.put(pass, buffer = new RenderBuffer(pass));
+                buffer = new RenderBuffer(pass);
             }
         }
 
         buffer.begin(camera);
         buffers.put(pass, buffer);
+        buffersSorted.add(pass);
         if (!this.getChildren().contains(buffer, true))
             this.add("Source " + pass.name(), buffer);
         return buffer;
@@ -59,16 +62,16 @@ public class RenderBufferSource extends GameObject implements Disposable {
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void end() {
         long start = System.nanoTime() / 1000;
-        for (ObjectMap.Entry<RenderPass, RenderBuffer> entry : this.buffers.entries()) {
-            if (entry == null) continue;
-            RenderPass pass = entry.key;
-            RenderBuffer buffer = entry.value;
+        for (RenderPass pass : this.buffersSorted) {
+            RenderBuffer buffer = buffers.get(pass);
+            if (buffer == null || !buffer.isStarted()) continue;
             buffer.flush();
             buffer.end();
             this.backBuffers.put(pass, buffer);
         }
 
         this.buffers.clear();
+        this.buffersSorted.clear();
 
         this.camera = null;
         this.started = false;

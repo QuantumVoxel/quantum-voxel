@@ -130,7 +130,7 @@ public class RenderBuffer extends GameObject implements Disposable {
 
     public void flush() {
         long startTime = System.nanoTime() / 1000;
-        if (!started) throw new IllegalStateException("RenderBuffer not started");
+        if (!started) throw new IllegalStateException("RenderBuffer not started: " + this.name);
         this.modelBatch.flush();
         this.timeSpan = System.nanoTime() / 1000 - startTime;
         this.lastRenderCount = this.renderCount;

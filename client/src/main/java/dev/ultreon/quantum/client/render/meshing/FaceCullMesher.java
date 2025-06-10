@@ -2,6 +2,8 @@ package dev.ultreon.quantum.client.render.meshing;
 
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
+import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.AOUtils;
 import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -56,17 +58,25 @@ public class FaceCullMesher implements Mesher {
             );
 
             model.bakeInto(
-                    meshPartBuilder.get(model.getRenderPass()), x, y, z, FaceCull.of(
-                            !top.isTransparent() && top.hasCollider(),
-                            !bottom.isTransparent() && bottom.hasCollider(),
-                            !front.isTransparent() && front.hasCollider(),
-                            !right.isTransparent() && right.hasCollider(),
-                            !back.isTransparent() && back.hasCollider(),
-                            !left.isTransparent() && left.hasCollider()
+                    meshPartBuilder.get(BlockRenderPassRegistry.get(block)), x, y, z, FaceCull.of(
+                            shouldMerge(block, top),
+                            shouldMerge(block, bottom),
+                            shouldMerge(block, front),
+                            shouldMerge(block, right),
+                            shouldMerge(block, back),
+                            shouldMerge(block, left)
                     ), AOUtils.calculate(chunk, x, y, z), light);
             return true;
         }
         return false;
+    }
+
+    private static boolean shouldMerge(BlockState block, BlockState other) {
+        RenderPass renderPass = BlockRenderPassRegistry.get(block);
+        return renderPass == BlockRenderPassRegistry.get(other)
+                && !other.isAir()
+                && block.isTransparent() == other.isTransparent()
+                && renderPass.doesMerging();
     }
 
 }

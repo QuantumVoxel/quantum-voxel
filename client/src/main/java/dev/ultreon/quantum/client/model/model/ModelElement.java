@@ -65,7 +65,7 @@ public final class ModelElement {
         for (var $ : blockFaceFaceElementMap.entrySet()) {
             final var direction = $.getKey();
             final var faceElement = $.getValue();
-            if (FaceCull.culls(faceElement.cullface, cull)) continue;
+            if (faceElement.cullface == direction && FaceCull.culls(faceElement.cullface, cull)) continue;
             final var texRef = faceElement.texture;
             final @Nullable NamespaceID texture = Objects.equals(texRef, "#missing") ? NamespaceID.of("blocks/error")
                     : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))

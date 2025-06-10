@@ -16,8 +16,10 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
+import it.unimi.dsi.fastutil.longs.LongHash;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static dev.ultreon.quantum.CommonConstants.RANDOM;
 
@@ -27,11 +29,12 @@ public class WorldCreationScreen extends Screen {
     private IconButton reloadButton;
     private TextButton createButton;
     private String worldName = "";
-    private final long seed = RANDOM.nextLong();
+    private long seed = RANDOM.nextLong();
     private final GameMode gameMode = GameMode.SURVIVAL;
     private Label titleLabel;
     private Platform platform;
     private TextButton cancelButton;
+    private TextEntry seedEntry;
 
     public WorldCreationScreen() {
         super(TextObject.translation("quantum.screen.world_creation.title"));
@@ -47,12 +50,16 @@ public class WorldCreationScreen extends Screen {
         titleLabel.text().set(getTitle());
         titleLabel.scale().set(2);
 
-
         platform = add(Platform.create());
 
         worldNameEntry = add(TextEntry.create()
                 .withCallback(this::updateWorldName)
                 .withValue(worldName)
+                .withHint(TextObject.translation("quantum.screen.world_creation.name")));
+
+        seedEntry = add(TextEntry.create()
+                .withCallback(this::setSeed)
+                .withValue(String.valueOf(seed))
                 .withHint(TextObject.translation("quantum.screen.world_creation.name")));
 
         reloadButton = add(IconButton.of(GenericIcon.RELOAD))
@@ -72,15 +79,42 @@ public class WorldCreationScreen extends Screen {
                 .withCallback(this::onBack));
     }
 
+    private static long murmurHash64(String input) {
+        byte[] data = input.getBytes(StandardCharsets.UTF_8);
+        long h = 0;
+
+        for (byte b : data) {
+            h ^= b;
+            h *= 0x5bd1e9955bd1e995L;
+            h ^= (h >>> 47);
+        }
+
+        return h;
+    }
+
+    private void setSeed(TextEntry textEntry) {
+        String value = textEntry.getValue();
+        if (value.isEmpty()) {
+            seed = RANDOM.nextLong();
+            return;
+        }
+        try {
+            seed = Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            seed = murmurHash64(value);
+        }
+    }
+
     @Override
     public void resized(int width, int height) {
         titleLabel.setPos(getWidth() / 2, getHeight() / 2 - 60);
-        platform.setBounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 240, 60);
+        platform.setBounds(getWidth() / 2 - 105, getHeight() / 2 - 27, 240, 85);
 
         worldNameEntry.setPos(getWidth() / 2 - 100, getHeight() / 2 - 20);
+        seedEntry.setPos(getWidth() / 2 - 100, getHeight() / 2 + 5);
         reloadButton.setPos(getWidth() / 2 + 105, getHeight() / 2 - 24);
-        createButton.setPos(getWidth() / 2 - 100, getHeight() / 2 + 5);
-        cancelButton.setPos(getWidth() / 2 + 5, getHeight() / 2 + 5);
+        createButton.setPos(getWidth() / 2 - 100, getHeight() / 2 + 30);
+        cancelButton.setPos(getWidth() / 2 + 5, getHeight() / 2 + 30);
     }
 
     private void regenerateName(IconButton iconButton) {
@@ -147,5 +181,9 @@ public class WorldCreationScreen extends Screen {
 
     public String getWorldName() {
         return worldName;
+    }
+
+    public TextEntry getSeedEntry() {
+        return seedEntry;
     }
 }
