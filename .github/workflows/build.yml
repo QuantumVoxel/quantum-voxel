@@ -33,7 +33,7 @@ jobs:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ github.token }}
       - name: Capture the build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Quantum Voxel Build ${{ github.run_number }}
           path: launcher/build/dist/package.zip
