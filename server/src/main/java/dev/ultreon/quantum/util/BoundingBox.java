@@ -23,7 +23,7 @@ import java.util.List;
  * Encapsulates an axis aligned bounding box represented by a minimum and a maximum Vector. Additionally you can query for the
  * bounding box's center, dimensions and corner points.
  *
- * @author badlogicgames@gmail.com, Xoppa
+ * @author badlogicgames@gmail.com, Xoppa, Qubix (conversion to double and userdata field)]
  */
 @SuppressWarnings({"ManualMinMaxCalculation", "UnusedReturnValue", "GrazieInspection", "SpellCheckingInspection", "BooleanMethodIsAlwaysInverted"})
 public class BoundingBox implements Serializable {
@@ -40,6 +40,9 @@ public class BoundingBox implements Serializable {
 
     private final Vec3d cnt = new Vec3d();
     private final Vec3d dim = new Vec3d();
+
+    public Object userData;
+
 
     // NOTE: Added 6-parameter constructor for use in Block#getBoundingBox - by XyperCode (Ultreon)
     public BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {

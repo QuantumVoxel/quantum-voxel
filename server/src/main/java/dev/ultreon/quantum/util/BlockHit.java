@@ -7,7 +7,6 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Objects;
 
@@ -19,7 +18,7 @@ public class BlockHit implements Hit {
     protected float distanceMax = 5.0F;
     protected Vec position = new Vec();
     protected Vec normal = new Vec();
-    protected BlockVec vec = new BlockVec(BlockVecSpace.WORLD);
+    protected BlockVec vec = new BlockVec();
     protected BlockState blockMeta = Blocks.AIR.getDefaultState();
     protected Block block = Blocks.AIR;
     protected boolean collide;

@@ -6,6 +6,7 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import lombok.Getter;
@@ -72,5 +73,9 @@ public abstract class BlockEntity implements CapabilityHolder {
 
     public BlockEntityType<?> getType() {
         return type;
+    }
+
+    public World getWorld() {
+        return world;
     }
 }

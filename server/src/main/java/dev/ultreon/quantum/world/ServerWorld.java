@@ -215,7 +215,7 @@ public class ServerWorld extends World implements Audience {
     public boolean set(int x, int y, int z, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         boolean isBlockSet = super.set(x, y, z, block, flags);
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
         block.onPlace(this, blockVec);
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
@@ -246,7 +246,7 @@ public class ServerWorld extends World implements Audience {
         int y = pos.getIntY();
         int z = pos.getIntZ();
         boolean isBlockSet = super.set(pos, block, flags);
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
         block.onPlace(this, blockVec);
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
@@ -282,10 +282,6 @@ public class ServerWorld extends World implements Audience {
         if (blockState.isAir()) {
             QuantumServer.LOGGER.warn("Tried to break air block at {}!", breaking);
             return false;
-        }
-
-        if (breaking.getSpace() != BlockVecSpace.WORLD) {
-            throw new IllegalArgumentException("Tried to destroy block in block vector space " + breaking.getSpace() + "!");
         }
 
         boolean broken = super.destroyBlock(breaking, breaker);
@@ -324,14 +320,14 @@ public class ServerWorld extends World implements Audience {
     }
 
     private void sync(int x, int y, int z, BlockState block) {
-        this.sendAllTracking(x, y, z, new S2CBlockSetPacket(new BlockVec(x, y, z, BlockVecSpace.WORLD), block));
+        this.sendAllTracking(x, y, z, new S2CBlockSetPacket(new BlockVec(x, y, z), block));
     }
 
     public void sendAllTracking(int x, int y, int z, Packet<? extends ClientPacketHandler> packet) {
         for (var player : this.server.getPlayers()) {
             if (player.getWorld() != this) continue;
 
-            if (player.isChunkActive(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk())) {
+            if (player.isChunkActive(new BlockVec(x, y, z).chunk())) {
                 player.connection.send(packet);
             }
         }
@@ -343,7 +339,7 @@ public class ServerWorld extends World implements Audience {
 
             if (player.getWorld() != this) continue;
 
-            if (player.isChunkActive(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk())) {
+            if (player.isChunkActive(new BlockVec(x, y, z).chunk())) {
                 player.connection.send(packet);
             }
         }
@@ -661,7 +657,7 @@ public class ServerWorld extends World implements Audience {
 
     @Override
     public @Nullable ServerChunk getChunkAt(int x, int y, int z) {
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
 
         if (this.isOutOfWorldBounds(x, y, z)) return null;
 
@@ -785,10 +781,10 @@ public class ServerWorld extends World implements Audience {
     public BlockVec getSpawnPoint() {
         int height = getHeight(spawnX, spawnZ, HeightmapType.MOTION_BLOCKING) + 1;
         if (height != 256) {
-            return new BlockVec(spawnX, height, spawnZ, BlockVecSpace.WORLD);
+            return new BlockVec(spawnX, height, spawnZ);
         }
 
-        return new BlockVec(spawnX, 256, spawnZ, BlockVecSpace.WORLD);
+        return new BlockVec(spawnX, 256, spawnZ);
     }
 
     /**

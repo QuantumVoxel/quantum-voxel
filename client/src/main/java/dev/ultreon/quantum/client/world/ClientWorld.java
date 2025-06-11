@@ -27,7 +27,6 @@ import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import dev.ultreon.quantum.ubo.types.MapType;
@@ -355,7 +354,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         boolean isBlockSet = super.set(x, y, z, block, flags);
 
         // Get the chunk containing the block
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
         ClientChunk chunk = this.getChunkAt(blockVec);
 
         // If the chunk exists, set the light source
@@ -474,8 +473,8 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
         // Start from the top of the world and move downward
         for (int y = 256 - 1; y >= 0; y--) {
-            BlockVec localBlockVec = new BlockVec(startX, y, startZ, BlockVecSpace.WORLD);
-            int lightReduction = chunk.get(new BlockVec(startX, y, startZ, BlockVecSpace.WORLD).chunkLocal()).getLightReduction();
+            BlockVec localBlockVec = new BlockVec(startX, y, startZ);
+            int lightReduction = chunk.get(new BlockVec(startX, y, startZ).chunkLocal()).getLightReduction();
             if (lightReduction < 15) {
                 int intensity = 15 - lightReduction;
                 setSunlight(localBlockVec.x, localBlockVec.y, localBlockVec.z, intensity); // Assuming maximum sunlight intensity is 15

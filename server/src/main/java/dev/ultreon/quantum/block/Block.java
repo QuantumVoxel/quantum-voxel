@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
@@ -395,6 +396,14 @@ public class Block implements BlockLike {
     @Override
     public Block getBlock() {
         return this;
+    }
+
+    public void onWalkOn(BlockState state, Entity entity, BlockCollision collision, BoundingBox box, double pressure) {
+        // To be implemented.
+    }
+
+    public void onTouch(BlockState blockState, Entity entity, BlockCollision collision, BoundingBox box, double pressure) {
+        // To be implemented.
     }
 
     /**

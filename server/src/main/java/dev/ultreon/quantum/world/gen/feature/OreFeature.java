@@ -12,7 +12,6 @@ import dev.ultreon.quantum.world.gen.TerrainFeature;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import kotlin.ranges.IntRange;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +50,7 @@ public class OreFeature extends TerrainFeature {
             }
 
             Direction dir = Direction.random(random);
-            BlockVec vec = new BlockVec(0, 0, 0, BlockVecSpace.WORLD);
+            BlockVec vec = new BlockVec(0, 0, 0);
             for (int i = 0; i < size; i++) {
                 vec = vec.relative(dir);
                 if (!setter.isAir(x, y, z))

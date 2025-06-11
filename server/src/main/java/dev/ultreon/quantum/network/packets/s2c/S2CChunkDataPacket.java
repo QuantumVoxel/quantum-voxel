@@ -18,7 +18,6 @@ import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -106,7 +105,7 @@ public final class S2CChunkDataPacket implements Packet<InGameClientPacketHandle
             int x = (blkEntityVec >> 16) & 0xFF;
             int y = (blkEntityVec >> 8) & 0xFF;
             int z = blkEntityVec & 0xFF;
-            blockEntitiesByLocation.get().put(new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byRawId(this.blockEntities.getInt(i)));
+            blockEntitiesByLocation.get().put(new BlockVec(x, y, z).chunkLocal(), Registries.BLOCK_ENTITY_TYPE.byRawId(this.blockEntities.getInt(i)));
         }
 
         handler.onChunkData(this.pos, this.info, this.storage, this.biomeStorage, blockEntitiesByLocation.get());

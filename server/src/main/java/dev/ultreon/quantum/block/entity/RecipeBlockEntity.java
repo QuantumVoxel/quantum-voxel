@@ -72,4 +72,8 @@ public abstract class RecipeBlockEntity<C extends ContainerMenu, T extends Recip
     }
 
     protected abstract void runTask();
+
+    public T getRecipe() {
+        return recipe;
+    }
 }

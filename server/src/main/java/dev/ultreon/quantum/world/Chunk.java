@@ -15,7 +15,6 @@ import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.ApiStatus;
@@ -149,7 +148,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         if (vec.getSpace() != ChunkVecSpace.WORLD)
             throw new IllegalArgumentException("ChunkVec must be in world space");
 
-        this.offset = new BlockVec(vec.getIntX() * CS, vec.getIntY() * CS, vec.getIntZ() * CS, BlockVecSpace.WORLD);
+        this.offset = new BlockVec(vec.getIntX() * CS, vec.getIntY() * CS, vec.getIntZ() * CS);
 
         this.vec = vec;
         this.storage = storage;
@@ -289,7 +288,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         synchronized (this){
             int index = this.getIndex(x, y, z);
 
-            this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+            this.breaking.remove(new BlockVec(x, y, z));
             this.storage.set(index, block);
 
 //            // Update the world surface heightmap
@@ -375,7 +374,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     }
 
     float getBreakProgress(float x, float y, float z) {
-        BlockVec pos = new BlockVec((int) x, (int) y, (int) z, BlockVecSpace.CHUNK);
+        BlockVec pos = new BlockVec((int) x, (int) y, (int) z);
         Float v = this.breaking.get(pos);
         if (v != null) {
             return v;
@@ -384,16 +383,16 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     }
 
     public void startBreaking(int x, int y, int z) {
-        this.breaking.put(new BlockVec(x, y, z, BlockVecSpace.CHUNK), 0.0F);
+        this.breaking.put(new BlockVec(x, y, z), 0.0F);
     }
 
     public boolean stopBreaking(int x, int y, int z) {
-        Float remove = this.breaking.remove(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+        Float remove = this.breaking.remove(new BlockVec(x, y, z));
         return remove != null && remove > 0.5F;
     }
 
     public BreakResult continueBreaking(int x, int y, int z, float amount) {
-        BlockVec pos = new BlockVec(x, y, z, BlockVecSpace.CHUNK);
+        BlockVec pos = new BlockVec(x, y, z);
         if (!this.breaking.containsKey(pos)) return BreakResult.FAILED;
         Float v = this.breaking.computeIfPresent(pos, (pos1, cur) -> Mth.clamp(cur + amount, 0, 1));
         if (v != null && v == 1.0F) {
@@ -661,7 +660,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
-        return this.blockEntities.get(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+        return this.blockEntities.get(new BlockVec(x, y, z));
     }
 
     public BlockEntity getBlockEntity(Vec3i localBlockVec) {

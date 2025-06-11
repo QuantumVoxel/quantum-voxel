@@ -20,7 +20,6 @@ import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
@@ -123,7 +122,7 @@ public final class ServerChunk extends Chunk {
                 ListType<MapType> blockEntities = chunkData.getList("BlockEntities");
 
                 for (MapType data : blockEntities.getValue()) {
-                    BlockVec blockVec = new BlockVec(data.getInt("x"), data.getInt("y"), data.getInt("z"), BlockVecSpace.WORLD);
+                    BlockVec blockVec = new BlockVec(data.getInt("x"), data.getInt("y"), data.getInt("z"));
                     BlockEntity blockEntity = BlockEntity.fullyLoad(world, blockVec, data);
                     if (blockEntity != null)
                         this.setBlockEntity(blockVec.chunkLocal(), blockEntity);
@@ -258,7 +257,7 @@ public final class ServerChunk extends Chunk {
         if (!blockState.doesRandomTick())
             return;
 
-        blockState.randomTick(this, vec.blockInWorldSpace(new BlockVec(randX, randY, randZ, BlockVecSpace.CHUNK)));
+        blockState.randomTick(this, vec.blockInWorldSpace(new BlockVec(randX, randY, randZ)));
     }
 
     public boolean isEmpty() {

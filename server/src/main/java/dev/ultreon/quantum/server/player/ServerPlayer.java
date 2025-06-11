@@ -33,7 +33,6 @@ import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.chat.Chat;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.ubo.types.DoubleArrayType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.GameMode;
@@ -41,7 +40,6 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -601,16 +599,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param z the z-coordinate received from the client
      */
     public void handlePlayerMove(double x, double y, double z) {
-        ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
+        ChunkVec chunkVec = new BlockVec(x, y, z).chunk();
         ServerChunk chunk = this.world.getChunkNoLoad(chunkVec);
         if (chunk == null) {
             return;
         }
-        if (!chunk.getTracker().isTracking(this)) {
-            if (!isSpectator()) QuantumServer.LOGGER.warn("Player moved into an untracked chunk: {}", this.getName());
-            return;
-        }
-
 
         this.ox = this.x;
         this.oy = this.y;
@@ -628,13 +621,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param z the z-coordinate received from the client
      */
     public void handlePlayerMove(double x, double y, double z, float xHeadRot, float xRot, float yRot) {
-        ChunkVec chunkVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
+        ChunkVec chunkVec = new BlockVec(x, y, z).chunk();
         ServerChunk chunk = this.world.getChunkNoLoad(chunkVec);
         if (chunk == null) {
-            return;
-        }
-        if (!chunk.getTracker().isTracking(this)) {
-            if (!isSpectator()) QuantumServer.LOGGER.warn("Player moved into an inactive chunk: {}", this.getName());
             return;
         }
 
@@ -786,7 +775,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param block the block to place
      */
     public void placeBlock(int x, int y, int z, BlockState block) {
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
         if (block == null || block.isAir() || !this.world.isLoaded(blockVec) || !this.world.get(x, y, z).isAir()) {
             this.world.sync(blockVec);
             return;

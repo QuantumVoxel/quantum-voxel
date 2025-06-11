@@ -4,7 +4,6 @@ import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.world.structure.BlockPoint;
 import dev.ultreon.quantum.world.structure.Structure;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 public class BlueprintStructure extends Structure {
     private final Blueprint blueprint;
@@ -27,7 +26,7 @@ public class BlueprintStructure extends Structure {
         if (boundingBox == null)
             boundingBox = blueprint.calcBoundingBox();
 
-        return new BlockVec(boundingBox.getWidth(), boundingBox.getHeight(), boundingBox.getDepth(), BlockVecSpace.WORLD);
+        return new BlockVec(boundingBox.getWidth(), boundingBox.getHeight(), boundingBox.getDepth());
     }
 
     @Override
@@ -35,6 +34,6 @@ public class BlueprintStructure extends Structure {
         if (boundingBox == null)
             boundingBox = blueprint.calcBoundingBox();
 
-        return new BlockVec(boundingBox.getCenterX(), boundingBox.getCenterY(), boundingBox.getCenterZ(), BlockVecSpace.WORLD);
+        return new BlockVec(boundingBox.getCenterX(), boundingBox.getCenterY(), boundingBox.getCenterZ());
     }
 }

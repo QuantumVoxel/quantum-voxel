@@ -2,6 +2,7 @@ package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.block.property.StatePropertyKey;
 import dev.ultreon.quantum.debug.timing.Timing;
+import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.item.tool.ToolType;
@@ -11,6 +12,7 @@ import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.world.BlockCollision;
 import dev.ultreon.quantum.world.ServerChunk;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.World;
@@ -312,5 +314,13 @@ public final class BlockState implements BlockLike {
         BlockState blockState = block.loadBlockState(data);
         Timing.end("load_block_state");
         return blockState;
+    }
+
+    public void onWalkOn(Entity entity, BlockCollision collision, BoundingBox box, double pressure) {
+        getBlock().onWalkOn(this, entity, collision, box, pressure);
+    }
+
+    public void onTouch(Entity entity, BlockCollision collision, BoundingBox box, double pressure) {
+        getBlock().onTouch(this, entity, collision, box, pressure);
     }
 }

@@ -2,7 +2,6 @@ package dev.ultreon.quantum.world.structure;
 
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -12,9 +11,6 @@ public final class BlockPoint {
     private final Supplier<BlockState> stateGetter;
 
     public BlockPoint(BlockVec pos, Supplier<BlockState> stateGetter) {
-        if (pos.getSpace() != BlockVecSpace.WORLD) {
-            throw new IllegalArgumentException("BlockPoint must be in the world space");
-        }
         this.pos = pos;
         this.stateGetter = stateGetter;
     }

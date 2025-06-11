@@ -512,14 +512,13 @@ public class PacketIO implements RegistryHandle {
         int y = this.readInt();
         int z = this.readInt();
 
-        return new BlockVec(x, y, z, this.readEnum(BlockVecSpace.WORLD));
+        return new BlockVec(x, y, z);
     }
 
     public PacketIO writeBlockVec(BlockVec pos) {
         this.writeInt(pos.getIntX());
         this.writeInt(pos.getIntY());
         this.writeInt(pos.getIntZ());
-        this.writeEnum(pos.getSpace());
         return this;
     }
 

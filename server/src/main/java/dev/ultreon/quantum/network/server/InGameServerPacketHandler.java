@@ -37,7 +37,6 @@ import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.HashMap;
@@ -216,7 +215,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     private static void revertBlockSet(BlockVec pos, ServerWorld world) {
-        QuantumServer.invoke(() -> world.sendAllTracking(pos.getIntX(), pos.getIntY(), pos.getIntZ(), new S2CBlockSetPacket(new BlockVec(pos.getIntX(), pos.getIntY(), pos.getIntZ(), BlockVecSpace.WORLD), world.get(pos))));
+        QuantumServer.invoke(() -> world.sendAllTracking(pos.getIntX(), pos.getIntY(), pos.getIntZ(), new S2CBlockSetPacket(new BlockVec(pos.getIntX(), pos.getIntY(), pos.getIntZ()), world.get(pos))));
     }
 
     public void onHotbarIndex(int hotbarIdx) {

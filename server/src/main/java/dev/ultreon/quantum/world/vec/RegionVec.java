@@ -42,7 +42,7 @@ public final class RegionVec extends Vec3i {
     }
 
     public BlockVec blockInWorld(int x, int y, int z) {
-        return new BlockVec(this.x * REGION_SIZE * CS + x, this.y * REGION_SIZE * CS + y, this.z * REGION_SIZE * CS + z, BlockVecSpace.WORLD);
+        return new BlockVec(this.x * REGION_SIZE * CS + x, this.y * REGION_SIZE * CS + y, this.z * REGION_SIZE * CS + z);
     }
 
     public BlockVec blockInChunk(int x, int y, int z) {
@@ -54,7 +54,7 @@ public final class RegionVec extends Vec3i {
         if (cy < 0) cy += CS;
         if (cz < 0) cz += CS;
 
-        return new BlockVec(this.x * REGION_SIZE * CS + cx, this.y * REGION_SIZE * CS + cy, this.z * REGION_SIZE * CS + cz, BlockVecSpace.CHUNK);
+        return new BlockVec(this.x * REGION_SIZE * CS + cx, this.y * REGION_SIZE * CS + cy, this.z * REGION_SIZE * CS + cz);
     }
 
     public BlockVec blockInChunk(Vec3i vec) {

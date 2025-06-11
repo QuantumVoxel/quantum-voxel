@@ -30,7 +30,6 @@ import dev.ultreon.quantum.util.ShowInNodeView;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -213,7 +212,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
-        this.removedModels.add(new BlockVec(x, y, z, BlockVecSpace.CHUNK));
+        this.removedModels.add(new BlockVec(x, y, z));
 
         boolean isBlockSet = super.setFast(x, y, z, block);
 

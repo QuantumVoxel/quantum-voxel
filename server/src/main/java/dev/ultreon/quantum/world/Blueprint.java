@@ -5,7 +5,6 @@ import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.Point;
 import dev.ultreon.quantum.world.structure.BlockPoint;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -21,11 +20,11 @@ public final class Blueprint implements Iterable<BlockPoint> {
     }
 
     public void addBlock(int x, int y, int z, BlockState state) {
-        blocks.add(new BlockPoint(new BlockVec(x, y, z, BlockVecSpace.WORLD), () -> state));
+        blocks.add(new BlockPoint(new BlockVec(x, y, z), () -> state));
     }
 
     public void addBlock(int x, int y, int z, Supplier<BlockState> stateSupplier) {
-        blocks.add(new BlockPoint(new BlockVec(x, y, z, BlockVecSpace.WORLD), stateSupplier));
+        blocks.add(new BlockPoint(new BlockVec(x, y, z), stateSupplier));
     }
 
     public void filledBox(int x, int y, int z, int width, int height, int depth, BlockState state) {

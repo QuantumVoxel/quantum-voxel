@@ -3,7 +3,6 @@ package dev.ultreon.quantum.server.util;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.UUID;
@@ -23,7 +22,7 @@ public class Utils {
     }
 
     public static ChunkVec ChunkVecFromBlockCoords(Vec3d pos) {
-        return new BlockVec((int)pos.x, (int)pos.y, (int)pos.z, BlockVecSpace.CHUNK).chunk();
+        return new BlockVec((int)pos.x, (int)pos.y, (int)pos.z).chunk();
     }
 
     public static int normalizeToInt(byte b) {

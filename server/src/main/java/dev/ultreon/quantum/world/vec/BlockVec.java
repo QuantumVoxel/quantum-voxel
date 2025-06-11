@@ -6,7 +6,6 @@ import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3f;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.Direction;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
@@ -19,50 +18,6 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public final class BlockVec extends Vec3i implements Point, Cloneable {
-    private final BlockVecSpace space;
-
-    /**
-     * Creates a new block position at the given coordinates.
-     *
-     * @param x the x-coordinate.
-     * @param y the y-coordinate.
-     * @param z the z-coordinate.
-     */
-    @ApiStatus.Internal
-    public BlockVec(int x, int y, int z) {
-        this(x, y, z, BlockVecSpace.WORLD);
-    }
-
-    /**
-     * Creates a new block position at the given coordinates.
-     *
-     * @param x the x-coordinate.
-     * @param y the y-coordinate.
-     * @param z the z-coordinate.
-     */
-    @Deprecated
-    public BlockVec(double x, double y, double z) {
-        this(x, y, z, BlockVecSpace.WORLD);
-    }
-
-    /**
-     * Creates a new block position at the given coordinates.
-     *
-     * @param point the vector coordinates.
-     */
-    @Deprecated
-    public BlockVec(Point point) {
-        this(point, BlockVecSpace.WORLD);
-    }
-
-    /**
-     * Creates a new block position at {@code 0,0,0}.
-     */
-    @Deprecated
-    public BlockVec() {
-        this(BlockVecSpace.WORLD);
-    }
-
     @Override
     public BlockVec set(Vec3i vec) {
         this.x = vec.x;
@@ -72,61 +27,36 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     /**
-     * Creates a new block position from a {@link Vec3i vector}.
-     *
-     * @param vec the vector.
-     */
-    @Deprecated
-    public BlockVec(Vec3i vec) {
-        this(vec, BlockVecSpace.WORLD);
-    }
-
-    @Deprecated
-    public BlockVec(MapType data) {
-        this(data.getInt("x"), data.getInt("y"), data.getInt("z"), BlockVecSpace.WORLD);
-    }
-
-    /**
      * Creates a new block position from a {@link BlockVec vector}.
      *
      * @param vec the vector.
      */
     public BlockVec(BlockVec vec) {
-        this(vec.x, vec.y, vec.z, vec.space);
+        this(vec.x, vec.y, vec.z);
     }
 
-    public BlockVec(int x, int y, int z, BlockVecSpace space) {
+    public BlockVec(int x, int y, int z) {
         super(x, y, z);
-
-        space.validate(x, y, z);
-        this.space = space;
     }
 
-    public BlockVec(double x, double y, double z, BlockVecSpace space) {
+    public BlockVec(double x, double y, double z) {
         super((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
-
-        space.validate((int) x, (int) y, (int) z);
-        this.space = space;
     }
 
-    public BlockVec(Point point, BlockVecSpace space) {
-        this(point.getX(), point.getY(), point.getZ(), space);
+    public BlockVec(Point point) {
+        this(point.getX(), point.getY(), point.getZ());
     }
 
-    public BlockVec(MapType data, BlockVecSpace space) {
-        this(data.getInt("x"), data.getInt("y"), data.getInt("z"), space);
+    public BlockVec(MapType data) {
+        this(data.getInt("x"), data.getInt("y"), data.getInt("z"));
     }
 
-    public BlockVec(Vec3i vec, BlockVecSpace space) {
-        this(vec.getX(), vec.getY(), vec.getZ(), space);
+    public BlockVec(Vec3i vec) {
+        this(vec.getX(), vec.getY(), vec.getZ());
     }
 
-    public BlockVec(BlockVecSpace space) {
-        this(0, 0, 0, space);
-    }
-
-    public BlockVecSpace getSpace() {
-        return space;
+    public BlockVec() {
+        this(0, 0, 0);
     }
 
     /**
@@ -138,7 +68,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
      * @return The new block position.
      */
     public BlockVec offset(int x, int y, int z) {
-        return new BlockVec(this.x + x, this.y + y, this.z + z, this.space);
+        return new BlockVec(this.x + x, this.y + y, this.z + z);
     }
 
     /**
@@ -183,7 +113,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec offset(Vec3i vec) {
-        return new BlockVec(this.x + vec.getX(), this.y + vec.getY(), this.z + vec.getZ(), space);
+        return new BlockVec(this.x + vec.getX(), this.y + vec.getY(), this.z + vec.getZ());
     }
 
     public BlockVec offset(Direction direction, int distance) {
@@ -212,46 +142,6 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         }
     }
 
-    public BlockVec toSpace(BlockVecSpace toSpace) {
-        if (toSpace.ordinal() == this.space.ordinal()) return this;
-        if (toSpace.ordinal() < this.space.ordinal()) return this;
-
-        switch (toSpace) {
-            case REGION:
-                int rx = this.x % (CS * REGION_SIZE);
-                int ry = this.y % (CS * REGION_SIZE);
-                int rz = this.z % (CS * REGION_SIZE);
-
-                if (this.x < 0) rx += CS * REGION_SIZE;
-                if (this.y < 0) ry += CS * REGION_SIZE;
-                if (this.x < 0) rz += CS * REGION_SIZE;
-
-                return new BlockVec(rx, ry, rz, BlockVecSpace.REGION);
-            case CHUNK:
-                int cx = this.x % CS;
-                int cy = this.y % CS;
-                int cz = this.z % CS;
-
-                if (this.x < 0) cx += CS;
-                if (this.y < 0) cy += CS;
-                if (this.z < 0) cz += CS;
-
-                return new BlockVec(cx, cy, cz, BlockVecSpace.CHUNK);
-            case SECTION:
-                int sx = this.x % CS;
-                int sy = this.y % CS;
-                int sz = this.z % CS;
-
-                if (this.x < 0) sx += CS;
-                if (this.y < 0) sy += CS;
-                if (this.z < 0) sz += CS;
-
-                return new BlockVec(sx, sy, sz, BlockVecSpace.SECTION);
-            default:
-                throw new IllegalStateException("Unexpected value: " + toSpace);
-        }
-    }
-
     public BlockVec chunkLocal() {
         int cx = this.x % CS;
         int cy = this.y % CS;
@@ -261,7 +151,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         if (this.y < 0 && cy != 0) cy += CS;
         if (this.z < 0 && cz != 0) cz += CS;
 
-        return new BlockVec(cx, cy, cz, BlockVecSpace.CHUNK);
+        return new BlockVec(cx, cy, cz);
     }
 
     public BlockVec sectionLocal() {
@@ -273,7 +163,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         if (this.y < 0 && sy != 0) sy += CS;
         if (this.z < 0 && sz != 0) sz += CS;
 
-        return new BlockVec(sx, sy, sz, BlockVecSpace.SECTION);
+        return new BlockVec(sx, sy, sz);
     }
 
     public BlockVec regionLocal() {
@@ -285,7 +175,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         if (this.y < 0) ry += CS * REGION_SIZE;
         if (this.z < 0) rz += CS * REGION_SIZE;
 
-        return new BlockVec(rx, ry, rz, BlockVecSpace.REGION);
+        return new BlockVec(rx, ry, rz);
     }
 
     public BlockVec local(BlockVecSpace space) {
@@ -301,12 +191,6 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
             default:
                 throw new IllegalArgumentException();
         }
-    }
-
-    public BlockVec offsetRegion(RegionVec region) {
-        if (this.space != BlockVecSpace.WORLD) throw new IllegalStateException("Cannot offset in this space: " + this.space);
-
-        return new BlockVec(this.x + region.getIntX() * (REGION_SIZE * CS), this.y, this.z + region.getIntZ() * (REGION_SIZE * CS), this.space);
     }
 
     public RegionVec region() {
@@ -330,14 +214,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         if (this.y < 0 && this.y % CS != 0) cy--;
         if (this.z < 0 && this.z % CS != 0) cz--;
 
-        switch (this.space) {
-            case WORLD:
-                return new ChunkVec(cx, cy, cz, ChunkVecSpace.WORLD);
-            case REGION:
-                return new ChunkVec(cx, cy, cz, ChunkVecSpace.REGION);
-            default:
-                throw new IllegalStateException("Can't get chunk in this space: " + this.space);
-        }
+        return new ChunkVec(cx, cy, cz, ChunkVecSpace.WORLD);
     }
 
     @Override
@@ -347,13 +224,12 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         var that = (BlockVec) obj;
         return this.x == that.x &&
                this.y == that.y &&
-               this.z == that.z &&
-               this.space == that.space;
+               this.z == that.z;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, z, space);
+        return Objects.hash(x, y, z);
     }
 
     public MapType save(MapType data) {
@@ -445,37 +321,37 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
 
     @Override
     public BlockVec clone() {
-        return (BlockVec) super.clone();
+        return new BlockVec(this.x, this.y, this.z);
     }
 
     @Override
     public BlockVec cpy() {
-        return new BlockVec(this.x, this.y, this.z, this.space);
+        return new BlockVec(this.x, this.y, this.z);
     }
 
     @Override
     public BlockVec add(int v) {
-        return new BlockVec(this.x + v, this.y + v, this.z + v, this.space);
+        return new BlockVec(this.x + v, this.y + v, this.z + v);
     }
 
     @Override
     public BlockVec sub(int v) {
-        return new BlockVec(this.x - v, this.y - v, this.z - v, this.space);
+        return new BlockVec(this.x - v, this.y - v, this.z - v);
     }
 
     @Override
     public BlockVec mul(int v) {
-        return new BlockVec(this.x * v, this.y * v, this.z * v, this.space);
+        return new BlockVec(this.x * v, this.y * v, this.z * v);
     }
 
     @Override
     public BlockVec div(int v) {
-        return new BlockVec(this.x / v, this.y / v, this.z / v, this.space);
+        return new BlockVec(this.x / v, this.y / v, this.z / v);
     }
 
     @Override
     public BlockVec mod(int v) {
-        return new BlockVec(this.x % v, this.y % v, this.z % v, this.space);
+        return new BlockVec(this.x % v, this.y % v, this.z % v);
     }
 
     public int dot(BlockVec vec) {
@@ -483,90 +359,90 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     public BlockVec cross(BlockVec vec) {
-        return new BlockVec(this.y * vec.z - this.z * vec.y, this.z * vec.x - this.x * vec.z, this.x * vec.y - this.y * vec.x, this.space);
+        return new BlockVec(this.y * vec.z - this.z * vec.y, this.z * vec.x - this.x * vec.z, this.x * vec.y - this.y * vec.x);
     }
 
     public BlockVec max(BlockVec vec) {
-        return new BlockVec(Math.max(this.x, vec.x), Math.max(this.y, vec.y), Math.max(this.z, vec.z), this.space);
+        return new BlockVec(Math.max(this.x, vec.x), Math.max(this.y, vec.y), Math.max(this.z, vec.z));
     }
 
     public BlockVec min(BlockVec vec) {
-        return new BlockVec(Math.min(this.x, vec.x), Math.min(this.y, vec.y), Math.min(this.z, vec.z), this.space);
+        return new BlockVec(Math.min(this.x, vec.x), Math.min(this.y, vec.y), Math.min(this.z, vec.z));
     }
 
     @Override
     public BlockVec dec() {
-        return new BlockVec(this.x - 1, this.y - 1, this.z - 1, this.space);
+        return new BlockVec(this.x - 1, this.y - 1, this.z - 1);
     }
 
     @Override
     public BlockVec inc() {
-        return new BlockVec(this.x + 1, this.y + 1, this.z + 1, this.space);
+        return new BlockVec(this.x + 1, this.y + 1, this.z + 1);
     }
 
     public BlockVec pow(int v) {
-        return new BlockVec((int) Math.pow(this.x, v), (int) Math.pow(this.y, v), (int) Math.pow(this.z, v), this.space);
+        return new BlockVec((int) Math.pow(this.x, v), (int) Math.pow(this.y, v), (int) Math.pow(this.z, v));
     }
 
     public BlockVec sqrt() {
-        return new BlockVec((int) Math.sqrt(this.x), (int) Math.sqrt(this.y), (int) Math.sqrt(this.z), this.space);
+        return new BlockVec((int) Math.sqrt(this.x), (int) Math.sqrt(this.y), (int) Math.sqrt(this.z));
     }
 
     @Override
     public BlockVec pow(Vec3i vec) {
-        return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z), this.space);
+        return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
     public BlockVec pow(Vec3f vec) {
-        return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z), this.space);
+        return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
     public BlockVec pow(Vec3d vec) {
-        return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z), this.space);
+        return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
     public BlockVec max(Vec3i vec) {
-        return new BlockVec(Math.max(this.x, vec.x), Math.max(this.y, vec.y), Math.max(this.z, vec.z), this.space);
+        return new BlockVec(Math.max(this.x, vec.x), Math.max(this.y, vec.y), Math.max(this.z, vec.z));
     }
 
     public BlockVec min(Vec3i vec) {
-        return new BlockVec(Math.min(this.x, vec.x), Math.min(this.y, vec.y), Math.min(this.z, vec.z), this.space);
+        return new BlockVec(Math.min(this.x, vec.x), Math.min(this.y, vec.y), Math.min(this.z, vec.z));
     }
 
     public BlockVec pow(double x, double y, double z) {
-        return new BlockVec((int) Math.pow(this.x, x), (int) Math.pow(this.y, y), (int) Math.pow(this.z, z), this.space);
+        return new BlockVec((int) Math.pow(this.x, x), (int) Math.pow(this.y, y), (int) Math.pow(this.z, z));
     }
 
     public BlockVec max(int x, int y, int z) {
-        return new BlockVec(Math.max(this.x, x), Math.max(this.y, y), Math.max(this.z, z), this.space);
+        return new BlockVec(Math.max(this.x, x), Math.max(this.y, y), Math.max(this.z, z));
     }
 
     public BlockVec min(int x, int y, int z) {
-        return new BlockVec(Math.min(this.x, x), Math.min(this.y, y), Math.min(this.z, z), this.space);
+        return new BlockVec(Math.min(this.x, x), Math.min(this.y, y), Math.min(this.z, z));
     }
 
     public BlockVec pow(Point point) {
-        return new BlockVec((int) Math.pow(this.x, point.getX()), (int) Math.pow(this.y, point.getY()), (int) Math.pow(this.z, point.getZ()), this.space);
+        return new BlockVec((int) Math.pow(this.x, point.getX()), (int) Math.pow(this.y, point.getY()), (int) Math.pow(this.z, point.getZ()));
     }
 
     public BlockVec max(Point point) {
-        return new BlockVec((int) Math.max(this.x, point.getX()), (int) Math.max(this.y, point.getY()), (int) Math.max(this.z, point.getZ()), this.space);
+        return new BlockVec((int) Math.max(this.x, point.getX()), (int) Math.max(this.y, point.getY()), (int) Math.max(this.z, point.getZ()));
     }
 
     public BlockVec min(Point point) {
-        return new BlockVec((int) Math.min(this.x, point.getX()), (int) Math.min(this.y, point.getY()), (int) Math.min(this.z, point.getZ()), this.space);
+        return new BlockVec((int) Math.min(this.x, point.getX()), (int) Math.min(this.y, point.getY()), (int) Math.min(this.z, point.getZ()));
     }
 
     public BlockVec pow(double v) {
-        return new BlockVec((int) Math.pow(this.x, v), (int) Math.pow(this.y, v), (int) Math.pow(this.z, v), this.space);
+        return new BlockVec((int) Math.pow(this.x, v), (int) Math.pow(this.y, v), (int) Math.pow(this.z, v));
     }
 
     public BlockVec max(int v) {
-        return new BlockVec(Math.max(this.x, v), Math.max(this.y, v), Math.max(this.z, v), this.space);
+        return new BlockVec(Math.max(this.x, v), Math.max(this.y, v), Math.max(this.z, v));
     }
 
     public BlockVec min(int v) {
-        return new BlockVec(Math.min(this.x, v), Math.min(this.y, v), Math.min(this.z, v), this.space);
+        return new BlockVec(Math.min(this.x, v), Math.min(this.y, v), Math.min(this.z, v));
     }
 
     public double dst(BlockVec vec) {
@@ -580,17 +456,17 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     public BlockVec relative(Direction dir) {
         switch (dir) {
             case NORTH:
-                return new BlockVec(this.x, this.y, this.z - 1, this.space);
+                return new BlockVec(this.x, this.y, this.z - 1);
             case SOUTH:
-                return new BlockVec(this.x, this.y, this.z + 1, this.space);
+                return new BlockVec(this.x, this.y, this.z + 1);
             case EAST:
-                return new BlockVec(this.x + 1, this.y, this.z, this.space);
+                return new BlockVec(this.x + 1, this.y, this.z);
             case WEST:
-                return new BlockVec(this.x - 1, this.y, this.z, this.space);
+                return new BlockVec(this.x - 1, this.y, this.z);
             case UP:
-                return new BlockVec(this.x, this.y + 1, this.z, this.space);
+                return new BlockVec(this.x, this.y + 1, this.z);
             case DOWN:
-                return new BlockVec(this.x, this.y - 1, this.z, this.space);
+                return new BlockVec(this.x, this.y - 1, this.z);
             default:
                 throw new IllegalArgumentException();
         }

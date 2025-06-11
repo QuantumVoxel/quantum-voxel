@@ -4,7 +4,6 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.Objects;
 
@@ -16,7 +15,7 @@ public class EntityHit implements Hit {
     protected float distanceMax = 5.0F;
     public Vec position = new Vec();
     protected Vec normal = new Vec();
-    protected BlockVec pos = new BlockVec(BlockVecSpace.WORLD);
+    protected BlockVec pos = new BlockVec();
     public Entity entity;
     public boolean collide;
     public float distance;

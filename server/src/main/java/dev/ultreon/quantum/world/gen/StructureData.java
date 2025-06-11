@@ -5,7 +5,6 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.world.structure.Structure;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.Nullable;
@@ -28,10 +27,10 @@ public class StructureData {
             this.bounds.add(boundingBox);
             this.structures.add(structure);
 
-            BlockVec start = new BlockVec(boundingBox.min.i(), BlockVecSpace.WORLD);
+            BlockVec start = new BlockVec(boundingBox.min.i());
             ChunkVec startChunk = start.chunk();
 
-            BlockVec end = new BlockVec(boundingBox.max.i(), BlockVecSpace.WORLD);
+            BlockVec end = new BlockVec(boundingBox.max.i());
             ChunkVec endChunk = end.chunk();
 
             for (int cx = startChunk.x; cx <= endChunk.x; cx++) {

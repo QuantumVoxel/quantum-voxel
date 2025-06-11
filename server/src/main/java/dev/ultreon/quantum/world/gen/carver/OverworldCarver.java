@@ -11,7 +11,6 @@ import dev.ultreon.quantum.world.gen.CaveNoiseGenerator;
 import dev.ultreon.quantum.world.gen.HillinessNoise;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongLists;
@@ -52,7 +51,7 @@ public class OverworldCarver implements Carver {
 
         // Carve the world into shape.
         for (int y = offset.y; y < offset.y + CS; y++) {
-            BlockVec vec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
+            BlockVec vec = new BlockVec(x, y, z).chunkLocal();
             if (y <= groundPos) {
 //                if (y <= World.SEA_LEVEL) {
 //                    if (y < groundPos - 7) {
@@ -77,7 +76,7 @@ public class OverworldCarver implements Carver {
         }
 
         // Write to the heightmaps
-        BlockVec vec = new BlockVec(x, height, z, BlockVecSpace.WORLD).chunkLocal();
+        BlockVec vec = new BlockVec(x, height, z).chunkLocal();
         chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE).set(vec.x, vec.z, (short) height);
         chunk.getWorld().heightMapAt(x, z, HeightmapType.MOTION_BLOCKING).set(vec.x, vec.z, (short) height);
 

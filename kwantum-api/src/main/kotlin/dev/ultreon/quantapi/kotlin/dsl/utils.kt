@@ -14,17 +14,17 @@ import dev.ultreon.quantum.world.vec.BlockVec
 import dev.ultreon.quantum.world.vec.ChunkVec
 import dev.ultreon.quantum.world.vec.RegionVec
 
-operator fun BlockVec.plus(vec: BlockVec) = BlockVec(this.x + vec.x, this.y + vec.y, this.z + vec.z, this.space)
-operator fun BlockVec.minus(vec: BlockVec) = BlockVec(this.x - vec.x, this.y - vec.y, this.z - vec.z, this.space)
-operator fun BlockVec.times(vec: BlockVec) = BlockVec(this.x * vec.x, this.y * vec.y, this.z * vec.z, this.space)
-operator fun BlockVec.div(vec: BlockVec) = BlockVec(this.x / vec.x, this.y / vec.y, this.z / vec.z, this.space)
-operator fun BlockVec.rem(vec: BlockVec) = BlockVec(this.x % vec.x, this.y % vec.y, this.z % vec.z, this.space)
+operator fun BlockVec.plus(vec: BlockVec) = BlockVec(this.x + vec.x, this.y + vec.y, this.z + vec.z)
+operator fun BlockVec.minus(vec: BlockVec) = BlockVec(this.x - vec.x, this.y - vec.y, this.z - vec.z)
+operator fun BlockVec.times(vec: BlockVec) = BlockVec(this.x * vec.x, this.y * vec.y, this.z * vec.z)
+operator fun BlockVec.div(vec: BlockVec) = BlockVec(this.x / vec.x, this.y / vec.y, this.z / vec.z)
+operator fun BlockVec.rem(vec: BlockVec) = BlockVec(this.x % vec.x, this.y % vec.y, this.z % vec.z)
 
-operator fun BlockVec.inc() = BlockVec(this.x + 1, this.y + 1, this.z + 1, this.space)
-operator fun BlockVec.dec() = BlockVec(this.x - 1, this.y - 1, this.z - 1, this.space)
+operator fun BlockVec.inc() = BlockVec(this.x + 1, this.y + 1, this.z + 1)
+operator fun BlockVec.dec() = BlockVec(this.x - 1, this.y - 1, this.z - 1)
 
-operator fun BlockVec.unaryPlus() = BlockVec(+this.x, +this.y, +this.z, this.space)
-operator fun BlockVec.unaryMinus() = BlockVec(-this.x, -this.y, -this.z, this.space)
+operator fun BlockVec.unaryPlus() = BlockVec(+this.x, +this.y, +this.z)
+operator fun BlockVec.unaryMinus() = BlockVec(-this.x, -this.y, -this.z)
 
 operator fun BlockVec.component1() = this.x
 operator fun BlockVec.component2() = this.y

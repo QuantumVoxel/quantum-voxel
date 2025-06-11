@@ -33,7 +33,6 @@ import dev.ultreon.quantum.world.gen.StructureData;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.structure.Structure;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.intellij.lang.annotations.MagicConstant;
@@ -65,7 +64,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(World.class);
 
-    protected final BlockVec spawnPoint = new BlockVec(BlockVecSpace.WORLD);
+    protected final BlockVec spawnPoint = new BlockVec();
     protected final long seed;
     private int renderedChunks;
 
@@ -100,7 +99,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
 
     @Deprecated
     public static ChunkVec toChunkVec(int x, int y, int z) {
-        return new BlockVec(x, y, z, BlockVecSpace.WORLD).chunk();
+        return new BlockVec(x, y, z).chunk();
     }
 
     protected abstract int getRenderDistance();
@@ -238,7 +237,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         this.checkThread();
 
         Chunk chunkAt = this.getChunkAt(x, y, z);
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
         if (chunkAt == null) return Blocks.VOID_AIR.getDefaultState();
         if (!chunkAt.ready) return Blocks.VOID_AIR.getDefaultState();
 
@@ -257,7 +256,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @return the block position in chunk space
      */
     public static BlockVec toLocalBlockVec(int x, int y, int z) {
-        BlockVec worldSpace = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec worldSpace = new BlockVec(x, y, z);
         return worldSpace.chunkLocal();
     }
 
@@ -271,7 +270,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @return the block position in chunk space
      */
     public static BlockVec toLocalBlockVec(int x, int y, int z, Vec3i tmp) {
-        BlockVec worldSpace = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec worldSpace = new BlockVec(x, y, z);
         return worldSpace.chunkLocal();
     }
 
@@ -304,7 +303,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
 
     @Override
     public @Nullable Chunk getChunkAt(int x, int y, int z) {
-        BlockVec blockVec = new BlockVec(x, y, z, BlockVecSpace.WORLD);
+        BlockVec blockVec = new BlockVec(x, y, z);
 
         if (this.isOutOfWorldBounds(x, y, z)) return null;
 
@@ -344,7 +343,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      */
     @Override
     public int getHeight(int x, int z, HeightmapType type) {
-        BlockVec blockVec = new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunkLocal();
+        BlockVec blockVec = new BlockVec(x, 0, z).chunkLocal();
         return this.heightMapAt(x, z, type).get(blockVec.x, blockVec.z);
     }
 
@@ -352,9 +351,9 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     public Heightmap heightMapAt(int x, int z, HeightmapType type) {
         switch (type) {
             case MOTION_BLOCKING:
-                return this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
+                return this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z).chunk(), vec -> new Heightmap(CS));
             case WORLD_SURFACE:
-                return this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z, BlockVecSpace.WORLD).chunk(), vec -> new Heightmap(CS));
+                return this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z).chunk(), vec -> new Heightmap(CS));
             default:
                 throw new IllegalArgumentException();
         }
@@ -571,6 +570,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
                     BlockState block = this.get(x, y, z);
                     if (block.hasCollider() && (!collideFluid || block.isFluid())) {
                         BoundingBox blockBox = block.getBoundingBox(x, y, z);
+                        blockBox.userData = new BlockCollision(block, new BlockVec(x, y, z), this);
                         if (blockBox.intersects(box)) {
                             boxes.add(blockBox);
                         }
@@ -742,7 +742,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         if (highest != Integer.MIN_VALUE)
             spawnY = highest;
 
-        return new BlockVec(this.spawnX, spawnY, this.spawnZ, BlockVecSpace.WORLD);
+        return new BlockVec(this.spawnX, spawnY, this.spawnZ);
     }
 
     @Override

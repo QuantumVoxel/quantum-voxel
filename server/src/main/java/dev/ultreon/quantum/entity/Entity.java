@@ -18,14 +18,10 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.text.Translations;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.quantum.world.Location;
-import dev.ultreon.quantum.world.ServerWorld;
-import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -230,6 +226,7 @@ public abstract class Entity extends GameObject implements CommandSender {
     /**
      * Updates the entity's state and movement.
      */
+    @Override
     public void tick() {
         // Apply gravity if not in the noGravity state
         if (!this.noGravity) {
@@ -309,7 +306,6 @@ public abstract class Entity extends GameObject implements CommandSender {
         // Check if the entity was previously in fluid
         if (!this.wasInFluid && this.isAffectedByFluid()) {
             this.wasInFluid = true;
-            return;
         }
     }
 
@@ -322,21 +318,6 @@ public abstract class Entity extends GameObject implements CommandSender {
      * @return true if the entity is colliding after the move, false otherwise
      */
     public boolean move(double deltaX, double deltaY, double deltaZ) {
-        // Store the original deltas
-        double originalDeltaX = deltaX, originalDeltaY = deltaY, originalDeltaZ = deltaZ;
-
-        // Calculate the absolute values of the deltas
-        double absDeltaX = Math.abs(deltaX);
-        double absDeltaY = Math.abs(deltaY);
-        double absDeltaZ = Math.abs(deltaZ);
-
-        // Check if the deltas are too small to cause a significant move
-        if (absDeltaX < 0.001 && absDeltaY < 0.001 && absDeltaZ < 0.001) {
-            absDeltaX = 0.0;
-            absDeltaY = 0.0;
-            absDeltaZ = 0.0;
-        }
-
         // Trigger an event to allow modification of the move
         EntityMoveEvent event = new EntityMoveEvent(this, new Vec(deltaX, deltaY, deltaZ));
         ModApi.getGlobalEventHandler().call(event);
@@ -394,53 +375,89 @@ public abstract class Entity extends GameObject implements CommandSender {
         // Get list of bounding boxes the entity collides with
         List<BoundingBox> boxes = this.world.collide(ext, false);
 
-        BoundingBox pBox = this.getBoundingBox(); // Get the entity's bounding box
+        BoundingBox motionBox = this.getBoundingBox(); // Get the entity's bounding box
 
         this.isColliding = false;
         this.isCollidingY = false;
 
         // Check collision and update y-coordinate
         for (BoundingBox box : boxes) {
-            double dy2 = BoundingBoxUtils.clipYCollide(box, pBox, dy);
-            this.isColliding |= dy != dy2;
-            this.isCollidingY |= dy != dy2;
+            double dy2 = BoundingBoxUtils.clipYCollide(box, motionBox, dy);
+            boolean colliding = dy != dy2;
+            this.isColliding |= colliding;
+            this.isCollidingY |= colliding;
+            if (colliding) {
+                Object userData = box.userData;
+                if (userData instanceof BlockCollision) {
+                    BlockCollision collision = (BlockCollision) userData;
+                    if (dy < 0) {
+                        collision.getBlock().onWalkOn(this, collision, box, -dy);
+                    }
+                    collision.getBlock().onTouch(this, collision, box, Math.abs(dy));
+                }
+            }
             dy = dy2;
         }
 
         // Update the y-coordinate of the bounding box
-        pBox.min.add(0.0f, dy, 0.0f);
-        pBox.max.add(0.0f, dy, 0.0f);
-        pBox.update();
+        motionBox.min.add(0.0f, dy, 0.0f);
+        motionBox.max.add(0.0f, dy, 0.0f);
+        motionBox.update();
 
         this.isCollidingX = false;
 
+        double heightToStep = 0;
+
         // Check collision and update x-coordinate
         for (BoundingBox box : boxes) {
-            double dx2 = BoundingBoxUtils.clipXCollide(box, pBox, dx);
-            this.isColliding |= dx != dx2;
-            this.isCollidingX |= dx != dx2;
+            double dx2 = BoundingBoxUtils.clipXCollide(box, motionBox, dx);
+            boolean colliding = dx != dx2;
+            heightToStep = Math.max(heightToStep, box.max.y - motionBox.min.y);
+            this.isColliding |= colliding;
+            this.isCollidingX |= colliding;
+            if (colliding) {
+                Object userData = box.userData;
+                if (userData instanceof BlockCollision) {
+                    BlockCollision collision = (BlockCollision) userData;
+                    collision.getBlock().onTouch(this, collision, box, Math.abs(dx));
+                }
+            }
             dx = dx2;
         }
 
         // Update the x-coordinate of the bounding box
-        pBox.min.add(dx, 0.0f, 0.0f);
-        pBox.max.add(dx, 0.0f, 0.0f);
-        pBox.update();
+        motionBox.min.add(dx, 0.0f, 0.0f);
+        motionBox.max.add(dx, 0.0f, 0.0f);
+        motionBox.update();
 
         this.isCollidingZ = false;
 
         // Check collision and update z-coordinate
         for (BoundingBox box : boxes) {
-            double dz2 = BoundingBoxUtils.clipZCollide(box, pBox, dz);
-            this.isColliding |= dz != dz2;
-            this.isCollidingZ |= dz != dz2;
+            double dz2 = BoundingBoxUtils.clipZCollide(box, motionBox, dz);
+            boolean colliding = dz != dz2;
+            heightToStep = Math.max(heightToStep, box.max.y - motionBox.min.y);
+            this.isColliding |= colliding;
+            this.isCollidingZ |= colliding;
+            if (colliding) {
+                Object userData = box.userData;
+                if (userData instanceof BlockCollision) {
+                    BlockCollision collision = (BlockCollision) userData;
+                    collision.getBlock().onTouch(this, collision, box, Math.abs(dz));
+                }
+            }
             dz = dz2;
         }
 
         // Update the z-coordinate of the bounding box
-        pBox.min.add(0.0f, 0.0f, dz);
-        pBox.max.add(0.0f, 0.0f, dz);
-        pBox.update();
+        motionBox.min.add(0.0f, 0.0f, dz);
+        motionBox.max.add(0.0f, 0.0f, dz);
+        motionBox.update();
+
+        if (heightToStep > 0 && heightToStep < 0.6 && onGround) {
+            step(dx, dy, dz, heightToStep, motionBox);
+            return;
+        }
 
         // Check if entity is on the ground
         this.wasOnGround = this.onGround;
@@ -456,13 +473,55 @@ public abstract class Entity extends GameObject implements CommandSender {
             this.fallDistance = 0.0F;
         }
 
+        dy = falling(dy);
+
+        // Reset velocity if there was a collision in z-coordinate
+        if (oldDz != dz) {
+            this.velocityZ = 0.0f;
+        }
+
+        // Update entity's position
+        this.x = (motionBox.min.x + motionBox.max.x) / 2.0f;
+        this.y = motionBox.min.y;
+        this.z = (motionBox.min.z + motionBox.max.z) / 2.0f;
+
+        this.oDx = dx;
+        this.oDy = dy;
+        this.oDz = dz;
+    }
+
+    private void step(double dx, double dy, double dz, double heightToStep, BoundingBox motionBox) {
+        this.velocityY = 0;
+        this.isCollidingY = true;
+        this.isColliding = true;
+        this.isCollidingX = false;
+        this.isCollidingZ = false;
+        this.fallDistance = 0.0F;
+        this.wasOnGround = this.onGround;
+        this.onGround = true;
+
+        falling(0);
+
+        // Update entity's position
+        this.x = (motionBox.min.x + motionBox.max.x) / 2.0f;
+        this.y += heightToStep;
+        this.z = (motionBox.min.z + motionBox.max.z) / 2.0f;
+
+        this.oDx = dx;
+        this.oDy = dy;
+        this.oDz = dz;
+    }
+
+    private double falling(double dy) {
         // Handle collision responses and update fall distance
         if (this.isAffectedByFluid()) {
             wasInFluid = true;
             fallDistance = 0;
+            dy = 0.0f;
         } else if (wasInFluid && !isAffectedByFluid()) {
             wasInFluid = false;
             fallDistance = 0;
+            dy = 0.0f;
         } else if (this.onGround && !this.wasOnGround) {
             this.hitGround();
             this.fallDistance = 0.0F;
@@ -471,20 +530,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         } else if (dy < 0) {
             this.fallDistance -= dy;
         }
-
-        // Reset velocity if there was a collision in z-coordinate
-        if (oldDz != dz) {
-            this.velocityZ = 0.0f;
-        }
-
-        // Update entity's position
-        this.x = (pBox.min.x + pBox.max.x) / 2.0f;
-        this.y = pBox.min.y;
-        this.z = (pBox.min.z + pBox.max.z) / 2.0f;
-
-        this.oDx = dx;
-        this.oDy = dy;
-        this.oDz = dz;
+        return dy;
     }
 
     /**
@@ -627,17 +673,7 @@ public abstract class Entity extends GameObject implements CommandSender {
      * @return a new BlockVec object with the current coordinates (x, y, z) and space set to WORLD.
      */
     public BlockVec getBlockVec() {
-        return new BlockVec(this.x, this.y, this.z, BlockVecSpace.WORLD);
-    }
-
-    /**
-     * Generates a BlockVec object with the current coordinates and the provided space.
-     *
-     * @param space the BlockVecSpace object defining the space in which the BlockVec resides
-     * @return a new BlockVec object with coordinates and the provided space
-     */
-    public BlockVec getBlockVec(BlockVecSpace space) {
-        return new BlockVec(this.x, this.y, this.z, space);
+        return new BlockVec(this.x, this.y, this.z);
     }
 
     /**

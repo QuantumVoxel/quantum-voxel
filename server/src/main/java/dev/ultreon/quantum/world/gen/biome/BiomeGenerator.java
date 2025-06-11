@@ -14,7 +14,6 @@ import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.structure.BlockPoint;
 import dev.ultreon.quantum.world.structure.WorldSlice;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -82,7 +81,7 @@ public class BiomeGenerator implements Disposable {
         BuilderFork fork = chunk.createFork(x, y, z);
         RNG rng = chunk.getRNG();
         long posSeed = rng.nextLong();
-        BlockVec localVec = new BlockVec(x, y, z, BlockVecSpace.WORLD).chunkLocal();
+        BlockVec localVec = new BlockVec(x, y, z).chunkLocal();
         if (feature.shouldPlace(x, y, z, chunk.get(localVec.x, localVec.y, localVec.z))) {
             if (feature.handle(fork, posSeed, 0, 0, 0)) {
                 List<BlockPoint> points = fork.getPositions();

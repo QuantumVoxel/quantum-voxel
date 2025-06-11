@@ -4,7 +4,6 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.world.gen.chunk.ChunkGenerator;
 import dev.ultreon.quantum.world.structure.BlockPoint;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class BuilderFork implements Fork {
 
     @Override
     public boolean set(int x, int y, int z, BlockState block) {
-        return this.positions.add(new BlockPoint(new BlockVec(this.x + x, this.y + y, this.z + z, BlockVecSpace.WORLD), () -> block));
+        return this.positions.add(new BlockPoint(new BlockVec(this.x + x, this.y + y, this.z + z), () -> block));
     }
 
     public List<BlockPoint> getPositions() {

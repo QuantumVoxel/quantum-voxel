@@ -216,7 +216,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         int cy = this.y * CS;
         int cz = this.z * CS;
 
-        return new BlockVec(cx, cy, cz, this.space.block());
+        return new BlockVec(cx, cy, cz);
     }
 
     /**
@@ -229,7 +229,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         int cy = this.y * CS;
         int cz = this.z * CS;
 
-        return new BlockVec(cx + CS - 1, cy + CS - 1, cz + CS - 1, this.space.block());
+        return new BlockVec(cx + CS - 1, cy + CS - 1, cz + CS - 1);
     }
 
     /**
@@ -244,7 +244,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     public BlockVec blockInWorldSpace(int x, int y, int z, @Nullable RegionVec region) {
         var start = start();
-        return new BlockVec(start.x + x, start.y + y, start.z + z, this.space.block());
+        return new BlockVec(start.x + x, start.y + y, start.z + z);
     }
 
     /**
@@ -292,7 +292,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
         if (this.y < 0) cy += CS;
         if (this.z < 0) cz += CS;
 
-        return new BlockVec(cx, cy, cz, this.space.block());
+        return new BlockVec(cx, cy, cz);
     }
 
     /**
@@ -328,26 +328,6 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     public ChunkVec worldSpace(RegionVec region) {
         return new ChunkVec(region.x * REGION_SIZE + this.x, region.y * REGION_SIZE + this.y, region.z * REGION_SIZE + this.z, ChunkVecSpace.WORLD);
-    }
-
-    /**
-     * Converts a block position to a specific space.
-     * <p>
-     * NOTE: This method assumes the current vector is in global space.
-     *
-     * @param x           the x position
-     * @param y           the y position
-     * @param z           the z position
-     * @param targetSpace the space to convert to
-     * @return the block position in the specified space
-     */
-    public BlockVec blockTo(int x, int y, int z, BlockVecSpace targetSpace) {
-        if (this.space.block() == targetSpace) return new BlockVec(x, y, z, this.space.block());
-        if (this.space.block() != BlockVecSpace.WORLD)
-            throw new IllegalArgumentException("The target space is not in world space: " + targetSpace);
-
-        BlockVec curSpaceBlock = new BlockVec(x, y, z, this.space.block());
-        return curSpaceBlock.toSpace(targetSpace);
     }
 
     @Override
