@@ -10,7 +10,7 @@ gretty {
 }
 
 group = "dev.ultreon.quantum"
-version = "0.2.0-SNAPSHOT"
+version = mavenVersion
 
 repositories {
     mavenCentral()
